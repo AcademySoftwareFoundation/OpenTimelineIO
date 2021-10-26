@@ -3,10 +3,7 @@
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class FreezeFrame : public LinearTimeWarp
 {
@@ -29,5 +26,4 @@ protected:
 private:
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -1,15 +1,13 @@
 #include "opentimelineio/mediaReference.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 MediaReference::MediaReference(
     std::string const&         name,
     optional<TimeRange> const& available_range,
     AnyDictionary const&       metadata)
-    : Parent(name, metadata), _available_range(available_range)
+    : Parent(name, metadata)
+    , _available_range(available_range)
 {}
 
 MediaReference::~MediaReference()
@@ -35,5 +33,4 @@ MediaReference::write_to(Writer& writer) const
     writer.write("available_range", _available_range);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

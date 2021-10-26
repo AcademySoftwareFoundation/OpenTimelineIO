@@ -4,10 +4,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
@@ -134,5 +131,4 @@ SerializableCollection::children_if(
     return out;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

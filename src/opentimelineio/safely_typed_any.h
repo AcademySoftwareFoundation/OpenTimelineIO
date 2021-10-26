@@ -22,10 +22,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 any create_safely_typed_any(bool&&);
 any create_safely_typed_any(int&&);
@@ -58,5 +55,4 @@ AnyVector     safely_cast_any_vector_any(any const& a);
 AnyDictionary& temp_safely_cast_any_dictionary_any(any const& a);
 AnyVector&     temp_safely_cast_any_vector_any(any const& a);
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

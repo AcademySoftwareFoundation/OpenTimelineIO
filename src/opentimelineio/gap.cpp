@@ -1,9 +1,6 @@
 #include "opentimelineio/gap.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Gap::Gap(
     TimeRange const&            source_range,
@@ -49,5 +46,4 @@ Gap::write_to(Writer& writer) const
     Parent::write_to(writer);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

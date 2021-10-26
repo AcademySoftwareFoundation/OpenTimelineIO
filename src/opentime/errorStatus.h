@@ -3,10 +3,7 @@
 #include "opentime/version.h"
 #include <string>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 struct ErrorStatus
 {
@@ -21,14 +18,18 @@ struct ErrorStatus
         INVALID_RATE_FOR_DROP_FRAME_TIMECODE,
     };
 
-    ErrorStatus() : outcome{ OK } {}
+    ErrorStatus()
+        : outcome{ OK }
+    {}
 
     ErrorStatus(Outcome in_outcome)
-        : outcome{ in_outcome }, details{ outcome_to_string(in_outcome) }
+        : outcome{ in_outcome }
+        , details{ outcome_to_string(in_outcome) }
     {}
 
     ErrorStatus(Outcome in_outcome, std::string const& in_details)
-        : outcome{ in_outcome }, details{ in_details }
+        : outcome{ in_outcome }
+        , details{ in_details }
     {}
 
     Outcome     outcome;
@@ -51,5 +52,4 @@ is_error(const ErrorStatus* es) noexcept
     return es && ErrorStatus::Outcome::OK != es->outcome;
 }
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

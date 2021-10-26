@@ -5,10 +5,7 @@
 #include "opentime/version.h"
 #include <string>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 class TimeTransform
 {
@@ -17,7 +14,9 @@ public:
         RationalTime offset = RationalTime{},
         double       scale  = 1,
         double       rate   = -1) noexcept
-        : _offset{ offset }, _scale{ scale }, _rate{ rate }
+        : _offset{ offset }
+        , _scale{ scale }
+        , _rate{ rate }
     {}
 
     constexpr RationalTime offset() const noexcept { return _offset; }
@@ -71,5 +70,4 @@ private:
     double       _rate;
 };
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

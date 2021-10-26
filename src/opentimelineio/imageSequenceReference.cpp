@@ -1,9 +1,6 @@
 #include "opentimelineio/imageSequenceReference.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 ImageSequenceReference::ImageSequenceReference(
     std::string const&         target_url_base,
@@ -263,5 +260,4 @@ ImageSequenceReference::write_to(Writer& writer) const
     }
     writer.write("missing_frame_policy", missing_frame_policy_value);
 }
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

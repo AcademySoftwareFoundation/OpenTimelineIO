@@ -3,10 +3,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class MissingReference final : public MediaReference
 {
@@ -33,5 +30,4 @@ protected:
     virtual void write_to(Writer&) const;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

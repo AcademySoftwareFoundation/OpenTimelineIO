@@ -3,10 +3,7 @@
 #include "opentimelineio/version.h"
 #include <string>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
 
@@ -41,7 +38,10 @@ struct ErrorStatus
         OBJECT_CYCLE
     };
 
-    ErrorStatus() : outcome(OK), object_details(nullptr) {}
+    ErrorStatus()
+        : outcome(OK)
+        , object_details(nullptr)
+    {}
 
     ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome)
@@ -88,5 +88,4 @@ is_error(const ErrorStatus* es) noexcept
     return es && ErrorStatus::Outcome::OK != es->outcome;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

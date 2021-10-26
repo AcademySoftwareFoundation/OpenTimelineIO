@@ -2,16 +2,14 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 SerializableCollection::SerializableCollection(
     std::string const&               name,
     std::vector<SerializableObject*> children,
     AnyDictionary const&             metadata)
-    : Parent(name, metadata), _children(children.begin(), children.end())
+    : Parent(name, metadata)
+    , _children(children.begin(), children.end())
 {}
 
 SerializableCollection::~SerializableCollection()
@@ -110,5 +108,4 @@ SerializableCollection::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

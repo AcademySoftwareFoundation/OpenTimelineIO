@@ -3,12 +3,10 @@
 #include "opentimelineio/serialization.h"
 #include "stringUtils.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-SerializableObject::SerializableObject() : _cached_type_record(nullptr)
+SerializableObject::SerializableObject()
+    : _cached_type_record(nullptr)
 {
     _managed_ref_count = 0;
 }
@@ -249,5 +247,4 @@ SerializableObject::current_ref_count() const
     return _managed_ref_count;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

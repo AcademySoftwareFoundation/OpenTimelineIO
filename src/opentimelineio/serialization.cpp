@@ -20,10 +20,7 @@
 #    include <windows.h>
 #endif
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /**
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
@@ -289,7 +286,9 @@ template <typename RapidJSONWriterType>
 class JSONEncoder : public Encoder
 {
 public:
-    JSONEncoder(RapidJSONWriterType& writer) : _writer(writer) {}
+    JSONEncoder(RapidJSONWriterType& writer)
+        : _writer(writer)
+    {}
 
     virtual ~JSONEncoder() {}
 
@@ -962,5 +961,4 @@ serialize_json_to_file(
     return status;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

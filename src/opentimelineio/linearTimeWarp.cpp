@@ -1,16 +1,14 @@
 #include "opentimelineio/linearTimeWarp.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 LinearTimeWarp::LinearTimeWarp(
     std::string const&   name,
     std::string const&   effect_name,
     double               time_scalar,
     AnyDictionary const& metadata)
-    : Parent(name, effect_name, metadata), _time_scalar(time_scalar)
+    : Parent(name, effect_name, metadata)
+    , _time_scalar(time_scalar)
 {}
 
 LinearTimeWarp::~LinearTimeWarp()
@@ -30,5 +28,4 @@ LinearTimeWarp::write_to(Writer& writer) const
     writer.write("time_scalar", _time_scalar);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

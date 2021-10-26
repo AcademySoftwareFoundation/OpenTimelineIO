@@ -3,10 +3,7 @@
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class LinearTimeWarp : public TimeEffect
 {
@@ -42,5 +39,4 @@ private:
     double _time_scalar;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

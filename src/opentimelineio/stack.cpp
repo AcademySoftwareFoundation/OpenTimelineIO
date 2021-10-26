@@ -2,10 +2,7 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Stack::Stack(
     std::string const&          name,
@@ -121,5 +118,4 @@ Stack::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

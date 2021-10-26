@@ -5,10 +5,7 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
@@ -102,5 +99,4 @@ Timeline::children_if(
         error_status, search_range, shallow_search);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

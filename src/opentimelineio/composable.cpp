@@ -1,13 +1,11 @@
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Composable::Composable(std::string const& name, AnyDictionary const& metadata)
-    : Parent(name, metadata), _parent(nullptr)
+    : Parent(name, metadata)
+    , _parent(nullptr)
 {}
 
 Composable::~Composable()
@@ -70,5 +68,4 @@ Composable::duration(ErrorStatus* error_status) const
     return RationalTime();
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

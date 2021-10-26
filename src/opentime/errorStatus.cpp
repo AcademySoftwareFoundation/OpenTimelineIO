@@ -1,9 +1,6 @@
 #include "opentime/errorStatus.h"
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 std::string
 ErrorStatus::outcome_to_string(Outcome o)
@@ -29,5 +26,4 @@ ErrorStatus::outcome_to_string(Outcome o)
     };
 }
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

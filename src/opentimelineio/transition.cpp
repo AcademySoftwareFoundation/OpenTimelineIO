@@ -1,10 +1,7 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/composition.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Transition::Transition(
     std::string const&   name,
@@ -85,5 +82,4 @@ Transition::trimmed_range_in_parent(ErrorStatus* error_status) const
     return parent()->trimmed_range_of_child(this, error_status);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

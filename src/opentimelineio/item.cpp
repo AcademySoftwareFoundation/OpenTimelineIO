@@ -5,10 +5,7 @@
 
 #include <assert.h>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Item::Item(
     std::string const&          name,
@@ -180,5 +177,4 @@ Item::write_to(Writer& writer) const
     writer.write("markers", _markers);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

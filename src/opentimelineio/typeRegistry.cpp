@@ -30,10 +30,7 @@
 //#include <sstream>
 //#include <iostream>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 TypeRegistry&
 TypeRegistry::TypeRegistry::instance()
@@ -307,5 +304,4 @@ TypeRegistry::set_type_record(
     return false;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

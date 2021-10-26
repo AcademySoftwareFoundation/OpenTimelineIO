@@ -1,9 +1,6 @@
 #include "opentimelineio/generatorReference.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 GeneratorReference::GeneratorReference(
     std::string const&         name,
@@ -34,5 +31,4 @@ GeneratorReference::write_to(Writer& writer) const
     writer.write("parameters", _parameters);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

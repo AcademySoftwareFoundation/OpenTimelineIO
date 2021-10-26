@@ -3,10 +3,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObjectWithMetadata : public SerializableObject
 {
@@ -41,5 +38,4 @@ private:
     AnyDictionary _metadata;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

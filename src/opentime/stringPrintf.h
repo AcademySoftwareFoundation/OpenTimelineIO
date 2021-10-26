@@ -5,10 +5,7 @@
 #include <memory>
 #include <string>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 template <typename... Args>
 std::string
@@ -26,5 +23,4 @@ string_printf(char const* format, Args... args)
     return std::string(buf.get());
 }
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

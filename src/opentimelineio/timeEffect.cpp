@@ -1,9 +1,6 @@
 #include "opentimelineio/timeEffect.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 TimeEffect::TimeEffect(
     std::string const&   name,
@@ -15,5 +12,4 @@ TimeEffect::TimeEffect(
 TimeEffect::~TimeEffect()
 {}
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

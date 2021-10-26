@@ -6,10 +6,7 @@
 
 #include <string>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 std::string serialize_json_to_string(
     const any& value, ErrorStatus* error_status = nullptr, int indent = 4);
@@ -20,5 +17,4 @@ bool serialize_json_to_file(
     ErrorStatus*       error_status = nullptr,
     int                indent       = 4);
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

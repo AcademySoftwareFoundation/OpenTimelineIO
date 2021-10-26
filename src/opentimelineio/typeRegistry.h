@@ -9,10 +9,7 @@
 #include <mutex>
 #include <string>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
 class AnyDictionary;
@@ -172,5 +169,4 @@ private:
     friend class SerializableObject;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

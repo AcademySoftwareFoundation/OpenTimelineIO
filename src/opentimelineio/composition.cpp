@@ -4,10 +4,7 @@
 #include <assert.h>
 #include <set>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Composition::Composition(
     std::string const&          name,
@@ -673,5 +670,4 @@ Composition::_bisect_left(
     return *lower_search_bound;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

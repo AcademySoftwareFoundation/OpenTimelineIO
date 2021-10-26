@@ -4,17 +4,15 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Track::Track(
     std::string const&         name,
     optional<TimeRange> const& source_range,
     std::string const&         kind,
     AnyDictionary const&       metadata)
-    : Parent(name, source_range, metadata), _kind(kind)
+    : Parent(name, source_range, metadata)
+    , _kind(kind)
 {}
 
 Track::~Track()
@@ -294,5 +292,4 @@ Track::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

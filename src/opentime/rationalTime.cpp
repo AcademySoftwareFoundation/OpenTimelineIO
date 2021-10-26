@@ -6,10 +6,7 @@
 #include <cmath>
 #include <vector>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 RationalTime RationalTime::_invalid_time{ 0, RationalTime::_invalid_rate };
 
@@ -431,5 +428,4 @@ RationalTime::to_time_string() const
         microseconds_str.c_str());
 }
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

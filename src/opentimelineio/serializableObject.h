@@ -13,10 +13,7 @@
 #include <list>
 #include <type_traits>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject
 {
@@ -493,7 +490,8 @@ public:
         }
         ///@}
 
-        Writer(class Encoder& encoder) : _encoder(encoder)
+        Writer(class Encoder& encoder)
+            : _encoder(encoder)
         {
             _build_dispatch_tables();
         }
@@ -544,13 +542,15 @@ public:
 
         operator bool() const noexcept { return value != nullptr; }
 
-        Retainer(T const* so = nullptr) : value((T*) so)
+        Retainer(T const* so = nullptr)
+            : value((T*) so)
         {
             if (value)
                 value->_managed_retain();
         }
 
-        Retainer(Retainer const& rhs) : value(rhs.value)
+        Retainer(Retainer const& rhs)
+            : value(rhs.value)
         {
             if (value)
                 value->_managed_retain();
@@ -646,5 +646,4 @@ dynamic_retainer_cast(SerializableObject::Retainer<U> const& retainer)
     return dynamic_cast<T*>(retainer.value);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

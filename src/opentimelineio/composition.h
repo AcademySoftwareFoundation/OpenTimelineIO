@@ -4,10 +4,7 @@
 #include "opentimelineio/version.h"
 #include <set>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Composition : public Item
 {
@@ -218,5 +215,4 @@ Composition::children_if(
     return out;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

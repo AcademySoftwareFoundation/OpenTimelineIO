@@ -3,10 +3,7 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class TimeEffect : public Effect
 {
@@ -28,5 +25,4 @@ protected:
     virtual ~TimeEffect();
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

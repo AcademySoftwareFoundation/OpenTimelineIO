@@ -5,10 +5,7 @@
 #include <algorithm>
 #include <string>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 /**
  * It is possible to construct TimeRange object with a negative duration.
@@ -30,7 +27,10 @@ constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 class TimeRange
 {
 public:
-    explicit constexpr TimeRange() noexcept : _start_time{}, _duration{} {}
+    explicit constexpr TimeRange() noexcept
+        : _start_time{}
+        , _duration{}
+    {}
 
     explicit constexpr TimeRange(RationalTime start_time) noexcept
         : _start_time{ start_time }
@@ -39,7 +39,8 @@ public:
 
     explicit constexpr TimeRange(
         RationalTime start_time, RationalTime duration) noexcept
-        : _start_time{ start_time }, _duration{ duration }
+        : _start_time{ start_time }
+        , _duration{ duration }
     {}
 
     constexpr TimeRange(TimeRange const&) noexcept = default;
@@ -381,5 +382,4 @@ private:
     }
 };
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

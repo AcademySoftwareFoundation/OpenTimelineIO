@@ -1,9 +1,6 @@
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 MissingReference::MissingReference(
     std::string const&         name,
@@ -33,5 +30,4 @@ MissingReference::write_to(Writer& writer) const
     Parent::write_to(writer);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

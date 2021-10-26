@@ -5,10 +5,7 @@
 #include <assert.h>
 #include <vector>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /**
  * An AnyVector has exactly the same API as
@@ -27,12 +24,15 @@ class AnyVector : private std::vector<any>
 public:
     using vector::vector;
 
-    AnyVector() : _mutation_stamp{} {}
+    AnyVector()
+        : _mutation_stamp{}
+    {}
 
     // must avoid brace-initialization so as to not trigger
     // list initialization behavior in older compilers:
     AnyVector(const AnyVector& other)
-        : vector(other), _mutation_stamp{ nullptr }
+        : vector(other)
+        , _mutation_stamp{ nullptr }
     {}
 
     ~AnyVector()
@@ -113,7 +113,9 @@ public:
 
     struct MutationStamp
     {
-        MutationStamp(AnyVector* v) : any_vector{ v }, owning{ false }
+        MutationStamp(AnyVector* v)
+            : any_vector{ v }
+            , owning{ false }
         {
             assert(v != nullptr);
         }
@@ -137,7 +139,9 @@ public:
         bool       owning;
 
     protected:
-        MutationStamp() : any_vector{ new AnyVector }, owning{ true }
+        MutationStamp()
+            : any_vector{ new AnyVector }
+            , owning{ true }
         {
             any_vector->_mutation_stamp = this;
         }
@@ -158,5 +162,4 @@ private:
     MutationStamp* _mutation_stamp = nullptr;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

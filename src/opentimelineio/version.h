@@ -7,15 +7,11 @@
 #include "opentime/timeTransform.h"
 #include "opentime/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 using opentime::RationalTime;
 using opentime::TimeRange;
 using opentime::TimeTransform;
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
 
 /// Convenience macro for the full namespace of OpenTimelineIO API.
 ///

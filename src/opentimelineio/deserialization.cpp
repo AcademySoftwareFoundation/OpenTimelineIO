@@ -21,10 +21,7 @@
 #    include <windows.h>
 #endif
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class JSONDecoder : public OTIO_rapidjson::
                         BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder>
@@ -263,7 +260,9 @@ SerializableObject::Reader::Reader(
     error_function_t const& error_function,
     SerializableObject*     so,
     int                     line_number)
-    : _error_function(error_function), _source(so), _line_number(line_number)
+    : _error_function(error_function)
+    , _source(so)
+    , _line_number(line_number)
 {
     // destructively read from source.  Decoding it will either return it back
     // anyway, or convert it to another type, in which case we want to destroy
@@ -890,5 +889,4 @@ deserialize_json_from_file(
     return true;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

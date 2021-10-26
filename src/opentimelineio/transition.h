@@ -3,10 +3,7 @@
 #include "opentimelineio/composable.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Transition : public Composable
 {
@@ -75,5 +72,4 @@ private:
     RationalTime _in_offset, _out_offset;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

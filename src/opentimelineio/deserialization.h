@@ -6,10 +6,7 @@
 
 #include <string>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 bool deserialize_json_from_string(
     std::string const& input,
@@ -21,5 +18,4 @@ bool deserialize_json_from_file(
     any*               destination,
     ErrorStatus*       error_status = nullptr);
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -1,10 +1,7 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/clip.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Timeline::Timeline(
     std::string const&     name,
@@ -83,5 +80,4 @@ Timeline::clip_if(
     return _tracks.value->clip_if(error_status, search_range, shallow_search);
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

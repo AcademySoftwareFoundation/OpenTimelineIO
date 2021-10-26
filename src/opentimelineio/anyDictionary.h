@@ -7,10 +7,7 @@
 #include <map>
 #include <string>
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /**
  * An AnyDictionary has exactly the same API as
@@ -31,11 +28,17 @@ class AnyDictionary : private std::map<std::string, any>
 public:
     using map::map;
 
-    AnyDictionary() : map{}, _mutation_stamp{} {}
+    AnyDictionary()
+        : map{}
+        , _mutation_stamp{}
+    {}
 
     // to be safe, avoid brace-initialization so as to not trigger
     // list initialization behavior in older compilers:
-    AnyDictionary(const AnyDictionary& other) : map(other), _mutation_stamp{} {}
+    AnyDictionary(const AnyDictionary& other)
+        : map(other)
+        , _mutation_stamp{}
+    {}
 
     ~AnyDictionary()
     {
@@ -148,7 +151,9 @@ public:
     struct MutationStamp
     {
         constexpr MutationStamp(AnyDictionary* d) noexcept
-            : stamp{ 1 }, any_dictionary{ d }, owning{ false }
+            : stamp{ 1 }
+            , any_dictionary{ d }
+            , owning{ false }
         {
             assert(d);
         }
@@ -174,7 +179,9 @@ public:
 
     protected:
         MutationStamp()
-            : stamp{ 1 }, any_dictionary{ new AnyDictionary }, owning{ true }
+            : stamp{ 1 }
+            , any_dictionary{ new AnyDictionary }
+            , owning{ true }
         {
             any_dictionary->_mutation_stamp = this;
         }
@@ -203,5 +210,4 @@ private:
     }
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

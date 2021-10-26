@@ -6,10 +6,7 @@
 #include "opentimelineio/optional.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Effect;
 class Marker;
@@ -95,5 +92,4 @@ private:
     std::vector<Retainer<Marker>> _markers;
 };
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

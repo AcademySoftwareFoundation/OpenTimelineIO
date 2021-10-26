@@ -7,8 +7,7 @@
 #    include <typeinfo>
 #endif
 
-namespace
-{
+namespace {
 #if defined(__GNUC__) || defined(__clang__)
 std::string
 cxxabi_type_name_for_error_mesage(const char* name)
@@ -24,10 +23,7 @@ cxxabi_type_name_for_error_mesage(const char* name)
 #endif
 } // namespace
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 std::string
 type_name_for_error_message(std::type_info const& t)
@@ -92,5 +88,4 @@ split_schema_string(
     }
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

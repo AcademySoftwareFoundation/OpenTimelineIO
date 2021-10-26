@@ -1,10 +1,7 @@
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Track*
 track_trimmed_to_range(
@@ -106,5 +103,4 @@ track_trimmed_to_range(
     return new_track;
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

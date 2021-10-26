@@ -6,10 +6,7 @@
 #include <limits>
 #include <string>
 
-namespace opentime
-{
-namespace OPENTIME_VERSION
-{
+namespace opentime { namespace OPENTIME_VERSION {
 
 enum IsDropFrameRate : int
 {
@@ -34,7 +31,8 @@ class RationalTime
 {
 public:
     explicit constexpr RationalTime(double value = 0, double rate = 1) noexcept
-        : _value{ value }, _rate{ rate }
+        : _value{ value }
+        , _rate{ rate }
     {}
 
     constexpr RationalTime(RationalTime const&) noexcept = default;
@@ -259,5 +257,4 @@ private:
     double _value, _rate;
 };
 
-} // namespace OPENTIME_VERSION
-} // namespace opentime
+}} // namespace opentime::OPENTIME_VERSION

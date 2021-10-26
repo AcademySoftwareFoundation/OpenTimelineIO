@@ -1,10 +1,7 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio
-{
-namespace OPENTIMELINEIO_VERSION
-{
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Clip::Clip(
     std::string const&         name,
@@ -75,5 +72,4 @@ Clip::available_range(ErrorStatus* error_status) const
     return _media_reference->available_range().value();
 }
 
-} // namespace OPENTIMELINEIO_VERSION
-} // namespace opentimelineio
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

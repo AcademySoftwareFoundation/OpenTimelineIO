@@ -80,7 +80,7 @@ Installing / Quick-Start
 
 The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
 
-`pip install opentimelineio`
+`python -m pip install opentimelineio`
 
 For detailed installation instructions and notes on how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
 
@@ -112,11 +112,13 @@ If you want to contribute to the project, please see: https://opentimelineio.rea
 
 You can get the latest development version via:
 
-`git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
+`git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git --recursive `
 
-You can install development dependencies with `pip install .[dev]`
+You can install development dependencies with `python -m pip install .[dev]`
 
-You can also install the PySide2 dependency with `pip install .[view]`
+You can also install the PySide2 dependency with `python -m pip install .[view]`
+
+You may need to escape the `[` depending on your shell, `\[view\]` .
 
 Currently the code base is written against python 2.7, 3.7, 3.8 and 3.9,
 in keeping with the pep8 style.  We ask that before developers submit pull
@@ -147,7 +149,7 @@ following environment variables:
 - `OTIO_CXX_BUILD_TMP_DIR=path/to/build/dir`
 
 When building/installing through `pip`/`setup.py`, these variables must be set
-before running the install command (`pip install .` for example).
+before running the install command (`python -m pip install .` for example).
 
 License
 -------

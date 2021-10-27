@@ -6,7 +6,7 @@ OpenTimelineIO
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2018--2021-lightgrey.svg)](http://www.vfxplatform.com/)
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.7%2C%203.8%2C%203.9-blue)
 [![Build Status](https://github.com/PixarAnimationStudios/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/PixarAnimationStudios/OpenTimelineIO/actions/workflows/python-package.yml)
-[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
+[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 
 Main web site: http://opentimeline.io/
@@ -96,10 +96,10 @@ for clip in timeline.each_clip():
   print(clip.name, clip.duration())
 ```
 
-There are more code examples here: https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples
+There are more code examples here: https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/main/examples
 
 Also, looking through the unit tests is a great way to see what OTIO can do:
-https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
+https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/main/tests
 
 OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
 

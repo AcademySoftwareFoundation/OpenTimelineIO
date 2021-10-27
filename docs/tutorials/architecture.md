@@ -134,4 +134,4 @@ For more information about writing media linkers, see <a href="write-a-media-lin
 Example Scripts
 ----------------
 
-Example scripts are located in the <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples" target="_blank">examples subdirectory</a>.
+Example scripts are located in the <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/main/examples" target="_blank">examples subdirectory</a>.

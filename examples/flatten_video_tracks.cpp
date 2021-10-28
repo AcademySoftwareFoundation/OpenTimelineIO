@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     // into a single track.
     std::cout << "Flattening " << video_tracks.size() << " video tracks into one..." << std::endl;
     auto onetrack = otio::flatten_stack(video_tracks, &error_status);
-    if (!onetrack)
+    if (!onetrack or is_error(error_status))
     {
         examples::print_error(error_status);
         return 1;
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     // ...and save it to disk.
     std::cout << "Saving " << newtimeline.value->video_tracks().size() << " video tracks and " <<
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;
-    if (!timeline.value->to_json_file(argv[2], &error_status))
+    if (!newtimeline.value->to_json_file(argv[2], &error_status))
     {
         examples::print_error(error_status);
         return 1;

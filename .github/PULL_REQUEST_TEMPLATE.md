@@ -18,5 +18,5 @@ If no new tests are introduced as part of this PR, note the tests that are provi
 
 <!--
 Important: If this is your first contribution to OpenTimelineIO, you will need to submit a Contributor License Agreement. For a step-by-step instructions on the pull request process, see
-https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/CONTRIBUTING.md
+https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/main/CONTRIBUTING.md
 -->

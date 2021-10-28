@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-10.15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
     - uses: actions/checkout@v2.3.5
@@ -39,7 +39,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-10.15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['2.7', '3.7', '3.8', '3.9']
 
     env:
@@ -89,7 +89,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-10.15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-build: [cp27*, cp37*, cp38*, cp39*]
     steps:
       - uses: actions/checkout@v2.3.5
@@ -124,7 +124,7 @@ jobs:
 
   package_sdist:
     needs: py_build_test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2.3.5
 

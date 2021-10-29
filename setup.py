@@ -107,6 +107,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if cxx_coverage:
             cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
+        # allow external arguments to cmake via the CMAKE_ARGS env var
+        cmake_args += [
+            arg for arg in os.environ.get("CMAKE_ARGS", "").split(" ")
+            if arg
+        ]
+
         return cmake_args
 
     def cmake_preflight_check(self):
@@ -180,7 +186,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.14.0.dev1",
+    "version": "0.15.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'opentimelineio@pixar.com',
     "license": 'Modified Apache 2.0 License',
@@ -259,6 +265,7 @@ setup(
     name='OpenTimelineIO',
     description='Editorial interchange format and API',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     url='http://opentimeline.io',
     project_urls={
         'Source':

@@ -29,7 +29,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     serialization.h
     stack.h
     stackAlgorithm.h
-    stringUtils.h
     timeEffect.h
     timeline.h
     track.h
@@ -58,13 +57,14 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             mediaReference.cpp
             missingReference.cpp
             safely_typed_any.cpp
+            serializableCollection.cpp
             serializableObject.cpp
             serializableObjectWithMetadata.cpp
-            serializableCollection.cpp
             serialization.cpp
             stack.cpp
             stackAlgorithm.cpp
             stringUtils.cpp
+            stringUtils.h # stringUtils.h is a private header
             timeEffect.cpp
             timeline.cpp
             track.cpp

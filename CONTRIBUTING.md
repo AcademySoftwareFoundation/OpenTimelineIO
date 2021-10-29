@@ -80,6 +80,6 @@ If all the tests pass and you'd like to send your change in for consideration, p
 git push origin mybugfix
 ```
 
-Now your remote branch will have your `mybugfix` branch, which you can now pull request (to OpenTimelineIO's `master` branch) using the github UI.
+Now your remote branch will have your `mybugfix` branch, which you can now pull request (to OpenTimelineIO's `main` branch) using the github UI.
 
 Please make sure that your pull requests are clean. In other words, address only the issue at hand. Split minor corrections, formatting clean ups, and the like into other PRs. Ensure that new work has coverage in a test. Ensure that any resultant behavioral changes in other parts of the library are called out. Use the rebase and squash git facilities as needed to ensure that the pull request does not contain non-informative remnants of old or superseded work.

@@ -56,7 +56,7 @@ Now you fetch the latest changes from Pixar's OpenTimelineIO repo like this:
 
 ```bash
 git fetch upstream
-git merge upstream/master
+git merge upstream/main
 ```
 
 All the development should happen against the `master` branch.  We recommend you create a new branch for each feature or fix that you'd like to make and give it a descriptive name so that you can remember it later.  You can checkout a new branch and create it simultaneously like this:

@@ -715,7 +715,8 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="clip1"
         )
 
-        # The Stack available_image_bounds should be equal to the single clip that's in it
+        # The Stack available_image_bounds should be equal to
+        # the single clip that's in it
         st.append(clip)
         self.assertEqual(st.available_image_bounds, clip.available_image_bounds)
 

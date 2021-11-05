@@ -209,7 +209,7 @@ def _get_global_transform(tl):
         return None
 
     bounds = find_display_bounds(tl)
-    if not bounds:
+    if bounds is None:
         return {}
 
     translate = bounds.center()

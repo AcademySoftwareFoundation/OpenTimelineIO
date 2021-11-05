@@ -361,7 +361,7 @@ def _add_source_bounds(media_ref, src, context):
 
     global_scale = context.get('global_scale')
     global_translate = context.get('global_translate')
-    if not global_scale or not global_translate:
+    if global_scale is None or global_translate is None:
         return
 
     bounds = media_ref.available_image_bounds

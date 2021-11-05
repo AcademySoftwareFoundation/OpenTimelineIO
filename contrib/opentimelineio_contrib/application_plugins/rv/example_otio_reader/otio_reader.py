@@ -201,11 +201,12 @@ def _get_global_transform(tl):
     # bounds as the global bounds
     def find_display_bounds(tl):
         for clip in tl.clip_if():
-            if hasattr(clip, "media_reference") and clip.media_reference:
-                if hasattr(clip.media_reference, "available_image_bounds"):
-                    bounds = clip.media_reference.available_image_bounds
-                    if bounds:
-                        return bounds
+            try:
+               bounds = clip.media_reference.available_image_bounds
+               if bounds:
+                   return bounds
+            except AttributeError:
+                continue
         return None
 
     bounds = find_display_bounds(tl)

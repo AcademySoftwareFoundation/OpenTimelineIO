@@ -18,22 +18,18 @@ A Bounds object is a 2D box that defines a spatial area in the unit-less coordin
 Here is an example of Bounds defining a first-quadrant-snapped rectangle with a width of 16 and a height of 9.  
 Note that, since Bounds are serializable object, they have a metadata member.  
 ```
-"bounds": {
-  "OTIO_SCHEMA": "Bounds.1",
-  "box": {
-    "OTIO_SCHEMA": "Box2d.1",
-    "min": {
-      "OTIO_SCHEMA":"V2d.1",
-      "x": 0.0,
-      "y": 0.0
-    },
-    "max": {
-      "OTIO_SCHEMA":"V2d.1",
-      "x": 16.0,
-      "y": 9.0
-    }
+"available_image_bounds": {
+  "OTIO_SCHEMA": "Box2d.1",
+  "min": {
+    "OTIO_SCHEMA":"V2d.1",
+    "x": 0.0,
+    "y": 0.0
   },
-  "metadata": {}
+  "max": {
+    "OTIO_SCHEMA":"V2d.1",
+    "x": 16.0,
+    "y": 9.0
+  }
 }
 ```
 
@@ -41,20 +37,17 @@ Note that, since Bounds are serializable object, they have a metadata member.
 
 Here is another example of Bounds defining an origin-centered rectangle with a width of 16 and a height of 9.  
 ```
-"bounds": {
-  "OTIO_SCHEMA": "Bounds.1",
-  "box": {
-    "OTIO_SCHEMA": "Box2d.1",
-    "min": {
-      "OTIO_SCHEMA":"V2d.1",
-      "x": -8.0,
-      "y": -4.5
-    },
-    "max": {
-      "OTIO_SCHEMA":"V2d.1",
-      "x": 8.0,
-      "y": 4.5
-    }
+"available_image_bounds": {
+  "OTIO_SCHEMA": "Box2d.1",
+  "min": {
+    "OTIO_SCHEMA":"V2d.1",
+    "x": -8.0,
+    "y": -4.5
+  },
+  "max": {
+    "OTIO_SCHEMA":"V2d.1",
+    "x": 8.0,
+    "y": 4.5
   }
 }
 ```

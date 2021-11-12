@@ -221,11 +221,13 @@ parameters:
 ```
 Defines an OTIO plugin Manifest.
 
-    This is an internal OTIO implementation detail.  A manifest tracks a
-    collection of adapters and allows finding specific adapters by suffix
+    This is considered an internal OTIO implementation detail.
 
-    For writing your own adapters, consult:
-        https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#
+    A manifest tracks a collection of plugins and enables finding them by name
+    or other features (in the case of adapters, what file suffixes they
+    advertise support for).
+
+    For more information, consult the documenation.
     
 ```
 

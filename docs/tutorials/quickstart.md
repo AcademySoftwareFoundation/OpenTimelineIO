@@ -13,7 +13,7 @@ You probably want the prebuilt binary for your platform.  PySide2 generally incl
 
 ## Install OTIO
 
-- `pip install opentimelineio`
+- `python -m pip install opentimelineio`
 
 ## Configure Environment Variables for extra adapters
 
@@ -55,41 +55,28 @@ The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, be
 
 ## To build OTIO for Python development:
 
-### Linux
+**Note** You are highly encouraged to use virtual environements to develop OTIO.
 
-+ `python setup.py install`
-
-### Mac
-
-+ `python setup.py install --user`
++ `python -m pip install . --user`
 
 The `--user` option is not necessary if the build is done within a virtualenv.
-
-### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
-
-+ `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
 
 ## To build OTIO for both C++ and Python development:
 
 The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
 
-**Note** Any CMake arguments can be passed through `python setup.py install` or `pip` by using the CMAKE_ARGS environment variable.  *nix Example:
+**Note** Any CMake arguments can be passed through `pip` by using the CMAKE_ARGS environment variable when building from source. *nix Example:
 
-`env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
+```bash
+env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" python -m pip install .
+```
 
-### Linux
-
-+ `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
-
-### Mac
-
-+ `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root --user`
-
-The `--user` option is not necessary if the build is done within a virtualenv.
-
-### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
-
-+ `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
+`python -m pip install .` adds some overhead that might be annoying or unwanted when
+developing the python bindings. For that reason (and only that reason), if you want a faster
+iteration process, you can use `setuptools` commands. For example you can use
+`python setup.py build_ext` to only run the compilation step. Be aware that calling `setup.py`
+directly is highly discouraged and should only be used when no of the other options
+are viable. See https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html.
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
 
@@ -105,9 +92,9 @@ To use opentime without opentimelineio, link with -lopentime instead, and compil
 
 ### Linux / GDB / LLDB
 
-From your virtual environment, compile with debug flags:
+From your virtual environment, compile with debug flags (also works on Windows):
 
-+ `env OTIO_CXX_DEBUG_BUILD=1 python setup.py install`
++ `env OTIO_CXX_DEBUG_BUILD=1 python -m pip install .`
 
 You can then attach GDB to python and run your program:
 
@@ -133,8 +120,12 @@ GDB will automatically break when it hits the SIGINT line.
 
 The doxygen docs can be generated with the following commands: 
 
-`cd doxygen ; doxygen config/dox_config ; cd ..`
+```
+cd doxygen ; doxygen config/dox_config ; cd ..
+```
 
 Another option is to trigger the make target: 
 
-`make doc-cpp`
+```
+make doc-cpp
+```

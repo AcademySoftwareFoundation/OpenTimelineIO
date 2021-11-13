@@ -84,7 +84,7 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
             try:
                 subprocess.check_call(
                     [
-                        "which", sys.argv[0]
+                        "where" if os.name == "nt" else "which", sys.argv[0]
                     ],
                     stdout=subprocess.PIPE
                 )

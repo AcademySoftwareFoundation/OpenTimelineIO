@@ -55,7 +55,7 @@ The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, be
 
 ## To build OTIO for Python development:
 
-**Note** You are highly encouraged to use virtual environements to develop OTIO.
+**Note** The use of virtual environments is highly encouraged for OTIO development.
 
 + `python -m pip install . --user`
 
@@ -92,9 +92,8 @@ To use opentime without opentimelineio, link with -lopentime instead, and compil
 
 ### Linux / GDB / LLDB
 
-From your virtual environment, compile with debug flags (also works on Windows):
-
-+ `env OTIO_CXX_DEBUG_BUILD=1 python -m pip install .`
+To compile in debug mode, set the `OTIO_CXX_DEBUG_BUILD` environment variable to any value
+and then `python -m pip install`.
 
 You can then attach GDB to python and run your program:
 

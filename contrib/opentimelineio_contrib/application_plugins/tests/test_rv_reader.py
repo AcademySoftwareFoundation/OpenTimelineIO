@@ -84,7 +84,7 @@ for clipnum in range(1, 4):
             ),
             source_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(11, 24),
-                otio.opentime.RationalTime(30, 24)
+                otio.opentime.RationalTime(3, 24)
             )
         )
     )
@@ -205,10 +205,10 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             clip1 = rv_media_name_at_frame(rvc, 1)
             self.assertEqual(clip1, 'clip1.mov')
 
-            clip2 = rv_media_name_at_frame(rvc, 20)
+            clip2 = rv_media_name_at_frame(rvc, 4)
             self.assertEqual(clip2, 'clip2.mov')
 
-            clip3 = rv_media_name_at_frame(rvc, 40)
+            clip3 = rv_media_name_at_frame(rvc, 7)
             self.assertEqual(clip3, 'clip3.mov')
 
             rvc.disconnect()

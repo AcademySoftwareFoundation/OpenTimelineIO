@@ -38,7 +38,6 @@ import shutil
 import shlex
 import time
 import imp
-import platform
 from subprocess import call, Popen, PIPE
 
 import opentimelineio as otio
@@ -47,10 +46,7 @@ RV_OTIO_READER_NAME = 'Example OTIO Reader'
 RV_OTIO_READER_VERSION = '1.0'
 
 RV_ROOT_DIR = os.getenv('OTIO_RV_ROOT_DIR', '')
-RV_BIN_DIR = os.path.join(
-    RV_ROOT_DIR,
-    'MacOS' if platform.system() == 'Darwin' else 'bin'
-)
+RV_BIN_DIR = os.path.join(RV_ROOT_DIR, 'bin')
 
 RV_OTIO_READER_DIR = os.path.join(
     '..',
@@ -166,7 +162,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             'I L - {version} "{package_name}" {pkg_path}'.format(
                 version=RV_OTIO_READER_VERSION,
                 package_name=RV_OTIO_READER_NAME,
-                pkg_path=os.path.realpath(installed_package_path)
+                pkg_path=installed_package_path
             )
 
         self.assertIn(desired_result, stdout.split('\n'))
@@ -191,7 +187,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             delete=False
         )
         otio.adapters.write_to_file(sample_timeline, sample_file.name)
-        run_cmd = '{root}/{exe} ' \
+        run_cmd = '{root}/rv ' \
                   '-nc ' \
                   '-network ' \
                   '-networkHost localhost ' \
@@ -199,7 +195,6 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                   '{sample_file}' \
                   .format(
                       root=RV_BIN_DIR,
-                      exe='RV' if platform.system() == 'Darwin' else 'rv',
                       port=9876,
                       sample_file=sample_file.name
                   )
@@ -217,15 +212,10 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                 if not rvc.connected:
                     time.sleep(.5)
 
-                if attempts == 20:
+                if attempts == 10:
                     raise socket.error(
                         "Unable to connect to RV!"
                     )
-
-            # some time can pass between the RV connection
-            # and the complete startup of RV
-            print("Waiting for RV startup to complete")
-            time.sleep(10)
 
             # Check clips at positions
             clip1 = rv_media_name_at_frame(rvc, 1)

@@ -28,6 +28,8 @@ import unittest
 import sys
 import os
 import subprocess
+import sysconfig
+import fnmatch
 
 try:
     # python2
@@ -81,19 +83,16 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
     def run_test(self):
         if self.SHELL_OUT:
             # make sure its on the path
-            try:
-                subprocess.check_call(
-                    [
-                        "where" if os.name == "nt" else "which", sys.argv[0]
-                    ],
-                    stdout=subprocess.PIPE
-                )
-            except subprocess.CalledProcessError:
-                self.fail(
-                    "Could not find '{}' on $PATH.  Tests that explicitly shell"
+            
+            console_script = os.path.join(sysconfig.get_path('scripts'), sys.argv[0])
+            if not os.path.exists(console_script):
+                # We might be on Windows
+                if not os.path.exists(console_script + ".exe"):
+                    self.fail(
+                    "Could not find '{}'.  Tests that explicitly shell"
                     " out can be disabled by setting the environment variable "
-                    "OTIO_DISABLE_SHELLOUT_TESTS.".format(sys.argv[0])
-                )
+                    "OTIO_DISABLE_SHELLOUT_TESTS.".format(console_script)
+                    )
 
             # actually run the test (sys.argv is already populated correctly)
             proc = subprocess.Popen(

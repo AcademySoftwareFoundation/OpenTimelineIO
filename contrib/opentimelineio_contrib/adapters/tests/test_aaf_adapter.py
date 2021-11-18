@@ -210,6 +210,11 @@ MULTIPLE_MARKERS_PATH = os.path.join(
     "multiple_markers.aaf"
 )
 
+KEYFRAMED_PROPERTIES_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "keyframed_properties.aaf"
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1159,6 +1164,334 @@ class AAFReaderTests(unittest.TestCase):
                 if markers:
                     all_markers[(i, item.name)] = markers
         self.assertEqual(all_markers, expected_markers)
+
+    def test_keyframed_properties(self):
+        def get_expected_dict(timeline):
+            expected = []
+            for clip in timeline.each_child(descended_from_type=otio.schema.Clip):
+                for effect in clip.effects:
+                    props = {}
+                    parameters = effect.metadata.get("AAF", {}).get("Parameters", {})
+                    for paramName, paramValue in parameters.items():
+                        try:
+                            is_animated = "_aaf_keyframed_property" in paramValue
+                        except (TypeError, KeyError):
+                            is_animated = False
+                        try:
+                            baked_count = len(paramValue["keyframe_baked_values"])
+                        except (TypeError, KeyError):
+                            baked_count = None
+                        props[paramName] = {"keyframed": is_animated,
+                                            "baked_sample_count": baked_count}
+                    expected.append(props)
+            return expected
+
+        tl_unbaked = otio.adapters.read_from_file(KEYFRAMED_PROPERTIES_PATH,
+                                                  bake_keyframed_properties=False)
+
+        tl_baked = otio.adapters.read_from_file(KEYFRAMED_PROPERTIES_PATH,
+                                                bake_keyframed_properties=True)
+
+        expected_unbaked = [
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_SCALE_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_SCALE_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_SCALE_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_ROT_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_ROT_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_ROT_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_ROT_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_POS_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_POS_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_POS_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_POS_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_PRSP_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_PRSP_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_PRSP_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_PRSP_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+        ]
+
+        expected_baked = [
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_SCALE_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_SCALE_X_U": {"baked_sample_count": 212, "keyframed": True},
+                "DVE_SCALE_Y_U": {"baked_sample_count": 212, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_ROT_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_ROT_X_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_ROT_Y_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_ROT_Z_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 159, "keyframed": True},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_POS_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_POS_X_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_POS_Y_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_POS_Z_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 116, "keyframed": True},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 276, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 276,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 182, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 182,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 219, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 219,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 193, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 193,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 241, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 241,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_PRSP_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_PRSP_X_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_PRSP_Y_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_PRSP_Z_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 241, "keyframed": True},
+            },
+        ]
+
+        self.assertEqual(get_expected_dict(tl_unbaked), expected_unbaked)
+        self.assertEqual(get_expected_dict(tl_baked), expected_baked)
 
 
 class AAFWriterTests(unittest.TestCase):

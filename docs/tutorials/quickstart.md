@@ -2,11 +2,13 @@
 
 This is for users who wish to get started using the "OTIOView" application to inspect the contents of editorial timelines.
 
+**Note** This guide assumes that you are working inside a [virtualenv](https://virtualenv.pypa.io/en/latest/).
+
 ## Install Prerequisites
 
 OTIOView has an additional prerequisite to OTIO:
 
-- Try `pip install PySide2`
+- Try `python -m pip install PySide2`
 - If that doesn't work, try downloading PySide2 here: <a href="https://wiki.qt.io/Qt_for_Python" target="_blank">https://wiki.qt.io/Qt_for_Python</a>
 
 You probably want the prebuilt binary for your platform.  PySide2 generally includes a link to the appropriate version of Qt as well.
@@ -31,6 +33,10 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 Get the source and submodules:
 + `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
 
+Before reading further, it is good to note that there is two parts to the
+C++ code: the OTIO C++ library that you can use in your C++ projects,
+and the C++ Python bindings that makes the C++ library available in Python.
+
 ## To build OTIO for C++ development:
 
 ### Linux/Mac
@@ -51,21 +57,31 @@ Get the source and submodules:
     cmake --build . --target install --config Release
 ```
 
-The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, because CMake's default install location is in C:\Program Files, which won't work with OpenTimelineIO due to spaces in the path.
+The `CMAKE_INSTALL_PREFIX` variable must be set to a path with no spaces in it,
+because CMake's default install location is in `C:\Program Files`, which won't work
+with OpenTimelineIO due to spaces in the path.
 
 ## To build OTIO for Python development:
 
-**Note** The use of virtual environments is highly encouraged for OTIO development.
-
-+ `python -m pip install . --user`
-
-The `--user` option is not necessary if the build is done within a virtualenv.
++ `python -m pip install .`
 
 ## To build OTIO for both C++ and Python development:
 
-The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
+The Python package is a mix of pure python and C++ code. Therefore, it is
+recommended to use the python tooling (`python -m pip`) to develop both
+the C++ binding and the pure python code. We use `setuptools` as our
+python build backend, which means `pip` will call the `setup.py` in the root
+of the directory to build both the pure python and the C++ bindings.
+`setuptools` will take care of all the complexity of building a C++ Python
+extension for you.
 
-**Note** Any CMake arguments can be passed through `pip` by using the CMAKE_ARGS environment variable when building from source. *nix Example:
+The first time `setup.py` is run, cmake scripts will be created, and the headers
+and libraries will be installed where you specify. If the C++ or Python  sources
+are subsequently modified, running this command again will build and update everything
+appropriately.
+
+**Note** Any CMake arguments can be passed through `pip` by using the `CMAKE_ARGS`
+environment variable when building from source. *nix Example:
 
 ```bash
 env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" python -m pip install .

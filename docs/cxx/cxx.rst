@@ -578,7 +578,6 @@ raise, and what their semantic meaning is.
     
     OK, n/a, No Error
     INVALID_TIMECODE_RATE, ``ValueError``, "Timecode rate isn't a valid SMPTE rate"
-    NON_DROPFRAME_RATE,  ``ValueError``, "Timecode rate isn't valid for SMPTE Drop-Frame Timecode"
     INVALID_TIMECODE_STRING,  ``ValueError``, "String is not properly formatted SMPTE timecode string"
     TIMECODE_RATE_MISMATCH,  ``ValueError``, " Timecode string has a frame number higher than the frame rate"
     INVALID_TIME_STRING,  ``ValueError``,

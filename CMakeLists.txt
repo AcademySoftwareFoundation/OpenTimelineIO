@@ -24,7 +24,7 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 # Installation options
 option(OTIO_CXX_INSTALL          "Install the C++ bindings" ON)
-option(OTIO_PYTHON_INSTALL       "Install the Python bindings" ON)
+option(OTIO_PYTHON_INSTALL       "Install the Python bindings" OFF)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")

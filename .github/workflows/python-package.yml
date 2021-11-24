@@ -11,9 +11,9 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ 'main', 'v[0-9]*' ]
   pull_request:
-    branches: [ main ]
+    branches: [ 'main', 'v[0-9]*' ]
 
 jobs:
   cpp_build:
@@ -124,9 +124,11 @@ jobs:
 
   package_sdist:
     needs: py_build_test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.5
+      with:
+        submodules: 'recursive'
 
     - uses: actions/setup-python@v2
 

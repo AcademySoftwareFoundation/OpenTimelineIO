@@ -217,11 +217,21 @@ if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
 endif()
 
 #------------------------------------------------------------------------------
+# Setup tests
+
+include(CTest)
+set(CTEST_OUTPUT_ON_FAILURE ON)
+
+#------------------------------------------------------------------------------
 # Build the dependencies and components
 
 add_subdirectory(src/deps)
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
+
+if(BUILD_TESTING)
+	add_subdirectory(tests)
+endif()
 
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)

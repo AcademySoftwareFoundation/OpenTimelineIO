@@ -1,0 +1,32 @@
+site_name: OpenTimelineIO
+site_url: http://opentimeline.io
+repo_url: http://github.com/PixarAnimationStudios/OpenTimelineIO
+edit_uri: edit/main/docs
+repo_name: Edit on GitHub
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - attr_list
+  - admonition
+  - codehilite
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+theme:
+  name: material
+  features:
+  - navigation.instant
+  - navigation.sections
+  - navigation.tracking
+  - navigation.tabs
+  - content.tabs.link

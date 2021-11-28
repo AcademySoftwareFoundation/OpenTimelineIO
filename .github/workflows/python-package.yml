@@ -33,7 +33,7 @@ jobs:
         submodules: 'recursive'
     - name: Compile C++
       run: |
-        mkdir -p $OTIO_BUILD_DIR
+        cmake -E make_directory $OTIO_BUILD_DIR
         cd $OTIO_BUILD_DIR
         cmake $GITHUB_WORKSPACE -DCMAKE_INSTALL_PREFIX=$OTIO_INSTALL_DIR
         cmake --build . --config $OTIO_BUILD_CONFIG

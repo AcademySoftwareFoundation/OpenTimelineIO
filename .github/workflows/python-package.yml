@@ -21,6 +21,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+        - os: ubuntu-latest
+          TEST_TARGET: test
+        - os: windows-latest
+          TEST_TARGET: RUN_TESTS
+        - os: macos-latest
+          TEST_TARGET: test
 
     env:
       OTIO_BUILD_CONFIG: Release
@@ -40,7 +47,7 @@ jobs:
     - name: Test C++
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
-        cmake --build . --target RUN_TESTS --config ${{ env.OTIO_BUILD_CONFIG }}
+        cmake --build . --target ${{ matrix.TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
     - name: Install C++
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}

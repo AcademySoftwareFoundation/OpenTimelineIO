@@ -7,17 +7,8 @@
 #include <string>
 #include <vector>
 
-inline void
-assertTrue(bool value)
-{
-    assert(value);
-}
-
-inline void
-assertFalse(bool value)
-{
-    assert(!value);
-}
+void assertTrue(bool value);
+void assertFalse(bool value);
 
 template <typename T>
 inline void
@@ -56,36 +47,26 @@ assertNotEqual(double a, double b)
     assert(std::abs(a - b) > double_epsilon);
 }
 
+struct Test
+{
+    std::string group;
+    std::string name;
+    std::function<void(void)> function;
+};
+
 class Tests
 {
 public:
-	void add_test(std::string const& name, std::function<void(void)> const& test) {
-		_tests.push_back(std::make_pair(name, test));
-	}
-	
-	void run(int argc, char** argv) {
-        std::vector<std::string> filter;
-		for (int arg = 1; arg < argc; ++arg)
-		{
-            filter.push_back(argv[arg]);
-		}
+    static void run(int argc, char** argv);
 
-		for (auto const& test : _tests)
-		{
-            bool run_test = true;
-			if (!filter.empty())
-			{
-                const auto filter_it =
-                    std::find(filter.begin(), filter.end(), test.first);
-                run_test = filter_it != filter.end();
-			}
-            if (run_test)
-			{
-                test.second();
-			}
-		}
-	}
+    struct AddTest
+    {
+        AddTest(
+            std::string const&               group,
+            std::string const&               name,
+            std::function<void(void)> const& function);
+    };
 
-private:
-	std::vector<std::pair<std::string, std::function<void(void)> > > _tests;
+ private:
+	std::vector<Test> _tests;
 };

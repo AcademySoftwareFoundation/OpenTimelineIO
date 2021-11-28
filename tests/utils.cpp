@@ -14,20 +14,11 @@ assertFalse(bool value)
     assert(!value);
 }
 
-namespace {
-
-Tests*
-instance()
+void
+Tests::add_test(std::string const& name, std::function<void(void)> const& test)
 {
-    static Tests* p = nullptr;
-    if (!p)
-    {
-        p = new Tests;
-    }
-    return p;
+    _tests.push_back(std::make_pair(name, test));
 }
-
-} // namespace
 
 void
 Tests::run(int argc, char** argv)
@@ -38,26 +29,18 @@ Tests::run(int argc, char** argv)
         filter.push_back(argv[arg]);
     }
 
-    for (auto const& test: instance()->_tests)
+    for (auto const& test: _tests)
     {
         bool run_test = true;
         if (!filter.empty())
         {
-            const auto filter_it = std::find(
-                filter.begin(), filter.end(), test.group + "/" + test.name);
+            const auto filter_it =
+                std::find(filter.begin(), filter.end(), test.first);
             run_test = filter_it != filter.end();
         }
         if (run_test)
         {
-            test.function();
+            test.second();
         }
     }
-}
-
-Tests::AddTest::AddTest(
-    std::string const& group,
-    std::string const& name,
-    std::function<void(void)> const& function)
-{
-    instance()->_tests.push_back({ group, name, function });
 }

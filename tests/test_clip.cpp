@@ -6,19 +6,22 @@
 #include <iostream>
 
 namespace otime = opentime::OPENTIME_VERSION;
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
 
-Tests::AddTest test_cons(
-    "test_clip",
-    "test_cons",
-    [] {
+int
+main(int argc, char** argv)
+{
+    Tests tests;
+
+    tests.add_test("test_cons", [] {
         std::string         name = "test";
         otime::RationalTime rt(5, 24);
         otime::TimeRange    tr(rt, rt);
 
         otio::SerializableObject::Retainer<otio::ExternalReference> mr(
             new otio::ExternalReference);
-        mr->set_available_range(otime::TimeRange(rt, otime::RationalTime(10, 24)));
+        mr->set_available_range(
+            otime::TimeRange(rt, otime::RationalTime(10, 24)));
         mr->set_target_url("/var/tmp/test.mov");
 
         otio::SerializableObject::Retainer<otio::Clip> cl(new otio::Clip);
@@ -34,16 +37,14 @@ Tests::AddTest test_cons(
         assertTrue(cl->is_equivalent_to(*decoded));
     });
 
-Tests::AddTest test_ranges(
-    "test_clip",
-    "test_ranges",
-    [] {
+    tests.add_test("test_ranges", [] {
         otime::TimeRange tr(
             // 1 hour in at 24 fps
             otime::RationalTime(86400, 24),
             otime::RationalTime(200, 24));
 
-        otio::SerializableObject::Retainer<otio::Clip> cl(new otio::Clip("test_clip"));
+        otio::SerializableObject::Retainer<otio::Clip> cl(
+            new otio::Clip("test_clip"));
         otio::SerializableObject::Retainer<otio::ExternalReference> mr(
             new otio::ExternalReference);
         mr->set_target_url("/var/tmp/test.mov");
@@ -63,3 +64,7 @@ Tests::AddTest test_ranges(
         assertEqual(cl->duration(), cl->source_range()->duration());
         assertEqual(cl->trimmed_range(), cl->source_range().value());
     });
+
+    tests.run(argc, argv);
+    return 0;
+}

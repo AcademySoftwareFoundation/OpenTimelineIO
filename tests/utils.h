@@ -47,26 +47,13 @@ assertNotEqual(double a, double b)
     assert(std::abs(a - b) > double_epsilon);
 }
 
-struct Test
-{
-    std::string group;
-    std::string name;
-    std::function<void(void)> function;
-};
-
 class Tests
 {
 public:
-    static void run(int argc, char** argv);
+    void add_test(std::string const& name, std::function<void(void)> const& test);
 
-    struct AddTest
-    {
-        AddTest(
-            std::string const&               group,
-            std::string const&               name,
-            std::function<void(void)> const& function);
-    };
+    void run(int argc, char** argv);
 
- private:
-	std::vector<Test> _tests;
+private:
+    std::vector<std::pair<std::string, std::function<void(void)>>> _tests;
 };

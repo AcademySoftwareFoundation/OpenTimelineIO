@@ -22,19 +22,30 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    env:
+      OTIO_BUILD_CONFIG: Release
+      OTIO_BUILD_DIR: ${{ github.workspace }}/build
+      OTIO_INSTALL_DIR: ${{ github.workspace }}/install
+
     steps:
     - uses: actions/checkout@v2.3.5
       with:
         submodules: 'recursive'
-
-    - name: compile c++
+    - name: Compile C++
       run: |
-        mkdir build
-        mkdir test_otio_inst_dir
-        cd build
-        cmake .. -DCMAKE_INSTALL_PREFIX=test_otio_inst_dir
-        cmake --build . --target install --config release
- 
+        mkdir -p $OTIO_BUILD_DIR
+        cd $OTIO_BUILD_DIR
+        cmake $GITHUB_WORKSPACE -DCMAKE_INSTALL_PREFIX=$OTIO_INSTALL_DIR
+        cmake --build . --config $OTIO_BUILD_CONFIG
+    - name: Test C++
+      run: |
+        cd $OTIO_BUILD_DIR
+        cmake --build . --target test --config $OTIO_BUILD_CONFIG
+    - name: Install C++
+      run: |
+        cd $OTIO_BUILD_DIR
+        cmake --build . --target install --config $OTIO_BUILD_CONFIG
+
   py_build_test:
     runs-on: ${{ matrix.os }}
     strategy:

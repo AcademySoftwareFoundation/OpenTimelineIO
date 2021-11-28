@@ -40,7 +40,7 @@ jobs:
     - name: Test C++
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
-        cmake --build . --target test --config ${{ env.OTIO_BUILD_CONFIG }}
+        cmake --build . --target RUN_TESTS --config ${{ env.OTIO_BUILD_CONFIG }}
     - name: Install C++
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}

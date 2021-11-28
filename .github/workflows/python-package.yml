@@ -33,18 +33,18 @@ jobs:
         submodules: 'recursive'
     - name: Compile C++
       run: |
-        cmake -E make_directory $env:OTIO_BUILD_DIR
-        cd $env:OTIO_BUILD_DIR
-        cmake $env:GITHUB_WORKSPACE -DCMAKE_INSTALL_PREFIX=$env:OTIO_INSTALL_DIR
-        cmake --build . --config $env:OTIO_BUILD_CONFIG
+        cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake ${{ env.GITHUB_WORKSPACE }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }}
+        cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
     - name: Test C++
       run: |
-        cd $env:OTIO_BUILD_DIR
-        cmake --build . --target test --config $env:OTIO_BUILD_CONFIG
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake --build . --target test --config ${{ env.OTIO_BUILD_CONFIG }}
     - name: Install C++
       run: |
-        cd $env:OTIO_BUILD_DIR
-        cmake --build . --target install --config $env:OTIO_BUILD_CONFIG
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
 
   py_build_test:
     runs-on: ${{ matrix.os }}

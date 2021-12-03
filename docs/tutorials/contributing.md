@@ -38,7 +38,7 @@ cd OpenTimelineIO
 git remote add upstream https://github.com/PixarAnimationStudios/OpenTimelineIO.git
 ```
 
-Now you fetch the latest changes from Pixar's OpenTimelineIO repo like this:
+Now you fetch the latest changes from the OpenTimelineIO repo like this:
 
 ```bash
 git fetch upstream

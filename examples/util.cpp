@@ -2,8 +2,6 @@
 
 #include <opentimelineio/timeline.h>
 
-#include <Python.h>
-
 #include <codecvt>
 #include <iostream>
 #include <locale>

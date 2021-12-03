@@ -42,7 +42,7 @@
                                     }
                                 }, 
                                 "take": {
-                                    "OTIO_SCHEMA": "PixarTake.1", 
+                                    "OTIO_SCHEMA": "ExampleStudioTake.1", 
                                     "globaltake": 1, 
                                     "prod": "ppjoshm", 
                                     "shot": "ppjoshm_1", 
@@ -110,7 +110,7 @@
                                     }
                                 }, 
                                 "take": {
-                                    "OTIO_SCHEMA": "PixarTake.1", 
+                                    "OTIO_SCHEMA": "ExampleStudioTake.1", 
                                     "globaltake": 1, 
                                     "prod": "ppjoshm", 
                                     "shot": "ppjoshm_1", 

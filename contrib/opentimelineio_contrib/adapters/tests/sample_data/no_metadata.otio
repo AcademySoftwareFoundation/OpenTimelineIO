@@ -32,17 +32,17 @@
                             "target_url": "sample_data/one_clip.aaf"
                         }, 
                         "metadata": {
-                            "pixar": {
-                                "OTIO_SCHEMA": "PixarMetadata.1", 
+                            "example_studio": {
+                                "OTIO_SCHEMA": "ExampleStudioMetadata.1", 
                                 "cache": {
                                     "hitech": {
-                                        "OTIO_SCHEMA": "PixarHitech.1", 
+                                        "OTIO_SCHEMA": "ExampleDatabase.1", 
                                         "shot": null, 
                                         "take": null
                                     }
                                 }, 
                                 "take": {
-                                    "OTIO_SCHEMA": "PixarTake.1", 
+                                    "OTIO_SCHEMA": "ExampleStudioTake.1", 
                                     "globaltake": 1, 
                                     "prod": "ppjoshm", 
                                     "shot": "ppjoshm_1", 
@@ -100,17 +100,17 @@
                             "target_url": "sample_data/one_clip.aaf"
                         }, 
                         "metadata": {
-                            "pixar": {
-                                "OTIO_SCHEMA": "PixarMetadata.1", 
+                            "example_studio": {
+                                "OTIO_SCHEMA": "ExampleStudioMetadata.1", 
                                 "cache": {
                                     "hitech": {
-                                        "OTIO_SCHEMA": "PixarHitech.1", 
+                                        "OTIO_SCHEMA": "ExampleDatabase.1", 
                                         "shot": null, 
                                         "take": null
                                     }
                                 }, 
                                 "take": {
-                                    "OTIO_SCHEMA": "PixarTake.1", 
+                                    "OTIO_SCHEMA": "ExampleStudioTake.1", 
                                     "globaltake": 1, 
                                     "prod": "ppjoshm", 
                                     "shot": "ppjoshm_1", 

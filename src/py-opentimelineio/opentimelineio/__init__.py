@@ -26,7 +26,7 @@
 
 see: http://opentimeline.io
 
-.. moduleauthor:: Contributors to the OpenTimelineIO project <opentimelineio@pixar.com>
+.. moduleauthor:: Contributors to the OpenTimelineIO project <otio-discussion@lists.aswf.io>
 """
 
 # flake8: noqa

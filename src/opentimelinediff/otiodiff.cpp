@@ -1,5 +1,4 @@
 
-#include "util.h"
 #include "trackDiff.h"
 
 #include <opentimelineio/stackAlgorithm.h>

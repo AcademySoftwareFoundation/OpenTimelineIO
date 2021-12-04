@@ -222,6 +222,7 @@ endif()
 add_subdirectory(src/deps)
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
+add_subdirectory(src/opentimelinediff)
 
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)

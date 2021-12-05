@@ -1,7 +1,7 @@
 package: Example OTIO Reader
 author: Contributors to the OpenTimelineIO project
 organization: OpenTimelineIO project
-contact: opentimelineio@pixar.com
+contact: otio-discussion@lists.aswf.io
 version: 1.0
 url: http://opentimeline.io
 rv: 4.0.8

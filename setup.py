@@ -188,7 +188,7 @@ if (
 PROJECT_METADATA = {
     "version": "0.15.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
-    "author_email": 'opentimelineio@pixar.com',
+    "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
 }
 

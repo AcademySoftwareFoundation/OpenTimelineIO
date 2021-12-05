@@ -106,6 +106,6 @@ sourceGroup000001_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\"pixar\":{\"OTIO_SCHEMA\":\"PixarMetadata.1\",\"cache\":{\"hitech\":{\"OTIO_SCHEMA\":\"PixarHitech.1\",\"shot\":null,\"take\":null}},\"take\":{\"OTIO_SCHEMA\":\"PixarTake.1\",\"globaltake\":1,\"prod\":\"ppjoshm\",\"shot\":\"ppjoshm_1\",\"unit\":\"none\"}}}"
+        string metadata = "{\"example_studio\":{\"OTIO_SCHEMA\":\"ExampleStudioMetadata.1\",\"cache\":{\"hitech\":{\"OTIO_SCHEMA\":\"ExampleDatabase.1\",\"shot\":null,\"take\":null}},\"take\":{\"OTIO_SCHEMA\":\"ExampleStudioTake.1\",\"globaltake\":1,\"prod\":\"ppjoshm\",\"shot\":\"ppjoshm_1\",\"unit\":\"none\"}}}"
     }
 }

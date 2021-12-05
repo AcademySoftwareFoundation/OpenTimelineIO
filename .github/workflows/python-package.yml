@@ -48,6 +48,23 @@ jobs:
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
+    - name: C++ code coverage
+      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      run: |
+        cd ${{ env.OTIO_BUILD_DIR }}
+        lcov --capture -b . --directory . --output-file=coverage.info -q
+        cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
+        lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
+        lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
+        lcov --list coverage.filtered.info
+    - name: Upload C++ coverage to Codecov
+      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        files: env.OTIO_BUILD_DIR/coverage.filtered.info
+        flags: unittests
+        name: opentimelineio-codecov
+        fail_ci_if_error: true
     - name: Install C++
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}

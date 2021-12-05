@@ -60,6 +60,7 @@ jobs:
         cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
         lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
         lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
+        lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info
     - name: Upload coverage to Codecov
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT

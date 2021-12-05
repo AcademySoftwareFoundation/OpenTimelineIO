@@ -42,17 +42,17 @@ jobs:
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
         sudo apt-get install lcov
-    - name: Compile C++
+    - name: Build
       run: |
         cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON
         cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
-    - name: Test C++
+    - name: Run tests
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
-    - name: C++ code coverage
+    - name: Collect code coverage
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
@@ -61,15 +61,15 @@ jobs:
         lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
         lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info
-    - name: Upload C++ coverage to Codecov
+    - name: Upload coverage to Codecov
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       uses: codecov/codecov-action@v2.1.0
       with:
-        files: env.OTIO_BUILD_DIR/coverage.filtered.info
+        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
         flags: unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
-    - name: Install C++
+    - name: Install
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}

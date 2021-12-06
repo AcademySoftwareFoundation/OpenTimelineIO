@@ -27,7 +27,7 @@ Before contributing code to OpenTimelineIO, we ask that you sign a Contributor L
 * [OTIO_CLA_Corporate.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Corporate.pdf): please sign this one for corporate use
 * [OTIO_CLA_Individual.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
 
-Once your CLA is signed, send it to `otio-tsc-private@lists.aswf.io` (please make sure to include your github username) and wait for confirmation that we've received it.  After that, you can submit pull requests.
+Once your CLA is signed, send it to `opentimelineio-tsc@aswf.io` (please make sure to include your github username) and wait for confirmation that we've received it.  After that, you can submit pull requests.
 
 ## Coding Conventions
 Please follow the coding convention and style in each file and in each library when adding new files.

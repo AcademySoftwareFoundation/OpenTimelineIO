@@ -67,7 +67,7 @@ jobs:
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
-        flags: unittests
+        flags: cxx-unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
     - name: Install
@@ -120,8 +120,8 @@ jobs:
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       uses: codecov/codecov-action@v2.1.0
       with:
-        flags: unittests
-        name: py-opentimelineio-codecov
+        flags: py-unittests
+        name: opentimelineio-codecov
         fail_ci_if_error: true
 
   package_wheels:

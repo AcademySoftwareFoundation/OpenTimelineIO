@@ -20,7 +20,7 @@ void print_error(otio::ErrorStatus const& error_status)
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 4)
     {
         std::cout << "Usage: diff_video_track (prev_path) (new_path)"
                   << std::endl;
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     
     auto newtimeline = new otio::Timeline("diff");
     newtimeline->set_tracks(stack);
-    if (!newtimeline->to_json_file("/var/tmp/diff.otio", &error_status))
+    if (!newtimeline->to_json_file(argv[3], &error_status))
     {
         print_error(error_status);
         return 1;

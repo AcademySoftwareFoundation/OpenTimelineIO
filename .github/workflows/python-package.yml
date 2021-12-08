@@ -5,7 +5,6 @@ name: OpenTimelineIO
 
 # for configuring which build will be a C++ coverage build / coverage report
 env:
-  GH_COV_PY: 3.7
   GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 
@@ -67,7 +66,7 @@ jobs:
       uses: codecov/codecov-action@v2.1.0
       with:
         files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
-        flags: cxx-unittests
+        flags: unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
     - name: Install
@@ -83,7 +82,6 @@ jobs:
         python-version: ['2.7', '3.7', '3.8', '3.9']
 
     env:
-      OTIO_CXX_COVERAGE_BUILD: ON
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
@@ -94,10 +92,6 @@ jobs:
       uses: actions/setup-python@v2.2.2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install coverage dependency
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: |
-        sudo apt-get install lcov
     - name: Install python build dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel flake8>=3.5 check-manifest
@@ -112,17 +106,6 @@ jobs:
         pip install .[dev] -v
     - name: Run tests w/ python coverage
       run: make ci-postbuild
-    # (only on ubuntu/pyhton3.7)
-    - name: Generate C++ coverage report
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: make lcov
-    - name: Upload coverage to Codecov
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      uses: codecov/codecov-action@v2.1.0
-      with:
-        flags: py-unittests
-        name: opentimelineio-codecov
-        fail_ci_if_error: true
 
   package_wheels:
     needs: py_build_test

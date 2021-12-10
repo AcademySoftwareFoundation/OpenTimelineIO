@@ -29,7 +29,6 @@ import sys
 import os
 import subprocess
 import sysconfig
-import fnmatch
 import platform
 
 try:

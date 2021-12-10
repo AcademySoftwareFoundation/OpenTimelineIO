@@ -30,6 +30,7 @@ import os
 import subprocess
 import sysconfig
 import fnmatch
+import platform
 
 try:
     # python2
@@ -85,14 +86,15 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
             # make sure its on the path
             
             console_script = os.path.join(sysconfig.get_path('scripts'), sys.argv[0])
+            if platform.system() == 'Windows':
+                console_script += '.exe'
+
             if not os.path.exists(console_script):
-                # We might be on Windows
-                if not os.path.exists(console_script + ".exe"):
-                    self.fail(
+                self.fail(
                     "Could not find '{}'.  Tests that explicitly shell"
                     " out can be disabled by setting the environment variable "
                     "OTIO_DISABLE_SHELLOUT_TESTS.".format(console_script)
-                    )
+                )
 
             # actually run the test (sys.argv is already populated correctly)
             proc = subprocess.Popen(

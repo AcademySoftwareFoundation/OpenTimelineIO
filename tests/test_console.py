@@ -83,7 +83,6 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
     def run_test(self):
         if self.SHELL_OUT:
             # make sure its on the path
-            
             console_script = os.path.join(sysconfig.get_path('scripts'), sys.argv[0])
             if platform.system() == 'Windows':
                 console_script += '.exe'

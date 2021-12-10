@@ -17,6 +17,7 @@ Item::Item(
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
     , _markers(markers.begin(), markers.end())
+    , _enabled(true)
 {}
 
 Item::~Item()
@@ -165,6 +166,7 @@ Item::read_from(Reader& reader)
     return reader.read_if_present("source_range", &_source_range) &&
            reader.read_if_present("effects", &_effects) &&
            reader.read_if_present("markers", &_markers) &&
+           reader.read_if_present("enabled", &_enabled) &&
            Parent::read_from(reader);
 }
 
@@ -175,6 +177,7 @@ Item::write_to(Writer& writer) const
     writer.write("source_range", _source_range);
     writer.write("effects", _effects);
     writer.write("markers", _markers);
+    writer.write("enabled", _enabled);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -227,7 +227,7 @@ class ALEAdapterTest(unittest.TestCase):
         add_then_check(tl, '4096x2304', 'CUSTOM')
 
     def test_ale_roundtrip(self):
-        ale_path = EXAMPLE_CDL_PATH
+        ale_path = EXAMPLE_PATH
 
         with open(ale_path, 'r') as fi:
             original = fi.read()

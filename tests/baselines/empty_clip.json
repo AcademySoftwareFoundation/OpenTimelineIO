@@ -4,6 +4,7 @@
     "name" : "test_clip",
     "source_range" : null,
     "markers" : [],
+    "enabled" : true,
     "effects" : [],
     "media_reference" : {
         "FROM_TEST_FILE" : "empty_missingreference.json"

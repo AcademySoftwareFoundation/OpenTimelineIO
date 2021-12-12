@@ -80,6 +80,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -97,6 +98,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -269,6 +271,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *markers*: 
 - *media_reference*: 
 - *metadata*: 
@@ -334,6 +337,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -512,6 +516,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -560,6 +565,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: 
 - *kind*: 
 - *markers*: 
 - *metadata*: 

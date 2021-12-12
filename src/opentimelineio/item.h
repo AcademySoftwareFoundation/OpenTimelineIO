@@ -27,7 +27,8 @@ public:
         optional<TimeRange> const&  source_range = nullopt,
         AnyDictionary const&        metadata     = AnyDictionary(),
         std::vector<Effect*> const& effects      = std::vector<Effect*>(),
-        std::vector<Marker*> const& markers      = std::vector<Marker*>());
+        std::vector<Marker*> const& markers      = std::vector<Marker*>(),
+        bool                        enabled      = true);
 
     virtual bool visible() const;
     virtual bool overlapping() const;

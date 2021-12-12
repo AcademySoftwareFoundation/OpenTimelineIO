@@ -295,15 +295,17 @@ static void define_bases2(py::module m) {
 static void define_items_and_compositions(py::module m) {
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
-                         py::object effects, py::object markers, py::object metadata) {
+                         py::object effects, py::object markers, py::bool_ enabled, py::object metadata) {
                           return new Item(name, source_range,
                                           py_to_any_dictionary(metadata),
                                           py_to_vector<Effect*>(effects),
-                                          py_to_vector<Marker*>(markers)); }),
+                                          py_to_vector<Marker*>(markers),
+                                          enabled); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = nullopt,
              "effects"_a = py::none(),
              "markers"_a = py::none(),
+             "enabled"_a = true,
              py::arg_v("metadata"_a = py::none()))
         .def_property("enabled", &Item::enabled, &Item::set_enabled)
         .def_property("source_range", &Item::source_range, &Item::set_source_range)

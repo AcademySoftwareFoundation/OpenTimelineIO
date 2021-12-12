@@ -12,12 +12,13 @@ Item::Item(
     optional<TimeRange> const&  source_range,
     AnyDictionary const&        metadata,
     std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers)
+    std::vector<Marker*> const& markers,
+    bool                        enabled)
     : Parent(name, metadata)
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
     , _markers(markers.begin(), markers.end())
-    , _enabled(true)
+    , _enabled(enabled)
 {}
 
 Item::~Item()

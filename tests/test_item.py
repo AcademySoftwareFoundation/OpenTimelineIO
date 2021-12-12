@@ -44,6 +44,7 @@ class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             str(gp.source_range) + ", " +
             str(gp.effects) + ", " +
             str(gp.markers) + ", " +
+            str(gp.enabled) + ", " +
             str(gp.metadata) +
             ")"
         )
@@ -54,12 +55,14 @@ class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "source_range={}, "
             "effects={}, "
             "markers={}, "
+            "enabled={}, "
             "metadata={}"
             ")".format(
                 repr(gp.name),
                 repr(gp.source_range),
                 repr(gp.effects),
                 repr(gp.markers),
+                repr(gp.enabled),
                 repr(gp.metadata),
             )
         )
@@ -211,12 +214,14 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "{}, "
             "{}, "
             "{}, "
+            "{}, "
             "{}"
             ")".format(
                 str(it.name),
                 str(it.source_range),
                 str(it.effects),
                 str(it.markers),
+                str(it.enabled),
                 str(it.metadata),
             )
         )
@@ -228,12 +233,14 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "source_range={}, "
             "effects={}, "
             "markers={}, "
+            "enabled={}, "
             "metadata={}"
             ")".format(
                 repr(it.name),
                 repr(it.source_range),
                 repr(it.effects),
                 repr(it.markers),
+                repr(it.enabled),
                 repr(it.metadata),
             )
         )

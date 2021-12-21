@@ -10,15 +10,17 @@ namespace opentime { namespace OPENTIME_VERSION {
 
 RationalTime RationalTime::_invalid_time{ 0, RationalTime::_invalid_rate };
 
-static constexpr std::array<double, 4> dropframe_timecode_rates{ {
+static constexpr std::array<double, 6> dropframe_timecode_rates{ {
     // 23.976,
     // 23.98,
     // 23.97,
     // 24000.0/1001.0,
     29.97,
     30000.0 / 1001.0,
+    48000.0 / 1001.0,
     59.94,
     60000.0 / 1001.0,
+    120000.0 / 1001.0,
 } };
 
 // currently unused:
@@ -37,7 +39,7 @@ static constexpr std::array<double, 10> non_dropframe_timecode_rates
 }};
 */
 
-static constexpr std::array<double, 16> valid_timecode_rates{
+static constexpr std::array<double, 20> valid_timecode_rates{
     { 1.0,
       12.0,
       23.97,
@@ -49,11 +51,15 @@ static constexpr std::array<double, 16> valid_timecode_rates{
       29.97,
       30000.0 / 1001.0,
       30.0,
+      48000.0 / 1001.0,
       48.0,
       50.0,
       59.94,
       60000.0 / 1001.0,
-      60.0 }
+      60.0,
+      100,
+      120000.0 / 1001.0,
+      120 }
 };
 
 bool
@@ -118,7 +124,14 @@ RationalTime::from_timecode(
         unsigned int last_pos = 0;
         for (unsigned int i = 0; i < 4; i++)
         {
-            fields[i] = timecode.substr(last_pos, 2);
+            if (i < 3)
+            {
+                fields[i] = timecode.substr(last_pos, 2);
+            }
+            else
+            {
+                fields[i] = timecode.substr(last_pos);
+            }
             last_pos  = last_pos + 3;
         }
 

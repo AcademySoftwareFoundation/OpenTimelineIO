@@ -67,7 +67,7 @@ double
 RationalTime::nearest_valid_timecode_rate(double rate)
 {
     double nearest_rate;
-    double min_diff = MAXFLOAT;
+    double min_diff = std::numeric_limits<double>::max();
     for (auto valid_rate : valid_timecode_rates)
     {
         if (valid_rate == rate)

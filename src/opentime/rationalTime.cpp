@@ -63,6 +63,28 @@ RationalTime::is_valid_timecode_rate(double fps)
     return std::find(b, e, fps) != e;
 }
 
+double
+RationalTime::nearest_valid_timecode_rate(double rate)
+{
+    double nearest_rate;
+    double min_diff = MAXFLOAT;
+    for (auto valid_rate : valid_timecode_rates)
+    {
+        if (valid_rate == rate)
+        {
+            return rate;
+        }
+        auto diff = std::abs(rate - valid_rate);
+        if (diff >= min_diff)
+        {
+            continue;
+        }
+        min_diff = diff;
+        nearest_rate = valid_rate;
+    }
+    return nearest_rate;
+}
+
 static bool
 is_dropframe_rate(double rate)
 {

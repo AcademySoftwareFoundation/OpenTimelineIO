@@ -95,7 +95,7 @@ def read_from_string(input_str):
     if maintractor is None:
         # global_feed is no longer set in newer kdenlive versions,
         # but the last tractor in the xml is apparently still the main tractor
-        # so lets take that one and check if it includes all the other ones, like it should
+        # so let's take that one and check if it includes all the other ones, like it should
         alltractors = mlt.findall("tractor")
         maintractor = alltractors[-1]
         if not all((maintractor.find("track[@producer='%s']" % tractor.attrib['id']) is not None)

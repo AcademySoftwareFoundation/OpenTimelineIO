@@ -689,8 +689,16 @@ class TestTime(unittest.TestCase):
         invalid_rate = 23.97602397602397
         nearest_valid_rate = 23.976023976023978
 
-        self.assertFalse(otio.opentime.RationalTime.is_valid_timecode_rate(invalid_rate))
-        self.assertTrue(otio.opentime.RationalTime.is_valid_timecode_rate(nearest_valid_rate))
+        self.assertFalse(
+            otio.opentime.RationalTime.is_valid_timecode_rate(
+                invalid_rate
+            )
+        )
+        self.assertTrue(
+            otio.opentime.RationalTime.is_valid_timecode_rate(
+                nearest_valid_rate
+            )
+        )
         self.assertEqual(
             otio.opentime.RationalTime.nearest_valid_timecode_rate(
                 invalid_rate

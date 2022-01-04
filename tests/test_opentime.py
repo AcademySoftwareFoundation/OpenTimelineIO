@@ -685,6 +685,19 @@ class TestTime(unittest.TestCase):
         t2 = otio.opentime.from_timecode(NDF_TC, 29.97)
         self.assertEqual(t2.value, frames)
 
+    def test_nearest_valid_timecode_rate(self):
+        invalid_rate = 23.97602397602397
+        nearest_valid_rate = 23.976023976023978
+
+        self.assertFalse(otio.opentime.RationalTime.is_valid_timecode_rate(invalid_rate))
+        self.assertTrue(otio.opentime.RationalTime.is_valid_timecode_rate(nearest_valid_rate))
+        self.assertEqual(
+            otio.opentime.RationalTime.nearest_valid_timecode_rate(
+                invalid_rate
+            ),
+            nearest_valid_rate,
+        )
+
 
 class TestTimeTransform(unittest.TestCase):
 

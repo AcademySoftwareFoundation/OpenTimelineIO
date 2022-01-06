@@ -293,6 +293,19 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(it, decoded)
         self.assertJsonEqual(it.markers, decoded.markers)
 
+    def test_enabled(self):
+        tr = otio.opentime.TimeRange(
+            duration=otio.opentime.RationalTime(10, 1)
+        )
+        it = otio.core.Item(source_range=tr)
+        self.assertEquals(it.enabled, True)
+        it.enabled = False
+        self.assertEquals(it.enabled, False)
+        encoded = otio.adapters.otio_json.write_to_string(it)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(it, decoded)
+        self.assertJsonEqual(it.enabled, decoded.enabled)
+
     def test_copy(self):
         tr = otio.opentime.TimeRange(
             duration=otio.opentime.RationalTime(10, 1)

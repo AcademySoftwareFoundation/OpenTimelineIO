@@ -57,6 +57,7 @@ import aaf2.content  # noqa: E402
 import aaf2.mobs  # noqa: E402
 import aaf2.components  # noqa: E402
 import aaf2.core  # noqa: E402
+import aaf2.misc  # noqa: E402
 from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
 
 
@@ -64,6 +65,16 @@ debug = False
 
 # If enabled, output recursive traversal info of _transcribe() method.
 _TRANSCRIBE_DEBUG = False
+
+# bake keyframed parameter
+_BAKE_KEYFRAMED_PROPERTIES_VALUES = False
+
+_PROPERTY_INTERPOLATION_MAP = {
+    aaf2.misc.ConstantInterp: "Constant",
+    aaf2.misc.LinearInterp: "Linear",
+    aaf2.misc.BezierInterpolator: "Bezier",
+    aaf2.misc.CubicInterpolator: "Cubic",
+}
 
 
 def _transcribe_log(s, indent=0, always_print=False):
@@ -108,7 +119,7 @@ def _get_class_name(item):
         return item.__class__.__name__
 
 
-def _transcribe_property(prop):
+def _transcribe_property(prop, owner=None):
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
     if isinstance(prop, (str, type(u""), numbers.Integral, float, dict)):
@@ -118,19 +129,66 @@ def _transcribe_property(prop):
     elif isinstance(prop, list):
         result = {}
         for child in prop:
-            if hasattr(child, "name") and hasattr(child, "value"):
-                result[child.name] = _transcribe_property(child.value)
+            if hasattr(child, "name"):
+                if isinstance(child, aaf2.misc.VaryingValue):
+                    # keyframed values
+                    control_points = []
+                    for control_point in child["PointList"]:
+                        try:
+                            # Some values cannot be transcribed yet
+                            control_points.append(
+                                [
+                                    control_point.time,
+                                    _transcribe_property(control_point.value),
+                                ]
+                            )
+                        except TypeError:
+                            _transcribe_log(
+                                "Unable to transcribe value for property: "
+                                "'{}' (Type: '{}', Parent: '{}')".format(
+                                    child.name, type(child), prop
+                                )
+                            )
+
+                    # bake keyframe values for owner time range
+                    baked_values = None
+                    if _BAKE_KEYFRAMED_PROPERTIES_VALUES:
+                        if isinstance(owner, aaf2.components.Component):
+                            baked_values = []
+                            for t in range(0, owner.length):
+                                baked_values.append([t, child.value_at(t)])
+                        else:
+                            _transcribe_log(
+                                "Unable to bake values for property: "
+                                "'{}'. Owner: {}, Control Points: {}".format(
+                                    child.name, owner, control_points
+                                )
+                            )
+
+                    value_dict = {
+                        "_aaf_keyframed_property": True,
+                        "keyframe_values": control_points,
+                        "keyframe_interpolation": _PROPERTY_INTERPOLATION_MAP.get(
+                            child.interpolationdef.auid, "Linear"
+                        ),
+                        "keyframe_baked_values": baked_values
+                    }
+                    result[child.name] = value_dict
+
+                elif hasattr(child, "value"):
+                    # static value
+                    result[child.name] = _transcribe_property(child.value, owner=owner)
             else:
                 # @TODO: There may be more properties that we might want also.
                 # If you want to see what is being skipped, turn on debug.
                 if debug:
-                    debug_message = "Skipping unrecognized property: {} of parent {}"
-                    print(debug_message.format(child, prop))
+                    debug_message = "Skipping unrecognized property: '{}', parent '{}'"
+                    _transcribe_log(debug_message.format(child, prop))
         return result
     elif hasattr(prop, "properties"):
         result = {}
         for child in prop.properties():
-            result[child.name] = _transcribe_property(child.value)
+            result[child.name] = _transcribe_property(child.value, owner=owner)
         return result
     else:
         return str(prop)
@@ -364,7 +422,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             if hasattr(prop, 'name') and hasattr(prop, 'value'):
                 key = str(prop.name)
                 value = prop.value
-                metadata[key] = _transcribe_property(value)
+                metadata[key] = _transcribe_property(value, owner=item)
 
     # Now we will use the item's class to determine which OTIO type
     # to transcribe into. Note that the order of this if/elif/... chain
@@ -1396,7 +1454,13 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers=True):
+def read_from_file(
+    filepath,
+    simplify=True,
+    transcribe_log=False,
+    attach_markers=True,
+    bake_keyframed_properties=False
+):
     """Reads AAF content from `filepath` and outputs an OTIO timeline object.
 
     Args:
@@ -1405,7 +1469,8 @@ def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers
         transcribe_log (bool, optional): log activity as items are getting transcribed
         attach_markers (bool, optional): attaches markers to their appropriate items
                                          like clip, gap. etc on the track
-
+        bake_keyframed_properties (bool, optional): bakes animated property values
+                                                    for each frame in a source clip
     Returns:
         otio.schema.Timeline
 
@@ -1414,8 +1479,9 @@ def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers
     # Note that a global 'switch' is used in order to avoid
     # passing another argument around in the _transcribe() method.
     #
-    global _TRANSCRIBE_DEBUG
+    global _TRANSCRIBE_DEBUG, _BAKE_KEYFRAMED_PROPERTIES_VALUES
     _TRANSCRIBE_DEBUG = transcribe_log
+    _BAKE_KEYFRAMED_PROPERTIES_VALUES = bake_keyframed_properties
 
     with aaf2.open(filepath) as aaf_file:
 

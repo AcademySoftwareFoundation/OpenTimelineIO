@@ -346,7 +346,8 @@ Reads AAF content from `filepath` and outputs an OTIO
   transcribed
       attach_markers (bool, optional): attaches markers to their appropriate items
                                        like clip, gap. etc on the track
-
+      bake_keyframed_properties (bool, optional): bakes animated property values
+                                                  for each frame in a source clip
   Returns:
       otio.schema.Timeline
 ```
@@ -354,6 +355,7 @@ Reads AAF content from `filepath` and outputs an OTIO
   - simplify
   - transcribe_log
   - attach_markers
+  - bake_keyframed_properties
 - write_to_file:
   - input_otio
   - filepath

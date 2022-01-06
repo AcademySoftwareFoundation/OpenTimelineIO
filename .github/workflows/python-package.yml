@@ -20,6 +20,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        # Unfortunately the CMake test target is OS dependent so we set it as
+        # a variable here.
         include:
         - os: ubuntu-latest
           OTIO_TEST_TARGET: test

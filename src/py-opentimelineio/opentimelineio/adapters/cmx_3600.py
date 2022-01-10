@@ -64,9 +64,16 @@ channel_map = {
 # the comment string for the media reference:
 #   'avid': '* FROM CLIP:' (default)
 #   'nucoda': '* FROM FILE:'
+#   'premiere': '' (If Adobe Premiere's imports an EDL that uses
+#                   a "FROM" comment will cause the clips
+#                   to be name UNKNOWN)
 # When adding a new style, please be sure to add sufficient tests
 # to verify both the new and existing styles.
-VALID_EDL_STYLES = ['avid', 'nucoda']
+VALID_EDL_STYLES = {
+    'avid': 'CLIP',
+    'nucoda': 'FILE',
+    'premiere': '',
+}
 
 
 def _extend_source_range_duration(obj, duration):
@@ -1246,14 +1253,13 @@ def _generate_comment_lines(
         )
     if timing_effect and timing_effect.effect_name == "FreezeFrame":
         lines.append('* * FREEZE FRAME')
-    if url and style == 'avid':
-        lines.append("* {from_or_to} CLIP: {url}".format(
+
+    # If the style has a spec, apply it and add it as a comment
+    style = VALID_EDL_STYLES.get(style)
+    if url and style:
+        lines.append("* {from_or_to} {style}: {url}".format(
             from_or_to=from_or_to,
-            url=url
-        ))
-    if url and style == 'nucoda':
-        lines.append("* {from_or_to} FILE: {url}".format(
-            from_or_to=from_or_to,
+            style=style,
             url=url
         ))
 

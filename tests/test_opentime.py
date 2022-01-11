@@ -696,11 +696,6 @@ class TestTime(unittest.TestCase):
         )
 
         for invalid_rate, nearest_valid_rate in invalid_valid_rates:
-            self.assertFalse(
-                otio.opentime.RationalTime.is_valid_timecode_rate(
-                    invalid_rate
-                )
-            )
             self.assertTrue(
                 otio.opentime.RationalTime.is_valid_timecode_rate(
                     nearest_valid_rate

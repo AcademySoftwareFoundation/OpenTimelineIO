@@ -101,6 +101,8 @@ public:
 
     static bool is_valid_timecode_rate(double rate);
 
+    static double nearest_valid_timecode_rate(double rate);
+
     static constexpr RationalTime
     from_frames(double frame, double rate) noexcept
     {

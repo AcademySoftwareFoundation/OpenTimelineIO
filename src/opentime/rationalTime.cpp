@@ -21,21 +21,19 @@ static constexpr std::array<double, 4> dropframe_timecode_rates{ {
     60000.0 / 1001.0,
 } };
 
-// currently unused:
-/*
-static constexpr std::array<double, 10> non_dropframe_timecode_rates
-{{  1,
-    12,
-    23.976,
-    23.98,
-    24,
-    25,
-    30,
-    48,
-    50,
-    60
-}};
-*/
+static constexpr std::array<double, 11> smpte_timecode_rates{
+    { 1.0,
+      12.0,
+      24000.0 / 1001.0,
+      24.0,
+      25.0,
+      30000.0 / 1001.0,
+      30.0,
+      48.0,
+      50.0,
+      60000.0 / 1001.0,
+      60.0 }
+};
 
 static constexpr std::array<double, 16> valid_timecode_rates{
     { 1.0,
@@ -61,6 +59,28 @@ RationalTime::is_valid_timecode_rate(double fps)
 {
     auto b = valid_timecode_rates.begin(), e = valid_timecode_rates.end();
     return std::find(b, e, fps) != e;
+}
+
+double
+RationalTime::nearest_valid_timecode_rate(double rate)
+{
+    double nearest_rate = 0;
+    double min_diff = std::numeric_limits<double>::max();
+    for (auto valid_rate : smpte_timecode_rates)
+    {
+        if (valid_rate == rate)
+        {
+            return rate;
+        }
+        auto diff = std::abs(rate - valid_rate);
+        if (diff >= min_diff)
+        {
+            continue;
+        }
+        min_diff = diff;
+        nearest_rate = valid_rate;
+    }
+    return nearest_rate;
 }
 
 static bool

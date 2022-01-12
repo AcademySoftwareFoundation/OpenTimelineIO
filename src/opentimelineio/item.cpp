@@ -27,7 +27,7 @@ Item::~Item()
 bool
 Item::visible() const
 {
-    return true;
+    return _enabled;
 }
 
 bool

@@ -75,6 +75,79 @@ class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         }
         """, "otio_json")
 
+        self.trackZd = otio.adapters.read_from_string("""
+        {
+            "OTIO_SCHEMA": "Track.1",
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "enabled": false,
+                    "metadata": {},
+                    "name": "Z",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 150
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 0.0
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "metadata": {},
+            "name": "Sequence1",
+            "source_range": null
+        }
+        """, "otio_json")
+
+        self.track_d = otio.adapters.read_from_string("""
+        {
+            "OTIO_SCHEMA": "Track.1",
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "enabled": true,
+                    "metadata": {},
+                    "name": "Z",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 150
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 0.0
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "enabled": false,
+            "metadata": {},
+            "name": "Sequence1",
+            "source_range": null
+        }
+        """, "otio_json")
+
         self.trackABC = otio.adapters.read_from_string("""
         {
             "OTIO_SCHEMA": "Track.1",
@@ -351,6 +424,48 @@ class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 self.trackABC,
             ]
         )
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackABC[:]
+        )
+
+    def test_flatten_disabled_clip(self):
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZ
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackZ[:]
+        )
+        del stack
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZd
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackABC[:]
+        )
+
+    def test_flatten_disabled_track(self):
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZ
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackZ[:]
+        )
+        del stack
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.track_d
+        ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertJsonEqual(
             flat_track[:],

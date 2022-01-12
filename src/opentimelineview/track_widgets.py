@@ -412,7 +412,8 @@ class ClipItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255) if self.item.enabled
+                                   else QtGui.QColor(200, 200, 200, 255)))
         self.source_name_label.setText(self.item.name)
 
 

@@ -1135,8 +1135,3 @@ def convert_otio_to_svg(timeline, width, height):
 
 def write_to_string(input_otio, width=2406.0, height=1054.0):
     return convert_otio_to_svg(input_otio, width=width, height=height)
-
-
-with open("/home/karthik/OpenTimelineIO/test.svg", "w") as svg_file:
-    input_otio = otio.adapters.read_from_file("/home/karthik/OpenTimelineIO/test.otio")
-    svg_file.write(write_to_string(input_otio))

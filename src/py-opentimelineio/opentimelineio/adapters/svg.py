@@ -528,7 +528,6 @@ class ClipData(object):
         self.avlbl_duration = avlbl_duration
         self.trim_start = trim_start
         self.trim_duration = trim_duration
-        # self.target_url = target_url
         self.clip_id = clip_id
         self.transition_begin = transition_begin
         self.transition_end = transition_end

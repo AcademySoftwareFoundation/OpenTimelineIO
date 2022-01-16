@@ -50,7 +50,7 @@ RationalTime _type_checked(py::object const& rhs, char const* op) {
         return py::cast<RationalTime>(rhs);
     }
     catch (...) {
-        std::string rhs_type = py::cast<std::string>(rhs.get_type().attr("__name__"));
+        std::string rhs_type = py::cast<std::string>(py::type::of(rhs).attr("__name__"));
         throw py::type_error(string_printf("unsupported operand type(s) for %s: "
                                            "RationalTime and %s", op, rhs_type.c_str()));
     }

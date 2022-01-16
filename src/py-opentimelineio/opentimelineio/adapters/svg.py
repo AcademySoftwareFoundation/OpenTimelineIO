@@ -519,7 +519,7 @@ class ClipData(object):
 
     def __init__(self, src_start=0.0, src_end=0.0, avlbl_start=0.0,
                  avlbl_end=0.0, avlbl_duration=0.0,
-                 trim_start=0.0, trim_duration=0.0, target_url='', clip_id=0,
+                 trim_start=0.0, trim_duration=0.0, clip_id=0,
                  transition_begin=None, transition_end=None):
         self.src_start = src_start
         self.src_end = src_end
@@ -528,7 +528,7 @@ class ClipData(object):
         self.avlbl_duration = avlbl_duration
         self.trim_start = trim_start
         self.trim_duration = trim_duration
-        self.target_url = target_url
+        # self.target_url = target_url
         self.clip_id = clip_id
         self.transition_begin = transition_begin
         self.transition_end = transition_end
@@ -587,7 +587,7 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 clip_data = ClipData(src_start, src_end, avlbl_start,
                                      avlbl_end, avlbl_duration, trim_start,
                                      trim_duration,
-                                     item.media_reference.target_url, clip_count - 1)
+                                     clip_count - 1)
                 if current_transition is not None:
                     clip_data.transition_begin = current_transition
                     current_transition = None
@@ -808,7 +808,7 @@ def _draw_track(track, svg_writer, extra_data=()):
             draw_item(item, svg_writer, (clips_data[item_count],))
             item_count += 1
         elif isinstance(item, otio.schema.Transition):
-            cut_x = svg_writer.x_origin + (clips_data[item_count].src_start *
+            cut_x = svg_writer.x_origin + (clips_data[clip_count].src_start *
                                            svg_writer.scale_x)
             draw_item(item, svg_writer, (cut_x,))
             transition_count += 1
@@ -935,19 +935,19 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         available_range_text = r'available_range: {}, {}'.format(
             repr(float(round(clip.available_range().start_time.value, 1))),
             repr(float(round(clip.available_range().duration.value, 1))))
-    if clip.media_reference.target_url is None:
-        target_url_text = r'target_url: {}'.format('Media Unavailable')
-    else:
-        target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
-    available_range_text = available_range_text
     available_range_location = Point(media_origin.x + svg_writer.font_size,
                                      media_origin.y - svg_writer.font_size)
-    target_url_location = Point(media_origin.x + svg_writer.font_size,
-                                media_origin.y - 2.0 * svg_writer.font_size)
     svg_writer.draw_text(available_range_text, available_range_location,
                          svg_writer.font_size,
                          )
-    svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)
+    if hasattr(clip.media_reference, 'target_url'):
+        if clip.media_reference.target_url is None:
+            target_url_text = r'target_url: {}'.format('Media Unavailable')
+        else:
+            target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
+        target_url_location = Point(media_origin.x + svg_writer.font_size,
+                                    media_origin.y - 2.0 * svg_writer.font_size)
+        svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)
     # Draw arrow from clip to media reference
     clip_media_height_difference = (((clip_count - 1) * 2.0 + 1) *
                                     svg_writer.clip_rect_height)
@@ -1135,3 +1135,8 @@ def convert_otio_to_svg(timeline, width, height):
 
 def write_to_string(input_otio, width=2406.0, height=1054.0):
     return convert_otio_to_svg(input_otio, width=width, height=height)
+
+
+with open("/home/karthik/OpenTimelineIO/test.svg", "w") as svg_file:
+    input_otio = otio.adapters.read_from_file("/home/karthik/OpenTimelineIO/test.otio")
+    svg_file.write(write_to_string(input_otio))

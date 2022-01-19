@@ -2,10 +2,15 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/operators.h>
+#include "nonstd/optional.hpp"
 
 #include "opentime/rationalTime.h"
 #include "opentimelineio/stringUtils.h"
+#include "py-opentimelineio/bindings-common/casters.h"
+
+using nonstd::optional;
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -28,11 +33,10 @@ struct ErrorStatusConverter {
     ErrorStatus error_status;
 };
 
-
-IsDropFrameRate df_enum_converter(py::object& df) {
-    if (df.is(py::none())) {
+IsDropFrameRate df_enum_converter(optional<bool>& df) {
+    if (!df.has_value()) {
         return IsDropFrameRate::InferFromRate;
-    } else if (py::cast<bool>(py::bool_(df))) {
+    } else if (df.value()) {
         return IsDropFrameRate::ForceYes;
     } else {
         return IsDropFrameRate::ForceNo;
@@ -107,7 +111,7 @@ For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Resul
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames, "Returns the frame number based on the current rate.")
         .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a, "Returns the frame number based on the given rate.")
         .def("to_seconds", &RationalTime::to_seconds)
-        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) {
+        .def("to_timecode", [](RationalTime rt, double rate, optional<bool> drop_frame) {
                 return rt.to_timecode(
                         rate,
                         df_enum_converter(drop_frame),

@@ -6,8 +6,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
+#include "py-opentimelineio/bindings-common/casters.h"
 #include "opentimelineio/any.h"
-#include "opentimelineio/optional.h"
 #include "opentimelineio/stringUtils.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/vectorIndexing.h"
@@ -17,13 +17,6 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
-namespace pybind11 { namespace detail {
-    template<typename T> struct type_caster<optional<T>>
-        : public optional_caster<optional<T>> {};
-
-    template<> struct type_caster<nullopt_t>
-        : public void_caster<nullopt_t> {};
-}}
 
 template <typename T>
 struct managing_ptr {

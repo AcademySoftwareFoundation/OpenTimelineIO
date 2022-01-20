@@ -70,7 +70,22 @@ sample_timeline = otio.schema.Timeline(
     global_start_time=otio.opentime.RationalTime(1, 24)
 )
 track = otio.schema.Track('v1')
-for clipnum in range(1, 4):
+bounds = [
+    otio.schema.Box2d(
+        otio.schema.V2d(0.0, 0.0),
+        otio.schema.V2d(16.0, 9.0)
+    ),  # sets viewing area
+    otio.schema.Box2d(
+        otio.schema.V2d(8.0, 0),
+        otio.schema.V2d(24.0, 9.0)
+    ),  # shifted right by half the viewing area
+    otio.schema.Box2d(
+        otio.schema.V2d(0.0, 0.0),
+        otio.schema.V2d(8.0, 4.5)
+    )  # scale to 1/4 of viewing area (lower left)
+]
+
+for clipnum, box in zip(range(1, 4), bounds):
     clip_name = 'clip{n}'.format(n=clipnum)
     track.append(
         otio.schema.Clip(
@@ -80,11 +95,12 @@ for clipnum in range(1, 4):
                 available_range=otio.opentime.TimeRange(
                     otio.opentime.RationalTime(1, 24),
                     otio.opentime.RationalTime(50, 24)
-                )
+                ),
+                available_image_bounds=box
             ),
             source_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(11, 24),
-                otio.opentime.RationalTime(30, 24)
+                otio.opentime.RationalTime(3, 24)
             )
         )
     )
@@ -205,11 +221,30 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             clip1 = rv_media_name_at_frame(rvc, 1)
             self.assertEqual(clip1, 'clip1.mov')
 
-            clip2 = rv_media_name_at_frame(rvc, 20)
+            # note RV has a default res of 1280,720 when the media doesn't exist
+            aspect_ratio = 1280.0 / 720.0
+
+            clip1_scale, clip1_translate = rv_transform_at_frame(rvc, 1)
+            self.assertEqual(clip1_scale, [1.0, 1.0])
+            self.assertEqual(clip1_translate, [0.0, 0.0])
+
+            clip2 = rv_media_name_at_frame(rvc, 4)
             self.assertEqual(clip2, 'clip2.mov')
 
-            clip3 = rv_media_name_at_frame(rvc, 40)
+            clip2_scale, clip2_translate = rv_transform_at_frame(rvc, 4)
+            self.assertEqual(clip2_scale, [1.0, 1.0])
+
+            self.assertAlmostEqual(clip2_translate[0], 0.5 * aspect_ratio)
+            self.assertEqual(clip2_translate[1], 0)
+
+            clip3 = rv_media_name_at_frame(rvc, 7)
             self.assertEqual(clip3, 'clip3.mov')
+
+            clip3_scale, clip3_translate = rv_transform_at_frame(rvc, 7)
+            self.assertEqual(clip3_scale, [0.5, 0.5])
+
+            self.assertAlmostEqual(clip3_translate[0], -0.25 * aspect_ratio)
+            self.assertEqual(clip3_translate[1], -0.25)
 
             rvc.disconnect()
 
@@ -245,17 +280,54 @@ def install_package(source_package_path):
     return rc
 
 
+def _exec_command(rvc, command, literal=True):
+    response = rvc.sendEventAndReturn("remote-pyeval", command)
+    return ast.literal_eval(response) if literal else response
+
+
+def _source_at_frame(rvc, frame):
+    return _exec_command(
+        rvc,
+        "rv.commands.sourcesAtFrame({0})".format(frame)
+    )[0]
+
+
 def rv_media_name_at_frame(rvc, frame):
-    command = "rv.commands.sourcesAtFrame({0})".format(frame)
-    source = rvc.sendEventAndReturn("remote-pyeval", command)
-    source_list = ast.literal_eval(source)
-    source_name = source_list[0]
+    source_name = _source_at_frame(rvc, frame)
+    return _exec_command(
+        rvc,
+        "rv.commands.sourceMedia('{0}')".format(source_name)
+    )[0]
 
-    command = "rv.commands.sourceMedia('{0}')".format(source_name)
-    media_string = rvc.sendEventAndReturn("remote-pyeval", command)
-    media = ast.literal_eval(media_string)[0]
 
-    return media
+def rv_transform_at_frame(rvc, frame):
+    source = _source_at_frame(rvc, frame)
+
+    source_group = _exec_command(
+        rvc,
+        """rv.commands.nodeGroup('{0}')""".format(source),
+        literal=False
+    )
+
+    transform = _exec_command(
+        rvc,
+        """rv.extra_commands.nodesInGroupOfType(
+            '{0}', 'RVTransform2D')""".format(source_group)
+    )[0]
+
+    scale = _exec_command(
+        rvc,
+        """rv.commands.getFloatProperty(
+            '{0}.transform.scale')""".format(transform)
+    )
+
+    translate = _exec_command(
+        rvc,
+        """rv.commands.getFloatProperty(
+            '{0}.transform.translate')""".format(transform)
+    )
+
+    return scale, translate
 
 
 if __name__ == '__main__':

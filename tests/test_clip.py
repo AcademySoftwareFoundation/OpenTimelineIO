@@ -152,7 +152,10 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         self.assertEqual(available_image_bounds, cl.available_image_bounds)
-        self.assertEqual(cl.available_image_bounds, media_reference.available_image_bounds)
+        self.assertEqual(
+            cl.available_image_bounds,
+            media_reference.available_image_bounds
+        )
 
         self.assertEqual(0.0, cl.available_image_bounds.min.x)
         self.assertEqual(0.0, cl.available_image_bounds.min.y)

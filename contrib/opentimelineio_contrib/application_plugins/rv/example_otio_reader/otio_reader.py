@@ -357,7 +357,7 @@ def _create_movieproc(time_range, kind="blank"):
 
 
 def _add_source_bounds(media_ref, src, context):
-    if not hasattr(media_ref, "available_image_bounds"):
+    if media_ref.available_image_bounds is None:
         return
 
     global_scale = context.get('global_scale')

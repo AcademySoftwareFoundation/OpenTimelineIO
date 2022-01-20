@@ -202,9 +202,9 @@ def _get_global_transform(tl):
     def find_display_bounds(tl):
         for clip in tl.clip_if():
             try:
-               bounds = clip.media_reference.available_image_bounds
-               if bounds:
-                   return bounds
+                bounds = clip.media_reference.available_image_bounds
+                if bounds:
+                    return bounds
             except AttributeError:
                 continue
         return None
@@ -357,16 +357,13 @@ def _create_movieproc(time_range, kind="blank"):
 
 
 def _add_source_bounds(media_ref, src, context):
-    if media_ref.available_image_bounds is None:
+    bounds = media_ref.available_image_bounds
+    if not bounds:
         return
 
     global_scale = context.get('global_scale')
     global_translate = context.get('global_translate')
     if global_scale is None or global_translate is None:
-        return
-
-    bounds = media_ref.available_image_bounds
-    if not bounds:
         return
 
     # A width of 1.0 in RV means draw to the aspect ratio, so scale the

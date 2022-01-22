@@ -61,6 +61,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
 )
 MULTIPLE_TARGET_AUDIO_PATH = os.path.join(SAMPLE_DATA_DIR, "multi_audio.edl")
 TRANSITION_DURATION_TEST = os.path.join(SAMPLE_DATA_DIR, "transition_duration.edl")
+ENABLED_TEST = os.path.join(SAMPLE_DATA_DIR, "enabled.otio")
 
 
 class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -1174,6 +1175,40 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertEqual(tl.tracks[0][5].duration().value, 52.0)
         self.assertEqual(tl.tracks[0][6].duration().value, 96.0)
         self.assertEqual(tl.tracks[0][7].duration().value, 135.0)
+
+    def test_enabled(self):
+        tl = otio.adapters.read_from_file(ENABLED_TEST)
+        # Exception is raised because the OTIO file has two tracks and cmx_3600 only
+        # supports one
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+
+        # Disable top track so we only have one track
+        tl.tracks[1].enabled = False
+        result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+        expected = r'''TITLE: enable_test
+
+001  Clip001  V     C        00:00:00:00 00:00:00:03 00:00:00:00 00:00:00:03
+* FROM CLIP NAME:  Clip-001
+* OTIO TRUNCATED REEL NAME FROM: Clip-001
+002  Clip002  V     C        00:00:00:03 00:00:00:06 00:00:00:03 00:00:00:06
+* FROM CLIP NAME:  Clip-002
+* OTIO TRUNCATED REEL NAME FROM: Clip-002
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+        # Disable first clip in the track
+        tl.tracks[0].children_if()[0].enabled = False
+        result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+        expected = r'''TITLE: enable_test
+
+001  Clip002  V     C        00:00:00:03 00:00:00:06 00:00:00:03 00:00:00:06
+* FROM CLIP NAME:  Clip-002
+* OTIO TRUNCATED REEL NAME FROM: Clip-002
+'''
+
+        self.assertMultiLineEqual(result, expected)
 
 
 if __name__ == "__main__":

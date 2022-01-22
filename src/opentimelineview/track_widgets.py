@@ -262,8 +262,8 @@ class TrackNameItem(BaseItem):
 
         if not self.track.enabled:
             self.setBrush(
-            QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
-        )
+                QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+            )
 
     def mouseDoubleClickEvent(self, event):
         super(TrackNameItem, self).mouseDoubleClickEvent(event)

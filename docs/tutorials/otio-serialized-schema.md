@@ -80,7 +80,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -98,7 +98,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -271,7 +271,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *media_reference*: 
 - *metadata*: 
@@ -337,7 +337,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -516,7 +516,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -565,7 +565,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *kind*: 
 - *markers*: 
 - *metadata*: 

@@ -307,7 +307,7 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              "enabled"_a = true,
              py::arg_v("metadata"_a = py::none()))
-        .def_property("enabled", &Item::enabled, &Item::set_enabled)
+        .def_property("enabled", &Item::enabled, &Item::set_enabled, "Enabled sets whether or not an Item contributes to compositions. Analogous to Mute in various NLEs.")
         .def_property("source_range", &Item::source_range, &Item::set_source_range)
         .def("available_range", [](Item* item) {
             return item->available_range(ErrorStatusHandler());

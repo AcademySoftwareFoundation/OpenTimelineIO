@@ -924,9 +924,9 @@ def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # also only works for a single video track at the moment
 
     video_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Video]
+                    if t.kind == schema.TrackKind.Video and t.enabled]
     audio_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Audio]
+                    if t.kind == schema.TrackKind.Audio and t.enabled]
 
     if len(video_tracks) != 1:
         raise exceptions.NotSupportedError(

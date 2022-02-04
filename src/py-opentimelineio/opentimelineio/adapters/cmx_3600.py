@@ -924,9 +924,9 @@ def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # also only works for a single video track at the moment
 
     video_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Video]
+                    if t.kind == schema.TrackKind.Video and t.enabled]
     audio_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Audio]
+                    if t.kind == schema.TrackKind.Audio and t.enabled]
 
     if len(video_tracks) != 1:
         raise exceptions.NotSupportedError(
@@ -1038,27 +1038,30 @@ class EDLWriter(object):
                     )
                 )
             elif isinstance(child, schema.Clip):
-                events.append(
-                    Event(
-                        child,
-                        self._tracks,
-                        track.kind,
-                        self._rate,
-                        self._style,
-                        self._reelname_len
+                if child.enabled:
+                    events.append(
+                        Event(
+                            child,
+                            self._tracks,
+                            track.kind,
+                            self._rate,
+                            self._style,
+                            self._reelname_len
+                        )
                     )
-                )
+                else:
+                    pass
             elif isinstance(child, schema.Gap):
                 # Gaps are represented as missing record timecode, no event
                 # needed.
                 pass
 
         content = "TITLE: {}\n\n".format(title) if title else ''
-
-        # Convert each event/dissolve-event into plain text.
-        for idx, event in enumerate(events):
-            event.edit_number = idx + 1
-            content += event.to_edl_format() + '\n'
+        if track.enabled:
+            # Convert each event/dissolve-event into plain text.
+            for idx, event in enumerate(events):
+                event.edit_number = idx + 1
+                content += event.to_edl_format() + '\n'
 
         return content
 

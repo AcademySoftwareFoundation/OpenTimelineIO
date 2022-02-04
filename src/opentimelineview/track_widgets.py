@@ -260,6 +260,11 @@ class TrackNameItem(BaseItem):
         font_metrics = QFontMetrics(self.font)
         self.full_width = font_metrics.width(self.full_track_name) + 40
 
+        if not self.track.enabled:
+            self.setBrush(
+                QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+            )
+
     def mouseDoubleClickEvent(self, event):
         super(TrackNameItem, self).mouseDoubleClickEvent(event)
         if self.name_toggle:
@@ -412,7 +417,8 @@ class ClipItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255) if self.item.enabled
+                                   else QtGui.QColor(100, 100, 100, 255)))
         self.source_name_label.setText(self.item.name)
 
 
@@ -471,6 +477,9 @@ class Track(QtWidgets.QGraphicsRectItem):
                 TIME_MULTIPLIER,
                 TRACK_HEIGHT
             )
+
+            if not self.track.enabled:
+                item.enabled = False
 
             if isinstance(item, otio.schema.Clip):
                 new_item = ClipItem(item, timeline_range, rect)

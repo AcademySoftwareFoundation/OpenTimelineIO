@@ -208,6 +208,110 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             all_children
         )
 
+    def test_each_child_options(self):
+        tl = otio.schema.Timeline(name="tl")
+        tr = otio.schema.Track(name="tr")
+        tl.tracks.append(tr)
+        c1 = otio.schema.Clip(
+            name="c1",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+        )
+        tr.append(c1)
+        c2 = otio.schema.Clip(
+            name="c2",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+        )
+        tr.append(c2)
+        st = otio.schema.Stack(
+            name="st",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+        )
+        tr.append(st)
+        c3 = otio.schema.Clip(
+            name="c3",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+        )
+        st.append(c3)
+
+        # Test the search range
+        self.assertListEqual(
+            [c1],
+            list(
+                tr.each_child(
+                    search_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(value=0, rate=24),
+                        duration=otio.opentime.RationalTime(value=50, rate=24)
+                    )
+                )
+            )
+        )
+        self.assertListEqual(
+            [c2],
+            list(
+                tr.each_child(
+                    search_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(value=50, rate=24),
+                        duration=otio.opentime.RationalTime(value=50, rate=24)
+                    )
+                )
+            )
+        )
+        self.assertListEqual(
+            [c1, c2],
+            list(
+                tr.each_child(
+                    search_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(value=0, rate=24),
+                        duration=otio.opentime.RationalTime(value=100, rate=24)
+                    )
+                )
+            )
+        )
+        self.assertListEqual(
+            [c1, c2, st, c3],
+            list(
+                tr.each_child(
+                    search_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(value=25, rate=24),
+                        duration=otio.opentime.RationalTime(value=100, rate=24)
+                    )
+                )
+            )
+        )
+
+        # Test descended from type
+        self.assertListEqual(
+            [c1, c2, c3],
+            list(tl.each_child(descended_from_type=otio.schema.Clip))
+        )
+        self.assertListEqual(
+            [st],
+            list(tl.each_child(descended_from_type=otio.schema.Stack))
+        )
+
+        # Test shallow search
+        self.assertListEqual(
+            [c1, c2],
+            list(
+                tr.each_child(
+                    descended_from_type=otio.schema.Clip,
+                    shallow_search=True
+                )
+            )
+        )
+
     def test_remove_actually_removes(self):
         """Test that removed item is no longer 'in' composition."""
         tr = otio.schema.Track()

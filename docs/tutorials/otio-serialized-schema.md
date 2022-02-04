@@ -80,6 +80,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -97,6 +98,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -269,6 +271,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *media_reference*: 
 - *metadata*: 
@@ -334,6 +337,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -512,6 +516,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -622,6 +627,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *kind*: 
 - *markers*: 
 - *metadata*: 

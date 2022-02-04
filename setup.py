@@ -27,19 +27,10 @@ import setuptools.command.build_py
 
 SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-
-INSTALL_REQUIRES = [
-    'pyaaf2~=1.4.0',
-]
-# python2 dependencies
-if sys.version_info[0] < 3:
-    INSTALL_REQUIRES.extend(
-        [
-            "backports.tempfile",
-            'future',  # enables the builtins module in the XGES adapter
-            "pathlib2"  # used in the otioz adapter to conform to unix paths
-        ]
-    )
+PLAT_TO_CMAKE = {
+    "win32": "Win32",
+    "win-amd64": "x64",
+}
 
 
 def _debugInstance(x):
@@ -103,8 +94,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         ]
 
         if platform.system() == "Windows":
-            if sys.maxsize > 2**32:
-                cmake_args += ['-A', 'x64']
+            cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
 
         cxx_coverage = bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
         if cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
@@ -116,6 +106,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
         if cxx_coverage:
             cmake_args += ['-DOTIO_CXX_COVERAGE=1']
+
+        # allow external arguments to cmake via the CMAKE_ARGS env var
+        cmake_args += [
+            arg for arg in os.environ.get("CMAKE_ARGS", "").split(" ")
+            if arg
+        ]
 
         return cmake_args
 
@@ -190,9 +186,9 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.14.0.dev1",
+    "version": "0.15.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
-    "author_email": 'opentimelineio@pixar.com',
+    "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
 }
 
@@ -269,6 +265,7 @@ setup(
     name='OpenTimelineIO',
     description='Editorial interchange format and API',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     url='http://opentimeline.io',
     project_urls={
         'Source':
@@ -292,6 +289,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -326,7 +324,17 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    install_requires=INSTALL_REQUIRES,
+    # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
+    python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
+
+    install_requires=[
+        'pyaaf2~=1.4.0',
+        'backports.tempfile; python_version<"3.0"',
+        # Enables the builtins module in the XGES adapter
+        'future; python_version<"3.0"',
+        # Used in the otioz adapter to conform to unix paths
+        'pathlib2; python_version<"3.0"'
+    ],
     entry_points={
         'console_scripts': [
             'otioview = opentimelineview.console:main',

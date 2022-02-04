@@ -3,6 +3,7 @@
     "metadata" : {},
     "name" : "",
     "markers" : [],
+    "enabled" :  true,
     "effects" : [],
     "source_range" : {
         "FROM_TEST_FILE" : "empty_timerange.json"

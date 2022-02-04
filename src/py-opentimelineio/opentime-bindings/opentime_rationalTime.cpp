@@ -14,10 +14,10 @@ struct ErrorStatusConverter {
     operator ErrorStatus* () {
         return &error_status;
     }
-    
+
     ~ErrorStatusConverter() noexcept(false) {
         namespace py = pybind11;
-        if (error_status) {
+        if (is_error(error_status)) {
             throw py::value_error(error_status.details);
         }
     }
@@ -50,7 +50,7 @@ RationalTime _type_checked(py::object const& rhs, char const* op) {
         return py::cast<RationalTime>(rhs);
     }
     catch (...) {
-        std::string rhs_type = py::cast<std::string>(rhs.get_type().attr("__name__"));
+        std::string rhs_type = py::cast<std::string>(py::type::of(rhs).attr("__name__"));
         throw py::type_error(string_printf("unsupported operand type(s) for %s: "
                                            "RationalTime and %s", op, rhs_type.c_str()));
     }
@@ -71,9 +71,9 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
              "other"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
-        .def("__copy__", [](RationalTime rt, py::object) {
+        .def("__copy__", [](RationalTime rt) {
                 return rt;
-            }, "copier"_a = py::none())
+            })
         .def("__deepcopy__", [](RationalTime rt, py::object) {
                 return rt;
             }, "copier"_a = py::none())
@@ -82,30 +82,33 @@ void opentime_rationalTime_bindings(py::module m) {
         .def_static("duration_from_start_end_time_inclusive", &RationalTime::duration_from_start_end_time_inclusive,
                     "start_time"_a, "end_time_inclusive"_a)
         .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a)
+        .def_static("nearest_valid_timecode_rate", &RationalTime::nearest_valid_timecode_rate, "rate"_a,
+            R"docstring(Returns the first valid timecode rate that has the least difference from the given value.)docstring")
         .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a)
-        .def_static("from_seconds", &RationalTime::from_seconds, "seconds"_a)
+        .def_static("from_seconds", static_cast<RationalTime (*)(double, double)> (&RationalTime::from_seconds), "seconds"_a, "rate"_a)
+        .def_static("from_seconds", static_cast<RationalTime (*)(double)> (&RationalTime::from_seconds), "seconds"_a)
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames)
         .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a)
         .def("to_seconds", &RationalTime::to_seconds)
-        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) { 
+        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) {
                 return rt.to_timecode(
-                        rate, 
+                        rate,
                         df_enum_converter(drop_frame),
                         ErrorStatusConverter()
-                ); 
+                );
         }, "rate"_a, "drop_frame"_a)
-        .def("to_timecode", [](RationalTime rt, double rate) { 
+        .def("to_timecode", [](RationalTime rt, double rate) {
                 return rt.to_timecode(
-                        rate, 
+                        rate,
                         IsDropFrameRate::InferFromRate,
                         ErrorStatusConverter()
-                ); 
+                );
         }, "rate"_a)
         .def("to_timecode", [](RationalTime rt) {
                 return rt.to_timecode(
                         rt.rate(),
                         IsDropFrameRate::InferFromRate,
-                        ErrorStatusConverter()); 
+                        ErrorStatusConverter());
                 })
         .def("to_time_string", &RationalTime::to_time_string)
         .def_static("from_timecode", [](std::string s, double rate) {

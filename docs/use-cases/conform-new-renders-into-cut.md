@@ -1,7 +1,7 @@
 # Conform New Renders Into The Cut
 
 **Status: Done**
-This use case is in active use at Pixar (Coco, Incredibles 2, etc.)
+This use case is in active use at several feature film production studios.
 
 ## Summary
 
@@ -20,17 +20,3 @@ Artists working on the animation or visual effects for shots in a sequence often
 3. In either case, we link the shots in the timeline to segments of the supplied QuickTime movie.
 3. The artist can now play the sequence and see exactly what the editor saw.
 4. The artist can now relink any or all of the shots to the latest renders (either via OpenTimelineIO or features of the video player tool)
-
-## Features Needed in OTIO
-
-- EDL reading (done)
-    - Single video track (done)
-    - Clip names (done)
-    - Source range for each clip (done)
-    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/6" target="_blank">Transitions</a> (done)
-- RV support
-    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/64" target="_blank">OTIO to RV Session file via adapter</a> (done)
-    - RV Plugin that uses OTIO to read an EDL (Pixar has use-case specific code for this) (done)
-- Relinking
-    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94" target="_blank">Relinking the whole EDL to segments of the full sequence QuickTime movie.</a> (done)
-    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94" target="_blank">Relinking of individual clips to renders of those shots.</a>(done)

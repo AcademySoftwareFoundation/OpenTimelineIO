@@ -12,7 +12,7 @@ set(OTIO_VERSION_PATCH "0")
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
-set(OTIO_AUTHOR_EMAIL "opentimelineio@pixar.com")
+set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")
 
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
@@ -24,7 +24,7 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 # Installation options
 option(OTIO_CXX_INSTALL          "Install the C++ bindings" ON)
-option(OTIO_PYTHON_INSTALL       "Install the Python bindings" ON)
+option(OTIO_PYTHON_INSTALL       "Install the Python bindings" OFF)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
@@ -87,6 +87,11 @@ if(OTIO_PYTHON_INSTALL)
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
         endif()
     endif()
+
+    if (WIN32)
+        string(REPLACE "\\" "/" OTIO_RESOLVED_PYTHON_INSTALL_DIR ${OTIO_RESOLVED_PYTHON_INSTALL_DIR})
+    endif()
+
 else()
     set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     message(STATUS "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")
@@ -98,10 +103,23 @@ if(OTIO_SHARED_LIBS)
 else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
-    if (OTIO_PYTHON_INSTALL AND NOT MSVC)
+    if (OTIO_PYTHON_INSTALL)
         # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden) 
+        # Note that this has no effect on Windows.
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
         set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
+        if(MSVC AND Python_VERSION_MAJOR VERSION_LESS 3)
+            # Statically link run-time library (vcruntime and msvcp)
+            # See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=msvc-160
+            # This allows us to compile OTIO bindings with a newer MSVC version
+            # than the one used by the interpreter where OTIO will be installed.
+            # This is only required for Python < 3 because only these are
+            # compiled with an older compiler (9.0). CPython 3.5+ uses at least
+            # Visual C++ 14.X.
+            # See https://wiki.python.org/moin/WindowsCompilers#Which_Microsoft_Visual_C.2B-.2B-_compiler_to_use_with_a_specific_Python_version_.3F
+            add_compile_options(/MT)
+        endif()
     endif()
 endif()
 
@@ -130,7 +148,7 @@ endif()
 # Global language settings
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

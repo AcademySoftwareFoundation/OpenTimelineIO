@@ -1,52 +1,57 @@
 #pragma once
 
-#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
-#include "opentimelineio/track.h"
 #include "opentimelineio/stack.h"
+#include "opentimelineio/track.h"
+#include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
-class Timeline : public SerializableObjectWithMetadata {
+class Timeline : public SerializableObjectWithMetadata
+{
 public:
-    struct Schema {
-        static auto constexpr name = "Timeline";
+    struct Schema
+    {
+        static auto constexpr name   = "Timeline";
         static int constexpr version = 1;
     };
 
     using Parent = SerializableObjectWithMetadata;
 
-    Timeline(std::string const& name = std::string(),
-             optional<RationalTime> global_start_time = nullopt,
-             AnyDictionary const& metadata = AnyDictionary());
+    Timeline(
+        std::string const&     name              = std::string(),
+        optional<RationalTime> global_start_time = nullopt,
+        AnyDictionary const&   metadata          = AnyDictionary());
 
-    Stack* tracks() const {
-        return _tracks;
-    }
+    Stack* tracks() const noexcept { return _tracks; }
 
     /*
     Stack* tracks() {
         return _tracks;
     }*/
-    
 
     void set_tracks(Stack* stack);
-    
-    optional<RationalTime> const& global_start_time() const {
+
+    optional<RationalTime> global_start_time() const noexcept
+    {
         return _global_start_time;
     }
-    
-    void set_global_start_time(optional<RationalTime> const& global_start_time) {
+
+    void set_global_start_time(optional<RationalTime> const& global_start_time)
+    {
         _global_start_time = global_start_time;
     }
 
-    RationalTime duration(ErrorStatus* error_status) const {
+    RationalTime duration(ErrorStatus* error_status = nullptr) const
+    {
         return _tracks.value->duration(error_status);
     }
-    
-    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const {
+
+    TimeRange range_of_child(
+        Composable const* child, ErrorStatus* error_status = nullptr) const
+    {
         return _tracks.value->range_of_child(child, error_status);
     }
 
@@ -56,22 +61,22 @@ public:
     // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
-    std::vector<Retainer<Clip> > clip_if(
-        ErrorStatus* error_status,
-        optional<TimeRange> const& search_range = nullopt,
-        bool shallow_search = false) const;
+    std::vector<Retainer<Clip>> clip_if(
+        ErrorStatus*               error_status   = nullptr,
+        optional<TimeRange> const& search_range   = nullopt,
+        bool                       shallow_search = false) const;
 
     // Return a vector of all objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
     // If shallow_search is false, will recurse into children.
-    template<typename T = Composable>
+    template <typename T = Composable>
     std::vector<Retainer<T>> children_if(
-        ErrorStatus* error_status,
-        optional<TimeRange> search_range = nullopt,
-        bool shallow_search = false) const;
-    
+        ErrorStatus*        error_status   = nullptr,
+        optional<TimeRange> search_range   = nullopt,
+        bool                shallow_search = false) const;
+
 protected:
     virtual ~Timeline();
 
@@ -80,16 +85,18 @@ protected:
 
 private:
     optional<RationalTime> _global_start_time;
-    Retainer<Stack> _tracks;
+    Retainer<Stack>        _tracks;
 };
 
-template<typename T>
-inline std::vector<SerializableObject::Retainer<T>> Timeline::children_if(
-    ErrorStatus* error_status,
+template <typename T>
+inline std::vector<SerializableObject::Retainer<T>>
+Timeline::children_if(
+    ErrorStatus*        error_status,
     optional<TimeRange> search_range,
-    bool shallow_search) const
+    bool                shallow_search) const
 {
-    return _tracks.value->children_if<T>(error_status, search_range, shallow_search);
+    return _tracks.value->children_if<T>(
+        error_status, search_range, shallow_search);
 }
 
-} }
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

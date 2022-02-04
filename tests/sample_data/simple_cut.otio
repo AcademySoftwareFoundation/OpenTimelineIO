@@ -1,0 +1,176 @@
+{
+  "OTIO_SCHEMA": "Timeline.1",
+  "metadata": {},
+  "name": "Figure 1 - Simple Cut List",
+  "tracks": {
+    "OTIO_SCHEMA": "Stack.1",
+    "children": [
+      {
+        "OTIO_SCHEMA": "Track.1",
+        "children": [
+          {
+            "OTIO_SCHEMA": "Clip.1",
+            "effects": [],
+            "markers": [],
+            "enabled": true,
+            "media_reference": {
+              "OTIO_SCHEMA": "ExternalReference.1",
+              "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 8
+                },
+                "start_time": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 0
+                }
+              },
+              "metadata": {},
+              "target_url": "file:///folder/titles.mov",
+              "name": "Media-001"
+            },
+            "metadata": {},
+            "name": "Clip-001",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 3
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 3
+              }
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Clip.1",
+            "effects": [],
+            "markers": [],
+            "enabled": true,
+            "media_reference": {
+              "OTIO_SCHEMA": "ExternalReference.1",
+              "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 8
+                },
+                "start_time": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 0
+                }
+              },
+              "metadata": {},
+              "target_url": "file:///folder/wind-up.mov",
+              "name": "Media-002"
+            },
+            "metadata": {},
+            "name": "Clip-002",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 6
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 2
+              }
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Clip.1",
+            "effects": [],
+            "markers": [],
+            "enabled": true,
+            "media_reference": {
+              "OTIO_SCHEMA": "ExternalReference.1",
+              "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 8
+                },
+                "start_time": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 0
+                }
+              },
+              "metadata": {},
+              "target_url": "file:///folder/punchline.mov",
+              "name": "Media-003"
+            },
+            "metadata": {},
+            "name": "Clip-003",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 4
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 0
+              }
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Clip.1",
+            "effects": [],
+            "markers": [],
+            "enabled": true,
+            "media_reference": {
+              "OTIO_SCHEMA": "ExternalReference.1",
+              "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 6
+                },
+                "start_time": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 100
+                }
+              },
+              "metadata": {},
+              "target_url": "file:///folder/credits.mov",
+              "name": "Media-004"
+            },
+            "metadata": {},
+            "name": "Clip-004",
+            "source_range": null
+          }
+        ],
+        "effects": [],
+        "kind": "Video",
+        "markers": [],
+        "enabled": true,
+        "metadata": {},
+        "name": "Track-001",
+        "source_range": null
+      }
+    ],
+    "effects": [],
+    "markers": [],
+    "enabled": true,
+    "metadata": {},
+    "name": "tracks",
+    "source_range": null
+  }
+}

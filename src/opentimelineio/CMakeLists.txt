@@ -61,9 +61,9 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             mediaReference.cpp
             missingReference.cpp
             safely_typed_any.cpp
+            serializableCollection.cpp
             serializableObject.cpp
             serializableObjectWithMetadata.cpp
-            serializableCollection.cpp
             serialization.cpp
             stack.cpp
             stackAlgorithm.cpp
@@ -71,6 +71,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             subtitles.cpp
             timedText.cpp
             timedTextStyle.cpp
+            stringUtils.h # stringUtils.h is a private header
             timeEffect.cpp
             timeline.cpp
             track.cpp

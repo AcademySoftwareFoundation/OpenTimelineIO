@@ -42,6 +42,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -51,6 +52,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -132,6 +134,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *media_reference*
 - *metadata*
@@ -165,6 +168,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -227,6 +231,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -289,6 +294,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *kind*
 - *markers*
 - *metadata*

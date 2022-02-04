@@ -1,24 +1,29 @@
 #pragma once
 
-#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObject.h"
+#include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
-class UnknownSchema : public SerializableObject {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+class UnknownSchema : public SerializableObject
+{
 public:
-    struct Schema {
-        static auto constexpr name = "UnknownSchema";
+    struct Schema
+    {
+        static auto constexpr name   = "UnknownSchema";
         static int constexpr version = 1;
     };
 
-    UnknownSchema(std::string const& original_schema_name, int original_schema_version);
+    UnknownSchema(
+        std::string const& original_schema_name, int original_schema_version);
 
-    std::string const& original_schema_name() const {
+    std::string original_schema_name() const noexcept
+    {
         return _original_schema_name;
     }
-    
-    int original_schema_version() const {
+
+    int original_schema_version() const noexcept
+    {
         return _original_schema_version;
     }
 
@@ -30,15 +35,15 @@ public:
 private:
     virtual ~UnknownSchema();
 
-    virtual std::string const& _schema_name_for_reference() const;
+    virtual std::string _schema_name_for_reference() const;
 
     std::string _original_schema_name;
-    int _original_schema_version;
+    int         _original_schema_version;
 
     AnyDictionary _data;
-    
+
     friend class TypeRegistry;
     friend class SerializableObject::Writer;
 };
 
-} }
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION

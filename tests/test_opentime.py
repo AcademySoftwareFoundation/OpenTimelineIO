@@ -330,6 +330,20 @@ class TestTime(unittest.TestCase):
                 invalid_df_rate, (24000 / 1001.0), drop_frame=True
             )
 
+    def test_timecode_infer_drop_frame(self):
+        frames = 1084319
+        rates = [
+            (29.97, '10:03:00;05'),
+            (30000.0 / 1001.0, '10:03:00;05'),
+            (59.94, '05:01:30;03'),
+            (60000.0 / 1001.0, '05:01:11;59')
+        ]
+        for rate, timecode in rates:
+            t = otio.opentime.RationalTime(frames, rate)
+
+            self.assertEqual(t.to_timecode(rate, drop_frame=None), timecode)
+            self.assertEqual(t.to_timecode(rate), timecode)
+
     def test_timecode_2997(self):
         ref_values = [
             (10789, '00:05:59:19', '00:05:59;29'),

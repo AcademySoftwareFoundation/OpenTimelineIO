@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version wheel manifest lcov
+	python-version wheel manifest lcov lcov-html lcov-reset
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -99,16 +99,25 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		C++ coverage will not work, because intermediate build products will \
 		not be found.)
 endif
-	lcov --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+	lcov --rc lcov_branch_coverage=1 --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
-	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
+	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
-	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
+	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	rm ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info
-	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+	# lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+
+
+lcov-html: lcov
+	@echo -e "$(ccgreen)Generating C++ HTML coverage report...$(ccend)"
+	genhtml --quiet --branch-coverage --output-directory lcov_html_report ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+
+lcov-reset:
+	@echo "$(tput setaf -Txterm 2)Resetting C++ coverage...$(tput sgr0)"
+	lcov -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} --zerocounters
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

@@ -14,7 +14,7 @@ using namespace opentime;
 
 
 void opentime_timeTransform_bindings(py::module m) {
-    py::class_<TimeTransform>(m, "TimeTransform")
+    py::class_<TimeTransform>(m, "TimeTransform", R"docstring(1D transform for :class:`~RationalTime`. Has offset and scale.)docstring")
         .def(py::init<RationalTime, double, double>(),
              "offset"_a = RationalTime(), "scale"_a = 1, "rate"_a = -1)
         .def_property_readonly("offset", &TimeTransform::offset)

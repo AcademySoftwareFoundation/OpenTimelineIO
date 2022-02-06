@@ -7,6 +7,24 @@ from . _opentime import ( # noqa
     TimeTransform,
 )
 
+__all__ = [
+    'RationalTime',
+    'TimeRange',
+    'TimeTransform',
+    'from_frames',
+    'from_timecode',
+    'from_time_string',
+    'from_seconds',
+    'to_timecode',
+    'to_frames',
+    'to_seconds',
+    'to_time_string',
+    'range_from_start_end_time',
+    'range_from_start_end_time_inclusive',
+    'duration_from_start_end_time',
+    'duration_from_start_end_time_inclusive',
+]
+
 from_frames = RationalTime.from_frames
 from_timecode = RationalTime.from_timecode
 from_time_string = RationalTime.from_time_string
@@ -21,6 +39,7 @@ duration_from_start_end_time_inclusive = (
 
 
 def to_timecode(rt, rate=None, drop_frame=None):
+    """Convert a :class:`~RationalTime` into a timecode string."""
     return (
         rt.to_timecode()
         if rate is None and drop_frame is None
@@ -29,12 +48,15 @@ def to_timecode(rt, rate=None, drop_frame=None):
 
 
 def to_frames(rt, rate=None):
+    """Turn a :class:`~RationalTime` into a frame number."""
     return rt.to_frames() if rate is None else rt.to_frames(rate)
 
 
 def to_seconds(rt):
+    """Convert a :class:`~RationalTime` into float seconds"""
     return rt.to_seconds()
 
 
 def to_time_string(rt):
+    """Convert this timecode to time with microsecond, as formated in `FFMPEG <https://trac.ffmpeg.org/wiki/Seeking#Timeunitsyntax>`_"""
     return rt.to_time_string()

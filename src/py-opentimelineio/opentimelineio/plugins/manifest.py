@@ -36,7 +36,7 @@ OTIO_PLUGIN_TYPES = [
 
 
 def manifest_from_file(filepath):
-    """Read the .json file at filepath into a Manifest object."""
+    """Read the .json file at filepath into a :py:class:`Manifest` object."""
 
     result = core.deserialize_json_from_file(filepath)
     absfilepath = os.path.abspath(filepath)
@@ -201,10 +201,11 @@ def load_manifest():
     """ Walk the plugin manifest discovery systems and accumulate manifests.
 
     The order of loading (and precedence) is:
-        1. manifests specfied via the OTIO_PLUGIN_MANIFEST_PATH variable
-        2. builtin plugin manifest
-        3. contrib plugin manifest
-        4. setuptools.pkg_resources based plugin manifests
+
+       1. manifests specfied via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
+       2. builtin plugin manifest
+       3. contrib plugin manifest
+       4. ``setuptools.pkg_resources`` based plugin manifests
     """
 
     result = Manifest()

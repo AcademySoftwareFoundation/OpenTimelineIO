@@ -128,7 +128,11 @@ PYBIND11_MODULE(_otio, m) {
     m.def("install_external_keepalive_monitor", &install_external_keepalive_monitor,
           "so"_a, "apply_now"_a);
     m.def("instance_from_schema", &instance_from_schema,
-          "schema_name"_a, "schema_version"_a, "data"_a);
+          "schema_name"_a, "schema_version"_a, "data"_a, R"docstring(
+Return an instance of the schema from data in the data_dict.
+
+:raises UnsupportedSchemaError: when the requested schema version is greater than the registered schema version.
+)docstring");
     m.def("register_upgrade_function", &register_upgrade_function,
           "schema_name"_a,
           "version_to_upgrade_to"_a,

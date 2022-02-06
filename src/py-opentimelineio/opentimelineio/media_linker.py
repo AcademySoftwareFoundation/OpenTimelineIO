@@ -1,33 +1,37 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-""" MediaLinker plugins fire after an adapter has read a file in order to
-produce MediaReferences that point at valid, site specific media.
+"""
+MediaLinker plugins fire after an adapter has read a file in order to
+produce :class:`.MediaReference`\s that point at valid, site specific media.
 
-They expose a "link_media_reference" function with the signature:
-link_media_reference :: otio.schema.Clip -> otio.core.MediaReference
+They expose a ``link_media_reference`` function with the signature:
 
-or:
-    def linked_media_reference(from_clip):
-        result = otio.core.MediaReference() # whichever subclass
-        # do stuff
-        return result
+.. py:function:: link_media_reference(in_clip: opentimelineio.schema.Clip) -> opentimelineio.core.MediaReference
+   :noindex:
+
+   Example link_media_reference function.
 
 To get context information, they can inspect the metadata on the clip and on
-the media reference.  The .parent() method can be used to find the containing
+the media reference. The :meth:`.Composable.parent` method can be used to find the containing
 track if metadata is stored there.
 
 Please raise an instance (or child instance) of
-otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.
+:class:`.CannotLinkMediaError` if there is a problem linking the media.
 
 For example:
-    for clip in timeline.each_clip():
-        try:
-            new_mr = otio.media_linker.linked_media_reference(clip)
-            clip.media_reference = new_mr
-        except otio.exceptions.CannotLinkMediaError:
-            # or report the error
-            pass
+
+.. code-block:: python
+
+   for clip in timeline.each_clip():
+       try:
+           new_mr = otio.media_linker.linked_media_reference(clip)
+           clip.media_reference = new_mr
+       except otio.exceptions.CannotLinkMediaError:
+           # or report the error
+           pass
+
+----
 """
 
 import os
@@ -40,8 +44,8 @@ from . import (
 )
 
 
-# Enum describing different media linker policies
 class MediaLinkingPolicy:
+    """Enum describing different media linker policies"""
     DoNotLinkMedia = "__do_not_link_media"
     ForceDefaultLinker = "__default"
 

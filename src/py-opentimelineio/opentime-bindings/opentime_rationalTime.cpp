@@ -60,19 +60,25 @@ RationalTime _type_checked(py::object const& rhs, char const* op) {
 }
 
 void opentime_rationalTime_bindings(py::module m) {
-    py::class_<RationalTime>(m, "RationalTime")
+    py::class_<RationalTime>(m, "RationalTime", R"docstring(
+The RationalTime class represents a point in time at :math:`rt.value*(1/rt.rate)` seconds.
+It can be rescaled into another :class:`~RationalTime`'s rate.
+)docstring")
         .def(py::init<double, double>(), "value"_a = 0, "rate"_a = 1)
-        .def("is_invalid_time", &RationalTime::is_invalid_time)
-        .def_property_readonly("value", &RationalTime::value)
+        .def("is_invalid_time", &RationalTime::is_invalid_time, R"docstring(
+Returns true if the time is invalid. The time is considered invalid if the value or the rate are a NaN value
+or if the value of the rate is smaller or equal to zero.
+)docstring")
+        .def_property_readonly("value", &RationalTime::value, "This is the value property doc")
         .def_property_readonly("rate", &RationalTime::rate)
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,
              "new_rate"_a, R"docstring(Returns the time value for time converted to new_rate.)docstring")
         .def("rescaled_to", (RationalTime (RationalTime::*)(RationalTime) const) &RationalTime::rescaled_to,
              "other"_a, R"docstring(Returns the time for time converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(double) const) &RationalTime::value_rescaled_to,
-             "new_rate"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
+             "new_rate"_a, R"docstring(Returns the time value for "self" converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
-             "other"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
+             "other"_a)
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
         .def("__copy__", [](RationalTime rt) {
                 return rt;
@@ -81,17 +87,25 @@ void opentime_rationalTime_bindings(py::module m) {
                 return rt;
             }, "copier"_a = py::none())
         .def_static("duration_from_start_end_time", &RationalTime::duration_from_start_end_time,
-                    "start_time"_a, "end_time_exclusive"_a)
+                    "start_time"_a, "end_time_exclusive"_a, R"docstring(
+Compute the duration of samples from first to last (excluding last). This is not the same as distance.
+
+For example, the duration of a clip from frame 10 to frame 15 is 5 frames. Result will be in the rate of start_time.
+)docstring")
         .def_static("duration_from_start_end_time_inclusive", &RationalTime::duration_from_start_end_time_inclusive,
-                    "start_time"_a, "end_time_inclusive"_a)
-        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a)
+                    "start_time"_a, "end_time_inclusive"_a, R"docstring(
+Compute the duration of samples from first to last (including last). This is not the same as distance.
+
+For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Result will be in the rate of start_time.
+)docstring")
+        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a, "Returns true is the rate is a known valid timecode.")
         .def_static("nearest_valid_timecode_rate", &RationalTime::nearest_valid_timecode_rate, "rate"_a,
-            R"docstring(Returns the first valid timecode rate that has the least difference from the given value.)docstring")
-        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a)
+            "Returns the first valid timecode rate that has the least difference from the given value.")
+        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a, "Turn a frame number and rate into a time object.")
         .def_static("from_seconds", static_cast<RationalTime (*)(double, double)> (&RationalTime::from_seconds), "seconds"_a, "rate"_a)
         .def_static("from_seconds", static_cast<RationalTime (*)(double)> (&RationalTime::from_seconds), "seconds"_a)
-        .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames)
-        .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a)
+        .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames, "Returns the frame number based on the current rate.")
+        .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a, "Returns the frame number based on the given rate.")
         .def("to_seconds", &RationalTime::to_seconds)
         .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) {
                 return rt.to_timecode(
@@ -99,7 +113,7 @@ void opentime_rationalTime_bindings(py::module m) {
                         df_enum_converter(drop_frame),
                         ErrorStatusConverter()
                 );
-        }, "rate"_a, "drop_frame"_a)
+        }, "rate"_a, "drop_frame"_a, "Convert to timecode (``HH:MM:SS;FRAME``)")
         .def("to_timecode", [](RationalTime rt, double rate) {
                 return rt.to_timecode(
                         rate,
@@ -116,10 +130,10 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("to_time_string", &RationalTime::to_time_string)
         .def_static("from_timecode", [](std::string s, double rate) {
                 return RationalTime::from_timecode(s, rate, ErrorStatusConverter());
-            }, "timecode"_a, "rate"_a)
+            }, "timecode"_a, "rate"_a, "Convert a timecode string (``HH:MM:SS;FRAME``) into a :class:`~RationalTime`.")
         .def_static("from_time_string", [](std::string s, double rate) {
                 return RationalTime::from_time_string(s, rate, ErrorStatusConverter());
-            }, "time_string"_a, "rate"_a)
+            }, "time_string"_a, "rate"_a, "Convert a time with microseconds string (``HH:MM:ss.ms``) into a :class:`~RationalTime`.")
         .def("__str__", &opentime_python_str)
         .def("__repr__", &opentime_python_repr)
         .def(- py::self)

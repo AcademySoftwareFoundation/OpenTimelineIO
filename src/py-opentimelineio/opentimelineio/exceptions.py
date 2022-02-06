@@ -9,6 +9,23 @@ from . _otio import ( # noqa
     CannotComputeAvailableRangeError
 )
 
+__all__ = [
+    'OTIOError',
+    'NotAChildError',
+    'UnsupportedSchemaError',
+    'CouldNotReadFileError',
+    'NoKnownAdapterForExtensionError',
+    'ReadingNotSupportedError',
+    'WritingNotSupportedError',
+    'NotSupportedError',
+    'InvalidSerializableLabelError',
+    'AdapterDoesntSupportFunctionError',
+    'InstancingNotAllowedError',
+    'TransitionFollowingATransitionError',
+    'MisconfiguredPluginError',
+    'CannotTrimTransitionsError',
+    'NoDefaultMediaLinkerError'
+]
 
 class CouldNotReadFileError(OTIOError):
     pass

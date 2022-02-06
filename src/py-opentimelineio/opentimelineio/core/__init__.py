@@ -41,6 +41,32 @@ from . import ( # noqa
     item,
 )
 
+__all__ = [
+    'CannotComputeAvailableRangeError',
+    'Composable',
+    'Composition',
+    'Item',
+    'MediaReference',
+    'SerializableObject',
+    'SerializableObjectWithMetadata',
+    'Track',
+    'deserialize_json_from_file',
+    'deserialize_json_from_string',
+    'flatten_stack',
+    'install_external_keepalive_monitor',
+    'instance_from_schema',
+    'register_serializable_object_type',
+    'register_upgrade_function',
+    'set_type_record',
+    'add_method',
+    'upgrade_function_for',
+    'serializable_field',
+    'deprecated_field',
+    'serialize_json_to_string',
+    'serialize_json_to_file',
+    'register_type'
+]
+
 
 def serialize_json_to_string(root, indent=4):
     return _serialize_json_to_string(_value_to_any(root), indent)
@@ -70,15 +96,19 @@ def register_type(classobj, schemaname=None):
 
 
 def upgrade_function_for(cls, version_to_upgrade_to):
-    """Decorator for identifying schema class upgrade functions.
+    """
+    Decorator for identifying schema class upgrade functions.
 
-    Example
-    >>>    @upgrade_function_for(MyClass, 5)
-    ...    def upgrade_to_version_five(data):
-    ...        pass
+    Example:
 
-    This will get called to upgrade a schema of MyClass to version 5.  My class
-    must be a class deriving from otio.core.SerializableObject.
+    .. code-block:: python
+
+        @upgrade_function_for(MyClass, 5)
+        def upgrade_to_version_five(data):
+            pass
+
+    This will get called to upgrade a schema of MyClass to version 5. MyClass
+    must be a class deriving from :class:`~SerializableObject`.
 
     The upgrade function should take a single argument - the dictionary to
     upgrade, and return a dictionary with the fields upgraded.
@@ -86,6 +116,9 @@ def upgrade_function_for(cls, version_to_upgrade_to):
     Remember that you don't need to provide an upgrade function for upgrades
     that add or remove fields, only for schema versions that change the field
     names.
+
+    :param type cls: class to upgrade
+    :param int version_to_upgrade_to: the version to upgrade to
     """
 
     def decorator_func(func):
@@ -103,15 +136,13 @@ def upgrade_function_for(cls, version_to_upgrade_to):
 
 
 def serializable_field(name, required_type=None, doc=None):
-    """Create a serializable_field for child classes of SerializableObject.
-
+    """
     Convienence function for adding attributes to child classes of
-    SerializableObject in such a way that they will be serialized/deserialized
+    :class:`~SerializableObject` in such a way that they will be serialized/deserialized
     automatically.
 
     Use it like this:
 
-    .. highlight:: python
     .. code-block:: python
 
         @core.register_type
@@ -120,7 +151,6 @@ def serializable_field(name, required_type=None, doc=None):
 
     This would indicate that class "foo" has a serializable field "bar".  So:
 
-    .. highlight:: python
     .. code-block:: python
 
         f = foo()
@@ -135,6 +165,13 @@ def serializable_field(name, required_type=None, doc=None):
 
     Additionally, the "doc" field will become the documentation for the
     property.
+
+    :param str name: name of the field to add
+    :param type required_type: type required for the field
+    :param str doc: field documentation
+
+    :return: property object
+    :rtype: :py:class:`property`
     """
 
     def getter(self):
@@ -158,7 +195,7 @@ def serializable_field(name, required_type=None, doc=None):
 
 
 def deprecated_field():
-    """ For marking attributes on a SerializableObject deprecated.  """
+    """For marking attributes on a SerializableObject deprecated."""
 
     def getter(self):
         raise DeprecationWarning

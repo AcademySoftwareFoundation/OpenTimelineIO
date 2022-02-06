@@ -154,7 +154,7 @@ private:
 };
 
 static void define_bases1(py::module m) {
-    py::class_<SerializableObject, managing_ptr<SerializableObject>>(m, "SerializableObject", py::dynamic_attr())
+    py::class_<SerializableObject, managing_ptr<SerializableObject>>(m, "SerializableObject", py::dynamic_attr(), "Superclass for all classes whose instances can be serialized.")
         .def(py::init<>())
         .def_property_readonly("_dynamic_fields", [](SerializableObject* s) {
                 auto ptr = s->dynamic_fields().get_or_create_mutation_stamp();
@@ -204,7 +204,7 @@ static void define_bases2(py::module m) {
     EffectVectorProxy::define_py_class(m, "EffectVector");
 
     py::class_<Composable, SOWithMetadata,
-               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr())
+               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr(), "An object that can be composed by :class:`~Track`\\s.")
         .def(py::init([](std::string const& name,
                          py::object metadata) {
                           return new Composable(name, py_to_any_dictionary(metadata));
@@ -216,7 +216,7 @@ static void define_bases2(py::module m) {
         .def("overlapping", &Composable::overlapping);
 
     auto marker_class =
-        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr())
+        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), "Holds metadata over time on a timeline")
         .def(py::init([](
                         py::object name,
                         TimeRange marked_range,
@@ -232,8 +232,8 @@ static void define_bases2(py::module m) {
              "marked_range"_a = TimeRange(),
              "color"_a = std::string(Marker::Color::red),
              py::arg_v("metadata"_a = py::none()))
-        .def_property("color", &Marker::color, &Marker::set_color)
-        .def_property("marked_range", &Marker::marked_range, &Marker::set_marked_range);
+        .def_property("color", &Marker::color, &Marker::set_color, "Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.")
+        .def_property("marked_range", &Marker::marked_range, &Marker::set_marked_range, "Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).");
 
     py::class_<Marker::Color>(marker_class, "Color")
         .def_property_readonly_static("PINK", [](py::object /* self */) { return Marker::Color::pink; })
@@ -255,7 +255,13 @@ static void define_bases2(py::module m) {
         .def("next", &SerializableCollectionIterator::next);
 
     py::class_<SerializableCollection, SOWithMetadata,
-               managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr())
+               managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr(), R"docstring(
+A kind of composition which can hold any serializable object.
+
+This composition approximates the concept of a bin - a collection of :class:`.SerializableObject`\s that do
+not have any compositing meaning, but can serialize to/from OTIO correctly, with metadata and
+a named collection.
+)docstring")
         .def(py::init([](std::string const& name, py::object children,
                          py::object metadata) {
                           return new SerializableCollection(name,
@@ -313,7 +319,7 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              "enabled"_a = true,
              py::arg_v("metadata"_a = py::none()))
-        .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. Analogous to Mute in various NLEs.")
+        .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.")
         .def_property("source_range", &Item::source_range, &Item::set_source_range)
         .def("available_range", [](Item* item) {
             return item->available_range(ErrorStatusHandler());
@@ -350,7 +356,7 @@ static void define_items_and_compositions(py::module m) {
             });
 
     auto transition_class =
-        py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr())
+        py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr(), "Represents a transition between two items.")
         .def(py::init([](std::string const& name, std::string const& transition_type,
                          RationalTime in_offset, RationalTime out_offset,
                          py::object metadata) {
@@ -362,21 +368,27 @@ static void define_items_and_compositions(py::module m) {
              "in_offset"_a = RationalTime(),
              "out_offset"_a = RationalTime(),
              py::arg_v("metadata"_a = py::none()))
-        .def_property("transition_type", &Transition::transition_type, &Transition::set_transition_type)
-        .def_property("in_offset", &Transition::in_offset, &Transition::set_in_offset)
-        .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset)
+        .def_property("transition_type", &Transition::transition_type, &Transition::set_transition_type, "Kind of transition, as defined by the :class:`Type` enum.")
+        .def_property("in_offset", &Transition::in_offset, &Transition::set_in_offset, "Amount of the previous clip this transition overlaps, exclusive.")
+        .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset, "Amount of the next clip this transition overlaps, exclusive.")
         .def("duration", [](Transition* t) {
             return t->duration(ErrorStatusHandler());
             })
         .def("range_in_parent", [](Transition* t) {
             return t->range_in_parent(ErrorStatusHandler());
-            })
+            }, "Find and return the range of this item in the parent.")
         .def("trimmed_range_in_parent", [](Transition* t) {
             return t->trimmed_range_in_parent(ErrorStatusHandler());
-            });
+            }, "Find and return the timmed range of this item in the parent.");
+
+    py::class_<Transition::Type>(transition_class, "Type", R"docstring(
+Enum encoding types of transitions.
 
 
-    py::class_<Transition::Type>(transition_class, "Type")
+This is for representing “Dissolves” and “Wipes” defined by the multi-source effect as defined in section 7.6.3.2 of `SMPTE 258M-2004 <https://ieeexplore.ieee.org/servlet/opac?punumber=7291837>`_.
+
+Other effects are handled by the :class:`Effect` class.
+)docstring")
         .def_property_readonly_static("SMPTE_Dissolve", [](py::object /* self */) { return Transition::Type::SMPTE_Dissolve; })
         .def_property_readonly_static("Custom", [](py::object /* self */) { return Transition::Type::Custom; });
 
@@ -405,7 +417,11 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()));
 
-    auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr())
+    auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr(), R"docstring(
+The base editable object in OTIO.
+
+Contains a :class:`.MediaReference` and a trim on that media reference.
+)docstring")
         .def(py::init([](std::string name, MediaReference* media_reference,
                          optional<TimeRange> source_range, py::object metadata,
                          const std::string&  active_media_reference) {
@@ -433,7 +449,11 @@ static void define_items_and_compositions(py::module m) {
         .def("__iter__", &CompositionIterator::iter)
         .def("next", &CompositionIterator::next);
 
-    py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr())
+    py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr(), R"docstring(
+Base class for an :class:`~Item` that contains other :class:`~Item`\s.
+
+Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
+)docstring")
         .def(py::init([](std::string name,
                          py::object children,
                          optional<TimeRange> source_range, py::object metadata) {
@@ -481,14 +501,14 @@ static void define_items_and_compositions(py::module m) {
                     l.push_back(child.value);
                 }
                 return l;
-            })
+            }, "search_range"_a)
         .def("children_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
                 return children_if(t, descended_from_type, search_range, shallow_search);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
-            }, "child_a")
+            }, "child"_a)
         .def("has_clips", &Composition::has_clips)
         .def("__internal_getitem__", [](Composition* c, int index) {
                 index = adjusted_vector_index(index, c->children());
@@ -633,7 +653,7 @@ static void define_effects(py::module m) {
              py::arg_v("metadata"_a = py::none()))
         .def_property("effect_name", &Effect::effect_name, &Effect::set_effect_name);
 
-    py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr())
+    py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr(), "Base Time Effect Class")
         .def(py::init([](std::string name,
                          std::string effect_name,
                          py::object metadata) {
@@ -642,7 +662,9 @@ static void define_effects(py::module m) {
              "effect_name"_a = std::string(),
              py::arg_v("metadata"_a = py::none()));
 
-    py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr())
+    py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr(), R"docstring(
+A time warp that applies a linear scale across the entire clip
+)docstring")
         .def(py::init([](std::string name,
                          double time_scalar,
                          py::object metadata) {
@@ -651,9 +673,9 @@ static void define_effects(py::module m) {
              py::arg_v("name"_a = std::string()),
              "time_scalar"_a = 1.0,
              py::arg_v("metadata"_a = py::none()))
-        .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar);
+        .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar, "Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.");
 
-    py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
+    py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr(), "Hold the first frame of the clip for the duration of the clip.")
         .def(py::init([](std::string name, py::object metadata) {
                     return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
             py::arg_v("name"_a = std::string()),
@@ -701,7 +723,7 @@ static void define_media_references(py::module m) {
 
 
     py::class_<MissingReference, MediaReference,
-               managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr())
+               managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr(), "Represents media for which a concrete reference is missing.")
         .def(py::init([](
                         py::object name,
                         optional<TimeRange> available_range,
@@ -737,13 +759,15 @@ static void define_media_references(py::module m) {
 
     auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
             managing_ptr<ImageSequenceReference>>(m, "ImageSequenceReference", py::dynamic_attr(), R"docstring(
-An ImageSequenceReference refers to a numbered series of single-frame image files. Each file can be referred to by a URL generated by the ImageSequenceReference.
+An ImageSequenceReference refers to a numbered series of single-frame image files. Each file can be referred to by a URL generated by the :class:`~ImageSequenceReference`.
 
-Image sequncences can have URLs with discontinuous frame numbers, for instance if you've only rendered every other frame in a sequence, your frame numbers may be 1, 3, 5, etc. This is configured using the ``frame_step`` attribute. In this case, the 0th image in the sequence is frame 1 and the 1st image in the sequence is frame 3. Because of this there are two numbering concepts in the image sequence, the image number and the frame number.
+Image sequences can have URLs with discontinuous frame numbers, for instance if you've only rendered every other frame in a sequence, your frame numbers may be 1, 3, 5, etc. This is configured using the ``frame_step`` attribute. In this case, the 0th image in the sequence is frame 1 and the 1st image in the sequence is frame 3. Because of this there are two numbering concepts in the image sequence, the image number and the frame number.
 
 Frame numbers are the integer numbers used in the frame file name. Image numbers are the 0-index based numbers of the frames available in the reference. Frame numbers can be discontinuous, image numbers will always be zero to the total count of frames minus 1.
 
-An example for 24fps media with a sample provided each frame numbered 1-1000 with a path ``/show/sequence/shot/sample_image_sequence.%04d.exr`` might be::
+An example for 24fps media with a sample provided each frame numbered 1-1000 with a path ``/show/sequence/shot/sample_image_sequence.%04d.exr`` might be
+
+.. code-block:: json
 
     {
       "available_range": {
@@ -765,7 +789,9 @@ An example for 24fps media with a sample provided each frame numbered 1-1000 wit
       "frame_zero_padding": 4,
     }
 
-The same duration sequence but with only every 2nd frame available in the sequence would be::
+The same duration sequence but with only every 2nd frame available in the sequence would be
+
+.. code-block:: json
 
     {
       "available_range": {
@@ -787,7 +813,9 @@ The same duration sequence but with only every 2nd frame available in the sequen
       "frame_zero_padding": 4,
     }
 
-A list of all the frame URLs in the sequence can be generated, regardless of frame step, with the following list comprehension::
+A list of all the frame URLs in the sequence can be generated, regardless of frame step, with the following list comprehension
+
+.. code-block:: python
 
     [ref.target_url_for_image_number(i) for i in range(ref.number_of_images_in_sequence())]
 
@@ -844,12 +872,12 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
         .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step, "Step between frame numbers in file names.")
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate, "Frame rate if every frame in the sequence were played back.")
         .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding, "Number of digits to pad zeros out to in frame numbers.")
-        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Enum ``ImageSequenceReference.MissingFramePolicy`` directive for how frames in sequence not found on disk should be handled.")
-        .def("end_frame", &ImageSequenceReference::end_frame, "Last frame number in the sequence based on the ``rate`` and ``available_range``.")
-        .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence, "Returns the number of images based on the ``rate`` and ``available_range``.")
+        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Directive for how frames in sequence not found on disk should be handled.")
+        .def("end_frame", &ImageSequenceReference::end_frame, "Last frame number in the sequence based on the :attr:`rate` and :attr:`.available_range`.")
+        .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence, "Returns the number of images based on the :attr:`rate` and :attr:`.available_range`.")
         .def("frame_for_time", [](ImageSequenceReference *seq_ref, RationalTime time) {
                 return seq_ref->frame_for_time(time, ErrorStatusHandler());
-        }, "time"_a, "Given a :class:`RationalTime` within the available range, returns the frame number.")
+        }, "time"_a, "Given a :class:`.RationalTime` within the available range, returns the frame number.")
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->target_url_for_image_number(
                         image_number,
@@ -858,14 +886,18 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
         }, "image_number"_a, R"docstring(Given an image number, returns the ``target_url`` for that image.
 
 This is roughly equivalent to:
-    ``f"{target_url_prefix}{(start_frame + (image_number * frame_step)):0{value_zero_padding}}{target_url_postfix}``
+
+.. code-block:: python
+
+   f"{target_url_prefix}{(start_frame + (image_number * frame_step)):0{value_zero_padding}}{target_url_postfix}"
+
 )docstring")
         .def("presentation_time_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->presentation_time_for_image_number(
                         image_number,
                         ErrorStatusHandler()
                 );
-        }, "image_number"_a, "Given an image number, returns the :class:`RationalTime` at which that image should be shown in the space of `available_range`.");
+        }, "image_number"_a, "Given an image number, returns the :class:`.RationalTime` at which that image should be shown in the space of :attr:`.available_range`.");
 
 }
 

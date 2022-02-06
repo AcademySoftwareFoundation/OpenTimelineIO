@@ -29,7 +29,8 @@ class SchemaDef(plugins.PythonPlugin):
         Return the module object for this schemadef plugin.
         If the module hasn't already been imported, it is imported and
         injected into the otio.schemadefs namespace as a side-effect.
-        (redefines PythonPlugin.module())
+
+        Redefines :py:meth:`.PythonPlugin.module`.
         """
 
         if not self._module:

@@ -42,19 +42,19 @@ def each_child(
         descended_from_type=_otio.Composable,
         shallow_search=False,
 ):
-    """ Generator that returns each child contained in the composition in
+    """
+    Generator that returns each child contained in the composition in
     the order in which it is found.
 
-    Note that this function is now deprecated, please consider using
-    children_if() instead.
+    .. deprecated:: 0.14.0
+        Use :meth:`children_if` instead.
 
-    Arguments:
-        search_range: if specified, only children whose range overlaps with
-                      the search range will be yielded.
-        descended_from_type: if specified, only children who are a
-                      descendent of the descended_from_type will be yielded.
-        shallow_search: if True, will only search children of self, not
-                        and not recurse into children of children.
+    :param opentimelineio.opentime.TimeRange search_range: if specified, only children whose range overlaps with
+                                                           the search range will be yielded.
+    :param type descended_from_type: if specified, only children who are a
+                                     descendent of the descended_from_type will be yielded.
+    :param bool shallow_search: if True, will only search children of self, not
+                                and not recurse into children of children.
     """
     for child in self.children_if(descended_from_type, search_range, shallow_search):
         yield child

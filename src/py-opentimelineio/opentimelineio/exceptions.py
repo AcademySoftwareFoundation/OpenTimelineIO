@@ -27,6 +27,7 @@ __all__ = [
     'NoDefaultMediaLinkerError'
 ]
 
+
 class CouldNotReadFileError(OTIOError):
     pass
 

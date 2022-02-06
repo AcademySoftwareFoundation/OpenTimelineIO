@@ -49,10 +49,10 @@ def each_child(
     .. deprecated:: 0.14.0
         Use :meth:`children_if` instead.
 
-    :param opentimelineio.opentime.TimeRange search_range: if specified, only children whose range overlaps with
-                                                           the search range will be yielded.
-    :param type descended_from_type: if specified, only children who are a
-                                     descendent of the descended_from_type will be yielded.
+    :param TimeRange search_range: if specified, only children whose range overlaps with
+                                   the search range will be yielded.
+    :param type descended_from_type: if specified, only children who are a descendent
+                                     of the descended_from_type will be yielded.
     :param bool shallow_search: if True, will only search children of self, not
                                 and not recurse into children of children.
     """

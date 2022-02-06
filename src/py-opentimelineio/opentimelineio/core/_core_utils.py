@@ -232,9 +232,10 @@ def _add_mutable_mapping_methods(mapClass):
             ):
                 setattr(mapClass, name, _im_func(func))
                 if name.startswith('__') or name.endswith('__'):
-                        continue
+                    continue
 
-                # Hide the method frm Sphinx doc. See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
+                # Hide the method frm Sphinx doc.
+                # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
                 getattr(mapClass, name).__doc__ += '\n\n:meta private:'
 
     mapClass.setdefault = setdefault
@@ -384,7 +385,8 @@ def _add_mutable_sequence_methods(
                     if name.startswith('__') or name.endswith('__'):
                         continue
 
-                    # Hide the method frm Sphinx doc. See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
+                    # Hide the method frm Sphinx doc.
+                    # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
                     getattr(sequenceClass, name).__doc__ += '\n\n:meta private:'
 
     if not issubclass(sequenceClass, SerializableObject):

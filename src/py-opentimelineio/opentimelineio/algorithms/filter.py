@@ -28,8 +28,6 @@ def filtered_composition(
 
     The ``unary_filter_fn`` must have this signature:
 
-    .. currentmodule:: _
-
     .. py:function:: func(item: typing.Any) -> list[typing.Any]
         :noindex:
 
@@ -38,9 +36,9 @@ def filtered_composition(
     2. Starting with root, perform a depth first traversal
     3. For each item (including root):
 
-       a. If types_to_prune is not None and item is an instance of a type in types_to_prune,
-          prune it from the copy, continue.
-       b. Otherwise, pass the copy to unary_filter_fn.  If ``unary_filter_fn``:
+       a. If ``types_to_prune`` is not None and item is an instance of a type in
+          ``types_to_prune``, prune it from the copy, continue.
+       b. Otherwise, pass the copy to ``unary_filter_fn``.  If ``unary_filter_fn``:
 
           I.   Returns an object: add it to the copy, replacing original
           II.  Returns a tuple: insert it into the list, replacing original
@@ -158,7 +156,7 @@ def filtered_with_sequence_context(
 
     .. currentmodule:: _
 
-    .. py:function:: func(previous_item: typing.Any, current: typing.Any, next_item: typing.Any) -> list[typing.Any]
+    .. py:function:: func(previous_item: typing.Any, current: typing.Any, next_item: typing.Any) -> list[typing.Any]  # noqa
         :noindex:
 
     1. Make a deep copy of root

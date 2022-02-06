@@ -21,8 +21,8 @@ def track_trimmed_to_range(in_track, trim_range):
     .. note:: The track is never expanded, only shortened.
 
     Please note that you could do nearly the same thing non-destructively by
-    just setting the :py:class:`.Track`\'s source_range but sometimes you want to really cut
-    away the stuff outside and that's what this function is meant for.
+    just setting the :py:class:`.Track`\'s source_range but sometimes you want
+    to really cut away the stuff outside and that's what this function is meant for.
 
     :param Track in_track: Track to trim
     :param TimeRange trim_range:

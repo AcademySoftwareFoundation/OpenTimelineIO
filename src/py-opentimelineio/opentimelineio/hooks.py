@@ -11,7 +11,7 @@ HookScripts are plugins that run at defined points ("Hooks").
 
 They expose a ``hook_function`` with signature:
 
-.. py:function:: hook_function(timeline: opentimelineio.schema.Timeline, optional_argument_dict: dict[str, Any]) -> opentimelineio.schema.Timeline
+.. py:function:: hook_function(timeline: opentimelineio.schema.Timeline, optional_argument_dict: dict[str, Any]) -> opentimelineio.schema.Timeline  # noqa
    :noindex:
 
    Hook function signature
@@ -22,7 +22,7 @@ manifest.
 You can attach multiple hook scripts to a hook. They will be executed in list
 order, first to last.
 
-They are defined by the manifests :class:`HookScript`\s and hooks areas.
+They are defined by the manifests :class:`HookScript`\\s and hooks areas.
 
 .. code-block:: json
 
@@ -42,7 +42,7 @@ They are defined by the manifests :class:`HookScript`\s and hooks areas.
        }
    }
 
-The ``hook_scripts`` area loads the python modules with the ``hook_function``\s to
+The ``hook_scripts`` area loads the python modules with the ``hook_function``\\s to
 call in them.  The ``hooks`` area defines the hooks (and any associated
 scripts). You can further query and modify these from python.
 

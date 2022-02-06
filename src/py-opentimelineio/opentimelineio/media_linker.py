@@ -7,7 +7,7 @@ produce :class:`.MediaReference`\s that point at valid, site specific media.
 
 They expose a ``link_media_reference`` function with the signature:
 
-.. py:function:: link_media_reference(in_clip: opentimelineio.schema.Clip) -> opentimelineio.core.MediaReference
+.. py:function:: link_media_reference(in_clip: opentimelineio.schema.Clip) -> opentimelineio.core.MediaReference  # noqa
    :noindex:
 
    Example link_media_reference function.

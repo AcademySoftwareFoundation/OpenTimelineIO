@@ -97,6 +97,9 @@ intersphinx_mapping = {
 # Pybind11 generates class signatures on the __init__ method.
 autoclass_content = "both"
 
+autodoc_default_options = {
+    'undoc-members': True
+}
 
 # -- Custom ----------------------------------------------------------------------------
 

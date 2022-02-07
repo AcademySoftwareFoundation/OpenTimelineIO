@@ -23,9 +23,9 @@ void opentime_timeTransform_bindings(py::module m) {
         .def("__copy__", [](TimeTransform const& tt) {
                 return tt;
             })
-        .def("__deepcopy__", [](TimeTransform const& tt) {
+        .def("__deepcopy__", [](TimeTransform const& tt, py::dict memo) {
                 return tt;
-            })
+            }, "memo"_a)
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def("__str__", [](TimeTransform tt) {

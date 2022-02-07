@@ -80,7 +80,7 @@ def get_nav_menu_data():
 
 def get_filters(filter_dict, bitmask):
     filters = list()
-    for item in filter_dict.itervalues():
+    for item in filter_dict.values():
         if bitmask & item.bitmask:
             filters.append(item)
     return filters

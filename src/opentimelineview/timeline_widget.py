@@ -128,7 +128,28 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
 
         self._data_cache = self._cache_tracks()
 
-    def _adjust_scene_size(self):
+    def track_name_width(self):
+        # Choose track name item from the longest track, since that track will
+        # define the composition's scene width.
+        width = track_widgets.TRACK_NAME_WIDGET_WIDTH
+        longest_track = None
+        max_end_time = 0
+
+        for item in self.items():
+            if isinstance(item, track_widgets.Track):
+                track_range = item.track.trimmed_range_in_parent()
+                end_time = track_range.end_time_inclusive().to_seconds()
+                if end_time > max_end_time:
+                    max_end_time = end_time
+                    longest_track = item
+
+        if longest_track is not None:
+            if longest_track.track_name_item is not None:
+                width = longest_track.track_name_item.rect().width()
+
+        return width
+
+    def _adjust_scene_size(self, zoom_level=1.0):
         scene_range = self.composition.trimmed_range()
 
         start_time = otio.opentime.to_seconds(scene_range.start_time)
@@ -173,9 +194,24 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self.setSceneRect(
             start_time * track_widgets.TIME_MULTIPLIER,
             0,
-            duration * track_widgets.TIME_MULTIPLIER,
+            duration * track_widgets.TIME_MULTIPLIER + 
+            self.track_name_width() * zoom_level,
             height
         )
+
+    def counteract_zoom(self, zoom_level=1.0):
+        # some items we do want to keep the same visual size. So we need to
+        # inverse the effect of the zoom
+        items_to_scale = [
+            i for i in self.items()
+            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
+                               ruler_widget.Ruler, track_widgets.TimeSlider)))
+        ]
+
+        for item in items_to_scale:
+            item.counteract_zoom(zoom_level)
+
+        self._adjust_scene_size(zoom_level)
 
     def _add_time_slider(self):
         scene_rect = self.sceneRect()
@@ -463,17 +499,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.scale(scale_by, 1)
         zoom_level = 1.0 / self.matrix().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
-
-        # some items we do want to keep the same visual size. So we need to
-        # inverse the effect of the zoom
-        items_to_scale = [
-            i for i in self.scene().items()
-            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
-                               ruler_widget.Ruler, track_widgets.TimeSlider)))
-        ]
-
-        for item in items_to_scale:
-            item.counteract_zoom(zoom_level)
+        self.scene().counteract_zoom(zoom_level)
 
     def _get_first_item(self):
         newXpos = 0
@@ -707,21 +733,22 @@ class CompositionView(QtWidgets.QGraphicsView):
             self.frame_all()
 
     def frame_all(self):
-        zoom_level = 1.0 / self.matrix().m11()
-        scaleFactor = self.size().width() / self.sceneRect().width()
-        self.scale(scaleFactor * zoom_level, 1)
+        self.resetMatrix()
+        track_widgets.CURRENT_ZOOM_LEVEL = 1.0
+        self.scene().counteract_zoom()
+
+        track_name_width = self.scene().track_name_width()
+        view_width = self.size().width() - track_name_width
+        scene_width = self.sceneRect().width() - track_name_width
+        if not view_width or not scene_width:
+            # Prevent zero division errors
+            return
+
+        scale_by = view_width / scene_width
+        self.scale(scale_by, 1)
         zoom_level = 1.0 / self.matrix().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
-        items_to_scale = [
-            i for i in self.scene().items()
-            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
-                               ruler_widget.Ruler, track_widgets.TimeSlider)))
-        ]
-        # some items we do want to keep the same visual size. So we need to
-        # inverse the effect of the zoom
-
-        for item in items_to_scale:
-            item.counteract_zoom(zoom_level)
+        self.scene().counteract_zoom(zoom_level)
 
     def navigationfilter_changed(self, bitmask):
         '''

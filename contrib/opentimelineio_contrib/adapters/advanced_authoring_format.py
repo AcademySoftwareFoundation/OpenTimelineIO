@@ -767,10 +767,12 @@ def _transcribe(item, parents, edit_rate, indent=0):
         # muted case -- if there is only one item its muted, otherwise its
         # a multi cam thing
         if alternates and len(alternates) == 1:
-            metadata['muted_clip'] = True
-            result.name = str(alternates[0].name) + "_MUTED"
-
-        metadata['alternates'] = alternates
+            # Our result is the clip itself, but marked as enabled=False (muted)
+            metadata = copy.deepcopy(alternates[0].metadata["AAF"])
+            result = alternates[0]
+            result.enabled = False
+        else:
+            metadata['alternates'] = alternates
 
     # @TODO: There are a bunch of other AAF object types that we will
     # likely need to add support for. I'm leaving this code here to help

@@ -768,8 +768,8 @@ def _transcribe(item, parents, edit_rate, indent=0):
         # a multi cam thing
         if alternates and len(alternates) == 1:
             # Our result is the clip itself, but marked as enabled=False (muted)
-            metadata = copy.deepcopy(alternates[0].metadata["AAF"])
             result = alternates[0]
+            metadata = copy.deepcopy(result.metadata["AAF"])
             result.enabled = False
         else:
             metadata['alternates'] = alternates
@@ -1346,24 +1346,38 @@ def _simplify(thing):
                     # TODO: We may be discarding metadata, should we merge it?
                     # TODO: Do we need to offset the markers in time?
                     thing.markers.extend(child.markers)
+
                     # Note: we don't merge effects, because we already made
                     # sure the child had no effects in the if statement above.
+
+                    # Preserve the enabled/disabled state as we merge these two.
+                    thing.enabled = thing.enabled and child.enabled
 
                     c = c + num
                 c = c - 1
 
         # skip redundant containers
         if _is_redundant_container(thing):
-            # TODO: We may be discarding metadata here, should we merge it?
+            # Merge the redundant container with the 1st (only) child object
             result = thing[0].deepcopy()
+
+            # TODO: We may be discarding metadata here, should we merge it?
+
+            # Merge the markers from both
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
+
+            # Merge the effects from both
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
             # Intuitively it seems like the child's effects should come before
             # the parent's effects. This will need to be solidified when we
             # add more effects support.
             result.effects.extend(thing.effects)
+
+            # Preserve the enabled/disabled state as we merge these two.
+            result.enabled = result.enabled and thing.enabled
+
             # Keep the parent's length, if it has one
             if thing.source_range:
                 # make sure it has a source_range first

@@ -18,6 +18,9 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/stack.h"
+#include "opentimelineio/subtitles.h"
+#include "opentimelineio/timedText.h"
+#include "opentimelineio/timedTextStyle.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
@@ -58,6 +61,9 @@ TypeRegistry::TypeRegistry()
     register_type<Effect>();
     register_type<ExternalReference>();
     register_type<FreezeFrame>();
+    register_type<Subtitles>();
+    register_type<TimedText>();
+    register_type<TimedTextStyle>();
 
     register_type<Gap>();
     register_type_from_existing_type("Filler", 1, "Gap", nullptr);

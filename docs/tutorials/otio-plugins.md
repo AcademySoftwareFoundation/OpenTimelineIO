@@ -639,6 +639,26 @@ RvSession Adapter harness
 
 
 
+### srt
+
+```
+SRT Adapter harness
+```
+
+*source*: `opentimelineio_contrib/adapters/srt.py`
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file:
+  - filepath
+- write_to_string:
+  - input_otio
+
+
+
+
+
 ### xges
 
 ```

@@ -1,0 +1,142 @@
+{
+    "OTIO_SCHEMA": "Subtitles.1",
+    "metadata": {},
+    "name": "",
+    "source_range": null,
+    "effects": [],
+    "markers": [],
+    "extent_x": 0.0,
+    "extent_y": 0.0,
+    "padding_x": 0.0,
+    "padding_y": 0.0,
+    "background_color": "",
+    "background_opacity": 0.0,
+    "timed_texts": [
+        {
+            "OTIO_SCHEMA": "TimedText.1",
+            "metadata": {},
+            "name": "",
+            "color": "GREEN",
+            "marked_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 76.72799999999984
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 805.5840000000001
+                }
+            },
+            "texts": [
+                "Subtitle 1 Line 1\n"
+            ],
+            "style_ids": [
+                ""
+            ]
+        },
+        {
+            "OTIO_SCHEMA": "TimedText.1",
+            "metadata": {},
+            "name": "",
+            "color": "GREEN",
+            "marked_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 74.25600000000009
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 883.2719999999999
+                }
+            },
+            "texts": [
+                "Subtitle 2 Line 1\nSubtitle 2 Line 2\n"
+            ],
+            "style_ids": [
+                ""
+            ]
+        },
+        {
+            "OTIO_SCHEMA": "TimedText.1",
+            "metadata": {},
+            "name": "",
+            "color": "GREEN",
+            "marked_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 51.048
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 958.5360000000001
+                }
+            },
+            "texts": [
+                "Subtitle 3 Line 1\nSubtitle 3 Line 2\nSubtitle 3 Line 3\n"
+            ],
+            "style_ids": [
+                ""
+            ]
+        },
+        {
+            "OTIO_SCHEMA": "TimedText.1",
+            "metadata": {},
+            "name": "",
+            "color": "GREEN",
+            "marked_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 50.2320000000002
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 1010.5919999999999
+                }
+            },
+            "texts": [
+                "\n"
+            ],
+            "style_ids": [
+                ""
+            ]
+        },
+        {
+            "OTIO_SCHEMA": "TimedText.1",
+            "metadata": {},
+            "name": "",
+            "color": "GREEN",
+            "marked_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 60.59999999999991
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0,
+                    "value": 1061.856
+                }
+            },
+            "texts": [
+                "Subtitle 5 Line 1"
+            ],
+            "style_ids": [
+                ""
+            ]
+        }
+    ],
+    "display_alignment": "after"
+}

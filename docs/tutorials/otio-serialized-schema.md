@@ -522,6 +522,31 @@ parameters:
 - *name*: 
 - *source_range*: 
 
+### Subtitles.1
+
+*full module path*: `opentimelineio.schema.Subtitles`
+
+*documentation*:
+
+```
+None
+```
+
+parameters:
+- *background_color*: 
+- *background_opacity*: 
+- *display_alignment*: 
+- *effects*: 
+- *extent_x*: 
+- *extent_y*: 
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *padding_x*: 
+- *padding_y*: 
+- *source_range*: 
+- *timed_texts*: 
+
 ### TimeEffect.1
 
 *full module path*: `opentimelineio.schema.TimeEffect`
@@ -536,6 +561,43 @@ parameters:
 - *effect_name*: 
 - *metadata*: 
 - *name*: 
+
+### TimedText.1
+
+*full module path*: `opentimelineio.schema.TimedText`
+
+*documentation*:
+
+```
+None
+```
+
+parameters:
+- *color*: 
+- *marked_range*: 
+- *metadata*: 
+- *name*: 
+- *text*: 
+
+### TimedTextStyle.1
+
+*full module path*: `opentimelineio.schema.TimedTextStyle`
+
+*documentation*:
+
+```
+None
+```
+
+parameters:
+- *font_family*: 
+- *style_id*: 
+- *text_alignment*: 
+- *text_bold*: 
+- *text_color*: 
+- *text_italics*: 
+- *text_size*: 
+- *text_underline*: 
 
 ### Timeline.1
 

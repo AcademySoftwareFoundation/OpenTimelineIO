@@ -15,6 +15,8 @@ set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")
 
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
+
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 #------------------------------------------------------------------------------

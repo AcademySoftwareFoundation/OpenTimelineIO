@@ -22,12 +22,15 @@ The OpenTimelineIO Project Committers (alphabetically by last name) are:
 
 ## Contributor License Agreement
 
-Before contributing code to OpenTimelineIO, we ask that you sign a Contributor License Agreement (CLA).  At the root of the repo you can find the two possible CLAs:
+Before contributing code to OpenTimelineIO, we ask that you sign a Contributor License Agreement (CLA).
+When you create a pull request, the Linux Foundation's EasyCLA system will guide you through the process of signing the CLA.
+
+If you are unable to use the EasyCLA system, you can send a signed CLA to `opentimelineio-tsc@aswf.io` (please make sure to include your github username) and wait for confirmation that we've received it.
+
+Here are the two possible CLAs:
 
 * [OTIO_CLA_Corporate.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Corporate.pdf): please sign this one for corporate use
 * [OTIO_CLA_Individual.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
-
-Once your CLA is signed, send it to `opentimelineio-tsc@aswf.io` (please make sure to include your github username) and wait for confirmation that we've received it.  After that, you can submit pull requests.
 
 ## Coding Conventions
 Please follow the coding convention and style in each file and in each library when adding new files.

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/imageSequenceReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {

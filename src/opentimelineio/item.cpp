@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/item.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/effect.h"

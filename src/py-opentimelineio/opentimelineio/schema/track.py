@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 from .. core._core_utils import add_method
 from .. import _otio
 

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 import unittest
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils

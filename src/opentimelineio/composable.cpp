@@ -68,8 +68,9 @@ Composable::duration(ErrorStatus* error_status) const
     return RationalTime();
 }
 
-optional<Imath::Box2d> 
-Composable::available_image_bounds(ErrorStatus* error_status) const {
+optional<Imath::Box2d>
+Composable::available_image_bounds(ErrorStatus* error_status) const
+{
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return optional<Imath::Box2d>();
 }

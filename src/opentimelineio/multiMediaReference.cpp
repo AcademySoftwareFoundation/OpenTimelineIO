@@ -3,8 +3,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 MultiMediaReference::MultiMediaReference(
-    std::string const&         name,
-    AnyDictionary const&       metadata)
+    std::string const& name, AnyDictionary const& metadata)
     : Parent(name, metadata)
     , _available_range(available_range)
 {}
@@ -12,14 +11,14 @@ MultiMediaReference::MultiMediaReference(
 MultiMediaReference::~MultiMediaReference()
 {}
 
-optional<TimeRange> MultiMediaReference::available_range() const noexcept final{
+optional<TimeRange>
+MultiMediaReference::available_range() const noexcept final
+{}
 
-}
-
-void MultiMediaReference::set_available_range(optional<TimeRange> const& available_range) final
-{
-
-}
+void
+MultiMediaReference::set_available_range(
+    optional<TimeRange> const& available_range) final
+{}
 
 bool
 MultiMediaReference::read_from(Reader& reader)

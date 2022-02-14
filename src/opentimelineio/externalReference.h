@@ -22,7 +22,6 @@ public:
         AnyDictionary const&          metadata               = AnyDictionary(),
         optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
-
     std::string target_url() const noexcept { return _target_url; }
 
     void set_target_url(std::string const& target_url)

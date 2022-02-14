@@ -8,6 +8,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class MultiMediaReference final : public MediaReference
 {
     using References = std::vector<Retainer<MediaReference>>;
+
 public:
     struct Schema
     {
@@ -18,8 +19,8 @@ public:
     using Parent = MediaReference;
 
     MultiMediaReference(
-        std::string const&         name            = std::string(),
-        AnyDictionary const&       metadata        = AnyDictionary());
+        std::string const&   name     = std::string(),
+        AnyDictionary const& metadata = AnyDictionary());
 
     optional<TimeRange> available_range() const noexcept final;
 

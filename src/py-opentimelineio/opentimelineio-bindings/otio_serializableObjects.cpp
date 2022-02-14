@@ -671,13 +671,13 @@ static void define_media_references(py::module m) {
                           return new GeneratorReference(name, generator_kind,
                                                         available_range,
                                                         py_to_any_dictionary(parameters),
-                                                        py_to_any_dictionary(metadata)
+                                                        py_to_any_dictionary(metadata),
                                                         available_image_bounds); }),
              py::arg_v("name"_a = std::string()),
              "generator_kind"_a = std::string(),
              "available_range"_a = nullopt,
              "parameters"_a = py::none(),
-             py::arg_v("metadata"_a = py::none())
+             py::arg_v("metadata"_a = py::none()),
              "available_image_bounds"_a = nullopt)
         .def_property("generator_kind", &GeneratorReference::generator_kind, &GeneratorReference::set_generator_kind)
         .def_property_readonly("parameters", [](GeneratorReference* g) {

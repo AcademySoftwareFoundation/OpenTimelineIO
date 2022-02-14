@@ -310,7 +310,7 @@ Track::available_image_bounds(ErrorStatus* error_status) const
                     }
                 }
             }
-            if (*error_status) {
+            if (is_error(error_status)) {
                 return optional<Imath::Box2d>();
             }
         }

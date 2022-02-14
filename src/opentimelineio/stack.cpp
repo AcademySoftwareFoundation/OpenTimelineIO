@@ -129,7 +129,7 @@ Stack::available_image_bounds(ErrorStatus* error_status) const
         if (auto clip_box = clip->available_image_bounds(error_status)) {
             child_box = clip_box;
         }
-        if (*error_status) {
+        if (is_error(error_status)) {
             return optional<Imath::Box2d>();
         }
         if (child_box) {

@@ -12,8 +12,9 @@ ImageSequenceReference::ImageSequenceReference(
     int                        frame_zero_padding,
     MissingFramePolicy const   missing_frame_policy,
     optional<TimeRange> const& available_range,
-    AnyDictionary const&       metadata)
-    : Parent(std::string(), available_range, metadata)
+    AnyDictionary const&       metadata,
+    optional<Imath::Box2d> const& available_image_bounds)
+    : Parent(std::string(), available_range, metadata, available_image_bounds)
     , _target_url_base(target_url_base)
     , _name_prefix(name_prefix)
     , _name_suffix(name_suffix)

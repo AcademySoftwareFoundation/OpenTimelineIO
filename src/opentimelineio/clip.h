@@ -30,6 +30,8 @@ public:
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 
+    virtual optional<Imath::Box2d> available_image_bounds(ErrorStatus* error_status) const;
+
 protected:
     virtual ~Clip();
 

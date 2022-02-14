@@ -69,6 +69,7 @@ PYBIND11_MODULE(_otio, m) {
     otio_exception_bindings(m);
     otio_any_dictionary_bindings(m);
     otio_any_vector_bindings(m);
+    otio_imath_bindings(m);
     otio_serializable_object_bindings(m);
     otio_tests_bindings(m);
 

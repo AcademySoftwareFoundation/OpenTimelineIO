@@ -4,10 +4,11 @@ from .. import _otio
 
 @add_method(_otio.MediaReference)
 def __str__(self):
-    return "{}({}, {}, {})".format(
+    return "{}({}, {}, {}, {})".format(
         self.__class__.__name__,
         repr(self.name),
         repr(self.available_range),
+        repr(self.available_image_bounds),
         repr(self.metadata)
     )
 
@@ -18,6 +19,7 @@ def __repr__(self):
         "otio.{}.{}("
         "name={},"
         " available_range={},"
+        " available_image_bounds={},"
         " metadata={}"
         ")"
     ).format(
@@ -25,5 +27,6 @@ def __repr__(self):
         self.__class__.__name__,
         repr(self.name),
         repr(self.available_range),
+        repr(self.available_image_bounds),
         repr(self.metadata)
     )

@@ -82,7 +82,7 @@ target_include_directories(opentimelineio PRIVATE
                            "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
                            "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
-target_link_libraries(opentimelineio PUBLIC opentime)
+target_link_libraries(opentimelineio PUBLIC opentime Imath::Imath)
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"

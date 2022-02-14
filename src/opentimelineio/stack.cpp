@@ -118,4 +118,31 @@ Stack::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
+optional<Imath::Box2d> 
+Stack::available_image_bounds(ErrorStatus* error_status) const 
+{
+    optional<Imath::Box2d> box;
+    bool found_first_child = false;
+    for (auto clip : children_if<Clip>(error_status))
+    {
+        optional<Imath::Box2d> child_box;
+        if (auto clip_box = clip->available_image_bounds(error_status)) {
+            child_box = clip_box;
+        }
+        if (*error_status) {
+            return optional<Imath::Box2d>();
+        }
+        if (child_box) {
+            if (found_first_child) {
+                box->extendBy(*child_box);
+            }
+            else {
+                box = child_box;
+                found_first_child = true;
+            }          
+        }
+    }
+    return box;
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -591,7 +591,17 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
 
         return any(SerializableObject::ReferenceId{ ref_id });
     }
-    else
+    else if (schema_name_and_version == "V2d.1") {
+        double x,y;
+        return _fetch("x", &x) && _fetch("y", &y) ? 
+            any(Imath::V2d(x,y)) : any();
+    }
+    else if (schema_name_and_version == "Box2d.1") {
+        Imath::V2d min, max; 
+        return _fetch("min", &min) && _fetch("max", &max) ? 
+            any(Imath::Box2d(std::move(min), std::move(max))) : any();
+    }
+    else 
     {
         std::string ref_id;
         if (_dict.find("OTIO_REF_ID") != _dict.end())
@@ -711,6 +721,14 @@ SerializableObject::Reader::read(std::string const& key, AnyVector* value)
     return _fetch(key, value);
 }
 
+bool SerializableObject::Reader::read(std::string const& key, Imath::V2d* value) {
+    return _fetch(key, value);
+}
+
+bool SerializableObject::Reader::read(std::string const& key, Imath::Box2d* value) {
+    return _fetch(key, value);
+}
+
 template <typename T>
 bool
 SerializableObject::Reader::_read_optional(
@@ -766,8 +784,13 @@ SerializableObject::Reader::read(
     return _read_optional(key, value);
 }
 
-bool
-SerializableObject::Reader::read(std::string const& key, any* value)
+bool 
+SerializableObject::Reader::read(std::string const& key, optional<Imath::Box2d>* value) {
+    return _read_optional(key, value);
+}
+
+bool 
+SerializableObject::Reader::read(std::string const& key, any* value) 
 {
     auto e = _dict.find(key);
     if (e == _dict.end())

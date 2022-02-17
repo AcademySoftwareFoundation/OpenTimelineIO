@@ -3,12 +3,13 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 GeneratorReference::GeneratorReference(
-    std::string const&         name,
-    std::string const&         generator_kind,
-    optional<TimeRange> const& available_range,
-    AnyDictionary const&       parameters,
-    AnyDictionary const&       metadata)
-    : Parent(name, available_range, metadata)
+    std::string const&            name,
+    std::string const&            generator_kind,
+    optional<TimeRange> const&    available_range,
+    AnyDictionary const&          parameters,
+    AnyDictionary const&          metadata,
+    optional<Imath::Box2d> const& available_image_bounds)
+    : Parent(name, available_range, metadata, available_image_bounds)
     , _generator_kind(generator_kind)
     , _parameters(parameters)
 {}

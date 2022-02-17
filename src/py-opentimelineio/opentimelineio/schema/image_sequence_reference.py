@@ -6,7 +6,7 @@ from .. import _otio
 def __str__(self):
     return (
         'ImageSequenceReference('
-        '"{}", "{}", "{}", {}, {}, {}, {}, {}, {}, {})' .format(
+        '"{}", "{}", "{}", {}, {}, {}, {}, {}, {}, {}, {})' .format(
             self.target_url_base,
             self.name_prefix,
             self.name_suffix,
@@ -16,6 +16,7 @@ def __str__(self):
             self.frame_zero_padding,
             self.missing_frame_policy,
             self.available_range,
+            self.available_image_bounds,
             self.metadata,
         )
     )
@@ -34,6 +35,7 @@ def __repr__(self):
         'frame_zero_padding={}, '
         'missing_frame_policy={}, '
         'available_range={}, '
+        'available_image_bounds={}, '
         'metadata={}'
         ')' .format(
             repr(self.target_url_base),
@@ -45,6 +47,7 @@ def __repr__(self):
             repr(self.frame_zero_padding),
             repr(self.missing_frame_policy),
             repr(self.available_range),
+            repr(self.available_image_bounds),
             repr(self.metadata),
         )
     )

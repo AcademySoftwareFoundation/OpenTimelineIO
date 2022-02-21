@@ -95,7 +95,9 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
 
         text.replace("\\\"", "  ")
 
-        expression = QtCore.QRegularExpression("\".*\" *\\:", QtCore.QRegularExpression.InvertedGreedinessOption)
+        expression = QtCore.QRegularExpression(
+            "\".*\" *\\:",
+            QtCore.QRegularExpression.InvertedGreedinessOption)
         match = expression.match(text)
         index = match.capturedStart()
         while index >= 0:
@@ -104,7 +106,9 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             match = expression.match(text, index + length)
             index = match.capturedStart()
 
-        expression = QtCore.QRegularExpression("\\: *\".*\"", QtCore.QRegularExpression.InvertedGreedinessOption)
+        expression = QtCore.QRegularExpression(
+            "\\: *\".*\"",
+            QtCore.QRegularExpression.InvertedGreedinessOption)
         match = expression.match(text)
         index = match.capturedStart()
         while index >= 0:

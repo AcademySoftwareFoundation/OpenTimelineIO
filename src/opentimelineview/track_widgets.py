@@ -24,11 +24,12 @@
 
 try:
     from PySide6 import QtGui, QtCore, QtWidgets
+    from PySide6.QtGui import QFontMetrics
 except ImportError:
     from PySide2 import QtGui, QtCore, QtWidgets
+    from PySide2.QtGui import QFontMetrics
 
 import opentimelineio as otio
-from PySide6.QtGui import QFontMetrics
 
 TIME_SLIDER_HEIGHT = 20
 MEDIA_TYPE_SEPARATOR_HEIGHT = 5

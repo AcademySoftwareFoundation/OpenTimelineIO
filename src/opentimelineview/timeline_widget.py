@@ -22,7 +22,10 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtGui, QtCore, QtWidgets
+try:
+    from PySide6 import QtGui, QtCore, QtWidgets
+except ImportError:
+    from PySide2 import QtGui, QtCore, QtWidgets
 from collections import OrderedDict, namedtuple
 
 import opentimelineio as otio
@@ -461,7 +464,7 @@ class CompositionView(QtWidgets.QGraphicsView):
     def wheelEvent(self, event):
         scale_by = 1.0 + float(event.delta()) / 1000
         self.scale(scale_by, 1)
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
 
         # some items we do want to keep the same visual size. So we need to
@@ -707,10 +710,10 @@ class CompositionView(QtWidgets.QGraphicsView):
             self.frame_all()
 
     def frame_all(self):
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
         scaleFactor = self.size().width() / self.sceneRect().width()
         self.scale(scaleFactor * zoom_level, 1)
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
         items_to_scale = [
             i for i in self.scene().items()

@@ -22,7 +22,10 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtWidgets, QtGui, QtCore
+try:
+    from PySide6 import QtWidgets, QtGui, QtCore
+except ImportError:
+    from PySide2 import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 
@@ -84,43 +87,55 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         self.schema_format.setFontWeight(QtGui.QFont.Bold)
 
     def highlightBlock(self, text):
-        expression = QtCore.QRegExp("(\\{|\\}|\\[|\\]|\\:|\\,)")
-        index = expression.indexIn(text)
+        expression = QtCore.QRegularExpression("(\\{|\\}|\\[|\\]|\\:|\\,)")
+        match = expression.match(text)
+        index = match.capturedStart()
         while index >= 0:
-            length = expression.matchedLength()
+            length = match.capturedLength()
             self.setFormat(index, length, self.punctuation_format)
-            index = expression.indexIn(text, index + length)
+            match = expression.match(text, index + length)
+            index = match.capturedStart()
 
         text.replace("\\\"", "  ")
 
-        expression = QtCore.QRegExp("\".*\" *\\:")
-        expression.setMinimal(True)
-        index = expression.indexIn(text)
+        expression = QtCore.QRegularExpression(
+            "\".*\" *\\:",
+            QtCore.QRegularExpression.InvertedGreedinessOption)
+        match = expression.match(text)
+        index = match.capturedStart()
         while index >= 0:
-            length = expression.matchedLength()
+            length = match.capturedLength()
             self.setFormat(index, length - 1, self.key_format)
-            index = expression.indexIn(text, index + length)
+            match = expression.match(text, index + length)
+            index = match.capturedStart()
 
-        expression = QtCore.QRegExp("\\: *\".*\"")
-        expression.setMinimal(True)
-        index = expression.indexIn(text)
+        expression = QtCore.QRegularExpression(
+            "\\: *\".*\"",
+            QtCore.QRegularExpression.InvertedGreedinessOption)
+        match = expression.match(text)
+        index = match.capturedStart()
         while index >= 0:
-            length = expression.matchedLength()
+            length = match.capturedLength()
             firstQuoteIndex = text.index('"', index)
             valueLength = length - (firstQuoteIndex - index) - 2
             self.setFormat(firstQuoteIndex + 1, valueLength, self.value_format)
-            index = expression.indexIn(text, index + length)
+            match = expression.match(text, index + length)
+            index = match.capturedStart()
 
-        expression = QtCore.QRegExp(r"\\: (null|true|false|[0-9\.]+)")
-        index = expression.indexIn(text)
+        expression = QtCore.QRegularExpression(r"\\: (null|true|false|[0-9\.]+)")
+        match = expression.match(text)
+        index = match.capturedStart()
         while index >= 0:
-            length = expression.matchedLength()
+            length = match.capturedLength()
             self.setFormat(index, length, self.literal_format)
-            index = expression.indexIn(text, index + length)
+            match = expression.match(text, index + length)
+            index = match.capturedStart()
 
-        expression = QtCore.QRegExp(r"\"OTIO_SCHEMA\"\s*:\s*\".*\"")
-        index = expression.indexIn(text)
+        expression = QtCore.QRegularExpression(r"\"OTIO_SCHEMA\"\s*:\s*\".*\"")
+        match = expression.match(text)
+        index = match.capturedStart()
         while index >= 0:
-            length = expression.matchedLength()
+            length = match.capturedLength()
             self.setFormat(index, length, self.schema_format)
-            index = expression.indexIn(text, index + length)
+            match = expression.match(text, index + length)
+            index = match.capturedStart()

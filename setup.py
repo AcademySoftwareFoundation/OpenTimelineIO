@@ -356,7 +356,8 @@ setup(
             'urllib3>=1.24.3'
         ],
         'view': [
-            'PySide2~=5.11'
+            'PySide2~=5.11; platform.machine=="x86_64"',
+            'PySide6~=6.2; platform.machine=="aarch64"'
         ]
     },
 

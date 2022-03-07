@@ -10,8 +10,9 @@
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -39,8 +40,9 @@
                         "children": [
                             {
                                 "OTIO_SCHEMA": "Clip.1", 
-                                "effects": [], 
+                                "effects": [],
                                 "markers": [], 
+                                "enabled": true,
                                 "media_reference": {
                                     "OTIO_SCHEMA": "MissingReference.1", 
                                     "available_range": null, 
@@ -64,8 +66,9 @@
                                 }
                             }
                         ], 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {}, 
                         "name": "Nested Stack 1", 
                         "source_range": {
@@ -84,8 +87,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -113,8 +117,9 @@
                         "children": [
                             {
                                 "OTIO_SCHEMA": "Clip.1", 
-                                "effects": [], 
+                                "effects": [],
                                 "markers": [], 
+                                "enabled": true,
                                 "media_reference": {
                                     "OTIO_SCHEMA": "MissingReference.1", 
                                     "available_range": null, 
@@ -146,8 +151,9 @@
                                 "name": null, 
                                 "time_scalar": 0.8545454551724138
                             }
-                        ], 
+                        ],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {}, 
                         "name": "Nested Stack 2 (with effects)", 
                         "source_range": {
@@ -166,8 +172,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -195,8 +202,9 @@
                         "children": [
                             {
                                 "OTIO_SCHEMA": "Clip.1", 
-                                "effects": [], 
+                                "effects": [],
                                 "markers": [], 
+                                "enabled": true,
                                 "media_reference": {
                                     "OTIO_SCHEMA": "MissingReference.1", 
                                     "available_range": null, 
@@ -229,8 +237,9 @@
                                 "time_scalar": 0
                             }
                         ], 
-                        "kind": "Video", 
+                        "kind": "Video",
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {}, 
                         "name": "Nested Track", 
                         "source_range": {
@@ -249,8 +258,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -275,15 +285,17 @@
                     }
                 ], 
                 "effects": [], 
-                "kind": "Video", 
+                "kind": "Video",
                 "markers": [], 
+                "eabled": true,
                 "metadata": {}, 
                 "name": "Top Level Track", 
                 "source_range": null
             }
         ], 
-        "effects": [], 
+        "effects": [],
         "markers": [], 
+        "enabled": true,
         "metadata": {}, 
         "name": "Top Level Stack", 
         "source_range": null

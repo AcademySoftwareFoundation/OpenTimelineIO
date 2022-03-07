@@ -22,9 +22,14 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtGui, QtCore, QtWidgets
+try:
+    from PySide6 import QtGui, QtCore, QtWidgets
+    from PySide6.QtGui import QFontMetrics
+except ImportError:
+    from PySide2 import QtGui, QtCore, QtWidgets
+    from PySide2.QtGui import QFontMetrics
+
 import opentimelineio as otio
-from PySide2.QtGui import QFontMetrics
 
 TIME_SLIDER_HEIGHT = 20
 MEDIA_TYPE_SEPARATOR_HEIGHT = 5
@@ -258,7 +263,12 @@ class TrackNameItem(BaseItem):
         self.font = self.source_name_label.font()
         self.short_width = TRACK_NAME_WIDGET_WIDTH
         font_metrics = QFontMetrics(self.font)
-        self.full_width = font_metrics.width(self.full_track_name) + 40
+        self.full_width = font_metrics.horizontalAdvance(self.full_track_name) + 40
+
+        if not self.track.enabled:
+            self.setBrush(
+                QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+            )
 
     def mouseDoubleClickEvent(self, event):
         super(TrackNameItem, self).mouseDoubleClickEvent(event)
@@ -412,7 +422,8 @@ class ClipItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255) if self.item.enabled
+                                   else QtGui.QColor(100, 100, 100, 255)))
         self.source_name_label.setText(self.item.name)
 
 
@@ -471,6 +482,9 @@ class Track(QtWidgets.QGraphicsRectItem):
                 TIME_MULTIPLIER,
                 TRACK_HEIGHT
             )
+
+            if not self.track.enabled:
+                item.enabled = False
 
             if isinstance(item, otio.schema.Clip):
                 new_item = ClipItem(item, timeline_range, rect)

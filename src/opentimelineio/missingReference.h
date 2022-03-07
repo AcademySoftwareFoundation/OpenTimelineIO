@@ -17,9 +17,10 @@ public:
     using Parent = MediaReference;
 
     MissingReference(
-        std::string const&         name            = std::string(),
-        optional<TimeRange> const& available_range = nullopt,
-        AnyDictionary const&       metadata        = AnyDictionary());
+        std::string const&            name                   = std::string(),
+        optional<TimeRange> const&    available_range        = nullopt,
+        AnyDictionary const&          metadata               = AnyDictionary(),
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     virtual bool is_missing_reference() const;
 

@@ -685,6 +685,29 @@ class TestTime(unittest.TestCase):
         t2 = otio.opentime.from_timecode(NDF_TC, 29.97)
         self.assertEqual(t2.value, frames)
 
+    def test_nearest_valid_timecode_rate(self):
+        invalid_valid_rates = (
+            (23.97602397602397, 24000.0 / 1001.0),
+            (23.97, 24000.0 / 1001.0),
+            (23.976, 24000.0 / 1001.0),
+            (23.98, 24000.0 / 1001.0),
+            (29.97, 30000.0 / 1001.0),
+            (59.94, 60000.0 / 1001.0),
+        )
+
+        for invalid_rate, nearest_valid_rate in invalid_valid_rates:
+            self.assertTrue(
+                otio.opentime.RationalTime.is_valid_timecode_rate(
+                    nearest_valid_rate
+                )
+            )
+            self.assertEqual(
+                otio.opentime.RationalTime.nearest_valid_timecode_rate(
+                    invalid_rate
+                ),
+                nearest_valid_rate,
+            )
+
 
 class TestTimeTransform(unittest.TestCase):
 
@@ -761,6 +784,28 @@ class TestTimeTransform(unittest.TestCase):
         txform3 = otio.opentime.TimeTransform(offset=tstart, scale=2)
         self.assertNotEqual(txform, txform3)
         self.assertFalse(txform == txform3)
+
+    def test_copy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.copy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
+
+    def test_deepcopy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.deepcopy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
 
 
 class TestTimeRange(unittest.TestCase):

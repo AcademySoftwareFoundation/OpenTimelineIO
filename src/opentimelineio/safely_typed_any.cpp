@@ -57,6 +57,18 @@ create_safely_typed_any(TimeTransform&& value)
 }
 
 any
+create_safely_typed_any(Imath::V2d&& value)
+{
+    return any(value);
+}
+
+any
+create_safely_typed_any(Imath::Box2d&& value)
+{
+    return any(value);
+}
+
+any
 create_safely_typed_any(AnyVector&& value)
 {
     return any(std::move(value));
@@ -126,6 +138,18 @@ TimeTransform
 safely_cast_time_transform_any(any const& a)
 {
     return any_cast<TimeTransform>(a);
+}
+
+Imath::V2d
+safely_cast_point_any(any const& a)
+{
+    return any_cast<Imath::V2d>(a);
+}
+
+Imath::Box2d
+safely_cast_box_any(any const& a)
+{
+    return any_cast<Imath::Box2d>(a);
 }
 
 AnyDictionary

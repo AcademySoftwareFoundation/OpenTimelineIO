@@ -42,6 +42,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -51,6 +52,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -59,6 +61,7 @@ parameters:
 ### MediaReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -132,6 +135,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *media_reference*
 - *metadata*
@@ -148,6 +152,7 @@ parameters:
 ### ExternalReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -165,6 +170,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -173,6 +179,7 @@ parameters:
 ### GeneratorReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *generator_kind*
 - *metadata*
@@ -182,6 +189,7 @@ parameters:
 ### ImageSequenceReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *frame_step*
 - *frame_zero_padding*
@@ -213,6 +221,7 @@ parameters:
 ### MissingReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -227,6 +236,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -251,6 +261,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *kind*
 - *markers*
 - *metadata*

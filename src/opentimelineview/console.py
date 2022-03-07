@@ -28,7 +28,12 @@
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets, QtGui
+try:
+    from PySide6 import QtWidgets, QtGui
+    from PySide6.QtGui import QAction
+except ImportError:
+    from PySide2 import QtWidgets, QtGui
+    from PySide2.QtWidgets import QAction
 
 import opentimelineio as otio
 import opentimelineio.console as otio_console
@@ -148,11 +153,11 @@ class Main(QtWidgets.QMainWindow):
         # menu
         menubar = self.menuBar()
 
-        file_load = QtWidgets.QAction('Open...', menubar)
+        file_load = QAction('Open...', menubar)
         file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
 
-        exit_action = QtWidgets.QAction('Exit', menubar)
+        exit_action = QAction('Exit', menubar)
         exit_action.setShortcut(QtGui.QKeySequence.Quit)
         exit_action.triggered.connect(self.close)
 
@@ -234,7 +239,7 @@ class Main(QtWidgets.QMainWindow):
 
         def __callback():
             self._navigation_filter_callback(actions)
-        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+        navigation_menu.triggered[[QAction]].connect(__callback)
 
     def _navigation_filter_callback(self, filters):
         nav_filter = 0
@@ -247,11 +252,7 @@ class Main(QtWidgets.QMainWindow):
 
     def center(self):
         frame = self.frameGeometry()
-        desktop = QtWidgets.QApplication.desktop()
-        screen = desktop.screenNumber(
-            desktop.cursor().pos()
-        )
-        centerPoint = desktop.screenGeometry(screen).center()
+        centerPoint = QtGui.QScreen().availableGeometry().center()
         frame.moveCenter(centerPoint)
         self.move(frame.topLeft())
 

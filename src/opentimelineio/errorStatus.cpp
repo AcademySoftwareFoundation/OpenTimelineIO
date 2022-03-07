@@ -55,6 +55,8 @@ ErrorStatus::outcome_to_string(Outcome o)
             return "cannot compute duration on this type of object";
         case CANNOT_TRIM_TRANSITION:
             return "cannot trim transition";
+        case CANNOT_COMPUTE_BOUNDS:
+            return "cannot compute image bounds";
         default:
             return "unknown/illegal ErrorStatus::Outcome code";
     };

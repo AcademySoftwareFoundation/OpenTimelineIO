@@ -5,6 +5,7 @@ name: OpenTimelineIO
 
 # for configuring which build will be a C++ coverage build / coverage report
 env:
+  GH_COV_PY: 3.7
   GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 

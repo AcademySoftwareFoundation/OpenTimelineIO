@@ -260,7 +260,7 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Clip.1
+### Clip.2
 
 *full module path*: `opentimelineio.schema.Clip`
 
@@ -271,10 +271,11 @@ None
 ```
 
 parameters:
+- *active_media_reference*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
-- *media_reference*: 
+- *media_references*: 
 - *metadata*: 
 - *name*: 
 - *source_range*: 

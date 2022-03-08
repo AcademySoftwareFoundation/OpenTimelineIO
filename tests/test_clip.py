@@ -181,6 +181,52 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.ExternalReference()
         )
 
+    def test_multi_ref(self):
+        cl = otio.schema.Clip()
+
+        self.assertEqual(
+            otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA,
+            cl.active_media_reference
+        )
+        self.assertIsOTIOEquivalentTo(
+            cl.media_reference,
+            otio.schema.MissingReference()
+        )
+
+        mrs = cl.media_references
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA],
+            otio.schema.MissingReference()
+        )
+
+        cl.media_references = {
+            otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA:
+                otio.schema.ExternalReference(),
+            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA:
+                otio.schema.GeneratorReference()
+        }
+
+        mrs = cl.media_references
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA],
+            otio.schema.ExternalReference()
+        )
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA],
+            otio.schema.GeneratorReference()
+        )
+
+        cl.active_media_reference = \
+            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA
+        self.assertIsOTIOEquivalentTo(
+            cl.media_reference,
+            otio.schema.GeneratorReference()
+        )
+        self.assertEqual(
+            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA,
+            cl.active_media_reference
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

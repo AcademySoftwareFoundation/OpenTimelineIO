@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include <iostream>
 #include <memory>
 
 void
@@ -38,6 +39,9 @@ Tests::run(int argc, char** argv)
                 std::find(filter.begin(), filter.end(), test.first);
             run_test = filter_it != filter.end();
         }
+
+        std::cout << (run_test ? "Running" : "Skipping") << " test "
+                  << test.first << std::endl;
         if (run_test)
         {
             test.second();

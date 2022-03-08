@@ -131,13 +131,14 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Clip.1
+### Clip.2
 
 parameters:
+- *active_media_reference*
 - *effects*
 - *enabled*
 - *markers*
-- *media_reference*
+- *media_references*
 - *metadata*
 - *name*
 - *source_range*

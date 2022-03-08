@@ -51,6 +51,7 @@ MarkerColor = Marker.Color
 TrackKind = Track.Kind
 TransitionTypes = Transition.Type
 NeighborGapPolicy = Track.NeighborGapPolicy
+ClipMediaRepresentation = Clip.MediaRepresentation
 
 from . schemadef import (
     SchemaDef

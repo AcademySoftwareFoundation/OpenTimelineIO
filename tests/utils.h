@@ -35,6 +35,14 @@ assertEqual(double a, double b)
     assert(std::abs(a - b) <= double_epsilon);
 }
 
+inline void
+assertEqual(const char* a, const char* b)
+{
+    assert(a != nullptr);
+    assert(b != nullptr);
+    assert(strcmp(a, b) == 0);
+}
+
 template <typename T>
 inline void
 assertNotEqual(T const& a, T const& b)
@@ -48,10 +56,17 @@ assertNotEqual(double a, double b)
     assert(std::abs(a - b) > double_epsilon);
 }
 
+inline void
+assertNotNull(const void* a)
+{
+    assert(a != nullptr);
+}
+
 class Tests
 {
 public:
-    void add_test(std::string const& name, std::function<void(void)> const& test);
+    void
+    add_test(std::string const& name, std::function<void(void)> const& test);
 
     void run(int argc, char** argv);
 

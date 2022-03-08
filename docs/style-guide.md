@@ -109,7 +109,6 @@ namespace opentime
 
 No runtime behavior of the OpenTimelineIO C++ runtime is modified by the settings of environment variables. This is because the C++ libraries must run in environments without environment variables, or that are sandboxed for security.
 
-The Python based tools are configured through two variables: OTIO_PLUGIN_MANIFEST_PATH (describe effect here), and OTIO_DEFAULT_+MEDIA_LINKER (describe effect here).
 
 The tests invoked as part of setup.py can be bypased by creating a variable named OTIO_DISABLE_SHELLOUT_TESTS
 

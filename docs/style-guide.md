@@ -110,7 +110,4 @@ namespace opentime
 No runtime behavior of the OpenTimelineIO C++ runtime is modified by the settings of environment variables. This is because the C++ libraries must run in environments without environment variables, or that are sandboxed for security.
 
 
-The tests invoked as part of setup.py can be bypased by creating a variable named OTIO_DISABLE_SHELLOUT_TESTS
-
-
 

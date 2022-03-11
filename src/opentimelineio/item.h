@@ -32,13 +32,10 @@ public:
 
     virtual bool visible() const;
     virtual bool overlapping() const;
-    
+
     bool enabled() const { return _enabled; };
 
-    void set_enabled(bool enabled)
-    {
-        _enabled = enabled;
-    }
+    void set_enabled(bool enabled) { _enabled = enabled; }
 
     optional<TimeRange> source_range() const noexcept { return _source_range; }
 

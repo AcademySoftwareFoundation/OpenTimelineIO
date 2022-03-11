@@ -51,12 +51,12 @@ class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         missing = otio.schema.MissingReference()
         self.assertMultiLineEqual(
             str(missing),
-            "MissingReference(\'\', None, {})"
+            "MissingReference(\'\', None, None, {})"
         )
         self.assertMultiLineEqual(
             repr(missing),
             "otio.schema.MissingReference("
-            "name='', available_range=None, metadata={}"
+            "name='', available_range=None, available_image_bounds=None, metadata={}"
             ")"
         )
 

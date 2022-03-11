@@ -92,6 +92,16 @@ def read_from_string(input_str):
         name=mlt.get('name', 'Kdenlive imported timeline'))
 
     maintractor = mlt.find("tractor[@global_feed='1']")
+    # global_feed is no longer set in newer kdenlive versions
+    if maintractor is None:
+        alltractors = mlt.findall("tractor")
+        # the last tractor is the main tractor
+        maintractor = alltractors[-1]
+        # check all other tractors are used as tracks
+        for tractor in alltractors[:-1]:
+            if maintractor.find("track[@producer='%s']" % tractor.attrib['id']) is None:
+                raise RuntimeError("Can't find main tractor")
+
     for maintrack in maintractor.findall('track'):
         if maintrack.get('producer') == 'black_track':
             continue

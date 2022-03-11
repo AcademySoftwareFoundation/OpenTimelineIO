@@ -15,6 +15,8 @@ set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")
 
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
+
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 #------------------------------------------------------------------------------
@@ -217,11 +219,21 @@ if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
 endif()
 
 #------------------------------------------------------------------------------
+# Setup tests
+
+include(CTest)
+set(CTEST_OUTPUT_ON_FAILURE ON)
+
+#------------------------------------------------------------------------------
 # Build the dependencies and components
 
 add_subdirectory(src/deps)
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
+
+if(BUILD_TESTING)
+	add_subdirectory(tests)
+endif()
 
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)

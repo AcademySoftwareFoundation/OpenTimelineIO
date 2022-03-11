@@ -270,6 +270,8 @@ class Main(QtWidgets.QMainWindow):
             if new_frame_w != frame_w or new_frame_h != frame_h:
                 self.resize(new_frame_w, new_frame_h)
                 frame_geo = self.frameGeometry()
+                frame_w = frame_geo.width()
+                frame_h = frame_geo.height()
 
             center_point = screen_geo.center()
             center_point.setY(center_point.y() - title_bar_height // 2)

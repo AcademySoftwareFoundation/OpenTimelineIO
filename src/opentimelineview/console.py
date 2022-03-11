@@ -251,10 +251,32 @@ class Main(QtWidgets.QMainWindow):
         self.timeline_widget.navigationfilter_changed.emit(nav_filter)
 
     def center(self):
-        frame = self.frameGeometry()
-        centerPoint = QtGui.QScreen().availableGeometry().center()
-        frame.moveCenter(centerPoint)
-        self.move(frame.topLeft())
+        screens = QtWidgets.QApplication.screens()
+        if screens:
+            style = QtWidgets.QApplication.style()
+            title_bar_height = style.pixelMetric(QtWidgets.QStyle.PM_TitleBarHeight)
+
+            screen = screens[0]
+            screen_geo = screen.availableGeometry()
+            screen_w = screen_geo.width()
+            screen_h = screen_geo.height() - title_bar_height
+
+            frame_geo = self.frameGeometry()
+            frame_w = frame_geo.width()
+            frame_h = frame_geo.height()
+
+            new_frame_w = screen_w if frame_w > screen_w else frame_w
+            new_frame_h = screen_h if frame_h > screen_h else frame_h
+            if new_frame_w != frame_w or new_frame_h != frame_h:
+                self.resize(new_frame_w, new_frame_h)
+                frame_geo = self.frameGeometry()
+                frame_w = frame_geo.width()
+                frame_h = frame_geo.height()
+
+            center_point = screen_geo.center()
+            center_point.setY(center_point.y() - title_bar_height // 2)
+            frame_geo.moveCenter(center_point)
+            self.move(frame_geo.topLeft())
 
     def show(self):
         super(Main, self).show()

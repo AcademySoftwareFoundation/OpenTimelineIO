@@ -284,7 +284,6 @@ class TrackNameItem(BaseItem):
                 self.track_name + '\n({})'.format(self.track.kind))
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.short_width
-                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
             self.name_toggle = False
         else:
             track_name_rect = QtCore.QRectF(
@@ -298,8 +297,16 @@ class TrackNameItem(BaseItem):
                 self.full_track_name + '\n({})'.format(self.track.kind))
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.full_width
-                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
             self.name_toggle = True
+
+        scene = self.scene()
+        if scene and hasattr(scene, "counteract_zoom"):
+            # If scene is CompositionWidget, trigger counteract zoom through
+            # it to also update the scene rect.
+            scene.counteract_zoom(CURRENT_ZOOM_LEVEL)
+        else:
+            for widget in self.track_widget.widget_items:
+                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
 
     def itemChange(self, change, value):
         return super(BaseItem, self).itemChange(change, value)

@@ -1118,7 +1118,7 @@ class AAFReaderTests(unittest.TestCase):
             )
 
         except Exception as e:
-            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format( #noqa
                 os.path.basename(MARKER_OVER_TRANSITION_PATH),
                 e)
             )

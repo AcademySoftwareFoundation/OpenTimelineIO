@@ -1247,7 +1247,7 @@ def _attach_markers(collection):
 
                 # determine new item to attach the marker to
                 target_item = target_track.child_at_time(marker.marked_range.start_time)
-                if target_item is None:
+                if target_item is None or not hasattr(target_item, 'markers'):
                     target_item = target_track
 
                 # attach marker to target item

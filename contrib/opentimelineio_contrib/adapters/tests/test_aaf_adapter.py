@@ -215,6 +215,11 @@ KEYFRAMED_PROPERTIES_PATH = os.path.join(
     "keyframed_properties.aaf"
 )
 
+MARKER_OVER_TRANSITION_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-transition.aaf",
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1099,6 +1104,26 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
         self.assertEqual(result_stderr, '')
+
+    def test_aaf_marker_over_transition(self):
+        """
+        Make sure we can transcibe this composition with markers over transition.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_TRANSITION_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_TRANSITION_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

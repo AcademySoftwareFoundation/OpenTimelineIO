@@ -197,7 +197,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self.setSceneRect(
             start_time * track_widgets.TIME_MULTIPLIER,
             0,
-            duration * track_widgets.TIME_MULTIPLIER + 
+            duration * track_widgets.TIME_MULTIPLIER +
             self.track_name_width() * zoom_level,
             height
         )

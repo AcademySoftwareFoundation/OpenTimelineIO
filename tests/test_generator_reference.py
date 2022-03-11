@@ -24,7 +24,11 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             },
             metadata={
                 "foo": "bar"
-            }
+            },
+            available_image_bounds=otio.schema.Box2d(
+                otio.schema.V2d(0.0, 0.0),
+                otio.schema.V2d(16.0, 9.0)
+            )
         )
 
     def test_constructor(self):
@@ -37,6 +41,13 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(0, 24),
                 otio.opentime.RationalTime(100, 24),
+            )
+        )
+        self.assertEqual(
+            self.gen.available_image_bounds,
+            otio.schema.Box2d(
+                otio.schema.V2d(0.0, 0.0),
+                otio.schema.V2d(16.0, 9.0)
             )
         )
 
@@ -59,11 +70,13 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             '"{}", '
             '"{}", '
             '{}, '
+            '{}, '
             "{}"
             ")".format(
                 str(self.gen.name),
                 str(self.gen.generator_kind),
                 str(self.gen.parameters),
+                str(self.gen.available_image_bounds),
                 str(self.gen.metadata),
             )
         )
@@ -74,11 +87,13 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name={}, "
             "generator_kind={}, "
             "parameters={}, "
+            "available_image_bounds={}, "
             "metadata={}"
             ")".format(
                 repr(self.gen.name),
                 repr(self.gen.generator_kind),
                 repr(self.gen.parameters),
+                repr(self.gen.available_image_bounds),
                 repr(self.gen.metadata),
             )
         )

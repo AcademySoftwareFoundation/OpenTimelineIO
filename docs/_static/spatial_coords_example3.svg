@@ -1,0 +1,63 @@
+<svg width="1000" height="1000" viewBox="-2000 -2000 4000 4000" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- DO-NOT-EDIT THIS SECTION, IT IS A COPY-PASTE FROM
+    spatial_coords_system.svg. SVG does not safely support svg recursion.
+  -->
+
+  <g fill="#DDDDDD">
+    <!-- grey background -->
+    <rect x="-2000" y="-2000" width="4000" height="4000" />
+  </g>
+  <g stroke="#000000" stroke-width="8">
+    <!-- x-axis -->
+    <line x1="-2000" y1="0" x2="2000" y2="0"/>
+    <polygon points="2000,0 1950,50 1950,-50" />
+    <!-- 7-axis -->
+    <line x1="0" y1="-2000" x2="0" y2="2000" />
+    <polygon points="0,-2000 50,-1950 -50,-1950" />
+
+    <!-- origin -->
+    <circle cx="0" cy="0" r="30" />
+  </g>
+  <g font-size="6.0rem" font-weight="bold" text-anchor="start">
+    <text x="75" y="-75" >(X=0.0, Y=0.0)</text>
+    <text x="1900" y="-75" >X</text>
+    <text x="75" y="-1900" >Y</text>
+  </g>
+
+  <!-- END OF DO-NOT-EDIT SECTION -->
+
+  <g fill="#AAFFAA" stroke="#000000" stroke-width="10">
+
+    <!-- Bounds Region 1 -->
+    <rect x="-800" y="-450" width="1600" height="900" fill="#BBBBBB"/>
+
+    <!-- Bounds Region 2 -->
+    <rect x="-450" y="-450" width="900" height="900" />
+    <circle cx="-450" cy="450" r="30" />
+    <circle cx="450" cy="-450" r="30" />
+
+    <!-- bounds width & height arrows -->
+    <line x1="-450" y1="0" x2="450" y2="0" stroke-width="30"/>
+    <polygon points="-450,0 -400,-50 -400,50" fill="#000000" stroke-width="0"/>
+    <polygon points="450,0 400,-50 400,50" fill="#000000" stroke-width="0"/>
+
+    <line x1="0" y1="-450" x2="0" y2="450" stroke-width="30"/>
+    <polygon points="0,-450 -50,-400 50,-400" fill="#000000" stroke-width="0"/>
+    <polygon points="0,450 -50,400 50,400" fill="#000000" stroke-width="0"/>
+
+  </g>
+  <g font-size="8.0rem" font-weight="bold" dominant-baseline="hanging">
+    <text x="-425" y="500" text-anchor="end">min = (-4.5, -4.5)</text>
+    <text x="425" y="-600" text-anchor="left">max = (4.5, 4.5)</text>
+  </g>
+
+  <g font-size="4.0rem" font-weight="bold" text-anchor="middle" dominant-baseline="auto">
+    <text x="-250" y="-50" >(Width=9.0)</text>
+  </g>
+
+  <g font-size="4.0rem" font-weight="bold" text-anchor="left" dominant-baseline="auto">
+    <text x="25" y="-200" >(Height=9.0)</text>
+  </g>
+
+</svg>

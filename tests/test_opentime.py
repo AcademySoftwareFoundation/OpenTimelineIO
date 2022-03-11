@@ -785,6 +785,28 @@ class TestTimeTransform(unittest.TestCase):
         self.assertNotEqual(txform, txform3)
         self.assertFalse(txform == txform3)
 
+    def test_copy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.copy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
+
+    def test_deepcopy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.deepcopy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
+
 
 class TestTimeRange(unittest.TestCase):
 

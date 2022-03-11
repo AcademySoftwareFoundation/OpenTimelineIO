@@ -3,10 +3,11 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 ExternalReference::ExternalReference(
-    std::string const&         target_url,
-    optional<TimeRange> const& available_range,
-    AnyDictionary const&       metadata)
-    : Parent(std::string(), available_range, metadata)
+    std::string const&            target_url,
+    optional<TimeRange> const&    available_range,
+    AnyDictionary const&          metadata,
+    optional<Imath::Box2d> const& available_image_bounds)
+    : Parent(std::string(), available_range, metadata, available_image_bounds)
     , _target_url(target_url)
 {}
 

@@ -27,6 +27,7 @@
 """User facing classes."""
 
 from .. _otio import (
+    Box2d,
     Clip,
     Effect,
     TimeEffect,
@@ -42,7 +43,8 @@ from .. _otio import (
     Stack,
     Timeline,
     Track,
-    Transition
+    Transition,
+    V2d,
 )
 
 MarkerColor = Marker.Color
@@ -55,6 +57,7 @@ from . schemadef import (
 )
 
 from . import (
+    box2d,
     clip,
     effect,
     external_reference,
@@ -66,6 +69,7 @@ from . import (
     timeline,
     track,
     transition,
+    v2d,
 )
 
 track.TrackKind = TrackKind

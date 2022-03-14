@@ -6,6 +6,7 @@
 #include <cmath>
 #include <functional>
 #include <string>
+#include <cstring>
 #include <vector>
 
 void assertTrue(bool value);

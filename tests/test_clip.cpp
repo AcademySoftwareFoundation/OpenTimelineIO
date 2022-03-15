@@ -128,6 +128,9 @@ main(int argc, char** argv)
         const ExternalReference* media_ref =
             dynamic_cast<ExternalReference*>(clip->media_reference());
         assertNotNull(media_ref);
+        assertEqual(
+            clip->active_media_reference().c_str(),
+            Clip::MediaRepresentation::default_media);
 
         assertEqual(media_ref->target_url().c_str(), "unit_test_url");
         assertEqual(media_ref->available_range()->duration().value(), 8);
@@ -152,12 +155,15 @@ main(int argc, char** argv)
             media,
             nullopt,
             AnyDictionary(),
-            Clip::MediaRepresentation::high_resolution_media));
+            Clip::MediaRepresentation::disk_high_quality_media));
 
+        assertEqual(
+            clip->active_media_reference().c_str(),
+            Clip::MediaRepresentation::disk_high_quality_media);
         assertEqual(clip->media_reference(), media.value);
         assertEqual(
             clip->active_media_reference().c_str(),
-            Clip::MediaRepresentation::high_resolution_media);
+            Clip::MediaRepresentation::disk_high_quality_media);
 
         SerializableObject::Retainer<MediaReference> ref1(
             new otio::ExternalReference());
@@ -165,17 +171,31 @@ main(int argc, char** argv)
             new otio::ExternalReference());
         SerializableObject::Retainer<MediaReference> ref3(
             new otio::ExternalReference());
+        SerializableObject::Retainer<MediaReference> ref4(
+            new otio::ExternalReference());
+        SerializableObject::Retainer<MediaReference> ref5(
+            new otio::ExternalReference());
 
         clip->set_media_references(
             { { Clip::MediaRepresentation::default_media, ref1 },
-              { Clip::MediaRepresentation::high_resolution_media, ref2 },
-              { Clip::MediaRepresentation::proxy_resolution_media, ref3 } });
+              { Clip::MediaRepresentation::disk_high_quality_media, ref2 },
+              { Clip::MediaRepresentation::disk_proxy_quality_media, ref3 },
+              { Clip::MediaRepresentation::cloud_high_quality_media, ref4 },
+              { Clip::MediaRepresentation::cloud_proxy_quality_media, ref5 } });
 
         assertEqual(clip->media_reference(), ref2.value);
 
         clip->set_active_media_reference(
-            Clip::MediaRepresentation::proxy_resolution_media);
+            Clip::MediaRepresentation::disk_proxy_quality_media);
         assertEqual(clip->media_reference(), ref3.value);
+
+        clip->set_active_media_reference(
+            Clip::MediaRepresentation::cloud_high_quality_media);
+        assertEqual(clip->media_reference(), ref4.value);
+
+        clip->set_active_media_reference(
+            Clip::MediaRepresentation::cloud_proxy_quality_media);
+        assertEqual(clip->media_reference(), ref5.value);
 
         clip->set_active_media_reference(
             Clip::MediaRepresentation::default_media);

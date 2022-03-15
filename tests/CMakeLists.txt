@@ -12,7 +12,7 @@ foreach(test ${tests_opentime})
            COMMAND ${test}
            # Set the pwd to the source directory so we can load the samples
            # like the python tests do
-           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sample_data)
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
 list(APPEND tests_opentimelineio test_clip)
@@ -24,5 +24,5 @@ foreach(test ${tests_opentimelineio})
            COMMAND ${test}
            # Set the pwd to the source directory so we can load the samples
            # like the python tests do
-           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sample_data)
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()

@@ -202,8 +202,14 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl.media_references = {
             otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA:
                 otio.schema.ExternalReference(),
-            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA:
-                otio.schema.GeneratorReference()
+            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA:
+                otio.schema.GeneratorReference(),
+            otio.schema.ClipMediaRepresentation.DISK_PROXY_QUALITY_MEDIA:
+                otio.schema.ImageSequenceReference(),
+            otio.schema.ClipMediaRepresentation.CLOUD_HIGH_QUALITY_MEDIA:
+                otio.schema.MissingReference(),
+            otio.schema.ClipMediaRepresentation.CLOUD_PROXY_QUALITY_MEDIA:
+                otio.schema.ExternalReference()
         }
 
         mrs = cl.media_references
@@ -212,18 +218,30 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.ExternalReference()
         )
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA],
+            mrs[otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA],
             otio.schema.GeneratorReference()
+        )
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.DISK_PROXY_QUALITY_MEDIA],
+            otio.schema.ImageSequenceReference()
+        )
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.CLOUD_HIGH_QUALITY_MEDIA],
+            otio.schema.MissingReference()
+        )
+        self.assertIsOTIOEquivalentTo(
+            mrs[otio.schema.ClipMediaRepresentation.CLOUD_PROXY_QUALITY_MEDIA],
+            otio.schema.ExternalReference()
         )
 
         cl.active_media_reference = \
-            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA
+            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA
         self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.GeneratorReference()
         )
         self.assertEqual(
-            otio.schema.ClipMediaRepresentation.HIGH_RESOLUTION_MEDIA,
+            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA,
             cl.active_media_reference
         )
 

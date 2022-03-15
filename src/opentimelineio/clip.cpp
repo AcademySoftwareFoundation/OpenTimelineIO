@@ -4,8 +4,10 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 char constexpr Clip::MediaRepresentation::default_media[];
-char constexpr Clip::MediaRepresentation::high_resolution_media[];
-char constexpr Clip::MediaRepresentation::proxy_resolution_media[];
+char constexpr Clip::MediaRepresentation::disk_high_quality_media[];
+char constexpr Clip::MediaRepresentation::disk_proxy_quality_media[];
+char constexpr Clip::MediaRepresentation::cloud_high_quality_media[];
+char constexpr Clip::MediaRepresentation::cloud_proxy_quality_media[];
 
 Clip::Clip(
     std::string const&         name,

@@ -11,10 +11,15 @@ class Clip : public Item
 public:
     struct MediaRepresentation
     {
-        static char constexpr default_media[]         = "DEFAULT_MEDIA";
-        static char constexpr high_resolution_media[] = "HIGH_RESOLUTION_MEDIA";
-        static char constexpr proxy_resolution_media[] =
-            "PROXY_RESOLUTION_MEDIA";
+        static char constexpr default_media[] = "DEFAULT_MEDIA";
+        static char constexpr disk_high_quality_media[] =
+            "DISK_HIGH_QUALITY_MEDIA";
+        static char constexpr disk_proxy_quality_media[] =
+            "DISK_PROXY_QUALITY_MEDIA";
+        static char constexpr cloud_high_quality_media[] =
+            "CLOUD_HIGH_QUALITY_MEDIA";
+        static char constexpr cloud_proxy_quality_media[] =
+            "CLOUD_PROXY_QUALITY_MEDIA";
     };
 
     struct Schema

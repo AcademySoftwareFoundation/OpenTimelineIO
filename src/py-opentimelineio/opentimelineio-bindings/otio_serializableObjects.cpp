@@ -420,10 +420,14 @@ static void define_items_and_compositions(py::module m) {
     py::class_<Clip::MediaRepresentation>(clip_class, "MediaRepresentation")
         .def_property_readonly_static("DEFAULT_MEDIA",[](py::object /* self */) { 
             return Clip::MediaRepresentation::default_media; })
-        .def_property_readonly_static("HIGH_RESOLUTION_MEDIA", [](py::object /* self */) { 
-            return Clip::MediaRepresentation::high_resolution_media; })
-        .def_property_readonly_static("PROXY_RESOLUTION_MEDIA", [](py::object /* self */) {
-                return Clip::MediaRepresentation::proxy_resolution_media; });
+        .def_property_readonly_static("DISK_HIGH_QUALITY_MEDIA", [](py::object /* self */) { 
+            return Clip::MediaRepresentation::disk_high_quality_media; })
+        .def_property_readonly_static("DISK_PROXY_QUALITY_MEDIA", [](py::object /* self */) {
+                return Clip::MediaRepresentation::disk_proxy_quality_media; })
+        .def_property_readonly_static("CLOUD_HIGH_QUALITY_MEDIA", [](py::object /* self */) { 
+            return Clip::MediaRepresentation::cloud_high_quality_media; })
+        .def_property_readonly_static("CLOUD_PROXY_QUALITY_MEDIA", [](py::object /* self */) {
+                return Clip::MediaRepresentation::cloud_proxy_quality_media; });
 
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")

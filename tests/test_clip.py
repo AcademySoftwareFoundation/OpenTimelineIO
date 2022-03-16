@@ -245,6 +245,18 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             cl.active_media_reference
         )
 
+        cl.active_media_reference = "dummy"
+        self.assertIsNone(cl.media_reference)
+
+        cl.media_references = {"dummy": otio.schema.GeneratorReference()}
+        self.assertIsOTIOEquivalentTo(
+            cl.media_reference,
+            otio.schema.GeneratorReference()
+        )
+
+        cl.media_references = {"dummy2": otio.schema.ExternalReference()}
+        self.assertIsNone(cl.media_reference)
+
 
 if __name__ == '__main__':
     unittest.main()

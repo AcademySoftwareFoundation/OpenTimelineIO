@@ -44,6 +44,12 @@ assertEqual(const char* a, const char* b)
     assert(strcmp(a, b) == 0);
 }
 
+inline void
+assertEqual(const void* a, const void* b)
+{
+    assert(a == b);
+}
+
 template <typename T>
 inline void
 assertNotEqual(T const& a, T const& b)

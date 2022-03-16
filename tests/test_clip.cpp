@@ -200,6 +200,15 @@ main(int argc, char** argv)
         clip->set_active_media_reference(
             Clip::MediaRepresentation::default_media);
         assertEqual(clip->media_reference(), ref1.value);
+
+        clip->set_active_media_reference("dummy");
+        assertEqual(clip->media_reference(), nullptr);
+
+        clip->set_media_references({ { "dummy", ref1 } });
+        assertEqual(clip->media_reference(), ref1.value);
+
+        clip->set_active_media_reference("dummy2");
+        assertEqual(clip->media_reference(), nullptr);
     });
 
     tests.run(argc, argv);

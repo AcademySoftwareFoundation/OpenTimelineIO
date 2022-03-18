@@ -6,7 +6,7 @@
     "markers" : [],
     "enabled" : true,
     "effects" : [],
-    "active_media_reference": "DEFAULT_MEDIA",
+    "active_media_reference_key": "DEFAULT_MEDIA",
     "media_references" : { 
         "DEFAULT_MEDIA" : {
             "FROM_TEST_FILE" : "empty_missingreference.json"

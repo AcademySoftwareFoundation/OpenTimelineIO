@@ -185,77 +185,84 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl = otio.schema.Clip()
 
         self.assertEqual(
-            otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA,
-            cl.active_media_reference
+            otio.schema.Clip.DEFAULT_MEDIA_KEY,
+            cl.active_media_reference_key
         )
         self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.MissingReference()
         )
 
-        mrs = cl.media_references
+        mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA],
+            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
             otio.schema.MissingReference()
         )
 
-        cl.media_references = {
-            otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA:
-                otio.schema.ExternalReference(),
-            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA:
-                otio.schema.GeneratorReference(),
-            otio.schema.ClipMediaRepresentation.DISK_PROXY_QUALITY_MEDIA:
-                otio.schema.ImageSequenceReference(),
-            otio.schema.ClipMediaRepresentation.CLOUD_HIGH_QUALITY_MEDIA:
-                otio.schema.MissingReference(),
-            otio.schema.ClipMediaRepresentation.CLOUD_PROXY_QUALITY_MEDIA:
-                otio.schema.ExternalReference()
-        }
+        cl.set_media_references(
+            {
+                otio.schema.Clip.DEFAULT_MEDIA_KEY: otio.schema.ExternalReference(),
+                "high_quality": otio.schema.GeneratorReference(),
+                "proxy_quality": otio.schema.ImageSequenceReference(),
+            })
 
-        mrs = cl.media_references
+        mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.DEFAULT_MEDIA],
+            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
             otio.schema.ExternalReference()
         )
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA],
+            mrs["high_quality"],
             otio.schema.GeneratorReference()
         )
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.DISK_PROXY_QUALITY_MEDIA],
+            mrs["proxy_quality"],
             otio.schema.ImageSequenceReference()
         )
-        self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.CLOUD_HIGH_QUALITY_MEDIA],
-            otio.schema.MissingReference()
-        )
-        self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.ClipMediaRepresentation.CLOUD_PROXY_QUALITY_MEDIA],
-            otio.schema.ExternalReference()
-        )
 
-        cl.active_media_reference = \
-            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA
+        cl.active_media_reference_key = "high_quality"
         self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.GeneratorReference()
         )
         self.assertEqual(
-            otio.schema.ClipMediaRepresentation.DISK_HIGH_QUALITY_MEDIA,
-            cl.active_media_reference
+            cl.active_media_reference_key,
+            "high_quality"
         )
 
-        cl.active_media_reference = "dummy"
-        self.assertIsNone(cl.media_reference)
+        # we should get an exception if we try to use a key that is
+        # not in the media_references
+        with self.assertRaises(ValueError):
+            cl.active_media_reference_key = "cloud"
 
-        cl.media_references = {"dummy": otio.schema.GeneratorReference()}
+        self.assertEqual(
+            cl.active_media_reference_key,
+            "high_quality"
+        )
+
+        # we should also get an exception if we set the references without
+        # the active key
+        with self.assertRaises(ValueError):
+            cl.set_media_references(
+                {
+                    "cloud": otio.schema.ExternalReference()
+                }
+            )
+        self.assertEqual(
+            cl.active_media_reference_key,
+            "high_quality"
+        )
+
+        # setting the references and the active key should resolve the problem
+        cl.set_media_references(
+            {
+                "cloud": otio.schema.ExternalReference()
+            },
+            "cloud"
+        )
+        self.assertEqual(cl.active_media_reference_key, "cloud")
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.GeneratorReference()
-        )
-
-        cl.media_references = {"dummy2": otio.schema.ExternalReference()}
-        self.assertIsNone(cl.media_reference)
+            cl.media_reference, otio.schema.ExternalReference())
 
 
 if __name__ == '__main__':

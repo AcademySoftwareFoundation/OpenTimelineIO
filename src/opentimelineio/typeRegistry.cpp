@@ -102,12 +102,11 @@ TypeRegistry::TypeRegistry()
             media_ref = SerializableObject::Retainer<>(new MissingReference);
         }
 
-        (*d)["media_references"] = AnyDictionary{
-            { Clip::MediaRepresentation::default_media, media_ref }
-        };
+        (*d)["media_references"] =
+            AnyDictionary{ { Clip::default_media_key, media_ref } };
 
-        (*d)["active_media_reference"] =
-            std::string(Clip::MediaRepresentation::default_media);
+        (*d)["active_media_reference_key"] =
+            std::string(Clip::default_media_key);
 
         d->erase("media_reference");
     });

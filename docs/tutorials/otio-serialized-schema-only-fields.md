@@ -134,7 +134,7 @@ parameters:
 ### Clip.2
 
 parameters:
-- *active_media_reference*
+- *active_media_reference_key*
 - *effects*
 - *enabled*
 - *markers*

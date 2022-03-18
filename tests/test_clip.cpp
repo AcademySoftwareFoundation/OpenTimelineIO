@@ -129,8 +129,8 @@ main(int argc, char** argv)
             dynamic_cast<ExternalReference*>(clip->media_reference());
         assertNotNull(media_ref);
         assertEqual(
-            clip->active_media_reference().c_str(),
-            Clip::MediaRepresentation::default_media);
+            clip->active_media_reference_key().c_str(),
+            Clip::default_media_key);
 
         assertEqual(media_ref->target_url().c_str(), "unit_test_url");
         assertEqual(media_ref->available_range()->duration().value(), 8);
@@ -139,31 +139,25 @@ main(int argc, char** argv)
         assertEqual(media_ref->available_range()->start_time().rate(), 24);
 
         auto mediaReferences = clip->media_references();
-        auto found =
-            mediaReferences.find(Clip::MediaRepresentation::default_media);
+        auto found           = mediaReferences.find(Clip::default_media_key);
         assertFalse(found == mediaReferences.end());
     });
 
     tests.add_test("test_clip_media_representation", [] {
         using namespace otio;
 
+        static constexpr auto high_quality  = "high_quality";
+        static constexpr auto proxy_quality = "proxy_quality";
+
         SerializableObject::Retainer<MediaReference> media(
             new otio::ExternalReference());
 
         SerializableObject::Retainer<Clip> clip(new Clip(
-            "unit_clip",
-            media,
-            nullopt,
-            AnyDictionary(),
-            Clip::MediaRepresentation::disk_high_quality_media));
+            "unit_clip", media, nullopt, AnyDictionary(), high_quality));
 
-        assertEqual(
-            clip->active_media_reference().c_str(),
-            Clip::MediaRepresentation::disk_high_quality_media);
+        assertEqual(clip->active_media_reference_key().c_str(), high_quality);
         assertEqual(clip->media_reference(), media.value);
-        assertEqual(
-            clip->active_media_reference().c_str(),
-            Clip::MediaRepresentation::disk_high_quality_media);
+        assertEqual(clip->active_media_reference_key().c_str(), high_quality);
 
         SerializableObject::Retainer<MediaReference> ref1(
             new otio::ExternalReference());
@@ -171,44 +165,48 @@ main(int argc, char** argv)
             new otio::ExternalReference());
         SerializableObject::Retainer<MediaReference> ref3(
             new otio::ExternalReference());
-        SerializableObject::Retainer<MediaReference> ref4(
-            new otio::ExternalReference());
-        SerializableObject::Retainer<MediaReference> ref5(
-            new otio::ExternalReference());
 
-        clip->set_media_references(
-            { { Clip::MediaRepresentation::default_media, ref1 },
-              { Clip::MediaRepresentation::disk_high_quality_media, ref2 },
-              { Clip::MediaRepresentation::disk_proxy_quality_media, ref3 },
-              { Clip::MediaRepresentation::cloud_high_quality_media, ref4 },
-              { Clip::MediaRepresentation::cloud_proxy_quality_media, ref5 } });
+        clip->set_media_references({ { Clip::default_media_key, ref1 },
+                                     { high_quality, ref2 },
+                                     { proxy_quality, ref3 } });
 
         assertEqual(clip->media_reference(), ref2.value);
 
-        clip->set_active_media_reference(
-            Clip::MediaRepresentation::disk_proxy_quality_media);
+        clip->set_active_media_reference_key(proxy_quality);
         assertEqual(clip->media_reference(), ref3.value);
 
-        clip->set_active_media_reference(
-            Clip::MediaRepresentation::cloud_high_quality_media);
+        clip->set_active_media_reference_key(Clip::default_media_key);
+        assertEqual(clip->media_reference(), ref1.value);
+
+        // setting the active reference to a key that does not exist
+        // should return an error
+        otio::ErrorStatus error;
+        clip->set_active_media_reference_key("cloud", &error);
+        assertTrue(otio::is_error(error));
+        assertEqual(
+            error.outcome,
+            otio::ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY);
+        assertEqual(clip->media_reference(), ref1.value);
+
+        // setting the references that doesn't have the active key should
+        // also generate an error
+        SerializableObject::Retainer<MediaReference> ref4(
+            new otio::ExternalReference());
+
+        otio::ErrorStatus error2;
+        clip->set_media_references(
+            { { "cloud", ref4 } }, std::string(), &error2);
+        assertTrue(otio::is_error(error2));
+        assertEqual(
+            error.outcome,
+            otio::ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY);
+
+        assertEqual(clip->media_reference(), ref1.value);
+
+        // setting the references and the active key at the same time
+        // should work
+        clip->set_media_references({ { "cloud", ref4 } }, "cloud");
         assertEqual(clip->media_reference(), ref4.value);
-
-        clip->set_active_media_reference(
-            Clip::MediaRepresentation::cloud_proxy_quality_media);
-        assertEqual(clip->media_reference(), ref5.value);
-
-        clip->set_active_media_reference(
-            Clip::MediaRepresentation::default_media);
-        assertEqual(clip->media_reference(), ref1.value);
-
-        clip->set_active_media_reference("dummy");
-        assertEqual(clip->media_reference(), nullptr);
-
-        clip->set_media_references({ { "dummy", ref1 } });
-        assertEqual(clip->media_reference(), ref1.value);
-
-        clip->set_active_media_reference("dummy2");
-        assertEqual(clip->media_reference(), nullptr);
     });
 
     tests.run(argc, argv);

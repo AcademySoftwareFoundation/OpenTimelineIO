@@ -3,20 +3,16 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-char constexpr Clip::MediaRepresentation::default_media[];
-char constexpr Clip::MediaRepresentation::disk_high_quality_media[];
-char constexpr Clip::MediaRepresentation::disk_proxy_quality_media[];
-char constexpr Clip::MediaRepresentation::cloud_high_quality_media[];
-char constexpr Clip::MediaRepresentation::cloud_proxy_quality_media[];
+char constexpr Clip::default_media_key[];
 
 Clip::Clip(
     std::string const&         name,
     MediaReference*            media_reference,
     optional<TimeRange> const& source_range,
     AnyDictionary const&       metadata,
-    std::string const&         active_media_reference)
+    std::string const&         active_media_reference_key)
     : Parent{ name, source_range, metadata }
-    , _active_media_reference(active_media_reference)
+    , _active_media_reference_key(active_media_reference_key)
 {
     set_media_reference(media_reference);
 }
@@ -27,7 +23,7 @@ Clip::~Clip()
 MediaReference*
 Clip::media_reference() const noexcept
 {
-    auto active = _media_references.find(_active_media_reference);
+    auto active = _media_references.find(_active_media_reference_key);
     return active == _media_references.end() || !active->second
                ? nullptr
                : active->second;
@@ -45,32 +41,77 @@ Clip::media_references() const noexcept
     return result;
 }
 
-void
-Clip::set_media_references(MediaReferences const& media_references) noexcept
+template <typename MediaRefMap>
+bool
+Clip::check_for_valid_media_reference_key(
+    std::string const& key,
+    MediaRefMap const& media_references,
+    ErrorStatus*       error_status)
 {
+    auto found = media_references.find(key);
+    if (found == media_references.end())
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY,
+                "The media references do not contain the active key",
+                this);
+        }
+        return false;
+    }
+    return true;
+}
+
+void
+Clip::set_media_references(
+    MediaReferences const& media_references,
+    std::string const&     new_active_key,
+    ErrorStatus*           error_status) noexcept
+{
+    if (!check_for_valid_media_reference_key(
+            new_active_key.empty() ? _active_media_reference_key
+                                   : new_active_key,
+            media_references,
+            error_status))
+    {
+        return;
+    }
+
     _media_references.clear();
     for (auto const& m: media_references)
     {
-        _media_references[m.first] = m.second;
+        _media_references[m.first] = m.second ? m.second : new MissingReference;
+    }
+
+    if (!new_active_key.empty())
+    {
+        _active_media_reference_key = new_active_key;
     }
 }
 
 std::string
-Clip::active_media_reference() const noexcept
+Clip::active_media_reference_key() const noexcept
 {
-    return _active_media_reference;
+    return _active_media_reference_key;
 }
 
 void
-Clip::set_active_media_reference(std::string const& new_active) noexcept
+Clip::set_active_media_reference_key(
+    std::string const& new_active_key, ErrorStatus* error_status) noexcept
 {
-    _active_media_reference = new_active;
+    if (!check_for_valid_media_reference_key(
+            new_active_key, _media_references, error_status))
+    {
+        return;
+    }
+    _active_media_reference_key = new_active_key;
 }
 
 void
 Clip::set_media_reference(MediaReference* media_reference)
 {
-    _media_references[_active_media_reference] =
+    _media_references[_active_media_reference_key] =
         media_reference ? media_reference : new MissingReference;
 }
 
@@ -78,7 +119,8 @@ bool
 Clip::read_from(Reader& reader)
 {
     return reader.read("media_references", &_media_references) &&
-           reader.read("active_media_reference", &_active_media_reference) &&
+           reader.read(
+               "active_media_reference_key", &_active_media_reference_key) &&
            Parent::read_from(reader);
 }
 
@@ -87,7 +129,7 @@ Clip::write_to(Writer& writer) const
 {
     Parent::write_to(writer);
     writer.write("media_references", _media_references);
-    writer.write("active_media_reference", _active_media_reference);
+    writer.write("active_media_reference_key", _active_media_reference_key);
 }
 
 TimeRange

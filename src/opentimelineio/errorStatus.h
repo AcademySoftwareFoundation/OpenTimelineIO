@@ -36,7 +36,8 @@ struct ErrorStatus
         OBJECT_WITHOUT_DURATION,
         CANNOT_TRIM_TRANSITION,
         OBJECT_CYCLE,
-        CANNOT_COMPUTE_BOUNDS
+        CANNOT_COMPUTE_BOUNDS,
+        MEDIA_REFERENCES_MISSING_ACTIVE_KEY
     };
 
     ErrorStatus()

@@ -412,22 +412,20 @@ static void define_items_and_compositions(py::module m) {
              "media_reference"_a = nullptr,
              "source_range"_a = nullopt,
              py::arg_v("metadata"_a = py::none()),
-             "active_media_reference"_a = std::string(Clip::MediaRepresentation::default_media))
+             "active_media_reference"_a = std::string(Clip::default_media_key))
+        .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
+            return Clip::default_media_key; 
+           })
         .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference)
-        .def_property("media_references", &Clip::media_references, &Clip::set_media_references)
-        .def_property("active_media_reference", &Clip::active_media_reference, &Clip::set_active_media_reference);
-
-    py::class_<Clip::MediaRepresentation>(clip_class, "MediaRepresentation")
-        .def_property_readonly_static("DEFAULT_MEDIA",[](py::object /* self */) { 
-            return Clip::MediaRepresentation::default_media; })
-        .def_property_readonly_static("DISK_HIGH_QUALITY_MEDIA", [](py::object /* self */) { 
-            return Clip::MediaRepresentation::disk_high_quality_media; })
-        .def_property_readonly_static("DISK_PROXY_QUALITY_MEDIA", [](py::object /* self */) {
-                return Clip::MediaRepresentation::disk_proxy_quality_media; })
-        .def_property_readonly_static("CLOUD_HIGH_QUALITY_MEDIA", [](py::object /* self */) { 
-            return Clip::MediaRepresentation::cloud_high_quality_media; })
-        .def_property_readonly_static("CLOUD_PROXY_QUALITY_MEDIA", [](py::object /* self */) {
-                return Clip::MediaRepresentation::cloud_proxy_quality_media; });
+        .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) { 
+            clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler()); 
+            })
+        .def("media_references", &Clip::media_references) 
+        .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
+            clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
+            },
+            "media_references"_a, 
+            "new_active_key"_a = std::string());
 
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")

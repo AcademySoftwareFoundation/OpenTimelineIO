@@ -9,18 +9,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip : public Item
 {
 public:
-    struct MediaRepresentation
-    {
-        static char constexpr default_media[] = "DEFAULT_MEDIA";
-        static char constexpr disk_high_quality_media[] =
-            "DISK_HIGH_QUALITY_MEDIA";
-        static char constexpr disk_proxy_quality_media[] =
-            "DISK_PROXY_QUALITY_MEDIA";
-        static char constexpr cloud_high_quality_media[] =
-            "CLOUD_HIGH_QUALITY_MEDIA";
-        static char constexpr cloud_proxy_quality_media[] =
-            "CLOUD_PROXY_QUALITY_MEDIA";
-    };
+    static char constexpr default_media_key[] = "DEFAULT_MEDIA";
 
     struct Schema
     {
@@ -31,12 +20,11 @@ public:
     using Parent = Item;
 
     Clip(
-        std::string const&         name            = std::string(),
-        MediaReference*            media_reference = nullptr,
-        optional<TimeRange> const& source_range    = nullopt,
-        AnyDictionary const&       metadata        = AnyDictionary(),
-        std::string const&         active_media_reference =
-            MediaRepresentation::default_media);
+        std::string const&         name               = std::string(),
+        MediaReference*            media_reference    = nullptr,
+        optional<TimeRange> const& source_range       = nullopt,
+        AnyDictionary const&       metadata           = AnyDictionary(),
+        std::string const& active_media_reference_key = default_media_key);
 
     void            set_media_reference(MediaReference* media_reference);
     MediaReference* media_reference() const noexcept;
@@ -44,10 +32,15 @@ public:
     using MediaReferences = std::map<std::string, MediaReference*>;
 
     MediaReferences media_references() const noexcept;
-    void set_media_references(MediaReferences const& media_references) noexcept;
+    void            set_media_references(
+                   MediaReferences const& media_references,
+                   std::string const&     new_active_key = std::string(),
+                   ErrorStatus*           error_status   = nullptr) noexcept;
 
-    std::string active_media_reference() const noexcept;
-    void set_active_media_reference(std::string const& new_active) noexcept;
+    std::string active_media_reference_key() const noexcept;
+    void        set_active_media_reference_key(
+               std::string const& new_active_key,
+               ErrorStatus*       error_status = nullptr) noexcept;
 
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
@@ -62,8 +55,15 @@ protected:
     virtual void write_to(Writer&) const;
 
 private:
+    template <typename MediaRefMap>
+    bool check_for_valid_media_reference_key(
+        std::string const& key,
+        MediaRefMap const& media_references,
+        ErrorStatus*       error_status);
+
+private:
     std::map<std::string, Retainer<MediaReference>> _media_references;
-    std::string                                     _active_media_reference;
+    std::string                                     _active_media_reference_key;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -153,7 +153,7 @@ public:
 
     std::string to_time_string() const;
 
-    inline RationalTime const& operator+=(RationalTime other) noexcept
+   RationalTime const& operator+=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {

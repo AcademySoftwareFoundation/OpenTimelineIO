@@ -167,7 +167,7 @@ public:
         return *this;
     }
 
-    inline RationalTime const& operator-=(RationalTime other) noexcept
+   RationalTime const& operator-=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {

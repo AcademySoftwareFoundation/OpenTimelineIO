@@ -275,7 +275,7 @@ parameters:
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
-- *media_references*: media_references(self: opentimelineio._otio.Clip) -> Dict[str, opentimelineio._otio.MediaReference]
+- *media_references*: 
 - *metadata*: 
 - *name*: 
 - *source_range*: 

@@ -204,7 +204,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 otio.schema.Clip.DEFAULT_MEDIA_KEY: otio.schema.ExternalReference(),
                 "high_quality": otio.schema.GeneratorReference(),
                 "proxy_quality": otio.schema.ImageSequenceReference(),
-            })
+            },
+            otio.schema.Clip.DEFAULT_MEDIA_KEY)
 
         mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
@@ -246,7 +247,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             cl.set_media_references(
                 {
                     "cloud": otio.schema.ExternalReference()
-                }
+                },
+                "high_quality"
             )
         self.assertEqual(
             cl.active_media_reference_key,

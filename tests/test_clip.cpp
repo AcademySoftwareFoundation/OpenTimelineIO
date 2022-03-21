@@ -166,9 +166,11 @@ main(int argc, char** argv)
         SerializableObject::Retainer<MediaReference> ref3(
             new otio::ExternalReference());
 
-        clip->set_media_references({ { Clip::default_media_key, ref1 },
-                                     { high_quality, ref2 },
-                                     { proxy_quality, ref3 } });
+        clip->set_media_references(
+            { { Clip::default_media_key, ref1 },
+              { high_quality, ref2 },
+              { proxy_quality, ref3 } },
+            high_quality);
 
         assertEqual(clip->media_reference(), ref2.value);
 
@@ -195,7 +197,7 @@ main(int argc, char** argv)
 
         otio::ErrorStatus error2;
         clip->set_media_references(
-            { { "cloud", ref4 } }, std::string(), &error2);
+            { { "cloud", ref4 } }, high_quality, &error2);
         assertTrue(otio::is_error(error2));
         assertEqual(
             error.outcome,

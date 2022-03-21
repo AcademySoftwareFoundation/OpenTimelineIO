@@ -34,8 +34,8 @@ public:
     MediaReferences media_references() const noexcept;
     void            set_media_references(
                    MediaReferences const& media_references,
-                   std::string const&     new_active_key = std::string(),
-                   ErrorStatus*           error_status   = nullptr) noexcept;
+                   std::string const&     new_active_key,
+                   ErrorStatus*           error_status = nullptr) noexcept;
 
     std::string active_media_reference_key() const noexcept;
     void        set_active_media_reference_key(

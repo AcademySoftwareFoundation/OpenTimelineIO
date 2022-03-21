@@ -423,9 +423,7 @@ static void define_items_and_compositions(py::module m) {
         .def("media_references", &Clip::media_references) 
         .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
             clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
-            },
-            "media_references"_a, 
-            "new_active_key"_a = std::string());
+            });
 
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")

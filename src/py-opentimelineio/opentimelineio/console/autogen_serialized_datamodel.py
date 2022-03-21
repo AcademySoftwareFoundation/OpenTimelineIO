@@ -200,7 +200,8 @@ def _generate_model_for_module(mod, classes, modules):
 
             for fetcher in PROP_FETCHERS:
                 try:
-                    model[cl][k] = fetcher(cl, k)
+                    model[cl][k] = fetcher(cl, k) if isinstance(
+                        getattr(cl, k), property) else ""
                     break
                 except AttributeError:
                     pass

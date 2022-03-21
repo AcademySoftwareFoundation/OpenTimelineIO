@@ -70,10 +70,7 @@ Clip::set_media_references(
     ErrorStatus*           error_status) noexcept
 {
     if (!check_for_valid_media_reference_key(
-            new_active_key.empty() ? _active_media_reference_key
-                                   : new_active_key,
-            media_references,
-            error_status))
+            new_active_key, media_references, error_status))
     {
         return;
     }

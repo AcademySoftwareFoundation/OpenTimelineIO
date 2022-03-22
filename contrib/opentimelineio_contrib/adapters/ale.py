@@ -256,7 +256,10 @@ def read_from_string(input_str, fps=24, **adapter_argument_map):
                 if line.strip() == "":
                     continue
 
-                clip = _parse_data_line(line, columns, fps, ale_name_column_key=ale_name_column_key)
+                clip = _parse_data_line(line,
+                                        columns,
+                                        fps,
+                                        ale_name_column_key=ale_name_column_key)
 
                 collection.append(clip)
 

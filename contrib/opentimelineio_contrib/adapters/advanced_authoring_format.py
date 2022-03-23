@@ -1454,7 +1454,7 @@ def _contains_something_valuable(thing):
     return True
 
 
-def _get_mobs_for_transcribe(storage):
+def _get_mobs_for_transcription(storage):
     """
     When we describe our AAF into OTIO space, we apply the following heuristic:
 
@@ -1532,7 +1532,7 @@ def read_from_file(
         # Is there something valuable in there?
 
         storage = aaf_file.content
-        mobs_to_transcribe = _get_mobs_for_transcribe(storage)
+        mobs_to_transcribe = _get_mobs_for_transcription(storage)
 
         result = _transcribe(mobs_to_transcribe, parents=list(), edit_rate=None)
 

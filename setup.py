@@ -91,6 +91,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_SHARED_LIBS:BOOL=OFF',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
+            '-DBUILD_TESTING:BOOL=OFF'
         ]
 
         if platform.system() == "Windows":

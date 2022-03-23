@@ -53,7 +53,7 @@ class ALEParseError(otio.exceptions.OTIOError):
     pass
 
 
-def _parse_data_line(line, columns, fps):
+def _parse_data_line(line, columns, fps, ale_name_column_key='Name'):
     row = line.split("\t")
 
     if len(row) < len(columns):
@@ -71,7 +71,7 @@ def _parse_data_line(line, columns, fps):
         metadata = dict(zip(columns, row))
 
         clip = otio.schema.Clip()
-        clip.name = metadata.pop("Name", None)
+        clip.name = metadata.get(ale_name_column_key, '')
 
         # When looking for Start, Duration and End, they might be missing
         # or blank. Treat None and "" as the same via: get(k,"")!=""
@@ -204,7 +204,8 @@ def _video_format_from_metadata(clips):
         return AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
 
 
-def read_from_string(input_str, fps=24):
+def read_from_string(input_str, fps=24, **adapter_argument_map):
+    ale_name_column_key = adapter_argument_map.get('ale_name_column_key', 'Name')
 
     collection = otio.schema.SerializableCollection()
     header = {}
@@ -255,7 +256,10 @@ def read_from_string(input_str, fps=24):
                 if line.strip() == "":
                     continue
 
-                clip = _parse_data_line(line, columns, fps)
+                clip = _parse_data_line(line,
+                                        columns,
+                                        fps,
+                                        ale_name_column_key=ale_name_column_key)
 
                 collection.append(clip)
 

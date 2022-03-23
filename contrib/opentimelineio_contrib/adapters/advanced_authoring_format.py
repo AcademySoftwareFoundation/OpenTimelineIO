@@ -1454,6 +1454,50 @@ def _contains_something_valuable(thing):
     return True
 
 
+def _get_mobs_for_transcription(storage):
+    """
+    When we describe our AAF into OTIO space, we apply the following heuristic:
+
+    1) First look for top level mobs and if found use that to transcribe.
+
+    2) If we don't have top level mobs, look for composition mobs and use them to
+    transcribe.
+
+    3) Lastly if we don't have either, try to use master mobs to transcribe.
+
+    If we don't find any Mobs, just tell the user and do transcrption on an empty
+    list (to generate some 'empty-level' OTIO structure)
+
+    This heuristic is based on 'real-world' examples. There may still be some
+    corner cases / open questions (like could there be metadata on both
+    a composition mob and master mob? And if so, who would 'win'?)
+
+    In any way, this heuristic satisfies the current set of AAFs we are using
+    in our test-environment.
+
+    """
+
+    top_level_mobs = list(storage.toplevel())
+
+    if len(top_level_mobs) > 0:
+        _transcribe_log("---\nTranscribing top level mobs\n---")
+        return top_level_mobs
+
+    composition_mobs = list(storage.compositionmobs())
+    if len(composition_mobs) > 0:
+        _transcribe_log("---\nTranscribing composition mobs\n---")
+        return composition_mobs
+
+    master_mobs = list(storage.mastermobs())
+    if len(master_mobs) > 0:
+        _transcribe_log("---\nTranscribing master mobs\n---")
+        return master_mobs
+
+    _transcribe_log("---\nNo mobs found to transcribe\n---")
+
+    return []
+
+
 def read_from_file(
     filepath,
     simplify=True,
@@ -1484,25 +1528,20 @@ def read_from_file(
     _BAKE_KEYFRAMED_PROPERTIES_VALUES = bake_keyframed_properties
 
     with aaf2.open(filepath) as aaf_file:
+        # Note: We're skipping: aaf_file.header
+        # Is there something valuable in there?
 
         storage = aaf_file.content
+        mobs_to_transcribe = _get_mobs_for_transcription(storage)
 
-        # Note: We're skipping: f.header
-        # Is there something valuable in there?
-        _transcribe_log("---\nTranscribing top level mobs\n---", 0)
-
-        # Get just the top-level MOBS from the AAF
-        top = list(storage.toplevel())
-
-        # Transcribe just the top-level mobs
-        result = _transcribe(top, parents=list(), edit_rate=None)
+        result = _transcribe(mobs_to_transcribe, parents=list(), edit_rate=None)
 
     # Attach marker to the appropriate clip, gap etc.
     if attach_markers:
         result = _attach_markers(result)
 
     # AAF is typically more deeply nested than OTIO.
-    # Lets try to simplify the structure by collapsing or removing
+    # Let's try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
         result = _simplify(result)

@@ -75,7 +75,7 @@ if(OTIO_PYTHON_INSTALL)
         message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     else()
         # either python_install or install_prefix have been set
-        if(OTIO_PYTHON_INSTALL_DIR_INITIALIZED_TO_DEFAULT)
+        if(NOT OTIO_PYTHON_INSTALL_DIR)
             # CMAKE_INSTALL_PREFIX was set, so install the python components there
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
 

@@ -232,9 +232,10 @@ def load_manifest():
 
     # Read plugin manifests defined on the $OTIO_PLUGIN_MANIFEST_PATH
     # environment variable.  This variable is an os.pathsep separated list of
-    # file paths to manifest json files.
+    # file paths to manifest json files. Can be set to "" to indicate no
+    # local custom manifest path.
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
-    if _local_manifest_path is not None:
+    if _local_manifest_path:
         for src_json_path in _local_manifest_path.split(os.pathsep):
             json_path = os.path.abspath(src_json_path)
             if (

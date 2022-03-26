@@ -260,8 +260,6 @@ set (OTIO_IMATH_TARGETS
     # For OpenEXR <= 2.3:
     ${ILMBASE_LIBRARIES})
 
-get_target_property(IMATH_INCLUDES IlmBase::IlmBaseConfig INTERFACE_INCLUDE_DIRECTORIES)
-message(XXX4 "${IMATH_INCLUDES}")
 message(XXX5 "${OTIO_IMATH_TARGETS}")
 
 add_subdirectory(src/opentime)

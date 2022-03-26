@@ -76,10 +76,6 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-get_target_property(IMATH_INCLUDES IlmBase::IlmBaseConfig INTERFACE_INCLUDE_DIRECTORIES)
-message(XXX "${IMATH_INCLUDES} ... ${ILMBASE_INCLUDE_DIRS}")
-
-
 target_include_directories(opentimelineio PRIVATE
                            "${IMATH_INCLUDES}"
                            "${PROJECT_SOURCE_DIR}/src"

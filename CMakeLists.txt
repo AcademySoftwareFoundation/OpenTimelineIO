@@ -239,8 +239,6 @@ if (NOT Imath_FOUND)
         set(USE_DEPS_IMATH ON)
     else()
         message(STATUS "Using IlmBase::Imath specifed by ${IlmBase_CONFIG}")
-        get_target_property(IMATH_INCLUDES IlmBase::IlmBaseConfig INTERFACE_INCLUDE_DIRECTORIES)
-        message(XXX1 "${IMATH_INCLUDES} ... ${IlmBase_INCLUDE_DIRS}")
     endif()
 else()
     message(STATUS "Using Imath::Imath specified by ${Imath_CONFIG}")
@@ -259,8 +257,6 @@ set (OTIO_IMATH_TARGETS
     $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
     # For OpenEXR <= 2.3:
     ${ILMBASE_LIBRARIES})
-
-message(XXX5 "${OTIO_IMATH_TARGETS}")
 
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)

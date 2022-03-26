@@ -228,7 +228,42 @@ set(CTEST_OUTPUT_ON_FAILURE ON)
 #------------------------------------------------------------------------------
 # Build the dependencies and components
 
+#----- Imath
+# prefer an installed Imath 3.
+find_package(Imath QUIET)
+if (NOT Imath_FOUND)
+    # check if there is an installed IlmBase
+    find_package(IlmBase QUIET)
+    if (NOT IlmBase_FOUND)
+        message(STATUS "Using Imath in OpenTimelineIO/src/deps")
+        set(USE_DEPS_IMATH ON)
+    else()
+        message(STATUS "Using IlmBase::Imath specifed by ${IlmBase_CONFIG}")
+        get_target_property(IMATH_INCLUDES IlmBase::IlmBaseConfig INTERFACE_INCLUDE_DIRECTORIES)
+        message(XXX1 "${IMATH_INCLUDES} ... ${IlmBase_INCLUDE_DIRS}")
+    endif()
+else()
+    message(STATUS "Using Imath::Imath specified by ${Imath_CONFIG}")
+endif()
+
+# set up the internally hosted dependencies
 add_subdirectory(src/deps)
+
+set (OTIO_IMATH_TARGETS
+    # For OpenEXR/Imath 3.x:
+    $<TARGET_NAME_IF_EXISTS:Imath::Imath>
+    $<TARGET_NAME_IF_EXISTS:Imath::Half>
+    # For OpenEXR >= 2.4/2.5 with reliable exported targets
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Imath>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Half>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
+    # For OpenEXR <= 2.3:
+    ${ILMBASE_LIBRARIES})
+
+get_target_property(IMATH_INCLUDES IlmBase::IlmBaseConfig INTERFACE_INCLUDE_DIRECTORIES)
+message(XXX4 "${IMATH_INCLUDES}")
+message(XXX5 "${OTIO_IMATH_TARGETS}")
+
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
 

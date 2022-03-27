@@ -83,7 +83,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['2.7', '3.7', '3.8', '3.9']
+        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10']
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
@@ -133,7 +133,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-build: [cp27*, cp37*, cp38*, cp39*]
+        python-build: ['cp27*', 'cp37*', 'cp38*', 'cp39*', 'cp310*']
     steps:
       - uses: actions/checkout@v3
 
@@ -153,12 +153,25 @@ jobs:
           echo "DISTUTILS_USE_SDK=1" >> $GITHUB_ENV
           echo "MSSdk=1" >> $GITHUB_ENV
 
-      - name: Build wheels
+      - name: Build wheels (Python 2.7)
+        if: matrix.python-build == 'cp27*'
+        # cibuildwheel 1.12.0 is the last release that supported Python 2.7.
         uses: pypa/cibuildwheel@v1.12.0
         with:
           output-dir: wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.python-build }}
+
+      - name: Build wheels (Python 3)
+        uses: pypa/cibuildwheel@v2.3.1
+        if: matrix.python-build != 'cp27*'
+        with:
+          output-dir: wheelhouse
+        env:
+          CIBW_BUILD: ${{ matrix.python-build }}
+          CIBW_SKIP: '*musllinux*'
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
+          CIBW_MANYLINUX_I686_IMAGE: manylinux2010
 
       - uses: actions/upload-artifact@v2
         with:

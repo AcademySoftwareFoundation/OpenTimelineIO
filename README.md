@@ -4,7 +4,7 @@ OpenTimelineIO
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2018--2021-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.7%2C%203.8%2C%203.9-blue)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.7%2C%203.8%2C%203.9%2C%203.10-blue)
 [![Build Status](https://github.com/PixarAnimationStudios/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/PixarAnimationStudios/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -52,8 +52,7 @@ Supported VFX Platforms
 -----------------
 The current release supports:
 - VFX platform 2021, 2020, 2019, 2018
-- Python 2.7 - 3.9
-- Notice that Python 2.7 is deprecated & we plan to drop it in OTIO release 0.15
+- Python 2.7 - 3.10
 
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)

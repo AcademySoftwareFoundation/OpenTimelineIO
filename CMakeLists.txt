@@ -30,6 +30,7 @@ option(OTIO_PYTHON_INSTALL            "Install the Python bindings" OFF)
 option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (any and nonstd)" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
+option(OTIO_FIND_IMATH                "Find Imath in the environment" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -230,18 +231,23 @@ set(CTEST_OUTPUT_ON_FAILURE ON)
 
 #----- Imath
 # prefer an installed Imath 3.
-find_package(Imath QUIET)
-if (NOT Imath_FOUND)
-    # check if there is an installed IlmBase
-    find_package(IlmBase QUIET)
-    if (NOT IlmBase_FOUND)
-        message(STATUS "Using Imath in OpenTimelineIO/src/deps")
-        set(USE_DEPS_IMATH ON)
+if (OTIO_FIND_IMATH)
+    find_package(Imath QUIET)
+    if (NOT Imath_FOUND)
+        # check if there is an installed IlmBase
+        find_package(IlmBase QUIET)
+        if (NOT IlmBase_FOUND)
+            message(STATUS "Using Imath in OpenTimelineIO/src/deps")
+            set(USE_DEPS_IMATH ON)
+        else()
+            message(STATUS "Using IlmBase::Imath specifed by ${IlmBase_CONFIG}")
+        endif()
     else()
-        message(STATUS "Using IlmBase::Imath specifed by ${IlmBase_CONFIG}")
+        message(STATUS "Using Imath::Imath specified by ${Imath_CONFIG}")
     endif()
 else()
-    message(STATUS "Using Imath::Imath specified by ${Imath_CONFIG}")
+    message(STATUS "Using Imath in OpenTimelineIO/src/deps")
+    set(USE_DEPS_IMATH ON)
 endif()
 
 # set up the internally hosted dependencies

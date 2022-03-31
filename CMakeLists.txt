@@ -31,6 +31,7 @@ option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (a
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
+option(OTIO_FIND_IMATH                "Find Imath in the environment" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -229,7 +230,41 @@ set(CTEST_OUTPUT_ON_FAILURE ON)
 #------------------------------------------------------------------------------
 # Build the dependencies and components
 
+#----- Imath
+# prefer an installed Imath 3.
+if (OTIO_FIND_IMATH)
+    find_package(Imath QUIET)
+    if (NOT Imath_FOUND)
+        # check if there is an installed IlmBase
+        find_package(IlmBase QUIET)
+        if (NOT IlmBase_FOUND)
+            message(STATUS "Using Imath in OpenTimelineIO/src/deps")
+            set(USE_DEPS_IMATH ON)
+        else()
+            message(STATUS "Using IlmBase::Imath specifed by ${IlmBase_CONFIG}")
+        endif()
+    else()
+        message(STATUS "Using Imath::Imath specified by ${Imath_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using Imath in OpenTimelineIO/src/deps")
+    set(USE_DEPS_IMATH ON)
+endif()
+
+# set up the internally hosted dependencies
 add_subdirectory(src/deps)
+
+set (OTIO_IMATH_TARGETS
+    # For OpenEXR/Imath 3.x:
+    $<TARGET_NAME_IF_EXISTS:Imath::Imath>
+    $<TARGET_NAME_IF_EXISTS:Imath::Half>
+    # For OpenEXR >= 2.4/2.5 with reliable exported targets
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Imath>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Half>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
+    # For OpenEXR <= 2.3:
+    ${ILMBASE_LIBRARIES})
+
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
 

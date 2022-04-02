@@ -220,6 +220,11 @@ MARKER_OVER_TRANSITION_PATH = os.path.join(
     "marker-over-transition.aaf",
 )
 
+MARKER_OVER_AUDIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-audio.aaf"
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1120,6 +1125,26 @@ class AAFReaderTests(unittest.TestCase):
         except Exception as e:
             print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
                 os.path.basename(MARKER_OVER_TRANSITION_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+    def test_aaf_marker_over_audio_file(self):
+        """
+        Make sure we can transcibe markers over an audio AAF file.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_AUDIO_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_AUDIO_PATH),
                 e)
             )
 

@@ -1247,7 +1247,10 @@ def _attach_markers(collection):
 
                 # determine new item to attach the marker to
                 try:
-                    target_item = target_track.child_at_time(marker.marked_range.start_time)
+                    target_item = target_track.child_at_time(
+                        marker.marked_range.start_time
+                    )
+
                     if target_item is None or not hasattr(target_item, 'markers'):
                         target_item = target_track
 
@@ -1257,7 +1260,8 @@ def _attach_markers(collection):
                     )
 
                     marker.marked_range = otio.opentime.TimeRange(
-                        start_time=marked_start_local, duration=marker.marked_range.duration
+                        start_time=marked_start_local,
+                        duration=marker.marked_range.duration
                     )
 
                 except otio.exceptions.CannotComputeAvailableRangeError:

@@ -498,7 +498,18 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def wheelEvent(self, event):
-        scale_by = 1.0 + float(event.delta()) / 1000
+        try:
+            # PySide6:
+            # https://doc.qt.io/qtforpython/PySide6/QtGui/QWheelEvent.html
+            delta_point = event.angleDelta()
+            delta = delta_point.y()
+
+        except AttributeError:
+            # PySide2:
+            # https://doc.qt.io/qtforpython-5/PySide2/QtGui/QWheelEvent.html
+            delta = event.delta()
+
+        scale_by = 1.0 + float(delta) / 1000
         self.scale(scale_by, 1)
         zoom_level = 1.0 / self.transform().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level

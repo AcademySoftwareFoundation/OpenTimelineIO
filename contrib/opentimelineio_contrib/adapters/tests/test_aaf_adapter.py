@@ -1150,6 +1150,43 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertIsNotNone(timeline)
 
+        # Verify markers
+        # We expect 1 track with 3 markers on it from the test data.
+        self.assertTrue(1 == len(timeline.tracks))
+
+        track = timeline.tracks[0]
+        self.assertTrue(3 == len(track.markers))
+
+        fps = 24.0
+        expected_markers = [
+            {
+                'color': 'RED',
+                'label': 'm1',
+                'start_time': otio.opentime.from_frames(50.0, fps)
+            },
+            {
+                'color': 'GREEN',
+                'label': 'm2',
+                'start_time': otio.opentime.from_frames(103.0, fps)
+            },
+            {
+                'color': 'BLUE',
+                'label': 'm3',
+                'start_time': otio.opentime.from_frames(166.0, fps)
+            }
+        ]
+
+        for index, marker in enumerate(track.markers):
+            expected_marker = expected_markers[index]
+
+            color = marker.color
+            label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
+            start_time = marker.marked_range.start_time
+
+            self.assertTrue(color == expected_marker.get('color'))
+            self.assertTrue(label == expected_marker.get('label'))
+            self.assertTrue(start_time == expected_marker.get('start_time'))
+
     def _verify_user_comments(self, aaf_metadata, expected_md):
 
         self.assertTrue(aaf_metadata is not None)

@@ -1252,6 +1252,15 @@ def _attach_markers(collection):
                     )
 
                     if target_item is None or not hasattr(target_item, 'markers'):
+                        # Item found cannot have markers, for example Transition.
+                        # See also `marker-over-transition.aaf` in test data.
+                        #
+                        # Leave markers on the track for now.
+                        _transcribe_log(
+                            'Skip target_item `{}` cannot have markers'.format(
+                                target_item,
+                            ),
+                        )
                         target_item = target_track
 
                     # transform marked range into new item range
@@ -1264,7 +1273,21 @@ def _attach_markers(collection):
                         duration=marker.marked_range.duration
                     )
 
-                except otio.exceptions.CannotComputeAvailableRangeError:
+                except otio.exceptions.CannotComputeAvailableRangeError as e:
+                    # For audio media AAF file (marker-over-audio.aaf),
+                    # this exception would be triggered in:
+                    # `target_item = target_track.child_at_time()` with error
+                    # message:
+                    # "No available_range set on media reference on clip".
+                    #
+                    # Leave markers on the track for now.
+                    _transcribe_log(
+                        'Cannot compute availableRange from {} to {}: {}'.format(
+                            marker,
+                            target_track,
+                            e,
+                        ),
+                    )
                     target_item = target_track
 
                 # attach marker to target item

@@ -1155,7 +1155,7 @@ class AAFReaderTests(unittest.TestCase):
         self.assertTrue(1 == len(timeline.tracks))
 
         track = timeline.tracks[0]
-        self.assertTrue(3 == len(track.markers))
+        self.assertEqual(3, len(track.markers))
 
         fps = 24.0
         expected_markers = [
@@ -1183,9 +1183,9 @@ class AAFReaderTests(unittest.TestCase):
             label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
             start_time = marker.marked_range.start_time
 
-            self.assertTrue(color == expected_marker.get('color'))
-            self.assertTrue(label == expected_marker.get('label'))
-            self.assertTrue(start_time == expected_marker.get('start_time'))
+            self.assertEqual(color, expected_marker.get('color'))
+            self.assertEqual(label, expected_marker.get('label'))
+            self.assertEqual(start_time, expected_marker.get('start_time'))
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

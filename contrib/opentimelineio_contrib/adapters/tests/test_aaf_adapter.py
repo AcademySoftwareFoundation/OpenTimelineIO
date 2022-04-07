@@ -220,6 +220,11 @@ MARKER_OVER_TRANSITION_PATH = os.path.join(
     "marker-over-transition.aaf",
 )
 
+MARKER_OVER_AUDIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-audio.aaf"
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1124,6 +1129,63 @@ class AAFReaderTests(unittest.TestCase):
             )
 
         self.assertIsNotNone(timeline)
+
+    def test_aaf_marker_over_audio_file(self):
+        """
+        Make sure we can transcibe markers over an audio AAF file.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_AUDIO_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_AUDIO_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+        # Verify markers
+        # We expect 1 track with 3 markers on it from the test data.
+        self.assertTrue(1 == len(timeline.tracks))
+
+        track = timeline.tracks[0]
+        self.assertEqual(3, len(track.markers))
+
+        fps = 24.0
+        expected_markers = [
+            {
+                'color': 'RED',
+                'label': 'm1',
+                'start_time': otio.opentime.from_frames(50.0, fps)
+            },
+            {
+                'color': 'GREEN',
+                'label': 'm2',
+                'start_time': otio.opentime.from_frames(103.0, fps)
+            },
+            {
+                'color': 'BLUE',
+                'label': 'm3',
+                'start_time': otio.opentime.from_frames(166.0, fps)
+            }
+        ]
+
+        for index, marker in enumerate(track.markers):
+            expected_marker = expected_markers[index]
+
+            color = marker.color
+            label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
+            start_time = marker.marked_range.start_time
+
+            self.assertEqual(color, expected_marker.get('color'))
+            self.assertEqual(label, expected_marker.get('label'))
+            self.assertEqual(start_time, expected_marker.get('start_time'))
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

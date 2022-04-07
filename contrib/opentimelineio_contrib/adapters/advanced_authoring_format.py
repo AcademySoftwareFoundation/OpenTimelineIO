@@ -1246,21 +1246,52 @@ def _attach_markers(collection):
                 current_track.markers.remove(marker)
 
                 # determine new item to attach the marker to
-                target_item = target_track.child_at_time(marker.marked_range.start_time)
-                if target_item is None or not hasattr(target_item, 'markers'):
+                try:
+                    target_item = target_track.child_at_time(
+                        marker.marked_range.start_time
+                    )
+
+                    if target_item is None or not hasattr(target_item, 'markers'):
+                        # Item found cannot have markers, for example Transition.
+                        # See also `marker-over-transition.aaf` in test data.
+                        #
+                        # Leave markers on the track for now.
+                        _transcribe_log(
+                            'Skip target_item `{}` cannot have markers'.format(
+                                target_item,
+                            ),
+                        )
+                        target_item = target_track
+
+                    # transform marked range into new item range
+                    marked_start_local = current_track.transformed_time(
+                        marker.marked_range.start_time, target_item
+                    )
+
+                    marker.marked_range = otio.opentime.TimeRange(
+                        start_time=marked_start_local,
+                        duration=marker.marked_range.duration
+                    )
+
+                except otio.exceptions.CannotComputeAvailableRangeError as e:
+                    # For audio media AAF file (marker-over-audio.aaf),
+                    # this exception would be triggered in:
+                    # `target_item = target_track.child_at_time()` with error
+                    # message:
+                    # "No available_range set on media reference on clip".
+                    #
+                    # Leave markers on the track for now.
+                    _transcribe_log(
+                        'Cannot compute availableRange from {} to {}: {}'.format(
+                            marker,
+                            target_track,
+                            e,
+                        ),
+                    )
                     target_item = target_track
 
                 # attach marker to target item
                 target_item.markers.append(marker)
-
-                # transform marked range into new item range
-                marked_start_local = current_track.transformed_time(
-                    marker.marked_range.start_time, target_item
-                )
-
-                marker.marked_range = otio.opentime.TimeRange(
-                    start_time=marked_start_local, duration=marker.marked_range.duration
-                )
 
                 _transcribe_log(
                     "Marker: '{}' (time: {}), attached to item: '{}'".format(

@@ -89,11 +89,13 @@ def write_to_file(input_otio, filepath):
     # rest of the code should catch the error case and print the (presumably)
     # helpful message from the subprocess.
     try:
-        proc.stdin.write(json.dumps(simplified_data))
+        proc.stdin.write(json.dumps(simplified_data).encode())
     except IOError:
         pass
 
     out, err = proc.communicate()
+    out = out.decode()
+    err = err.decode()
 
     if out.strip():
         print("stdout: {}".format(out))

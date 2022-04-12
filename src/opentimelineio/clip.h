@@ -57,6 +57,7 @@ protected:
 private:
     template <typename MediaRefMap>
     bool check_for_valid_media_reference_key(
+        std::string const& caller,
         std::string const& key,
         MediaRefMap const& media_references,
         ErrorStatus*       error_status);

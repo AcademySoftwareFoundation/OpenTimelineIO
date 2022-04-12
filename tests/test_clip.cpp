@@ -187,7 +187,7 @@ main(int argc, char** argv)
         assertTrue(otio::is_error(error));
         assertEqual(
             error.outcome,
-            otio::ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY);
+            otio::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
         assertEqual(clip->media_reference(), ref1.value);
 
         // setting the references that doesn't have the active key should
@@ -200,10 +200,18 @@ main(int argc, char** argv)
             { { "cloud", ref4 } }, high_quality, &error2);
         assertTrue(otio::is_error(error2));
         assertEqual(
-            error.outcome,
-            otio::ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY);
+            error2.outcome,
+            otio::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
 
         assertEqual(clip->media_reference(), ref1.value);
+
+        // setting an empty should also generate an error
+        otio::ErrorStatus error3;
+        clip->set_media_references({ { "", ref4 } }, "", &error3);
+        assertTrue(otio::is_error(error3));
+        assertEqual(
+            error3.outcome,
+            otio::ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY);
 
         // setting the references and the active key at the same time
         // should work

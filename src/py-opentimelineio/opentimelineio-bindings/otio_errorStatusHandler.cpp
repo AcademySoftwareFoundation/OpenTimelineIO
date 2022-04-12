@@ -60,8 +60,10 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
         throw _CannotComputeAvailableRangeException(full_details());
     case ErrorStatus::OBJECT_CYCLE:
         throw py::value_error("Detected SerializableObject cycle while copying/serializing: " + details());
-    case ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY:
+    case ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY:
         throw py::value_error("The media references do not contain the active key");
+    case ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY:
+        throw py::value_error("The media references contain an empty key");
     default:
         throw py::value_error(full_details());
     }

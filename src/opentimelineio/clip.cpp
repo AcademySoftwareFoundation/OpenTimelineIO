@@ -44,18 +44,34 @@ Clip::media_references() const noexcept
 template <typename MediaRefMap>
 bool
 Clip::check_for_valid_media_reference_key(
+    std::string const& caller,
     std::string const& key,
     MediaRefMap const& media_references,
     ErrorStatus*       error_status)
 {
+    auto empty_key = media_references.find("");
+    if (empty_key != media_references.end())
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY,
+                caller +
+                    " failed because the media references contain an empty string key",
+                this);
+        }
+        return false;
+    }
+
     auto found = media_references.find(key);
     if (found == media_references.end())
     {
         if (error_status)
         {
             *error_status = ErrorStatus(
-                ErrorStatus::MEDIA_REFERENCES_MISSING_ACTIVE_KEY,
-                "The media references do not contain the active key",
+                ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY,
+                caller +
+                    " failed because the media references do not contain the active key",
                 this);
         }
         return false;
@@ -70,7 +86,10 @@ Clip::set_media_references(
     ErrorStatus*           error_status) noexcept
 {
     if (!check_for_valid_media_reference_key(
-            new_active_key, media_references, error_status))
+            "set_media_references",
+            new_active_key,
+            media_references,
+            error_status))
     {
         return;
     }
@@ -81,10 +100,7 @@ Clip::set_media_references(
         _media_references[m.first] = m.second ? m.second : new MissingReference;
     }
 
-    if (!new_active_key.empty())
-    {
-        _active_media_reference_key = new_active_key;
-    }
+    _active_media_reference_key = new_active_key;
 }
 
 std::string
@@ -98,7 +114,10 @@ Clip::set_active_media_reference_key(
     std::string const& new_active_key, ErrorStatus* error_status) noexcept
 {
     if (!check_for_valid_media_reference_key(
-            new_active_key, _media_references, error_status))
+            "set_active_media_reference_key",
+            new_active_key,
+            _media_references,
+            error_status))
     {
         return;
     }

@@ -255,6 +255,20 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "high_quality"
         )
 
+        # we should also get an exception if we set the references with
+        # an empty key
+        with self.assertRaises(ValueError):
+            cl.set_media_references(
+                {
+                    "": otio.schema.ExternalReference()
+                },
+                ""
+            )
+        self.assertEqual(
+            cl.active_media_reference_key,
+            "high_quality"
+        )
+
         # setting the references and the active key should resolve the problem
         cl.set_media_references(
             {

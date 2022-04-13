@@ -200,7 +200,10 @@ def _generate_model_for_module(mod, classes, modules):
 
             for fetcher in PROP_FETCHERS:
                 try:
-                    model[cl][k] = fetcher(cl, k)
+                    # Serialized fields are almost always properties, but skip
+                    # over those that are not
+                    model[cl][k] = fetcher(cl, k) if isinstance(
+                        getattr(cl, k), property) else ""
                     break
                 except AttributeError:
                     pass

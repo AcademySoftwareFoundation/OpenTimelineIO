@@ -1,12 +1,15 @@
 {
-    "OTIO_SCHEMA" : "Clip.1",
+    "OTIO_SCHEMA" : "Clip.2",
     "metadata" : {},
     "name" : "test_clip",
     "source_range" : null,
     "markers" : [],
     "enabled" : true,
     "effects" : [],
-    "media_reference" : {
-        "FROM_TEST_FILE" : "empty_missingreference.json"
+    "active_media_reference_key": "DEFAULT_MEDIA",
+    "media_references" : { 
+        "DEFAULT_MEDIA" : {
+            "FROM_TEST_FILE" : "empty_missingreference.json"
+        }
     }
 }

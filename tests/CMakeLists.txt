@@ -8,7 +8,11 @@ foreach(test ${tests_opentime})
 	add_executable(${test} utils.h utils.cpp ${test}.cpp)
 	target_link_libraries(${test} opentime)
 	set_target_properties(${test} PROPERTIES FOLDER tests)
-	add_test(${test} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${test}${CMAKE_EXECUTABLE_SUFFIX})
+	add_test(NAME ${test} 
+           COMMAND ${test}
+           # Set the pwd to the source directory so we can load the samples
+           # like the python tests do
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
 list(APPEND tests_opentimelineio test_clip)
@@ -16,5 +20,9 @@ foreach(test ${tests_opentimelineio})
 	add_executable(${test} utils.h utils.cpp ${test}.cpp)
 	target_link_libraries(${test} opentimelineio)
 	set_target_properties(${test} PROPERTIES FOLDER tests)
-	add_test(${test} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${test}${CMAKE_EXECUTABLE_SUFFIX})
+	add_test(NAME ${test} 
+           COMMAND ${test}
+           # Set the pwd to the source directory so we can load the samples
+           # like the python tests do
+           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()

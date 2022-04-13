@@ -402,16 +402,28 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()));
 
-    py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr())
+    auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr())
         .def(py::init([](std::string name, MediaReference* media_reference,
-                         optional<TimeRange> source_range, py::object metadata) {
-                          return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata));
+                         optional<TimeRange> source_range, py::object metadata,
+                         const std::string&  active_media_reference) {
+                          return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata), active_media_reference);
                       }),
              py::arg_v("name"_a = std::string()),
              "media_reference"_a = nullptr,
              "source_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
-        .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference);
+             py::arg_v("metadata"_a = py::none()),
+             "active_media_reference"_a = std::string(Clip::default_media_key))
+        .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
+            return Clip::default_media_key; 
+           })
+        .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference)
+        .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) { 
+            clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler()); 
+            })
+        .def("media_references", &Clip::media_references) 
+        .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
+            clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
+            });
 
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")

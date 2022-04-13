@@ -90,6 +90,26 @@ TypeRegistry::TypeRegistry()
         (*d)["marked_range"] = (*d)["range"];
         d->erase("range");
     });
+
+    register_upgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
+        auto media_ref = (*d)["media_reference"];
+
+        // The default ctor of Clip used to set media_reference to
+        // MissingReference. To preserve the same behaviour, if we don't have a
+        // valid MediaReference, do it here too.
+        if (media_ref.type() != typeid(SerializableObject::Retainer<>))
+        {
+            media_ref = SerializableObject::Retainer<>(new MissingReference);
+        }
+
+        (*d)["media_references"] =
+            AnyDictionary{ { Clip::default_media_key, media_ref } };
+
+        (*d)["active_media_reference_key"] =
+            std::string(Clip::default_media_key);
+
+        d->erase("media_reference");
+    });
 }
 
 bool

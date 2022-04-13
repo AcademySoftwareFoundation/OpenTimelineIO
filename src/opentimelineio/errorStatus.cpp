@@ -57,6 +57,10 @@ ErrorStatus::outcome_to_string(Outcome o)
             return "cannot trim transition";
         case CANNOT_COMPUTE_BOUNDS:
             return "cannot compute image bounds";
+        case MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY:
+            return "active key not found in media references";
+        case MEDIA_REFERENCES_CONTAIN_EMPTY_KEY:
+            return "the media referencess cannot contain an empty key";
         default:
             return "unknown/illegal ErrorStatus::Outcome code";
     };

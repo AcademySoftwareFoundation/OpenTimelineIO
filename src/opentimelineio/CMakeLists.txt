@@ -77,7 +77,9 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
 target_include_directories(opentimelineio
-    SYSTEM PUBLIC "${IMATH_INCLUDES}"
+    SYSTEM PUBLIC "${IMATH_INCLUDES}")
+
+target_include_directories(opentimelineio
     PRIVATE       "${PROJECT_SOURCE_DIR}/src"
                   "${PROJECT_SOURCE_DIR}/src/deps"
                   "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"

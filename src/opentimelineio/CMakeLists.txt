@@ -76,16 +76,12 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-if (NOT "${IMATH_INCLUDES}" STREQUAL "")
-    target_include_directories(opentimelineio
-        SYSTEM PUBLIC "${IMATH_INCLUDES}")
-endif()
-
 target_include_directories(opentimelineio
     PRIVATE       "${PROJECT_SOURCE_DIR}/src"
                   "${PROJECT_SOURCE_DIR}/src/deps"
                   "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
-                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
+    SYSTEM PUBLIC "${IMATH_INCLUDES}")
 
 target_link_libraries(opentimelineio 
     PUBLIC opentime ${OTIO_IMATH_TARGETS})

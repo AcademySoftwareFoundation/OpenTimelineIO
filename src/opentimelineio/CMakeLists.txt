@@ -20,6 +20,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     linearTimeWarp.h
     marker.h
     mediaReference.h
+    multiMediaReference.h
     missingReference.h
     optional.h
     safely_typed_any.h
@@ -40,39 +41,40 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
-            clip.cpp
-            composable.cpp
-            composition.cpp
-            deserialization.cpp
-            effect.cpp
-            errorStatus.cpp
-            externalReference.cpp
-            freezeFrame.cpp
-            gap.cpp
-            generatorReference.cpp
-            imageSequenceReference.cpp
-            item.cpp
-            linearTimeWarp.cpp
-            marker.cpp
-            mediaReference.cpp
-            missingReference.cpp
-            safely_typed_any.cpp
-            serializableCollection.cpp
-            serializableObject.cpp
-            serializableObjectWithMetadata.cpp
-            serialization.cpp
-            stack.cpp
-            stackAlgorithm.cpp
-            stringUtils.cpp
-            stringUtils.h # stringUtils.h is a private header
-            timeEffect.cpp
-            timeline.cpp
-            track.cpp
-            trackAlgorithm.cpp
-            transition.cpp
-            typeRegistry.cpp
-            unknownSchema.cpp 
-            ${OPENTIMELINEIO_HEADER_FILES})
+    clip.cpp
+    composable.cpp
+    composition.cpp
+    deserialization.cpp
+    effect.cpp
+    errorStatus.cpp
+    externalReference.cpp
+    freezeFrame.cpp
+    gap.cpp
+    generatorReference.cpp
+    imageSequenceReference.cpp
+    item.cpp
+    linearTimeWarp.cpp
+    marker.cpp
+    mediaReference.cpp
+    missingReference.cpp
+    multiMediaReference.cpp
+    safely_typed_any.cpp
+    serializableCollection.cpp
+    serializableObject.cpp
+    serializableObjectWithMetadata.cpp
+    serialization.cpp
+    stack.cpp
+    stackAlgorithm.cpp
+    stringUtils.cpp
+    stringUtils.h
+    timeEffect.cpp
+    timeline.cpp
+    track.cpp
+    trackAlgorithm.cpp
+    transition.cpp
+    typeRegistry.cpp
+    unknownSchema.cpp 
+    ${OPENTIMELINEIO_HEADER_FILES})
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 

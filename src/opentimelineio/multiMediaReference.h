@@ -22,12 +22,13 @@ public:
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
-    virtual optional<TimeRange> available_range() const noexcept final;
+    virtual optional<TimeRange> available_range() const noexcept final 
+        { return {}; }
 
-    virtual void set_available_range(optional<TimeRange> const& available_range) final;
+    virtual void set_available_range(optional<TimeRange> const&) final {}
 
 protected:
-    virtual ~MultiMediaReference();
+    virtual ~MultiMediaReference() = default;
 
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;

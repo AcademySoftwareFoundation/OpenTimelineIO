@@ -7,18 +7,6 @@ MultiMediaReference::MultiMediaReference(
     : Parent(name, metadata)
 {}
 
-MultiMediaReference::~MultiMediaReference()
-{}
-
-optional<TimeRange>
-MultiMediaReference::available_range() const noexcept
-{}
-
-void
-MultiMediaReference::set_available_range(
-    optional<TimeRange> const& available_range)
-{}
-
 bool
 MultiMediaReference::read_from(Reader& reader)
 {

@@ -20,7 +20,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     linearTimeWarp.h
     marker.h
     mediaReference.h
-    multiMediaReference.h
     missingReference.h
     optional.h
     safely_typed_any.h
@@ -57,7 +56,6 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     marker.cpp
     mediaReference.cpp
     missingReference.cpp
-    multiMediaReference.cpp
     safely_typed_any.cpp
     serializableCollection.cpp
     serializableObject.cpp

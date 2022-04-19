@@ -22,9 +22,9 @@ public:
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
-    optional<TimeRange> available_range() const noexcept final;
+    virtual optional<TimeRange> available_range() const noexcept final;
 
-    void set_available_range(optional<TimeRange> const& available_range) final;
+    virtual void set_available_range(optional<TimeRange> const& available_range) final;
 
 protected:
     virtual ~MultiMediaReference();

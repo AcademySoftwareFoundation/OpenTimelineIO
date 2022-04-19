@@ -20,18 +20,24 @@ public:
 
     using Parent = SerializableObjectWithMetadata;
 
+    explicit MediaReference() {}
+    
     MediaReference(
-        std::string const&            name                   = std::string(),
+        std::string const&            name,
+        AnyDictionary const&          metadata               = AnyDictionary());
+
+    MediaReference(
+        std::string const&            name,
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          metadata               = AnyDictionary(),
         optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
-    optional<TimeRange> available_range() const noexcept
+    virtual optional<TimeRange> available_range() const noexcept
     {
         return _available_range;
     }
 
-    void set_available_range(optional<TimeRange> const& available_range)
+    virtual void set_available_range(optional<TimeRange> const& available_range)
     {
         _available_range = available_range;
     }
@@ -55,7 +61,6 @@ protected:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 
-private:
     optional<TimeRange>    _available_range;
     optional<Imath::Box2d> _available_image_bounds;
 };

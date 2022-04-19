@@ -4,6 +4,14 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 MediaReference::MediaReference(
     std::string const&            name,
+    AnyDictionary const&          metadata)
+    : Parent(name, metadata)
+    , _available_range(optional<TimeRange>())
+    , _available_image_bounds(optional<Imath::Box2d>())
+{}
+
+MediaReference::MediaReference(
+    std::string const&            name,
     optional<TimeRange> const&    available_range,
     AnyDictionary const&          metadata,
     optional<Imath::Box2d> const& available_image_bounds)

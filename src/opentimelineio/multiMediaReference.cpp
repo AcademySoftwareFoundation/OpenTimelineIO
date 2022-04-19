@@ -1,23 +1,22 @@
-#include "opentimelineio/mediaReference.h"
+#include "opentimelineio/multiMediaReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 MultiMediaReference::MultiMediaReference(
     std::string const& name, AnyDictionary const& metadata)
     : Parent(name, metadata)
-    , _available_range(available_range)
 {}
 
 MultiMediaReference::~MultiMediaReference()
 {}
 
 optional<TimeRange>
-MultiMediaReference::available_range() const noexcept final
+MultiMediaReference::available_range() const noexcept
 {}
 
 void
 MultiMediaReference::set_available_range(
-    optional<TimeRange> const& available_range) final
+    optional<TimeRange> const& available_range)
 {}
 
 bool

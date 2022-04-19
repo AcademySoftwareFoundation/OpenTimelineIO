@@ -10,7 +10,7 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
-#include <ImathBox.h>
+#include "ImathBox.h"
 
 #include <list>
 #include <type_traits>

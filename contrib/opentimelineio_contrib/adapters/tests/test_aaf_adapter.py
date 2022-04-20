@@ -873,13 +873,15 @@ class AAFReaderTests(unittest.TestCase):
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%
 
     def test_muted_clip(self):
-        sc = otio.adapters.read_from_file(MUTED_CLIP_PATH, simplify=False)
-        gp = sc[0].tracks[8][0][0]
-
-        self.assertIsNotNone(gp)
-        self.assertTrue(gp.metadata['AAF']['muted_clip'])
-        self.assertIsInstance(gp, otio.schema.Gap)
-        self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
+        timeline = otio.adapters.read_from_file(MUTED_CLIP_PATH)
+        self.assertIsInstance(timeline, otio.schema.Timeline)
+        self.assertEqual(len(timeline.tracks), 1)
+        track = timeline.tracks[0]
+        self.assertEqual(len(track), 1)
+        clip = track[0]
+        self.assertIsInstance(clip, otio.schema.Clip)
+        self.assertEqual(clip.name, 'Frame Debugger 0h.mov')
+        self.assertEqual(clip.enabled, False)
 
     def test_essence_group(self):
         timeline = otio.adapters.read_from_file(ESSENCE_GROUP_PATH)

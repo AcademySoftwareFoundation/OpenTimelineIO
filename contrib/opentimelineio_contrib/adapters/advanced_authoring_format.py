@@ -767,7 +767,8 @@ def _transcribe(item, parents, edit_rate, indent=0):
             # Get the first element of the alternates list and transcribe
             alternates = item.getvalue('Alternates')
             if len(alternates) != 1:
-                err = "AAF Selector parsing error: object has unexpected number of alternates - {}".format(len(alternates))
+                err = "AAF Selector parsing error: object has unexpected number of " \
+                      "alternates - {}".format(len(alternates))
                 raise AAFAdapterError(err)
             alt = alternates[0]
             result = _transcribe(alt, parents + [item], edit_rate, indent + 2)
@@ -780,18 +781,21 @@ def _transcribe(item, parents, edit_rate, indent=0):
             # Muted tracks are handled in a slightly odd way so we need to do a
             # check here and pass the param back up to the track object
             # if isinstance(parents[-1], aaf2.mobslots.TimelineMobSlot):
-                # TODO: Figure out mechanism for passing this back up to parent OTIO object
+                # TODO: Figure out mechanism for passing this back up to parent object
 
         else:
 
             # This is most likely a multi-cam clip
-            result = _transcribe(item.getvalue("Selected"), parents + [item], edit_rate, indent + 2)
+            result = _transcribe(item.getvalue("Selected"), parents + [item],
+                                 edit_rate, indent + 2)
 
-            # Perform a check here to make sure no potential Gap objects are slipping through the cracks
+            # Perform a check here to make sure no potential Gap objects
+            # are slipping through the cracks
             if isinstance(result, otio.schema.Gap):
-                raise AAFAdapterError("AAF Selector parsing error: {}".format(type(item)))
+                err = "AAF Selector parsing error: {}".format(type(item))
+                raise AAFAdapterError(err)
 
-            # A Selector can have a set of alternates to handle multiple options for an 
+            # A Selector can have a set of alternates to handle multiple options for an
             # editorial decision - we do a full parse on those obects too
             alternates = item.getvalue("Alternates", None)
             if alternates is not None:
@@ -1427,7 +1431,7 @@ def _simplify(thing):
 
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
-            
+
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
             # Intuitively it seems like the child's effects should come before

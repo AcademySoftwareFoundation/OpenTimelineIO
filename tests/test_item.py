@@ -298,9 +298,9 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             duration=otio.opentime.RationalTime(10, 1)
         )
         it = otio.core.Item(source_range=tr)
-        self.assertEquals(it.enabled, True)
+        self.assertEqual(it.enabled, True)
         it.enabled = False
-        self.assertEquals(it.enabled, False)
+        self.assertEqual(it.enabled, False)
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(it, decoded)

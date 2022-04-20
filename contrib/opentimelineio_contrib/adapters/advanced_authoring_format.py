@@ -754,23 +754,53 @@ def _transcribe(item, parents, edit_rate, indent=0):
     elif isinstance(item, aaf2.components.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
-        # If you mute a clip in media composer, it becomes one of these in the
-        # AAF.
-        result = _transcribe(item.getvalue("Selected"),
-                             parents + [item], edit_rate, indent + 2)
 
-        alternates = [
-            _transcribe(alt, parents + [item], edit_rate, indent + 2)
-            for alt in item.getvalue("Alternates")
-        ]
+        result = None
+        selected = item.getvalue('Selected')
+        selected_is_filler = isinstance(selected, aaf2.components.Filler)
 
-        # muted case -- if there is only one item its muted, otherwise its
-        # a multi cam thing
-        if alternates and len(alternates) == 1:
-            metadata['muted_clip'] = True
-            result.name = str(alternates[0].name) + "_MUTED"
+        # First we check to see if the Selected component is either a Filler
+        # or ScopeReference object, meaning we have to grab the Alternate instead
+        if selected_is_filler or \
+                isinstance(selected, aaf2.components.ScopeReference):
 
-        metadata['alternates'] = alternates
+            # Get the first element of the alternates list and transcribe
+            alternates = item.getvalue('Alternates')
+            if len(alternates) != 1:
+                err = "AAF Selector parsing error: object has unexpected number of alternates - {}".format(len(alternates))
+                raise AAFAdapterError(err)
+            alt = alternates[0]
+            result = _transcribe(alt, parents + [item], edit_rate, indent + 2)
+
+            # We set the enabled status of the result object to False to
+            # indicate the correct status
+            if selected_is_filler:
+                result.enabled = False
+
+            # Muted tracks are handled in a slightly odd way so we need to do a
+            # check here and pass the param back up to the track object
+            # if isinstance(parents[-1], aaf2.mobslots.TimelineMobSlot):
+                # TODO: Figure out mechanism for passing this back up to parent OTIO object
+
+        else:
+
+            # This is most likely a multi-cam clip
+            result = _transcribe(item.getvalue("Selected"), parents + [item], edit_rate, indent + 2)
+
+            # Perform a check here to make sure no potential Gap objects are slipping through the cracks
+            if isinstance(result, otio.schema.Gap):
+                raise AAFAdapterError("AAF Selector parsing error: {}".format(type(item)))
+
+            # A Selector can have a set of alternates to handle multiple options for an 
+            # editorial decision - we do a full parse on those obects too
+            alternates = item.getvalue("Alternates", None)
+            if alternates is not None:
+                alternates = [
+                    _transcribe(alt, parents + [item], edit_rate, indent + 2)
+                    for alt in alternates
+                ]
+
+            metadata['alternates'] = alternates
 
     # @TODO: There are a bunch of other AAF object types that we will
     # likely need to add support for. I'm leaving this code here to help
@@ -1378,6 +1408,9 @@ def _simplify(thing):
                     # Note: we don't merge effects, because we already made
                     # sure the child had no effects in the if statement above.
 
+                    # Preserve the enabled/disabled state as we merge these two.
+                    thing.enabled = thing.enabled and child.enabled
+
                     c = c + num
                 c = c - 1
 
@@ -1385,8 +1418,16 @@ def _simplify(thing):
         if _is_redundant_container(thing):
             # TODO: We may be discarding metadata here, should we merge it?
             result = thing[0].deepcopy()
+
+            # As we are reducing the complexity of the object structure through
+            # this process, we need to make sure that any/all enabled statuses
+            # are being respected and applied in an appropriate way
+            if not thing.enabled:
+                result.enabled = False
+
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
+            
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
             # Intuitively it seems like the child's effects should come before

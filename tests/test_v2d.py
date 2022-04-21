@@ -113,10 +113,10 @@ class V2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         nv = otio.schema.V2d(0.0, 0.0)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises((ValueError, RuntimeError)):
             nv.normalizeExc()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises((ValueError, RuntimeError)):
             nv.normalizedExc()
 
     def test_limits(self):

@@ -755,17 +755,15 @@ def _transcribe(item, parents, edit_rate, indent=0):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
 
-        result = None
         selected = item.getvalue('Selected')
-        selected_is_filler = isinstance(selected, aaf2.components.Filler)
+        alternates = item.getvalue('Alternates', None)
 
         # First we check to see if the Selected component is either a Filler
         # or ScopeReference object, meaning we have to grab the Alternate instead
-        if selected_is_filler or \
+        if isinstance(selected, aaf2.components.Filler) or \
                 isinstance(selected, aaf2.components.ScopeReference):
 
             # Get the first element of the alternates list and transcribe
-            alternates = item.getvalue('Alternates')
             if len(alternates) != 1:
                 err = "AAF Selector parsing error: object has unexpected number of " \
                       "alternates - {}".format(len(alternates))
@@ -773,10 +771,8 @@ def _transcribe(item, parents, edit_rate, indent=0):
             alt = alternates[0]
             result = _transcribe(alt, parents + [item], edit_rate, indent + 2)
 
-            # We set the enabled status of the result object to False to
-            # indicate the correct status
-            if selected_is_filler:
-                result.enabled = False
+            # Filler/ScopeReference means the clip is muted/not enabled
+            result.enabled = False
 
             # Muted tracks are handled in a slightly odd way so we need to do a
             # check here and pass the param back up to the track object
@@ -786,8 +782,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         else:
 
             # This is most likely a multi-cam clip
-            result = _transcribe(item.getvalue("Selected"), parents + [item],
-                                 edit_rate, indent + 2)
+            result = _transcribe(selected, parents + [item], edit_rate, indent + 2)
 
             # Perform a check here to make sure no potential Gap objects
             # are slipping through the cracks
@@ -797,7 +792,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
 
             # A Selector can have a set of alternates to handle multiple options for an
             # editorial decision - we do a full parse on those obects too
-            alternates = item.getvalue("Alternates", None)
             if alternates is not None:
                 alternates = [
                     _transcribe(alt, parents + [item], edit_rate, indent + 2)

@@ -759,17 +759,17 @@ def _transcribe(item, parents, edit_rate, indent=0):
         alternates = item.getvalue('Alternates', None)
 
         # First we check to see if the Selected component is either a Filler
-        # or ScopeReference object, meaning we have to grab the Alternate instead
+        # or ScopeReference object, meaning we have to use the alternate instead
         if isinstance(selected, aaf2.components.Filler) or \
                 isinstance(selected, aaf2.components.ScopeReference):
 
-            # Get the first element of the alternates list and transcribe
-            if len(alternates) != 1:
+            # Safety check of the alternates list, then transcribe first object -
+            # there should only ever be one alternate in this situation
+            if alternates is None or len(alternates) != 1:
                 err = "AAF Selector parsing error: object has unexpected number of " \
                       "alternates - {}".format(len(alternates))
                 raise AAFAdapterError(err)
-            alt = alternates[0]
-            result = _transcribe(alt, parents + [item], edit_rate, indent + 2)
+            result = _transcribe(alternates[0], parents + [item], edit_rate, indent + 2)
 
             # Filler/ScopeReference means the clip is muted/not enabled
             result.enabled = False
@@ -777,7 +777,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             # Muted tracks are handled in a slightly odd way so we need to do a
             # check here and pass the param back up to the track object
             # if isinstance(parents[-1], aaf2.mobslots.TimelineMobSlot):
-                # TODO: Figure out mechanism for passing this back up to parent object
+            #     pass # TODO: Figure out mechanism for passing this up to parent
 
         else:
 

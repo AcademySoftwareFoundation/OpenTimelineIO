@@ -324,7 +324,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                     columns.append(key)
 
     # Always output these
-    for c in ["Duration", "End", "Start", "Name", "Source File"]:
+    for c in ["Duration", "End", "Start", "Name", "Source File", "ASC_SOP", "ASC_SAT"]:
         if c not in columns:
             columns.insert(0, c)
 
@@ -362,6 +362,15 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             return otio.opentime.to_timecode(
                 clip.source_range.end_time_exclusive(), fps
             )
+        elif column == "ASC_SOP":
+            asc_sop = clip.metadata.get("cdl", {}).get("asc_sop", {})
+            asc_sop_arr = [asc_sop.get("offset", [0, 0, 0]), asc_sop.get("power", [0, 0, 0]), asc_sop.get("slope", [0, 0, 0])]
+            asc_sop = ""
+            for i in range (3):
+                asc_sop += "(" + str(asc_sop_arr[i][0]) + " " + str(asc_sop_arr[i][1]) + " " + str(asc_sop_arr[i][2]) + ")"
+            return asc_sop
+        elif column == "ASC_SAT":
+            return clip.metadata.get("cdl", {}).get("asc_sat", {})
         else:
             return clip.metadata.get("ALE", {}).get(column)
 

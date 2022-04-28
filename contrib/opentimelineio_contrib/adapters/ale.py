@@ -369,7 +369,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             slope = asc_sop.get("slope", [0, 0, 0])
             asc_sop_arr = [offset, power, slope]
             asc_sop = ""
-            for i in range (3):
+            for i in range(3):
                 asc_sop += "("
                 asc_sop += str(asc_sop_arr[i][0]) + " "
                 asc_sop += str(asc_sop_arr[i][1]) + " "

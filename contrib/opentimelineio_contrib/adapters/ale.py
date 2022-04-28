@@ -364,10 +364,16 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             )
         elif column == "ASC_SOP":
             asc_sop = clip.metadata.get("cdl", {}).get("asc_sop", {})
-            asc_sop_arr = [asc_sop.get("offset", [0, 0, 0]), asc_sop.get("power", [0, 0, 0]), asc_sop.get("slope", [0, 0, 0])]
+            offset = asc_sop.get("offset", [0, 0, 0])
+            power = asc_sop.get("power", [0, 0, 0])
+            slope = asc_sop.get("slope", [0, 0, 0])
+            asc_sop_arr = [offset, power, slope]
             asc_sop = ""
             for i in range (3):
-                asc_sop += "(" + str(asc_sop_arr[i][0]) + " " + str(asc_sop_arr[i][1]) + " " + str(asc_sop_arr[i][2]) + ")"
+                asc_sop += "("
+                asc_sop += str(asc_sop_arr[i][0]) + " "
+                asc_sop += str(asc_sop_arr[i][1]) + " "
+                asc_sop += str(asc_sop_arr[i][2]) + ")"
             return asc_sop
         elif column == "ASC_SAT":
             return clip.metadata.get("cdl", {}).get("asc_sat", {})

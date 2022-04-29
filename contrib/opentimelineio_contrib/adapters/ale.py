@@ -379,7 +379,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             return asc_sop
         elif column == "ASC_SAT":
             asc_sat = clip.metadata.get("cdl", {}).get("asc_sat", None)
-            if clip.metadata.get is not None:
+            if asc_sat is not None:
                 return asc_sat
             else:
                 return clip.metadata.get("ALE", {}).get(column)

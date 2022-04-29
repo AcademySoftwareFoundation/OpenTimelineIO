@@ -322,7 +322,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             for key in fields.keys():
                 if key not in columns:
                     columns.append(key)
-        
+
         # If otio contains CDL data add ASC_SOP and/or ASC_SAT columns
         cdl = clip.metadata.get('cdl', None)
         if cdl is not None:
@@ -330,13 +330,11 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                 columns.append('ASC_SOP')
             if cdl.get('asc_sat') and 'ASC_SAT' not in columns:
                 columns.append('ASC_SAT')
-            
 
     # Always output these
     for c in ["Duration", "End", "Start", "Name", "Source File"]:
         if c not in columns:
             columns.insert(0, c)
-            
 
     result += "\nColumn\n{}\n".format("\t".join(columns))
 

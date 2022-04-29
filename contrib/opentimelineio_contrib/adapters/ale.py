@@ -379,11 +379,14 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             if None in asc_sop_arr:
                 return clip.metadata.get("ALE", {}).get(column)
             asc_sop = ""
-            for i in range(3):
-                asc_sop += "("
-                asc_sop += str(asc_sop_arr[i][0]) + " "
-                asc_sop += str(asc_sop_arr[i][1]) + " "
-                asc_sop += str(asc_sop_arr[i][2]) + ")"
+            try:
+                for i in range(3):
+                    asc_sop += "("
+                    asc_sop += str(asc_sop_arr[i][0]) + " "
+                    asc_sop += str(asc_sop_arr[i][1]) + " "
+                    asc_sop += str(asc_sop_arr[i][2]) + ")"
+            except:
+                return clip.metadata.get("ALE", {}).get(column, "")
             return asc_sop
         elif column == "ASC_SAT":
             asc_sat = clip.metadata.get("cdl", {}).get("asc_sat", None)

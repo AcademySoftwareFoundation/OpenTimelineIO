@@ -584,10 +584,15 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                              item.trimmed_range().duration.value + track_duration - 1)
                 clip_count += 1
                 avlbl_duration = item.available_range().duration.value
+
+                target_url = ''
+                if hasattr(item.media_reference, 'target_url') and item.media_reference.target_url is not None:
+                    target_url = item.media_reference.target_url
+
                 clip_data = ClipData(src_start, src_end, avlbl_start,
                                      avlbl_end, avlbl_duration, trim_start,
                                      trim_duration,
-                                     item.media_reference.target_url, clip_count - 1)
+                                     target_url, clip_count - 1)
                 if current_transition is not None:
                     clip_data.transition_begin = current_transition
                     current_transition = None
@@ -935,10 +940,13 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         available_range_text = r'available_range: {}, {}'.format(
             repr(float(round(clip.available_range().start_time.value, 1))),
             repr(float(round(clip.available_range().duration.value, 1))))
-    if clip.media_reference.target_url is None:
-        target_url_text = r'target_url: {}'.format('Media Unavailable')
-    else:
-        target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
+
+    target_url = 'Media Unavailable'
+    if hasattr(clip.media_reference, 'target_url') and clip.media_reference.target_url is not None:
+        target_url = clip.media_reference.target_url
+
+    target_url_text = r'target_url: {}'.format(target_url)
+
     available_range_text = available_range_text
     available_range_location = Point(media_origin.x + svg_writer.font_size,
                                      media_origin.y - svg_writer.font_size)

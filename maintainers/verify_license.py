@@ -16,7 +16,16 @@ licenses = {
     ".cpp": """// SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 """,
+    ".c": """// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+""",
     ".h": """// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+""",
+    ".swift": """// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+""",
+    ".mm": """// SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 """
 }

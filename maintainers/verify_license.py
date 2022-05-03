@@ -33,11 +33,12 @@ for root, dirs, files in os.walk("."):
                 total += 1
                 try:
                     content = open(fullpath, 'r').read()
-                except:
-                    print("ERROR: Unable to read file:", fullpath)
+                except Exception as ex:
+                    print("ERROR: Unable to read file: {}\n{}".format(
+                        fullpath, ex))
                     # raise
                     continue
-                if len(content)>10 and license not in content:
+                if len(content) > 10 and license not in content:
                     print("MISSING: {}".format(fullpath))
                     no += 1
                 else:
@@ -48,4 +49,3 @@ print("{} of {} files have the correct license.".format(yes, total))
 if no != 0:
     print("ERROR: {} files do NOT have the correct license.".format(no))
     sys.exit(1)
-

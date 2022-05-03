@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 """
 This script downloads an artifact from a GitHub Action workflow run,
 unzips and and stores the files in a directory of your choice.

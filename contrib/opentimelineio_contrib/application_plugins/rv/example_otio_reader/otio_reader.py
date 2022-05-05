@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 # This code has been taken from opentimelineio's exten_rv rv adapter
 # and converted to work interactively in RV.
@@ -33,6 +12,19 @@ from rv import commands
 from rv import extra_commands
 
 import opentimelineio as otio
+from contextlib import contextmanager
+
+
+@contextmanager
+def set_context(context, **kwargs):
+    old_context = context.copy()
+    context.update(**kwargs)
+
+    try:
+        yield
+    finally:
+        context.clear()
+        context.update(old_context)
 
 
 class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
@@ -52,7 +44,7 @@ def read_otio_file(otio_file):
     return create_rv_node_from_otio(input_otio)
 
 
-def create_rv_node_from_otio(otio_obj, track_kind=None):
+def create_rv_node_from_otio(otio_obj, context=None):
     WRITE_TYPE_MAP = {
         otio.schema.Timeline: _create_timeline,
         otio.schema.Stack: _create_stack,
@@ -64,14 +56,14 @@ def create_rv_node_from_otio(otio_obj, track_kind=None):
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
-        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, track_kind)
+        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, context)
 
     raise NoMappingForOtioTypeError(
         str(type(otio_obj)) + " on object: {}".format(otio_obj)
     )
 
 
-def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
+def _create_dissolve(pre_item, in_dissolve, post_item, context=None):
     rv_trx = commands.newNode("CrossDissolve", in_dissolve.name or "dissolve")
     extra_commands.setUIName(rv_trx, str(in_dissolve.name or "dissolve"))
 
@@ -89,9 +81,9 @@ def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
                               [float(pre_item.trimmed_range().duration.rate)],
                               True)
 
-    pre_item_rv = create_rv_node_from_otio(pre_item, track_kind)
+    pre_item_rv = create_rv_node_from_otio(pre_item, context)
 
-    post_item_rv = create_rv_node_from_otio(post_item, track_kind)
+    post_item_rv = create_rv_node_from_otio(post_item, context)
 
     node_to_insert = post_item_rv
 
@@ -113,7 +105,7 @@ def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
             pre_item.media_reference.available_range.start_time.rate
         )
 
-        post_item_rv = create_rv_node_from_otio(post_item, track_kind)
+        post_item_rv = create_rv_node_from_otio(post_item, context)
 
         rt_node.addInput(post_item_rv)
         node_to_insert = rt_node
@@ -123,7 +115,7 @@ def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
     return rv_trx
 
 
-def _create_transition(pre_item, in_trx, post_item, track_kind=None):
+def _create_transition(pre_item, in_trx, post_item, context=None):
     trx_map = {
         otio.schema.TransitionTypes.SMPTE_Dissolve: _create_dissolve,
     }
@@ -135,17 +127,17 @@ def _create_transition(pre_item, in_trx, post_item, track_kind=None):
         pre_item,
         in_trx,
         post_item,
-        track_kind
+        context
     )
 
 
-def _create_stack(in_stack, track_kind=None):
+def _create_stack(in_stack, context=None):
     new_stack = commands.newNode("RVStackGroup", in_stack.name or "tracks")
     extra_commands.setUIName(new_stack, str(in_stack.name or "tracks"))
 
     new_inputs = []
     for seq in in_stack:
-        result = create_rv_node_from_otio(seq, track_kind)
+        result = create_rv_node_from_otio(seq, context)
         if result:
             new_inputs.append(result)
 
@@ -154,7 +146,9 @@ def _create_stack(in_stack, track_kind=None):
     return new_stack
 
 
-def _create_track(in_seq, _=None):
+def _create_track(in_seq, context=None):
+    context = context or {}
+
     new_seq = commands.newNode("RVSequenceGroup", str(in_seq.name or "track"))
     extra_commands.setUIName(new_seq, str(in_seq.name or "track"))
 
@@ -162,33 +156,70 @@ def _create_track(in_seq, _=None):
         in_seq
     )
 
-    track_kind = in_seq.kind
+    with set_context(context, track_kind=in_seq.kind):
+        new_inputs = []
+        for thing in items_to_serialize:
+            if isinstance(thing, tuple):
+                result = _create_transition(*thing, context=context)
+            elif thing.duration().value == 0:
+                continue
+            else:
+                result = create_rv_node_from_otio(thing, context)
 
-    new_inputs = []
-    for thing in items_to_serialize:
-        if isinstance(thing, tuple):
-            result = _create_transition(*thing, track_kind=track_kind)
-        elif thing.duration().value == 0:
-            continue
-        else:
-            result = create_rv_node_from_otio(thing, track_kind)
+            if result:
+                new_inputs.append(result)
 
-        if result:
-            new_inputs.append(result)
+        commands.setNodeInputs(new_seq, new_inputs)
+        _add_metadata_to_node(in_seq, new_seq)
 
-    commands.setNodeInputs(new_seq, new_inputs)
-    _add_metadata_to_node(in_seq, new_seq)
     return new_seq
 
 
-def _create_timeline(tl, _=None):
-    return create_rv_node_from_otio(tl.tracks)
+def _get_global_transform(tl):
+    # since there's no global scale in otio, use the first source with
+    # bounds as the global bounds
+    def find_display_bounds(tl):
+        for clip in tl.clip_if():
+            try:
+                bounds = clip.media_reference.available_image_bounds
+                if bounds:
+                    return bounds
+            except AttributeError:
+                continue
+        return None
+
+    bounds = find_display_bounds(tl)
+    if bounds is None:
+        return {}
+
+    translate = bounds.center()
+    scale = bounds.max - bounds.min
+
+    # RV's global coordinate system has a width and height of 1 where the
+    # width will be scaled to the image aspect ratio.  So scale globally by
+    # height. The source width will later be scaled to aspect ratio.
+    global_scale = otio.schema.V2d(1.0 / scale.y, 1.0 / scale.y)
+
+    return {
+        'global_scale': global_scale,
+        'global_translate': translate * global_scale,
+    }
 
 
-def _create_collection(collection, track_kind=None):
+def _create_timeline(tl, context=None):
+    context = context or {}
+
+    with set_context(
+        context,
+        **_get_global_transform(tl)
+    ):
+        return create_rv_node_from_otio(tl.tracks, context)
+
+
+def _create_collection(collection, context=None):
     results = []
     for item in collection:
-        result = create_rv_node_from_otio(item, track_kind)
+        result = create_rv_node_from_otio(item, context)
         if result:
             results.append(result)
 
@@ -196,11 +227,12 @@ def _create_collection(collection, track_kind=None):
         return results[0]
 
 
-def _create_media_reference(item, track_kind=None):
+def _create_media_reference(item, context=None):
+    context = context or {}
     if hasattr(item, "media_reference") and item.media_reference:
         if isinstance(item.media_reference, otio.schema.ExternalReference):
             media = [str(item.media_reference.target_url)]
-            if track_kind == otio.schema.TrackKind.Audio:
+            if context.get('track_kind') == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
                 blank = _create_movieproc(item.available_range())
                 # Appending blank to media promotes name of audio file in RV
@@ -226,7 +258,8 @@ def _create_media_reference(item, track_kind=None):
     return None
 
 
-def _create_item(it, track_kind=None):
+def _create_item(it, context=None):
+    context = context or {}
     range_to_read = it.trimmed_range()
 
     if not range_to_read:
@@ -236,7 +269,7 @@ def _create_item(it, track_kind=None):
             )
         )
 
-    new_media = _create_media_reference(it, track_kind)
+    new_media = _create_media_reference(it, context)
     if not new_media:
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
@@ -269,6 +302,8 @@ def _create_item(it, track_kind=None):
                     range_to_read
                 )
 
+        _add_source_bounds(it.media_reference, src, context)
+
     if not in_frame and not out_frame:
         # because OTIO has no global concept of FPS, the rate of the duration
         # is used as the rate for the range of the source.
@@ -298,6 +333,61 @@ def _create_movieproc(time_range, kind="blank"):
         time_range.duration.rate
     )
     return movieproc
+
+
+def _add_source_bounds(media_ref, src, context):
+    bounds = media_ref.available_image_bounds
+    if not bounds:
+        return
+
+    global_scale = context.get('global_scale')
+    global_translate = context.get('global_translate')
+    if global_scale is None or global_translate is None:
+        return
+
+    # A width of 1.0 in RV means draw to the aspect ratio, so scale the
+    # width by the inverse of the aspect ratio
+    #
+    media_info = commands.sourceMediaInfo(src)
+    height = media_info['height']
+    aspect_ratio = 1.0 if height == 0 else media_info['width'] / height
+
+    translate = bounds.center() * global_scale - global_translate
+    scale = (bounds.max - bounds.min) * global_scale
+
+    transform_node = extra_commands.associatedNode('RVTransform2D', src)
+
+    commands.setFloatProperty(
+        "{}.transform.scale".format(transform_node),
+        [scale.x / aspect_ratio, scale.y]
+    )
+    commands.setFloatProperty(
+        "{}.transform.translate".format(transform_node),
+        [translate.x, translate.y]
+    )
+
+    # write the bounds global_scale and global_translate to the node so we can
+    # preserve the original values if we round-trip
+    commands.newProperty(
+        "{}.otio.global_scale".format(transform_node),
+        commands.FloatType,
+        2
+    )
+    commands.newProperty(
+        "{}.otio.global_translate".format(transform_node),
+        commands.FloatType,
+        2
+    )
+    commands.setFloatProperty(
+        "{}.otio.global_scale".format(transform_node),
+        [global_scale.x, global_scale.y],
+        True
+    )
+    commands.setFloatProperty(
+        "{}.otio.global_translate".format(transform_node),
+        [global_translate.x, global_translate.y],
+        True
+    )
 
 
 def _add_metadata_to_node(item, rv_node):

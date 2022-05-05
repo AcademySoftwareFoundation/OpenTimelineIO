@@ -1,7 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
+
+#include <ImathBox.h>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -28,6 +33,9 @@ public:
     Composition* parent() const { return _parent; }
 
     virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
+
+    virtual optional<Imath::Box2d>
+    available_image_bounds(ErrorStatus* error_status) const;
 
 protected:
     bool        _set_parent(Composition*) noexcept;

@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """OTIO to SVG Adapter
    Points in calculations are y-up.
@@ -531,7 +510,6 @@ class ClipData(object):
         self.available_duration = available_duration
         self.trim_start = trim_start
         self.trim_duration = trim_duration
-        self.target_url = target_url
         self.clip_id = clip_id
         self.transition_begin = transition_begin
         self.transition_end = transition_end
@@ -809,7 +787,7 @@ def _draw_track(track, svg_writer, extra_data=()):
             draw_item(item, svg_writer, (clips_data[item_count],))
             item_count += 1
         elif isinstance(item, otio.schema.Transition):
-            cut_x = svg_writer.x_origin + (clips_data[item_count].src_start *
+            cut_x = svg_writer.x_origin + (clips_data[clip_count].src_start *
                                            svg_writer.scale_x)
             draw_item(item, svg_writer, (cut_x,))
             transition_count += 1

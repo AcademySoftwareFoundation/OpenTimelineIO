@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/mediaReference.h"
@@ -17,11 +20,12 @@ public:
     using Parent = MediaReference;
 
     GeneratorReference(
-        std::string const&         name            = std::string(),
-        std::string const&         generator_kind  = std::string(),
-        optional<TimeRange> const& available_range = nullopt,
-        AnyDictionary const&       parameters      = AnyDictionary(),
-        AnyDictionary const&       metadata        = AnyDictionary());
+        std::string const&            name                   = std::string(),
+        std::string const&            generator_kind         = std::string(),
+        optional<TimeRange> const&    available_range        = nullopt,
+        AnyDictionary const&          parameters             = AnyDictionary(),
+        AnyDictionary const&          metadata               = AnyDictionary(),
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     std::string generator_kind() const noexcept { return _generator_kind; }
 

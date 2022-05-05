@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/item.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/effect.h"
@@ -12,11 +15,13 @@ Item::Item(
     optional<TimeRange> const&  source_range,
     AnyDictionary const&        metadata,
     std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers)
+    std::vector<Marker*> const& markers,
+    bool                        enabled)
     : Parent(name, metadata)
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
     , _markers(markers.begin(), markers.end())
+    , _enabled(enabled)
 {}
 
 Item::~Item()
@@ -25,7 +30,7 @@ Item::~Item()
 bool
 Item::visible() const
 {
-    return true;
+    return _enabled;
 }
 
 bool
@@ -165,6 +170,7 @@ Item::read_from(Reader& reader)
     return reader.read_if_present("source_range", &_source_range) &&
            reader.read_if_present("effects", &_effects) &&
            reader.read_if_present("markers", &_markers) &&
+           reader.read_if_present("enabled", &_enabled) &&
            Parent::read_from(reader);
 }
 
@@ -175,6 +181,7 @@ Item::write_to(Writer& writer) const
     writer.write("source_range", _source_range);
     writer.write("effects", _effects);
     writer.write("markers", _markers);
+    writer.write("enabled", _enabled);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

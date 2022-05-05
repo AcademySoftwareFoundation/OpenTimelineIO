@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include "otio_anyDictionary.h"
 #include "otio_anyVector.h"
@@ -69,6 +72,7 @@ PYBIND11_MODULE(_otio, m) {
     otio_exception_bindings(m);
     otio_any_dictionary_bindings(m);
     otio_any_vector_bindings(m);
+    otio_imath_bindings(m);
     otio_serializable_object_bindings(m);
     otio_tests_bindings(m);
 

@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
 
 """Setup.py for installing OpenTimelineIO
 
@@ -91,6 +94,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_SHARED_LIBS:BOOL=OFF',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
+            # turn off the C++ tests during a Python build
+            '-DBUILD_TESTING:BOOL=OFF',
+            # Python modules wil be installed by setuptools.
+            '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
 
         if platform.system() == "Windows":
@@ -290,6 +297,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -356,7 +364,8 @@ setup(
             'urllib3>=1.24.3'
         ],
         'view': [
-            'PySide2~=5.11'
+            'PySide2~=5.11; platform.machine=="x86_64"',
+            'PySide6~=6.2; platform.machine=="aarch64"'
         ]
     },
 

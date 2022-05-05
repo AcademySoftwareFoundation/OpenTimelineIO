@@ -8,10 +8,10 @@ This is for users who wish to get started using the "OTIOView" application to in
 
 OTIOView has an additional prerequisite to OTIO:
 
-- Try `python -m pip install PySide2`
-- If that doesn't work, try downloading PySide2 here: <a href="https://wiki.qt.io/Qt_for_Python" target="_blank">https://wiki.qt.io/Qt_for_Python</a>
+- Try `python -m pip install PySide2` or `python -m pip install PySide6`
+- If that doesn't work, try downloading PySide here: <a href="https://wiki.qt.io/Qt_for_Python" target="_blank">https://wiki.qt.io/Qt_for_Python</a>
 
-You probably want the prebuilt binary for your platform.  PySide2 generally includes a link to the appropriate version of Qt as well.
+You probably want the prebuilt binary for your platform.  PySide generally includes a link to the appropriate version of Qt as well.
 
 ## Install OTIO
 

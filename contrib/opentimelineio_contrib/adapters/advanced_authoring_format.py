@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """OpenTimelineIO Advanced Authoring Format (AAF) Adapter
 
@@ -754,23 +733,51 @@ def _transcribe(item, parents, edit_rate, indent=0):
     elif isinstance(item, aaf2.components.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
-        # If you mute a clip in media composer, it becomes one of these in the
-        # AAF.
-        result = _transcribe(item.getvalue("Selected"),
-                             parents + [item], edit_rate, indent + 2)
 
-        alternates = [
-            _transcribe(alt, parents + [item], edit_rate, indent + 2)
-            for alt in item.getvalue("Alternates")
-        ]
+        selected = item.getvalue('Selected')
+        alternates = item.getvalue('Alternates', None)
 
-        # muted case -- if there is only one item its muted, otherwise its
-        # a multi cam thing
-        if alternates and len(alternates) == 1:
-            metadata['muted_clip'] = True
-            result.name = str(alternates[0].name) + "_MUTED"
+        # First we check to see if the Selected component is either a Filler
+        # or ScopeReference object, meaning we have to use the alternate instead
+        if isinstance(selected, aaf2.components.Filler) or \
+                isinstance(selected, aaf2.components.ScopeReference):
 
-        metadata['alternates'] = alternates
+            # Safety check of the alternates list, then transcribe first object -
+            # there should only ever be one alternate in this situation
+            if alternates is None or len(alternates) != 1:
+                err = "AAF Selector parsing error: object has unexpected number of " \
+                      "alternates - {}".format(len(alternates))
+                raise AAFAdapterError(err)
+            result = _transcribe(alternates[0], parents + [item], edit_rate, indent + 2)
+
+            # Filler/ScopeReference means the clip is muted/not enabled
+            result.enabled = False
+
+            # Muted tracks are handled in a slightly odd way so we need to do a
+            # check here and pass the param back up to the track object
+            # if isinstance(parents[-1], aaf2.mobslots.TimelineMobSlot):
+            #     pass # TODO: Figure out mechanism for passing this up to parent
+
+        else:
+
+            # This is most likely a multi-cam clip
+            result = _transcribe(selected, parents + [item], edit_rate, indent + 2)
+
+            # Perform a check here to make sure no potential Gap objects
+            # are slipping through the cracks
+            if isinstance(result, otio.schema.Gap):
+                err = "AAF Selector parsing error: {}".format(type(item))
+                raise AAFAdapterError(err)
+
+            # A Selector can have a set of alternates to handle multiple options for an
+            # editorial decision - we do a full parse on those obects too
+            if alternates is not None:
+                alternates = [
+                    _transcribe(alt, parents + [item], edit_rate, indent + 2)
+                    for alt in alternates
+                ]
+
+            metadata['alternates'] = alternates
 
     # @TODO: There are a bunch of other AAF object types that we will
     # likely need to add support for. I'm leaving this code here to help
@@ -1246,21 +1253,52 @@ def _attach_markers(collection):
                 current_track.markers.remove(marker)
 
                 # determine new item to attach the marker to
-                target_item = target_track.child_at_time(marker.marked_range.start_time)
-                if target_item is None:
+                try:
+                    target_item = target_track.child_at_time(
+                        marker.marked_range.start_time
+                    )
+
+                    if target_item is None or not hasattr(target_item, 'markers'):
+                        # Item found cannot have markers, for example Transition.
+                        # See also `marker-over-transition.aaf` in test data.
+                        #
+                        # Leave markers on the track for now.
+                        _transcribe_log(
+                            'Skip target_item `{}` cannot have markers'.format(
+                                target_item,
+                            ),
+                        )
+                        target_item = target_track
+
+                    # transform marked range into new item range
+                    marked_start_local = current_track.transformed_time(
+                        marker.marked_range.start_time, target_item
+                    )
+
+                    marker.marked_range = otio.opentime.TimeRange(
+                        start_time=marked_start_local,
+                        duration=marker.marked_range.duration
+                    )
+
+                except otio.exceptions.CannotComputeAvailableRangeError as e:
+                    # For audio media AAF file (marker-over-audio.aaf),
+                    # this exception would be triggered in:
+                    # `target_item = target_track.child_at_time()` with error
+                    # message:
+                    # "No available_range set on media reference on clip".
+                    #
+                    # Leave markers on the track for now.
+                    _transcribe_log(
+                        'Cannot compute availableRange from {} to {}: {}'.format(
+                            marker,
+                            target_track,
+                            e,
+                        ),
+                    )
                     target_item = target_track
 
                 # attach marker to target item
                 target_item.markers.append(marker)
-
-                # transform marked range into new item range
-                marked_start_local = current_track.transformed_time(
-                    marker.marked_range.start_time, target_item
-                )
-
-                marker.marked_range = otio.opentime.TimeRange(
-                    start_time=marked_start_local, duration=marker.marked_range.duration
-                )
 
                 _transcribe_log(
                     "Marker: '{}' (time: {}), attached to item: '{}'".format(
@@ -1347,6 +1385,9 @@ def _simplify(thing):
                     # Note: we don't merge effects, because we already made
                     # sure the child had no effects in the if statement above.
 
+                    # Preserve the enabled/disabled state as we merge these two.
+                    thing.enabled = thing.enabled and child.enabled
+
                     c = c + num
                 c = c - 1
 
@@ -1354,8 +1395,16 @@ def _simplify(thing):
         if _is_redundant_container(thing):
             # TODO: We may be discarding metadata here, should we merge it?
             result = thing[0].deepcopy()
+
+            # As we are reducing the complexity of the object structure through
+            # this process, we need to make sure that any/all enabled statuses
+            # are being respected and applied in an appropriate way
+            if not thing.enabled:
+                result.enabled = False
+
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
+
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
             # Intuitively it seems like the child's effects should come before
@@ -1454,6 +1503,50 @@ def _contains_something_valuable(thing):
     return True
 
 
+def _get_mobs_for_transcription(storage):
+    """
+    When we describe our AAF into OTIO space, we apply the following heuristic:
+
+    1) First look for top level mobs and if found use that to transcribe.
+
+    2) If we don't have top level mobs, look for composition mobs and use them to
+    transcribe.
+
+    3) Lastly if we don't have either, try to use master mobs to transcribe.
+
+    If we don't find any Mobs, just tell the user and do transcrption on an empty
+    list (to generate some 'empty-level' OTIO structure)
+
+    This heuristic is based on 'real-world' examples. There may still be some
+    corner cases / open questions (like could there be metadata on both
+    a composition mob and master mob? And if so, who would 'win'?)
+
+    In any way, this heuristic satisfies the current set of AAFs we are using
+    in our test-environment.
+
+    """
+
+    top_level_mobs = list(storage.toplevel())
+
+    if len(top_level_mobs) > 0:
+        _transcribe_log("---\nTranscribing top level mobs\n---")
+        return top_level_mobs
+
+    composition_mobs = list(storage.compositionmobs())
+    if len(composition_mobs) > 0:
+        _transcribe_log("---\nTranscribing composition mobs\n---")
+        return composition_mobs
+
+    master_mobs = list(storage.mastermobs())
+    if len(master_mobs) > 0:
+        _transcribe_log("---\nTranscribing master mobs\n---")
+        return master_mobs
+
+    _transcribe_log("---\nNo mobs found to transcribe\n---")
+
+    return []
+
+
 def read_from_file(
     filepath,
     simplify=True,
@@ -1484,25 +1577,20 @@ def read_from_file(
     _BAKE_KEYFRAMED_PROPERTIES_VALUES = bake_keyframed_properties
 
     with aaf2.open(filepath) as aaf_file:
+        # Note: We're skipping: aaf_file.header
+        # Is there something valuable in there?
 
         storage = aaf_file.content
+        mobs_to_transcribe = _get_mobs_for_transcription(storage)
 
-        # Note: We're skipping: f.header
-        # Is there something valuable in there?
-        _transcribe_log("---\nTranscribing top level mobs\n---", 0)
-
-        # Get just the top-level MOBS from the AAF
-        top = list(storage.toplevel())
-
-        # Transcribe just the top-level mobs
-        result = _transcribe(top, parents=list(), edit_rate=None)
+        result = _transcribe(mobs_to_transcribe, parents=list(), edit_rate=None)
 
     # Attach marker to the appropriate clip, gap etc.
     if attach_markers:
         result = _attach_markers(result)
 
     # AAF is typically more deeply nested than OTIO.
-    # Lets try to simplify the structure by collapsing or removing
+    # Let's try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
         result = _simplify(result)

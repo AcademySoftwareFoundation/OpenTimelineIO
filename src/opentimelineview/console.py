@@ -1,34 +1,19 @@
 #!/usr/bin/env python
 #
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Simple otio viewer"""
 
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets, QtGui
+try:
+    from PySide6 import QtWidgets, QtGui
+    from PySide6.QtGui import QAction
+except ImportError:
+    from PySide2 import QtWidgets, QtGui
+    from PySide2.QtWidgets import QAction
 
 import opentimelineio as otio
 import opentimelineio.console as otio_console
@@ -148,11 +133,11 @@ class Main(QtWidgets.QMainWindow):
         # menu
         menubar = self.menuBar()
 
-        file_load = QtWidgets.QAction('Open...', menubar)
+        file_load = QAction('Open...', menubar)
         file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
 
-        exit_action = QtWidgets.QAction('Exit', menubar)
+        exit_action = QAction('Exit', menubar)
         exit_action.setShortcut(QtGui.QKeySequence.Quit)
         exit_action.triggered.connect(self.close)
 
@@ -234,7 +219,7 @@ class Main(QtWidgets.QMainWindow):
 
         def __callback():
             self._navigation_filter_callback(actions)
-        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+        navigation_menu.triggered[[QAction]].connect(__callback)
 
     def _navigation_filter_callback(self, filters):
         nav_filter = 0
@@ -246,14 +231,32 @@ class Main(QtWidgets.QMainWindow):
         self.timeline_widget.navigationfilter_changed.emit(nav_filter)
 
     def center(self):
-        frame = self.frameGeometry()
-        desktop = QtWidgets.QApplication.desktop()
-        screen = desktop.screenNumber(
-            desktop.cursor().pos()
-        )
-        centerPoint = desktop.screenGeometry(screen).center()
-        frame.moveCenter(centerPoint)
-        self.move(frame.topLeft())
+        screens = QtWidgets.QApplication.screens()
+        if screens:
+            style = QtWidgets.QApplication.style()
+            title_bar_height = style.pixelMetric(QtWidgets.QStyle.PM_TitleBarHeight)
+
+            screen = screens[0]
+            screen_geo = screen.availableGeometry()
+            screen_w = screen_geo.width()
+            screen_h = screen_geo.height() - title_bar_height
+
+            frame_geo = self.frameGeometry()
+            frame_w = frame_geo.width()
+            frame_h = frame_geo.height()
+
+            new_frame_w = screen_w if frame_w > screen_w else frame_w
+            new_frame_h = screen_h if frame_h > screen_h else frame_h
+            if new_frame_w != frame_w or new_frame_h != frame_h:
+                self.resize(new_frame_w, new_frame_h)
+                frame_geo = self.frameGeometry()
+                frame_w = frame_geo.width()
+                frame_h = frame_geo.height()
+
+            center_point = screen_geo.center()
+            center_point.setY(center_point.y() - title_bar_height // 2)
+            frame_geo.moveCenter(center_point)
+            self.move(frame_geo.topLeft())
 
     def show(self):
         super(Main, self).show()

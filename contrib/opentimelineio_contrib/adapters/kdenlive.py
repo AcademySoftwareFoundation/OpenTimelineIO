@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Kdenlive (MLT XML) Adapter."""
 import re
@@ -92,6 +71,16 @@ def read_from_string(input_str):
         name=mlt.get('name', 'Kdenlive imported timeline'))
 
     maintractor = mlt.find("tractor[@global_feed='1']")
+    # global_feed is no longer set in newer kdenlive versions
+    if maintractor is None:
+        alltractors = mlt.findall("tractor")
+        # the last tractor is the main tractor
+        maintractor = alltractors[-1]
+        # check all other tractors are used as tracks
+        for tractor in alltractors[:-1]:
+            if maintractor.find("track[@producer='%s']" % tractor.attrib['id']) is None:
+                raise RuntimeError("Can't find main tractor")
+
     for maintrack in maintractor.findall('track'):
         if maintrack.get('producer') == 'black_track':
             continue

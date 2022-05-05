@@ -1,27 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
-
 
 __doc__ = """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
 
@@ -53,7 +31,7 @@ class ALEParseError(otio.exceptions.OTIOError):
     pass
 
 
-def _parse_data_line(line, columns, fps):
+def _parse_data_line(line, columns, fps, ale_name_column_key='Name'):
     row = line.split("\t")
 
     if len(row) < len(columns):
@@ -71,7 +49,7 @@ def _parse_data_line(line, columns, fps):
         metadata = dict(zip(columns, row))
 
         clip = otio.schema.Clip()
-        clip.name = metadata.pop("Name", None)
+        clip.name = metadata.get(ale_name_column_key, '')
 
         # When looking for Start, Duration and End, they might be missing
         # or blank. Treat None and "" as the same via: get(k,"")!=""
@@ -204,7 +182,8 @@ def _video_format_from_metadata(clips):
         return AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
 
 
-def read_from_string(input_str, fps=24):
+def read_from_string(input_str, fps=24, **adapter_argument_map):
+    ale_name_column_key = adapter_argument_map.get('ale_name_column_key', 'Name')
 
     collection = otio.schema.SerializableCollection()
     header = {}
@@ -255,7 +234,10 @@ def read_from_string(input_str, fps=24):
                 if line.strip() == "":
                     continue
 
-                clip = _parse_data_line(line, columns, fps)
+                clip = _parse_data_line(line,
+                                        columns,
+                                        fps,
+                                        ale_name_column_key=ale_name_column_key)
 
                 collection.append(clip)
 

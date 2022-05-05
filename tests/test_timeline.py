@@ -1,29 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 import math
 import os
@@ -342,6 +320,54 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tl.range_of_child(cl),
             tl.tracks[0].range_of_child_at_index(0)
         )
+
+    def test_available_image_bounds(self):
+        track = otio.schema.Track(name="test_track")
+        tl = otio.schema.Timeline("test_timeline", tracks=[track])
+
+        # three clips, each successive clip partially overlaps the previous
+        cl = otio.schema.Clip(
+            name="test clip1",
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(0.0, 0.0),
+                    otio.schema.V2d(1.0, 1.0)
+                ),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        cl2 = otio.schema.Clip(
+            name="test clip2",
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1.0, 1.0),
+                    otio.schema.V2d(2.0, 2.0)
+                ),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        cl3 = otio.schema.Clip(
+            name="test clip3",
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(2.0, 2.0),
+                    otio.schema.V2d(3.0, 3.0)
+                ),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        gap = otio.schema.Gap(name="gap")
+
+        tl.tracks[0].append(cl)
+        tl.tracks[0].extend([cl2, cl3, gap])
+
+        union = otio.schema.Box2d(
+            otio.schema.V2d(0.0, 0.0),
+            otio.schema.V2d(3.0, 3.0)
+        )
+
+        # union should be overlapping area, gap should be ignored
+        self.assertEqual(tl.tracks[0].available_image_bounds, union)
 
     def test_iterators(self):
         self.maxDiff = None

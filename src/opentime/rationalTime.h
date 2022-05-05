@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentime/errorStatus.h"
@@ -153,7 +156,7 @@ public:
 
     std::string to_time_string() const;
 
-    constexpr RationalTime const& operator+=(RationalTime other) noexcept
+   RationalTime const& operator+=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {
@@ -167,7 +170,7 @@ public:
         return *this;
     }
 
-    constexpr RationalTime const& operator-=(RationalTime other) noexcept
+   RationalTime const& operator-=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {

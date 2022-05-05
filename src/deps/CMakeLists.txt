@@ -1,4 +1,8 @@
 
+
+
+#----- Other dependencies
+
 # detect if the submodules haven't been updated
 set(DEPS_SUBMODULES any optional-lite pybind11 rapidjson)
 foreach(submodule IN LISTS DEPS_SUBMODULES)
@@ -22,3 +26,17 @@ if(OTIO_CXX_INSTALL AND OTIO_DEPENDENCIES_INSTALL)
     install(FILES optional-lite/include/nonstd/optional.hpp
     	    DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps/nonstd")
 endif()
+
+if (USE_DEPS_IMATH)
+    # preserve BUILD_SHARED_LIBS options for this project, but set it off for Imath
+    option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+    set(BUILD_SHARED_LIBS OFF)
+
+    # If we do not want Imath to install headers and CMake files use the EXCLUDE_FROM_ALL option
+    if(OTIO_CXX_INSTALL AND OTIO_DEPENDENCIES_INSTALL)
+        add_subdirectory(Imath)
+    else()
+        add_subdirectory(Imath EXCLUDE_FROM_ALL)
+    endif()
+endif()
+

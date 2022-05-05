@@ -12,6 +12,7 @@
             "OTIO_SCHEMA": "Gap.1",
             "effects": [],
             "markers": [],
+            "enabled": true,
             "metadata": {},
             "name": "Gap A",
             "source_range": {
@@ -32,6 +33,7 @@
             "OTIO_SCHEMA": "Clip.1",
             "effects": [],
             "markers": [],
+            "enabled": true,
             "media_reference": {
               "OTIO_SCHEMA": "MissingReference.1",
               "available_range": {
@@ -48,6 +50,19 @@
                 }
               },
               "metadata": {},
+              "available_image_bounds": {
+                "OTIO_SCHEMA": "Box2d.1",
+                "min": {
+                  "OTIO_SCHEMA":"V2d.1",
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "max": {
+                  "OTIO_SCHEMA":"V2d.1",
+                  "x": 16.0,
+                  "y": 9.0
+                }
+              },
               "name": null
             },
             "metadata": {},
@@ -87,6 +102,7 @@
             "OTIO_SCHEMA": "Gap.1",
             "effects": [],
             "markers": [],
+            "enabled": true,
             "metadata": {},
             "name": "Gap B",
             "source_range": {
@@ -107,6 +123,7 @@
         "effects": [],
         "kind": "Video",
         "markers": [],
+        "enabled": true,
         "metadata": {},
         "name": "Track-001",
         "source_range": null
@@ -114,6 +131,7 @@
     ],
     "effects": [],
     "markers": [],
+    "enabled": true,
     "metadata": {},
     "name": "tracks",
     "source_range": null

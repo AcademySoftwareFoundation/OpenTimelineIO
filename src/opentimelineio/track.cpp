@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/track.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/gap.h"
@@ -290,6 +293,39 @@ Track::clip_if(
     bool                       shallow_search) const
 {
     return children_if<Clip>(error_status, search_range, shallow_search);
+}
+
+optional<Imath::Box2d>
+Track::available_image_bounds(ErrorStatus* error_status) const
+{
+    optional<Imath::Box2d> box;
+    bool                   found_first_clip = false;
+    for (auto child: children())
+    {
+        if (auto clip = dynamic_cast<Clip*>(child.value))
+        {
+            if (auto clip_box = clip->available_image_bounds(error_status))
+            {
+                if (clip_box)
+                {
+                    if (found_first_clip)
+                    {
+                        box->extendBy(*clip_box);
+                    }
+                    else
+                    {
+                        box              = clip_box;
+                        found_first_clip = true;
+                    }
+                }
+            }
+            if (is_error(error_status))
+            {
+                return optional<Imath::Box2d>();
+            }
+        }
+    }
+    return box;
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

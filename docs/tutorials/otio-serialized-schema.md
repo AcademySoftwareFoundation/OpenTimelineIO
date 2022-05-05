@@ -80,6 +80,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -97,6 +98,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -113,6 +115,7 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
 - *metadata*: 
 - *name*: 
@@ -257,7 +260,7 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Clip.1
+### Clip.2
 
 *full module path*: `opentimelineio.schema.Clip`
 
@@ -268,9 +271,11 @@ None
 ```
 
 parameters:
+- *active_media_reference_key*: 
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
-- *media_reference*: 
+- *media_references*: 
 - *metadata*: 
 - *name*: 
 - *source_range*: 
@@ -301,6 +306,7 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
 - *metadata*: 
 - *name*: 
@@ -334,6 +340,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -350,6 +357,7 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
 - *generator_kind*: 
 - *metadata*: 
@@ -427,6 +435,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
 - *frame_step*: Step between frame numbers in file names.
 - *frame_zero_padding*: Number of digits to pad zeros out to in frame numbers.
@@ -482,6 +491,7 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
 - *metadata*: 
 - *name*: 
@@ -512,6 +522,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -560,6 +571,7 @@ None
 
 parameters:
 - *effects*: 
+- *enabled*: If true, an Item contributes to compositions. Analogous to Mute in various NLEs.
 - *kind*: 
 - *markers*: 
 - *metadata*: 

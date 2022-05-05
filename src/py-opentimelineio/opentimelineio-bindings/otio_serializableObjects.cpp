@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 #include <pybind11/stl.h>
@@ -28,6 +31,8 @@
 
 #include "otio_utils.h"
 #include "otio_anyDictionary.h"
+
+#include "ImathBox.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -290,21 +295,25 @@ static void define_bases2(py::module m) {
         .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
                 return children_if(t, descended_from_type, search_range);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+
 }
 
 static void define_items_and_compositions(py::module m) {
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
-                         py::object effects, py::object markers, py::object metadata) {
+                         py::object effects, py::object markers, py::bool_ enabled, py::object metadata) {
                           return new Item(name, source_range,
                                           py_to_any_dictionary(metadata),
                                           py_to_vector<Effect*>(effects),
-                                          py_to_vector<Marker*>(markers)); }),
+                                          py_to_vector<Marker*>(markers),
+                                          enabled); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = nullopt,
              "effects"_a = py::none(),
              "markers"_a = py::none(),
+             "enabled"_a = true,
              py::arg_v("metadata"_a = py::none()))
+        .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. Analogous to Mute in various NLEs.")
         .def_property("source_range", &Item::source_range, &Item::set_source_range)
         .def("available_range", [](Item* item) {
             return item->available_range(ErrorStatusHandler());
@@ -335,7 +344,10 @@ static void define_items_and_compositions(py::module m) {
             }, "time"_a, "to_item"_a)
         .def("transformed_time_range", [](Item* item, TimeRange time_range, Item* to_item) {
             return item->transformed_time_range(time_range, to_item, ErrorStatusHandler());
-            }, "time_range"_a, "to_item"_a);
+            }, "time_range"_a, "to_item"_a)
+        .def_property_readonly("available_image_bounds", [](Item* item) {
+            return item->available_image_bounds(ErrorStatusHandler());
+            });
 
     auto transition_class =
         py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr())
@@ -393,16 +405,28 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()));
 
-    py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr())
+    auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr())
         .def(py::init([](std::string name, MediaReference* media_reference,
-                         optional<TimeRange> source_range, py::object metadata) {
-                          return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata));
+                         optional<TimeRange> source_range, py::object metadata,
+                         const std::string&  active_media_reference) {
+                          return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata), active_media_reference);
                       }),
              py::arg_v("name"_a = std::string()),
              "media_reference"_a = nullptr,
              "source_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
-        .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference);
+             py::arg_v("metadata"_a = py::none()),
+             "active_media_reference"_a = std::string(Clip::default_media_key))
+        .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
+            return Clip::default_media_key; 
+           })
+        .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference)
+        .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) { 
+            clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler()); 
+            })
+        .def("media_references", &Clip::media_references) 
+        .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
+            clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
+            });
 
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")
@@ -465,6 +489,7 @@ static void define_items_and_compositions(py::module m) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
             }, "child_a")
+        .def("has_clips", &Composition::has_clips)
         .def("__internal_getitem__", [](Composition* c, int index) {
                 index = adjusted_vector_index(index, c->children());
                 if (index < 0 || index >= int(c->children().size())) {
@@ -640,28 +665,35 @@ static void define_media_references(py::module m) {
                managing_ptr<MediaReference>>(m, "MediaReference", py::dynamic_attr())
         .def(py::init([](std::string name,
                          optional<TimeRange> available_range,
-                         py::object metadata) {
-                          return new MediaReference(name, available_range, py_to_any_dictionary(metadata)); }),
+                         py::object metadata,
+                         optional<Imath::Box2d> const& available_image_bounds) {
+                          return new MediaReference(name, available_range, py_to_any_dictionary(metadata), available_image_bounds); }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::none()),
+             "available_image_bounds"_a = nullopt)
+
         .def_property("available_range", &MediaReference::available_range, &MediaReference::set_available_range)
+        .def_property("available_image_bounds", &MediaReference::available_image_bounds, &MediaReference::set_available_image_bounds) 
         .def_property_readonly("is_missing_reference", &MediaReference::is_missing_reference);
 
     py::class_<GeneratorReference, MediaReference,
                managing_ptr<GeneratorReference>>(m, "GeneratorReference", py::dynamic_attr())
         .def(py::init([](std::string name, std::string generator_kind,
                          optional<TimeRange> const& available_range,
-                         py::object parameters, py::object metadata) {
+                         py::object parameters, py::object metadata,
+                         optional<Imath::Box2d> const& available_image_bounds) {
                           return new GeneratorReference(name, generator_kind,
                                                         available_range,
                                                         py_to_any_dictionary(parameters),
-                                                        py_to_any_dictionary(metadata)); }),
+                                                        py_to_any_dictionary(metadata),
+                                                        available_image_bounds); }),
              py::arg_v("name"_a = std::string()),
              "generator_kind"_a = std::string(),
              "available_range"_a = nullopt,
              "parameters"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::none()),
+             "available_image_bounds"_a = nullopt)
         .def_property("generator_kind", &GeneratorReference::generator_kind, &GeneratorReference::set_generator_kind)
         .def_property_readonly("parameters", [](GeneratorReference* g) {
                 auto ptr = g->parameters().get_or_create_mutation_stamp();
@@ -673,28 +705,34 @@ static void define_media_references(py::module m) {
         .def(py::init([](
                         py::object name,
                         optional<TimeRange> available_range,
-                        py::object metadata) {
+                        py::object metadata,
+                        optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
                                   string_or_none_converter(name),
                                   available_range,
-                                  py_to_any_dictionary(metadata)); 
+                                  py_to_any_dictionary(metadata),
+                                  available_image_bounds); 
                     }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()));
+             py::arg_v("metadata"_a = py::none()),
+             "available_image_bounds"_a = nullopt);
 
 
     py::class_<ExternalReference, MediaReference,
                managing_ptr<ExternalReference>>(m, "ExternalReference", py::dynamic_attr())
         .def(py::init([](std::string target_url,
                          optional<TimeRange> const& available_range,
-                         py::object metadata) {
+                         py::object metadata,
+                         optional<Imath::Box2d> const& available_image_bounds) {
                           return new ExternalReference(target_url,
                                                         available_range,
-                                                        py_to_any_dictionary(metadata)); }),
+                                                        py_to_any_dictionary(metadata),
+                                                        available_image_bounds); }),
              "target_url"_a = std::string(),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::none()),
+             "available_image_bounds"_a = nullopt)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
 
     auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
@@ -775,7 +813,8 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                          int frame_zero_padding,
                          ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
-                         py::object metadata) {
+                         py::object metadata,
+                         optional<Imath::Box2d> const& available_image_bounds) {
                           return new ImageSequenceReference(target_url_base,
                                                             name_prefix,
                                                             name_suffix,
@@ -785,7 +824,8 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                                                             frame_zero_padding,
                                                             missing_frame_policy,
                                                             available_range,
-                                                            py_to_any_dictionary(metadata)); }),
+                                                            py_to_any_dictionary(metadata),
+                                                            available_image_bounds); }),
                         "target_url_base"_a = std::string(),
                         "name_prefix"_a = std::string(),
                         "name_suffix"_a = std::string(),
@@ -795,7 +835,8 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                         "frame_zero_padding"_a = 0,
                         "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
-                        py::arg_v("metadata"_a = py::none()))
+                        py::arg_v("metadata"_a = py::none()),
+                        "available_image_bounds"_a = nullopt)
         .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base, "Everything leading up to the file name in the ``target_url``.")
         .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix, "Everything in the file name leading up to the frame number.")
         .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix, "Everything after the frame number in the file name.")

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
@@ -76,6 +79,12 @@ public:
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
+
+    optional<Imath::Box2d>
+    available_image_bounds(ErrorStatus* error_status) const
+    {
+        return _tracks.value->available_image_bounds(error_status);
+    }
 
 protected:
     virtual ~Timeline();

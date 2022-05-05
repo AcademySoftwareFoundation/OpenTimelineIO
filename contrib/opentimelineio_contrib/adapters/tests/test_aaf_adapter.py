@@ -1,27 +1,6 @@
 # -*- coding: utf-8 -*-
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Test the AAF adapter."""
 
@@ -213,6 +192,16 @@ MULTIPLE_MARKERS_PATH = os.path.join(
 KEYFRAMED_PROPERTIES_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "keyframed_properties.aaf"
+)
+
+MARKER_OVER_TRANSITION_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-transition.aaf",
+)
+
+MARKER_OVER_AUDIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-audio.aaf"
 )
 
 
@@ -863,13 +852,15 @@ class AAFReaderTests(unittest.TestCase):
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%
 
     def test_muted_clip(self):
-        sc = otio.adapters.read_from_file(MUTED_CLIP_PATH, simplify=False)
-        gp = sc[0].tracks[8][0][0]
-
-        self.assertIsNotNone(gp)
-        self.assertTrue(gp.metadata['AAF']['muted_clip'])
-        self.assertIsInstance(gp, otio.schema.Gap)
-        self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
+        timeline = otio.adapters.read_from_file(MUTED_CLIP_PATH)
+        self.assertIsInstance(timeline, otio.schema.Timeline)
+        self.assertEqual(len(timeline.tracks), 1)
+        track = timeline.tracks[0]
+        self.assertEqual(len(track), 1)
+        clip = track[0]
+        self.assertIsInstance(clip, otio.schema.Clip)
+        self.assertEqual(clip.name, 'Frame Debugger 0h.mov')
+        self.assertEqual(clip.enabled, False)
 
     def test_essence_group(self):
         timeline = otio.adapters.read_from_file(ESSENCE_GROUP_PATH)
@@ -1099,6 +1090,83 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
         self.assertEqual(result_stderr, '')
+
+    def test_aaf_marker_over_transition(self):
+        """
+        Make sure we can transcibe this composition with markers over transition.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_TRANSITION_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_TRANSITION_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+    def test_aaf_marker_over_audio_file(self):
+        """
+        Make sure we can transcibe markers over an audio AAF file.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_AUDIO_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_AUDIO_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+        # Verify markers
+        # We expect 1 track with 3 markers on it from the test data.
+        self.assertTrue(1 == len(timeline.tracks))
+
+        track = timeline.tracks[0]
+        self.assertEqual(3, len(track.markers))
+
+        fps = 24.0
+        expected_markers = [
+            {
+                'color': 'RED',
+                'label': 'm1',
+                'start_time': otio.opentime.from_frames(50.0, fps)
+            },
+            {
+                'color': 'GREEN',
+                'label': 'm2',
+                'start_time': otio.opentime.from_frames(103.0, fps)
+            },
+            {
+                'color': 'BLUE',
+                'label': 'm3',
+                'start_time': otio.opentime.from_frames(166.0, fps)
+            }
+        ]
+
+        for index, marker in enumerate(track.markers):
+            expected_marker = expected_markers[index]
+
+            color = marker.color
+            label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
+            start_time = marker.marked_range.start_time
+
+            self.assertEqual(color, expected_marker.get('color'))
+            self.assertEqual(label, expected_marker.get('label'))
+            self.assertEqual(start_time, expected_marker.get('start_time'))
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

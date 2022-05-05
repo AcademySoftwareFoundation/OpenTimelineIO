@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentime/rationalTime.h"
@@ -9,6 +12,8 @@
 #include "opentimelineio/optional.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
+
+#include "ImathBox.h"
 
 #include <list>
 #include <type_traits>
@@ -83,6 +88,8 @@ public:
         bool read(std::string const& key, RationalTime* dest);
         bool read(std::string const& key, TimeRange* dest);
         bool read(std::string const& key, class TimeTransform* dest);
+        bool read(std::string const& key, Imath::V2d* value);
+        bool read(std::string const& key, Imath::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
         bool read(std::string const& key, AnyDictionary* dest);
         bool read(std::string const& key, any* dest);
@@ -93,6 +100,8 @@ public:
         bool read(std::string const& key, optional<RationalTime>* dest);
         bool read(std::string const& key, optional<TimeRange>* dest);
         bool read(std::string const& key, optional<TimeTransform>* dest);
+        bool read(std::string const& key, optional<Imath::Box2d>* value);
+
         // skipping std::string because we translate null into the empty
         // string, so the conversion is somewhat ambiguous
 
@@ -393,8 +402,11 @@ public:
         void write(std::string const& key, std::string const& value);
         void write(std::string const& key, RationalTime value);
         void write(std::string const& key, TimeRange value);
+        void write(std::string const& key, Imath::V2d value);
+        void write(std::string const& key, Imath::Box2d value);
         void write(std::string const& key, optional<RationalTime> value);
         void write(std::string const& key, optional<TimeRange> value);
+        void write(std::string const& key, optional<Imath::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)

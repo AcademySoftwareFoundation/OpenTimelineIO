@@ -1,27 +1,7 @@
 #!/usr/bin/env python
 #
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Test file for the stack algorithms library."""
 
@@ -69,6 +49,79 @@ class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "effects": [],
             "kind": "Video",
             "markers": [],
+            "metadata": {},
+            "name": "Sequence1",
+            "source_range": null
+        }
+        """, "otio_json")
+
+        self.trackZd = otio.adapters.read_from_string("""
+        {
+            "OTIO_SCHEMA": "Track.1",
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "enabled": false,
+                    "metadata": {},
+                    "name": "Z",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 150
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 0.0
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "metadata": {},
+            "name": "Sequence1",
+            "source_range": null
+        }
+        """, "otio_json")
+
+        self.track_d = otio.adapters.read_from_string("""
+        {
+            "OTIO_SCHEMA": "Track.1",
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "enabled": true,
+                    "metadata": {},
+                    "name": "Z",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 150
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 0.0
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "enabled": false,
             "metadata": {},
             "name": "Sequence1",
             "source_range": null
@@ -351,6 +404,48 @@ class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 self.trackABC,
             ]
         )
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackABC[:]
+        )
+
+    def test_flatten_disabled_clip(self):
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZ
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackZ[:]
+        )
+        del stack
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZd
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackABC[:]
+        )
+
+    def test_flatten_disabled_track(self):
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.trackZ
+        ])
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertJsonEqual(
+            flat_track[:],
+            self.trackZ[:]
+        )
+        del stack
+        stack = otio.schema.Stack(children=[
+            self.trackABC,
+            self.track_d
+        ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertJsonEqual(
             flat_track[:],

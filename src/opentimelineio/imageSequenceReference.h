@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/mediaReference.h"
@@ -33,8 +36,9 @@ public:
         int                      frame_zero_padding = 0,
         MissingFramePolicy const missing_frame_policy =
             MissingFramePolicy::error,
-        optional<TimeRange> const& available_range = nullopt,
-        AnyDictionary const&       metadata        = AnyDictionary());
+        optional<TimeRange> const&    available_range        = nullopt,
+        AnyDictionary const&          metadata               = AnyDictionary(),
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     std::string target_url_base() const noexcept { return _target_url_base; }
 

@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Test harness for Item."""
 
@@ -44,6 +23,7 @@ class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             str(gp.source_range) + ", " +
             str(gp.effects) + ", " +
             str(gp.markers) + ", " +
+            str(gp.enabled) + ", " +
             str(gp.metadata) +
             ")"
         )
@@ -54,12 +34,14 @@ class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "source_range={}, "
             "effects={}, "
             "markers={}, "
+            "enabled={}, "
             "metadata={}"
             ")".format(
                 repr(gp.name),
                 repr(gp.source_range),
                 repr(gp.effects),
                 repr(gp.markers),
+                repr(gp.enabled),
                 repr(gp.metadata),
             )
         )
@@ -211,12 +193,14 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "{}, "
             "{}, "
             "{}, "
+            "{}, "
             "{}"
             ")".format(
                 str(it.name),
                 str(it.source_range),
                 str(it.effects),
                 str(it.markers),
+                str(it.enabled),
                 str(it.metadata),
             )
         )
@@ -228,12 +212,14 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "source_range={}, "
             "effects={}, "
             "markers={}, "
+            "enabled={}, "
             "metadata={}"
             ")".format(
                 repr(it.name),
                 repr(it.source_range),
                 repr(it.effects),
                 repr(it.markers),
+                repr(it.enabled),
                 repr(it.metadata),
             )
         )
@@ -285,6 +271,19 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(it, decoded)
         self.assertJsonEqual(it.markers, decoded.markers)
+
+    def test_enabled(self):
+        tr = otio.opentime.TimeRange(
+            duration=otio.opentime.RationalTime(10, 1)
+        )
+        it = otio.core.Item(source_range=tr)
+        self.assertEqual(it.enabled, True)
+        it.enabled = False
+        self.assertEqual(it.enabled, False)
+        encoded = otio.adapters.otio_json.write_to_string(it)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(it, decoded)
+        self.assertJsonEqual(it.enabled, decoded.enabled)
 
     def test_copy(self):
         tr = otio.opentime.TimeRange(

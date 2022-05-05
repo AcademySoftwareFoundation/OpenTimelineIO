@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/composition.h"
@@ -58,6 +61,9 @@ public:
 
     virtual std::map<Composable*, TimeRange>
     range_of_all_children(ErrorStatus* error_status = nullptr) const;
+
+    optional<Imath::Box2d>
+    available_image_bounds(ErrorStatus* error_status) const;
 
     // Return a vector of clips.
     //

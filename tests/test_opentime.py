@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Test Harness for the otio.opentime library."""
 
@@ -784,6 +763,28 @@ class TestTimeTransform(unittest.TestCase):
         txform3 = otio.opentime.TimeTransform(offset=tstart, scale=2)
         self.assertNotEqual(txform, txform3)
         self.assertFalse(txform == txform3)
+
+    def test_copy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.copy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
+
+    def test_deepcopy(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        t1 = otio.opentime.TimeTransform(tstart)
+
+        t2 = copy.deepcopy(t1)
+        self.assertEqual(t1, t2)
+        self.assertIsNot(t1, t2)
+        self.assertEqual(t1.offset, t2.offset)
+        # TimeTransform.__copy__ acts as a deep copy
+        self.assertIsNot(t1.offset, t2.offset)
 
 
 class TestTimeRange(unittest.TestCase):

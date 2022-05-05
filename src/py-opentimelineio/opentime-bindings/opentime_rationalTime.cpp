@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 
@@ -71,9 +74,9 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
              "other"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
-        .def("__copy__", [](RationalTime rt, py::object) {
+        .def("__copy__", [](RationalTime rt) {
                 return rt;
-            }, "copier"_a = py::none())
+            })
         .def("__deepcopy__", [](RationalTime rt, py::object) {
                 return rt;
             }, "copier"_a = py::none())

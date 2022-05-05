@@ -1935,6 +1935,10 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     video_e = _get_or_create_subelement(media_e, 'video')
     audio_e = _get_or_create_subelement(media_e, 'audio')
 
+    # This is a fix for Davinci Resolve. After the "video" tag, it expects
+    # a <format> tag, even if empty. See issue 839
+    _get_or_create_subelement(video_e, "format")
+
     # XXX: Due to the way that backreferences are created later on, the XML
     #      is assumed to have its video tracks serialized before its audio
     #      tracks.  Because the order that they are added to the media is

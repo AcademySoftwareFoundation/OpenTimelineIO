@@ -925,17 +925,20 @@ def _draw_clip(clip, svg_writer, extra_data=()):
     # Draw arrow from clip to media reference
     clip_media_height_difference = (((clip_count - 1) * 2.0 + 1)
                                     * svg_writer.clip_rect_height)
-    media_arrow_start = Point(
-        clip_origin.x + (clip_data.trim_duration * svg_writer.scale_x) * 0.5,
-        clip_origin.y - svg_writer.arrow_margin)
+
+    media_arrow_x = clip_origin.x + (clip_data.trim_duration * svg_writer.scale_x) * 0.5
+    media_arrow_start = Point(media_arrow_x, clip_origin.y - svg_writer.arrow_margin)
     media_arrow_end = Point(
-        clip_origin.x + (clip_data.trim_duration * svg_writer.scale_x) * 0.5,
-        clip_origin.y - clip_media_height_difference + svg_writer.arrow_margin)
+        media_arrow_x,
+        clip_origin.y - clip_media_height_difference + svg_writer.arrow_margin
+    )
     svg_writer.draw_arrow(start_point=media_arrow_start, end_point=media_arrow_end,
                           stroke_width=2.0, stroke_color=COLORS['black'])
-    arrow_label_text = 'media_reference'
     arrow_label_location = Point(media_arrow_start.x + svg_writer.arrow_label_margin,
-                                 media_arrow_start.y - svg_writer.clip_rect_height * 0.5)
+                                 media_arrow_start.y
+                                 - svg_writer.clip_rect_height * 0.5)
+
+    arrow_label_text = 'media_reference'
     svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
     # Draw media transition sections
     if clip_data.transition_end is not None:
@@ -960,7 +963,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         svg_writer.draw_dashed_rect(media_transition_rect, fill_color=section_color)
         marker_x.sort()
         # Draw markers for transition sections
-        for i in range(int(marker_x[0]),  int(marker_x[1]) + 1):
+        for i in range(int(marker_x[0]), int(marker_x[1]) + 1):
             start_pt = Point(svg_writer.x_origin + (i * svg_writer.scale_x),
                              media_origin.y)
             if start_pt.x < media_transition_rect.min_x():

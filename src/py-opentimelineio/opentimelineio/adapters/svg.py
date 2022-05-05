@@ -520,15 +520,15 @@ class SVGWriter:
 
 class ClipData(object):
 
-    def __init__(self, src_start=0.0, src_end=0.0, avlbl_start=0.0,
-                 avlbl_end=0.0, avlbl_duration=0.0,
+    def __init__(self, src_start=0.0, src_end=0.0, available_start=0.0,
+                 available_end=0.0, available_duration=0.0,
                  trim_start=0.0, trim_duration=0.0, target_url='', clip_id=0,
                  transition_begin=None, transition_end=None):
         self.src_start = src_start
         self.src_end = src_end
-        self.avlbl_start = avlbl_start
-        self.avlbl_end = avlbl_end
-        self.avlbl_duration = avlbl_duration
+        self.available_start = available_start
+        self.available_end = available_end
+        self.available_duration = available_duration
         self.trim_start = trim_start
         self.trim_duration = trim_duration
         self.target_url = target_url
@@ -570,30 +570,36 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 current_transition = item
                 current_track_clips_data[-1].transition_end = item
                 continue
-            avlbl_start = track_duration - item.trimmed_range().start_time.value
+
+            available_start = track_duration - item.trimmed_range().start_time.value
+
+            available_range = _available_range_from_clip(item)
             if isinstance(item, otio.schema.Clip):
-                avlbl_start += item.available_range().start_time.value
-            min_time = min(min_time, avlbl_start)
+                available_start += available_range.start_time.value
+
+            min_time = min(min_time, available_start)
             src_start = track_duration
             track_duration += item.trimmed_range().duration.value
             src_end = track_duration - 1
-            avlbl_end = 0.0
+            available_end = 0.0
             trim_start = item.trimmed_range().start_time.value
             trim_duration = item.trimmed_range().duration.value
+
             if isinstance(item, otio.schema.Clip):
-                avlbl_end = (item.available_range().start_time.value +
-                             item.available_range().duration.value -
-                             item.trimmed_range().start_time.value -
-                             item.trimmed_range().duration.value + track_duration - 1)
+                available_duration = available_range.duration.value
+
+                available_end = (available_start +
+                                 available_duration -
+                                 item.trimmed_range().start_time.value -
+                                 item.trimmed_range().duration.value + track_duration - 1)
                 clip_count += 1
-                avlbl_duration = item.available_range().duration.value
 
                 target_url = ''
                 if hasattr(item.media_reference, 'target_url') and item.media_reference.target_url is not None:
                     target_url = item.media_reference.target_url
 
-                clip_data = ClipData(src_start, src_end, avlbl_start,
-                                     avlbl_end, avlbl_duration, trim_start,
+                clip_data = ClipData(src_start, src_end, available_start,
+                                     available_end, available_duration, trim_start,
                                      trim_duration,
                                      target_url, clip_count - 1)
                 if current_transition is not None:
@@ -601,15 +607,15 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                     current_transition = None
                 current_track_clips_data.append(clip_data)
             elif isinstance(item, otio.schema.Gap):
-                avlbl_end = src_end
-                avlbl_duration = trim_duration
+                available_end = src_end
+                available_duration = trim_duration
                 current_transition = None
-                clip_data = ClipData(src_start, src_end, avlbl_start,
-                                     avlbl_end, avlbl_duration, trim_start,
+                clip_data = ClipData(src_start, src_end, available_start,
+                                     available_end, available_duration, trim_start,
                                      trim_duration,
                                      "Gap", -1)
                 current_track_clips_data.append(clip_data)
-            max_time = max(max_time, avlbl_end)
+            max_time = max(max_time, available_end)
         svg_writer.global_max_time = max(svg_writer.global_max_time, max_time)
         svg_writer.global_min_time = min(svg_writer.global_min_time, min_time)
         svg_writer.all_clips_data.append(current_track_clips_data)
@@ -879,12 +885,12 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         (svg_writer.vertical_drawing_index + clip_count * 2) *
         svg_writer.clip_rect_height)
     media_origin = Point(
-        svg_writer.x_origin + (clip_data.avlbl_start * svg_writer.scale_x),
+        svg_writer.x_origin + (clip_data.available_start * svg_writer.scale_x),
         svg_writer.image_height - svg_writer.image_margin -
         (svg_writer.vertical_drawing_index + clip_count * 2) *
         svg_writer.clip_rect_height)
     svg_writer.draw_rect(
-        Rect(media_origin, clip_data.avlbl_duration * svg_writer.scale_x,
+        Rect(media_origin, clip_data.available_duration * svg_writer.scale_x,
              svg_writer.clip_rect_height))
     media_text_size = 0.4 * svg_writer.clip_rect_height
     media_text = r'Media-{}'.format(clip_data.clip_id) if len(
@@ -894,8 +900,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
              svg_writer.clip_rect_height),
         label=media_text, fill_color=clip_color,
         label_size=media_text_size)
-    for i in range(int(clip_data.avlbl_start),
-                   int(clip_data.avlbl_end) + 1):
+    for i in range(int(clip_data.available_start), int(clip_data.available_end) + 1):
         start_pt = Point(svg_writer.x_origin + (i * svg_writer.scale_x), media_origin.y)
         if start_pt.x < media_origin.x:
             continue
@@ -904,7 +909,8 @@ def _draw_clip(clip, svg_writer, extra_data=()):
                              stroke_color=COLORS['black'])
 
     # Draw media_reference info
-    available_range_text = r'available_range: {}'.format(_time_range_to_repr(clip.available_range()))
+    available_range = _available_range_from_clip(clip)
+    available_range_text = r'available_range: {}'.format(_time_range_to_repr(available_range))
 
     target_url = 'Media Unavailable'
     if hasattr(clip.media_reference, 'target_url') and clip.media_reference.target_url is not None:
@@ -997,6 +1003,20 @@ def _draw_clip(clip, svg_writer, extra_data=()):
             svg_writer.draw_line(start_point=start_pt, end_point=end_pt,
                                  stroke_width=1.0,
                                  stroke_color=COLORS['black'])
+
+
+def _available_range_from_clip(clip):
+    """
+    Default to a Clip's source range but
+    if the media reference has a defined available_range use that it instead
+    :param opentimelineio.schema.Clip clip:
+    :return: The clips available range
+    :rtype: opentimelineio.opentime.TimeRange
+    """
+    available_range = clip.source_range
+    if clip.media_reference.available_range:
+        available_range = clip.available_range()
+    return available_range
 
 
 def _draw_gap(gap, svg_writer, extra_data=()):

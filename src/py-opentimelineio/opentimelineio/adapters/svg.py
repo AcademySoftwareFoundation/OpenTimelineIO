@@ -492,7 +492,7 @@ class SVGWriter:
 
     def get_image(self):
         # Python 3 produces a bytestring with the tostring() method, whereas Python 2
-        # gives an str object. The try-except block below checks for this case.
+        # gives a str object. The try-except block below checks for this case.
         xmlstr = tostring(self.svg_elem, encoding='utf-8', method='xml')
         try:
             xmlstr = xmlstr.decode("utf8")
@@ -656,7 +656,7 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
     label_text_size = 0.4 * svg_writer.clip_rect_height
     rect = Rect(timeline_origin,
                 svg_writer.max_total_duration * svg_writer.scale_x,
-                svg_writer.clip_rect_height),
+                svg_writer.clip_rect_height)
     svg_writer.draw_labeled_solid_rect_with_border(rect,
                                                    label="Timeline",
                                                    label_size=label_text_size)

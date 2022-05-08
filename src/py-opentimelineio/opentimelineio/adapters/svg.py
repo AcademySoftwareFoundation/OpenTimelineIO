@@ -1127,10 +1127,9 @@ def _available_range_from_clip(clip):
     :return: The clips available range
     :rtype: opentimelineio.opentime.TimeRange
     """
-    available_range = clip.source_range
-    if clip.media_reference.available_range:
-        available_range = clip.available_range()
-    return available_range
+    if clip.media_reference and clip.media_reference.available_range:
+        return clip.available_range()
+    return clip.source_range
 
 
 def _time_range_to_repr(time_range):

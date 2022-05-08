@@ -1202,22 +1202,19 @@ def _elem_attr_to_str(value):
     return value
 
 
-def convert_otio_to_svg(timeline, width, height):
-    global RANDOM_COLORS_USED
-
-    svg_writer = SVGWriter(image_width=width, image_height=height,
-                           font_family='sans-serif', image_margin=20.0, font_size=5.0,
-                           arrow_label_margin=5.0)
-    RANDOM_COLORS_USED = []
-    seed(100)
-    draw_item(timeline, svg_writer, ())
-
-    return svg_writer.get_image()
-
-
 # --------------------
 # adapter requirements
 # --------------------
 
-def write_to_string(input_otio, width=2406.0, height=1054.0):
-    return convert_otio_to_svg(input_otio, width=width, height=height)
+def write_to_string(input_otio, width=2406.0, height=1054.0, image_margin=20.0,
+                    font_family='sans-serif', font_size=5.0, arrow_label_margin=5.0):
+    global RANDOM_COLORS_USED
+
+    svg_writer = SVGWriter(image_width=width, image_height=height,
+                           font_family=font_family, image_margin=image_margin,
+                           font_size=font_size, arrow_label_margin=arrow_label_margin)
+    RANDOM_COLORS_USED = []
+    seed(100)
+    draw_item(input_otio, svg_writer, ())
+
+    return svg_writer.get_image()

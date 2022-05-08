@@ -557,28 +557,26 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 current_track_clips_data[-1].transition_end = item
                 continue
 
-            available_start = track_duration - item.trimmed_range().start_time.value
-
+            trim_start = item.trimmed_range().start_time.value
+            trim_duration = item.trimmed_range().duration.value
+            available_start = track_duration - trim_start
+            available_end = 0.0
             available_range = _available_range_from_clip(item)
+
+            src_start = track_duration
+            src_end = track_duration - 1
+            track_duration += trim_duration
+
             if isinstance(item, otio.schema.Clip):
                 available_start += available_range.start_time.value
 
             min_time = min(min_time, available_start)
-            src_start = track_duration
-            track_duration += item.trimmed_range().duration.value
-            src_end = track_duration - 1
-            available_end = 0.0
-            trim_start = item.trimmed_range().start_time.value
-            trim_duration = item.trimmed_range().duration.value
 
             if isinstance(item, otio.schema.Clip):
-                available_duration = available_range.duration.value
-
-                available_end = (available_start +
-                                 available_duration -
-                                 trim_start -
-                                 trim_duration + track_duration - 1)
                 clip_count += 1
+                available_duration = available_range.duration.value
+                available_end = (available_start + available_duration -
+                                 trim_start - trim_duration + track_duration - 1)
 
                 target_url = ''
                 if hasattr(item.media_reference, 'target_url'):
@@ -586,36 +584,39 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
 
                 clip_data = ClipData(src_start, src_end, available_start,
                                      available_end, available_duration, trim_start,
-                                     trim_duration,
-                                     target_url, clip_count - 1)
+                                     trim_duration, target_url, clip_count - 1)
                 if current_transition is not None:
                     clip_data.transition_begin = current_transition
                     current_transition = None
                 current_track_clips_data.append(clip_data)
+
             elif isinstance(item, otio.schema.Gap):
                 available_end = src_end
                 available_duration = trim_duration
                 current_transition = None
                 clip_data = ClipData(src_start, src_end, available_start,
                                      available_end, available_duration, trim_start,
-                                     trim_duration,
-                                     "Gap", -1)
+                                     trim_duration, "Gap", -1)
                 current_track_clips_data.append(clip_data)
             max_time = max(max_time, available_end)
+
         svg_writer.global_max_time = max(svg_writer.global_max_time, max_time)
         svg_writer.global_min_time = min(svg_writer.global_min_time, min_time)
+
         svg_writer.all_clips_data.append(current_track_clips_data)
         svg_writer.tracks_duration.append(track_duration)
+
         svg_writer.track_transition_available.append(current_track_has_transition)
         if current_track_has_transition:
             transition_track_count += 1
+
         # store track-wise clip count to draw arrows from stack to tracks
-        if len(svg_writer.trackwise_clip_count) == 0:
+        track_clip_count = len(svg_writer.trackwise_clip_count)
+        if track_clip_count == 0:
             svg_writer.trackwise_clip_count.append(clip_count)
         else:
-            svg_writer.trackwise_clip_count.append(
-                clip_count - svg_writer.trackwise_clip_count[
-                    len(svg_writer.trackwise_clip_count) - 1])
+            svg_clip_count = svg_writer.trackwise_clip_count[track_clip_count - 1]
+            svg_writer.trackwise_clip_count.append(clip_count - svg_clip_count)
     # The scale in x direction is calculated considering margins on the
     # left and right side if the image
     svg_writer.scale_x = (svg_writer.image_width - (2.0 * svg_writer.image_margin)) / \

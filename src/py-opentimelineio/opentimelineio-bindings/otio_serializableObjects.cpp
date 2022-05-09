@@ -390,7 +390,7 @@ static void define_items_and_compositions(py::module m) {
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = TimeRange(),
-             "effect"_a = py::none(),
+             "effects"_a = py::none(),
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
        .def(py::init([](std::string name, RationalTime duration, py::object effects,
@@ -401,7 +401,7 @@ static void define_items_and_compositions(py::module m) {
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "duration"_a = RationalTime(),
-             "effect"_a = py::none(),
+             "effects"_a = py::none(),
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()));
 

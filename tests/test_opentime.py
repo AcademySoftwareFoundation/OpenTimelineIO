@@ -407,6 +407,11 @@ class TestTime(unittest.TestCase):
         time_obj = otio.opentime.from_time_string(time_string, 24)
         self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
+        time_string = "0:12:04"
+        t = otio.opentime.RationalTime(value=24 * (12 * 60 + 4), rate=24)
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
+
     def test_time_string_25(self):
         time_string = "00:00:01"
         t = otio.opentime.RationalTime(value=25, rate=25)

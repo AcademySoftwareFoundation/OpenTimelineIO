@@ -86,5 +86,5 @@ class OTIOScriptedSequenceExporter(unreal.Exporter):
         if not task.replace_identical and unreal.Paths.file_exists(task.filename):
             return False
 
-        timeline = export_otio(task.filename, task.object)
+        export_otio(task.filename, task.object)
         return True

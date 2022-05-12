@@ -32,6 +32,8 @@ __all__ = [
     "HOOK_PRE_IMPORT_ITEM",
     "HOOK_POST_EXPORT",
     "HOOK_POST_EXPORT_ITEM",
+    "LevelSequenceProxy",
+    "ShotSectionProxy",
     "METADATA_KEY_UE",
     "METADATA_KEY_SUB_SEQ",
     "MARKER_COLOR_MAP",

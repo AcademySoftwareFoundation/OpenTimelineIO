@@ -38,6 +38,13 @@ main(int argc, char** argv)
         assertFalse(t1 != t3);
     });
 
+    tests.add_test("test_from_time_string", [] {
+        std::string time_string = "0:12:04";
+        auto t = otime::RationalTime(24 * (12 * 60 + 4), 24);
+        auto time_obj = otime::RationalTime::from_time_string(time_string, 24);
+        assertTrue(t.almost_equal(time_obj, 0.001));
+    });
+
     tests.run(argc, argv);
     return 0;
 }

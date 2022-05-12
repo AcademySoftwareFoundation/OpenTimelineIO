@@ -25,6 +25,27 @@ from .util import (
     load_or_create_level_seq,
 )
 
+__all__ = [
+    "import_otio",
+    "export_otio",
+    "HOOK_PRE_IMPORT",
+    "HOOK_PRE_IMPORT_ITEM",
+    "HOOK_POST_EXPORT",
+    "HOOK_POST_EXPORT_ITEM",
+    "METADATA_KEY_UE",
+    "METADATA_KEY_SUB_SEQ",
+    "MARKER_COLOR_MAP",
+    "get_level_seq_references",
+    "get_item_frame_ranges",
+    "get_sub_sequence_path",
+    "set_sub_sequence_path",
+    "get_root_level_seq_path",
+    "load_or_create_level_seq",
+    "uclasses",
+]
+
 if os.getenv("OTIO_UE_REGISTER_UCLASSES", "1") == "1":
     # Register import/export uclasses
     from . import uclasses
+
+    __all__.append("uclasses")

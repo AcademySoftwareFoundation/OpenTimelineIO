@@ -95,7 +95,7 @@ once) or a granular level (updating each stack and clip in-place).
 The root level sequence should be referenced by the timeline's top-level
 "tracks" stack. In practice though, implementors may find it is preferrable
 to create a custom menu command which uses the current level sequence as
-the root for a more adaptable user experience. A custom command coild also
+the root for a more adaptable user experience. A custom command could also
 leverage a GUI with embedded ``otioview`` for previewing the effects of a
 sequence update prior to committing to the change.
 

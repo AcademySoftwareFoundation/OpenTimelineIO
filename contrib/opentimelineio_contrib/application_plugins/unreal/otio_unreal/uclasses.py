@@ -55,7 +55,7 @@ class OTIOScriptedSequenceImportFactory(unreal.Factory):
             if level_seq_data.is_valid() and not task.replace_existing:
                 return False
 
-        level_seq, timeline = import_otio(
+        level_seq, _ = import_otio(
             task.filename,
             destination_path=task.destination_path,
             destination_name=task.destination_name,

@@ -151,7 +151,8 @@ class ShotSectionProxy(object):
             "post_roll_frames": self.section.get_post_roll_frames(),
             "can_loop": self.section.parameters.can_loop,
             "end_frame_offset": self.section.parameters.end_frame_offset.value,
-            "first_loop_start_frame_offset": self.section.parameters.first_loop_start_frame_offset.value,
+            "first_loop_start_frame_offset":
+            self.section.parameters.first_loop_start_frame_offset.value,
             "hierarchical_bias": self.section.parameters.hierarchical_bias,
             METADATA_KEY_SUB_SEQ: self.section.get_sequence().get_path_name(),
             "network_mask": self.section.get_editor_property("network_mask"),

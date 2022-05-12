@@ -3,7 +3,7 @@
 
 import unreal
 import opentimelineio as otio
-from opentimelineio.opentime import RationalTime, TimeRange
+from opentimelineio.opentime import TimeRange
 
 
 # Critical metadata keys for this adapter to work with level sequences

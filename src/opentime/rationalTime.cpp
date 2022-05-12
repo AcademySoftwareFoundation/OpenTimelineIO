@@ -222,11 +222,41 @@ RationalTime::from_time_string(
 
     // split the fields
     int last_pos = 0;
+    std::string colon = ":";
+    size_t separator_pos = time_string.find(colon);
+
+    if(std::string::npos == separator_pos)
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_STRING);
+        }
+        return RationalTime::_invalid_time;
+    }
 
     for (int i = 0; i < 2; i++)
     {
-        fields[i] = time_string.substr(last_pos, 2);
-        last_pos  = last_pos + 3;
+        size_t field_length = separator_pos - last_pos;
+        fields[i] = time_string.substr(last_pos, field_length);
+
+        // Prepare for the next iteration
+        last_pos = last_pos + field_length + 1;
+
+        if (i == 0)
+        {
+            separator_pos = time_string.substr(last_pos, std::string::npos).find(colon);
+
+            if (std::string::npos == separator_pos)
+            {
+                if (error_status)
+                {
+                    *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_STRING);
+                }
+                return RationalTime::_invalid_time;
+            }
+
+            separator_pos = separator_pos + field_length + 1;
+        }
     }
 
     fields[2] = time_string.substr(last_pos, time_string.length());

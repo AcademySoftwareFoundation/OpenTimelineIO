@@ -64,7 +64,7 @@ API References
 
 
 .. toctree::
-   :maxdepth: 10
+   :maxdepth: 3
    :caption: API References
 
    python_reference

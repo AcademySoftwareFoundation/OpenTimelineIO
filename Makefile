@@ -20,7 +20,6 @@ $(ccblue)	pip install -e .[dev]$(newline)$(ccend)
 endef
 
 # variables
-DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
 MAKE_PROG ?= make
 
 # external programs
@@ -117,6 +116,7 @@ ifdef COV_PROG
 endif
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
 	rm -vf *.whl
+	@cd docs; ${MAKE_PROG} clean
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:
@@ -185,8 +185,7 @@ doc-plugins-update:
 # generate documentation in html
 doc-html:
 	@# if you just want to build the docs yourself outside of RTD
-	@echo "Writing documentation to $(DOC_OUTPUT_DIR), set variable DOC_OUTPUT_DIR to change output directory."
-	@cd docs ; sphinx-build -j8 -E -b html -d $(DOC_OUTPUT_DIR)/doctrees . $(DOC_OUTPUT_DIR)/html
+	@cd docs; ${MAKE_PROG} html
 
 doc-cpp: 
 	@cd doxygen ; doxygen config/dox_config ; cd .. 

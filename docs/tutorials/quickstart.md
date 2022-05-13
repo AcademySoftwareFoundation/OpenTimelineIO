@@ -9,7 +9,7 @@ This is for users who wish to get started using the "OTIOView" application to in
 OTIOView has an additional prerequisite to OTIO:
 
 - Try `python -m pip install PySide2` or `python -m pip install PySide6`
-- If that doesn't work, try downloading PySide here: <a href="https://wiki.qt.io/Qt_for_Python" target="_blank">https://wiki.qt.io/Qt_for_Python</a>
+- If that doesn't work, try downloading PySide here: [](https://wiki.qt.io/Qt_for_Python)
 
 You probably want the prebuilt binary for your platform.  PySide generally includes a link to the appropriate version of Qt as well.
 
@@ -20,7 +20,7 @@ You probably want the prebuilt binary for your platform.  PySide generally inclu
 ## Configure Environment Variables for extra adapters
 
 By default, when you install OTIO you will only get the "Core" adapters, which include CMX EDL, Final Cut Pro 7 XML, and the built in JSON format.  In order to get access to the "contrib" adapters (which includes the maya sequencer, rv and others) you'll need to set some environment variables.  If you need support for these formats, please consult the 
-<a href="adapters.html" target="_blank"> Adapters documentation page for details</a>
+[Adapters documentation page for details](./adapters).
 
 ## Run OTIOView
 

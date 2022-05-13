@@ -45,8 +45,7 @@ class Adapter(plugins.PythonPlugin):
     to OTIO.  You should not need to extend this class to create new adapters
     for OTIO.
 
-    For more information:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+    For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html. # noqa
     """
     _serializable_label = "Adapter.1"
 

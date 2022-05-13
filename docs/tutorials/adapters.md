@@ -7,11 +7,11 @@ existing file formats.
 
 Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
-- <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101" target="_blank">Reference</a>
+- [Reference](https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
 
 Final Cut Pro X XML Format:
 - Status: Supported via the `fcpx_xml` adapter
-- <a href="https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html" target="_blank">Intro to FCP X XML</a>
+- [Intro to FCP X XML](https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html)
 
 ### Adobe Premiere Project ###
 
@@ -24,17 +24,17 @@ Final Cut Pro X XML Format:
 - Includes support for ASC_CDL color correction metadata
 - Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
 - http://xmil.biz/EDL-X/CMX3600.pdf
-- <a href="https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1" target="_blank">Reference</a>
+- [Reference](https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1)
 
 ### Avid AAF ###
 
 - Status: Reads and writes AAF compositions
   - includes clip, gaps, transitions but not markers or effects
-  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
-- <a href="https://static.amwa.tv/ms-01-aaf-object-spec.pdf" target="_blank">Spec</a>
-- <a href="https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf" target="_blank">Protocol</a>
+  - This adapter is still in progress, see the ongoing work here: [AAF Project](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1)
+- [Spec](https://static.amwa.tv/ms-01-aaf-object-spec.pdf)
+- [Protocol](https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf)
 
-- Depends on the <a href="https://github.com/markreidvfx/pyaaf2" target="_blank">`PyAAF2`</a> module, so either:
+- Depends on the [PyAAF2](https://github.com/markreidvfx/pyaaf2) module, so either:
     - `pip install pyaaf2`
     - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
 

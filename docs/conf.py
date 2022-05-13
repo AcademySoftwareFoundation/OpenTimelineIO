@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
+import re
 
 import sphinx_rtd_theme
 import opentimelineio
@@ -29,21 +30,13 @@ release = RELEASE
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
-    'sphinx.ext.doctest',
-    'sphinx.ext.coverage',
     'sphinx.ext.intersphinx',
-    'recommonmark',  # This plugin is used to format our markdown correctly
+    'myst_parser',  # This plugin is used to format our markdown correctly
 ]
 
 templates_path = ['_templates']
 
 exclude_patterns = ['_build', '_templates', '.venv']
-
-source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
-}
-
-source_suffix = ['.rst', '.md']
 
 pygments_style = 'sphinx'
 
@@ -100,6 +93,11 @@ autoclass_content = "both"
 autodoc_default_options = {
     'undoc-members': True
 }
+
+# -- Options for MySt-Parser ---------------------------------------------------------------
+# https://myst-parser.readthedocs.io/en/latest/sphinx/reference.html
+
+myst_heading_anchors = 5
 
 # -- Custom ----------------------------------------------------------------------------
 

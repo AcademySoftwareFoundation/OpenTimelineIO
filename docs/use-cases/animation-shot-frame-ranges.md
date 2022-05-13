@@ -5,7 +5,7 @@
 ## Summary
 
 This case is very similar to the
-<a href="../use-cases/shots-added-removed-from-cut.html" target="_blank">Shots Added/Removed from the Cut Use Case</a>.
+[](/use-cases/shots-added-removed-from-cut).
 The editorial and animation departments are working with a sequence of shots simultaneously over the course of a few
 weeks. The initial delivery of rendered video clips from animation to editorial provides enough footage for the
 editor(s) to work with, at least as a starting point. As the cut evolves, the editor(s) may need more frames at the
@@ -26,7 +26,7 @@ runs a Python script which compares the frame range of each shot used in the cut
 take of each shot being animated. Any shot that is too short must be extended and any shot that is more than 12 frames
 too long can be trimmed down. The revised shots are animated, re-rendered and re-delivered to editorial. Upon receiving
 these new deliveries, editorial will cut them into the sequence (see also
-<a href="../use-cases/conform-new-renders-into-cut.html" target="_blank">Use Case: Conform New Renders into the Cut</a>).
+[](/use-cases/conform-new-renders-into-cut)).
 For shots that used timing effects to temporarily extend them, those effects can be removed, since the new version of
 those shots is now longer.
 
@@ -35,8 +35,8 @@ those shots is now longer.
 - EDL reading
     - Clip names for video track
     - Source frame range for each clip
-    - <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
-- <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/1" target="_blank">AAF reading</a>
+    - [Timing effects](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39)
+- [AAF reading](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/1)
     - Clip names across all video tracks, subclips, etc.
     - Source frame range for each clip
     - Timing effects
@@ -48,7 +48,7 @@ those shots is now longer.
     - Name
     - Metadata
     - Timing effects
-- <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
+- [Timing effects](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39)
     - Source frame range of each clip as effected by timing effects.
 - Composition
     - Clips in lower tracks that are obscured (totally or partially) by overlapping clips in higher tracks are considered trimmed or hidden.

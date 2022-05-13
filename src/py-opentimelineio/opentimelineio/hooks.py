@@ -75,10 +75,6 @@ To delete a function the list:
 
 ----
 """
-from . import (
-    plugins,
-    core,
-)
 
 
 @core.register_type

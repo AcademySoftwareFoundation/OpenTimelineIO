@@ -28,11 +28,9 @@ Manifest path: `opentimelineio/adapters/builtin_adapters.plugin_manifest.json`
 
 Adapter plugins convert to and from OpenTimelineIO.
 
-<a href="adapters.html" target="_blank"> Adapters documentation page for more
-information</a>
+[Adapters documentation page for more information](./adapters).
 
-<a href="write-an-adapter.html" target="_blank">Tutorial on how to write an
-adapter.</a>
+[Tutorial on how to write an adapter](write-an-adapter).
 
 
 ### cmx_3600
@@ -269,8 +267,7 @@ Points in SVG are y-down.
 Media Linkers run after the adapter has read in the file and convert the media
 references into valid references where appropriate.
 
-<a href="write-a-media-linker.html" target="_blank"> Tutorial on how to write a
-Media Linker</a>
+[Tutorial on how to write a Media Linker](write-a-media-linker).
 
 
 
@@ -278,8 +275,7 @@ Media Linker</a>
 
 SchemaDef plugins define new external schema.
 
-<a href="write-a-schemadef.html" target="_blank"> Tutorial on how to write a
-schemadef</a>
+[Tutorial on how to write a schemadef](write-a-schemadef).
 
 
 
@@ -287,8 +283,7 @@ schemadef</a>
 
 HookScripts are extra plugins that run on _hooks_.
 
-<a href="write-a-hookscript.html" target="_blank">Tutorial on how to write a
-hookscript.</a>
+[Tutorial on how to write a hookscript](write-a-hookscript).
 
 
 
@@ -312,11 +307,9 @@ Manifest path: `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest
 
 Adapter plugins convert to and from OpenTimelineIO.
 
-<a href="adapters.html" target="_blank"> Adapters documentation page for more
-information</a>
+[Adapters documentation page for more information](./adapters).
 
-<a href="write-an-adapter.html" target="_blank">Tutorial on how to write an
-adapter.</a>
+[Tutorial on how to write an adapter](write-an-adapter).
 
 
 ### AAF
@@ -682,8 +675,7 @@ Necessary write method for otio adapter
 Media Linkers run after the adapter has read in the file and convert the media
 references into valid references where appropriate.
 
-<a href="write-a-media-linker.html" target="_blank"> Tutorial on how to write a
-Media Linker</a>
+[Tutorial on how to write a Media Linker](write-a-media-linker).
 
 
 
@@ -691,8 +683,7 @@ Media Linker</a>
 
 SchemaDef plugins define new external schema.
 
-<a href="write-a-schemadef.html" target="_blank"> Tutorial on how to write a
-schemadef</a>
+[Tutorial on how to write a schemadef](write-a-schemadef).
 
 
 ### xges
@@ -790,8 +781,7 @@ An OpenTimelineIO Schema for storing a GESTrack.
 
 HookScripts are extra plugins that run on _hooks_.
 
-<a href="write-a-hookscript.html" target="_blank">Tutorial on how to write a
-hookscript.</a>
+[Tutorial on how to write a hookscript](write-a-hookscript).
 
 
 

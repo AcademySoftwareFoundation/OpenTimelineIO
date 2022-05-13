@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"Version": 0.1,
+	"VersionName": "0.1",
+	"FriendlyName": "OpenTimelineIO (OTIO)",
+	"Description": "Provides support for OpenTimelineIO",
+	"Category": "Scripting",
+	"CreatedBy": "Contributors to the OpenTimelineIO project",
+	"CreatedByURL": "http://opentimeline.io/",
+	"DocsURL": "https://opentimelineio.readthedocs.io/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://lists.aswf.io/g/otio-discussion",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false
+}

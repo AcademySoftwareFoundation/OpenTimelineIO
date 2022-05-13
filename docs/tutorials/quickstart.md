@@ -106,7 +106,7 @@ To use opentime without opentimelineio, link with -lopentime instead, and compil
 
 # Debugging Quickstart
 
-### Linux / GDB / LLDB
+## Linux / GDB / LLDB
 
 To compile in debug mode, set the `OTIO_CXX_DEBUG_BUILD` environment variable to any value
 and then `python -m pip install`.
@@ -129,9 +129,9 @@ One handy tip is that you can trigger a breakpoint in gdb by inserting a SIGINT:
 
 GDB will automatically break when it hits the SIGINT line.
 
-## How to Generate the C++ Documentation: 
+# How to Generate the C++ Documentation:
 
-### Mac / Linux
+## Mac / Linux
 
 The doxygen docs can be generated with the following commands: 
 

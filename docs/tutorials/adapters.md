@@ -3,7 +3,7 @@
 OpenTimelineIO supports, or plans to support, conversion adapters for many
 existing file formats.
 
-### Final Cut Pro XML ###
+## Final Cut Pro XML
 
 Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
@@ -13,12 +13,12 @@ Final Cut Pro X XML Format:
 - Status: Supported via the `fcpx_xml` adapter
 - [Intro to FCP X XML](https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html)
 
-### Adobe Premiere Project ###
+## Adobe Premiere Project
 
 - Based on guidance from Adobe, we support interchange with Adobe Premiere via
     the FCP 7 XML format (see above).
 
-### CMX3600 EDL ###
+## CMX3600 EDL
 
 - Status: Supported via the `cmx_3600` adapter
 - Includes support for ASC_CDL color correction metadata
@@ -26,7 +26,7 @@ Final Cut Pro X XML Format:
 - http://xmil.biz/EDL-X/CMX3600.pdf
 - [Reference](https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1)
 
-### Avid AAF ###
+## Avid AAF
 
 - Status: Reads and writes AAF compositions
   - includes clip, gaps, transitions but not markers or effects
@@ -38,13 +38,12 @@ Final Cut Pro X XML Format:
     - `pip install pyaaf2`
     - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
 
-Contrib Adapters
-----------------
+# Contrib Adapters
 
 The contrib area hosts adapters which come from the community (_not_ supported
     by the core-otio team) and may require extra dependencies.
 
-### RV Session File ###
+## RV Session File
 
 - Status: write-only adapter supported via the `rv_session` adapter.
 - need to set environment variables to locate `py-interp` and `rvSession.py`
@@ -55,30 +54,30 @@ The contrib area hosts adapters which come from the community (_not_ supported
 - set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
 
-### Maya Sequencer ###
+## Maya Sequencer
 
 - Status: supported via the `maya_sequencer` adapter.
 - set `${OTIO_MAYA_PYTHON_BIN}` to point the location of `mayapy` within the maya
     installation.
 
-### HLS Playlist ###
+## HLS Playlist
 
 - Status: supported via the `hls_playlist` adapter.
 
-### Avid Log Exchange (ALE) ###
+## Avid Log Exchange (ALE)
 
 - Status: supported via the `ale` adapter.
 
-### Text Burn-in Adapter ###
+## Text Burn-in Adapter
 
 Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `burnins` adapter.
 
-### GStreamer Editing Services Adapter ###
+## GStreamer Editing Services Adapter
 
 - Status: supported via the `xges` adapter.
 
-### Kdenlive Adapter ###
+## Kdenlive Adapter
 
 - Status: supported via the kdenlive adapter

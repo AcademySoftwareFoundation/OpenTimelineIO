@@ -76,7 +76,7 @@ class Adapter(plugins.PythonPlugin):
         return true if adapter supports feature_string, which must be a key
         of the _FEATURE_MAP dictionary.
 
-        Will trigger a call to :py:meth:`.module`, which imports the plugin.
+        Will trigger a call to :meth:`.PythonPlugin.module`, which imports the plugin.
         """
 
         if feature_string.lower() not in _FEATURE_MAP:

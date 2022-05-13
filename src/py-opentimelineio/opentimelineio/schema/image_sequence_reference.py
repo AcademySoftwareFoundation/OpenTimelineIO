@@ -61,7 +61,7 @@ def frame_range_for_time_range(self, time_range):
     """Returns first and last frame numbers for
     the given time range in the reference.
 
-    :rtype: typle[int]
+    :rtype: tuple[int]
     :raises ValueError: if the provided time range is outside the available range.
     """
     return (

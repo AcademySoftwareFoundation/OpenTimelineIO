@@ -46,6 +46,7 @@ Tutorials
    tutorials/write-a-media-linker
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
+   tutorials/spatial-coordinates
    tutorials/versioning-schemas
 
 Use Cases

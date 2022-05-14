@@ -561,7 +561,13 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
             trim_duration = item.trimmed_range().duration.value
             available_start = track_duration - trim_start
             available_end = 0.0
-            available_range = _available_range_from_clip(item)
+
+            # If the Item's media reference does not have an available_range
+            # use the Item's source range
+            if item.media_reference and item.media_reference.available_range:
+                available_range = item.available_range()
+            else:
+                available_range = item.source_range
 
             src_start = track_duration
             src_end = track_duration - 1
@@ -578,9 +584,10 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 available_end = (available_start + available_duration -
                                  trim_start - trim_duration + track_duration - 1)
 
-                target_url = ''
-                if hasattr(item.media_reference, 'target_url'):
-                    target_url = item.media_reference.target_url or target_url
+                if item.media_reference and hasattr(item.media_reference, 'target_url'):
+                    target_url = item.media_reference.target_url
+                else:
+                    target_url = 'UNKNOWN'
 
                 clip_data = ClipData(src_start, src_end, available_start,
                                      available_end, available_duration, trim_start,
@@ -946,13 +953,17 @@ def _draw_clip(clip, svg_writer, extra_data=()):
                              stroke_color=COLORS['black'])
 
     # Draw media_reference info
-    available_range = _available_range_from_clip(clip)
-    str_available_range = _time_range_to_repr(available_range)
+    if clip.media_reference and clip.media_reference.available_range:
+        str_available_range = _time_range_to_repr(clip.available_range())
+    else:
+        str_available_range = 'UNKNOWN'
+
     available_range_text = 'available_range: {}'.format(str_available_range)
 
-    target_url = 'Media Unavailable'
-    if hasattr(clip.media_reference, 'target_url'):
-        target_url = clip.media_reference.target_url or target_url
+    if clip.media_reference and hasattr(clip.media_reference, 'target_url'):
+        target_url = clip.media_reference.target_url
+    else:
+        target_url = 'UNKNOWN'
 
     target_url_text = 'target_url: {}'.format(target_url)
 
@@ -1117,20 +1128,6 @@ def _draw_transition(transition, svg_writer, extra_data=()):
 
 def _draw_collection(collection, svg_writer, extra_data=()):
     pass
-
-
-def _available_range_from_clip(clip):
-    """
-    Default to a Clip's source range but
-    if the media reference has a defined available_range use that it instead
-
-    :param opentimelineio.schema.Clip clip:
-    :return: The clips available range
-    :rtype: opentimelineio.opentime.TimeRange
-    """
-    if clip.media_reference and clip.media_reference.available_range:
-        return clip.available_range()
-    return clip.source_range
 
 
 def _time_range_to_repr(time_range):

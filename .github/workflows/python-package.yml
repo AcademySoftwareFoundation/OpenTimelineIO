@@ -11,7 +11,7 @@ env:
 
 on:
   push:
-    branches: [ main, 'docs_test' ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 

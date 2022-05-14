@@ -62,7 +62,7 @@ parameters:
 *documentation*:
 
 ```
-An object that can be composed by :class:`~Track`\s.
+An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or :class:`.Stack`).
 ```
 
 parameters:
@@ -85,7 +85,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
 parameters:
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -103,7 +103,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -183,14 +183,14 @@ parameters:
 
 ```
 
-The RationalTime class represents a point in time at :math:`rt.value*(1/rt.rate)` seconds.
+The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
 It can be rescaled into another :class:`~RationalTime`'s rate.
 
 ```
 
 parameters:
 - *rate*: 
-- *value*: This is the value property doc
+- *value*: 
 
 ### TimeRange.1
 
@@ -280,7 +280,7 @@ parameters:
 
 ```
 
-The base editable object in OTIO.
+A :class:`~Clip` is a segment of editable media (usually audio or video).
 
 Contains a :class:`.MediaReference` and a trim on that media reference.
 
@@ -289,7 +289,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 parameters:
 - *active_media_reference_key*: 
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
 - *media_references*: 
 - *metadata*: 
@@ -344,6 +344,9 @@ parameters:
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
 
+Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
+Instead it affects the speed of the media displayed within that item.
+
 ### Gap.1
 
 *full module path*: `opentimelineio.schema.Gap`
@@ -356,7 +359,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -462,7 +465,7 @@ parameters:
 - *frame_step*: Step between frame numbers in file names.
 - *frame_zero_padding*: Number of digits to pad zeros out to in frame numbers.
 - *metadata*: 
-- *missing_frame_policy*: Directive for how frames in sequence not found on disk should be handled.
+- *missing_frame_policy*: Directive for how frames in sequence not found during playback or rendering should be handled.
 - *name*: 
 - *name_prefix*: Everything in the file name leading up to the frame number.
 - *name_suffix*: Everything after the frame number in the file name.
@@ -478,7 +481,7 @@ parameters:
 
 ```
 
-A time warp that applies a linear scale across the entire clip
+A time warp that applies a linear speed up or slow down across the entire clip.
 
 ```
 
@@ -488,6 +491,9 @@ parameters:
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
 
+Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
+Instead it affects the speed of the media displayed within that item.
+
 ### Marker.2
 
 *full module path*: `opentimelineio.schema.Marker`
@@ -495,7 +501,7 @@ parameters:
 *documentation*:
 
 ```
-Holds metadata over time on a timeline
+A marker indicates a moment or range of time on an item in a timeline, usually with a name, color or other metadata.
 ```
 
 parameters:
@@ -511,7 +517,11 @@ parameters:
 *documentation*:
 
 ```
+
 Represents media for which a concrete reference is missing.
+
+Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
+
 ```
 
 parameters:
@@ -528,11 +538,13 @@ parameters:
 
 ```
 
-A kind of composition which can hold any serializable object.
+A container which can hold an ordered list of any serializable objects. Note that this is not a :class:`.Composition` nor is it :class:`.Composable`.
 
-This composition approximates the concept of a bin - a collection of :class:`.SerializableObject`\s that do
-not have any compositing meaning, but can serialize to/from OTIO correctly, with metadata and
+This container approximates the concept of a bin - a collection of :class:`.SerializableObject`\s that do
+not have any compositional meaning, but can serialize to/from OTIO correctly, with metadata and
 a named collection.
+
+A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media references to a single file.
 
 ```
 
@@ -552,7 +564,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
 - *metadata*: 
 - *name*: 
@@ -565,7 +577,7 @@ parameters:
 *documentation*:
 
 ```
-Base Time Effect Class
+Base class for all effects that alter the timing of an item.
 ```
 
 parameters:
@@ -601,7 +613,7 @@ None
 
 parameters:
 - *effects*: 
-- *enabled*: If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.
+- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *kind*: 
 - *markers*: 
 - *metadata*: 
@@ -615,7 +627,7 @@ parameters:
 *documentation*:
 
 ```
-Represents a transition between two items.
+Represents a transition between the two adjacent items in a :class:`.Track`. For example, a cross dissolve or wipe.
 ```
 
 parameters:

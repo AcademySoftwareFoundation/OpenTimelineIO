@@ -15,23 +15,6 @@ They expose a ``link_media_reference`` function with the signature:
 To get context information, they can inspect the metadata on the clip and on
 the media reference. The :meth:`.Composable.parent` method can be used to find the containing
 track if metadata is stored there.
-
-Please raise an instance (or child instance) of
-:class:`.CannotLinkMediaError` if there is a problem linking the media.
-
-For example:
-
-.. code-block:: python
-
-   for clip in timeline.each_clip():
-       try:
-           new_mr = otio.media_linker.linked_media_reference(clip)
-           clip.media_reference = new_mr
-       except otio.exceptions.CannotLinkMediaError:
-           # or report the error
-           pass
-
-----
 """
 
 import os

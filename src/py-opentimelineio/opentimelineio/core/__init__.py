@@ -2,9 +2,6 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 from .. _otio import ( # noqa
-    # errors
-    CannotComputeAvailableRangeError,
-
     # classes
     Composable,
     Composition,
@@ -42,7 +39,6 @@ from . import ( # noqa
 )
 
 __all__ = [
-    'CannotComputeAvailableRangeError',
     'Composable',
     'Composition',
     'Item',

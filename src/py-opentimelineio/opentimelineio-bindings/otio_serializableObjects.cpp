@@ -204,7 +204,7 @@ static void define_bases2(py::module m) {
     EffectVectorProxy::define_py_class(m, "EffectVector");
 
     py::class_<Composable, SOWithMetadata,
-               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr(), "An object that can be composed by :class:`~Track`\\s.")
+               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr(), "An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or :class:`.Stack`).")
         .def(py::init([](std::string const& name,
                          py::object metadata) {
                           return new Composable(name, py_to_any_dictionary(metadata));
@@ -216,7 +216,7 @@ static void define_bases2(py::module m) {
         .def("overlapping", &Composable::overlapping);
 
     auto marker_class =
-        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), "Holds metadata over time on a timeline")
+        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), "A marker indicates a moment or range of time on an item in a timeline, usually with a name, color or other metadata.")
         .def(py::init([](
                         py::object name,
                         TimeRange marked_range,
@@ -256,11 +256,13 @@ static void define_bases2(py::module m) {
 
     py::class_<SerializableCollection, SOWithMetadata,
                managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr(), R"docstring(
-A kind of composition which can hold any serializable object.
+A container which can hold an ordered list of any serializable objects. Note that this is not a :class:`.Composition` nor is it :class:`.Composable`.
 
-This composition approximates the concept of a bin - a collection of :class:`.SerializableObject`\s that do
-not have any compositing meaning, but can serialize to/from OTIO correctly, with metadata and
+This container approximates the concept of a bin - a collection of :class:`.SerializableObject`\s that do
+not have any compositional meaning, but can serialize to/from OTIO correctly, with metadata and
 a named collection.
+
+A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media references to a single file.
 )docstring")
         .def(py::init([](std::string const& name, py::object children,
                          py::object metadata) {
@@ -319,7 +321,7 @@ static void define_items_and_compositions(py::module m) {
              "markers"_a = py::none(),
              "enabled"_a = true,
              py::arg_v("metadata"_a = py::none()))
-        .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. Analogous to 'mute' in various NLEs.")
+        .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.")
         .def_property("source_range", &Item::source_range, &Item::set_source_range)
         .def("available_range", [](Item* item) {
             return item->available_range(ErrorStatusHandler());
@@ -356,7 +358,7 @@ static void define_items_and_compositions(py::module m) {
             });
 
     auto transition_class =
-        py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr(), "Represents a transition between two items.")
+        py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr(), "Represents a transition between the two adjacent items in a :class:`.Track`. For example, a cross dissolve or wipe.")
         .def(py::init([](std::string const& name, std::string const& transition_type,
                          RationalTime in_offset, RationalTime out_offset,
                          py::object metadata) {
@@ -383,7 +385,6 @@ static void define_items_and_compositions(py::module m) {
 
     py::class_<Transition::Type>(transition_class, "Type", R"docstring(
 Enum encoding types of transitions.
-
 
 This is for representing “Dissolves” and “Wipes” defined by the multi-source effect as defined in section 7.6.3.2 of `SMPTE 258M-2004 <https://ieeexplore.ieee.org/servlet/opac?punumber=7291837>`_.
 
@@ -418,7 +419,7 @@ Other effects are handled by the :class:`Effect` class.
              py::arg_v("metadata"_a = py::none()));
 
     auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr(), R"docstring(
-The base editable object in OTIO.
+A :class:`~Clip` is a segment of editable media (usually audio or video).
 
 Contains a :class:`.MediaReference` and a trim on that media reference.
 )docstring")
@@ -653,7 +654,7 @@ static void define_effects(py::module m) {
              py::arg_v("metadata"_a = py::none()))
         .def_property("effect_name", &Effect::effect_name, &Effect::set_effect_name);
 
-    py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr(), "Base Time Effect Class")
+    py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr(), "Base class for all effects that alter the timing of an item.")
         .def(py::init([](std::string name,
                          std::string effect_name,
                          py::object metadata) {
@@ -663,7 +664,7 @@ static void define_effects(py::module m) {
              py::arg_v("metadata"_a = py::none()));
 
     py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr(), R"docstring(
-A time warp that applies a linear scale across the entire clip
+A time warp that applies a linear speed up or slow down across the entire clip.
 )docstring")
         .def(py::init([](std::string name,
                          double time_scalar,
@@ -673,7 +674,12 @@ A time warp that applies a linear scale across the entire clip
              py::arg_v("name"_a = std::string()),
              "time_scalar"_a = 1.0,
              py::arg_v("metadata"_a = py::none()))
-        .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar, "Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.");
+        .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar, R"docstring(
+Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
+
+Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
+Instead it affects the speed of the media displayed within that item.
+)docstring");
 
     py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr(), "Hold the first frame of the clip for the duration of the clip.")
         .def(py::init([](std::string name, py::object metadata) {
@@ -723,7 +729,11 @@ static void define_media_references(py::module m) {
 
 
     py::class_<MissingReference, MediaReference,
-               managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr(), "Represents media for which a concrete reference is missing.")
+               managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr(), R"docstring(
+Represents media for which a concrete reference is missing.
+
+Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
+)docstring")
         .def(py::init([](
                         py::object name,
                         optional<TimeRange> available_range,
@@ -872,7 +882,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
         .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step, "Step between frame numbers in file names.")
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate, "Frame rate if every frame in the sequence were played back.")
         .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding, "Number of digits to pad zeros out to in frame numbers.")
-        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Directive for how frames in sequence not found on disk should be handled.")
+        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Directive for how frames in sequence not found during playback or rendering should be handled.")
         .def("end_frame", &ImageSequenceReference::end_frame, "Last frame number in the sequence based on the :attr:`rate` and :attr:`.available_range`.")
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence, "Returns the number of images based on the :attr:`rate` and :attr:`.available_range`.")
         .def("frame_for_time", [](ImageSequenceReference *seq_ref, RationalTime time) {

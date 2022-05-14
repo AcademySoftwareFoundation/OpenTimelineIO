@@ -12,6 +12,7 @@ from . _otio import ( # noqa
 __all__ = [
     'OTIOError',
     'NotAChildError',
+    'CannotComputeAvailableRangeError',
     'UnsupportedSchemaError',
     'CouldNotReadFileError',
     'NoKnownAdapterForExtensionError',

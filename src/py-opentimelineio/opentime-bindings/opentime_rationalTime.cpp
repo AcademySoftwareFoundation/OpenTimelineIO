@@ -61,15 +61,15 @@ RationalTime _type_checked(py::object const& rhs, char const* op) {
 
 void opentime_rationalTime_bindings(py::module m) {
     py::class_<RationalTime>(m, "RationalTime", R"docstring(
-The RationalTime class represents a point in time at :math:`rt.value*(1/rt.rate)` seconds.
+The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
 It can be rescaled into another :class:`~RationalTime`'s rate.
 )docstring")
         .def(py::init<double, double>(), "value"_a = 0, "rate"_a = 1)
         .def("is_invalid_time", &RationalTime::is_invalid_time, R"docstring(
 Returns true if the time is invalid. The time is considered invalid if the value or the rate are a NaN value
-or if the value of the rate is smaller or equal to zero.
+or if the rate is less than or equal to zero.
 )docstring")
-        .def_property_readonly("value", &RationalTime::value, "This is the value property doc")
+        .def_property_readonly("value", &RationalTime::value)
         .def_property_readonly("rate", &RationalTime::rate)
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,
              "new_rate"_a, R"docstring(Returns the time value for time converted to new_rate.)docstring")
@@ -98,10 +98,10 @@ Compute the duration of samples from first to last (including last). This is not
 
 For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Result will be in the rate of start_time.
 )docstring")
-        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a, "Returns true is the rate is a known valid timecode.")
+        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a, "Returns true if the rate is valid for use with timecode.")
         .def_static("nearest_valid_timecode_rate", &RationalTime::nearest_valid_timecode_rate, "rate"_a,
             "Returns the first valid timecode rate that has the least difference from the given value.")
-        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a, "Turn a frame number and rate into a time object.")
+        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a, "Turn a frame number and rate into a :class:`~RationalTime` object.")
         .def_static("from_seconds", static_cast<RationalTime (*)(double, double)> (&RationalTime::from_seconds), "seconds"_a, "rate"_a)
         .def_static("from_seconds", static_cast<RationalTime (*)(double)> (&RationalTime::from_seconds), "seconds"_a)
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames, "Returns the frame number based on the current rate.")

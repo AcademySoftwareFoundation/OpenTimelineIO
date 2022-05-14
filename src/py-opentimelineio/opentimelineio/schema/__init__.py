@@ -60,6 +60,7 @@ def timeline_from_clips(clips):
     return Timeline(tracks=[trck])
 
 __all__ = [
+    'Box2d',
     'Clip',
     'Effect',
     'TimeEffect',
@@ -76,5 +77,6 @@ __all__ = [
     'Timeline',
     'Transition',
     'SchemaDef',
-    'timeline_from_clips'
+    'timeline_from_clips',
+    'V2d'
 ]

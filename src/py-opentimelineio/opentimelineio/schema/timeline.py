@@ -22,7 +22,7 @@ def __repr__(self):
 
 @add_method(_otio.Timeline)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
-    """ enerator that returns each child contained in the timeline
+    """Generator that returns each child contained in the timeline
     in the order in which it is found.
 
     .. deprecated:: 0.14.0

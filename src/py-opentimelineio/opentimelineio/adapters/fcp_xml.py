@@ -561,9 +561,7 @@ class FCP7XMLParser:
         1. Inheritance
         2. The id Attribute
 
-    .. seealso:: https://developer.apple.com/library/archive/documentation/\
-            AppleApplications/Reference/FinalCutPro_XML/Basics/Basics.html\
-            #//apple_ref/doc/uid/TP30001154-TPXREF102
+    .. seealso:: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/Basics/Basics.html#//apple_ref/doc/uid/TP30001154-TPXREF102 # noqa
 
     Inheritance is implemented using a _Context object that is pushed down
     through layers of parsing. A given parsing method is passed the element to

@@ -12,8 +12,7 @@ from xml.dom import minidom
 
 # python
 import math
-from random import seed
-from random import random
+import random
 
 random_colors_used = []
 
@@ -48,7 +47,7 @@ class Color:
 
     @staticmethod
     def __get_random_color():
-        return Color(random(), random(), random(), 1.0)
+        return Color(random.random(), random.random(), random.random(), 1.0)
 
     @staticmethod
     def __color_distance(c1, c2):
@@ -1101,7 +1100,7 @@ def convert_otio_to_svg(timeline, width, height):
                            font_family='sans-serif', image_margin=20.0, font_size=15.0,
                            arrow_label_margin=5.0)
     random_colors_used = []
-    seed(100)
+    random.seed(100)
     draw_item(timeline, svg_writer, ())
 
     return svg_writer.get_image()

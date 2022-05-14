@@ -4,7 +4,7 @@
 """Implementation of the OTIO internal `Adapter` system.
 
 For information on writing adapters, please consult:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html # noqa
 """
 
 import inspect

@@ -255,9 +255,8 @@ class SVGWriter:
                           label='',
                           label_size=10.0):
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
-        elem_attrs = {"transform": "translate({:.8f},{:.8f})".format(svg_rect.origin.x,
-                                                                     svg_rect.origin.y)}
-        g_elem = SubElement(self.svg_elem, "g", elem_attrs)
+        svg_xform_attrs = _transform_elem_attrs_from_rect(svg_rect)
+        g_elem = SubElement(self.svg_elem, "g", svg_xform_attrs)
 
         elem_attrs = {"width": svg_rect.width,
                       "height": svg_rect.height,
@@ -310,9 +309,8 @@ class SVGWriter:
                                              label='',
                                              label_size=10.0):
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
-        elem_attrs = {"transform": "translate({:.8f},{:.8f})".format(svg_rect.origin.x,
-                                                                     svg_rect.origin.y)}
-        g_elem = SubElement(self.svg_elem, "g", elem_attrs)
+        svg_xform_attrs = _transform_elem_attrs_from_rect(svg_rect)
+        g_elem = SubElement(self.svg_elem, "g", svg_xform_attrs)
 
         elem_attrs = {"width": svg_rect.width,
                       "height": svg_rect.height,
@@ -377,9 +375,8 @@ class SVGWriter:
                                             label_size=10.0,
                                             stroke_width=2.0):
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
-        elem_attrs = {"transform": "translate({:.8f},{:.8f})".format(svg_rect.origin.x,
-                                                                     svg_rect.origin.y)}
-        g_elem = SubElement(self.svg_elem, "g", _map_to_element_attrs(elem_attrs))
+        svg_xform_attrs = _transform_elem_attrs_from_rect(svg_rect)
+        g_elem = SubElement(self.svg_elem, "g", svg_xform_attrs)
 
         rect_attrs = {"height": svg_rect.height,
                       "width": svg_rect.width,
@@ -1183,6 +1180,18 @@ def _map_to_element_attrs(data):
 
         elem_attrs[key] = value
     return elem_attrs
+
+
+def _transform_elem_attrs_from_rect(rect):
+    """
+    Generate the XML Element transform attrs from a :class:`Rect`
+
+    :param Rect rect:
+    :rtype: dict
+    """
+    x_str = _elem_attr_to_str(rect.origin.x)
+    y_str = _elem_attr_to_str(rect.origin.y)
+    return {"transform": "translate({},{})".format(x_str, y_str)}
 
 
 def _elem_attr_to_str(value):

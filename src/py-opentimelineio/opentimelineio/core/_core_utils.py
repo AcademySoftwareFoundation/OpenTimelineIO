@@ -231,7 +231,7 @@ def _add_mutable_mapping_methods(mapClass):
                     and name not in klass.__abstractmethods__
             ):
                 setattr(mapClass, name, _im_func(func))
-                if name.startswith('__') or name.endswith('__'):
+                if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
                     continue
 
                 # Hide the method frm Sphinx doc.
@@ -382,7 +382,7 @@ def _add_mutable_sequence_methods(
                         and name not in klass.__abstractmethods__
                 ):
                     setattr(sequenceClass, name, _im_func(func))
-                    if name.startswith('__') or name.endswith('__'):
+                    if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
                         continue
 
                     # Hide the method frm Sphinx doc.

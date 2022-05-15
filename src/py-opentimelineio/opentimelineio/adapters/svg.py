@@ -14,6 +14,18 @@ from xml.dom import minidom
 # otio
 import opentimelineio as otio
 
+AVAILABLE_RANGE_LABEL = "available_range: {}"
+CHILDREN_LABEL = "children[{}]"
+CLIP_LABEL = "Clip-{}"
+GLOBAL_START_TIME_LABEL = "global_start_time: {}"
+IN_OFFSET_LABEL = "in_offset: {}"
+MEDIA_REFERENCE_LABEL = "media_reference"
+OUT_OFFSET_LABEL = "out_offset: {}"
+SOURCE_RANGE_LABEL = "source_range: {}"
+TARGET_URL_LABEL = "target_url: {}"
+TRIMMED_RANGE_LABEL = "trimmed_range() -> {}"
+UNKNOWN_LABEL = "UNKNOWN"
+
 RANDOM_COLORS_USED = []
 
 
@@ -109,9 +121,6 @@ COLORS = {
     'dark_gray': Color(0.66, 0.66, 0.66, 1.0),
     'dark_gray_translucent': Color(0.66, 0.66, 0.66, 0.7843)
 }
-
-
-NONE_TEXT = 'None'
 
 
 class Point:
@@ -338,7 +347,7 @@ class SVGWriter:
                                _map_to_element_attrs(text_elem_attrs))
         text_elem.text = label
 
-    def draw_solid_rect(self, rect, fill_color=COLORS['white']):
+    def draw_solid_rect(self, rect, fill_color=COLORS["white"]):
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
 
         solid_attrs = {"height": svg_rect.height,
@@ -584,7 +593,7 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 if item.media_reference and hasattr(item.media_reference, 'target_url'):
                     target_url = item.media_reference.target_url
                 else:
-                    target_url = 'UNKNOWN'
+                    target_url = UNKNOWN_LABEL
 
                 clip_data = ClipData(src_start, src_end, available_start,
                                      available_end, available_duration, trim_start,
@@ -658,13 +667,15 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                             svg_writer.vertical_drawing_index *
                             svg_writer.clip_rect_height)
     svg_writer.max_total_duration = max(svg_writer.tracks_duration)
-    label_text_size = 0.4 * svg_writer.clip_rect_height
+
     rect = Rect(timeline_origin,
                 svg_writer.max_total_duration * svg_writer.scale_x,
                 svg_writer.clip_rect_height)
-    svg_writer.draw_labeled_solid_rect_with_border(rect,
-                                                   label="Timeline",
-                                                   label_size=label_text_size)
+    svg_writer.draw_labeled_solid_rect_with_border(
+        rect,
+        label="Timeline",
+        label_size=0.4 * svg_writer.clip_rect_height
+    )
     time_marker_height = 0.15 * svg_writer.clip_rect_height
     for i in range(1, int(svg_writer.max_total_duration)):
         start_pt = Point(svg_writer.x_origin + (i * svg_writer.scale_x),
@@ -687,12 +698,13 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
     svg_writer.draw_text('tracks', arrow_label_location, svg_writer.font_size)
 
     # Draw global_start_time info
-    time_repr = _time_range_to_repr(timeline.global_start_time)
-    start_time_text = 'global_start_time: {}'.format(time_repr)
-
     start_time_location = Point(timeline_origin.x + svg_writer.font_size,
                                 timeline_origin.y - svg_writer.font_size)
-    svg_writer.draw_text(start_time_text, start_time_location, svg_writer.font_size)
+    svg_writer.draw_text(
+        GLOBAL_START_TIME_LABEL.format(_range_to_repr(timeline.global_start_time)),
+        start_time_location,
+        svg_writer.font_size
+    )
 
     # Draw stack
     draw_item(timeline.tracks, svg_writer,
@@ -708,7 +720,6 @@ def _draw_stack(stack, svg_writer, extra_data=()):
                          svg_writer.image_height - svg_writer.image_margin -
                          svg_writer.vertical_drawing_index *
                          svg_writer.clip_rect_height)
-    stack_text_size = 0.4 * svg_writer.clip_rect_height
 
     rect = Rect(stack_origin,
                 stack_duration * svg_writer.scale_x,
@@ -717,7 +728,7 @@ def _draw_stack(stack, svg_writer, extra_data=()):
         rect,
         label="Stack",
         fill_color=COLORS['dark_gray_translucent'],
-        label_size=stack_text_size
+        label_size=0.4 * svg_writer.clip_rect_height
     )
 
     time_marker_height = 0.15 * svg_writer.clip_rect_height
@@ -761,27 +772,30 @@ def _draw_stack(stack, svg_writer, extra_data=()):
                               stroke_width=2.0,
                               stroke_color=COLORS['black'])
 
-    arrow_label_text = 'children[{}]'.format(len(svg_writer.trackwise_clip_count))
     arrow_label_location = Point(arrow_start.x + svg_writer.arrow_label_margin,
                                  stack_origin.y - svg_writer.clip_rect_height * 0.5)
-    svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
+    svg_writer.draw_text(
+        CHILDREN_LABEL.format(len(svg_writer.trackwise_clip_count)),
+        arrow_label_location,
+        svg_writer.font_size
+    )
 
     # Draw range info
-    str_trimmed_range = _time_range_to_repr(stack.trimmed_range())
-    trimmed_range_text = 'trimmed_range() -> {}'.format(str_trimmed_range)
-
-    str_source_range = _time_range_to_repr(stack.source_range)
-    source_range_text = 'source_range: {}'.format(str_source_range)
-
     trimmed_range_location = Point(stack_origin.x + svg_writer.font_size,
                                    stack_origin.y + svg_writer.clip_rect_height +
                                    svg_writer.text_margin)
+    svg_writer.draw_text(
+        TRIMMED_RANGE_LABEL.format(_range_to_repr(stack.trimmed_range())),
+        trimmed_range_location,
+        svg_writer.font_size
+    )
     source_range_location = Point(stack_origin.x + svg_writer.font_size,
                                   stack_origin.y - svg_writer.font_size)
-    svg_writer.draw_text(trimmed_range_text,
-                         trimmed_range_location,
-                         svg_writer.font_size)
-    svg_writer.draw_text(source_range_text, source_range_location, svg_writer.font_size)
+    svg_writer.draw_text(
+        SOURCE_RANGE_LABEL.format(_range_to_repr(stack.source_range)),
+        source_range_location,
+        svg_writer.font_size
+    )
 
 
 def _draw_track(track, svg_writer, extra_data=()):
@@ -794,17 +808,15 @@ def _draw_track(track, svg_writer, extra_data=()):
                          svg_writer.image_height - svg_writer.image_margin -
                          svg_writer.vertical_drawing_index *
                          svg_writer.clip_rect_height)
-    track_text_size = 0.4 * svg_writer.clip_rect_height
-    track_text = track.name or 'Track'
 
     track_rect = Rect(track_origin,
                       track_duration * svg_writer.scale_x,
                       svg_writer.clip_rect_height)
     svg_writer.draw_labeled_solid_rect_with_border(
-        track_rect,
-        label=track_text,
-        fill_color=COLORS['dark_gray_translucent'],
-        label_size=track_text_size
+        rect=track_rect,
+        label=track.name or "Track",
+        fill_color=COLORS["dark_gray_translucent"],
+        label_size=0.4 * svg_writer.clip_rect_height,
     )
     time_marker_height = 0.15 * svg_writer.clip_rect_height
     for i in range(1, int(track_duration)):
@@ -845,27 +857,29 @@ def _draw_track(track, svg_writer, extra_data=()):
                           end_point=arrow_end,
                           stroke_width=2.0,
                           stroke_color=COLORS['black'])
-    arrow_label_text = 'children[{}]'.format(item_count + transition_count)
+    arrow_label_text = CHILDREN_LABEL.format(item_count + transition_count)
     arrow_label_location = Point(arrow_start.x + svg_writer.arrow_label_margin,
                                  track_origin.y - svg_writer.clip_rect_height * 0.5)
     svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
 
     # Draw range info
-    str_trimmed_range = _time_range_to_repr(track.trimmed_range())
-    trimmed_range_text = 'trimmed_range() -> {}'.format(str_trimmed_range)
-
-    str_source_range = _time_range_to_repr(track.source_range)
-    source_range_text = 'source_range: {}'.format(str_source_range)
-
-    trimmed_range_location = Point(track_origin.x + svg_writer.font_size,
-                                   track_origin.y + svg_writer.clip_rect_height +
-                                   svg_writer.text_margin)
-    source_range_location = Point(track_origin.x + svg_writer.font_size,
-                                  track_origin.y - svg_writer.font_size)
-    svg_writer.draw_text(trimmed_range_text,
-                         trimmed_range_location,
-                         svg_writer.font_size)
-    svg_writer.draw_text(source_range_text, source_range_location, svg_writer.font_size)
+    trimmed_range_location = Point(
+        track_origin.x + svg_writer.font_size,
+        track_origin.y + svg_writer.clip_rect_height + svg_writer.text_margin,
+    )
+    svg_writer.draw_text(
+        TRIMMED_RANGE_LABEL.format(_range_to_repr(track.trimmed_range())),
+        trimmed_range_location,
+        svg_writer.font_size
+    )
+    source_range_location = Point(
+        track_origin.x + svg_writer.font_size, track_origin.y - svg_writer.font_size
+    )
+    svg_writer.draw_text(
+        SOURCE_RANGE_LABEL.format(_range_to_repr(track.source_range)),
+        source_range_location,
+        svg_writer.font_size
+    )
 
 
 # Draw clip
@@ -880,12 +894,14 @@ def _draw_clip(clip, svg_writer, extra_data=()):
     )
     clip_rect = Rect(clip_origin, clip_data.trim_duration * svg_writer.scale_x,
                      svg_writer.clip_rect_height)
-    clip_text_size = 0.4 * svg_writer.clip_rect_height
-    clip_text = clip.name or 'Clip-{}'.format(clip_data.clip_id)
-    svg_writer.draw_labeled_solid_rect_with_border(clip_rect,
-                                                   label=clip_text,
-                                                   fill_color=clip_color,
-                                                   label_size=clip_text_size)
+
+    svg_writer.draw_labeled_solid_rect_with_border(
+        clip_rect,
+        label=clip.name or CLIP_LABEL.format(clip_data.clip_id),
+        fill_color=clip_color,
+        label_size=0.4 * svg_writer.clip_rect_height
+    )
+
     time_marker_height = 0.15 * svg_writer.clip_rect_height
 
     for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
@@ -893,22 +909,25 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         svg_writer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                              stroke_color=COLORS['black'])
-    # Draw range info
-    str_trimmed_range = _time_range_to_repr(clip.trimmed_range())
-    trimmed_range_text = 'trimmed_range() -> {}'.format(str_trimmed_range)
 
-    str_source_range = _time_range_to_repr(clip.source_range)
-    source_range_text = 'source_range: {}'.format(str_source_range)
-
+    # Draw trimmed range info
     trimmed_range_location = Point(clip_origin.x + svg_writer.font_size,
                                    clip_origin.y + svg_writer.clip_rect_height +
                                    svg_writer.text_margin)
+    svg_writer.draw_text(
+        TRIMMED_RANGE_LABEL.format(_range_to_repr(clip.trimmed_range())),
+        trimmed_range_location,
+        svg_writer.font_size
+    )
+
+    # Draw source range info
     source_range_location = Point(clip_origin.x + svg_writer.font_size,
                                   clip_origin.y - svg_writer.font_size)
-    svg_writer.draw_text(trimmed_range_text,
-                         trimmed_range_location,
-                         svg_writer.font_size)
-    svg_writer.draw_text(source_range_text, source_range_location, svg_writer.font_size)
+    svg_writer.draw_text(
+        SOURCE_RANGE_LABEL.format(_range_to_repr(clip.source_range)),
+        source_range_location,
+        svg_writer.font_size
+    )
 
     # Draw media reference
     trim_media_origin = Point(
@@ -929,16 +948,16 @@ def _draw_clip(clip, svg_writer, extra_data=()):
                           svg_writer.clip_rect_height)
     svg_writer.draw_rect(media_ref_rect)
 
-    media_text_size = 0.4 * svg_writer.clip_rect_height
-    media_text = clip.media_reference.name or 'Media-{}'.format(clip_data.clip_id)
-
+    # Draw lableled rect
     lbl_media_rect = Rect(trim_media_origin,
                           clip_data.trim_duration * svg_writer.scale_x,
                           svg_writer.clip_rect_height)
-    svg_writer.draw_labeled_solid_rect_with_border(lbl_media_rect,
-                                                   label=media_text,
-                                                   fill_color=clip_color,
-                                                   label_size=media_text_size)
+    svg_writer.draw_labeled_solid_rect_with_border(
+        lbl_media_rect,
+        label=clip.media_reference.name or "Media-{}".format(clip_data.clip_id),
+        fill_color=clip_color,
+        label_size=0.4 * svg_writer.clip_rect_height
+    )
     for i in range(int(clip_data.available_start), int(clip_data.available_end) + 1):
         start_pt = Point(svg_writer.x_origin + (i * svg_writer.scale_x), media_origin.y)
         if start_pt.x < media_origin.x:
@@ -951,32 +970,36 @@ def _draw_clip(clip, svg_writer, extra_data=()):
 
     # Draw media_reference info
     if clip.media_reference and clip.media_reference.available_range:
-        str_available_range = _time_range_to_repr(clip.available_range())
+        str_available_range = _range_to_repr(clip.available_range())
     else:
-        str_available_range = 'UNKNOWN'
-
-    available_range_text = 'available_range: {}'.format(str_available_range)
-
-    if clip.media_reference and hasattr(clip.media_reference, 'target_url'):
-        target_url = clip.media_reference.target_url
-    else:
-        target_url = 'UNKNOWN'
-
-    target_url_text = 'target_url: {}'.format(target_url)
+        str_available_range = UNKNOWN_LABEL
 
     available_range_location = Point(media_origin.x + svg_writer.font_size,
                                      media_origin.y - svg_writer.font_size)
+    svg_writer.draw_text(
+        AVAILABLE_RANGE_LABEL.format(str_available_range),
+        available_range_location,
+        svg_writer.font_size
+    )
+
+    # Draw target_rul
+    if clip.media_reference and hasattr(clip.media_reference, 'target_url'):
+        target_url = clip.media_reference.target_url
+    else:
+        target_url = UNKNOWN_LABEL
     target_url_location = Point(media_origin.x + svg_writer.font_size,
                                 media_origin.y - 2.0 * svg_writer.font_size)
-    svg_writer.draw_text(available_range_text,
-                         available_range_location,
-                         svg_writer.font_size)
-    svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)
-    # Draw arrow from clip to media reference
-    clip_media_height_difference = (((clip_count - 1) * 2.0 + 1)
-                                    * svg_writer.clip_rect_height)
+    svg_writer.draw_text(
+        TARGET_URL_LABEL.format(target_url),
+        target_url_location,
+        svg_writer.font_size
+    )
 
+    # Draw arrow from clip to media reference
+    calc_clip_count = (clip_count - 1) * 2.0 + 1
+    clip_media_height_difference = calc_clip_count * svg_writer.clip_rect_height
     media_arrow_x = clip_origin.x + (clip_data.trim_duration * svg_writer.scale_x) * 0.5
+
     media_arrow_start = Point(media_arrow_x, clip_origin.y - svg_writer.arrow_margin)
     media_arrow_end = Point(
         media_arrow_x,
@@ -984,12 +1007,11 @@ def _draw_clip(clip, svg_writer, extra_data=()):
     )
     svg_writer.draw_arrow(start_point=media_arrow_start, end_point=media_arrow_end,
                           stroke_width=2.0, stroke_color=COLORS['black'])
-    arrow_label_location = Point(media_arrow_start.x + svg_writer.arrow_label_margin,
-                                 media_arrow_start.y
-                                 - svg_writer.clip_rect_height * 0.5)
 
-    arrow_label_text = 'media_reference'
-    svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
+    arrow_lbl_height = Point(media_arrow_start.x + svg_writer.arrow_label_margin,
+                             media_arrow_start.y - svg_writer.clip_rect_height * 0.5)
+    svg_writer.draw_text(MEDIA_REFERENCE_LABEL, arrow_lbl_height, svg_writer.font_size)
+
     # Draw media transition sections
     if clip_data.transition_end is not None:
         cut_x = clip_origin.x + clip_rect.width
@@ -1052,43 +1074,47 @@ def _draw_gap(gap, svg_writer, extra_data=()):
     gap_origin = Point(svg_writer.x_origin + (gap_data.src_start * svg_writer.scale_x),
                        svg_writer.image_height - svg_writer.image_margin -
                        svg_writer.vertical_drawing_index * svg_writer.clip_rect_height)
-    gap_text = 'Gap'
-    gap_text_size = 0.4 * svg_writer.clip_rect_height
+
     gap_rect = Rect(gap_origin,
                     gap_data.trim_duration * svg_writer.scale_x,
                     svg_writer.clip_rect_height)
-    svg_writer.draw_labeled_dashed_rect_with_border(gap_rect,
-                                                    label=gap_text,
-                                                    label_size=gap_text_size)
+    svg_writer.draw_labeled_dashed_rect_with_border(
+        gap_rect,
+        label='Gap',
+        label_size=0.4 * svg_writer.clip_rect_height
+    )
+
     time_marker_height = 0.15 * svg_writer.clip_rect_height
     for i in range(int(gap_data.src_start), int(gap_data.src_end) + 1):
         start_pt = Point(svg_writer.x_origin + (i * svg_writer.scale_x), gap_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         svg_writer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                              stroke_color=COLORS['black'])
-    # Draw range info
-    str_trimmed_range = _time_range_to_repr(gap.trimmed_range())
-    trimmed_range_text = 'trimmed_range() -> {}'.format(str_trimmed_range)
 
-    str_source_range = _time_range_to_repr(gap.source_range)
-    source_range_text = 'source_range: {}'.format(str_source_range)
-    font_size = svg_writer.font_size
-
-    trimmed_range_location = Point(gap_origin.x + font_size,
+    # Draw trimmed range info
+    trimmed_range_location = Point(gap_origin.x + svg_writer.font_size,
                                    gap_origin.y + svg_writer.clip_rect_height +
                                    svg_writer.text_margin)
-    source_range_location = Point(gap_origin.x + font_size,
-                                  gap_origin.y - font_size)
-    svg_writer.draw_text(trimmed_range_text, trimmed_range_location, font_size)
-    svg_writer.draw_text(source_range_text, source_range_location, font_size)
+    svg_writer.draw_text(
+        TRIMMED_RANGE_LABEL.format(_range_to_repr(gap.trimmed_range())),
+        trimmed_range_location,
+        svg_writer.font_size
+    )
+
+    # Draw source range info
+    source_range_location = Point(gap_origin.x + svg_writer.font_size,
+                                  gap_origin.y - svg_writer.font_size)
+    svg_writer.draw_text(
+        SOURCE_RANGE_LABEL.format(_range_to_repr(gap.source_range)),
+        source_range_location,
+        svg_writer.font_size
+    )
 
 
 def _draw_transition(transition, svg_writer, extra_data=()):
     cut_x = extra_data[0]
     in_offset = transition.in_offset.value
     out_offset = transition.out_offset.value
-    transition_name = transition.name or 'Transition'
-    transition_name_size = 0.4 * svg_writer.clip_rect_height
 
     transition_origin = Point(cut_x - (in_offset * svg_writer.scale_x),
                               svg_writer.image_height - svg_writer.image_margin -
@@ -1098,8 +1124,8 @@ def _draw_transition(transition, svg_writer, extra_data=()):
                            (in_offset + out_offset) * svg_writer.scale_x,
                            svg_writer.clip_rect_height)
     svg_writer.draw_labeled_rect(transition_rect,
-                                 label=transition_name,
-                                 label_size=transition_name_size)
+                                 label=transition.name or "Transition",
+                                 label_size=0.4 * svg_writer.clip_rect_height)
     line_end = Point(transition_origin.x + transition_rect.width,
                      transition_origin.y + transition_rect.height)
     svg_writer.draw_line(transition_origin, line_end, stroke_width=1.0,
@@ -1108,10 +1134,17 @@ def _draw_transition(transition, svg_writer, extra_data=()):
                                transition_origin.y - svg_writer.font_size)
     out_offset_location = Point(transition_origin.x + svg_writer.font_size,
                                 transition_origin.y - 2.0 * svg_writer.font_size)
-    in_offset_text = 'in_offset: {}'.format(_float_to_repr(in_offset))
-    out_offset_text = 'out_offset: {}'.format(_float_to_repr(out_offset))
-    svg_writer.draw_text(in_offset_text, in_offset_location, svg_writer.font_size)
-    svg_writer.draw_text(out_offset_text, out_offset_location, svg_writer.font_size)
+
+    svg_writer.draw_text(
+        IN_OFFSET_LABEL.format(_float_to_repr(in_offset)),
+        in_offset_location,
+        svg_writer.font_size
+    )
+    svg_writer.draw_text(
+        OUT_OFFSET_LABEL.format(_float_to_repr(out_offset)),
+        out_offset_location,
+        svg_writer.font_size
+    )
     cut_location = Point(cut_x, transition_origin.y)
     cut_line_end = Point(cut_x,
                          svg_writer.image_height - svg_writer.image_margin -
@@ -1127,7 +1160,7 @@ def _draw_collection(collection, svg_writer, extra_data=()):
     pass
 
 
-def _time_range_to_repr(time_range):
+def _range_to_repr(time_range):
     """
     Converts a TimeRange's value to a repr for formatting in strings
 
@@ -1137,11 +1170,11 @@ def _time_range_to_repr(time_range):
     """
 
     if time_range is None:
-        return NONE_TEXT
+        return UNKNOWN_LABEL
 
     start_time = _float_to_repr(time_range.start_time.value)
     duration = _float_to_repr(time_range.duration.value)
-    return '{}, {}'.format(start_time, duration)
+    return "{}, {}".format(start_time, duration)
 
 
 def _float_to_repr(value):

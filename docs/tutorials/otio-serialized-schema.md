@@ -62,7 +62,9 @@ parameters:
 *documentation*:
 
 ```
+
 An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or :class:`.Stack`).
+
 ```
 
 parameters:

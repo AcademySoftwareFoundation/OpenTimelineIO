@@ -203,18 +203,6 @@ static void define_bases2(py::module m) {
     MarkerVectorProxy::define_py_class(m, "MarkerVector");
     EffectVectorProxy::define_py_class(m, "EffectVector");
 
-    py::class_<Composable, SOWithMetadata,
-               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr(), "An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or :class:`.Stack`).")
-        .def(py::init([](std::string const& name,
-                         py::object metadata) {
-                          return new Composable(name, py_to_any_dictionary(metadata));
-                      }),
-             py::arg_v("name"_a = std::string()),
-             py::arg_v("metadata"_a = py::none()))
-        .def("parent", &Composable::parent)
-        .def("visible", &Composable::visible)
-        .def("overlapping", &Composable::overlapping);
-
     auto marker_class =
         py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), "A marker indicates a moment or range of time on an item in a timeline, usually with a name, color or other metadata.")
         .def(py::init([](
@@ -307,6 +295,11 @@ A :class:`~SerializableCollection` is useful for serializing multiple timelines,
 }
 
 static void define_items_and_compositions(py::module m) {
+    auto composable_class = py::class_<Composable, SOWithMetadata,
+               managing_ptr<Composable>>(m, "Composable", py::dynamic_attr(), R"docstring(
+An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or :class:`.Stack`).
+)docstring");
+
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
                          py::object effects, py::object markers, py::bool_ enabled, py::object metadata) {
@@ -537,6 +530,17 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def("__iter__", [](Composition* c) {
                 return new CompositionIterator(c);
             });
+
+    composable_class
+        .def(py::init([](std::string const& name,
+                         py::object metadata) {
+                          return new Composable(name, py_to_any_dictionary(metadata));
+                      }),
+             py::arg_v("name"_a = std::string()),
+             py::arg_v("metadata"_a = py::none()))
+        .def("parent", &Composable::parent)
+        .def("visible", &Composable::visible)
+        .def("overlapping", &Composable::overlapping);
 
     auto track_class = py::class_<Track, Composition, managing_ptr<Track>>(m, "Track", py::dynamic_attr());
 

@@ -15,7 +15,8 @@ def parse_args():
     parser.add_argument(
         '--repo',
         required=True,
-        help='GitHub Project/Repo name. (e.g. "AcademySoftwareFoundation/OpenTimelineIO")'
+        help='GitHub Project/Repo name.'
+        ' (e.g. "AcademySoftwareFoundation/OpenTimelineIO")'
     )
     parser.add_argument(
         '--token',

@@ -30,7 +30,7 @@ Final Cut Pro X XML Format:
 
 - Status: Reads and writes AAF compositions
   - includes clip, gaps, transitions but not markers or effects
-  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
+  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
 - <a href="https://static.amwa.tv/ms-01-aaf-object-spec.pdf" target="_blank">Spec</a>
 - <a href="https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf" target="_blank">Protocol</a>
 

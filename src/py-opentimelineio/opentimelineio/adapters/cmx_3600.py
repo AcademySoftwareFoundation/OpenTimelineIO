@@ -392,7 +392,7 @@ class ClipHandler(object):
 
         # BLACK/BL and BARS are called out as "Special Source Identifiers" in
         # the documents referenced here:
-        # https://github.com/PixarAnimationStudios/OpenTimelineIO#cmx3600-edl
+        # https://github.com/AcademySoftwareFoundation/OpenTimelineIO#cmx3600-edl
         if self.reel in ['BL', 'BLACK']:
             clip.media_reference = schema.GeneratorReference()
             # TODO: Replace with enum, once one exists

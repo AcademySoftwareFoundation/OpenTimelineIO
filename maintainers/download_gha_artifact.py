@@ -57,7 +57,7 @@ if not os.path.exists(args.directory):
     os.makedirs(args.directory)
 
 request = urllib.request.Request(
-    "https://api.github.com/repos/PixarAnimationStudios/OpenTimelineIO/actions/runs?status=success",  # noqa: E501
+    "https://api.github.com/repos/AcademySoftwareFoundation/OpenTimelineIO/actions/runs?status=success",  # noqa: E501
     headers=headers,
 )
 response = urllib.request.urlopen(request).read()

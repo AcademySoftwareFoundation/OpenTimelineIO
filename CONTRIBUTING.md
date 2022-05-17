@@ -29,8 +29,8 @@ If you are unable to use the EasyCLA system, you can send a signed CLA to `opent
 
 Here are the two possible CLAs:
 
-* [OTIO_CLA_Corporate.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Corporate.pdf): please sign this one for corporate use
-* [OTIO_CLA_Individual.pdf](https://github.com/PixarAnimationStudios/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
+* [OTIO_CLA_Corporate.pdf](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/raw/main/OTIO_CLA_Corporate.pdf): please sign this one for corporate use
+* [OTIO_CLA_Individual.pdf](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
 
 ## Coding Conventions
 Please follow the coding convention and style in each file and in each library when adding new files.
@@ -52,7 +52,7 @@ Add the primary OpenTimelineIO repo as upstream to make it easier to update your
 
 ```bash
 cd OpenTimelineIO
-git remote add upstream https://github.com/PixarAnimationStudios/OpenTimelineIO.git
+git remote add upstream https://github.com/AcademySoftwareFoundation/OpenTimelineIO.git
 ```
 
 Now you fetch the latest changes from the OpenTimelineIO repo like this:

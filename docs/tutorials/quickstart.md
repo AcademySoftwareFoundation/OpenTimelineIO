@@ -31,7 +31,7 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 # Developer Quickstart
 
 Get the source and submodules:
-+ `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
++ `git clone git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git`
 
 Before reading further, it is good to note that there is two parts to the
 C++ code: the OTIO C++ library that you can use in your C++ projects,

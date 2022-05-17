@@ -35,8 +35,8 @@ those shots is now longer.
 - EDL reading
     - Clip names for video track
     - Source frame range for each clip
-    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
-- <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1" target="_blank">AAF reading</a>
+    - <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
+- <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/1" target="_blank">AAF reading</a>
     - Clip names across all video tracks, subclips, etc.
     - Source frame range for each clip
     - Timing effects
@@ -48,7 +48,7 @@ those shots is now longer.
     - Name
     - Metadata
     - Timing effects
-- <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
+- <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/39" target="_blank">Timing effects</a>
     - Source frame range of each clip as effected by timing effects.
 - Composition
     - Clips in lower tracks that are obscured (totally or partially) by overlapping clips in higher tracks are considered trimmed or hidden.

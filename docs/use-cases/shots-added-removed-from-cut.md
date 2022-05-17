@@ -36,7 +36,7 @@ deliver the new shot to editorial when it is ready.
 
 - EDL reading (done)
     - Clip names across all tracks
-- <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1" target="_blank">AAF reading</a>
+- <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/1" target="_blank">AAF reading</a>
     - Clip names across all tracks, subclips, etc.
 - Timeline should include (done)
     -  a Stack of tracks, each of which is a Sequence

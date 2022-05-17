@@ -276,11 +276,11 @@ setup(
     url='http://opentimeline.io',
     project_urls={
         'Source':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO',
+            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO',
         'Documentation':
             'https://opentimelineio.readthedocs.io/',
         'Issues':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
+            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues',
     },
 
     classifiers=[

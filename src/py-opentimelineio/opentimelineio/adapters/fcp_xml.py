@@ -1031,7 +1031,13 @@ class FCP7XMLParser:
 
         media_start_time = opentime.RationalTime()
         if sequence_element is not None:
-            item = self.stack_for_element(sequence_element, local_context)
+            sequence_media_element = sequence_element.find("./media")
+            sequence_media_context = local_context.context_pushing_element(
+                sequence_element
+            )
+            item = self.stack_for_element(
+                sequence_media_element, sequence_media_context
+            )
             # TODO: is there an applicable media start time we should be
             #       using from nested sequences?
         elif file_element is not None or generator_effect_element is not None:

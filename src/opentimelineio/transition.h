@@ -34,6 +34,13 @@ public:
 
     virtual bool overlapping() const;
 
+    bool enabled() const { return _enabled; };
+
+    void set_enabled(bool enabled)
+    {
+        _enabled = enabled;
+    }
+
     std::string transition_type() const noexcept { return _transition_type; }
 
     void set_transition_type(std::string const& transition_type)
@@ -73,6 +80,7 @@ protected:
 private:
     std::string  _transition_type;
     RationalTime _in_offset, _out_offset;
+    bool _enabled;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

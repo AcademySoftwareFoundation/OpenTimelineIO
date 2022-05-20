@@ -16,6 +16,7 @@ Transition::Transition(
     , _transition_type(transition_type)
     , _in_offset(in_offset)
     , _out_offset(out_offset)
+    , _enabled(true)
 {}
 
 Transition::~Transition()
@@ -33,6 +34,7 @@ Transition::read_from(Reader& reader)
     return reader.read("in_offset", &_in_offset) &&
            reader.read("out_offset", &_out_offset) &&
            reader.read("transition_type", &_transition_type) &&
+           reader.read("enabled", &_enabled) &&
            Parent::read_from(reader);
 }
 
@@ -43,6 +45,7 @@ Transition::write_to(Writer& writer) const
     writer.write("in_offset", _in_offset);
     writer.write("out_offset", _out_offset);
     writer.write("transition_type", _transition_type);
+    writer.write("enabled", _enabled);
 }
 
 RationalTime

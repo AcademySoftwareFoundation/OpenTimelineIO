@@ -7,7 +7,7 @@ existing file formats.
 
 Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
-- [Reference](https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
+- [Reference](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
 
 Final Cut Pro X XML Format:
 - Status: Supported via the `fcpx_xml` adapter
@@ -24,7 +24,7 @@ Final Cut Pro X XML Format:
 - Includes support for ASC_CDL color correction metadata
 - Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
 - http://xmil.biz/EDL-X/CMX3600.pdf
-- [Reference](https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1)
+- [Reference](https://prohelp.apple.com/finalcutpro_help-r01/English/en/finalcutpro/usermanual/chapter_96_section_0.html)
 
 ## Avid AAF
 

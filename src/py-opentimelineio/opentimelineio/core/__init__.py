@@ -2,6 +2,9 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 from .. _otio import ( # noqa
+    # errors
+    CannotComputeAvailableRangeError,
+
     # classes
     Composable,
     Composition,

@@ -83,7 +83,7 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
-# -- Options for Autodoc --------------------------------------------------------------
+# -- Options for Autodoc ---------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 
 # Both the class’ and the __init__ method’s docstring are concatenated and inserted.
@@ -94,7 +94,14 @@ autodoc_default_options = {
     'undoc-members': True
 }
 
-# -- Options for MySt-Parser ---------------------------------------------------------------
+# -- Options for linkcheck -------------------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-the-linkcheck-builder
+
+linkcheck_exclude_documents = [
+    r'cxx/cxx'
+]
+
+# -- Options for MySt-Parser -----------------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/sphinx/reference.html
 
 myst_heading_anchors = 5
@@ -163,6 +170,16 @@ def process_docstring(
     lines: list[str],
 ):
     for index, line in enumerate(lines):
+        # Remove "self" from docstrings of overloaded functions/methods.
+        # For overloaded functions/methods/classes, pybind11
+        # creates docstrings that look like:
+        #
+        #     Overloaded function.
+        #     1. func_name(self: <something>, param2: int)
+        #     1. func_name(self: <something>, param2: float)
+        #
+        # "self" is a distraction that can be removed to improve readability.
+        # This should be removed once https://github.com/pybind/pybind11/pull/2621 is merged.
         if re.match(f'\d+\. {name.split("."[0])}', line):
             line = re.sub("self\: [a-zA-Z0-9._]+(,\s)?", "", line)
             lines[index] = line

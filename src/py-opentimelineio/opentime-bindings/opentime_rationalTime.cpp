@@ -133,7 +133,7 @@ For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Resul
             }, "timecode"_a, "rate"_a, "Convert a timecode string (``HH:MM:SS;FRAME``) into a :class:`~RationalTime`.")
         .def_static("from_time_string", [](std::string s, double rate) {
                 return RationalTime::from_time_string(s, rate, ErrorStatusConverter());
-            }, "time_string"_a, "rate"_a, "Convert a time with microseconds string (``HH:MM:ss.ms``) into a :class:`~RationalTime`.")
+            }, "time_string"_a, "rate"_a, "Convert a time with microseconds string (``HH:MM:ss`` where ``ss`` is an integer or a decimal number) into a :class:`~RationalTime`.")
         .def("__str__", &opentime_python_str)
         .def("__repr__", &opentime_python_repr)
         .def(- py::self)

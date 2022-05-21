@@ -204,7 +204,11 @@ static void define_bases2(py::module m) {
     EffectVectorProxy::define_py_class(m, "EffectVector");
 
     auto marker_class =
-        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), "A marker indicates a moment or range of time on an item in a timeline, usually with a name, color or other metadata.")
+        py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), R"docstring(
+A marker indicates a marked range of time on an item in a timeline, usually with a name, color or other metadata.
+
+The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
+)docstring")
         .def(py::init([](
                         py::object name,
                         TimeRange marked_range,
@@ -378,8 +382,6 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 
     py::class_<Transition::Type>(transition_class, "Type", R"docstring(
 Enum encoding types of transitions.
-
-This is for representing “Dissolves” and “Wipes” defined by the multi-source effect as defined in section 7.6.3.2 of `SMPTE 258M-2004 <https://ieeexplore.ieee.org/servlet/opac?punumber=7291837>`_.
 
 Other effects are handled by the :class:`Effect` class.
 )docstring")
@@ -679,7 +681,8 @@ A time warp that applies a linear speed up or slow down across the entire clip.
              "time_scalar"_a = 1.0,
              py::arg_v("metadata"_a = py::none()))
         .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar, R"docstring(
-Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
+Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
+0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
 Instead it affects the speed of the media displayed within that item.

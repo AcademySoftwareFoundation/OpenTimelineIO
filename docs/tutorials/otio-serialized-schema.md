@@ -344,7 +344,8 @@ parameters:
 - *effect_name*: 
 - *metadata*: 
 - *name*: 
-- *time_scalar*: Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
+- *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
+0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
 Instead it affects the speed of the media displayed within that item.
@@ -491,7 +492,8 @@ parameters:
 - *effect_name*: 
 - *metadata*: 
 - *name*: 
-- *time_scalar*: Linear time scalar applied to clip. 2.0 = double speed, 0.5 = half speed.
+- *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
+0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
 Instead it affects the speed of the media displayed within that item.
@@ -503,7 +505,11 @@ Instead it affects the speed of the media displayed within that item.
 *documentation*:
 
 ```
-A marker indicates a moment or range of time on an item in a timeline, usually with a name, color or other metadata.
+
+A marker indicates a marked range of time on an item in a timeline, usually with a name, color or other metadata.
+
+The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
+
 ```
 
 parameters:

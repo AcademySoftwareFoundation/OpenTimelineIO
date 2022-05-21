@@ -58,7 +58,8 @@ def to_seconds(rt):
 
 
 def to_time_string(rt):
-    """Convert this timecode to time with microsecond, as formated in
-    `FFMPEG <https://trac.ffmpeg.org/wiki/Seeking#Timeunitsyntax>`_
+    """
+    Convert this timecode to time as used by ffmpeg, formatted as
+    ``hh:mm:ss`` where ss is an integer or decimal number.
     """
     return rt.to_time_string()

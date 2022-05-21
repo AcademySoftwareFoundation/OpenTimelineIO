@@ -19,7 +19,7 @@ They expose a ``hook_function`` with signature:
 Both hook scripts and the hooks they attach to are defined in the plugin
 manifest.
 
-You can attach multiple hook scripts to a hook. They will be executed in list
+Multiple scripts can be attached to a hook. They will be executed in list
 order, first to last.
 
 They are defined by the manifests :class:`HookScript`\\s and hooks areas.

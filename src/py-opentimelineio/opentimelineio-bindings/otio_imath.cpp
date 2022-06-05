@@ -24,7 +24,10 @@ CLASS _type_checked(py::object const& rhs, char const* op) {
 }
 
 static void define_imath_2d(py::module m) {
-    py::class_<Imath::V2d>(m, "V2d")
+    // Note that module_local is used to avoid issues when
+    // Imath classes are binded with Pybind11 more than once.
+    // Using module_local will avoid conflicts in such cases.
+    py::class_<Imath::V2d>(m, "V2d", py::module_local())
         .def(py::init<>())
         .def(py::init<double>())
         .def(py::init<double, double>())
@@ -97,7 +100,7 @@ static void define_imath_2d(py::module m) {
                 return Imath::V2d::dimensions();
             });
 
-    py::class_<Imath::Box2d>(m, "Box2d")
+    py::class_<Imath::Box2d>(m, "Box2d", py::module_local())
         .def(py::init<>())
         .def(py::init<Imath::V2d>())
         .def(py::init<Imath::V2d, Imath::V2d>())
@@ -127,4 +130,3 @@ static void define_imath_2d(py::module m) {
 void otio_imath_bindings(py::module m) {
     define_imath_2d(m);
 }
-

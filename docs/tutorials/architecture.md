@@ -5,8 +5,26 @@ Overview
 
 OpenTimelineIO is an open source library for the interchange of editorial information.  This document describes the structure of the python library.
 
-To import the library into python:
-`import opentimelineio as otio`
+You can import the library using the following:
+
+=== " :fontawesome-brands-python: python"
+
+    ``` python
+    import opentimelineio as otio
+    ```
+
+=== " C++"
+
+    ``` c++
+    #include <opentimelineio/opentimelineio.h>
+
+    // This allows using otio:: instead of the long fully qualified namespace
+    namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+    ```
+
+    !!! warning
+        The `opentimelineio.h` header doesn't actually exist, you'll use
+        the specific headers you need in your code.
 
 Canonical Structure
 --------------------
@@ -39,30 +57,58 @@ The `otio.schema.Clip` objects can reference media through a `otio.schema.Extern
 
 Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
 
+=== "python"
 
-```python
-import opentimelineio as otio
+    ```python
+    import opentimelineio as otio
 
-# read the timeline into memory
-tl = otio.adapters.read_from_file("my_file.otio")
+    # read the timeline into memory
+    tl = otio.adapters.read_from_file("my_file.otio")
 
-for each_seq in tl.tracks:
-    for each_item in each_seq:
-        if isinstance(each_item, otio.schema.Clip):
-            print each_item.media_reference
-```
+    for each_seq in tl.tracks:
+        for each_item in each_seq:
+            if isinstance(each_item, otio.schema.Clip):
+                print each_item.media_reference
+    ```
 
-Or, in the case of a nested composition, like this:
+=== "C++"
 
-```python
-import opentimelineio as otio
+    ``` c++
+    #include <opentimelineio/clip.h>
+    #include <opentimelineio/externalReference.h>
+    #include <opentimelineio/timeline.h>
 
-# read the timeline into memory
-tl = otio.adapters.read_from_file("my_file.otio")
+    #include <iostream>
 
-for clip in tl.each_clip():
-    print clip.media_reference
-```
+    namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
+    otio::ErrorStatus error_status;
+    otio::SerializableObject::Retainer<otio::Timeline> timeline(
+            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file("my_file.otio", &error_status)));
+    if (!timeline || otio::is_error(error_status))
+    {
+
+        std::cout << "error reading timeline";
+        exit(1);
+    }
+    otio::ErrorStatus error_status;
+    const auto clips = timeline->clip_if(&error_status);
+    if (otio::is_error(error_status))
+    {
+        std::cout << "error iterating clips";
+        exit(1);
+    }
+
+    for (const otio::SerializableObject::Retainer<otio::Clip>& clip : clips)
+    {
+        // This doesn't work, just an example
+        cout << clip->media_reference();
+    }
+
+    ```
+
+!!! note
+    Custom schema can also be implemented, for more information look [here](about:blank).
 
 ## Time on otio.schema.Clip
 

@@ -156,14 +156,14 @@ jobs:
       - name: Build wheels (Python 2.7)
         if: matrix.python-build == 'cp27*'
         # cibuildwheel 1.12.0 is the last release that supported Python 2.7.
-        uses: pypa/cibuildwheel@v1.12.0
+        uses: pypa/cibuildwheel@2.6.1
         with:
           output-dir: wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.python-build }}
 
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@2.6.1
         if: matrix.python-build != 'cp27*'
         with:
           output-dir: wheelhouse

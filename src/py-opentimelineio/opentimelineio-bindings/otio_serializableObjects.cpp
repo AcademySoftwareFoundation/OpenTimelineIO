@@ -365,6 +365,7 @@ static void define_items_and_compositions(py::module m) {
         .def_property("transition_type", &Transition::transition_type, &Transition::set_transition_type)
         .def_property("in_offset", &Transition::in_offset, &Transition::set_in_offset)
         .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset)
+        .def_property("enabled", &Transition::enabled, &Transition::set_enabled)
         .def("duration", [](Transition* t) {
             return t->duration(ErrorStatusHandler());
             })

@@ -4,7 +4,7 @@
 """Implementation of the OTIO internal `Adapter` system.
 
 For information on writing adapters, please consult:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html # noqa
 """
 
 import inspect
@@ -30,8 +30,10 @@ except AttributeError:
 class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.
 
-    Note that this class is not subclassed by adapters.  Rather, an adapter is
+    Note that this class is not subclassed by adapters. Rather, an adapter is
     a python module that implements at least one of the following functions:
+
+    .. code-block:: python
 
         write_to_string(input_otio)
         write_to_file(input_otio, filepath) (optionally inferred)
@@ -43,8 +45,7 @@ class Adapter(plugins.PythonPlugin):
     to OTIO.  You should not need to extend this class to create new adapters
     for OTIO.
 
-    For more information:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+    For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html. # noqa
     """
     _serializable_label = "Adapter.1"
 
@@ -75,7 +76,7 @@ class Adapter(plugins.PythonPlugin):
         return true if adapter supports feature_string, which must be a key
         of the _FEATURE_MAP dictionary.
 
-        Will trigger a call to self.module(), which imports the plugin.
+        Will trigger a call to :meth:`.PythonPlugin.module`, which imports the plugin.
         """
 
         if feature_string.lower() not in _FEATURE_MAP:

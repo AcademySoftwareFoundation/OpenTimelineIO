@@ -22,17 +22,16 @@ def __repr__(self):
 
 @add_method(_otio.Timeline)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
-    """ Generator that returns each child contained in the timeline
+    """Generator that returns each child contained in the timeline
     in the order in which it is found.
 
-    Note that this function is now deprecated, please consider using
-    children_if() instead.
+    .. deprecated:: 0.14.0
+        Use :meth:`children_if` instead.
 
-    Arguments:
-        search_range: if specified, only children whose range overlaps with
-                      the search range will be yielded.
-        descended_from_type: if specified, only children who are a
-                      descendent of the descended_from_type will be yielded.
+    :param TimeRange search_range: if specified, only children whose range overlaps
+                                   with the search range will be yielded.
+    :param type descended_from_type: if specified, only children who are a descendent
+                                     of the descended_from_type will be yielded.
     """
     for child in self.children_if(descended_from_type, search_range):
         yield child
@@ -40,15 +39,14 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
 
 @add_method(_otio.Timeline)
 def each_clip(self, search_range=None):
-    """ Generator that returns each clip contained in the timeline
+    """Generator that returns each clip contained in the timeline
     in the order in which it is found.
 
-    Note that this function is now deprecated, please consider using
-    clip_if() instead.
+    .. deprecated:: 0.14.0
+        Use :meth:`clip_if` instead.
 
-    Arguments:
-        search_range: if specified, only children whose range overlaps with
-                      the search range will be yielded.
+    :param TimeRange search_range: if specified, only children whose range overlaps
+                                   with the search range will be yielded.
     """
     for child in self.clip_if(search_range):
         yield child

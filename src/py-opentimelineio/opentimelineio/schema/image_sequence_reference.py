@@ -58,12 +58,11 @@ def __repr__(self):
 
 @add_method(_otio.ImageSequenceReference)
 def frame_range_for_time_range(self, time_range):
-    """
-    Returns a :class:`tuple` containing the first and last frame numbers for
+    """Returns first and last frame numbers for
     the given time range in the reference.
 
-    Raises ValueError if the provided time range is outside the available
-    range.
+    :rtype: tuple[int]
+    :raises ValueError: if the provided time range is outside the available range.
     """
     return (
         self.frame_for_time(time_range.start_time),
@@ -74,7 +73,7 @@ def frame_range_for_time_range(self, time_range):
 @add_method(_otio.ImageSequenceReference)
 def abstract_target_url(self, symbol):
     """
-    Generates a target url for a frame where :param:``symbol`` is used in place
+    Generates a target url for a frame where ``symbol`` is used in place
     of the frame number. This is often used to generate wildcard target urls.
     """
     if not self.target_url_base.endswith("/"):

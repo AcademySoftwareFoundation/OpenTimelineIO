@@ -3,48 +3,47 @@
 OpenTimelineIO supports, or plans to support, conversion adapters for many
 existing file formats.
 
-### Final Cut Pro XML ###
+## Final Cut Pro XML
 
 Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
-- <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101" target="_blank">Reference</a>
+- [Reference](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
 
 Final Cut Pro X XML Format:
 - Status: Supported via the `fcpx_xml` adapter
-- <a href="https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html" target="_blank">Intro to FCP X XML</a>
+- [Intro to FCP X XML](https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html)
 
-### Adobe Premiere Project ###
+## Adobe Premiere Project
 
 - Based on guidance from Adobe, we support interchange with Adobe Premiere via
     the FCP 7 XML format (see above).
 
-### CMX3600 EDL ###
+## CMX3600 EDL
 
 - Status: Supported via the `cmx_3600` adapter
 - Includes support for ASC_CDL color correction metadata
 - Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
 - http://xmil.biz/EDL-X/CMX3600.pdf
-- <a href="https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1" target="_blank">Reference</a>
+- [Reference](https://prohelp.apple.com/finalcutpro_help-r01/English/en/finalcutpro/usermanual/chapter_96_section_0.html)
 
-### Avid AAF ###
+## Avid AAF
 
 - Status: Reads and writes AAF compositions
   - includes clip, gaps, transitions but not markers or effects
-  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
-- <a href="https://static.amwa.tv/ms-01-aaf-object-spec.pdf" target="_blank">Spec</a>
-- <a href="https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf" target="_blank">Protocol</a>
+  - This adapter is still in progress, see the ongoing work here: [AAF Project](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1)
+- [Spec](https://static.amwa.tv/ms-01-aaf-object-spec.pdf)
+- [Protocol](https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf)
 
-- Depends on the <a href="https://github.com/markreidvfx/pyaaf2" target="_blank">`PyAAF2`</a> module, so either:
+- Depends on the [PyAAF2](https://github.com/markreidvfx/pyaaf2) module, so either:
     - `pip install pyaaf2`
     - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
 
-Contrib Adapters
-----------------
+# Contrib Adapters
 
 The contrib area hosts adapters which come from the community (_not_ supported
     by the core-otio team) and may require extra dependencies.
 
-### RV Session File ###
+## RV Session File
 
 - Status: write-only adapter supported via the `rv_session` adapter.
 - need to set environment variables to locate `py-interp` and `rvSession.py`
@@ -55,30 +54,30 @@ The contrib area hosts adapters which come from the community (_not_ supported
 - set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
 
-### Maya Sequencer ###
+## Maya Sequencer
 
 - Status: supported via the `maya_sequencer` adapter.
 - set `${OTIO_MAYA_PYTHON_BIN}` to point the location of `mayapy` within the maya
     installation.
 
-### HLS Playlist ###
+## HLS Playlist
 
 - Status: supported via the `hls_playlist` adapter.
 
-### Avid Log Exchange (ALE) ###
+## Avid Log Exchange (ALE)
 
 - Status: supported via the `ale` adapter.
 
-### Text Burn-in Adapter ###
+## Text Burn-in Adapter
 
 Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `burnins` adapter.
 
-### GStreamer Editing Services Adapter ###
+## GStreamer Editing Services Adapter
 
 - Status: supported via the `xges` adapter.
 
-### Kdenlive Adapter ###
+## Kdenlive Adapter
 
 - Status: supported via the kdenlive adapter

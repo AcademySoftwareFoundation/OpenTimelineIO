@@ -16,4 +16,5 @@ xcuserdata/
 
 # These files are generated, don't put them into source control
 docs/api
+docs/_build
 .tox

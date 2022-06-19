@@ -30,6 +30,20 @@ from . import (  # noqa: F401
     file_bundle_utils,  # utilities for working with OTIO file bundles
 )
 
+__all__ = [
+    'Adapter',
+    'otio_json',
+    'file_bundle_utils',
+    'suffixes_with_defined_adapters',
+    'available_adapter_names',
+    'from_filepath',
+    'from_name',
+    'read_from_file',
+    'read_from_string',
+    'write_to_file',
+    'write_to_string'
+]
+
 
 def suffixes_with_defined_adapters(read=False, write=False):
     """Return a set of all the suffixes that have adapters defined for them."""
@@ -70,8 +84,7 @@ def _from_filepath_or_name(filepath, adapter_name):
 def from_filepath(filepath):
     """Guess the adapter object to use for a given filepath.
 
-    example:
-        "foo.otio" returns the "otio_json" adapter.
+    For example, ``foo.otio`` returns the ``otio_json`` adapter.
     """
 
     outext = os.path.splitext(filepath)[1][1:]
@@ -112,7 +125,9 @@ def read_from_file(
 
     If adapter_name is None, try and infer the adapter name from the filepath.
 
-    For example:
+    .. code-block:: python
+       :caption: Example
+
         timeline = read_from_file("example_trailer.otio")
         timeline = read_from_file("file_with_no_extension", "cmx_3600")
     """
@@ -139,7 +154,9 @@ def read_from_string(
     This is useful if you obtain a timeline from someplace other than the
     filesystem.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         raw_text = urlopen(my_url).read()
         timeline = read_from_string(raw_text, "otio_json")
     """
@@ -164,7 +181,9 @@ def write_to_file(
     If adapter_name is None, infer the adapter_name to use based on the
     filepath.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         otio.adapters.write_to_file(my_timeline, "output.otio")
     """
 
@@ -184,7 +203,9 @@ def write_to_string(
 ):
     """Return input_otio written to a string using adapter_name.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         raw_text = otio.adapters.write_to_string(my_timeline, "otio_json")
     """
 

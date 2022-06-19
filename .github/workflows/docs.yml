@@ -1,0 +1,105 @@
+name: docs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+
+    - name: Create virtualenv
+      run: python3 -m venv .venv
+
+    - name: Install dependencies
+      run: |
+        source .venv/bin/activate
+        python -m pip install .
+        python -m pip install -r docs/requirements.txt
+
+    - name: Linkcheck
+      working-directory: docs
+      run: |
+        source ../.venv/bin/activate
+
+        set +e
+        make linkcheck
+        exit_code=$?
+
+        set -e
+
+        if [ $exit_code -eq 0 ]; then
+            echo -e "\n\n=================\nAll links are valid!"
+
+            echo "# :heavy_check_mark: Sphinx links" >> $GITHUB_STEP_SUMMARY
+            echo "All links are valid!" >> $GITHUB_STEP_SUMMARY
+        else
+            echo -e "\n\n=================\nFound broken links. Look at the build logs.\n"
+
+            echo "# :x: Sphinx links" >> $GITHUB_STEP_SUMMARY
+            echo "Found broken links. Look at the build logs for additional information." >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat _build/linkcheck/output.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+
+        exit $exit_code
+
+  check-warnings:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+
+    - name: Create virtualenv
+      run: python3 -m venv .venv
+
+    - name: Install dependencies
+      run: |
+        source .venv/bin/activate
+        python -m pip install .
+        python -m pip install -r docs/requirements.txt
+
+    - name: Check warnings/errors
+      working-directory: docs
+      run: |
+        source ../.venv/bin/activate
+
+        set +e
+        make htmlstrict
+
+        exit_code=$?
+
+        set -e
+
+        if [ $exit_code -eq 0 ]; then
+            echo -e "\n\n=================\nNo warnings or errors detected!"
+            echo "# :heavy_check_mark: Sphinx warnings/errors" >> $GITHUB_STEP_SUMMARY
+            echo "No errors or warnings detected!" >> $GITHUB_STEP_SUMMARY
+        else
+            echo -e "\n\n=================\nWarnings and or errors detected; See the summary bellow:\n"
+            cat _build/htmlstrict/output.txt
+
+            echo "# :x: Sphinx warnings/errors" >> $GITHUB_STEP_SUMMARY
+            echo "Found some warnings or errors:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            cat _build/htmlstrict/output.txt >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+
+        exit $exit_code

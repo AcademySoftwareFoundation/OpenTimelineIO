@@ -51,6 +51,13 @@
             "suffixes" : ["aaf"]
         },
         {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "AVB",
+            "execution_scope" : "in process",
+            "filepath" : "avb.py",
+            "suffixes" : ["avb"]
+        },
+        {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "xges",
             "execution_scope": "in process",

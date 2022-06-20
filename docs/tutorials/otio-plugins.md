@@ -357,6 +357,48 @@ Reads AAF content from `filepath` and outputs an OTIO
 
 
 
+### AVB
+
+```
+OpenTimelineIO Avid Bin (AVB) Adapter
+
+Depending on if/where pyavb is installed, you may need to set this env var:
+    OTIO_AVB_PYTHON_LIB - should point at the pyavb module.
+```
+
+*source*: `opentimelineio_contrib/adapters/avb.py`
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file: 
+```
+Reads AVB content from `filepath` and outputs an OTIO
+  timeline object.
+
+  Args:
+      filepath (str): AVB filepath
+      simplify (bool, optional): simplify timeline structure by stripping empty
+  items
+      transcribe_log (bool, optional): log activity as items are getting
+  transcribed
+      attach_markers (bool, optional): attaches markers to their appropriate items
+                                       like clip, gap. etc on the track
+      bake_keyframed_properties (bool, optional): bakes animated property values
+                                                  for each frame in a source clip
+  Returns:
+      otio.schema.Timeline
+```
+  - filepath
+  - simplify
+  - transcribe_log
+  - attach_markers
+  - bake_keyframed_properties
+
+
+
+
+
 ### ale
 
 ```

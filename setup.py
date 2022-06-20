@@ -337,6 +337,7 @@ setup(
 
     install_requires=[
         'pyaaf2~=1.4.0',
+        'pyavb~=1.0.0',
         'backports.tempfile; python_version<"3.0"',
         # Enables the builtins module in the XGES adapter
         'future; python_version<"3.0"',

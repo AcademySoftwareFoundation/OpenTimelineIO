@@ -8,7 +8,7 @@ import opentimelineio as otio
 HOOK_PRE_IMPORT = "otio_ue_pre_import"
 HOOK_PRE_IMPORT_ITEM = "otio_ue_pre_import_item"
 HOOK_POST_EXPORT = "otio_ue_post_export"
-HOOK_POST_EXPORT_ITEM = "otio_ue_post_export"
+HOOK_POST_EXPORT_CLIP = "otio_ue_post_export_clip"
 
 
 def run_pre_import_otio_hook(timeline):
@@ -62,5 +62,5 @@ def run_post_export_otio_clip_hook(clip):
     Args:
         clip (otio.schema.Clip): Clip to update in place
     """
-    if HOOK_POST_EXPORT_ITEM in otio.hooks.names():
-        otio.hooks.run(HOOK_POST_EXPORT_ITEM, clip)
+    if HOOK_POST_EXPORT_CLIP in otio.hooks.names():
+        otio.hooks.run(HOOK_POST_EXPORT_CLIP, clip)

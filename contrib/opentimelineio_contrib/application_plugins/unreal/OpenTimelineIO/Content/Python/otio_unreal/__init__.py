@@ -9,7 +9,7 @@ from .hooks import (
     HOOK_PRE_IMPORT,
     HOOK_PRE_IMPORT_ITEM,
     HOOK_POST_EXPORT,
-    HOOK_POST_EXPORT_ITEM,
+    HOOK_POST_EXPORT_CLIP,
 )
 from .level_sequence import LevelSequenceProxy
 from .shot_section import ShotSectionProxy
@@ -31,7 +31,7 @@ __all__ = [
     "HOOK_PRE_IMPORT",
     "HOOK_PRE_IMPORT_ITEM",
     "HOOK_POST_EXPORT",
-    "HOOK_POST_EXPORT_ITEM",
+    "HOOK_POST_EXPORT_CLIP",
     "LevelSequenceProxy",
     "ShotSectionProxy",
     "METADATA_KEY_UE",

@@ -121,6 +121,20 @@ the root for a more adaptable user experience. A custom command could also
 leverage a GUI with embedded `otioview` for previewing the effects of a
 sequence update prior to committing to the change.
 
+**NOTE**
+
+All OTIO hook functions must have the following signature and parameter names,
+regardless of expected parameter type:
+
+```
+def hook_function(in_timeline, argument_map=None):
+    ...
+```
+
+For example, the first parameter should always be named `in_timeline`, even
+though the value received in these UE-specific hooks may be a `Timeline`,
+`Stack`, or `Clip` object.
+
 ## Environment Variables
 
 OTIO import/export behavior in Unreal Engine can also be configured with

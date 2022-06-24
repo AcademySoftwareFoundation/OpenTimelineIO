@@ -339,6 +339,25 @@ def _extract_timecode_info(mob):
         return None
 
 
+def _get_start_timecode_at(source_mob, start_time):
+
+    # TODO: need to find sample with multiple timecode samples
+    for track in source_mob.tracks:
+        # TODO: check for Physical track metadata?
+        if track.component.media_kind == 'timecode':
+            timecode = None
+            if isinstance(track.component, avb.components.Sequence):
+                timecode, start_time = track.component.nearest_component_at_time(start_time)
+            elif isinstance(track.component, avb.components.Timecode):
+                timecode = track.component
+
+            assert isinstance(timecode, avb.components.Timecode)
+            assert track.index == 1
+            return timecode, timecode.start + start_time, timecode.fps
+
+    return None, None, None
+
+
 def _add_child(parent, child, source):
     if child is None:
         if debug:
@@ -458,7 +477,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
         metadata["SourceMobUsage"] = clip_usage or ""
 
         # Evidently the last mob is the one with the timecode
-        # mobs = _find_timecode_mobs(item)
         ref_chain = _walk_reference_chain(item, 0, [])
         mobs = [mob for start, mob in ref_chain
                 if isinstance(mob, avb.trackgroups.Composition)]
@@ -469,10 +487,24 @@ def _transcribe(item, parents, edit_rate, indent=0):
         media_length = item.length
         media_edit_rate = edit_rate
 
+        source_mob = None
+
         for start_time, comp in ref_chain:
+            if isinstance(comp, avb.trackgroups.Composition) and
+               comp.mob_type == "SourceMob":
+
+                source_mob = comp
+
             if isinstance(comp, avb.components.SourceClip):
-                media_start = source_start
+                source_start = start_time
                 media_edit_rate = comp.edit_rate
+                if source_mob:
+                    timecode, tc_start, tc_rate =_get_start_timecode_at(source_mob, start_time)
+                    if timecode is not None:
+                        source_start = tc_start
+                        media_start = timecode.start
+                        media_length = timecode.length
+                        media_edit_rate = tc_rate
 
         parent_mobs = filter(lambda parent:
                              isinstance(parent, avb.trackgroups.Composition), parents)
@@ -588,6 +620,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         msg = "Creating Transition for {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
         result = otio.schema.Transition()
+        result.name = "Transition"
         result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve
 
         in_offset = int(metadata.get("cutpoint", "0"))

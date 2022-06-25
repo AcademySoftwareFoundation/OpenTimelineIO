@@ -153,7 +153,7 @@ def _transcribe_property(prop, owner=None):
         result = {}
         for key, value in prop.items():
             # skip None values to save space
-            if value is None or value == "":
+            if value is None:
                 continue
             result[key] = _transcribe_property(value, prop)
         return result
@@ -509,7 +509,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             if mob.mob_type == "CompositionMob":
                 composition_user_metadata = _get_composition_user_comments(mob)
                 if composition_user_metadata:
-                    _transcribe_log("[found Compositionmob meta]", indent, True)
+                    _transcribe_log("[found Compositionmob meta]", indent, False)
                     break
 
         mastermobs = []
@@ -547,7 +547,11 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 if not descriptor:
                     continue
 
-                locator = descriptor.get('locator', None)
+                physical_media = descriptor.get("physical_media", None)
+                if not physical_media:
+                    continue
+
+                locator = physical_media.get("locator", None)
                 if not locator:
                     continue
 
@@ -594,12 +598,46 @@ def _transcribe(item, parents, edit_rate, indent=0):
         _transcribe_log(msg, indent)
 
         selected = item.selected
+        selected_track = None
+        alternates = []
 
         for i, track in enumerate(item.tracks):
             if i == selected:
-                result = _transcribe(track, parents + [item], edit_rate, indent + 2)
+                selected_track = track
+            else:
+                alternates.append(track)
 
-        assert result
+        if not selected_track or isinstance(selected_track.component,
+                                            avb.components.Filler):
+            for track in alternates:
+                if not isinstance(track.component, avb.components.Filler):
+                    selected_track = track
+                    break
+
+            if not selected_track:
+                err = "AVB Selector parsing error: object has unexpected number of " \
+                      "alternates - {}".format(len(alternates))
+                raise AVBAdapterError(err)
+            component = track.component
+            result = _transcribe(component, parents + [item], edit_rate, indent + 2)
+
+            # Filler/ScopeReference means the clip is muted/not enabled
+            result.enabled = False
+
+        else:
+            # This is most likely a multi-cam clip
+            component = track.component
+            result = _transcribe(component, parents + [item], edit_rate, indent + 2)
+
+            # A Selector can have a set of alternates to handle multiple options for an
+            # editorial decision - we do a full parse on those objects too
+            if alternates:
+                alternates = [
+                    _transcribe(alt.component, parents + [item], edit_rate, indent + 2)
+                    for alt in alternates
+                ]
+
+            metadata['alternates'] = alternates
 
     elif isinstance(item, avb.trackgroups.TransitionEffect):
         msg = "Creating Transition for {}".format(_encoded_name(item))
@@ -736,9 +774,7 @@ def _get_composition_user_comments(compositionMob):
         return compositionMetadata
 
     compositionMobUserComments = compositionMob.attributes.get("_USER", {})
-    for prop in compositionMobUserComments:
-        key = str(prop.name)
-        value = prop.value
+    for key, value in compositionMobUserComments.items():
         compositionMetadata[key] = _transcribe_property(value)
 
     return compositionMetadata

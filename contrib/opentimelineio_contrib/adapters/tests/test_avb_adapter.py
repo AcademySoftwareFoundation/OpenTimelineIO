@@ -544,8 +544,7 @@ class AVBReaderTests(unittest.TestCase):
             otio.opentime.RationalTime(86424, 24),
         )
 
-    def skip_test_avb_user_comments(self):
-        # TODO: rework this Unify User Comments?
+    def test_avb_user_comments(self):
         avb_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(avb_path)
         self.assertIsNotNone(timeline)
@@ -559,20 +558,20 @@ class AVBReaderTests(unittest.TestCase):
             None,   # Gap
             None
         ]
-        print(TRIMS_EXAMPLE_PATH)
-        print(timeline.metadata.get("AVB"))
+
         for clip, correctWord in zip(timeline.tracks[0], correctWords):
             if isinstance(clip, otio.schema.Gap):
                 continue
-            AVBmetadata = clip.media_reference.metadata.get("AVB")
-            self.assertIsNotNone(AVBmetadata)
-            self.assertIsNotNone(AVBmetadata.get("UserComments"))
+            avb_metadata = clip.media_reference.metadata.get("AVB")
+            attribute_meta = avb_metadata.get("attributes")
+            self.assertIsNotNone(attribute_meta)
+            self.assertIsNotNone(attribute_meta.get("_USER"))
             self.assertEqual(
-                AVBmetadata.get("UserComments").get("CustomTest"),
+                attribute_meta.get("_USER").get("CustomTest"),
                 correctWord
             )
 
-    def skip_test_avb_flatten_tracks(self):
+    def test_avb_flatten_tracks(self):
         multitrack_timeline = otio.adapters.read_from_file(
             MULTITRACK_EXAMPLE_PATH, attach_markers=False
         )
@@ -587,7 +586,8 @@ class AVBReaderTests(unittest.TestCase):
 
         self.assertEqual(3, len(multitrack_timeline.video_tracks()))
         self.assertEqual(2, len(multitrack_timeline.audio_tracks()))
-        self.assertEqual(8, len(multitrack_timeline.tracks))
+        # AVB doesn't have marker tracks like AAF which has 3 additional tracks
+        self.assertEqual(5, len(multitrack_timeline.tracks))
 
         preflattened = preflattened_timeline.video_tracks()[0]
         self.assertEqual(7, len(preflattened))
@@ -606,12 +606,12 @@ class AVBReaderTests(unittest.TestCase):
             for c in t.each_child():
                 if hasattr(c, "media_reference") and c.media_reference:
                     mr = c.media_reference
-                    mr.metadata.get("AVB", {}).pop('LastModified', None)
+                    mr.metadata.get("AVB", {}).pop('last_modified', None)
+                    mr.metadata.get("AVB", {}).pop('attributes', None)
                 meta = c.metadata.get("AVB", {})
-                meta.pop('ComponentAttributeList', None)
-                meta.pop('DataDefinition', None)
-                meta.pop('Length', None)
-                meta.pop('StartTime', None)
+                meta.pop('attributes', None)
+                meta.pop('length', None)
+                meta.pop('start_time', None)
 
             # We don't care about Gap start times, only their duration matters
             for g in t.each_child(descended_from_type=otio.schema.Gap):
@@ -793,8 +793,7 @@ class AVBReaderTests(unittest.TestCase):
         # TODO: We don't yet support non-linear time warps, but when we
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%
 
-    def skip_test_muted_clip(self):
-        # TODO: detect muted clips
+    def test_muted_clip(self):
         timeline = otio.adapters.read_from_file(MUTED_CLIP_PATH)
         self.assertIsInstance(timeline, otio.schema.Timeline)
         self.assertEqual(len(timeline.tracks), 1)
@@ -823,8 +822,9 @@ class AVBReaderTests(unittest.TestCase):
         tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
         self.assertEqual(tl.duration().rate, 30000 / 1001.0)
 
-    def skip_test_utf8_names(self):
-        # TODO: has avid messed up these names?
+    def test_utf8_names(self):
+        # NOTE: AAF to AVB convert in MC resulted in different for name
+        # on macOS vs Windows Ω -> ? this appears to be MC issue
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
             (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
@@ -836,10 +836,12 @@ class AVBReaderTests(unittest.TestCase):
             safe_str(first_clip.name),
             (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
+        comment = first_clip.media_reference.metadata.get('AVB', {}) \
+                                                     .get('attributes', {}) \
+                                                     .get('_USER', {}) \
+                                                     .get("Comments", "")
         self.assertEqual(
-            (
-                first_clip.media_reference.metadata["AVB"]["attributes"]["_USER"]
-            ).encode('utf-8'),
+            comment.encode('utf-8'),
             (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
         )
 
@@ -865,8 +867,7 @@ class AVBReaderTests(unittest.TestCase):
             unc_path
         )
 
-    def skip_test_external_reference_paths(self):
-        # TODO: I think converting the aaf to avb has messed up the MXF paths
+    def test_external_reference_paths(self):
         timeline = otio.adapters.read_from_file(COMPOSITE_PATH)
         video_target_urls = [
             [
@@ -875,12 +876,12 @@ class AVBReaderTests(unittest.TestCase):
                 "file:////animation/root/work/editorial/jburnell/700/3.aaf"
             ],
             [
-                "file:///C%3A/Avid%20MediaFiles/MXF/1/700.Exported.03_Vi48896FA0V.mxf"
+                "file://C//Avid MediaFiles/MXF/1/700.Exported.03_Vi48896FA0V.mxf"
             ]
         ]
         audio_target_urls = [
             [
-                "file:///C%3A/OMFI%20MediaFiles/700.ExportA01.5D8A14612890A.aif"
+                "file://C//OMFI MediaFiles/700.ExportA01.5D8A14612890A.aif"
             ]
         ]
 
@@ -898,9 +899,9 @@ class AVBReaderTests(unittest.TestCase):
                 self.assertEqual(clip.media_reference.target_url,
                                  audio_target_urls[track_index][clip_index])
 
-    def SKIP_test_avb_subclip_metadata(self):
+    def test_avb_subclip_metadata(self):
         """
-        For subclips, the AAF SourceClip can actually reference a CompositionMob
+        For subclips, the AVB SourceClip can actually reference a CompositionMob
         (instead of a MasterMob)
         In which case we need to drill down into the CompositionMob
         to find the MasterMob with the UserComments.
@@ -909,8 +910,7 @@ class AVBReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
         audio_track = timeline.audio_tracks()[0]
         first_clip = audio_track[0]
-
-        avb_metadata = first_clip.media_reference.metadata.get("AAF")
+        avb_metadata = first_clip.media_reference.metadata.get("AVB")
 
         expected_md = {"Director": "director_name",
                        "Line": "script_line",
@@ -920,17 +920,17 @@ class AVBReaderTests(unittest.TestCase):
 
         self._verify_user_comments(avb_metadata, expected_md)
 
-    def SKIP_test_avb_sourcemob_usage(self):
+    def test_avb_sourcemob_usage(self):
         """
-        Each clip stores it's source mob usage AAF value as metadata in`SourceMobUsage`.
+        Each clip stores it's source mob usage AVB value as metadata in`SourceMobUsage`.
         For sub-clips this value should be `Usage_SubClip`.
         """
         # `Usage_SubClip` value
         subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
-        subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
+        subclip_usages = {"Subclip.BREATH": "subclip"}
         for clip in subclip_timeline.each_clip():
             self.assertEqual(
-                clip.metadata.get("AAF", {}).get("SourceMobUsage"),
+                clip.metadata.get("AVB", {}).get("SourceMobUsage"),
                 subclip_usages[clip.name]
             )
 
@@ -945,11 +945,11 @@ class AVBReaderTests(unittest.TestCase):
         }
         for clip in simple_timeline.each_clip():
             self.assertEqual(
-                clip.metadata.get("AAF", {}).get("SourceMobUsage", ""),
+                clip.metadata.get("AVB", {}).get("SourceMobUsage", ""),
                 simple_usages[clip.name]
             )
 
-    def SKIP_test_avb_composition_metadata(self):
+    def test_avb_composition_metadata(self):
         """
         For standard clips the AAF SourceClip can actually reference a
         CompositionMob (instead of a MasterMob) and the composition mob is holding the
@@ -963,7 +963,7 @@ class AVBReaderTests(unittest.TestCase):
         audio_track = timeline.audio_tracks()[0]
         first_clip = audio_track[0]
 
-        avb_metadata = first_clip.media_reference.metadata.get("AAF")
+        avb_metadata = first_clip.media_reference.metadata.get("AVB")
 
         expected_md = {"Director": "director",
                        "Line": "scriptline",
@@ -975,7 +975,7 @@ class AVBReaderTests(unittest.TestCase):
 
     def SKIP_test_avb_composition_metadata_mastermob(self):
         """
-        For standard clips the AAF SourceClip can actually reference a
+        For standard clips the AVB SourceClip can actually reference a
         CompositionMob (instead of a masterMob), the CompositionMob is holding
         UserComments AND the MasterMob is holding UserComments.
         In this case the masterMob has the valid UserComments (empirically determined)
@@ -987,7 +987,9 @@ class AVBReaderTests(unittest.TestCase):
         audio_track = timeline.audio_tracks()[0]
         first_clip = audio_track[0]
 
-        avb_metadata = first_clip.metadata.get("AAF")
+        avb_metadata = first_clip.metadata.get("AVB")
+
+        print(first_clip)
 
         expected_md = {"Director": "director",
                        "Line": "scriptline",
@@ -997,7 +999,7 @@ class AVBReaderTests(unittest.TestCase):
 
         self._verify_user_comments(avb_metadata, expected_md)
 
-    def SKIP_test_avb_multiple_timecode_objects(self):
+    def test_avb_multiple_timecode_objects(self):
         """
         Make sure we can read SourceClips with multiple timecode objects of the
         same start value and length.
@@ -1118,9 +1120,11 @@ class AVBReaderTests(unittest.TestCase):
     def _verify_user_comments(self, avb_metadata, expected_md):
 
         self.assertTrue(avb_metadata is not None)
-        self.assertTrue("UserComments" in avb_metadata.keys())
 
-        user_comments = avb_metadata['UserComments']
+        attribute_meta = avb_metadata.get("attributes", {})
+        self.assertTrue("_USER" in attribute_meta.keys())
+
+        user_comments = attribute_meta['_USER']
 
         user_comment_keys = user_comments.keys()
         for k, v in expected_md.items():

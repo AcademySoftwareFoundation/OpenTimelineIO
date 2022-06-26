@@ -612,6 +612,7 @@ class AVBReaderTests(unittest.TestCase):
                 meta.pop('attributes', None)
                 meta.pop('length', None)
                 meta.pop('start_time', None)
+                c.markers.clear()
 
             # We don't care about Gap start times, only their duration matters
             for g in t.each_child(descended_from_type=otio.schema.Gap):
@@ -1138,17 +1139,21 @@ class AVBReaderTests(unittest.TestCase):
                                                 attach_markers=True)
 
         expected_markers = {
+            (0, 'Timecode'): [
+                ('GREEN: TC1: zts02_1080: f1206: seq.f2604',
+                 1795.0, 1.0, 24.0, 'GREEN')
+            ],
             (1, 'Filler'): [('PUBLISH', 0.0, 1.0, 24.0, 'RED')],
             (1, 'zts02_1010'): [
                 ('GREEN: V1: zts02_1010: f1104: seq.f1104',
                  1103.0, 1.0, 24.0, 'GREEN')
             ],
-            (2, 'ScopeReference'): [
+            (2, 'Filler'): [
                 ('FX', 0.0, 1.0, 24.0, 'YELLOW'),
                 ('BLUE: V2 (no FX): zts02_1020: f1134: seq.f1327',
                  518.0, 1.0, 24.0, 'BLUE')
             ],
-            (3, 'ScopeReference'): [
+            (3, 'Filler'): [
                 ('INSERT', 0.0, 1.0, 24.0, 'CYAN'),
                 ('CYAN: V3: zts02_1030: f1212: seq.f1665',
                  856.0,
@@ -1160,7 +1165,7 @@ class AVBReaderTests(unittest.TestCase):
                 ('MAGENTA: V4: zts02_1040: f1001: seq.f1666',
                  86400.0, 1.0, 24.0, 'MAGENTA')
             ],
-            (5, 'ScopeReference'): [
+            (5, 'Filler'): [
                 ('RED: V5: zts02_1050: f1061: seq.f1885',
                  884.0, 1.0, 24.0, 'RED')
             ]

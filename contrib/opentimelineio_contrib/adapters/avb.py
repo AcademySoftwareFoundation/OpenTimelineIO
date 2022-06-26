@@ -6,6 +6,7 @@
 Depending on if/where pyavb is installed, you may need to set this env var:
     OTIO_AVB_PYTHON_LIB - should point at the pyavb module.
 """
+import colorsys
 import copy
 import numbers
 import os
@@ -178,6 +179,110 @@ def _transcribe_property(prop, owner=None):
         return str(prop)
 
 
+def _otio_color_from_hue(hue):
+    """Return an OTIO marker color, based on hue in range of [0.0, 1.0].
+
+    Args:
+        hue (float): marker color hue value
+
+    Returns:
+        otio.schema.MarkerColor: converted / estimated marker color
+
+    """
+    if hue <= 0.04 or hue > 0.93:
+        return otio.schema.MarkerColor.RED
+    if hue <= 0.13:
+        return otio.schema.MarkerColor.ORANGE
+    if hue <= 0.2:
+        return otio.schema.MarkerColor.YELLOW
+    if hue <= 0.43:
+        return otio.schema.MarkerColor.GREEN
+    if hue <= 0.52:
+        return otio.schema.MarkerColor.CYAN
+    if hue <= 0.74:
+        return otio.schema.MarkerColor.BLUE
+    if hue <= 0.82:
+        return otio.schema.MarkerColor.PURPLE
+    return otio.schema.MarkerColor.MAGENTA
+
+
+def _marker_color_from_string(color):
+    """Tries to derive a valid marker color from a string.
+
+    Args:
+        color (str): color name (e.g. "Yellow")
+
+    Returns:
+        otio.schema.MarkerColor: matching color or `None`
+    """
+    if not color:
+        return
+
+    return getattr(otio.schema.MarkerColor, color.upper(), None)
+
+
+def _convert_rgb_to_marker_color(rgb_dict):
+    """Returns a matching OTIO marker color for a given AAF color string.
+
+    Adapted from `get_nearest_otio_color()` in the `xges.py` adapter.
+
+    Args:
+        rgb_dict (dict): marker color as dict,
+                         e.g. `"{'red': 41471, 'green': 12134, 'blue': 6564}"`
+
+    Returns:
+        otio.schema.MarkerColor: converted / estimated marker color
+
+    """
+
+    float_colors = {
+        (1.0, 0.0, 0.0): otio.schema.MarkerColor.RED,
+        (0.0, 1.0, 0.0): otio.schema.MarkerColor.GREEN,
+        (0.0, 0.0, 1.0): otio.schema.MarkerColor.BLUE,
+        (0.0, 0.0, 0.0): otio.schema.MarkerColor.BLACK,
+        (1.0, 1.0, 1.0): otio.schema.MarkerColor.WHITE,
+    }
+
+    # convert from UInt to float
+    red = float(rgb_dict["red"]) / 65535.0
+    green = float(rgb_dict["green"]) / 65535.0
+    blue = float(rgb_dict["blue"]) / 65535.0
+    rgb_float = (red, green, blue)
+
+    # check for exact match
+    marker_color = float_colors.get(rgb_float)
+    if marker_color:
+        return marker_color
+
+    # try to get an approxiate match based on hue
+    hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
+    nearest = None
+    if saturation < 0.2:
+        if lightness > 0.65:
+            nearest = otio.schema.MarkerColor.WHITE
+        else:
+            nearest = otio.schema.MarkerColor.BLACK
+    if nearest is None:
+        if lightness < 0.13:
+            nearest = otio.schema.MarkerColor.BLACK
+        if lightness > 0.9:
+            nearest = otio.schema.MarkerColor.WHITE
+    if nearest is None:
+        nearest = _otio_color_from_hue(hue)
+        if nearest == otio.schema.MarkerColor.RED and lightness > 0.53:
+            nearest = otio.schema.MarkerColor.PINK
+        if (
+            nearest == otio.schema.MarkerColor.MAGENTA
+            and hue < 0.89
+            and lightness < 0.42
+        ):
+            # some darker magentas look more like purple
+            nearest = otio.schema.MarkerColor.PURPLE
+
+    # default to red color
+    return nearest or otio.schema.MarkerColor.RED
+
+
 def iter_source_clips(component):
     if isinstance(component, avb.components.SourceClip):
         yield component
@@ -213,8 +318,8 @@ def _walk_reference_chain(item, time, results):
         track = item.track
 
         if track:
-            results.append([time, mob])
-            results.append([time, track])
+            results.append([item.start_time + time, mob])
+            results.append([item.start_time + time, track])
             # TODO: check for this affects anything
             if hasattr(track, 'start_pos'):
                 raise AVBAdapterError("start_pos not handles, sample please")
@@ -353,6 +458,7 @@ def _add_child(parent, child, source):
 def _transcribe(item, parents, edit_rate, indent=0):
     result = None
     metadata = {}
+    markers = []
 
     metadata["Name"] = _get_name(item)
     metadata["ClassName"] = _get_class_name(item)
@@ -383,6 +489,13 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 continue
 
             metadata[key] = v
+
+    # Markers
+    if isinstance(item, avb.components.Component):
+        attributes = item.get('attributes', None) or {}
+        for marker_item in attributes.get("_TMP_CRM", []):
+            marker = _transcribe(marker_item, parents + [item], edit_rate, indent + 2)
+            markers.append(marker)
 
     if isinstance(item, avb.trackgroups.Composition):
         _transcribe_log("Creating Timeline for {}".format(_encoded_name(item)), indent)
@@ -515,7 +628,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
         mastermobs = []
         name = None
         for mob in mobs:
-
             # use the name of the first mob seen with name
             if not name:
                 name = mob.name
@@ -593,6 +705,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             media.metadata["AVB"] = clip_metadata
 
             result.media_reference = media
+
     elif isinstance(item, avb.trackgroups.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
@@ -675,6 +788,33 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 otio.opentime.RationalTime(length, edit_rate)
             )
 
+    elif isinstance(item, avb.misc.Marker):
+        attributes = item.attributes
+        name = attributes.get("_ATN_CRM_COM", "")
+        _transcribe_log(
+            "Create Marker for '{}'".format(_encoded_name(name)), indent
+        )
+        result = otio.schema.Marker()
+        result.name = name
+
+        # determine marker color
+        color = _marker_color_from_string(
+            attributes.get("_ATN_CRM_COLOR", None)
+        )
+        if color is None:
+            color = _convert_rgb_to_marker_color(
+                item.color
+            )
+
+        result.color = color
+        length = 1
+        position = item.comp_offset
+
+        result.marked_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.from_frames(position, edit_rate),
+            duration=otio.opentime.from_frames(length, edit_rate),
+        )
+
     elif isinstance(item, collections_abc.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
@@ -700,6 +840,22 @@ def _transcribe(item, parents, edit_rate, indent=0):
     # If we didn't get a name yet, use the one we have in metadata
     if not result.name:
         result.name = metadata["Name"]
+
+    # AVB stores markers with component relative offsets
+    # this converts them to media reference relative offsets
+    for marker in markers:
+        if isinstance(result, otio.core.Item):
+            duration = marker.marked_range.start_time
+            current_start = marker.marked_range.start_time
+            source_range = result.source_range
+            if source_range:
+                offset = source_range.start_time
+                marker.marked_range = otio.opentime.TimeRange(
+                    start_time=current_start + offset,
+                    duration=duration
+                )
+
+        result.markers.append(marker)
 
     # Attach the AVB metadata
     if not result.metadata:

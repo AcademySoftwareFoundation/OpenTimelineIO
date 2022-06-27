@@ -336,7 +336,7 @@ setup(
     python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
 
     install_requires=[
-        'pyaaf2~=1.4.0',
+        'pyaaf2>=1.4,<1.6',
         'backports.tempfile; python_version<"3.0"',
         # Enables the builtins module in the XGES adapter
         'future; python_version<"3.0"',

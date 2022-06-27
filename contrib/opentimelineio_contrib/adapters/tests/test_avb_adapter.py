@@ -974,7 +974,7 @@ class AVBReaderTests(unittest.TestCase):
 
         self._verify_user_comments(avb_metadata, expected_md)
 
-    def SKIP_test_avb_composition_metadata_mastermob(self):
+    def test_avb_composition_metadata_mastermob(self):
         """
         For standard clips the AVB SourceClip can actually reference a
         CompositionMob (instead of a masterMob), the CompositionMob is holding
@@ -988,9 +988,7 @@ class AVBReaderTests(unittest.TestCase):
         audio_track = timeline.audio_tracks()[0]
         first_clip = audio_track[0]
 
-        avb_metadata = first_clip.metadata.get("AVB")
-
-        print(first_clip)
+        avb_metadata = first_clip.media_reference.metadata.get("AVB")
 
         expected_md = {"Director": "director",
                        "Line": "scriptline",
@@ -1041,7 +1039,7 @@ class AVBReaderTests(unittest.TestCase):
         self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
         self.assertEqual(result_stderr, '')
 
-    def SKIP_test_avb_marker_over_transition(self):
+    def test_avb_marker_over_transition(self):
         """
         Make sure we can transcibe this composition with markers over transition.
         """
@@ -1061,7 +1059,7 @@ class AVBReaderTests(unittest.TestCase):
 
         self.assertIsNotNone(timeline)
 
-    def SKIP_test_avb_marker_over_audio_file(self):
+    def test_avb_marker_over_audio_file(self):
         """
         Make sure we can transcibe markers over an audio AAF file.
         """
@@ -1086,32 +1084,36 @@ class AVBReaderTests(unittest.TestCase):
         self.assertTrue(1 == len(timeline.tracks))
 
         track = timeline.tracks[0]
-        self.assertEqual(3, len(track.markers))
+        clip = track[0]
+
+        self.assertEqual(3, len(clip.markers))
 
         fps = 24.0
         expected_markers = [
             {
                 'color': 'RED',
                 'label': 'm1',
-                'start_time': otio.opentime.from_frames(50.0, fps)
+                'start_time': otio.opentime.from_frames(86450.0, fps)
             },
             {
                 'color': 'GREEN',
                 'label': 'm2',
-                'start_time': otio.opentime.from_frames(103.0, fps)
+                'start_time': otio.opentime.from_frames(86503.0, fps)
             },
             {
                 'color': 'BLUE',
                 'label': 'm3',
-                'start_time': otio.opentime.from_frames(166.0, fps)
+                'start_time': otio.opentime.from_frames(86566.0, fps)
             }
         ]
 
-        for index, marker in enumerate(track.markers):
+        for index, marker in enumerate(clip.markers):
             expected_marker = expected_markers[index]
 
             color = marker.color
-            label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
+            label = marker.metadata.get('AVB', {}) \
+                                   .get('attributes', {}) \
+                                   .get("_ATN_CRM_USER")
             start_time = marker.marked_range.start_time
 
             self.assertEqual(color, expected_marker.get('color'))
@@ -1132,7 +1134,7 @@ class AVBReaderTests(unittest.TestCase):
             self.assertTrue(k in user_comment_keys)
             self.assertEqual(user_comments[k], v)
 
-    def SKIP_test_attach_markers(self):
+    def test_attach_markers(self):
         """Check if markers are correctly translated and attached to the right items.
         """
         timeline = otio.adapters.read_from_file(MULTIPLE_MARKERS_PATH,
@@ -1146,7 +1148,7 @@ class AVBReaderTests(unittest.TestCase):
             (1, 'Filler'): [('PUBLISH', 0.0, 1.0, 24.0, 'RED')],
             (1, 'zts02_1010'): [
                 ('GREEN: V1: zts02_1010: f1104: seq.f1104',
-                 1103.0, 1.0, 24.0, 'GREEN')
+                 1104.0, 1.0, 24.0, 'GREEN')
             ],
             (2, 'Filler'): [
                 ('FX', 0.0, 1.0, 24.0, 'YELLOW'),

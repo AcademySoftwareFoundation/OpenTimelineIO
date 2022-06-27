@@ -584,7 +584,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
         media_edit_rate = edit_rate
 
         source_mob = None
-
         for start_time, comp in ref_chain:
             if isinstance(comp, avb.trackgroups.Composition) \
                and comp.mob_type == "SourceMob":
@@ -604,26 +603,10 @@ def _transcribe(item, parents, edit_rate, indent=0):
                         media_start = track_tc
                         media_edit_rate = tc_rate
 
-        parent_mobs = filter(lambda parent:
-                             isinstance(parent, avb.trackgroups.Composition), parents)
-        is_directly_in_composition = all(
-            mob.mob_type == 'CompositionMob'
-            for mob in parent_mobs
+        result.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(source_start, media_edit_rate),
+            otio.opentime.RationalTime(source_length, media_edit_rate)
         )
-
-        if is_directly_in_composition:
-            result.source_range = otio.opentime.TimeRange(
-                otio.opentime.RationalTime(source_start, media_edit_rate),
-                otio.opentime.RationalTime(source_length, media_edit_rate)
-            )
-
-        composition_user_metadata = {}
-        for mob in mobs:
-            if mob.mob_type == "CompositionMob":
-                composition_user_metadata = _get_composition_user_comments(mob)
-                if composition_user_metadata:
-                    _transcribe_log("[found Compositionmob meta]", indent, False)
-                    break
 
         mastermobs = []
         name = None
@@ -693,15 +676,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
 
             # Copy the metadata from the master into the media_reference
             clip_metadata = copy.deepcopy(mastermob_child.metadata.get("AVB", {}))
-
-            # If the composition was holding UserComments and the current masterMob has
-            # no UserComments, use the ones from the CompositionMob. But if the
-            # masterMob has any, prefer them over the compositionMob, since the
-            # masterMob is the ultimate authority for a source clip.
-            if composition_user_metadata:
-                if "UserComments" not in clip_metadata:
-                    clip_metadata['UserComments'] = composition_user_metadata
-
             media.metadata["AVB"] = clip_metadata
 
             result.media_reference = media
@@ -845,7 +819,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     # this converts them to media reference relative offsets
     for marker in markers:
         if isinstance(result, otio.core.Item):
-            duration = marker.marked_range.start_time
+            duration = marker.marked_range.duration
             current_start = marker.marked_range.start_time
             source_range = result.source_range
             if source_range:
@@ -1088,6 +1062,14 @@ def _fix_transitions(thing):
                         start_time=csr.start_time + pre_trans.in_offset,
                         duration=csr.duration - pre_trans.in_offset
                     )
+
+                    # offset markers
+                    for marker in child.markers:
+                        msr = marker.marked_range
+                        marker.marked_range = otio.opentime.TimeRange(
+                            start_time=msr.start_time + pre_trans.in_offset,
+                            duration=msr.duration
+                        )
 
                 # Is the item after us a Transition?
                 if c < len(thing) - 1 and isinstance(

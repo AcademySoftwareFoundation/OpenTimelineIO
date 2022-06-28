@@ -125,6 +125,7 @@ def _get_class_name(item):
 def _encoded_name(item):
 
     name = _get_name(item)
+    # TODO: ask why is this being done?
     return name.encode("utf-8", "replace")
 
 
@@ -536,17 +537,6 @@ def _transcribe(item, parents, edit_rate, indent=0):
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
-        # if parent is a sequence add SlotID / PhysicalTrackNumber to attach markers
-        # parent = parents[-1]
-        # if isinstance(parent, (avb.components.Sequence, )):
-        #     timeline_slots = [
-        #         p for p in parents if isinstance(p, avb.trackgroups.Track)
-        #     ]
-        #     timeline_slot = timeline_slots[-1]
-        #      if timeline_slot:
-        #         metadata["PhysicalTrackNumber"] = list(parent.slots).index(item) + 1
-        #         metadata["SlotID"] = int(timeline_slot["SlotID"].value)
-
         for component in item.components:
             child = _transcribe(component, parents + [item], edit_rate, indent + 2)
             _add_child(result, child, component)
@@ -766,7 +756,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         attributes = item.attributes
         name = attributes.get("_ATN_CRM_COM", "")
         _transcribe_log(
-            "Create Marker for '{}'".format(_encoded_name(name)), indent
+            "Create Marker for '{}'".format(_encoded_name(item)), indent
         )
         result = otio.schema.Marker()
         result.name = name
@@ -1346,10 +1336,15 @@ def read_from_file(
         otio.schema.Timeline
 
     """
+    # 'activate' transcribe logging if adapter argument is provided.
+    # Note that a global 'switch' is used in order to avoid
+    # passing another argument around in the _transcribe() method.
+    #
+    global _TRANSCRIBE_DEBUG
+    _TRANSCRIBE_DEBUG = transcribe_log
 
     with avb.open(filepath) as avb_file:
-        # Note: We're skipping: aaf_file.header
-        # Is there something valuable in there?
+        # TODO: there is additional Bin data that might be useful
 
         avb_file.content.build_mob_dict()
         mobs_to_transcribe = _get_mobs_for_transcription(avb_file.content)
@@ -1369,6 +1364,6 @@ def read_from_file(
     _fix_transitions(result)
 
     # Reset transcribe_log debugging
-    # _TRANSCRIBE_DEBUG = False
+    _TRANSCRIBE_DEBUG = False
 
     return result

@@ -18,7 +18,48 @@ except ImportError:
     # python3
     import io
 
-TRANSCRIPTION_RESULT = ""
+
+TRANSCRIPTION_RESULT = """---
+Transcribing top level mobs
+---
+Creating SerializableCollection for Iterable for list
+  Creating Timeline for SubclipTSVNoData_NoVideo.Exported.02
+    Creating Track for Track for Track
+      Creating Gap for Timecode
+    Creating Track for Track for Track
+      Creating Gap for CaptureMask
+    Creating Track for Track for Track
+      Creating Gap for Timecode
+    Creating Track for Track for Track
+      Creating Gap for Timecode
+    Creating Track for Track for Track
+      Creating Gap for CaptureMask
+    Creating Track for Track for Track
+      Creating Gap for CaptureMask
+    Creating Track for Track for Track
+      Creating Gap for CaptureMask
+    Creating Track for Track for Track
+      Creating Gap for Edgecode
+    Creating Track for Track for Track
+      Creating Track for Sequence for DX
+        Creating Effect for PanVolumeEffect
+          Creating Track for Track for Track
+              Create Marker for Marker
+            Creating SourceClip for Subclip.BREATH (subclip)
+            [found mastermob]
+            Creating Timeline for subclip
+              Creating Track for Track for Track
+                  Create Marker for Marker
+                Creating SourceClip for x000-0000_01_Xxxxx_Xxx.aaf
+                [found no mastermob]
+          Creating Track for Track for Track
+            Creating Gap for ControlClip
+    Creating Track for Track for Track
+      Creating Track for Sequence for Sequence
+        Creating Gap for Filler
+    Creating Track for Track for Track
+      Creating Gap for CaptureMask
+"""
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
@@ -1017,8 +1058,8 @@ class AVBReaderTests(unittest.TestCase):
         self.assertEqual(available_range.start_time.value, 86501.0)
         self.assertEqual(available_range.duration.value, 1981.0)
 
-    def SKIP_test_avb_transcribe_log(self):
-        """Excercise an aaf-adapter read with transcribe_logging enabled."""
+    def test_avb_transcribe_log(self):
+        """Excercise an avb-adapter read with transcribe_logging enabled."""
 
         # capture output of debugging statements
         old_stdout = sys.stdout

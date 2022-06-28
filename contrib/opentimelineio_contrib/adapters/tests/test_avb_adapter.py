@@ -614,10 +614,10 @@ class AVBReaderTests(unittest.TestCase):
 
     def test_avb_flatten_tracks(self):
         multitrack_timeline = otio.adapters.read_from_file(
-            MULTITRACK_EXAMPLE_PATH, attach_markers=False
+            MULTITRACK_EXAMPLE_PATH,
         )
         preflattened_timeline = otio.adapters.read_from_file(
-            PREFLATTENED_EXAMPLE_PATH, attach_markers=False
+            PREFLATTENED_EXAMPLE_PATH,
         )
 
         # first make sure we got the structure we expected
@@ -1178,8 +1178,7 @@ class AVBReaderTests(unittest.TestCase):
     def test_attach_markers(self):
         """Check if markers are correctly translated and attached to the right items.
         """
-        timeline = otio.adapters.read_from_file(MULTIPLE_MARKERS_PATH,
-                                                attach_markers=True)
+        timeline = otio.adapters.read_from_file(MULTIPLE_MARKERS_PATH)
 
         expected_markers = {
             (0, 'Timecode'): [

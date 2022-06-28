@@ -382,18 +382,12 @@ Reads AVB content from `filepath` and outputs an OTIO
   items
       transcribe_log (bool, optional): log activity as items are getting
   transcribed
-      attach_markers (bool, optional): attaches markers to their appropriate items
-                                       like clip, gap. etc on the track
-      bake_keyframed_properties (bool, optional): bakes animated property values
-                                                  for each frame in a source clip
   Returns:
       otio.schema.Timeline
 ```
   - filepath
   - simplify
   - transcribe_log
-  - attach_markers
-  - bake_keyframed_properties
 
 
 

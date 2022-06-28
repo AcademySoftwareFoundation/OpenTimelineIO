@@ -284,28 +284,6 @@ def _convert_rgb_to_marker_color(rgb_dict):
     return nearest or otio.schema.MarkerColor.RED
 
 
-def iter_source_clips(component):
-    if isinstance(component, avb.components.SourceClip):
-        yield component
-
-    elif isinstance(component, avb.components.Sequence):
-        for c in component.components:
-            if isinstance(c, avb.components.SourceClip):
-                yield c
-    elif isinstance(component, avb.trackgroups.EssenceGroup):
-        source_clip = None
-
-        for track in component.tracks:
-            for clip in iter_source_clips(track.component):
-                source_clip = clip
-                break
-            if source_clip:
-                break
-
-        if source_clip:
-            yield source_clip
-
-
 def _walk_reference_chain(item, time, results):
 
     if item is None:
@@ -387,30 +365,6 @@ def _walk_reference_chain(item, time, results):
     for v in results:
         print(v)
     assert False
-
-
-def timecode_values_are_same(timecodes):
-    """
-    A SourceClip can have multiple timecode objects (for example an auxTC24
-    value that got added via the Avid Bin column). As long as they have the
-    same start and length values, they can be treated as being the same.
-    """
-    if len(timecodes) == 1:
-        return True
-
-    start_set = set()
-    length_set = set()
-
-    for timecode in timecodes:
-        start_set.add(timecode.start)
-        length_set.add(timecode.length)
-
-    # If all timecode objects are having same start and length we can consider
-    # them equivalent.
-    if len(start_set) == 1 and len(length_set) == 1:
-        return True
-
-    return False
 
 
 def _extract_timecode_info(source_mob, start_time):
@@ -1318,9 +1272,7 @@ def _get_mobs_for_transcription(content):
 def read_from_file(
     filepath,
     simplify=True,
-    transcribe_log=False,
-    attach_markers=True,
-    bake_keyframed_properties=False
+    transcribe_log=False
 ):
     """Reads AVB content from `filepath` and outputs an OTIO timeline object.
 
@@ -1328,10 +1280,6 @@ def read_from_file(
         filepath (str): AVB filepath
         simplify (bool, optional): simplify timeline structure by stripping empty items
         transcribe_log (bool, optional): log activity as items are getting transcribed
-        attach_markers (bool, optional): attaches markers to their appropriate items
-                                         like clip, gap. etc on the track
-        bake_keyframed_properties (bool, optional): bakes animated property values
-                                                    for each frame in a source clip
     Returns:
         otio.schema.Timeline
 
@@ -1339,12 +1287,12 @@ def read_from_file(
     # 'activate' transcribe logging if adapter argument is provided.
     # Note that a global 'switch' is used in order to avoid
     # passing another argument around in the _transcribe() method.
-    #
+
     global _TRANSCRIBE_DEBUG
     _TRANSCRIBE_DEBUG = transcribe_log
 
     with avb.open(filepath) as avb_file:
-        # TODO: there is additional Bin data that might be useful
+        # TODO: check if there is additional bin data that might be useful
 
         avb_file.content.build_mob_dict()
         mobs_to_transcribe = _get_mobs_for_transcription(avb_file.content)

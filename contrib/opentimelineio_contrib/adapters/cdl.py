@@ -1,7 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""CDL Export Adapter"""
+"""
+CDL Export Adapter
+This simple adapter allows users to export a collection of .cdl files from an OTIO timeline.
+The ColorCorrection ID within the .cdl will use the reel name/Tape of the clip, while the file itself will be named using the timeline event name.
+
+To use: otio.adapters.write_to_file(timeline, cdl_output_directory, adapter_name='cdl')
+"""
 import os
 import sys
 import xml.etree.cElementTree as ET
@@ -30,9 +36,15 @@ def write_to_file(input_otio, filepath):
       Actually writes to multiple .cdl files (one per clip/event in timeline)
       filepath parameter should be a directory where the CDLs should be saved.
     """
-    for track in input_otio.tracks:
-        for timeline_event in track:
-            if timeline_event.metadata["cdl"]:
-                cdl_filepath = os.path.join(filepath, timeline_event.name + ".cdl")
-                cdl_et_tree = convert_to_cdl(timeline_event)
-                cdl_et_tree.write(cdl_filepath, encoding='utf-8', xml_declaration=True)
+    if os.path.isdir(filepath):
+        for track in input_otio.tracks:
+            for timeline_event in track:
+                if timeline_event.metadata["cdl"]:
+                    try:
+                        cdl_filepath = os.path.join(filepath, timeline_event.name + ".cdl")
+                        cdl_et_tree = convert_to_cdl(timeline_event)
+                        cdl_et_tree.write(cdl_filepath, encoding='utf-8', xml_declaration=True)
+                    finally:
+                       pass
+    else:
+        raise RuntimeError(f"{filepath} is not a valid directory, please create it and run again.")

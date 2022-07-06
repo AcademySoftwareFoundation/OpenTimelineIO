@@ -15,7 +15,8 @@ MODULE = otio.adapters.from_name('cdl').module()
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TEMP_TESTS_OUTPUT_DIR = os.path.join(SAMPLE_DATA_DIR, "CDL_EXPORTS")
-SAMPLE_CDL_EDL_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_cdl_edl.edl")
+# SAMPLE_CDL_EDL_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_cdl_edl.edl")
+SAMPLE_CDL_EDL_PATH = '/Users/joshunwin/Downloads/220705_TFIB_PULL_ABSOLUTE_002.edl'
 
 class CDLAdapterTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -39,7 +40,7 @@ class CDLAdapterTest(unittest.TestCase):
 
     def test_write_cdl(self):
         edl_path = SAMPLE_CDL_EDL_PATH
-        timeline = otio.adapters.read_from_file(edl_path)
+        timeline = otio.adapters.read_from_file(edl_path, rate=25)
         otio.adapters.write_to_file(timeline, TEMP_TESTS_OUTPUT_DIR, adapter_name='cdl')
 
         exported_cdl_files = [f for f in sorted(os.listdir(TEMP_TESTS_OUTPUT_DIR))]

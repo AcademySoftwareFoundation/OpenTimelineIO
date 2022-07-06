@@ -13,17 +13,22 @@ import sys
 import xml.etree.cElementTree as ET
 
 def convert_to_cdl(timeline_event):
+    slope = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["slope"])
+    offset = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["offset"])
+    power = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["power"])
+    saturation = str("{:.6f}".format(timeline_event.metadata["cdl"]["asc_sat"]))
+
     color_decision_list = ET.Element("ColorDecisionList", xmlns="urn:ASC:CDL:v1.01")
     color_decision = ET.SubElement(color_decision_list, "ColorDecision")
     color_correction = ET.SubElement(color_decision, "ColorCorrection", id=timeline_event.metadata["cmx_3600"]["reel"])
 
     sop_node = ET.SubElement(color_correction, "SOPNode")
-    slope = ET.SubElement(sop_node, "Slope").text = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["slope"])
-    offset = ET.SubElement(sop_node, "Offset").text = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["offset"])
-    power = ET.SubElement(sop_node, "Power").text = " ".join(str("{:.6f}".format(x)) for x in timeline_event.metadata["cdl"]["asc_sop"]["power"])
+    ET.SubElement(sop_node, "Slope").text = slope
+    ET.SubElement(sop_node, "Offset").text = offset
+    ET.SubElement(sop_node, "Power").text = power
 
     sat_node = ET.SubElement(color_correction, "SATNode")
-    saturation = ET.SubElement(sat_node, "Saturation").text = str("{:.6f}".format(timeline_event.metadata["cdl"]["asc_sat"]))
+    ET.SubElement(sat_node, "Saturation").text = saturation
 
     tree = ET.ElementTree(color_decision_list)
     ET.indent(tree)

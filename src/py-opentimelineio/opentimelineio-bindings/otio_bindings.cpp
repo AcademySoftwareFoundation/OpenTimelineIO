@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include "otio_anyDictionary.h"
 #include "otio_anyVector.h"
@@ -69,6 +72,7 @@ PYBIND11_MODULE(_otio, m) {
     otio_exception_bindings(m);
     otio_any_dictionary_bindings(m);
     otio_any_vector_bindings(m);
+    otio_imath_bindings(m);
     otio_serializable_object_bindings(m);
     otio_tests_bindings(m);
 
@@ -124,7 +128,11 @@ PYBIND11_MODULE(_otio, m) {
     m.def("install_external_keepalive_monitor", &install_external_keepalive_monitor,
           "so"_a, "apply_now"_a);
     m.def("instance_from_schema", &instance_from_schema,
-          "schema_name"_a, "schema_version"_a, "data"_a);
+          "schema_name"_a, "schema_version"_a, "data"_a, R"docstring(
+Return an instance of the schema from data in the data_dict.
+
+:raises UnsupportedSchemaError: when the requested schema version is greater than the registered schema version.
+)docstring");
     m.def("register_upgrade_function", &register_upgrade_function,
           "schema_name"_a,
           "version_to_upgrade_to"_a,

@@ -12,8 +12,10 @@ set(OTIO_VERSION_PATCH "0")
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
-set(OTIO_AUTHOR_EMAIL "opentimelineio@pixar.com")
+set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")
+
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
 
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
@@ -23,10 +25,14 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 # maintenance and troubleshooting
 
 # Installation options
-option(OTIO_CXX_INSTALL          "Install the C++ bindings" ON)
-option(OTIO_PYTHON_INSTALL       "Install the Python bindings" OFF)
-option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
+option(OTIO_CXX_INSTALL               "Install the C++ bindings" ON)
+option(OTIO_PYTHON_INSTALL            "Install the Python bindings" OFF)
+option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (any and nonstd)" ON)
+option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
+option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
+set(OTIO_IMATH_LIBS "" CACHE STRING   "Imath library overrides to use instead of src/deps or find_package")
+option(OTIO_FIND_IMATH                "Find Imath using find_package, ignored if OTIO_IMATH_LIBS is set" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -72,7 +78,7 @@ if(OTIO_PYTHON_INSTALL)
         message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     else()
         # either python_install or install_prefix have been set
-        if(OTIO_PYTHON_INSTALL_DIR_INITIALIZED_TO_DEFAULT)
+        if(NOT OTIO_PYTHON_INSTALL_DIR)
             # CMAKE_INSTALL_PREFIX was set, so install the python components there
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
 
@@ -217,11 +223,62 @@ if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
 endif()
 
 #------------------------------------------------------------------------------
+# Setup tests
+
+include(CTest)
+set(CTEST_OUTPUT_ON_FAILURE ON)
+
+#------------------------------------------------------------------------------
 # Build the dependencies and components
 
+#----- Imath
+set(OTIO_RESOLVED_IMATH_LIBRARIES "")
+if (NOT "${OTIO_IMATH_LIBS}" STREQUAL "")
+    message(STATUS "Using Imath from OTIO_MATH_LIBS: ${OTIO_IMATH_LIBS}")
+    set(OTIO_RESOLVED_IMATH_LIBRARIES "${OTIO_IMATH_LIBS}")
+    set(USE_DEPS_IMATH OFF)
+elseif(OTIO_FIND_IMATH)
+    find_package(Imath QUIET)
+    if (Imath_FOUND)
+        message(STATUS "Found Imath 3 at ${Imath_CONFIG}")
+        set(USE_DEPS_IMATH OFF)
+    else()
+        find_package(IlmBase QUIET)
+        if (IlmBase_FOUND)
+            message(STATUS "Imath 3 not found, found Imath 2 at ${IlmBase_CONFIG}")
+            message(STATUS "You may need to point to the Imath headers by setting IMATH_INCLUDES")
+            set(USE_DEPS_IMATH_OFF)
+            set(OTIO_RESOLVED_IMATH_LIBRARIES "${IlmBase_LIBRARIES")
+        else()
+            message(STATUS "Imath 3 and 2 were not found, using src/deps/Imath")
+            set(USE_DEPS_IMATH ON)
+        endif()
+    endif()
+else()
+    message(STATUS "Using src/deps/Imath by default")
+    set(USE_DEPS_IMATH ON)
+endif()
+
+# set up the internally hosted dependencies
 add_subdirectory(src/deps)
+
+set (OTIO_IMATH_TARGETS
+    # For OpenEXR/Imath 3.x:
+    $<TARGET_NAME_IF_EXISTS:Imath::Imath>
+    $<TARGET_NAME_IF_EXISTS:Imath::Half>
+    # For OpenEXR >= 2.4/2.5 with reliable exported targets
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Imath>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Half>
+    $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
+    # For OpenEXR <= 2.3:
+    ${ILMBASE_LIBRARIES})
+
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
+
+if(BUILD_TESTING)
+	add_subdirectory(tests)
+endif()
 
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)

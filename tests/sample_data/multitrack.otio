@@ -10,8 +10,9 @@
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -36,8 +37,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
-                        "markers": [], 
+                        "effects": [],
+                        "markers": [],
+                        "enabled": true,
                         "metadata": {},
                         "name": "Filler", 
                         "source_range": {
@@ -56,8 +58,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -82,8 +85,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {},
                         "name": "Filler 2", 
                         "source_range": {
@@ -102,8 +106,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -128,8 +133,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {},
                         "name": "Filler 3", 
                         "source_range": {
@@ -148,8 +154,9 @@
                     }
                 ], 
                 "effects": [], 
-                "kind": "Video", 
-                "markers": [], 
+                "kind": "Video",
+                "markers": [],
+                "enabled": true,
                 "metadata": {},
                 "name": "Sequence", 
                 "source_range": null
@@ -159,8 +166,9 @@
                 "children": [
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {},
                         "name": "ScopeReference", 
                         "source_range": {
@@ -179,8 +187,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -205,8 +214,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {},
                         "name": "ScopeReference 2", 
                         "source_range": {
@@ -225,8 +235,9 @@
                     }
                 ], 
                 "effects": [], 
-                "kind": "Video", 
+                "kind": "Video",
                 "markers": [], 
+                "enabled": true,
                 "metadata": {},
                 "name": "Sequence 2", 
                 "source_range": null
@@ -236,8 +247,9 @@
                 "children": [
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "metadata": {},
                         "name": "ScopeReference 3", 
                         "source_range": {
@@ -256,8 +268,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
+                        "effects": [],
                         "markers": [], 
+                        "enabled": true,
                         "media_reference": {
                             "OTIO_SCHEMA": "MissingReference.1", 
                             "available_range": null, 
@@ -282,8 +295,9 @@
                     }, 
                     {
                         "OTIO_SCHEMA": "Gap.1", 
-                        "effects": [], 
-                        "markers": [], 
+                        "effects": [],
+                        "markers": [],
+                        "enabled": true,
                         "metadata": {},
                         "name": "ScopeReference 4", 
                         "source_range": {
@@ -302,15 +316,17 @@
                     }
                 ], 
                 "effects": [], 
-                "kind": "Video", 
+                "kind": "Video",
                 "markers": [], 
+                "enabled": true,
                 "metadata": {},
                 "name": "Sequence 3", 
                 "source_range": null
             }
         ], 
-        "effects": [], 
+        "effects": [],
         "markers": [], 
+        "enabled": true,
         "metadata": {},
         "name": "NestedScope", 
         "source_range": null

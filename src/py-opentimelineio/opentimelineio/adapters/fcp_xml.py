@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """OpenTimelineIO Final Cut Pro 7 XML Adapter."""
 
@@ -582,9 +561,7 @@ class FCP7XMLParser:
         1. Inheritance
         2. The id Attribute
 
-    .. seealso:: https://developer.apple.com/library/archive/documentation/\
-            AppleApplications/Reference/FinalCutPro_XML/Basics/Basics.html\
-            #//apple_ref/doc/uid/TP30001154-TPXREF102
+    .. seealso:: https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/Basics/Basics.html#//apple_ref/doc/uid/TP30001154-TPXREF102 # noqa
 
     Inheritance is implemented using a _Context object that is pushed down
     through layers of parsing. A given parsing method is passed the element to
@@ -1955,6 +1932,10 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     media_e = _get_or_create_subelement(sequence_e, "media")
     video_e = _get_or_create_subelement(media_e, 'video')
     audio_e = _get_or_create_subelement(media_e, 'audio')
+
+    # This is a fix for Davinci Resolve. After the "video" tag, it expects
+    # a <format> tag, even if empty. See issue 839
+    _get_or_create_subelement(video_e, "format")
 
     # XXX: Due to the way that backreferences are created later on, the XML
     #      is assumed to have its video tracks serialized before its audio

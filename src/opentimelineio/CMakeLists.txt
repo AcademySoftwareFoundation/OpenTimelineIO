@@ -40,49 +40,53 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
-            clip.cpp
-            composable.cpp
-            composition.cpp
-            deserialization.cpp
-            effect.cpp
-            errorStatus.cpp
-            externalReference.cpp
-            freezeFrame.cpp
-            gap.cpp
-            generatorReference.cpp
-            imageSequenceReference.cpp
-            item.cpp
-            linearTimeWarp.cpp
-            marker.cpp
-            mediaReference.cpp
-            missingReference.cpp
-            safely_typed_any.cpp
-            serializableCollection.cpp
-            serializableObject.cpp
-            serializableObjectWithMetadata.cpp
-            serialization.cpp
-            stack.cpp
-            stackAlgorithm.cpp
-            stringUtils.cpp
-            stringUtils.h # stringUtils.h is a private header
-            timeEffect.cpp
-            timeline.cpp
-            track.cpp
-            trackAlgorithm.cpp
-            transition.cpp
-            typeRegistry.cpp
-            unknownSchema.cpp 
-            ${OPENTIMELINEIO_HEADER_FILES})
+    clip.cpp
+    composable.cpp
+    composition.cpp
+    deserialization.cpp
+    effect.cpp
+    errorStatus.cpp
+    externalReference.cpp
+    freezeFrame.cpp
+    gap.cpp
+    generatorReference.cpp
+    imageSequenceReference.cpp
+    item.cpp
+    linearTimeWarp.cpp
+    marker.cpp
+    mediaReference.cpp
+    missingReference.cpp
+    safely_typed_any.cpp
+    serializableCollection.cpp
+    serializableObject.cpp
+    serializableObjectWithMetadata.cpp
+    serialization.cpp
+    stack.cpp
+    stackAlgorithm.cpp
+    stringUtils.cpp
+    stringUtils.h # stringUtils.h is a private header
+    timeEffect.cpp
+    timeline.cpp
+    track.cpp
+    trackAlgorithm.cpp
+    transition.cpp
+    typeRegistry.cpp
+    unknownSchema.cpp 
+    ${OPENTIMELINEIO_HEADER_FILES})
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-target_include_directories(opentimelineio PRIVATE
-                           "${PROJECT_SOURCE_DIR}/src"
-                           "${PROJECT_SOURCE_DIR}/src/deps"
-                           "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
-                           "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+target_include_directories(opentimelineio
+    PRIVATE       "${IMATH_INCLUDES}"
+                  "${PROJECT_SOURCE_DIR}/src"
+                  "${PROJECT_SOURCE_DIR}/src/deps"
+                  "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
+                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
+                  "${IMATH_INCLUDES}")
 
-target_link_libraries(opentimelineio PUBLIC opentime)
+target_link_libraries(opentimelineio 
+    PUBLIC opentime ${OTIO_IMATH_TARGETS})
+
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"

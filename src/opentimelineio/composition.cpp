@@ -1,4 +1,8 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/composition.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
 #include <assert.h>
@@ -668,6 +672,26 @@ Composition::_bisect_left(
     }
 
     return *lower_search_bound;
+}
+
+bool
+Composition::has_clips() const
+{
+    for (auto child: children())
+    {
+        if (dynamic_cast<Clip*>(child.value))
+        {
+            return true;
+        }
+        else if (auto child_comp = dynamic_cast<Composition*>(child.value))
+        {
+            if (child_comp->has_clips())
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

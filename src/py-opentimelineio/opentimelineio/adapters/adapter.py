@@ -1,31 +1,10 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Implementation of the OTIO internal `Adapter` system.
 
 For information on writing adapters, please consult:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html # noqa
 """
 
 import inspect
@@ -51,8 +30,10 @@ except AttributeError:
 class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.
 
-    Note that this class is not subclassed by adapters.  Rather, an adapter is
+    Note that this class is not subclassed by adapters. Rather, an adapter is
     a python module that implements at least one of the following functions:
+
+    .. code-block:: python
 
         write_to_string(input_otio)
         write_to_file(input_otio, filepath) (optionally inferred)
@@ -64,8 +45,7 @@ class Adapter(plugins.PythonPlugin):
     to OTIO.  You should not need to extend this class to create new adapters
     for OTIO.
 
-    For more information:
-    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
+    For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html. # noqa
     """
     _serializable_label = "Adapter.1"
 
@@ -96,7 +76,7 @@ class Adapter(plugins.PythonPlugin):
         return true if adapter supports feature_string, which must be a key
         of the _FEATURE_MAP dictionary.
 
-        Will trigger a call to self.module(), which imports the plugin.
+        Will trigger a call to :meth:`.PythonPlugin.module`, which imports the plugin.
         """
 
         if feature_string.lower() not in _FEATURE_MAP:

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
 
 import argparse
 import json
@@ -12,7 +15,8 @@ def parse_args():
     parser.add_argument(
         '--repo',
         required=True,
-        help='GitHub Project/Repo name. (e.g. "PixarAnimationStudios/OpenTimelineIO")'
+        help='GitHub Project/Repo name.'
+        ' (e.g. "AcademySoftwareFoundation/OpenTimelineIO")'
     )
     parser.add_argument(
         '--token',

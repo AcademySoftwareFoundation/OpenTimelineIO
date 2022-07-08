@@ -1,27 +1,7 @@
 #!/usr/bin/env python
 #
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 import unittest
 import os
@@ -376,6 +356,42 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertNotIn(cl, st)
         self.assertIn(cl2, st)
+
+    def test_has_clip(self):
+        st = otio.schema.Stack(name="ST")
+
+        tr1 = otio.schema.Track(name="tr1")
+        st.append(tr1)
+
+        self.assertFalse(st.has_clips())
+        self.assertFalse(tr1.has_clips())
+
+        c1 = otio.schema.Clip(name="c1")
+        tr1.append(c1)
+
+        self.assertTrue(st.has_clips())
+        self.assertTrue(tr1.has_clips())
+
+        tr2 = otio.schema.Track(name="tr2")
+        st.append(tr2)
+
+        self.assertTrue(st.has_clips())
+        self.assertTrue(tr1.has_clips())
+        self.assertFalse(tr2.has_clips())
+
+        g1 = otio.schema.Gap(name="g1")
+        tr2.append(g1)
+
+        self.assertTrue(st.has_clips())
+        self.assertTrue(tr1.has_clips())
+        self.assertFalse(tr2.has_clips())
+
+        c2 = otio.schema.Clip(name="c2")
+        tr2.append(c2)
+
+        self.assertTrue(st.has_clips())
+        self.assertTrue(tr1.has_clips())
+        self.assertTrue(tr2.has_clips())
 
 
 class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -763,6 +779,139 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             clip3.transformed_time(otio.opentime.RationalTime(152, 24), st),
             otio.opentime.RationalTime(50, 24)
         )
+
+    def test_available_image_bounds_single_clip(self):
+        st = otio.schema.Stack(name="foo", children=[
+            otio.schema.Gap(name="GAP1")
+        ])
+
+        # There's noting valid, we should have no available_image_bounds
+        self.assertEqual(st.available_image_bounds, None)
+
+        clip = otio.schema.Clip(
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1, 1),
+                    otio.schema.V2d(2, 2)
+                ),
+                target_url="/var/tmp/test.mov"
+            ),
+            name="clip1"
+        )
+
+        # The Stack available_image_bounds should be equal to
+        # the single clip that's in it
+        st.append(clip)
+        self.assertEqual(st.available_image_bounds, clip.available_image_bounds)
+
+    def test_available_image_bounds_multi_clip(self):
+        st = otio.schema.Stack(name="foo", children=[
+            otio.schema.Gap(name="GAP1"),
+            otio.schema.Clip(
+                media_reference=otio.schema.ExternalReference(
+                    available_image_bounds=otio.schema.Box2d(
+                        otio.schema.V2d(1, 1),
+                        otio.schema.V2d(2, 2)
+                    ),
+                    target_url="/var/tmp/test.mov"
+                ),
+                name="clip1"
+            ),
+            otio.schema.Gap(name="GAP2"),
+            otio.schema.Clip(
+                media_reference=otio.schema.ExternalReference(
+                    available_image_bounds=otio.schema.Box2d(
+                        otio.schema.V2d(2, 2),
+                        otio.schema.V2d(3, 3)
+                    ),
+                    target_url="/var/tmp/test.mov"
+                ),
+                name="clip2"
+            ),
+            otio.schema.Gap(name="GAP3"),
+            otio.schema.Clip(
+                media_reference=otio.schema.ExternalReference(
+                    available_image_bounds=otio.schema.Box2d(
+                        otio.schema.V2d(3, 3),
+                        otio.schema.V2d(4, 4)
+                    ),
+                    target_url="/var/tmp/test.mov"
+                ),
+                name="clip3"
+            ),
+            otio.schema.Gap(name="GAP4")
+        ])
+
+        # The Stack available_image_bounds should cover the overlapping boxes,
+        # the gaps should be ignored
+        self.assertEqual(st.available_image_bounds,
+                         otio.schema.Box2d(
+                             otio.schema.V2d(1, 1),
+                             otio.schema.V2d(4, 4)
+                         )
+                         )
+
+    def test_available_image_bounds_multi_layer(self):
+        tr1 = otio.schema.Track(name="tr1", children=[
+            otio.schema.Gap(name="GAP1")
+        ])
+        st = otio.schema.Stack(name="foo", children=[tr1])
+
+        self.assertEqual(st.available_image_bounds, tr1.available_image_bounds)
+        self.assertEqual(st.available_image_bounds, None)
+
+        cl1 = otio.schema.Clip(
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(0, 0),
+                    otio.schema.V2d(2, 2)
+                ),
+                target_url="/var/tmp/test.mov"
+            ),
+            name="clip1"
+        )
+        tr1.append(cl1)
+
+        self.assertEqual(st.available_image_bounds, cl1.available_image_bounds)
+        self.assertEqual(st.available_image_bounds, tr1.available_image_bounds)
+
+        tr2 = otio.schema.Track(name="tr2", children=[
+            otio.schema.Gap(name="GAP2")
+        ])
+        st.append(tr2)
+
+        self.assertEqual(st.available_image_bounds, cl1.available_image_bounds)
+        self.assertEqual(st.available_image_bounds, tr1.available_image_bounds)
+
+        cl2 = otio.schema.Clip(
+            media_reference=otio.schema.ExternalReference(
+                available_image_bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1, 1),
+                    otio.schema.V2d(3, 3)
+                ),
+                target_url="/var/tmp/test.mov"
+            ),
+            name="clip2"
+        )
+        tr2.append(cl2)
+
+        # Each track should have available_image_bounds equal to its single clip,
+        # but the stack available_image_bounds should use both tracks
+        self.assertEqual(tr1.available_image_bounds, cl1.available_image_bounds)
+        self.assertEqual(tr2.available_image_bounds, cl2.available_image_bounds)
+
+        union = st.available_image_bounds
+        self.assertEqual(union,
+                         otio.schema.Box2d(
+                             otio.schema.V2d(0, 0),
+                             otio.schema.V2d(3, 3)
+                         )
+                         )
+
+        # Appending a track with no available_image_bounds should do nothing
+        st.append(otio.schema.Track())
+        union2 = st.available_image_bounds
+        self.assertEqual(union, union2)
 
 
 class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):

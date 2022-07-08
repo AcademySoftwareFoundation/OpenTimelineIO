@@ -1,27 +1,7 @@
 #!/usr/bin/env python
 #
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# licensed under the apache license, version 2.0 (the "apache license")
-# with the following modification; you may not use this file except in
-# compliance with the apache license and the following modification to it:
-# section 6. trademarks. is deleted and replaced with:
-#
-# 6. trademarks. this license does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the licensor
-#    and its affiliates, except as required to comply with section 4(c) of
-#    the license and to reproduce the content of the notice file.
-#
-# you may obtain a copy of the apache license at
-#
-#     http://www.apache.org/licenses/license-2.0
-#
-# unless required by applicable law or agreed to in writing, software
-# distributed under the apache license with the above modification is
-# distributed on an "as is" basis, without warranties or conditions of any
-# kind, either express or implied. see the apache license for the specific
-# language governing permissions and limitations under the apache license.
-#
 
 """Generates documentation of all the built in plugins for OpenTimelineIO"""
 
@@ -92,11 +72,9 @@ MANIFEST_CONTENT_TEMPLATE = """
 
 Adapter plugins convert to and from OpenTimelineIO.
 
-<a href="adapters.html" target="_blank"> Adapters documentation page for more
-information</a>
+[Adapters documentation page for more information](./adapters).
 
-<a href="write-an-adapter.html" target="_blank">Tutorial on how to write an
-adapter.</a>
+[Tutorial on how to write an adapter](write-an-adapter).
 
 {adapters}
 
@@ -105,8 +83,7 @@ adapter.</a>
 Media Linkers run after the adapter has read in the file and convert the media
 references into valid references where appropriate.
 
-<a href="write-a-media-linker.html" target="_blank"> Tutorial on how to write a
-Media Linker</a>
+[Tutorial on how to write a Media Linker](write-a-media-linker).
 
 {media_linkers}
 
@@ -114,8 +91,7 @@ Media Linker</a>
 
 SchemaDef plugins define new external schema.
 
-<a href="write-a-schemadef.html" target="_blank"> Tutorial on how to write a
-schemadef</a>
+[Tutorial on how to write a schemadef](write-a-schemadef).
 
 {schemadefs}
 
@@ -123,8 +99,7 @@ schemadef</a>
 
 HookScripts are extra plugins that run on _hooks_.
 
-<a href="write-a-hookscript.html" target="_blank">Tutorial on how to write a
-hookscript.</a>
+[Tutorial on how to write a hookscript](write-a-hookscript).
 
 {hook_scripts}
 

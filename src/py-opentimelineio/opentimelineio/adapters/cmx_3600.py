@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """OpenTimelineIO CMX 3600 EDL Adapter"""
 
@@ -413,7 +392,7 @@ class ClipHandler(object):
 
         # BLACK/BL and BARS are called out as "Special Source Identifiers" in
         # the documents referenced here:
-        # https://github.com/PixarAnimationStudios/OpenTimelineIO#cmx3600-edl
+        # https://github.com/AcademySoftwareFoundation/OpenTimelineIO#cmx3600-edl
         if self.reel in ['BL', 'BLACK']:
             clip.media_reference = schema.GeneratorReference()
             # TODO: Replace with enum, once one exists
@@ -924,9 +903,9 @@ def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # also only works for a single video track at the moment
 
     video_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Video]
+                    if t.kind == schema.TrackKind.Video and t.enabled]
     audio_tracks = [t for t in input_otio.tracks
-                    if t.kind == schema.TrackKind.Audio]
+                    if t.kind == schema.TrackKind.Audio and t.enabled]
 
     if len(video_tracks) != 1:
         raise exceptions.NotSupportedError(
@@ -1038,27 +1017,30 @@ class EDLWriter(object):
                     )
                 )
             elif isinstance(child, schema.Clip):
-                events.append(
-                    Event(
-                        child,
-                        self._tracks,
-                        track.kind,
-                        self._rate,
-                        self._style,
-                        self._reelname_len
+                if child.enabled:
+                    events.append(
+                        Event(
+                            child,
+                            self._tracks,
+                            track.kind,
+                            self._rate,
+                            self._style,
+                            self._reelname_len
+                        )
                     )
-                )
+                else:
+                    pass
             elif isinstance(child, schema.Gap):
                 # Gaps are represented as missing record timecode, no event
                 # needed.
                 pass
 
         content = "TITLE: {}\n\n".format(title) if title else ''
-
-        # Convert each event/dissolve-event into plain text.
-        for idx, event in enumerate(events):
-            event.edit_number = idx + 1
-            content += event.to_edl_format() + '\n'
+        if track.enabled:
+            # Convert each event/dissolve-event into plain text.
+            for idx, event in enumerate(events):
+                event.edit_number = idx + 1
+                content += event.to_edl_format() + '\n'
 
         return content
 

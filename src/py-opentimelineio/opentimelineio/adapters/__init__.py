@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Expose the adapter interface to developers.
 
@@ -50,6 +29,20 @@ from . import (  # noqa: F401
     otio_json,  # core JSON adapter
     file_bundle_utils,  # utilities for working with OTIO file bundles
 )
+
+__all__ = [
+    'Adapter',
+    'otio_json',
+    'file_bundle_utils',
+    'suffixes_with_defined_adapters',
+    'available_adapter_names',
+    'from_filepath',
+    'from_name',
+    'read_from_file',
+    'read_from_string',
+    'write_to_file',
+    'write_to_string'
+]
 
 
 def suffixes_with_defined_adapters(read=False, write=False):
@@ -91,8 +84,7 @@ def _from_filepath_or_name(filepath, adapter_name):
 def from_filepath(filepath):
     """Guess the adapter object to use for a given filepath.
 
-    example:
-        "foo.otio" returns the "otio_json" adapter.
+    For example, ``foo.otio`` returns the ``otio_json`` adapter.
     """
 
     outext = os.path.splitext(filepath)[1][1:]
@@ -133,7 +125,9 @@ def read_from_file(
 
     If adapter_name is None, try and infer the adapter name from the filepath.
 
-    For example:
+    .. code-block:: python
+       :caption: Example
+
         timeline = read_from_file("example_trailer.otio")
         timeline = read_from_file("file_with_no_extension", "cmx_3600")
     """
@@ -160,7 +154,9 @@ def read_from_string(
     This is useful if you obtain a timeline from someplace other than the
     filesystem.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         raw_text = urlopen(my_url).read()
         timeline = read_from_string(raw_text, "otio_json")
     """
@@ -185,7 +181,9 @@ def write_to_file(
     If adapter_name is None, infer the adapter_name to use based on the
     filepath.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         otio.adapters.write_to_file(my_timeline, "output.otio")
     """
 
@@ -205,7 +203,9 @@ def write_to_string(
 ):
     """Return input_otio written to a string using adapter_name.
 
-    Example:
+    .. code-block:: python
+       :caption: Example
+
         raw_text = otio.adapters.write_to_string(my_timeline, "otio_json")
     """
 

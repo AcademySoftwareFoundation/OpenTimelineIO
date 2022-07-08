@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """OTIO to SVG Adapter
    Points in calculations are y-up.
@@ -33,8 +12,7 @@ from xml.dom import minidom
 
 # python
 import math
-from random import seed
-from random import random
+import random
 
 random_colors_used = []
 
@@ -69,7 +47,7 @@ class Color:
 
     @staticmethod
     def __get_random_color():
-        return Color(random(), random(), random(), 1.0)
+        return Color(random.random(), random.random(), random.random(), 1.0)
 
     @staticmethod
     def __color_distance(c1, c2):
@@ -519,7 +497,7 @@ class ClipData(object):
 
     def __init__(self, src_start=0.0, src_end=0.0, avlbl_start=0.0,
                  avlbl_end=0.0, avlbl_duration=0.0,
-                 trim_start=0.0, trim_duration=0.0, target_url='', clip_id=0,
+                 trim_start=0.0, trim_duration=0.0, clip_id=0,
                  transition_begin=None, transition_end=None):
         self.src_start = src_start
         self.src_end = src_end
@@ -528,7 +506,6 @@ class ClipData(object):
         self.avlbl_duration = avlbl_duration
         self.trim_start = trim_start
         self.trim_duration = trim_duration
-        self.target_url = target_url
         self.clip_id = clip_id
         self.transition_begin = transition_begin
         self.transition_end = transition_end
@@ -587,7 +564,7 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
                 clip_data = ClipData(src_start, src_end, avlbl_start,
                                      avlbl_end, avlbl_duration, trim_start,
                                      trim_duration,
-                                     item.media_reference.target_url, clip_count - 1)
+                                     clip_count - 1)
                 if current_transition is not None:
                     clip_data.transition_begin = current_transition
                     current_transition = None
@@ -808,7 +785,7 @@ def _draw_track(track, svg_writer, extra_data=()):
             draw_item(item, svg_writer, (clips_data[item_count],))
             item_count += 1
         elif isinstance(item, otio.schema.Transition):
-            cut_x = svg_writer.x_origin + (clips_data[item_count].src_start *
+            cut_x = svg_writer.x_origin + (clips_data[clip_count].src_start *
                                            svg_writer.scale_x)
             draw_item(item, svg_writer, (cut_x,))
             transition_count += 1
@@ -935,19 +912,19 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         available_range_text = r'available_range: {}, {}'.format(
             repr(float(round(clip.available_range().start_time.value, 1))),
             repr(float(round(clip.available_range().duration.value, 1))))
-    if clip.media_reference.target_url is None:
-        target_url_text = r'target_url: {}'.format('Media Unavailable')
-    else:
-        target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
-    available_range_text = available_range_text
     available_range_location = Point(media_origin.x + svg_writer.font_size,
                                      media_origin.y - svg_writer.font_size)
-    target_url_location = Point(media_origin.x + svg_writer.font_size,
-                                media_origin.y - 2.0 * svg_writer.font_size)
     svg_writer.draw_text(available_range_text, available_range_location,
                          svg_writer.font_size,
                          )
-    svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)
+    if hasattr(clip.media_reference, 'target_url'):
+        if clip.media_reference.target_url is None:
+            target_url_text = r'target_url: {}'.format('Media Unavailable')
+        else:
+            target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
+        target_url_location = Point(media_origin.x + svg_writer.font_size,
+                                    media_origin.y - 2.0 * svg_writer.font_size)
+        svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)
     # Draw arrow from clip to media reference
     clip_media_height_difference = (((clip_count - 1) * 2.0 + 1) *
                                     svg_writer.clip_rect_height)
@@ -1123,7 +1100,7 @@ def convert_otio_to_svg(timeline, width, height):
                            font_family='sans-serif', image_margin=20.0, font_size=15.0,
                            arrow_label_margin=5.0)
     random_colors_used = []
-    seed(100)
+    random.seed(100)
     draw_item(timeline, svg_writer, ())
 
     return svg_writer.get_image()

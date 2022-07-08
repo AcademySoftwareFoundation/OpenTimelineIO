@@ -1,54 +1,20 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
-""" MediaLinker plugins fire after an adapter has read a file in order to
-produce MediaReferences that point at valid, site specific media.
+"""
+MediaLinker plugins fire after an adapter has read a file in order to
+produce :class:`.MediaReference`\s that point at valid, site specific media.
 
-They expose a "link_media_reference" function with the signature:
-link_media_reference :: otio.schema.Clip -> otio.core.MediaReference
+They expose a ``link_media_reference`` function with the signature:
 
-or:
-    def linked_media_reference(from_clip):
-        result = otio.core.MediaReference() # whichever subclass
-        # do stuff
-        return result
+.. py:function:: link_media_reference(in_clip: opentimelineio.schema.Clip) -> opentimelineio.core.MediaReference  # noqa
+   :noindex:
+
+   Example link_media_reference function.
 
 To get context information, they can inspect the metadata on the clip and on
-the media reference.  The .parent() method can be used to find the containing
+the media reference. The :meth:`.Composable.parent` method can be used to find the containing
 track if metadata is stored there.
-
-Please raise an instance (or child instance) of
-otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.
-
-For example:
-    for clip in timeline.each_clip():
-        try:
-            new_mr = otio.media_linker.linked_media_reference(clip)
-            clip.media_reference = new_mr
-        except otio.exceptions.CannotLinkMediaError:
-            # or report the error
-            pass
 """
 
 import os
@@ -61,8 +27,8 @@ from . import (
 )
 
 
-# Enum describing different media linker policies
 class MediaLinkingPolicy:
+    """Enum describing different media linker policies"""
     DoNotLinkMedia = "__do_not_link_media"
     ForceDefaultLinker = "__default"
 

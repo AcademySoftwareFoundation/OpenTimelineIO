@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/stackAlgorithm.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/trackAlgorithm.h"
@@ -129,7 +132,10 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
     {
         if (auto track = dynamic_retainer_cast<Track>(c))
         {
-            tracks.push_back(track);
+            if (track->enabled())
+            {
+                tracks.push_back(track);
+            }
         }
         else
         {

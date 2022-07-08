@@ -1,30 +1,14 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
-from PySide2 import QtGui, QtCore, QtWidgets
+try:
+    from PySide6 import QtGui, QtCore, QtWidgets
+    from PySide6.QtGui import QFontMetrics
+except ImportError:
+    from PySide2 import QtGui, QtCore, QtWidgets
+    from PySide2.QtGui import QFontMetrics
+
 import opentimelineio as otio
-from PySide2.QtGui import QFontMetrics
 
 TIME_SLIDER_HEIGHT = 20
 MEDIA_TYPE_SEPARATOR_HEIGHT = 5
@@ -38,6 +22,19 @@ HIGHLIGHT_WIDTH = 5
 TRACK_NAME_WIDGET_WIDTH = 100.0
 SHORT_NAME_LENGTH = 7
 CURRENT_ZOOM_LEVEL = 1.0
+MARKER_COLORS = {
+    otio.schema.MarkerColor.RED: (0xff, 0x00, 0x00, 0xff),
+    otio.schema.MarkerColor.PINK: (0xff, 0x70, 0x70, 0xff),
+    otio.schema.MarkerColor.ORANGE: (0xff, 0xa0, 0x00, 0xff),
+    otio.schema.MarkerColor.YELLOW: (0xff, 0xff, 0x00, 0xff),
+    otio.schema.MarkerColor.GREEN: (0x00, 0xff, 0x00, 0xff),
+    otio.schema.MarkerColor.CYAN: (0x00, 0xff, 0xff, 0xff),
+    otio.schema.MarkerColor.BLUE: (0x00, 0x00, 0xff, 0xff),
+    otio.schema.MarkerColor.PURPLE: (0xa0, 0x00, 0xd0, 0xff),
+    otio.schema.MarkerColor.MAGENTA: (0xff, 0x00, 0xff, 0xff),
+    otio.schema.MarkerColor.WHITE: (0xff, 0xff, 0xff, 0xff),
+    otio.schema.MarkerColor.BLACK: (0x00, 0x00, 0x00, 0xff)
+}
 
 
 class BaseItem(QtWidgets.QGraphicsRectItem):
@@ -105,8 +102,7 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
             if not trimmed_range.overlaps(marked_time):
                 continue
 
-            # @TODO: set the marker color if its set from the OTIO object
-            marker = Marker(m, None)
+            marker = Marker(m)
             marker.setY(0.5 * MARKER_SIZE)
             marker.setX(
                 (
@@ -258,7 +254,12 @@ class TrackNameItem(BaseItem):
         self.font = self.source_name_label.font()
         self.short_width = TRACK_NAME_WIDGET_WIDTH
         font_metrics = QFontMetrics(self.font)
-        self.full_width = font_metrics.width(self.full_track_name) + 40
+        self.full_width = font_metrics.horizontalAdvance(self.full_track_name) + 40
+
+        if not self.track.enabled:
+            self.setBrush(
+                QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+            )
 
     def mouseDoubleClickEvent(self, event):
         super(TrackNameItem, self).mouseDoubleClickEvent(event)
@@ -274,7 +275,6 @@ class TrackNameItem(BaseItem):
                 self.track_name + '\n({})'.format(self.track.kind))
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.short_width
-                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
             self.name_toggle = False
         else:
             track_name_rect = QtCore.QRectF(
@@ -288,8 +288,16 @@ class TrackNameItem(BaseItem):
                 self.full_track_name + '\n({})'.format(self.track.kind))
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.full_width
-                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
             self.name_toggle = True
+
+        scene = self.scene()
+        if scene and hasattr(scene, "counteract_zoom"):
+            # If scene is CompositionWidget, trigger counteract zoom through
+            # it to also update the scene rect.
+            scene.counteract_zoom(CURRENT_ZOOM_LEVEL)
+        else:
+            for widget in self.track_widget.widget_items:
+                widget.counteract_zoom(CURRENT_ZOOM_LEVEL)
 
     def itemChange(self, change, value):
         return super(BaseItem, self).itemChange(change, value)
@@ -412,7 +420,8 @@ class ClipItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255) if self.item.enabled
+                                   else QtGui.QColor(100, 100, 100, 255)))
         self.source_name_label.setText(self.item.name)
 
 
@@ -472,6 +481,9 @@ class Track(QtWidgets.QGraphicsRectItem):
                 TRACK_HEIGHT
             )
 
+            if not self.track.enabled:
+                item.enabled = False
+
             if isinstance(item, otio.schema.Clip):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
@@ -511,8 +523,10 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         super(Marker, self).__init__(poly, *args, **kwargs)
 
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        color = MARKER_COLORS.get(marker.color, (121, 212, 177, 255))
+
         self.setBrush(
-            QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
+            QtGui.QBrush(QtGui.QColor(*color))
         )
 
     def paint(self, *args, **kwargs):

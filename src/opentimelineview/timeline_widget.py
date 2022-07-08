@@ -1,28 +1,10 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
-from PySide2 import QtGui, QtCore, QtWidgets
+try:
+    from PySide6 import QtGui, QtCore, QtWidgets
+except ImportError:
+    from PySide2 import QtGui, QtCore, QtWidgets
 from collections import OrderedDict, namedtuple
 
 import opentimelineio as otio
@@ -80,7 +62,7 @@ def get_nav_menu_data():
 
 def get_filters(filter_dict, bitmask):
     filters = list()
-    for item in filter_dict.itervalues():
+    for item in filter_dict.values():
         if bitmask & item.bitmask:
             filters.append(item)
     return filters
@@ -128,7 +110,28 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
 
         self._data_cache = self._cache_tracks()
 
-    def _adjust_scene_size(self):
+    def track_name_width(self):
+        # Choose track name item from the longest track, since that track will
+        # define the composition's scene width.
+        width = track_widgets.TRACK_NAME_WIDGET_WIDTH
+        longest_track = None
+        max_end_time = 0
+
+        for item in self.items():
+            if isinstance(item, track_widgets.Track):
+                track_range = item.track.trimmed_range_in_parent()
+                end_time = track_range.end_time_inclusive().to_seconds()
+                if end_time > max_end_time:
+                    max_end_time = end_time
+                    longest_track = item
+
+        if longest_track is not None:
+            if longest_track.track_name_item is not None:
+                width = longest_track.track_name_item.rect().width()
+
+        return width
+
+    def _adjust_scene_size(self, zoom_level=1.0):
         scene_range = self.composition.trimmed_range()
 
         start_time = otio.opentime.to_seconds(scene_range.start_time)
@@ -173,9 +176,24 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self.setSceneRect(
             start_time * track_widgets.TIME_MULTIPLIER,
             0,
-            duration * track_widgets.TIME_MULTIPLIER,
+            duration * track_widgets.TIME_MULTIPLIER +
+            self.track_name_width() * zoom_level,
             height
         )
+
+    def counteract_zoom(self, zoom_level=1.0):
+        # some items we do want to keep the same visual size. So we need to
+        # inverse the effect of the zoom
+        items_to_scale = [
+            i for i in self.items()
+            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
+                               ruler_widget.Ruler, track_widgets.TimeSlider)))
+        ]
+
+        for item in items_to_scale:
+            item.counteract_zoom(zoom_level)
+
+        self._adjust_scene_size(zoom_level)
 
     def _add_time_slider(self):
         scene_rect = self.sceneRect()
@@ -459,21 +477,22 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def wheelEvent(self, event):
-        scale_by = 1.0 + float(event.delta()) / 1000
+        try:
+            # PySide6:
+            # https://doc.qt.io/qtforpython/PySide6/QtGui/QWheelEvent.html
+            delta_point = event.angleDelta()
+            delta = delta_point.y()
+
+        except AttributeError:
+            # PySide2:
+            # https://doc.qt.io/qtforpython-5/PySide2/QtGui/QWheelEvent.html
+            delta = event.delta()
+
+        scale_by = 1.0 + float(delta) / 1000
         self.scale(scale_by, 1)
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
-
-        # some items we do want to keep the same visual size. So we need to
-        # inverse the effect of the zoom
-        items_to_scale = [
-            i for i in self.scene().items()
-            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
-                               ruler_widget.Ruler, track_widgets.TimeSlider)))
-        ]
-
-        for item in items_to_scale:
-            item.counteract_zoom(zoom_level)
+        self.scene().counteract_zoom(zoom_level)
 
     def _get_first_item(self):
         newXpos = 0
@@ -707,21 +726,22 @@ class CompositionView(QtWidgets.QGraphicsView):
             self.frame_all()
 
     def frame_all(self):
-        zoom_level = 1.0 / self.matrix().m11()
-        scaleFactor = self.size().width() / self.sceneRect().width()
-        self.scale(scaleFactor * zoom_level, 1)
-        zoom_level = 1.0 / self.matrix().m11()
-        track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
-        items_to_scale = [
-            i for i in self.scene().items()
-            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
-                               ruler_widget.Ruler, track_widgets.TimeSlider)))
-        ]
-        # some items we do want to keep the same visual size. So we need to
-        # inverse the effect of the zoom
+        self.resetTransform()
+        track_widgets.CURRENT_ZOOM_LEVEL = 1.0
+        self.scene().counteract_zoom()
 
-        for item in items_to_scale:
-            item.counteract_zoom(zoom_level)
+        track_name_width = self.scene().track_name_width()
+        view_width = self.size().width() - track_name_width
+        scene_width = self.sceneRect().width() - track_name_width
+        if not view_width or not scene_width:
+            # Prevent zero division errors
+            return
+
+        scale_by = view_width / scene_width
+        self.scale(scale_by, 1)
+        zoom_level = 1.0 / self.transform().m11()
+        track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
+        self.scene().counteract_zoom(zoom_level)
 
     def navigationfilter_changed(self, bitmask):
         '''

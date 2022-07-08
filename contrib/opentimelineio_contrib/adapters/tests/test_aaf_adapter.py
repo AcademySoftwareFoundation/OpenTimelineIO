@@ -1,27 +1,6 @@
 # -*- coding: utf-8 -*-
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Test the AAF adapter."""
 
@@ -69,12 +48,15 @@ Creating SerializableCollection for Iterable for list
               [found no mastermob]
             Creating Track for MobSlot for EventMobSlot
               Creating Track for Sequence for Sequence
+                Create marker for DescriptiveMarker
     Creating Track for MobSlot for EventMobSlot
       Creating Track for Sequence for Sequence
+        Create marker for DescriptiveMarker
     Creating Track for TimelineMobSlot for TimelineMobSlot
       Creating Track for Sequence for Sequence
         Creating Gap for Filler
     Creating Track for TimelineMobSlot for TimelineMobSlot
+Marker: NEED PDX (time: 360567.0), attached to item: Subclip.BREATH
 """
 
 
@@ -200,6 +182,26 @@ COMPOSITION_METADATA_PATH = os.path.join(
 MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "multiple_timecode_objects.aaf"
+)
+
+MULTIPLE_MARKERS_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multiple_markers.aaf"
+)
+
+KEYFRAMED_PROPERTIES_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "keyframed_properties.aaf"
+)
+
+MARKER_OVER_TRANSITION_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-transition.aaf",
+)
+
+MARKER_OVER_AUDIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "marker-over-audio.aaf"
 )
 
 
@@ -616,10 +618,10 @@ class AAFReaderTests(unittest.TestCase):
 
     def test_aaf_flatten_tracks(self):
         multitrack_timeline = otio.adapters.read_from_file(
-            MULTITRACK_EXAMPLE_PATH
+            MULTITRACK_EXAMPLE_PATH, attach_markers=False
         )
         preflattened_timeline = otio.adapters.read_from_file(
-            PREFLATTENED_EXAMPLE_PATH
+            PREFLATTENED_EXAMPLE_PATH, attach_markers=False
         )
 
         # first make sure we got the structure we expected
@@ -629,7 +631,7 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(3, len(multitrack_timeline.video_tracks()))
         self.assertEqual(2, len(multitrack_timeline.audio_tracks()))
-        self.assertEqual(5, len(multitrack_timeline.tracks))
+        self.assertEqual(8, len(multitrack_timeline.tracks))
 
         preflattened = preflattened_timeline.video_tracks()[0]
         self.assertEqual(7, len(preflattened))
@@ -850,13 +852,15 @@ class AAFReaderTests(unittest.TestCase):
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%
 
     def test_muted_clip(self):
-        sc = otio.adapters.read_from_file(MUTED_CLIP_PATH, simplify=False)
-        gp = sc[0].tracks[8][0][0]
-
-        self.assertIsNotNone(gp)
-        self.assertTrue(gp.metadata['AAF']['muted_clip'])
-        self.assertIsInstance(gp, otio.schema.Gap)
-        self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
+        timeline = otio.adapters.read_from_file(MUTED_CLIP_PATH)
+        self.assertIsInstance(timeline, otio.schema.Timeline)
+        self.assertEqual(len(timeline.tracks), 1)
+        track = timeline.tracks[0]
+        self.assertEqual(len(track), 1)
+        clip = track[0]
+        self.assertIsInstance(clip, otio.schema.Clip)
+        self.assertEqual(clip.name, 'Frame Debugger 0h.mov')
+        self.assertEqual(clip.enabled, False)
 
     def test_essence_group(self):
         timeline = otio.adapters.read_from_file(ESSENCE_GROUP_PATH)
@@ -974,7 +978,6 @@ class AAFReaderTests(unittest.TestCase):
         Each clip stores it's source mob usage AAF value as metadata in`SourceMobUsage`.
         For sub-clips this value should be `Usage_SubClip`.
         """
-
         # `Usage_SubClip` value
         subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
         subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
@@ -1088,6 +1091,83 @@ class AAFReaderTests(unittest.TestCase):
         self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
         self.assertEqual(result_stderr, '')
 
+    def test_aaf_marker_over_transition(self):
+        """
+        Make sure we can transcibe this composition with markers over transition.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_TRANSITION_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_TRANSITION_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+    def test_aaf_marker_over_audio_file(self):
+        """
+        Make sure we can transcibe markers over an audio AAF file.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                MARKER_OVER_AUDIO_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(MARKER_OVER_AUDIO_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
+
+        # Verify markers
+        # We expect 1 track with 3 markers on it from the test data.
+        self.assertTrue(1 == len(timeline.tracks))
+
+        track = timeline.tracks[0]
+        self.assertEqual(3, len(track.markers))
+
+        fps = 24.0
+        expected_markers = [
+            {
+                'color': 'RED',
+                'label': 'm1',
+                'start_time': otio.opentime.from_frames(50.0, fps)
+            },
+            {
+                'color': 'GREEN',
+                'label': 'm2',
+                'start_time': otio.opentime.from_frames(103.0, fps)
+            },
+            {
+                'color': 'BLUE',
+                'label': 'm3',
+                'start_time': otio.opentime.from_frames(166.0, fps)
+            }
+        ]
+
+        for index, marker in enumerate(track.markers):
+            expected_marker = expected_markers[index]
+
+            color = marker.color
+            label = marker.metadata.get('AAF', {}).get('CommentMarkerUSer')
+            start_time = marker.marked_range.start_time
+
+            self.assertEqual(color, expected_marker.get('color'))
+            self.assertEqual(label, expected_marker.get('label'))
+            self.assertEqual(start_time, expected_marker.get('start_time'))
+
     def _verify_user_comments(self, aaf_metadata, expected_md):
 
         self.assertTrue(aaf_metadata is not None)
@@ -1099,6 +1179,387 @@ class AAFReaderTests(unittest.TestCase):
         for k, v in expected_md.items():
             self.assertTrue(k in user_comment_keys)
             self.assertEqual(user_comments[k], v)
+
+    def test_attach_markers(self):
+        """Check if markers are correctly translated and attached to the right items.
+        """
+        timeline = otio.adapters.read_from_file(MULTIPLE_MARKERS_PATH,
+                                                attach_markers=True)
+
+        expected_markers = {
+            (1, 'Filler'): [('PUBLISH', 0.0, 1.0, 24.0, 'RED')],
+            (1, 'zts02_1010'): [
+                ('GREEN: V1: zts02_1010: f1104: seq.f1104',
+                 1103.0, 1.0, 24.0, 'GREEN')
+            ],
+            (2, 'ScopeReference'): [
+                ('FX', 0.0, 1.0, 24.0, 'YELLOW'),
+                ('BLUE: V2 (no FX): zts02_1020: f1134: seq.f1327',
+                 518.0, 1.0, 24.0, 'BLUE')
+            ],
+            (3, 'ScopeReference'): [
+                ('INSERT', 0.0, 1.0, 24.0, 'CYAN'),
+                ('CYAN: V3: zts02_1030: f1212: seq.f1665',
+                 856.0,
+                 1.0,
+                 24.0,
+                 'CYAN')
+            ],
+            (4, 'Drop_24.mov'): [
+                ('MAGENTA: V4: zts02_1040: f1001: seq.f1666',
+                 86400.0, 1.0, 24.0, 'MAGENTA')
+            ],
+            (5, 'ScopeReference'): [
+                ('RED: V5: zts02_1050: f1061: seq.f1885',
+                 884.0, 1.0, 24.0, 'RED')
+            ]
+        }
+
+        all_markers = {}
+        for i, track in enumerate(
+                timeline.each_child(descended_from_type=otio.schema.Track)
+        ):
+            for item in track.each_child():
+                markers = [
+                    (
+                        m.name,
+                        m.marked_range.start_time.value,
+                        m.marked_range.duration.value,
+                        m.marked_range.start_time.rate,
+                        m.color
+                    ) for m in item.markers
+                ]
+                if markers:
+                    all_markers[(i, item.name)] = markers
+        self.assertEqual(all_markers, expected_markers)
+
+    def test_keyframed_properties(self):
+        def get_expected_dict(timeline):
+            expected = []
+            for clip in timeline.each_child(descended_from_type=otio.schema.Clip):
+                for effect in clip.effects:
+                    props = {}
+                    parameters = effect.metadata.get("AAF", {}).get("Parameters", {})
+                    for paramName, paramValue in parameters.items():
+                        try:
+                            is_animated = "_aaf_keyframed_property" in paramValue
+                        except (TypeError, KeyError):
+                            is_animated = False
+                        try:
+                            baked_count = len(paramValue["keyframe_baked_values"])
+                        except (TypeError, KeyError):
+                            baked_count = None
+                        props[paramName] = {"keyframed": is_animated,
+                                            "baked_sample_count": baked_count}
+                    expected.append(props)
+            return expected
+
+        tl_unbaked = otio.adapters.read_from_file(KEYFRAMED_PROPERTIES_PATH,
+                                                  bake_keyframed_properties=False)
+
+        tl_baked = otio.adapters.read_from_file(KEYFRAMED_PROPERTIES_PATH,
+                                                bake_keyframed_properties=True)
+
+        expected_unbaked = [
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_SCALE_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_SCALE_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_SCALE_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_ROT_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_ROT_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_ROT_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_ROT_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_POS_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_POS_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_POS_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_POS_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": None, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": None,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_PRSP_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_PRSP_X_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_PRSP_Y_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_PRSP_Z_U": {"baked_sample_count": None, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": None, "keyframed": True},
+            },
+        ]
+
+        expected_baked = [
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_SCALE_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_SCALE_X_U": {"baked_sample_count": 212, "keyframed": True},
+                "DVE_SCALE_Y_U": {"baked_sample_count": 212, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_ROT_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_ROT_X_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_ROT_Y_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_ROT_Z_U": {"baked_sample_count": 159, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 159, "keyframed": True},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_POS_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_POS_X_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_POS_Y_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_POS_Z_U": {"baked_sample_count": 116, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 116, "keyframed": True},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 276, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 276,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 182, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 182,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 219, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 219,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 193, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 193,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AvidMotionInputFormat": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "AvidMotionOutputFormat": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "AvidMotionPulldown": {"baked_sample_count": None, "keyframed": False},
+                "AvidPhase": {"baked_sample_count": None, "keyframed": False},
+                "PARAM_SPEED_MAP_U": {"baked_sample_count": 241, "keyframed": True},
+                "PARAM_SPEED_OFFSET_MAP_U": {"baked_sample_count": 241,
+                                             "keyframed": True},
+                "SpeedRatio": {"baked_sample_count": None, "keyframed": False},
+            },
+            {
+                "AFX_FIXED_ASPECT_U": {"baked_sample_count": None, "keyframed": False},
+                "AvidEffectID": {"baked_sample_count": None, "keyframed": False},
+                "AvidParameterByteOrder": {"baked_sample_count": None,
+                                           "keyframed": False},
+                "DVE_BORDER_ENABLED_U": {"baked_sample_count": None,
+                                         "keyframed": False},
+                "DVE_DEFOCUS_MODE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_FG_KEY_HIGH_SAT_U": {"baked_sample_count": None,
+                                          "keyframed": False},
+                "DVE_MT_WARP_FOREGROUND_U": {"baked_sample_count": None,
+                                             "keyframed": False},
+                "DVE_PRSP_ENABLED_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_PRSP_X_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_PRSP_Y_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_PRSP_Z_U": {"baked_sample_count": 241, "keyframed": True},
+                "DVE_TRACKING_POS_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_AMPLT_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_CURVE_U": {"baked_sample_count": None, "keyframed": False},
+                "DVE_WARP_FREQ_U": {"baked_sample_count": None, "keyframed": False},
+                "Vergence": {"baked_sample_count": 241, "keyframed": True},
+            },
+        ]
+
+        self.assertEqual(get_expected_dict(tl_unbaked), expected_unbaked)
+        self.assertEqual(get_expected_dict(tl_baked), expected_baked)
 
 
 class AAFWriterTests(unittest.TestCase):

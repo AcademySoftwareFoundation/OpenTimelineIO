@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 """
 This script downloads an artifact from a GitHub Action workflow run,
 unzips and and stores the files in a directory of your choice.
@@ -53,7 +57,7 @@ if not os.path.exists(args.directory):
     os.makedirs(args.directory)
 
 request = urllib.request.Request(
-    "https://api.github.com/repos/PixarAnimationStudios/OpenTimelineIO/actions/runs?status=success",  # noqa: E501
+    "https://api.github.com/repos/AcademySoftwareFoundation/OpenTimelineIO/actions/runs?status=success",  # noqa: E501
     headers=headers,
 )
 response = urllib.request.urlopen(request).read()

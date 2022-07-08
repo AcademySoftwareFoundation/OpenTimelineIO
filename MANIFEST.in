@@ -2,7 +2,7 @@ include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
 recursive-include examples *
 recursive-include contrib *
 recursive-include src *
-
+recursive-include tests *
 prune .github
 prune docs
 prune doxygen
@@ -22,10 +22,9 @@ exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude */.DS_Store
 exclude .clang-format
+global-exclude *.pyc
 
-prune contrib/opentimelineio_contrib/adapters/tests
 prune maintainers
-prune tests
 prune tsc
 prune src/deps/pybind11/tools/clang
 prune src/deps/rapidjson/thirdparty

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 
@@ -66,6 +69,13 @@ Composable::duration(ErrorStatus* error_status) const
         *error_status = ErrorStatus::NOT_IMPLEMENTED;
     }
     return RationalTime();
+}
+
+optional<Imath::Box2d>
+Composable::available_image_bounds(ErrorStatus* error_status) const
+{
+    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    return optional<Imath::Box2d>();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

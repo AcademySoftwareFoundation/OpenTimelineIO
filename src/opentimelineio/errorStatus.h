@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #pragma once
 
 #include "opentimelineio/version.h"
@@ -35,7 +38,10 @@ struct ErrorStatus
         INVALID_TIME_RANGE,
         OBJECT_WITHOUT_DURATION,
         CANNOT_TRIM_TRANSITION,
-        OBJECT_CYCLE
+        OBJECT_CYCLE,
+        CANNOT_COMPUTE_BOUNDS,
+        MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY,
+        MEDIA_REFERENCES_CONTAIN_EMPTY_KEY
     };
 
     ErrorStatus()

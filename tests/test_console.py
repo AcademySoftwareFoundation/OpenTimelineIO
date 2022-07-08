@@ -1,26 +1,5 @@
-#
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
 
 """Unit tests for the 'console' module."""
 
@@ -28,6 +7,8 @@ import unittest
 import sys
 import os
 import subprocess
+import sysconfig
+import platform
 
 try:
     # python2
@@ -81,18 +62,15 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
     def run_test(self):
         if self.SHELL_OUT:
             # make sure its on the path
-            try:
-                subprocess.check_call(
-                    [
-                        "which", sys.argv[0]
-                    ],
-                    stdout=subprocess.PIPE
-                )
-            except subprocess.CalledProcessError:
+            console_script = os.path.join(sysconfig.get_path('scripts'), sys.argv[0])
+            if platform.system() == 'Windows':
+                console_script += '.exe'
+
+            if not os.path.exists(console_script):
                 self.fail(
-                    "Could not find '{}' on $PATH.  Tests that explicitly shell"
+                    "Could not find '{}'.  Tests that explicitly shell"
                     " out can be disabled by setting the environment variable "
-                    "OTIO_DISABLE_SHELLOUT_TESTS.".format(sys.argv[0])
+                    "OTIO_DISABLE_SHELLOUT_TESTS.".format(console_script)
                 )
 
             # actually run the test (sys.argv is already populated correctly)

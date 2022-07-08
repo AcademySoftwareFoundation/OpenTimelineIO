@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
 
@@ -11,7 +14,7 @@ using namespace opentime;
 
 
 void opentime_timeTransform_bindings(py::module m) {
-    py::class_<TimeTransform>(m, "TimeTransform")
+    py::class_<TimeTransform>(m, "TimeTransform", R"docstring(1D transform for :class:`~RationalTime`. Has offset and scale.)docstring")
         .def(py::init<RationalTime, double, double>(),
              "offset"_a = RationalTime(), "scale"_a = 1, "rate"_a = -1)
         .def_property_readonly("offset", &TimeTransform::offset)
@@ -23,9 +26,9 @@ void opentime_timeTransform_bindings(py::module m) {
         .def("__copy__", [](TimeTransform const& tt) {
                 return tt;
             })
-        .def("__deepcopy__", [](TimeTransform const& tt) {
+        .def("__deepcopy__", [](TimeTransform const& tt, py::dict memo) {
                 return tt;
-            })
+            }, "memo"_a)
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def("__str__", [](TimeTransform tt) {

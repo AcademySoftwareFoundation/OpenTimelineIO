@@ -1,4 +1,7 @@
 #! /usr/bin/env python
+#
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
 
 """Setup.py for installing OpenTimelineIO
 
@@ -91,6 +94,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_SHARED_LIBS:BOOL=OFF',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
+            # turn off the C++ tests during a Python build
+            '-DBUILD_TESTING:BOOL=OFF',
+            # Python modules wil be installed by setuptools.
+            '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
 
         if platform.system() == "Windows":
@@ -188,7 +195,7 @@ if (
 PROJECT_METADATA = {
     "version": "0.15.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
-    "author_email": 'opentimelineio@pixar.com',
+    "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
 }
 
@@ -269,11 +276,11 @@ setup(
     url='http://opentimeline.io',
     project_urls={
         'Source':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO',
+            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO',
         'Documentation':
             'https://opentimelineio.readthedocs.io/',
         'Issues':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
+            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues',
     },
 
     classifiers=[
@@ -290,6 +297,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -307,12 +315,12 @@ setup(
         ],
     },
 
-    include_package_data=True,
     packages=(
-        find_packages(where="src/py-opentimelineio") +
-        find_packages(where="src") +
-        find_packages(where="contrib")
+        find_packages(where="src/py-opentimelineio") +  # opentimelineio
+        find_packages(where="src") +  # opentimelineview
+        find_packages(where="contrib", exclude=["opentimelineio_contrib.adapters.tests"])  # opentimelineio_contrib # noqa
     ),
+
     ext_modules=[
         CMakeExtension('_opentimelineio'),
         CMakeExtension('_opentime'),
@@ -356,7 +364,8 @@ setup(
             'urllib3>=1.24.3'
         ],
         'view': [
-            'PySide2~=5.11'
+            'PySide2~=5.11; platform.machine=="x86_64"',
+            'PySide6~=6.2; platform.machine=="aarch64"'
         ]
     },
 

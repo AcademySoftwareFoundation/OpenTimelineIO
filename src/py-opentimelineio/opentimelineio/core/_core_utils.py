@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 import types
 try:
     # Python 3.3+
@@ -228,6 +231,12 @@ def _add_mutable_mapping_methods(mapClass):
                     and name not in klass.__abstractmethods__
             ):
                 setattr(mapClass, name, _im_func(func))
+                if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
+                    continue
+
+                # Hide the method frm Sphinx doc.
+                # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
+                getattr(mapClass, name).__doc__ += '\n\n:meta private:'
 
     mapClass.setdefault = setdefault
     mapClass.pop = pop
@@ -373,6 +382,12 @@ def _add_mutable_sequence_methods(
                         and name not in klass.__abstractmethods__
                 ):
                     setattr(sequenceClass, name, _im_func(func))
+                    if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
+                        continue
+
+                    # Hide the method frm Sphinx doc.
+                    # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
+                    getattr(sequenceClass, name).__doc__ += '\n\n:meta private:'
 
     if not issubclass(sequenceClass, SerializableObject):
         def __copy__(self):

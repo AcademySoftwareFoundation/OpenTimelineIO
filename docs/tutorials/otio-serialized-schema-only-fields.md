@@ -42,6 +42,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -51,6 +52,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -59,6 +61,7 @@ parameters:
 ### MediaReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -128,12 +131,14 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Clip.1
+### Clip.2
 
 parameters:
+- *active_media_reference_key*
 - *effects*
+- *enabled*
 - *markers*
-- *media_reference*
+- *media_references*
 - *metadata*
 - *name*
 - *source_range*
@@ -148,6 +153,7 @@ parameters:
 ### ExternalReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -165,6 +171,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -173,6 +180,7 @@ parameters:
 ### GeneratorReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *generator_kind*
 - *metadata*
@@ -182,6 +190,7 @@ parameters:
 ### ImageSequenceReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *frame_step*
 - *frame_zero_padding*
@@ -213,6 +222,7 @@ parameters:
 ### MissingReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
 - *metadata*
 - *name*
@@ -227,6 +237,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *markers*
 - *metadata*
 - *name*
@@ -251,6 +262,7 @@ parameters:
 
 parameters:
 - *effects*
+- *enabled*
 - *kind*
 - *markers*
 - *metadata*

@@ -174,10 +174,15 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         is_head = False
         is_tail = False
         f = "-?-"
+        ratio = -1.0
+        width = float(item.rect().width())
 
-        ratio = (self.x() - item.x() +
-                 track_widgets.CURRENT_ZOOM_LEVEL *
-                 track_widgets.TRACK_NAME_WIDGET_WIDTH) / float(item.rect().width())
+        if width > 0.0:
+            ratio = (self.x() - item.x() +
+                     track_widgets.CURRENT_ZOOM_LEVEL *
+                     track_widgets.TRACK_NAME_WIDGET_WIDTH) / width
+        else:
+            print("Warning: zero width item: {}.".format(item))
 
         # The 'if' condition should be : ratio < 0 or ration >= 1
         # However, we are cheating in order to display the last frame of

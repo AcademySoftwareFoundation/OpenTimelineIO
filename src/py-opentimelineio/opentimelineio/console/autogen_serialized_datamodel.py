@@ -311,7 +311,8 @@ def _write_documentation(model):
                                          break_long_words=False)
                     if(line == []):
                         line = [""]
-                    for l in line: new_docstring.append(l)
+                    for wrapped_line in line:
+                        new_docstring.append(wrapped_line)
                 new_docstring = "\n".join(new_docstring)
             else:
                 new_docstring = cl.__doc__

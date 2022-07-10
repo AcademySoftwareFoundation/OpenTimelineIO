@@ -304,7 +304,12 @@ def _write_documentation(model):
                 docstring = cl.__doc__.split("\n")
                 new_docstring = []
                 for line in docstring:
-                    line = textwrap.wrap(line, width=100, expand_tabs=False, replace_whitespace=False, drop_whitespace=False, break_long_words=False)
+                    line = textwrap.wrap(
+                                    line, width=100, 
+                                     expand_tabs=False, 
+                                     replace_whitespace=False, 
+                                     drop_whitespace=False, 
+                                     break_long_words=False)
                     if(line == []):
                         line = [""]
                     for l in line: new_docstring.append(l)

@@ -337,7 +337,7 @@ def _add_mutable_sequence_methods(
                 func = getattr(klass, name)
                 if (
                         isinstance(func, types.FunctionType)
-                        and name not in klass.__abstractmethods__ #and name != "__iter__"
+                        and name not in klass.__abstractmethods__ # noqa and name != "__iter__"
                 ):
                     setattr(sequenceClass, name, func)
                     if name.startswith('__') or name.endswith('__'):

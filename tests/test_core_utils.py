@@ -33,16 +33,16 @@ class AnyDictionaryTests(unittest.TestCase):
             self.assertTrue(key)
 
         class CustomClass(object):
-            ...
+            pass
 
         with self.assertRaises(TypeError):
             d['custom'] = CustomClass()
 
-        with self.assertRaises(ValueError) as excinfo:
+        with self.assertRaises(ValueError):
             # Integer bigger than C++ int64_t can accept.
             d['super big int'] = 9223372036854775808
 
-        with self.assertRaises(ValueError) as excinfo:
+        with self.assertRaises(ValueError):
             # Integer smaller than C++ int64_t can accept.
             d['super big int'] = -9223372036854775809
 
@@ -59,26 +59,26 @@ class AnyDictionaryTests(unittest.TestCase):
         d1 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d1)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             d1['asd']
 
         d2 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d2)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             d2['asd'] = 'asd'
 
         d3 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d3)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             del d3['asd']
 
         d4 = opentimelineio.core._core_utils.AnyDictionary()
         d4['asd'] = 1
         it = iter(d4)
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d4)
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             next(it)
 
 
@@ -86,7 +86,7 @@ class AnyVectorTests(unittest.TestCase):
     def test_main(self):
         v = opentimelineio.core._core_utils.AnyVector()
 
-        with self.assertRaises(IndexError) as excinfo:
+        with self.assertRaises(IndexError):
             del v[0]  # There is a special case in the C++ code for empty vector
 
         v.append(1)
@@ -126,9 +126,10 @@ class AnyVectorTests(unittest.TestCase):
         self.assertEqual(len(v), 1)
         self.assertEqual([value for value in v], [1])
 
-        del v[-1000]  # Will delete the last item even if the index doesn't match.
-                    # It's a surprising behavior.
-                    # This is caused by size_t(index)
+        # Will delete the last item even if the index doesn't match.
+        # It's a surprising behavior.
+        # This is caused by size_t(index)
+        del v[-1000]
 
         v.extend([1, '234', {}])
 
@@ -146,14 +147,14 @@ class AnyVectorTests(unittest.TestCase):
         self.assertEqual(list(reversed(v)), [{}, '234', 1])
 
         self.assertEqual(v.index('234'), 1)
-        
+
         v += [1, 2]
         self.assertEqual(v.count(1), 2)
 
         self.assertEqual(v + ['new'], [1, '234', {}, 1, 2, 'new'])  # __add__
         self.assertEqual(['new'] + v, [1, '234', {}, 1, 2, 'new'])  # __radd__
 
-        self.assertEqual(v + ('new',), [1, '234', {}, 1, 2, 'new'])  # __add__ with non list type
+        self.assertEqual(v + ('new',), [1, '234', {}, 1, 2, 'new'])  # noqa __add__ with non list type
 
         v2 = opentimelineio.core._core_utils.AnyVector()
         v2.append('v2')
@@ -177,7 +178,7 @@ class AnyVectorTests(unittest.TestCase):
 
         v4 = opentimelineio.core._core_utils.AnyVector()
         v4.extend(range(10))
-        
+
         del v4[::2]
         self.assertEqual(list(v4), [1, 3, 5, 7, 9])
 
@@ -192,32 +193,32 @@ class AnyVectorTests(unittest.TestCase):
         v1 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v1)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             v1[0]
 
         v2 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v2)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             v2[0] = 1
 
         v3 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v3)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             del v3[0]
 
         v4 = opentimelineio.core._core_utils.AnyVector()
         v4.append(1)
         it = iter(v4)
         opentimelineio._otio._testing.test_AnyVector_destroy(v4)
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):
+        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             next(it)
 
     def test_copy(self):
-        l = [1, 2, [3, 4], 5]
-        copied = copy.copy(l)
-        self.assertEqual(list(l), list(copied))
+        list1 = [1, 2, [3, 4], 5]
+        copied = copy.copy(list1)
+        self.assertEqual(list(list1), list(copied))
 
         v = opentimelineio.core._core_utils.AnyVector()
         v.extend([1, 2, [3, 4], 5])
@@ -229,5 +230,5 @@ class AnyVectorTests(unittest.TestCase):
         self.assertIsNot(v[2], copied[2])
 
         deepcopied = copy.deepcopy(v)
-        self.assertIsNot(v, copied)
-        self.assertIsNot(v[2], copied[2])
+        self.assertIsNot(v, deepcopied)
+        self.assertIsNot(v[2], deepcopied[2])

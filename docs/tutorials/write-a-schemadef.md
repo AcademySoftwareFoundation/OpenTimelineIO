@@ -84,8 +84,8 @@ Then you must add it to a plugin manifest:
 
 The same plugin manifest may also include adapters and media linkers, if desired.
 
-Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment
-variable (which is separated with `:` for POSIX or `;` for Windows).
+Then you need to add this manifest to your {term}`OTIO_PLUGIN_MANIFEST_PATH` environment
+variable.
 
 ## Using the New Schema in Your Code
 

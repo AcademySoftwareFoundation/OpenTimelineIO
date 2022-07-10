@@ -223,5 +223,11 @@ class AnyVectorTests(unittest.TestCase):
         v.extend([1, 2, [3, 4], 5])
 
         copied = copy.copy(v)
-        self.assertListEqual(list(v), list(copied))
         self.assertIsNot(v, copied)
+        # AnyVector can only deep copy. So it's __copy__
+        # does a deepcopy.
+        self.assertIsNot(v[2], copied[2])
+
+        deepcopied = copy.deepcopy(v)
+        self.assertIsNot(v, copied)
+        self.assertIsNot(v[2], copied[2])

@@ -300,7 +300,7 @@ def _write_documentation(model):
             modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
 
-            if(cl.__doc__ != None):
+            if(cl.__doc__ is not None):
                 docstring = cl.__doc__.split("\n")
                 new_docstring = []
                 for line in docstring:

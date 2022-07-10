@@ -1,3 +1,4 @@
+import sys
 import copy
 import unittest
 
@@ -16,7 +17,7 @@ class AnyDictionaryTests(unittest.TestCase):
         self.assertEqual(len(d), 1)
         self.assertEqual(d['a'], 1)  # New key
 
-        with self.assertRaisesRegex(KeyError, "'non-existent'"):
+        with self.assertRaisesRegexp(KeyError, "'non-existent'"):
             d['non-existent']
 
         # TODO: Test different type of values to exercise the any_to_py function?
@@ -26,7 +27,7 @@ class AnyDictionaryTests(unittest.TestCase):
 
         del d['a']
         self.assertEqual(dict(d), {})
-        with self.assertRaisesRegex(KeyError, "'non-existent'"):
+        with self.assertRaisesRegexp(KeyError, "'non-existent'"):
             del d['non-existent']
 
         for key in iter(d):  # Test AnyDictionaryProxy.Iterator.iter
@@ -51,7 +52,7 @@ class AnyDictionaryTests(unittest.TestCase):
         d['a'] = 'test'
         d['b'] = 'asdasda'
 
-        with self.assertRaisesRegex(ValueError, "container mutated during iteration"):
+        with self.assertRaisesRegexp(ValueError, "container mutated during iteration"):
             for key in d:
                 del d['b']
 
@@ -59,26 +60,26 @@ class AnyDictionaryTests(unittest.TestCase):
         d1 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d1)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             d1['asd']
 
         d2 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d2)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             d2['asd'] = 'asd'
 
         d3 = opentimelineio.core._core_utils.AnyDictionary()
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d3)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             del d3['asd']
 
         d4 = opentimelineio.core._core_utils.AnyDictionary()
         d4['asd'] = 1
         it = iter(d4)
         opentimelineio._otio._testing.test_AnyDictionary_destroy(d4)
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyDictionary has been destroyed"):  # noqa
             next(it)
 
 
@@ -164,8 +165,12 @@ class AnyVectorTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             v + 'asd'  # __add__ invalid type
 
-        self.assertEqual(str(v), "[1, '234', {}, 1, 2]")
-        self.assertEqual(repr(v), "[1, '234', {}, 1, 2]")
+        if sys.version_info[0] > 2:
+            self.assertEqual(str(v), "[1, '234', {}, 1, 2]")
+            self.assertEqual(repr(v), "[1, '234', {}, 1, 2]")
+        else:
+            self.assertEqual(str(v), "[1L, u'234', {}, 1L, 2L]")
+            self.assertEqual(repr(v), "[1L, u'234', {}, 1L, 2L]")
 
         v3 = opentimelineio.core._core_utils.AnyVector()
         v3.extend(range(10))
@@ -193,26 +198,26 @@ class AnyVectorTests(unittest.TestCase):
         v1 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v1)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             v1[0]
 
         v2 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v2)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             v2[0] = 1
 
         v3 = opentimelineio.core._core_utils.AnyVector()
         opentimelineio._otio._testing.test_AnyVector_destroy(v3)
 
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             del v3[0]
 
         v4 = opentimelineio.core._core_utils.AnyVector()
         v4.append(1)
         it = iter(v4)
         opentimelineio._otio._testing.test_AnyVector_destroy(v4)
-        with self.assertRaisesRegex(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
+        with self.assertRaisesRegexp(ValueError, r"underlying C\+\+ AnyVector object has been destroyed"):  # noqa
             next(it)
 
     def test_copy(self):

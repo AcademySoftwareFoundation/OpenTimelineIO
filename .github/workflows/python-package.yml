@@ -11,7 +11,7 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'improve_test_coverage' ]
   pull_request:
     branches: [ main ]
 

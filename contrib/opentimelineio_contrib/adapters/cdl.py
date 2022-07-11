@@ -44,7 +44,7 @@ def write_to_file(input_otio, filepath):
     if os.path.isdir(filepath):
         for track in input_otio.tracks:
             for timeline_event in track:
-                if timeline_event.metadata["cdl"]:
+                if "cdl" in timeline_event.metadata:
                     try:
                         cdl_filepath = os.path.join(filepath, timeline_event.name + ".cdl")
                         cdl_et_tree = convert_to_cdl(timeline_event)

@@ -75,6 +75,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.cmake_generate()
         self.cmake_install()
 
+    def is_windows(self):
+        return platform.system() == "Windows"
+
+    def is_mingw(self):
+        return self.plat_name.startswith('mingw')
+
     def generate_cmake_arguments(self):
         # Use the provided build dir so setuptools will be able to locate and
         # either install to the correct location or package.
@@ -99,9 +105,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             # Python modules wil be installed by setuptools.
             '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
-
-        if platform.system() == "Windows":
-            cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
+        if self.is_windows():
+            if self.is_mingw():
+                cmake_args += ['-G Unix Makefiles']
+            else:
+                cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
 
         cxx_coverage = bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
         if cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
@@ -159,7 +167,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
     def cmake_install(self):
         self.announce('running cmake build', level=2)
-        if platform.system() == "Windows":
+        if self.is_windows() and not self.is_mingw():
             multi_proc = '/m'
         else:
             multi_proc = '-j{}'.format(multiprocessing.cpu_count())

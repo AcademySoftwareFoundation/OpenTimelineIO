@@ -131,6 +131,36 @@ jobs:
         name: py-opentimelineio-codecov
         fail_ci_if_error: true
 
+  py_build_test_mingw64:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'recursive'
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        install: >-
+          mingw-w64-x86_64-python
+          mingw-w64-x86_64-python-setuptools
+          mingw-w64-x86_64-python-pip
+          mingw-w64-x86_64-python-wheel
+          mingw-w64-x86_64-python-build
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-cmake
+          make
+    - name: Build Wheel
+      shell: msys2 {0}
+      run: |
+        python --version
+        python -m build -w .
+    - name: Install and Test
+      shell: msys2 {0}
+      run: |
+        python -m pip install -I dist/*.whl
+        make test
+
   package_wheels:
     needs: py_build_test
     runs-on: ${{ matrix.os }}

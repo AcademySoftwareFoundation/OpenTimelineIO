@@ -107,13 +107,14 @@ def main():
         for timeline in timelines:
             inspect_timelines(args.inspect, timeline)
 
-    if args.list_clips or args.list_media or args.list_tracks or args.list_markers:
+    if args.list_clips or args.list_media or args.verify_media or args.list_tracks or args.list_markers:
         for timeline in timelines:
             summarize_timeline(
                 args.list_tracks, 
                 args.list_clips, 
-                args.list_media, 
-                args.list_markers, 
+                args.list_media,
+                args.verify_media,
+                args.list_markers,
                 timeline)
 
     # Final Phase: Output
@@ -238,6 +239,11 @@ def parse_arguments():
         "--list-media",
         action='store_true',
         help="List each referenced media URL"
+    )
+    parser.add_argument(
+        "--verify-media",
+        action='store_true',
+        help="Verify that each referenced media URL exists (for local media only)"
     )
     parser.add_argument(
         "--list-markers",
@@ -572,7 +578,7 @@ def inspect_timelines(name_regex, timeline):
             ancestor = ancestor.parent()
 
 
-def summarize_timeline(list_tracks, list_clips, list_media, list_markers, timeline):
+def summarize_timeline(list_tracks, list_clips, list_media, verify_media, list_markers, timeline):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -583,12 +589,19 @@ def summarize_timeline(list_tracks, list_clips, list_media, list_markers, timeli
         if isinstance(child, otio.schema.Clip):
             if list_clips:
                 print("  CLIP:", child.name)
-            if list_media:
+            if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url
                 except:
                     url = None
-                print("    MEDIA:", url)
+                detail = ""
+                if verify_media and url:
+                    if os.path.exists(url):
+                        detail = " EXISTS"
+                    else:
+                        detail = " NOT FOUND"
+                print("    MEDIA{}: {}".format(detail, url))
+
         if list_markers and hasattr(child, 'markers'):
             top_level = child
             while top_level.parent() is not None:

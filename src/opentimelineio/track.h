@@ -17,6 +17,7 @@ public:
     {
         static auto constexpr video = "Video";
         static auto constexpr audio = "Audio";
+        static auto constexpr data = "Data";
     };
 
     enum NeighborGapPolicy

@@ -581,7 +581,8 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
-        .def_property_readonly_static("Video", [](py::object /* self */) { return Track::Kind::video; });
+        .def_property_readonly_static("Video", [](py::object /* self */) { return Track::Kind::video; })
+        .def_property_readonly_static("Data", [](py::object /* self */) { return Track::Kind::data; });
 
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())

@@ -880,6 +880,8 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 result.kind = otio.schema.TrackKind.Video
             elif media_kind in ("SoundMasterTrack", "Sound"):
                 result.kind = otio.schema.TrackKind.Audio
+            elif media_kind == "Descriptive Metadata":
+                result.kind = otio.schema.TrackKind.Data
             else:
                 # Timecode, Edgecode, others?
                 result.kind = ""
@@ -1444,6 +1446,28 @@ def _simplify(thing):
     return thing
 
 
+def _update_kind_of_data_tracks(thing):
+    if isinstance(thing, otio.schema.Timeline):
+        for track in thing.tracks:
+            track = _update_kind_of_data_tracks(track)
+    elif isinstance(thing, otio.schema.Stack):
+        for child in thing:
+            if isinstance(child, otio.schema.Track):
+                metadata = child.metadata.get("AAF", {})
+                media_kind = metadata.get("MediaKind", "")
+                if media_kind == "DataEssenceTrack":
+                    child.kind = otio.schema.TrackKind.Data
+            elif isinstance(child, otio.schema.Stack):
+                child = _update_kind_of_data_tracks(child)
+    elif isinstance(thing, otio.schema.Track):
+        metadata = thing.metadata.get("AAF", {})
+        media_kind = metadata.get("MediaKind", "")
+        if media_kind == "DataEssenceTrack":
+            thing.kind = otio.schema.TrackKind.Data
+
+    return thing
+
+
 def _has_effects(thing):
     if isinstance(thing, otio.core.Item):
         if len(thing.effects) > 0:
@@ -1594,6 +1618,9 @@ def read_from_file(
     # unnecessary stuff.
     if simplify:
         result = _simplify(result)
+
+    # Make sure that any AAF Data tracks are marked as such
+    result = _update_kind_of_data_tracks(result)
 
     # OTIO represents transitions a bit different than AAF, so
     # we need to iterate over them and modify the items on either side.

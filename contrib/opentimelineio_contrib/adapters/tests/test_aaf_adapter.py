@@ -204,6 +204,10 @@ MARKER_OVER_AUDIO_PATH = os.path.join(
     "marker-over-audio.aaf"
 )
 
+DATA_TRACK_MARKERS_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "simple_data_track_marker_test.aaf"
+)
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1951,6 +1955,37 @@ class SimplifyTests(unittest.TestCase):
         # None of the things in the top level stack should be a clip
         for i in simple_tl.tracks:
             self.assertNotEqual(type(i), otio.schema.Clip)
+
+    def test_aaf_data_track_markers(self):
+        expected_markers = [('Frame 1',    0.0, 1.0, 24.0, 'GREEN'),
+                            ('Frame 23',  22.0, 1.0, 24.0, 'RED'),
+                            ('Frame 56',  55.0, 1.0, 24.0, 'GREEN'),
+                            ('Frame 100', 99.0, 1.0, 24.0, 'RED')]
+        aaf_path = DATA_TRACK_MARKERS_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(len(timeline.tracks), 2)
+
+        data_track = timeline.tracks[1]
+        self.assertEqual(otio.schema.TrackKind.Data, data_track.kind)
+        self.assertEqual(1, len(data_track))
+
+        filler = data_track[0]
+        self.assertEqual(otio.schema.Gap, type(filler))
+        markers = filler.markers
+        self.assertEqual(4, len(markers))
+
+        markers = [
+            (
+                m.name,
+                m.marked_range.start_time.value,
+                m.marked_range.duration.value,
+                m.marked_range.start_time.rate,
+                m.color
+            ) for m in filler.markers
+        ]
+        self.assertEqual(expected_markers, markers)
 
 
 if __name__ == '__main__':

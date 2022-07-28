@@ -216,7 +216,7 @@ _MANIFEST = None
 
 
 def load_manifest():
-    """ Walk the plugin manifest discovery systems and accumulate manifests.
+    """Walk the plugin manifest discovery systems and accumulate manifests.
 
     The order of loading (and precedence) is:
 

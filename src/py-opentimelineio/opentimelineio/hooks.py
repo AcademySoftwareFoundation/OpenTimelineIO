@@ -141,7 +141,7 @@ def available_hookscripts():
 
 
 def scripts_attached_to(hook):
-    """Return an editable list of all the hook scriptss that are attached to
+    """Return an editable list of all the hook scripts that are attached to
     the specified hook, in execution order.  Changing this list will change the
     order that scripts run in, and deleting a script will remove it from
     executing

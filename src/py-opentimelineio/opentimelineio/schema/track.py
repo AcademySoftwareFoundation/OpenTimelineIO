@@ -7,7 +7,7 @@ from .. import _otio
 
 @add_method(_otio.Track)
 def each_clip(self, search_range=None, shallow_search=False):
-    """ Generator that returns each clip contained in the track
+    """Generator that returns each clip contained in the track
     in the order in which it is found.
 
     .. deprecated:: 0.14.0

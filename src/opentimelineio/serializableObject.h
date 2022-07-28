@@ -38,7 +38,7 @@ public:
      * You cannot directly delete a SerializableObject* (or, hopefully, anything
      * derived from it, as all derivations are required to protect the destructor).
      *
-     * Instead, call the member funtion possibly_delete(), which deletes the object
+     * Instead, call the member function possibly_delete(), which deletes the object
      * (and, recursively, the objects owned by this object), provided the objects
      * are not under external management (e.g. prevented from being deleted because an
      * external scripting system is holding a reference to them).
@@ -72,7 +72,7 @@ public:
     // is set appropriately.
     SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
 
-    // Allow external system (e.g. Python, Swifft) to add serializable fields
+    // Allow external system (e.g. Python, Swift) to add serializable fields
     // on the fly.  C++ implementations should have no need for this functionality.
     AnyDictionary& dynamic_fields() { return _dynamic_fields; }
 

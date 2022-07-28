@@ -209,6 +209,7 @@ DATA_TRACK_MARKERS_PATH = os.path.join(
     "simple_data_track_marker_test.aaf"
 )
 
+
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
     decode a string, and if it cannot decode it just returns the string.
@@ -1957,9 +1958,10 @@ class SimplifyTests(unittest.TestCase):
             self.assertNotEqual(type(i), otio.schema.Clip)
 
     def test_aaf_data_track_markers(self):
-        expected_markers = [('Frame 1',    0.0, 1.0, 24.0, 'GREEN'),
-                            ('Frame 23',  22.0, 1.0, 24.0, 'RED'),
-                            ('Frame 56',  55.0, 1.0, 24.0, 'GREEN'),
+        """Test that we can load a Data track and read the markers on it."""
+        expected_markers = [('Frame 1', 0.0, 1.0, 24.0, 'GREEN'),
+                            ('Frame 23', 22.0, 1.0, 24.0, 'RED'),
+                            ('Frame 56', 55.0, 1.0, 24.0, 'GREEN'),
                             ('Frame 100', 99.0, 1.0, 24.0, 'RED')]
         aaf_path = DATA_TRACK_MARKERS_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)

@@ -29,8 +29,6 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             # transition_in
             # transition_out
         )
-       
-       
         assert cl.name == name
         assert cl.source_range == tr
         self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
@@ -38,9 +36,6 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(cl, decoded)
-        
-
-        
 
     def test_each_clip(self):
         cl = otio.schema.Clip(name="test_clip")
@@ -51,7 +46,10 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(\'\', None, None, {}), None, {})'
+            'Clip('
+            '"test_clip", '
+            'MissingReference(\'\', None, None, {}), '
+            'None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -104,7 +102,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 available_range=tr
             )
         )
-      
+
         assert cl.duration() == cl.trimmed_range().duration
         assert cl.duration() == tr.duration
         assert cl.trimmed_range() == tr
@@ -117,12 +115,11 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             start_time=otio.opentime.RationalTime(86500, 24),
             duration=otio.opentime.RationalTime(50, 24)
         )
-      
+
         assert cl.duration() != tr.duration
         assert cl.trimmed_range() != tr
         assert cl.duration() == cl.source_range.duration
         assert cl.duration() is not cl.source_range.duration
-
         assert cl.trimmed_range() == cl.source_range
         assert cl.trimmed_range() is not cl.source_range
 
@@ -190,8 +187,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 "high_quality": otio.schema.GeneratorReference(),
                 "proxy_quality": otio.schema.ImageSequenceReference(),
             },
-            otio.schema.Clip.DEFAULT_MEDIA_KEY)
-
+            otio.schema.Clip.DEFAULT_MEDIA_KEY
+        )
         mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
             mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
@@ -211,7 +208,6 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             cl.media_reference,
             otio.schema.GeneratorReference()
         )
-   
         assert cl.active_media_reference_key == "high_quality"
 
         # we should get an exception if we try to use a key that is
@@ -219,7 +215,6 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with pytest.raises(ValueError):
             cl.active_media_reference_key = "cloud"
 
-        
         assert cl.active_media_reference_key == "high_quality"
 
         # we should also get an exception if we set the references without

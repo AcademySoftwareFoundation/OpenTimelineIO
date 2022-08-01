@@ -78,48 +78,6 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(Foo, type(foo_copy))
 
-    def test_schema_versioning(self):
-        @otio.core.register_type
-        class FakeThing(otio.core.SerializableObject):
-            _serializable_label = "Stuff.1"
-            foo_two = otio.core.serializable_field("foo_2", doc="test")
-        ft = FakeThing()
-
-        self.assertEqual(ft.schema_name(), "Stuff")
-        self.assertEqual(ft.schema_version(), 1)
-
-        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
-            otio.core.instance_from_schema(
-                "Stuff",
-                2,
-                {"foo": "bar"}
-            )
-
-        ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo'], "bar")
-
-        @otio.core.register_type
-        class FakeThing(otio.core.SerializableObject):
-            _serializable_label = "NewStuff.4"
-            foo_two = otio.core.serializable_field("foo_2")
-
-        @otio.core.upgrade_function_for(FakeThing, 2)
-        def upgrade_one_to_two(_data_dict):
-            return {"foo_2": _data_dict["foo"]}
-
-        @otio.core.upgrade_function_for(FakeThing, 3)
-        def upgrade_one_to_two_three(_data_dict):
-            return {"foo_3": _data_dict["foo_2"]}
-
-        ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
-
-        ft = otio.core.instance_from_schema("NewStuff", 3, {"foo_2": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
-
-        ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
-
     def test_equality(self):
         o1 = otio.core.SerializableObject()
         o2 = otio.core.SerializableObject()
@@ -176,6 +134,54 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with self.assertRaises(ValueError):
             o.clone()
 
+
+class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
+    def test_schema_versioning(self):
+        """ test basic upgrade function and unsupported schema error """
+        @otio.core.register_type
+        class FakeThing(otio.core.SerializableObject):
+            _serializable_label = "Stuff.1"
+            foo_two = otio.core.serializable_field("foo_2", doc="test")
+        ft = FakeThing()
+
+        self.assertEqual(ft.schema_name(), "Stuff")
+        self.assertEqual(ft.schema_version(), 1)
+
+        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
+            otio.core.instance_from_schema(
+                "Stuff",
+                2,
+                {"foo": "bar"}
+            )
+
+        ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo'], "bar")
+
+    def test_upgrading_skips_versions(self):
+        """ test that the upgrading system skips versions that don't have
+        upgrade functions"""
+
+        @otio.core.register_type
+        class FakeThing(otio.core.SerializableObject):
+            _serializable_label = "NewStuff.4"
+            foo_two = otio.core.serializable_field("foo_2")
+
+        @otio.core.upgrade_function_for(FakeThing, 2)
+        def upgrade_one_to_two(_data_dict):
+            return {"foo_2": _data_dict["foo"]}
+
+        @otio.core.upgrade_function_for(FakeThing, 3)
+        def upgrade_one_to_two_three(_data_dict):
+            return {"foo_3": _data_dict["foo_2"]}
+
+        ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+
+        ft = otio.core.instance_from_schema("NewStuff", 3, {"foo_2": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+
+        ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
 if __name__ == '__main__':
     unittest.main()

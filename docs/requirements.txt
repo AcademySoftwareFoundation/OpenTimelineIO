@@ -1,4 +1,4 @@
-sphinx==4.5.0
+sphinx==5.1.1
 readthedocs-sphinx-ext==2.1.5 # ??
 sphinx-rtd-theme
 myst-parser==0.17.2

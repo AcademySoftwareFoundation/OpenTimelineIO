@@ -66,5 +66,5 @@ def write_to_file(input_otio, filepath):
                 if "cdl" in timeline_event.metadata:
                     create_cdl_file(timeline_event, output_dir_path)
     else:
-        err = f"{filepath} is not a valid directory, please create it and run again."
+        err = filepath + " is not a valid directory, please create it and run again."
         raise RuntimeError(err)

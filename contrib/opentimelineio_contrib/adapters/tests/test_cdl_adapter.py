@@ -19,12 +19,12 @@ SAMPLE_CDL_EDL_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_cdl_edl.edl")
 
 
 class CDLAdapterTest(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         if os.path.exists(TEMP_TESTS_OUTPUT_DIR):
             shutil.rmtree(TEMP_TESTS_OUTPUT_DIR)
         os.makedirs(TEMP_TESTS_OUTPUT_DIR)
 
-    def tearDown(self) -> None:
+    def tearDown(self):
         shutil.rmtree(TEMP_TESTS_OUTPUT_DIR)
 
     def test_edl_read(self):

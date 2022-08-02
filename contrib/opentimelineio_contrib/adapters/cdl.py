@@ -45,7 +45,7 @@ def convert_to_cdl(timeline_event):
 
 def create_cdl_file(timeline_event, output_dir_path):
     try:
-        cdl_filepath = os.path.join(output_dir_path, f"{timeline_event.name}.cdl")
+        cdl_filepath = os.path.join(output_dir_path, timeline_event.name + ".cdl")
         cdl_et_tree = convert_to_cdl(timeline_event)
         cdl_et_tree.write(cdl_filepath, encoding='utf-8', xml_declaration=True)
     finally:

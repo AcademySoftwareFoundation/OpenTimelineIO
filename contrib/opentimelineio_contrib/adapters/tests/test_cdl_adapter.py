@@ -17,6 +17,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TEMP_TESTS_OUTPUT_DIR = os.path.join(SAMPLE_DATA_DIR, "CDL_EXPORTS")
 SAMPLE_CDL_EDL_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_cdl_edl.edl")
 
+
 class CDLAdapterTest(unittest.TestCase):
     def setUp(self) -> None:
         if os.path.exists(TEMP_TESTS_OUTPUT_DIR):
@@ -36,7 +37,7 @@ class CDLAdapterTest(unittest.TestCase):
         self.assertEqual(
             [c.name for c in timeline.tracks[0]],
             ["VFX_NAME_01", "VFX_NAME_02", "VFX_NAME_03", "VFX_NAME_04", "VFX_NAME_05",
-            "VFX_NAME_06", "VFX_NAME_07", "VFX_NAME_08", "VFX_NAME_09", "VFX_NAME_10"]
+             "VFX_NAME_06", "VFX_NAME_07", "VFX_NAME_08", "VFX_NAME_09", "VFX_NAME_10"]
         )
 
     def test_write_cdl(self):
@@ -44,10 +45,10 @@ class CDLAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(edl_path, rate=25.000)
         otio.adapters.write_to_file(timeline, TEMP_TESTS_OUTPUT_DIR, adapter_name='cdl')
 
-        exported_cdl_files = [f for f in sorted(os.listdir(TEMP_TESTS_OUTPUT_DIR))]
+        cdl_files = [f for f in sorted(os.listdir(TEMP_TESTS_OUTPUT_DIR))]
 
-        first_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, exported_cdl_files[0]), "r")
-        last_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, exported_cdl_files[-1]), "r")
+        first_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[0]), "r")
+        last_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[-1]), "r")
 
         first_cdl = """<?xml version='1.0' encoding='utf-8'?>
                         <ColorDecisionList xmlns="urn:ASC:CDL:v1.01">
@@ -82,10 +83,9 @@ class CDLAdapterTest(unittest.TestCase):
                     </ColorDecisionList>
                     """
 
-        self.assertEqual(len(exported_cdl_files), 10)
+        self.assertEqual(len(cdl_files), 10)
         self.assertEqual(first_cdl_file.read(), inspect.cleandoc(first_cdl))
         self.assertEqual(last_cdl_file.read(), inspect.cleandoc(last_cdl))
-
 
 
 if __name__ == '__main__':

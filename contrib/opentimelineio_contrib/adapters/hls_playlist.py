@@ -1074,7 +1074,7 @@ def master_playlist_to_string(master_timeline):
     hls_md_rejectlist = ['master_playlist']
     for key in hls_md_rejectlist:
         try:
-            del(header_tags[key])
+            del header_tags[key]
         except KeyError:
             pass
 
@@ -1158,7 +1158,7 @@ def master_playlist_to_string(master_timeline):
         # Remove entries to not be included for I-Frame streams
         for attr in I_FRAME_OMIT_ATTRS:
             try:
-                del(attribute_list[attr])
+                del attribute_list[attr]
             except KeyError:
                 pass
 
@@ -1316,7 +1316,7 @@ class MediaPlaylistWriter():
 
             # Remove the version tag from the track metadata, we'll compute
             # based on what we write out
-            del(self._playlist_tags[PLAYLIST_VERSION_TAG])
+            del self._playlist_tags[PLAYLIST_VERSION_TAG]
 
         except KeyError:
             pass
@@ -1325,7 +1325,7 @@ class MediaPlaylistWriter():
         # playlist URIs
         for key in ('uri', 'iframe_uri'):
             try:
-                del(self._playlist_tags[key])
+                del self._playlist_tags[key]
             except KeyError:
                 pass
 
@@ -1434,7 +1434,7 @@ class MediaPlaylistWriter():
                 omit_hls_keys = omit_hls_keys or []
                 for key in omit_hls_keys:
                     try:
-                        del(segment_tags[key])
+                        del segment_tags[key]
                     except KeyError:
                         pass
 
@@ -1462,7 +1462,7 @@ class MediaPlaylistWriter():
         omit_hls_keys = omit_hls_keys or []
         for key in omit_hls_keys:
             try:
-                del(segment_tags[key])
+                del segment_tags[key]
             except KeyError:
                 pass
 

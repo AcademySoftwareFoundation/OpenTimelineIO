@@ -216,7 +216,15 @@ def _ffprobe_fps(name, full_path, dryrun=False):
     if dryrun:
         return 1.0
 
-    for line in err.split('\n'):
+    try:
+        # python3
+        # if its bytes (python3+)
+        err_str = err.decode("utf-8")
+    except AttributeError:
+        # if its a string (python <3)
+        err_str = err
+
+    for line in err_str.split('\n'):
         if not ("Stream" in line and "Video" in line):
             continue
 

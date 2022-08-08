@@ -72,10 +72,10 @@ def main():
     # Phase 3: Combine timelines
 
     if args.stack:
-        timelines = [ stack_timelines(timelines) ]
+        timelines = [stack_timelines(timelines)]
 
     if args.concat:
-        timelines = [ concatenate_timelines(timelines) ]
+        timelines = [concatenate_timelines(timelines)]
 
     # Phase 4: Combine (or add) tracks
 
@@ -109,11 +109,16 @@ def main():
         for timeline in timelines:
             inspect_timelines(args.inspect, timeline)
 
-    if args.list_clips or args.list_media or args.verify_media or args.list_tracks or args.list_markers:
+    should_summarize = (args.list_clips or
+                        args.list_media or
+                        args.verify_media or
+                        args.list_tracks or
+                        args.list_markers)
+    if should_summarize:
         for timeline in timelines:
             summarize_timeline(
-                args.list_tracks, 
-                args.list_clips, 
+                args.list_tracks,
+                args.list_clips,
                 args.list_media,
                 args.verify_media,
                 args.list_markers,
@@ -135,7 +140,8 @@ def main():
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="""otiotool = a multi-purpose command line utility for working with OpenTimelineIO.
+        description="""
+otiotool = a multi-purpose command line utility for working with OpenTimelineIO.
 
 This tool works in phases, as follows:
 1. Input
@@ -153,7 +159,7 @@ This tool works in phases, as follows:
 3. Combine
     If specified, the --stack, --concat, and --flatten operations are
     performed (in that order) to combine all of the input timeline(s) into one.
-    
+
 4. Relink
     If specified, the --copy-media-to-folder option, will copy or download
     all linked media, and relink the OTIO to reference the local copies.
@@ -172,7 +178,7 @@ This tool works in phases, as follows:
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
     format supported by the adapter plugins.)
-""",
+""".strip(),
         epilog="""Examples:
 
 Combine multiple files into one, by joining them end-to-end:
@@ -199,7 +205,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         required=True,
         help="""Input file path(s). All formats supported by adapter plugins
         are supported. Use '-' to read OTIO from standard input."""
-        )
+    )
 
     # Filter...
     parser.add_argument(
@@ -224,7 +230,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--only-tracks-with-index",
         type=int,
         nargs='*',
-        help="Output tracks with these indexes (1 based, in same order as --list-tracks)"
+        help="Output tracks with these indexes"
+        " (1 based, in same order as --list-tracks)"
     )
     parser.add_argument(
         "--only-clips-with-name",
@@ -261,7 +268,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--keep-flattened-tracks",
         action='store_true',
-        help="When used with --flatten, the new flat track is added above the others instead of replacing them."
+        help="""When used with --flatten, the new flat track is added above the
+        others instead of replacing them."""
     )
     parser.add_argument(
         "-s",
@@ -280,21 +288,24 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--copy-media-to-folder",
         type=str,
-        help="Copy or download all linked media to the specified folder and relink all media references to the copies"
+        help="""Copy or download all linked media to the specified folder and
+        relink all media references to the copies"""
     )
 
     # Redact
     parser.add_argument(
         "--redact",
         action='store_true',
-        help="Remove all metadata, names, etc. leaving only the timeline structure"
+        help="""Remove all metadata, names, etc. leaving only the timeline
+        structure"""
     )
 
     # Inspect...
     parser.add_argument(
         "--stats",
         action='store_true',
-        help="List statistics about the result, including start, end, and duration"
+        help="""List statistics about the result, including start, end, and
+        duration"""
     )
     parser.add_argument(
         "--list-clips",
@@ -314,7 +325,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--verify-media",
         action='store_true',
-        help="Verify that each referenced media URL exists (for local media only)"
+        help="""Verify that each referenced media URL exists (for local media
+        only)"""
     )
     parser.add_argument(
         "--list-markers",
@@ -335,7 +347,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         type=str,
         help="""Output file. All formats supported by adapter plugins
         are supported. Use '-' to write OTIO to standard output."""
-        )
+    )
 
     args = parser.parse_args()
 
@@ -412,7 +424,7 @@ def filter_tracks(only_tracks_with_name, only_tracks_with_index, timelines):
 
     # Use a variable saved within this function so that the closure
     # below can modify it.
-    # See: https://stackoverflow.com/questions/21959985/why-cant-python-increment-variable-in-closure
+    # See: https://stackoverflow.com/questions/21959985/why-cant-python-increment-variable-in-closure   # noqa: E501
     filter_tracks.index = 0
 
     def _f(item):
@@ -465,7 +477,7 @@ def flatten_timeline(timeline, which_tracks='video', keep=False):
     """Replace the tracks of this timeline with a single track by flattening.
     If which_tracks is specified, you may choose 'video', 'audio', or 'all'.
     If keep is True, then the old tracks are retained and the new one is added
-    above them instead of replacing them. This can be useful to see and 
+    above them instead of replacing them. This can be useful to see and
     understand how flattening works."""
 
     # Make two lists: tracks_to_flatten and other_tracks
@@ -487,7 +499,7 @@ def flatten_timeline(timeline, which_tracks='video', keep=False):
         raise ValueError(
             "Invalid choice {} for which_tracks argument"
             " to flatten_timeline.".format(which_tracks)
-            )
+        )
 
     flat_track = otio.algorithms.flatten_stack(tracks_to_flatten[:])
     flat_track.kind = kind
@@ -518,15 +530,21 @@ def trim_timeline(start, end, timeline):
     try:
         start_time = time_from_string(start, rate)
         end_time = time_from_string(end, rate)
-    except:
+    except Exception:
         raise ValueError("Start and end arguments to --trim must be "
-            "either HH:MM:SS:FF or a floating point number of seconds,"
-            " not '{}' and '{}'".format(start, end))
+                         "either HH:MM:SS:FF or a floating point number of"
+                         " seconds, not '{}' and '{}'".format(start, end))
     trim_range = otio.opentime.range_from_start_end_time(start_time, end_time)
-    timeline.tracks[:] = [otio.algorithms.track_trimmed_to_range(t, trim_range) for t in timeline.tracks]
+    timeline.tracks[:] = [
+        otio.algorithms.track_trimmed_to_range(t, trim_range)
+        for t in timeline.tracks
+    ]
 
 
+# Used only within _counter() to keep track of object indexes
 __counters = {}
+
+
 def _counter(name):
     """This is a helper function for returning redacted names, based on a name."""
     counter = __counters.get(name, 0)
@@ -534,9 +552,10 @@ def _counter(name):
     __counters[name] = counter
     return counter
 
+
 def redact_timeline(timeline):
-    """Remove all metadata, names, or other identifying information from this timeline. Only the
-    structure, schema and timing will remain."""
+    """Remove all metadata, names, or other identifying information from this
+    timeline. Only the structure, schema and timing will remain."""
 
     counter = _counter(timeline.schema_name())
     timeline.name = "{} #{}".format(timeline.schema_name(), counter)
@@ -560,7 +579,8 @@ def redact_timeline(timeline):
             media_reference = child.media_reference
             if media_reference:
                 counter = _counter(media_reference.schema_name())
-                if hasattr(media_reference, 'target_url') and media_reference.target_url:
+                has_target_url = hasattr(media_reference, 'target_url')
+                if has_target_url and media_reference.target_url:
                     media_reference.target_url = "URL #{}".format(counter)
                     media_reference.metadata.clear()
 
@@ -577,8 +597,9 @@ def copy_media(url, destination_path):
 
 
 def copy_media_to_folder(timeline, folder):
-    """Copy or download all referenced media to this folder, and relink media references to the copies."""
-    
+    """Copy or download all referenced media to this folder, and relink media
+    references to the copies."""
+
     # @TODO: Add an option to allow mkdir
     # if not os.path.exists(folder):
     #     os.mkdir(folder)
@@ -586,21 +607,27 @@ def copy_media_to_folder(timeline, folder):
     copied_files = set()
     for clip in timeline.each_clip():
         media_reference = clip.media_reference
-        if media_reference and hasattr(media_reference, 'target_url') and media_reference.target_url:
+        has_actual_url = (media_reference and
+                          hasattr(media_reference, 'target_url') and
+                          media_reference.target_url)
+        if has_actual_url:
             source_url = media_reference.target_url
             filename = os.path.basename(source_url)
             # @TODO: This is prone to name collisions if the basename is not unique
             # We probably need to hash the url, or turn the whole url into a filename.
             destination_path = os.path.join(folder, filename)
             already_copied_this = destination_path in copied_files
-            file_exists = os.path.exists(destination_url)
+            file_exists = os.path.exists(destination_path)
             if already_copied_this:
                 media_reference.target_url = destination_path
             else:
                 if file_exists:
-                    print("WARNING: Relinking clip {} to existing file (instead of overwriting it): {}",format(
-                        clip.name, destination_path
-                    ))
+                    print(
+                        "WARNING: Relinking clip {} to existing file"
+                        " (instead of overwriting it): {}".format(
+                            clip.name, destination_path
+                        )
+                    )
                     media_reference.target_url = destination_path
                     already_copied_this.add(destination_path)
                 else:
@@ -637,18 +664,35 @@ def inspect_timelines(name_regex, timeline):
         print("    visible_range:", item.visible_range())
         try:
             print("    available_range:", item.available_range())
-        except:
+        except Exception:
             pass
         print("    range_in_parent:", item.range_in_parent())
-        print("    trimmed range in timeline:", item.transformed_time_range(item.trimmed_range(), timeline.tracks))
-        print("    visible range in timeline:", item.transformed_time_range(item.visible_range(), timeline.tracks))
+        print(
+            "    trimmed range in timeline:",
+            item.transformed_time_range(
+                item.trimmed_range(), timeline.tracks
+            )
+        )
+        print(
+            "    visible range in timeline:",
+            item.transformed_time_range(
+                item.visible_range(), timeline.tracks
+            )
+        )
         ancestor = item.parent()
-        while ancestor != None:
-            print("    range in {} ({}): {}".format(ancestor.name, type(ancestor), item.transformed_time_range(item.trimmed_range(), ancestor)))
+        while ancestor is not None:
+            print(
+                "    range in {} ({}): {}".format(
+                    ancestor.name,
+                    type(ancestor),
+                    item.transformed_time_range(item.trimmed_range(), ancestor)
+                )
+            )
             ancestor = ancestor.parent()
 
 
-def summarize_timeline(list_tracks, list_clips, list_media, verify_media, list_markers, timeline):
+def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
+                       list_markers, timeline):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -662,7 +706,7 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media, list_m
             if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url
-                except:
+                except Exception:
                     url = None
                 detail = ""
                 if verify_media and url:
@@ -677,8 +721,11 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media, list_m
             while top_level.parent() is not None:
                 top_level = top_level.parent()
             for marker in child.markers:
-                print("  MARKER: global: {} local: {} duration: {} color: {} name: {}".format(
-                    otio.opentime.to_timecode(child.transformed_time(marker.marked_range.start_time, top_level)),
+                template = "  MARKER: global: {} local: {} duration: {} color: {} name: {}"  # noqa: E501
+                print(template.format(
+                    otio.opentime.to_timecode(child.transformed_time(
+                        marker.marked_range.start_time,
+                        top_level)),
                     otio.opentime.to_timecode(marker.marked_range.start_time),
                     marker.marked_range.duration.value,
                     marker.color,
@@ -698,4 +745,3 @@ def write_output(output_path, output):
 
 if __name__ == '__main__':
     main()
-

@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# otiotool is a multipurpose command line tool for inspecting,
-# modifying, combining, and splitting OTIO files.
-#
-# Each of the many operations it can perform is provided by a
-# small, simple utility function. These functions also serve
-# as concise examples of how OTIO can be used to perform common
-# workflow tasks.
+
+"""otiotool is a multipurpose command line tool for inspecting,
+modifying, combining, and splitting OTIO files.
+
+Each of the many operations it can perform is provided by a
+small, simple utility function. These functions also serve
+as concise examples of how OTIO can be used to perform common
+workflow tasks."""
 
 import argparse
 import os

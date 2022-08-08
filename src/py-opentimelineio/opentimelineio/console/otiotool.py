@@ -30,13 +30,15 @@ def main():
 
     args = parse_arguments()
 
+    # Phase 1: Input...
+
     # Most of this function will operate on this list of timelines.
     # Often there will be just one, but this tool in general enough
     # to operate on several. This is essential when the --stack or
     # --concatenate arguments are used.
     timelines = read_inputs(args.input)
 
-    # Phase 1: Remove things...
+    # Phase 2: Filter (remove stuff)...
 
     if args.video_only:
         for timeline in timelines:
@@ -67,7 +69,7 @@ def main():
         for timeline in timelines:
             trim_timeline(args.trim[0], args.trim[1], timeline)
 
-    # Phase 2: Combine timelines
+    # Phase 3: Combine timelines
 
     if args.stack:
         timelines = [ stack_timelines(timelines) ]
@@ -75,7 +77,7 @@ def main():
     if args.concat:
         timelines = [ concatenate_timelines(timelines) ]
 
-    # Phase 3: Combine (or add) tracks
+    # Phase 4: Combine (or add) tracks
 
     if args.flatten:
         for timeline in timelines:
@@ -85,19 +87,19 @@ def main():
                 keep=args.keep_flattened_tracks
             )
 
-    # Phase 4: Relinking media
+    # Phase 5: Relinking media
 
     if args.copy_media_to_folder:
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
 
-    # Phase 5: Redaction
+    # Phase 6: Redaction
 
     if args.redact:
         for timeline in timelines:
             redact_timeline(timeline)
 
-    # Phase 6: Inspection
+    # Phase 7: Inspection
 
     if args.stats:
         for timeline in timelines:
@@ -133,22 +135,73 @@ def main():
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Multi-purpose command line utility for working with OpenTimelineIO."
+        description="""otiotool = a multi-purpose command line utility for working with OpenTimelineIO.
+
+This tool works in phases, as follows:
+1. Input
+    Input files provided by the "--input <filename>" argument(s) are read into
+    memory. Files may be OTIO format, or any format supported by adapter
+    plugins.
+
+2. Filtering
+    Options such as --video-only, --audio-only, --only-tracks-with-name,
+    -only-tracks-with-index, --only-clips-with-name,
+    --only-clips-with-name-regex, --remove-transitions, and --trim will remove
+    content. Only the tracks, clips, etc. that pass all of the filtering options
+    provided are passed to the next phase.
+
+3. Combine
+    If specified, the --stack, --concat, and --flatten operations are
+    performed (in that order) to combine all of the input timeline(s) into one.
+    
+4. Relink
+    If specified, the --copy-media-to-folder option, will copy or download
+    all linked media, and relink the OTIO to reference the local copies.
+
+5. Redact
+    If specified, the --redact option, will remove all metadata and rename all
+    objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
+
+6. Inspect
+    Options such as --stats, --list-clips, --list-tracks, --list-media,
+    --verify-media, --list-markers, and --inspect will examine the OTIO and
+    print information to standard output.
+
+7. Output
+    Finally, if the "--output <filename>" option is specified, the resulting
+    OTIO will be written to the specified file. The extension of the output
+    filename is used to determine the format of the output (e.g. OTIO or any
+    format supported by the adapter plugins.)
+""",
+        epilog="""Examples:
+
+Combine multiple files into one, by joining them end-to-end:
+otiotool -i titles.otio -i feature.otio -i credits.otio --concat -o full.otio
+
+Layer multiple files on top of each other in a stack:
+otiotool -i background.otio -i foreground.otio --stack -o composite.otio
+
+Verify that all referenced media files are accessible:
+otiotool -i playlist.otio --verify-media
+
+Inspect specific audio clips in detail:
+otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
+""",
+        formatter_class=argparse.RawDescriptionHelpFormatter
     )
+
+    # Input...
     parser.add_argument(
         "-i",
         "--input",
         type=str,
         nargs='+',
         required=True,
-        help="Input file path(s)"
+        help="""Input file path(s). All formats supported by adapter plugins
+        are supported. Use '-' to read OTIO from standard input."""
         )
-    parser.add_argument(
-        "-o",
-        "--output",
-        type=str,
-        help="Output file"
-        )
+
+    # Filter...
     parser.add_argument(
         "-v",
         "--video-only",
@@ -191,6 +244,15 @@ def parse_arguments():
         help="Remove all transitions"
     )
     parser.add_argument(
+        "-t",
+        "--trim",
+        type=str,
+        nargs=2,
+        help="Trim from <start> to <end> as HH:MM:SS:FF timecode or seconds"
+    )
+
+    # Combine...
+    parser.add_argument(
         "-f",
         "--flatten",
         choices=['video', 'audio', 'all'],
@@ -208,18 +270,27 @@ def parse_arguments():
         help="Stack multiple input files into one timeline"
     )
     parser.add_argument(
-        "-t",
-        "--trim",
-        type=str,
-        nargs=2,
-        help="Trim from <start> to <end> as HH:MM:SS:FF timecode or seconds"
-    )
-    parser.add_argument(
         "-c",
         "--concat",
         action='store_true',
         help="Concatenate multiple input files end-to-end into one timeline"
     )
+
+    # Relink
+    parser.add_argument(
+        "--copy-media-to-folder",
+        type=str,
+        help="Copy or download all linked media to the specified folder and relink all media references to the copies"
+    )
+
+    # Redact
+    parser.add_argument(
+        "--redact",
+        action='store_true',
+        help="Remove all metadata, names, etc. leaving only the timeline structure"
+    )
+
+    # Inspect...
     parser.add_argument(
         "--stats",
         action='store_true',
@@ -256,16 +327,15 @@ def parse_arguments():
         nargs='*',
         help="Inspect details of clips with names matching the given regex"
     )
+
+    # Output...
     parser.add_argument(
-        "--redact",
-        action='store_true',
-        help="Remove all metadata, names, etc. leaving only the timeline structure"
-    )
-    parser.add_argument(
-        "--copy-media-to-folder",
+        "-o",
+        "--output",
         type=str,
-        help="Copy or download all linked media to the specified folder and relink all media references to the copies"
-    )
+        help="""Output file. All formats supported by adapter plugins
+        are supported. Use '-' to write OTIO to standard output."""
+        )
 
     args = parser.parse_args()
 

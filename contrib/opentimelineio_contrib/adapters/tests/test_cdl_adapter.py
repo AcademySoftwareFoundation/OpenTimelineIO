@@ -50,42 +50,42 @@ class CDLAdapterTest(unittest.TestCase):
         first_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[0]), "r")
         last_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[-1]), "r")
 
-        first_cdl = """<?xml version='1.0' encoding='utf-8'?>
+        first_cdl = """<?xml version="1.0" encoding="utf-8"?>
                         <ColorDecisionList xmlns="urn:ASC:CDL:v1.01">
-                          <ColorDecision>
-                            <ColorCorrection id="A001C001_220201_ABCD">
-                              <SOPNode>
-                                <Slope>0.912700 0.912700 0.912700</Slope>
-                                <Offset>0.024500 0.024500 0.024500</Offset>
-                                <Power>1.010000 1.120000 0.910000</Power>
-                              </SOPNode>
-                              <SATNode>
-                                <Saturation>1.000000</Saturation>
-                              </SATNode>
-                            </ColorCorrection>
-                          </ColorDecision>
+                            <ColorDecision>
+                                <ColorCorrection id="A001C001_220201_ABCD">
+                                    <SOPNode>
+                                        <Slope>0.912700 0.912700 0.912700</Slope>
+                                        <Offset>0.024500 0.024500 0.024500</Offset>
+                                        <Power>1.010000 1.120000 0.910000</Power>
+                                    </SOPNode>
+                                    <SATNode>
+                                        <Saturation>1.000000</Saturation>
+                                    </SATNode>
+                                </ColorCorrection>
+                            </ColorDecision>
                         </ColorDecisionList>
                     """
-        last_cdl = """<?xml version='1.0' encoding='utf-8'?>
-                    <ColorDecisionList xmlns="urn:ASC:CDL:v1.01">
-                      <ColorDecision>
-                        <ColorCorrection id="A001C010_220201_ABCD">
-                          <SOPNode>
-                            <Slope>0.832000 0.798000 0.964000</Slope>
-                            <Offset>0.042300 0.034500 0.035200</Offset>
-                            <Power>1.000000 1.000000 1.000000</Power>
-                          </SOPNode>
-                          <SATNode>
-                            <Saturation>0.200000</Saturation>
-                          </SATNode>
-                        </ColorCorrection>
-                      </ColorDecision>
-                    </ColorDecisionList>
+        last_cdl = """<?xml version="1.0" encoding="utf-8"?>
+                        <ColorDecisionList xmlns="urn:ASC:CDL:v1.01">
+                            <ColorDecision>
+                                <ColorCorrection id="A001C010_220201_ABCD">
+                                    <SOPNode>
+                                        <Slope>0.832000 0.798000 0.964000</Slope>
+                                        <Offset>0.042300 0.034500 0.035200</Offset>
+                                        <Power>1.000000 1.000000 1.000000</Power>
+                                    </SOPNode>
+                                    <SATNode>
+                                        <Saturation>0.200000</Saturation>
+                                    </SATNode>
+                                </ColorCorrection>
+                            </ColorDecision>
+                        </ColorDecisionList>
                     """
 
         self.assertEqual(len(cdl_files), 10)
-        self.assertEqual(first_cdl_file.read(), inspect.cleandoc(first_cdl))
-        self.assertEqual(last_cdl_file.read(), inspect.cleandoc(last_cdl))
+        self.assertEqual(first_cdl_file.read().strip(), inspect.cleandoc(first_cdl))
+        self.assertEqual(last_cdl_file.read().strip(), inspect.cleandoc(last_cdl))
 
         first_cdl_file.close()
         last_cdl_file.close()

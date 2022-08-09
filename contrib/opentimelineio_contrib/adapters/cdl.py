@@ -1,4 +1,3 @@
-
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
@@ -13,6 +12,7 @@ To use: otio.adapters.write_to_file(timeline, cdl_output_directory, adapter_name
 """
 import os
 import xml.etree.ElementTree as ET
+from xml.dom import minidom
 
 
 def convert_to_cdl(timeline_event):
@@ -40,15 +40,21 @@ def convert_to_cdl(timeline_event):
     ET.SubElement(sat_node, "Saturation").text = saturation
 
     tree = ET.ElementTree(color_decision_list)
-    ET.indent(tree)
-    return tree
+
+    # Python 3.8 doesn't support ET.indent(), using minidom as a workaround.
+    stringified = ET.tostring(tree.getroot(), 'utf-8')
+    reparsed = minidom.parseString(stringified)
+
+    return reparsed.toprettyxml(indent="    ", encoding='utf-8')
 
 
 def create_cdl_file(timeline_event, output_dir_path):
     try:
         cdl_filepath = os.path.join(output_dir_path, timeline_event.name + ".cdl")
-        cdl_et_tree = convert_to_cdl(timeline_event)
-        cdl_et_tree.write(cdl_filepath, encoding='utf-8', xml_declaration=True)
+        cdl_string = convert_to_cdl(timeline_event)
+
+        with open(cdl_filepath, "w") as f:
+            f.write(str(cdl_string.decode('utf-8')))
     finally:
         pass
 

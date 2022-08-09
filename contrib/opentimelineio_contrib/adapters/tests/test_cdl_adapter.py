@@ -87,6 +87,9 @@ class CDLAdapterTest(unittest.TestCase):
         self.assertEqual(first_cdl_file.read(), inspect.cleandoc(first_cdl))
         self.assertEqual(last_cdl_file.read(), inspect.cleandoc(last_cdl))
 
+        first_cdl_file.close()
+        last_cdl_file.close()
+
 
 if __name__ == '__main__':
     unittest.main()

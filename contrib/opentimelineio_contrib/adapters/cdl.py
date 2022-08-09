@@ -11,7 +11,7 @@ using the timeline event name.
 To use: otio.adapters.write_to_file(timeline, cdl_output_directory, adapter_name='cdl')
 """
 import os
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 
 def convert_to_cdl(timeline_event):

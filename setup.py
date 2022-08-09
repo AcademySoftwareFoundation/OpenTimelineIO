@@ -193,7 +193,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.15.0.dev1",
+    "version": "0.16.1.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
@@ -269,7 +269,7 @@ Each adapter allows for import/export between that proprietary tool and the
 OpenTimelineIO format."""
 
 setup(
-    name='OpenTimelineIO',
+    name='origami-opentimelineio',
     description='Editorial interchange format and API',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',

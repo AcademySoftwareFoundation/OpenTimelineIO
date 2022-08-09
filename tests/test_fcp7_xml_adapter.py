@@ -1287,10 +1287,10 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         # Before comparing, scrub ignorable metadata introduced in
         # serialization (things like unique ids minted by the adapter)
         # Since we seeded metadata for the generator, keep that metadata
-        del(new_timeline.metadata["fcp_xml"])
+        del new_timeline.metadata["fcp_xml"]
         for child in new_timeline.tracks.each_child():
             try:
-                del(child.metadata["fcp_xml"])
+                del child.metadata["fcp_xml"]
             except KeyError:
                 pass
 
@@ -1299,7 +1299,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     child.media_reference, schema.GeneratorReference
                 )
                 if not is_generator:
-                    del(child.media_reference.metadata["fcp_xml"])
+                    del child.media_reference.metadata["fcp_xml"]
             except (AttributeError, KeyError):
                 pass
 
@@ -1323,7 +1323,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             def scrub_displayformat(md_dict):
                 for ignore_key in {"link"}:
                     try:
-                        del(md_dict[ignore_key])
+                        del md_dict[ignore_key]
                     except KeyError:
                         pass
 

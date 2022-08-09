@@ -327,7 +327,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
 
         # Configure the playlist to be an iframe list
         track_hls_metadata = timeline.tracks[0].metadata['HLS']
-        del(track_hls_metadata['EXT-X-INDEPENDENT-SEGMENTS'])
+        del track_hls_metadata['EXT-X-INDEPENDENT-SEGMENTS']
         track_hls_metadata['EXT-X-I-FRAMES-ONLY'] = None
 
         # Write out the playlist

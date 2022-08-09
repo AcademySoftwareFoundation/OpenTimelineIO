@@ -145,6 +145,11 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(16.0, cl.available_image_bounds.max.x)
         self.assertEqual(9.0, cl.available_image_bounds.max.y)
 
+        # test range exceptions
+        cl.media_reference.available_image_bounds = None
+        with self.assertRaises(otio.exceptions.CannotComputeAvailableRangeError):
+            cl.available_range()
+
     def test_ref_default(self):
         cl = otio.schema.Clip()
         self.assertIsOTIOEquivalentTo(

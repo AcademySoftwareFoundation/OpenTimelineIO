@@ -22,6 +22,19 @@ HIGHLIGHT_WIDTH = 5
 TRACK_NAME_WIDGET_WIDTH = 100.0
 SHORT_NAME_LENGTH = 7
 CURRENT_ZOOM_LEVEL = 1.0
+MARKER_COLORS = {
+    otio.schema.MarkerColor.RED: (0xff, 0x00, 0x00, 0xff),
+    otio.schema.MarkerColor.PINK: (0xff, 0x70, 0x70, 0xff),
+    otio.schema.MarkerColor.ORANGE: (0xff, 0xa0, 0x00, 0xff),
+    otio.schema.MarkerColor.YELLOW: (0xff, 0xff, 0x00, 0xff),
+    otio.schema.MarkerColor.GREEN: (0x00, 0xff, 0x00, 0xff),
+    otio.schema.MarkerColor.CYAN: (0x00, 0xff, 0xff, 0xff),
+    otio.schema.MarkerColor.BLUE: (0x00, 0x00, 0xff, 0xff),
+    otio.schema.MarkerColor.PURPLE: (0xa0, 0x00, 0xd0, 0xff),
+    otio.schema.MarkerColor.MAGENTA: (0xff, 0x00, 0xff, 0xff),
+    otio.schema.MarkerColor.WHITE: (0xff, 0xff, 0xff, 0xff),
+    otio.schema.MarkerColor.BLACK: (0x00, 0x00, 0x00, 0xff)
+}
 
 
 class BaseItem(QtWidgets.QGraphicsRectItem):
@@ -89,8 +102,7 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
             if not trimmed_range.overlaps(marked_time):
                 continue
 
-            # @TODO: set the marker color if its set from the OTIO object
-            marker = Marker(m, None)
+            marker = Marker(m)
             marker.setY(0.5 * MARKER_SIZE)
             marker.setX(
                 (
@@ -511,8 +523,10 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         super(Marker, self).__init__(poly, *args, **kwargs)
 
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        color = MARKER_COLORS.get(marker.color, (121, 212, 177, 255))
+
         self.setBrush(
-            QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
+            QtGui.QBrush(QtGui.QColor(*color))
         )
 
     def paint(self, *args, **kwargs):

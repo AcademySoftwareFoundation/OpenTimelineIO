@@ -315,12 +315,12 @@ setup(
         ],
     },
 
-    include_package_data=True,
     packages=(
-        find_packages(where="src/py-opentimelineio") +
-        find_packages(where="src") +
-        find_packages(where="contrib")
+        find_packages(where="src/py-opentimelineio") +  # opentimelineio
+        find_packages(where="src") +  # opentimelineview
+        find_packages(where="contrib", exclude=["opentimelineio_contrib.adapters.tests"])  # opentimelineio_contrib # noqa
     ),
+
     ext_modules=[
         CMakeExtension('_opentimelineio'),
         CMakeExtension('_opentime'),

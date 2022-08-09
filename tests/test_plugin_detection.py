@@ -68,7 +68,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         self.sys_patch.stop()
         self.entry_patcher.stop()
         if 'otio_mockplugin' in sys.modules:
-            del(sys.modules['otio_mockplugin'])
+            del sys.modules['otio_mockplugin']
 
     def test_detect_plugin(self):
         """This manifest uses the plugin_manifest function"""

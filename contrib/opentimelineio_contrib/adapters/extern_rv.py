@@ -56,7 +56,7 @@ def execute_rv_commands(simplified_data, to_session):
         rv_node_index = len(rv_nodes)
 
         # make sure that node order lines up
-        assert(rv_node_index == node["node_index"])
+        assert rv_node_index == node["node_index"]
 
         rv_nodes.append(new_node)
         node["rv_node"] = new_node

@@ -403,6 +403,36 @@ required OTIO function hook
 
 
 
+### cdl
+
+```
+CDL Export Adapter
+This simple adapter allows users to export a collection of .cdl files
+from an OTIO timeline. The ColorCorrection Node ID within the .cdl will use the
+CMX_3600 reel name/Tape of the clip, while the file itself will be named
+using the timeline event name.
+
+To use: otio.adapters.write_to_file(timeline, cdl_output_directory, adapter_name='cdl')
+```
+
+*source*: `opentimelineio_contrib/adapters/cdl.py`
+
+
+*Supported Features (with arguments)*:
+
+- write_to_file: 
+```
+Required OTIO function hook.
+  Actually writes to multiple .cdl files (one per clip/event in timeline)
+  filepath parameter should be a directory where the CDLs should be saved.
+```
+  - input_otio
+  - filepath
+
+
+
+
+
 ### fcpx_xml
 
 ```

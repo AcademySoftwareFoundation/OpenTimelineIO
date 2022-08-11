@@ -8,12 +8,25 @@ import sys
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
+import json
 try:
     from urllib.parse import urlparse, unquote
 except ImportError:
     # Python 2
     from urlparse import urlparse
     from urllib import unquote
+
+marker_types = {
+    0: otio.schema.MarkerColor.PURPLE,
+    1: otio.schema.MarkerColor.CYAN,
+    2: otio.schema.MarkerColor.BLUE,
+    3: otio.schema.MarkerColor.GREEN,
+    4: otio.schema.MarkerColor.YELLOW,
+    5: otio.schema.MarkerColor.ORANGE,
+    6: otio.schema.MarkerColor.RED,
+    7: otio.schema.MarkerColor.PINK,
+    8: otio.schema.MarkerColor.MAGENTA
+}
 
 
 def read_property(element, name):
@@ -159,6 +172,24 @@ def read_from_string(input_str):
                     in_offset=time(transition.get('in'), rate),
                     out_offset=time(transition.get('out'), rate)))
 
+    main_bin = mlt.find("playlist[@id='main_bin']")
+
+    # Process timeline markers
+    guides_raw = read_property(main_bin, "kdenlive:docproperties.guides")
+    if guides_raw:
+        guides = json.loads(guides_raw)
+        for guide in guides:
+            time_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(guide["pos"], rate),
+                otio.opentime.RationalTime(0, rate)
+            )
+            marker = otio.schema.Marker(
+                name=guide["comment"],
+                marked_range=time_range,
+                color=marker_types[guide["type"]]
+            )
+            timeline.tracks.markers.append(marker)
+
     return timeline
 
 
@@ -234,13 +265,27 @@ def write_to_string(input_otio):
     write_property(main_bin, 'kdenlive:docproperties.version', '0.98')
     write_property(main_bin, 'xml_retain', '1')
 
+    # Process timeline markers
+    markers = []
+    for marker in input_otio.tracks.markers:
+        try:
+            marker_type = [
+                key for key in marker_types.items() if key[1] == marker.color
+            ][0][0]
+        except:
+            marker_type = 0
+        markers.append(
+            {
+                "pos": int(marker.marked_range.start_time.value),
+                "comment": marker.name,
+                "type": marker_type
+            }
+        )
+
+    write_property(main_bin, 'kdenlive:docproperties.guides', json.dumps(markers))
+
     producer_count = 0
 
-    # Build media library, indexed by url
-    main_bin = ET.Element('playlist', dict(id='main_bin'))
-    write_property(main_bin, 'kdenlive:docproperties.decimalPoint', '.')
-    write_property(main_bin, 'kdenlive:docproperties.version', '0.98')
-    write_property(main_bin, 'xml_retain', '1')
     media_prod = {}
     for clip in input_otio.each_clip():
         producer, producer_count = _make_producer(

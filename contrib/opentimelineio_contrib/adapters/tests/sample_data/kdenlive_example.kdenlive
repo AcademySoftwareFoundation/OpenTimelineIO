@@ -264,6 +264,7 @@
   <property name="kdenlive:folderid">-1</property>
   <property name="kdenlive:id">10</property>
   <property name="kdenlive:file_hash">de362639624a26f69e4278e90d059408</property>
+  <property name="kdenlive:clipname">Placeholder: Unsupported clip type</property>
   <property name="force_reload">0</property>
   <property name="meta.media.width">768</property>
   <property name="meta.media.height">576</property>

@@ -306,28 +306,6 @@ def write_to_string(input_otio):
             )
             write_property(entry, 'kdenlive:id', kdenlive_id)
 
-    # Substitute source clip to be referred to when meeting an unsupported clip
-    unsupported = ET.SubElement(
-        mlt, 'producer',
-        {
-            'id': 'unsupported',
-            'in': '0',
-            'out': '10000',
-        },
-    )
-    write_property(unsupported, 'mlt_service', 'qtext')
-    write_property(unsupported, 'family', 'Courier')
-    write_property(unsupported, 'fgcolour', '#ff808080')
-    write_property(unsupported, 'bgcolour', '#00000000')
-    write_property(unsupported, 'text', 'Unsupported clip type')
-    write_property(unsupported, 'kdenlive:id', '3')
-
-    entry = ET.SubElement(
-        main_bin, 'entry',
-        dict(producer='unsupported'),
-    )
-    write_property(entry, 'kdenlive:id', '3')
-
     mlt.append(main_bin)
 
     # Background clip
@@ -338,6 +316,8 @@ def write_to_string(input_otio):
     # Timeline & tracks
     maintractor = ET.Element('tractor', {'global_feed': '1'})
     ET.SubElement(maintractor, 'track', {'producer': 'black_track'})
+
+    unsupported_count = 0
 
     for i, track in enumerate(input_otio.tracks):
         is_audio = track.kind == otio.schema.TrackKind.Audio
@@ -409,6 +389,9 @@ def write_to_string(input_otio):
                         )
                     ]
 
+                if producer_id == "unsupported":
+                    unsupported_count += 1
+
                 entry = ET.SubElement(
                     playlist, 'entry',
                     {
@@ -468,6 +451,31 @@ def write_to_string(input_otio):
 
     mlt.append(maintractor)
 
+    # In case we need it: add substitute source clip to be referred to when meeting an unsupported clip
+    if unsupported_count > 0:
+        unsupported = ET.Element(
+            'producer',
+            {
+                'id': 'unsupported',
+                'in': '0',
+                'out': '10000',
+            },
+        )
+        write_property(unsupported, 'mlt_service', 'qtext')
+        write_property(unsupported, 'family', 'Courier')
+        write_property(unsupported, 'fgcolour', '#ff808080')
+        write_property(unsupported, 'bgcolour', '#00000000')
+        write_property(unsupported, 'text', 'Unsupported clip type')
+        write_property(unsupported, 'kdenlive:clipname', 'Placeholder: Unsupported clip type')
+        write_property(unsupported, 'kdenlive:id', '3')
+        mlt.insert(1, unsupported)
+
+        entry = ET.SubElement(
+            main_bin, 'entry',
+            dict(producer='unsupported'),
+        )
+        write_property(entry, 'kdenlive:id', '3')
+
     return minidom.parseString(ET.tostring(mlt)).toprettyxml(
         encoding=sys.getdefaultencoding(),
     ).decode(sys.getdefaultencoding())
@@ -502,7 +510,7 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
 
         key = (service, resource, speed, is_audio)
         # check not already in our library
-        if key not in media_prod:
+        if key not in media_prod and item.media_reference.available_range:
             # add ids to library
             media_prod[key] = producer_id, kdenlive_id
             producer = ET.SubElement(

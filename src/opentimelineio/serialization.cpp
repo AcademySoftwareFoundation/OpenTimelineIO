@@ -983,34 +983,22 @@ serialize_json_to_file(
     OTIO_rapidjson::OStreamWrapper osw(os);
     bool                           status;
 
-    if (indent < 0)
-    {
-        OTIO_rapidjson::Writer<
-            decltype(osw),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(osw);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-        status = SerializableObject::Writer::write_root(
-            value, json_encoder, error_status);
-    }
-    else
-    {
-        OTIO_rapidjson::PrettyWriter<
-            decltype(osw),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(osw);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+    OTIO_rapidjson::PrettyWriter<
+        decltype(osw),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+                                       json_writer(osw);
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
+    if (indent >= 0)
+    {
         json_writer.SetIndent(' ', indent);
-        status = SerializableObject::Writer::write_root(
-            value, json_encoder, error_status);
     }
+
+    status = SerializableObject::Writer::write_root(
+        value, json_encoder, error_status);
 
     return status;
 }

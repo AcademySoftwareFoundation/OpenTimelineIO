@@ -930,41 +930,25 @@ serialize_json_to_string(
 {
     OTIO_rapidjson::StringBuffer s;
 
-    if (indent < 0)
+    OTIO_rapidjson::PrettyWriter<
+        decltype(s),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+        json_writer(s);
+
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+
+    if (indent >= 0)
     {
-        OTIO_rapidjson::Writer<
-            decltype(s),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(s);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-
-        if (!SerializableObject::Writer::write_root(
-                value, json_encoder, error_status))
-        {
-            return std::string();
-        }
-    }
-    else
-    {
-        OTIO_rapidjson::PrettyWriter<
-            decltype(s),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-            json_writer(s);
-
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-
         json_writer.SetIndent(' ', indent);
-        if (!SerializableObject::Writer::write_root(
+    }
+
+    if (!SerializableObject::Writer::write_root(
                 value, json_encoder, error_status))
-        {
-            return std::string();
-        }
+    {
+        return std::string();
     }
 
     return std::string(s.GetString());

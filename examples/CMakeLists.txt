@@ -8,6 +8,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src
 list(APPEND examples conform)
 list(APPEND examples flatten_video_tracks)
 list(APPEND examples summarize_timing)
+list(APPEND examples io_perf_test)
 if(OTIO_PYTHON_INSTALL)
     list(APPEND examples python_adapters_child_process)
     list(APPEND examples python_adapters_embed)

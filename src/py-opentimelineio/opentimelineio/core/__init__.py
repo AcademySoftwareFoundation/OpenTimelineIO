@@ -22,9 +22,11 @@ from .. _otio import ( # noqa
     instance_from_schema,
     register_serializable_object_type,
     register_upgrade_function,
+    register_downgrade_function,
     set_type_record,
     _serialize_json_to_string,
     _serialize_json_to_file,
+    type_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -56,19 +58,26 @@ __all__ = [
     'instance_from_schema',
     'register_serializable_object_type',
     'register_upgrade_function',
+    'register_downgrade_function',
     'set_type_record',
     'add_method',
     'upgrade_function_for',
+    'downgrade_function_for',
     'serializable_field',
     'deprecated_field',
     'serialize_json_to_string',
     'serialize_json_to_file',
-    'register_type'
+    'register_type',
+    'type_version_map',
 ]
 
 
-def serialize_json_to_string(root, indent=4):
-    return _serialize_json_to_string(_value_to_any(root), indent)
+def serialize_json_to_string(root, downgrade_version_manifest=None, indent=4):
+    return _serialize_json_to_string(
+            _value_to_any(root),
+            downgrade_version_manifest or {},
+            indent
+    )
 
 
 def serialize_json_to_file(root, filename, indent=4):
@@ -129,6 +138,47 @@ def upgrade_function_for(cls, version_to_upgrade_to):
 
         register_upgrade_function(cls._serializable_label.split(".")[0],
                                   version_to_upgrade_to, wrapped_update)
+        return func
+
+    return decorator_func
+
+
+def downgrade_function_for(cls, version_to_upgrade_to):
+    """
+    @TODO <- fix docs
+    Decorator for identifying schema class downgrade functions.
+
+    Example:
+
+    .. code-block:: python
+
+        @upgrade_function_for(MyClass, 5)
+        def upgrade_to_version_five(data):
+            pass
+
+    This will get called to upgrade a schema of MyClass to version 5. MyClass
+    must be a class deriving from :class:`~SerializableObject`.
+
+    The upgrade function should take a single argument - the dictionary to
+    upgrade, and return a dictionary with the fields upgraded.
+
+    Remember that you don't need to provide an upgrade function for upgrades
+    that add or remove fields, only for schema versions that change the field
+    names.
+
+    :param type cls: class to upgrade
+    :param int version_to_upgrade_to: the version to upgrade to
+    """
+
+    def decorator_func(func):
+        """ Decorator for marking upgrade functions """
+        def wrapped_update(data):
+            modified = func(data)
+            data.clear()
+            data.update(modified)
+
+        register_downgrade_function(cls._serializable_label.split(".")[0],
+                version_to_upgrade_to, wrapped_update)
         return func
 
     return decorator_func

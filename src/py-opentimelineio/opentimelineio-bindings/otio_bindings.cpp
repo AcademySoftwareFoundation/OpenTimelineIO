@@ -55,6 +55,30 @@ static bool register_upgrade_function(std::string const& schema_name,
                                                              upgrade_function);
 }
 
+static bool 
+register_downgrade_function(
+        std::string const& schema_name,
+        int version_to_downgrade_from,
+        py::object const& downgrade_function_obj) 
+{
+    std::function<void (AnyDictionary* d)> downgrade_function = ( 
+            [downgrade_function_obj](AnyDictionary* d) 
+            {
+                py::gil_scoped_acquire acquire;
+
+                auto ptr = d->get_or_create_mutation_stamp();
+                py::object dobj = py::cast((AnyDictionaryProxy*)ptr);
+                downgrade_function_obj(dobj);
+            }
+    );
+    
+    return TypeRegistry::instance().register_downgrade_function(
+            schema_name,
+            version_to_downgrade_from,
+            downgrade_function
+    );
+}
+
 static void set_type_record(SerializableObject* so, std::string schema_name) {
     TypeRegistry::instance().set_type_record(so, schema_name, ErrorStatusHandler());
 }
@@ -76,13 +100,30 @@ PYBIND11_MODULE(_otio, m) {
     otio_serializable_object_bindings(m);
     otio_tests_bindings(m);
 
-    m.def("_serialize_json_to_string",
-          [](PyAny* pyAny, int indent) {
-              return serialize_json_to_string(pyAny->a, ErrorStatusHandler(), indent);
-          }, "value"_a, "indent"_a)
+    m.def(
+            "_serialize_json_to_string",
+            [](
+                PyAny* pyAny,
+                const std::unordered_map<std::string, int>& downgrade_version_manifest,
+                int indent
+              ) 
+            {
+                auto result = serialize_json_to_string(
+                            pyAny->a,
+                            {&downgrade_version_manifest},
+                            ErrorStatusHandler(),
+                            indent
+                    );
+
+                return result;
+            },
+            "value"_a,
+            "downgrade_version_manifest"_a,
+            "indent"_a
+    )
      .def("_serialize_json_to_file",
           [](PyAny* pyAny, std::string filename, int indent) {
-              return serialize_json_to_file(pyAny->a, filename, ErrorStatusHandler(), indent);
+              return serialize_json_to_file(pyAny->a, filename, {}, ErrorStatusHandler(), indent);
           }, "value"_a, "filename"_a, "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {
@@ -133,10 +174,20 @@ Return an instance of the schema from data in the data_dict.
 
 :raises UnsupportedSchemaError: when the requested schema version is greater than the registered schema version.
 )docstring");
+    m.def("type_version_map",
+             []() {
+                std::map<std::string, int> tmp;
+                TypeRegistry::instance().type_version_map(tmp);
+                return tmp;
+             });
     m.def("register_upgrade_function", &register_upgrade_function,
           "schema_name"_a,
           "version_to_upgrade_to"_a,
           "upgrade_function"_a);
+    m.def("register_downgrade_function", &register_downgrade_function,
+          "schema_name"_a,
+          "version_to_downgrade_from"_a,
+          "downgrade_function"_a);
     m.def("flatten_stack", [](Stack* s) {
             return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);

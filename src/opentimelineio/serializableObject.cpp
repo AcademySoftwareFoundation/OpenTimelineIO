@@ -112,18 +112,34 @@ SerializableObject::is_unknown_schema() const
 }
 
 std::string
-SerializableObject::to_json_string(ErrorStatus* error_status, int indent) const
+SerializableObject::to_json_string(
+        ErrorStatus* error_status,
+        optional<const schema_version_map*>downgrade_version_manifest,
+        int indent
+) const
 {
     return serialize_json_to_string(
-        any(Retainer<>(this)), error_status, indent);
+        any(Retainer<>(this)), 
+        downgrade_version_manifest,
+        error_status,
+        indent
+    );
 }
 
 bool
 SerializableObject::to_json_file(
-    std::string const& file_name, ErrorStatus* error_status, int indent) const
+    std::string const& file_name,
+    ErrorStatus* error_status,
+    optional<const schema_version_map*>downgrade_version_manifest,
+    int indent) const
 {
     return serialize_json_to_file(
-        any(Retainer<>(this)), file_name, error_status, indent);
+        any(Retainer<>(this)),
+        file_name,
+        downgrade_version_manifest,
+        error_status,
+        indent
+    );
 }
 
 SerializableObject*

@@ -2,6 +2,8 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include "opentimelineio/serializableObject.h"
+#include "opentimelineio/serialization.h"
+#include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
 
@@ -90,11 +92,21 @@ private:
 class CloningEncoder : public Encoder
 {
 public:
-    CloningEncoder(bool actually_clone)
+    enum class ResultObjectPolicy {
+        CloneBackToSerializableObject = 0,
+        MathTypesConcreteAnyDictionaryResult, 
+        OnlyAnyDictionary,
+    };
+
+    CloningEncoder(
+            CloningEncoder::ResultObjectPolicy result_object_policy,
+            optional<const schema_version_map*> downgrade_version_manifest = {}
+    ) : 
+        _result_object_policy(result_object_policy),
+        _downgrade_version_manifest(downgrade_version_manifest)
     {
         using namespace std::placeholders;
         _error_function = std::bind(&CloningEncoder::_error, this, _1);
-        _actually_clone = actually_clone;
     }
 
     virtual ~CloningEncoder() {}
@@ -155,20 +167,85 @@ public:
 
     void write_value(double value) { _store(any(value)); }
 
-    void write_value(RationalTime const& value) { _store(any(value)); }
+    // @{ @TODO: these three the json serializer knows how to dereference them
+    //           ... probably better to scooch that into this class... EXCEPT
+    //               the equivalence test wants to use their == methods
+    void 
+    write_value(RationalTime const& value) 
+    { 
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "RationalTime.1";
+            result["value"] = value.value();
+            result["rate"] = value.rate();
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
+    }
+    void 
+    write_value(TimeRange const& value) {
+ 
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "TimeRange.1";
+            result["duration"] = value.duration();
+            result["start_time"] = value.start_time();
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
 
-    void write_value(TimeRange const& value) { _store(any(value)); }
-
-    void write_value(TimeTransform const& value) { _store(any(value)); }
-
+    }
+    void write_value(TimeTransform const& value) {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "TimeTransform.1";
+            result["offset"] = value.offset();
+            result["rate"] = value.rate();
+            result["scale"] = value.scale();
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
+    }
     void write_value(SerializableObject::ReferenceId value)
     {
-        _store(any(value));
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "SerializableObjectRef.1";
+            result["id"] = value.id.c_str();
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
+       _store(any(value));
     }
+    void write_value(Imath::V2d const& value) {
+ 
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "V2d.1";
+            result["x"] = value.x;
+            result["y"] = value.y;
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
 
-    void write_value(Imath::V2d const& value) { _store(any(value)); }
-
-    void write_value(Imath::Box2d const& value) { _store(any(value)); }
+    }
+    void write_value(Imath::Box2d const& value) {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
+            AnyDictionary result;
+            result["OTIO_SCHEMA"] = "Box2d.1";
+            result["min"] = value.min;
+            result["max"] = value.max;
+            _store(any(std::move(result)));
+        } else { 
+            _store(any(value)); 
+        }
+    }
+    // @}
 
     void start_array(size_t /* n */)
     {
@@ -232,36 +309,132 @@ public:
         {
             _internal_error(
                 "Encoder::end_object() called without matching start_object()");
+            return;
         }
-        else
+
+        auto& top = _stack.back();
+        if (!top.is_dict)
         {
-            auto& top = _stack.back();
-            if (!top.is_dict)
+            _internal_error(
+                "Encoder::end_object() called without matching start_object()");
+            _stack.pop_back();
+
+            return;
+        }
+
+        /*
+         * Convert back to SerializableObject* right here.
+         */
+        if (
+                _result_object_policy 
+                == ResultObjectPolicy::CloneBackToSerializableObject
+        )
+        {
+            SerializableObject::Reader reader(
+                top.dict, 
+                _error_function,
+                nullptr
+            );
+            _stack.pop_back();
+            _store(reader._decode(_resolver));
+
+            return;
+        }
+
+        // otherwise, build out as an anydictionary & downgrade
+        AnyDictionary m;
+        m.swap(top.dict);
+
+        const std::string schema_string = m.get_default(
+                "OTIO_SCHEMA",
+                std::string("")
+        );
+
+        const int sep = schema_string.rfind(".");
+        const std::string schema_name = schema_string.substr(0, sep);
+        const std::string schema_vers = schema_string.substr(sep+1);
+
+        // @TODO: need to pull the version number from the schema string rather
+        //        than the type record - in case there are some kind of weird
+        //        mixed types in the document that don't match the desired 
+        //        target -- OR it'll only downgrade from latest/current down 
+        //        to target and assume that you've intentionally done something
+        //        weird.  Need to consider this I guess.
+        // int vers = -1;
+
+        if (!schema_vers.empty()) 
+        {
+            
+        }
+
+        const auto dg_version_it = (
+                (*_downgrade_version_manifest)->find(schema_name)
+        );
+
+        // @TODO: should this check to also make sure its in the
+        // schema table?
+        if (
+                !schema_name.empty()
+                && !schema_vers.empty()
+                && dg_version_it != (*_downgrade_version_manifest)->end()
+        )
+        {
+            const int target_version = (dg_version_it->second);
+
+            const auto type_rec = (
+                    TypeRegistry::instance()._find_type_record(
+                        schema_name
+                    )
+            );
+
+            int current_version = type_rec->schema_version;
+
+            while (target_version < current_version) 
             {
-                _internal_error(
-                    "Encoder::end_object() called without matching start_object()");
-                _stack.pop_back();
-            }
-            else
-            {
-                /*
-                 * Convert back to SerializableObject* right here.
-                 */
-                if (_actually_clone)
+                auto next_dg_fn = (
+                    type_rec->downgrade_functions.find(
+                        current_version
+                    )
+                );
+
+                if (
+                        next_dg_fn 
+                        == type_rec->downgrade_functions.end()
+                ) 
                 {
-                    SerializableObject::Reader reader(
-                        top.dict, _error_function, nullptr);
-                    _stack.pop_back();
-                    _store(reader._decode(_resolver));
+                    _internal_error(
+                        string_printf(
+                            "No downgrader function available for "
+                            "going from version %d to version %d.",
+                            current_version,
+                            target_version
+                        )
+                    );
+                    return;
                 }
-                else
-                {
-                    AnyDictionary m;
-                    m.swap(top.dict);
-                    _stack.pop_back();
-                    _store(any(std::move(m)));
-                }
+
+                // apply it
+                next_dg_fn->second(&m);
+
+                current_version --;
             }
+        }
+
+        _stack.pop_back();
+        _store(any(std::move(m)));
+    }
+
+    // @TODO: what kind of ownership policy here?
+    AnyDictionary
+    root() 
+    {
+        if (_root.type() == typeid(AnyDictionary))
+        {
+            return any_cast<AnyDictionary>(_root);
+        }
+        else 
+        {
+            return AnyDictionary();
         }
     }
 
@@ -287,7 +460,8 @@ private:
 
     friend class SerializableObject;
     std::vector<_DictOrArray> _stack;
-    bool                      _actually_clone;
+    ResultObjectPolicy        _result_object_policy;
+    optional<const schema_version_map*> _downgrade_version_manifest = {};
 };
 
 template <typename RapidJSONWriterType>
@@ -604,9 +778,13 @@ SerializableObject::Writer::_any_equals(any const& lhs, any const& rhs)
 
 bool
 SerializableObject::Writer::write_root(
-    any const& value, Encoder& encoder, ErrorStatus* error_status)
+    any const& value,
+    Encoder& encoder,
+    optional<const schema_version_map*> downgrade_version_manifest,
+    ErrorStatus* error_status
+)
 {
-    Writer w(encoder);
+    Writer w(encoder, downgrade_version_manifest);
     w.write(w._no_key, value);
     return !encoder.has_errored(error_status);
 }
@@ -705,6 +883,7 @@ SerializableObject::Writer::write(
         return;
     }
 
+    // look for the multiple instances of the same thing in the id map
     auto e = _id_for_object.find(value);
     if (e != _id_for_object.end())
     {
@@ -734,32 +913,124 @@ SerializableObject::Writer::write(
         _next_id_for_type[schema_type_name] = 0;
     }
 
+    // build a unique id for this instance of this type, to store in the id map
+    // table
     std::string next_id = schema_type_name + "-" +
                           std::to_string(++_next_id_for_type[schema_type_name]);
     _id_for_object[value] = next_id;
 
     _encoder.start_object();
 
-    _encoder.write_key("OTIO_SCHEMA");
+    std::string schema_str = "";
 
+    // if its an unknown schema, the schema name is computed from the
+    // _original_schema_name and _original_schema_version attributes
     if (UnknownSchema const* us = dynamic_cast<UnknownSchema const*>(value))
     {
-        _encoder.write_value(string_printf(
+        schema_str = string_printf(
             "%s.%d",
             us->_original_schema_name.c_str(),
-            us->_original_schema_version));
+            us->_original_schema_version
+        );
     }
     else
     {
-        _encoder.write_value(string_printf(
-            "%s.%d", value->schema_name().c_str(), value->schema_version()));
+        // otherwise, use the schema_name and schema_version attributes
+        // @TODO: this needs to be deferred until downgrading is complete
+        schema_str = string_printf(
+            "%s.%d",
+            value->schema_name().c_str(),
+            value->schema_version()
+        );
+    }
+
+    // cache in case transformed
+    const std::string schema_name = value->schema_name();
+    const int schema_version = value->schema_version();
+
+    optional<AnyDictionary> downgraded = {};
+
+    // if there is a valid schema string
+    if (!schema_name.empty()) 
+    {
+        if (_downgrade_version_manifest.has_value()) 
+        {
+            const auto& target_version_it = (
+                    (*_downgrade_version_manifest)->find(schema_name)
+            );
+
+            // down the manifest specify a target version
+            if (target_version_it != (*_downgrade_version_manifest)->end())
+            {
+                const int target_version = target_version_it->second;
+
+                const auto& tr = TypeRegistry::instance()._find_type_record(schema_name);
+                const auto& downgrade_fn_map = tr->downgrade_functions;
+
+                int current_version = schema_version;
+
+                downgraded = { AnyDictionary() };
+
+                // build the dictionary to downgrade
+                for (auto kv: value->_dynamic_fields) 
+                {
+                    (*downgraded)[kv.first] = kv.second;
+                }
+
+                while (current_version > target_version)
+                {
+                    // downgrade in place
+                    auto dg_fn = downgrade_fn_map.find(current_version);
+                    if (dg_fn == downgrade_fn_map.end()) 
+                    {
+                        _encoder._error(
+                                ErrorStatus(
+                                    ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
+                                    string_printf(
+                                        "Could not find a downgrade function"
+                                        "from %d to %d for schema %s",
+                                        current_version,
+                                        current_version - 1,
+                                        schema_name.c_str()
+                                    )
+                                )
+                        );
+                        return;
+                    }
+                    dg_fn->second(&(*downgraded));
+
+                    current_version--;
+                }
+
+                schema_str = string_printf(
+                        "%s.%d",
+                        schema_name.c_str(),
+                        target_version
+                );
+            }
+        }
+
+        // @TODO: probably this is why metadata is getting a null schema_str
+        _encoder.write_key("OTIO_SCHEMA");
+        _encoder.write_value(schema_str);
     }
 
 #ifdef OTIO_INSTANCING_SUPPORT
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
 #endif
-    value->write_to(*this);
+
+    if (!downgraded)
+    {
+        value->write_to(*this);
+    }
+    else
+    {
+        for (auto kv : *downgraded) 
+        {
+            this->write(kv.first, kv.second);
+        }
+    }
 
     _encoder.end_object();
 
@@ -885,9 +1156,13 @@ SerializableObject::is_equivalent_to(SerializableObject const& other) const
         return false;
     }
 
-    CloningEncoder             e1(false), e2(false);
-    SerializableObject::Writer w1(e1);
-    SerializableObject::Writer w2(e2);
+    const auto policy = (
+        CloningEncoder::ResultObjectPolicy::MathTypesConcreteAnyDictionaryResult
+    );
+
+    CloningEncoder             e1(policy), e2(policy);
+    SerializableObject::Writer w1(e1, {});
+    SerializableObject::Writer w2(e2, {});
 
     w1.write(w1._no_key, any(Retainer<>(this)));
     w2.write(w2._no_key, any(Retainer<>(&other)));
@@ -900,8 +1175,10 @@ SerializableObject::is_equivalent_to(SerializableObject const& other) const
 SerializableObject*
 SerializableObject::clone(ErrorStatus* error_status) const
 {
-    CloningEncoder             e(true /* actually_clone*/);
-    SerializableObject::Writer w(e);
+    CloningEncoder e(
+            CloningEncoder::ResultObjectPolicy::CloneBackToSerializableObject
+    );
+    SerializableObject::Writer w(e, {});
 
     w.write(w._no_key, any(Retainer<>(this)));
     if (e.has_errored(error_status))
@@ -926,38 +1203,50 @@ SerializableObject::clone(ErrorStatus* error_status) const
 
 std::string
 serialize_json_to_string(
-    any const& value, ErrorStatus* error_status, int indent)
+    const any& value,
+    optional<const schema_version_map*> downgrade_version_manifest,
+    ErrorStatus* error_status,
+    int indent
+)
 {
-    OTIO_rapidjson::StringBuffer s;
+    OTIO_rapidjson::StringBuffer output_string_buffer;
 
     OTIO_rapidjson::PrettyWriter<
-        decltype(s),
+        decltype(output_string_buffer),
         OTIO_rapidjson::UTF8<>,
         OTIO_rapidjson::UTF8<>,
         OTIO_rapidjson::CrtAllocator,
         OTIO_rapidjson::kWriteNanAndInfFlag>
-        json_writer(s);
-
-    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+        json_writer(output_string_buffer);
 
     if (indent >= 0)
     {
         json_writer.SetIndent(' ', indent);
     }
 
-    if (!SerializableObject::Writer::write_root(
-                value, json_encoder, error_status))
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+
+    if (
+            !SerializableObject::Writer::write_root(
+                value,
+                json_encoder,
+                downgrade_version_manifest,
+                error_status
+            )
+    )
     {
         return std::string();
     }
 
-    return std::string(s.GetString());
+    return std::string(output_string_buffer.GetString());
+
 }
 
 bool
 serialize_json_to_file(
     any const&         value,
     std::string const& file_name,
+    optional<const schema_version_map*>downgrade_version_manifest,
     ErrorStatus*       error_status,
     int                indent)
 {
@@ -998,7 +1287,10 @@ serialize_json_to_file(
     }
 
     status = SerializableObject::Writer::write_root(
-        value, json_encoder, error_status);
+        value, 
+        json_encoder,
+        downgrade_version_manifest,
+        error_status);
 
     return status;
 }

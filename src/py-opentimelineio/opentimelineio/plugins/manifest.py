@@ -32,6 +32,7 @@ OTIO_PLUGIN_TYPES = [
     'schemadefs',
     'hook_scripts',
     'hooks',
+    'version_manifests',
 ]
 
 
@@ -90,6 +91,8 @@ class Manifest(core.SerializableObject):
         self.hooks = {}
         self.hook_scripts = []
 
+        self.version_manifests = {}
+
     adapters = core.serializable_field(
         "adapters",
         type([]),
@@ -114,6 +117,11 @@ class Manifest(core.SerializableObject):
         "hook_scripts",
         type([]),
         "Scripts that can be attached to hooks."
+    )
+    version_manifests = core.serializable_field(
+        "version_manifests",
+        type({}),
+        "Sets of versions to downgrade schemas to."
     )
 
     def extend(self, another_manifest):

@@ -30,8 +30,6 @@
 
 #include <assert.h>
 #include <vector>
-//#include <sstream>
-//#include <iostream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -113,6 +111,33 @@ TypeRegistry::TypeRegistry()
 
         d->erase("media_reference");
     });
+
+    // 2->1
+    register_downgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
+        AnyDictionary media_refs = d->get_default("media_references", AnyDictionary());
+        const std::string active_reference_key = (
+                d->get_default("active_media_reference_key", std::string(""))
+        );
+        AnyDictionary active_ref = AnyDictionary();
+        if (active_reference_key != "") {
+            active_ref = media_refs.get_default(active_reference_key, AnyDictionary());
+            std::cerr << "found reference: ";
+        }
+
+        (*d)["media_reference"] = active_ref;
+
+        auto downgrade_md = AnyDictionary();
+        downgrade_md["media_references"] = media_refs;
+        downgrade_md["active_media_reference_key"] = active_reference_key;
+
+        d->set_default(
+                "metadata",
+                AnyDictionary()
+        )["downgrade_Clip.2_to_Clip.1"] = downgrade_md;
+
+        d->erase("media_references");
+        d->erase("active_reference_key");
+    });
 }
 
 bool
@@ -191,6 +216,28 @@ TypeRegistry::register_upgrade_function(
             r->upgrade_functions.end())
         {
             r->upgrade_functions[version_to_upgrade_to] = upgrade_function;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool
+TypeRegistry::register_downgrade_function(
+    std::string const&                  schema_name,
+    int                                 version_to_downgrade_from,
+    std::function<void(AnyDictionary*)> downgrade_function)
+{
+    std::lock_guard<std::mutex> lock(_registry_mutex);
+    if (auto r = _find_type_record(schema_name))
+    {
+        if (r->downgrade_functions.find(version_to_downgrade_from) ==
+            r->downgrade_functions.end())
+        {
+            r->downgrade_functions[version_to_downgrade_from] = (
+                    downgrade_function
+            );
             return true;
         }
     }
@@ -325,6 +372,18 @@ TypeRegistry::set_type_record(
                 schema_name.c_str()));
     }
     return false;
+}
+
+void
+TypeRegistry::type_version_map(
+        std::map<std::string, int32_t>& result)
+{
+    std::lock_guard<std::mutex> lock(_registry_mutex);
+
+    for (const auto& pair: _type_records) {
+        const auto record_ptr = pair.second;
+        result[record_ptr->schema_name] = record_ptr->schema_version;
+    }
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -15,6 +15,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
+class Encoder;
 class AnyDictionary;
 
 class TypeRegistry
@@ -93,6 +94,24 @@ public:
             CLASS::schema_name, version_to_upgrade_to, upgrade_function);
     }
 
+    /// Downgrade function from version_to_downgrade_from to
+    /// version_to_downgrade_from - 1
+    bool register_downgrade_function(
+        std::string const&                  schema_name,
+        int                                 version_to_downgrade_from,
+        std::function<void(AnyDictionary*)> downgrade_function);
+
+    /// Convenience API for C++ developers.  See the documentation of the
+    /// non-templated register_downgrade_function() for details.
+    template <typename CLASS>
+    bool register_downgrade_function(
+        int                                 version_to_upgrade_to,
+        std::function<void(AnyDictionary*)> upgrade_function)
+    {
+        return register_downgrade_function(
+            CLASS::schema_name, version_to_upgrade_to, upgrade_function);
+    }
+
     SerializableObject* instance_from_schema(
         std::string const& schema_name,
         int                schema_version,
@@ -113,6 +132,16 @@ public:
         std::string const& schema_name,
         ErrorStatus*       error_status = nullptr);
 
+    int 
+    version_number_of_schema(
+            const std::string& schema_name)
+    {
+        return _find_type_record(schema_name)->schema_version;
+    }
+
+    // for inspecting the type registry, build a map of schema name to version
+    void type_version_map(std::map<std::string, int>& result);
+
 private:
     TypeRegistry();
 
@@ -127,6 +156,7 @@ private:
         std::function<SerializableObject*()> create;
 
         std::map<int, std::function<void(AnyDictionary*)>> upgrade_functions;
+        std::map<int, std::function<void(AnyDictionary*)>> downgrade_functions;
 
         _TypeRecord(
             std::string                          _schema_name,
@@ -144,6 +174,7 @@ private:
 
         friend class TypeRegistry;
         friend class SerializableObject;
+        friend class CloningEncoder;
     };
 
     // helper functions for lookup
@@ -170,6 +201,7 @@ private:
     std::map<std::string, _TypeRecord*> _type_records_by_type_name;
 
     friend class SerializableObject;
+    friend class CloningEncoder;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

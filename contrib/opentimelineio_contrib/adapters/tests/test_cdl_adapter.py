@@ -36,19 +36,27 @@ class CDLAdapterTest(unittest.TestCase):
         self.assertEqual(len(timeline.tracks[0]), 10)
         self.assertEqual(
             [c.name for c in timeline.tracks[0]],
-            ["VFX_NAME_01", "VFX_NAME_02", "VFX_NAME_03", "VFX_NAME_04", "VFX_NAME_05",
-             "VFX_NAME_06", "VFX_NAME_07", "VFX_NAME_08", "VFX_NAME_09", "VFX_NAME_10"]
+            ["VFX_NAME_01", "VFX_NAME_02", "VFX_NAME_03", "VFX_NAME_04",
+             "VFX_NAME_05", "VFX_NAME_06", "VFX_NAME_07", "VFX_NAME_08",
+             "VFX_NAME_09", "VFX_NAME_10"
+            ]
         )
 
     def test_write_cdl(self):
         edl_path = SAMPLE_CDL_EDL_PATH
         timeline = otio.adapters.read_from_file(edl_path, rate=25.000)
-        otio.adapters.write_to_file(timeline, TEMP_TESTS_OUTPUT_DIR, adapter_name='cdl')
+        otio.adapters.write_to_file(
+            timeline,
+            TEMP_TESTS_OUTPUT_DIR,
+            adapter_name='cdl'
+        )
 
         cdl_files = [f for f in sorted(os.listdir(TEMP_TESTS_OUTPUT_DIR))]
 
-        first_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[0]), "r")
-        last_cdl_file = open(os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[-1]), "r")
+        first_cdl_filepath = os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[0])
+        last_cdl_filepath = os.path.join(TEMP_TESTS_OUTPUT_DIR, cdl_files[-1])
+        first_cdl_file = open(first_cdl_filepath, "r")
+        last_cdl_file = open(last_cdl_filepath, "r")
 
         first_cdl = """<?xml version="1.0" encoding="utf-8"?>
                         <ColorDecisionList xmlns="urn:ASC:CDL:v1.01">
@@ -84,8 +92,16 @@ class CDLAdapterTest(unittest.TestCase):
                     """
 
         self.assertEqual(len(cdl_files), 10)
-        self.assertEqual(first_cdl_file.read().strip(), inspect.cleandoc(first_cdl))
-        self.assertEqual(last_cdl_file.read().strip(), inspect.cleandoc(last_cdl))
+
+        self.assertEqual(
+            first_cdl_file.read().strip(),
+            inspect.cleandoc(first_cdl)
+        )
+
+        self.assertEqual(
+            last_cdl_file.read().strip(),
+            inspect.cleandoc(last_cdl)
+        )
 
         first_cdl_file.close()
         last_cdl_file.close()

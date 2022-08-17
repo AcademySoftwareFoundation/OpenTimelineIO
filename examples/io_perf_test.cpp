@@ -54,7 +54,14 @@ main(int argc, char *argv[])
     print_elapsed_time("deserialize_json_from_file", begin, end);
 
     begin = std::chrono::steady_clock::now();
-    const std::string result = timeline.value->to_json_string(&err);
+    otio::schema_version_map downgrade_version_manifest = {
+        {"Clip", 1}
+    };
+    const std::string result = timeline.value->to_json_string(
+            &err,
+            &downgrade_version_manifest
+    );
+
     if (otio::is_error(err))
     {
         examples::print_error(err);
@@ -62,6 +69,12 @@ main(int argc, char *argv[])
     }
     end = std::chrono::steady_clock::now();
     print_elapsed_time("serialize_json_to_string", begin, end);
+
+    timeline.value->to_json_file(
+            "/var/tmp/test.otio",
+            &err,
+            &downgrade_version_manifest
+    );
 
     return 0;
 }

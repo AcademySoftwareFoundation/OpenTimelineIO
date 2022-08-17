@@ -8,6 +8,7 @@
 
 #include <assert.h>
 #include <map>
+#include <vector>
 #include <string>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -121,6 +122,46 @@ public:
         other.mutate();
         map::swap(other);
     }
+
+    /// @TODO: need the right policy for accessing/returning membors
+    template<typename containedType>
+    containedType
+    get_default(
+            const std::string& key,
+            const containedType& default_value
+    )
+    {
+        any value_any = (*this)[key];
+        if (value_any.type() == typeid(containedType)) {
+            return any_cast<containedType>(value_any);
+        } else {
+            return default_value;
+        }
+    }
+
+    inline bool
+    has_key(
+            const std::string& key
+    )
+    {
+        return (this->find(key) != this->end());
+    }
+
+    template<typename containedType>
+    containedType
+    set_default(
+            const std::string& key, 
+            const containedType& default_value
+    )
+    {
+        if (this->has_key(key)) {
+            return this->get_default(key, default_value);
+        } else {
+            (*this)[key] = default_value;
+            return this->get_default(key, default_value);
+        }
+    }
+
 
     using map::empty;
     using map::max_size;

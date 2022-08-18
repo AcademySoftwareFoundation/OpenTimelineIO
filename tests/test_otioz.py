@@ -124,7 +124,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         shutil.rmtree(tempdir)
 
     def test_round_trip(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -155,7 +156,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_with_extraction(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -213,7 +215,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
     def test_round_trip_with_extraction_no_media(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(
             self.tl,
             tmp_path,

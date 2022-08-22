@@ -10,6 +10,7 @@ htmlcov
 .vscode/
 xcuserdata/
 .venv/
+.cache
 
 # Pycharm metadata
 .idea/

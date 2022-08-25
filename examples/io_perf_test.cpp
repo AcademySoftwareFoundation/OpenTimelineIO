@@ -12,9 +12,10 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 using chrono_time_point = std::chrono::steady_clock::time_point;
 
 constexpr struct {
-    bool TO_JSON_STRING = false;
+    bool TO_JSON_STRING = true;
     bool TO_JSON_FILE = true;
-    bool CLONE_TEST = false;
+    bool CLONE_TEST = true;
+    bool SINGLE_CLIP_DOWNGRADE_TEST = true;
 } RUN_STRUCT ;
 
 /// utility function for printing std::chrono elapsed time
@@ -60,6 +61,20 @@ main(
         assert(cl->name() == cl_clone->name());
     }
 
+    otio::schema_version_map downgrade_version_manifest = {
+        {"Clip", 1}
+    };
+
+    if (RUN_STRUCT.SINGLE_CLIP_DOWNGRADE_TEST)
+    {
+        otio::SerializableObject::Retainer<otio::Clip> cl = new otio::Clip("test");
+        cl->metadata()["example thing"] = "banana";
+        chrono_time_point begin = std::chrono::steady_clock::now();
+        cl->to_json_file("/var/tmp/clip.otio", &err, &downgrade_version_manifest);
+        chrono_time_point end = std::chrono::steady_clock::now();
+        print_elapsed_time("downgrade clip", begin, end);
+    }
+
     otio::any tl;
     std::string fname = std::string(argv[1]);
 
@@ -78,9 +93,6 @@ main(
 
     print_elapsed_time("deserialize_json_from_file", begin, end);
 
-    otio::schema_version_map downgrade_version_manifest = {
-        {"Clip", 1}
-    };
 
     if (RUN_STRUCT.TO_JSON_STRING)
     {

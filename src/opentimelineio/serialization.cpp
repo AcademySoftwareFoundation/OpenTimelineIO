@@ -390,98 +390,7 @@ public:
 
         if (_downgrade_version_manifest.has_value())
         {
-            const std::string& schema_string = m.get_default(
-                    "OTIO_SCHEMA",
-                    std::string("")
-            );
-
-            if (!schema_string.empty())
-            {
-                const int sep = schema_string.rfind(".");
-                const std::string& schema_name = schema_string.substr(0, sep);
-                const std::string& schema_vers = schema_string.substr(sep+1);
-
-                // @TODO: need to pull the version number from the schema string rather
-                //        than the type record - in case there are some kind of weird
-                //        mixed types in the document that don't match the desired 
-                //        target -- OR it'll only downgrade from latest/current down 
-                //        to target and assume that you've intentionally done something
-                //        weird.  Need to consider this I guess.
-                int vers = -1;
-                if (!schema_vers.empty()) 
-                {
-                    vers = std::stoi(schema_vers);
-                }
-
-                if (vers < 0)
-                {
-                    _internal_error(
-                            string_printf(
-                                "Could not parse version number from Schema"
-                                " string: %s",
-                                schema_string.c_str()
-                                )
-                            );
-                    return;
-                }
-
-                const auto& dg_man = *(*_downgrade_version_manifest);
-
-                const auto dg_version_it = dg_man.find(schema_name);
-
-                // @TODO: should this check to also make sure its in the
-                // schema table?
-                if (dg_version_it != dg_man.end())
-                {
-                    const int target_version = (dg_version_it->second);
-
-                    int current_version = vers;
-
-                    const auto& type_rec = (
-                            TypeRegistry::instance()._find_type_record(
-                                schema_name
-                            )
-                    );
-
-                    while (target_version < current_version) 
-                    {
-                        const auto& next_dg_fn = (
-                                type_rec->downgrade_functions.find(
-                                    current_version
-                                )
-                        );
-
-                        if (next_dg_fn == type_rec->downgrade_functions.end()) 
-                        {
-                            _internal_error(
-                                    string_printf(
-                                        "No downgrader function available for "
-                                        "going from version %d to version %d.",
-                                        current_version,
-                                        target_version
-                                    )
-                            );
-                            return;
-                        }
-
-                        // apply it
-                        next_dg_fn->second(&m);
-
-                        current_version --;
-                    }
-
-                    vers = target_version;
-                }
-
-                if (vers > 0) 
-                {
-                    m["OTIO_SCHEMA"] = string_printf(
-                            "%s.%d",
-                            schema_name.c_str(),
-                            vers
-                    );
-                }
-            }
+            _downgrade_dictionary(m);
         }
 
         _stack.pop_back();
@@ -527,6 +436,98 @@ private:
     std::vector<_DictOrArray> _stack;
     ResultObjectPolicy        _result_object_policy;
     optional<const schema_version_map*> _downgrade_version_manifest = {};
+
+    void
+    _downgrade_dictionary(
+            AnyDictionary& m
+    )
+    {
+        const std::string& schema_string = m.get_default(
+                "OTIO_SCHEMA",
+                std::string("")
+        );
+
+        if (schema_string.empty())
+        {
+            return;
+        }
+
+        const int sep = schema_string.rfind('.');
+        const std::string& schema_name = schema_string.substr(0, sep);
+
+        const auto& dg_man = *(*_downgrade_version_manifest);
+        const auto dg_version_it = dg_man.find(schema_name);
+
+        if (dg_version_it == dg_man.end())
+        {
+            return;
+        }
+
+        const std::string& schema_vers = schema_string.substr(sep+1);
+        int current_version = -1;
+
+        // @TODO: need to pull the version number from the schema string rather
+        //        than the type record - in case there are some kind of weird
+        //        mixed types in the document that don't match the desired 
+        //        target -- OR it'll only downgrade from latest/current down 
+        //        to target and assume that you've intentionally done something
+        //        weird.  Need to consider this I guess.
+        if (!schema_vers.empty()) 
+        {
+            current_version = std::stoi(schema_vers);
+        }
+
+        if (current_version < 0)
+        {
+            _internal_error(
+                    string_printf(
+                        "Could not parse version number from Schema"
+                        " string: %s",
+                        schema_string.c_str()
+                        )
+                    );
+            return;
+        }
+
+        const int target_version = (dg_version_it->second);
+
+        const auto& type_rec = (
+                TypeRegistry::instance()._find_type_record(schema_name)
+                );
+
+        while (current_version > target_version ) 
+        {
+            const auto& next_dg_fn = (
+                    type_rec->downgrade_functions.find(
+                        current_version
+                    )
+            );
+
+            if (next_dg_fn == type_rec->downgrade_functions.end()) 
+            {
+                _internal_error(
+                        string_printf(
+                            "No downgrader function available for "
+                            "going from version %d to version %d.",
+                            current_version,
+                            target_version
+                            )
+                        );
+                return;
+            }
+
+            // apply it
+            next_dg_fn->second(&m);
+
+            current_version --;
+        }
+
+        m["OTIO_SCHEMA"] = string_printf(
+                "%s.%d",
+                schema_name.c_str(),
+                current_version
+        );
+    }
 };
 
 template <typename RapidJSONWriterType>
@@ -1366,5 +1367,6 @@ serialize_json_to_file(
 
     return status;
 }
+
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

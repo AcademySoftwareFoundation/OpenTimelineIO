@@ -1232,10 +1232,6 @@ SerializableObject::clone(ErrorStatus* error_status) const
 
     e._resolver.finalize(error_function);
 
-    const auto t = &e._root.type();
-    const auto tid_retainer = &typeid(SerializableObject::Retainer<>);
-    const auto equi = (t == tid_retainer);
-
     return e._root.type() == typeid(SerializableObject::Retainer<>)
                ? any_cast<SerializableObject::Retainer<>&>(e._root).take_value()
                : nullptr;

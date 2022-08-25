@@ -183,13 +183,17 @@ public:
     void 
     write_value(RationalTime const& value) override
     { 
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "RationalTime.1";
-            result["value"] = value.value();
-            result["rate"] = value.rate();
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result = {
+                {"OTIO_SCHEMA", "RationalTime.1"},
+                {"value", value.value()},
+                {"rate", value.rate()},
+            };
             _store(any(std::move(result)));
-        } else { 
+        } 
+        else 
+        {
             _store(any(value)); 
         }
     }
@@ -197,13 +201,17 @@ public:
     write_value(TimeRange const& value) override
     {
  
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "TimeRange.1";
-            result["duration"] = value.duration();
-            result["start_time"] = value.start_time();
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result = {
+                {"OTIO_SCHEMA", "TimeRange.1"},
+                {"duration", value.duration()},
+                {"start_time", value.start_time()},
+            };
             _store(any(std::move(result)));
-        } else { 
+        } 
+        else 
+        { 
             _store(any(value)); 
         }
 
@@ -211,49 +219,69 @@ public:
     void 
     write_value(TimeTransform const& value) override
     {
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "TimeTransform.1";
-            result["offset"] = value.offset();
-            result["rate"] = value.rate();
-            result["scale"] = value.scale();
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result {
+                {"OTIO_SCHEMA", "TimeTransform.1"},
+                {"offset", value.offset()},
+                {"rate", value.rate()},
+                {"scale", value.scale()},
+            };
             _store(any(std::move(result)));
-        } else { 
+        } 
+        else 
+        {
             _store(any(value)); 
         }
     }
     void 
     write_value(SerializableObject::ReferenceId value) override
     {
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "SerializableObjectRef.1";
-            result["id"] = value.id.c_str();
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result {
+                {"OTIO_SCHEMA", "SerializableObjectRef.1"},
+                {"id", value.id.c_str()},
+            };
             _store(any(std::move(result)));
-        } else { 
+        } 
+        else 
+        {
             _store(any(value)); 
         }
        _store(any(value));
     }
-    void write_value(Imath::V2d const& value) {
+    
+    void 
+    write_value(Imath::V2d const& value) 
+    {
  
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "V2d.1";
-            result["x"] = value.x;
-            result["y"] = value.y;
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result {
+                {"OTIO_SCHEMA", "V2d.1"},
+                {"x", value.x},
+                {"y", value.y},
+            };
             _store(any(std::move(result)));
-        } else { 
+        }
+        else 
+        {
             _store(any(value)); 
         }
 
     }
-    void write_value(Imath::Box2d const& value) override {
-        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
-            AnyDictionary result;
-            result["OTIO_SCHEMA"] = "Box2d.1";
-            result["min"] = value.min;
-            result["max"] = value.max;
+
+    void 
+    write_value(Imath::Box2d const& value) override 
+    {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) 
+        {
+            AnyDictionary result {
+                {"OTIO_SCHEMA", "Box2d.1"},
+                {"min", value.min},
+                {"max", value.max},
+            };
             _store(any(std::move(result)));
         } else { 
             _store(any(value)); 
@@ -362,7 +390,7 @@ public:
 
         if (_downgrade_version_manifest.has_value())
         {
-            const std::string schema_string = m.get_default(
+            const std::string& schema_string = m.get_default(
                     "OTIO_SCHEMA",
                     std::string("")
             );
@@ -370,8 +398,8 @@ public:
             if (!schema_string.empty())
             {
                 const int sep = schema_string.rfind(".");
-                const std::string schema_name = schema_string.substr(0, sep);
-                const std::string schema_vers = schema_string.substr(sep+1);
+                const std::string& schema_name = schema_string.substr(0, sep);
+                const std::string& schema_vers = schema_string.substr(sep+1);
 
                 // @TODO: need to pull the version number from the schema string rather
                 //        than the type record - in case there are some kind of weird
@@ -392,68 +420,60 @@ public:
                                 "Could not parse version number from Schema"
                                 " string: %s",
                                 schema_string.c_str()
-                            )
-                    );
+                                )
+                            );
                     return;
                 }
 
-                if (_downgrade_version_manifest.has_value())
+                const auto& dg_man = *(*_downgrade_version_manifest);
+
+                const auto dg_version_it = dg_man.find(schema_name);
+
+                // @TODO: should this check to also make sure its in the
+                // schema table?
+                if (dg_version_it != dg_man.end())
                 {
-                    // @TODO: fill this in
-                    const auto dg_version_it = (
-                            (*_downgrade_version_manifest)->find(schema_name)
+                    const int target_version = (dg_version_it->second);
+
+                    int current_version = vers;
+
+                    const auto& type_rec = (
+                            TypeRegistry::instance()._find_type_record(
+                                schema_name
+                            )
                     );
 
-                    // @TODO: should this check to also make sure its in the
-                    // schema table?
-                    if (dg_version_it != (*_downgrade_version_manifest)->end())
+                    while (target_version < current_version) 
                     {
-                        const int target_version = (dg_version_it->second);
-
-                        int current_version = vers;
-
-                        const auto type_rec = (
-                                TypeRegistry::instance()._find_type_record(
-                                    schema_name
+                        const auto& next_dg_fn = (
+                                type_rec->downgrade_functions.find(
+                                    current_version
                                 )
                         );
 
-                        while (target_version < current_version) 
+                        if (next_dg_fn == type_rec->downgrade_functions.end()) 
                         {
-                            auto next_dg_fn = (
-                                    type_rec->downgrade_functions.find(
-                                        current_version
+                            _internal_error(
+                                    string_printf(
+                                        "No downgrader function available for "
+                                        "going from version %d to version %d.",
+                                        current_version,
+                                        target_version
                                     )
                             );
-
-                            if (
-                                    next_dg_fn 
-                                    == type_rec->downgrade_functions.end()
-                            ) 
-                            {
-                                _internal_error(
-                                        string_printf(
-                                            "No downgrader function available"
-                                            " for going from version %d to "
-                                            "version %d.",
-                                            current_version,
-                                            target_version
-                                        )
-                                );
-                                return;
-                            }
-
-                            // apply it
-                            next_dg_fn->second(&m);
-
-                            current_version --;
+                            return;
                         }
 
-                        vers = target_version;
+                        // apply it
+                        next_dg_fn->second(&m);
+
+                        current_version --;
                     }
+
+                    vers = target_version;
                 }
 
-                if (!schema_name.empty() && vers > 0) 
+                if (vers > 0) 
                 {
                     m["OTIO_SCHEMA"] = string_printf(
                             "%s.%d",

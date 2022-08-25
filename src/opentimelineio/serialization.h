@@ -13,10 +13,44 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+//
+// {
+//  "OTIO_CORE": {
+//  ^ family
+//      "0.14.0": {
+//      ^ family_label
+//          "Clip": 1,
+//          ^ schema  ^ schema_version
+//          ...
+//      },
+//      "0.15.0": {
+//          ...
+//      },
+//      ...
+//  },
+//  "MY_COMPANY_PLUGIN_SETS": {}
+// }
 
-// a mapping of schema name : schema version
+
+// typedefs for the schema downgrading system
 using schema_version_map = std::unordered_map<std::string, int>;
-const static schema_version_map EMPTY_VERSION_MAP = schema_version_map();
+using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
+using family_to_label_map = std::unordered_map<std::string, label_to_schema_version_map>;
+using family_label_spec = std::pair<std::string, std::string>;
+
+static family_to_label_map FAMILY_LABEL_MAP {
+    { 
+        "OTIO_CORE", 
+            { 
+                { "test", 
+                    { 
+                        { "Clip", 1 } 
+                    } 
+                } 
+            } 
+    }
+};
+
 
 std::string 
 serialize_json_to_string(

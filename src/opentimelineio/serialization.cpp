@@ -1263,22 +1263,6 @@ serialize_json_to_string(
     int indent
 )
 {
-
-    CloningEncoder e(
-            CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
-            downgrade_version_manifest
-    );
-    if (!SerializableObject::Writer::write_root(
-                value,
-                e,
-                downgrade_version_manifest,
-                error_status
-            )
-        ) 
-    {
-        return std::string();
-    }
-
     OTIO_rapidjson::StringBuffer output_string_buffer;
 
     OTIO_rapidjson::PrettyWriter<
@@ -1298,8 +1282,7 @@ serialize_json_to_string(
 
     if (
             !SerializableObject::Writer::write_root(
-                // value,
-                e.root(),
+                value,
                 json_encoder,
                 downgrade_version_manifest,
                 error_status
@@ -1361,7 +1344,7 @@ serialize_json_to_file(
     status = SerializableObject::Writer::write_root(
         value, 
         json_encoder,
-        *downgrade_version_manifest,
+        downgrade_version_manifest,
         error_status
     );
 

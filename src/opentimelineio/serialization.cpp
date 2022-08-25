@@ -391,10 +391,11 @@ public:
                 {
                     _internal_error(
                             string_printf(
-                                "Could not parse version number from Schema string: %s",
+                                "Could not parse version number from Schema"
+                                " string: %s",
                                 schema_string.c_str()
-                                )
-                            );
+                            )
+                    );
                     return;
                 }
 
@@ -434,8 +435,9 @@ public:
                             {
                                 _internal_error(
                                         string_printf(
-                                            "No downgrader function available for "
-                                            "going from version %d to version %d.",
+                                            "No downgrader function available"
+                                            " for going from version %d to "
+                                            "version %d.",
                                             current_version,
                                             target_version
                                         )
@@ -455,7 +457,11 @@ public:
 
                 if (!schema_name.empty() && vers > 0) 
                 {
-                    m["OTIO_SCHEMA"] = string_printf("%s.%d", schema_name.c_str(), vers);
+                    m["OTIO_SCHEMA"] = string_printf(
+                            "%s.%d",
+                            schema_name.c_str(),
+                            vers
+                    );
                 }
             }
         }
@@ -971,11 +977,10 @@ SerializableObject::Writer::write(
 
     optional<AnyDictionary> downgraded = {};
 
-    // if there is a manifest & the encoder is not already converting to 
-    // AnyDictionary
+    // if there is a manifest & the encoder is not converting to AnyDictionary
     if (
             _downgrade_version_manifest.has_value()    
-            && _encoder.encoding_to_anydict()
+            && !_encoder.encoding_to_anydict()
     ) 
     {
         const auto& target_version_it = (
@@ -1033,9 +1038,6 @@ SerializableObject::Writer::write(
 
     _encoder.start_object();
 
-    _encoder.write_key("OTIO_SCHEMA");
-    _encoder.write_value(schema_str);
-
 #ifdef OTIO_INSTANCING_SUPPORT
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
@@ -1053,6 +1055,8 @@ SerializableObject::Writer::write(
     }
     else
     {
+        _encoder.write_key("OTIO_SCHEMA");
+        _encoder.write_value(schema_str);
         value->write_to(*this);
     }
 
@@ -1257,7 +1261,7 @@ serialize_json_to_string(
                 downgrade_version_manifest,
                 error_status
             )
-    ) 
+        ) 
     {
         return std::string();
     }
@@ -1344,7 +1348,7 @@ serialize_json_to_file(
     status = SerializableObject::Writer::write_root(
         value, 
         json_encoder,
-        downgrade_version_manifest,
+        *downgrade_version_manifest,
         error_status
     );
 

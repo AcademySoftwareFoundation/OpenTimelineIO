@@ -127,7 +127,7 @@ public:
         return (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary);
     }
 
-    void write_key(std::string const& key)
+    void write_key(std::string const& key) override
     {
         if (has_errored())
         {
@@ -169,25 +169,19 @@ public:
         }
     }
 
-    void write_null_value() { _store(any()); }
-
-    void write_value(bool value) { _store(any(value)); }
-
-    void write_value(int value) { _store(any(value)); }
-
-    void write_value(int64_t value) { _store(any(value)); }
-
-    void write_value(uint64_t value) { _store(any(value)); }
-
-    void write_value(std::string const& value) { _store(any(value)); }
-
-    void write_value(double value) { _store(any(value)); }
+    void write_null_value() override { _store(any()); }
+    void write_value(bool value) override { _store(any(value)); }
+    void write_value(int value) override { _store(any(value)); }
+    void write_value(int64_t value) override { _store(any(value)); }
+    void write_value(uint64_t value) override { _store(any(value)); }
+    void write_value(std::string const& value) override { _store(any(value)); }
+    void write_value(double value) override { _store(any(value)); }
 
     // @{ @TODO: these three the json serializer knows how to dereference them
     //           ... probably better to scooch that into this class... EXCEPT
     //               the equivalence test wants to use their == methods
     void 
-    write_value(RationalTime const& value) 
+    write_value(RationalTime const& value) override
     { 
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
             AnyDictionary result;
@@ -200,7 +194,8 @@ public:
         }
     }
     void 
-    write_value(TimeRange const& value) {
+    write_value(TimeRange const& value) override
+    {
  
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
             AnyDictionary result;
@@ -213,7 +208,9 @@ public:
         }
 
     }
-    void write_value(TimeTransform const& value) {
+    void 
+    write_value(TimeTransform const& value) override
+    {
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
             AnyDictionary result;
             result["OTIO_SCHEMA"] = "TimeTransform.1";
@@ -225,7 +222,8 @@ public:
             _store(any(value)); 
         }
     }
-    void write_value(SerializableObject::ReferenceId value)
+    void 
+    write_value(SerializableObject::ReferenceId value) override
     {
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
             AnyDictionary result;
@@ -250,7 +248,7 @@ public:
         }
 
     }
-    void write_value(Imath::Box2d const& value) {
+    void write_value(Imath::Box2d const& value) override {
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary) {
             AnyDictionary result;
             result["OTIO_SCHEMA"] = "Box2d.1";
@@ -263,7 +261,7 @@ public:
     }
     // @}
 
-    void start_array(size_t /* n */)
+    void start_array(size_t /* n */) override
     {
         if (has_errored())
         {
@@ -273,7 +271,7 @@ public:
         _stack.emplace_back(_DictOrArray{ false /* is_dict*/ });
     }
 
-    void start_object()
+    void start_object() override
     {
         if (has_errored())
         {
@@ -283,7 +281,7 @@ public:
         _stack.emplace_back(_DictOrArray{ true /* is_dict*/ });
     }
 
-    void end_array()
+    void end_array() override
     {
         if (has_errored())
         {
@@ -314,7 +312,7 @@ public:
         }
     }
 
-    void end_object()
+    void end_object() override
     {
         if (has_errored())
         {

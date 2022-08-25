@@ -13,7 +13,9 @@ using chrono_time_point = std::chrono::steady_clock::time_point;
 
 constexpr struct {
     bool TO_JSON_STRING = true;
+    bool TO_JSON_STRING_NO_DOWNGRADE = true;
     bool TO_JSON_FILE = true;
+    bool TO_JSON_FILE_NO_DOWNGRADE = true;
     bool CLONE_TEST = true;
     bool SINGLE_CLIP_DOWNGRADE_TEST = true;
 } RUN_STRUCT ;
@@ -112,16 +114,38 @@ main(
         print_elapsed_time("serialize_json_to_string", begin, end);
     }
 
+    if (RUN_STRUCT.TO_JSON_STRING_NO_DOWNGRADE)
+    {
+        begin = std::chrono::steady_clock::now();
+        const std::string result = timeline.value->to_json_string(&err, {});
+        end = std::chrono::steady_clock::now();
+
+        if (otio::is_error(err))
+        {
+            examples::print_error(err);
+            return 1;
+        }
+        print_elapsed_time("serialize_json_to_string [no downgrade]", begin, end);
+    }
+
     if (RUN_STRUCT.TO_JSON_FILE)
     {
         begin = std::chrono::steady_clock::now();
         timeline.value->to_json_file(
-                "/var/tmp/test.otio",
+                "/var/tmp/io_perf_test.otio",
                 &err,
                 &downgrade_version_manifest
         );
         end = std::chrono::steady_clock::now();
         print_elapsed_time("serialize_json_to_file", begin, end);
+    }
+
+    if (RUN_STRUCT.TO_JSON_FILE_NO_DOWNGRADE)
+    {
+        begin = std::chrono::steady_clock::now();
+        timeline.value->to_json_file("/var/tmp/io_perf_test.nodowngrade.otio", &err, {});
+        end = std::chrono::steady_clock::now();
+        print_elapsed_time("serialize_json_to_file [no downgrade]", begin, end);
     }
 
     return 0;

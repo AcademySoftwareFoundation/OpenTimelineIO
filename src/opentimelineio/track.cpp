@@ -135,7 +135,7 @@ TimeRange
 Track::available_range(ErrorStatus* error_status) const
 {
     RationalTime duration;
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto item = dynamic_retainer_cast<Item>(child))
         {
@@ -261,7 +261,7 @@ Track::range_of_all_children(ErrorStatus* error_status) const
     }
 
     RationalTime last_end_time(0, rate);
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto transition = dynamic_retainer_cast<Transition>(child))
         {
@@ -300,7 +300,7 @@ Track::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<Imath::Box2d> box;
     bool                   found_first_clip = false;
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto clip = dynamic_cast<Clip*>(child.value))
         {

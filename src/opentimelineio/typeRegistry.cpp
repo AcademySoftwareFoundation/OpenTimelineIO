@@ -296,7 +296,7 @@ TypeRegistry::_instance_from_schema(
     }
     else if (schema_version < type_record->schema_version)
     {
-        for (auto e: type_record->upgrade_functions)
+        for (const auto& e: type_record->upgrade_functions)
         {
             if (schema_version <= e.first &&
                 e.first <= type_record->schema_version)

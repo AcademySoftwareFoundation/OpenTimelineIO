@@ -747,7 +747,7 @@ SerializableObject::Writer::_build_dispatch_tables()
      * Install a backup table, using the actual type name as a key.
      * This is to deal with type aliasing across compilation units.
      */
-    for (auto e: wt)
+    for (const auto& e: wt)
     {
         _write_dispatch_table_by_name[e.first->name()] = e.second;
     }
@@ -792,7 +792,7 @@ SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
 
     auto r_it = rd.begin();
 
-    for (auto l_it: ld)
+    for (const auto& l_it: ld)
     {
         if (r_it == rd.end())
         {
@@ -1110,7 +1110,7 @@ SerializableObject::Writer::write(
 
     _encoder.start_object();
 
-    for (auto e: value)
+    for (const auto& e: value)
     {
         write(e.first, e.second);
     }
@@ -1126,7 +1126,7 @@ SerializableObject::Writer::write(
 
     _encoder.start_array(value.size());
 
-    for (auto e: value)
+    for (const auto& e: value)
     {
         write(_no_key, e);
     }

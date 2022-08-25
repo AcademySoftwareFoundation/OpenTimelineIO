@@ -983,13 +983,12 @@ SerializableObject::Writer::write(
             && !_encoder.encoding_to_anydict()
     ) 
     {
-        const auto& target_version_it = (
-                (*_downgrade_version_manifest)->find(schema_name)
-        );
+        const auto& dg_man = *(*_downgrade_version_manifest);
+        const auto& target_version_it = dg_man.find(schema_name);
 
         // ...and if that downgrade manifest specifies a target version for
         // this schema
-        if (target_version_it != (*_downgrade_version_manifest)->end())
+        if (target_version_it != dg_man.end())
         {
             const int target_version = target_version_it->second;
 
@@ -1001,7 +1000,7 @@ SerializableObject::Writer::write(
                         { *_downgrade_version_manifest }
                 );
 
-                Writer w(e, {} );
+                Writer w(e, {});
                 w.write(w._no_key, value);
 
                 if (e.has_errored(&_encoder._error_status))
@@ -1028,10 +1027,9 @@ SerializableObject::Writer::write(
     else
     {
         // otherwise, use the schema_name and schema_version attributes
-        // @TODO: this needs to be deferred until downgrading is complete
         schema_str = string_printf(
             "%s.%d",
-            value->schema_name().c_str(),
+            schema_name.c_str(),
             schema_version
         );
     }

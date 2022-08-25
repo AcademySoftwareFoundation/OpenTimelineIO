@@ -6,6 +6,7 @@
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
+#include <string>
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/ostreamwrapper.h>
@@ -522,11 +523,7 @@ private:
             current_version --;
         }
 
-        m["OTIO_SCHEMA"] = string_printf(
-                "%s.%d",
-                schema_name.c_str(),
-                current_version
-        );
+        m["OTIO_SCHEMA"] = schema_name + "." + std::to_string(current_version);
     }
 };
 
@@ -1016,7 +1013,7 @@ SerializableObject::Writer::write(
             {
                 CloningEncoder e(
                         CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
-                        { *_downgrade_version_manifest }
+                        _downgrade_version_manifest
                 );
 
                 Writer w(e, {});
@@ -1037,20 +1034,16 @@ SerializableObject::Writer::write(
     // _original_schema_name and _original_schema_version attributes
     if (UnknownSchema const* us = dynamic_cast<UnknownSchema const*>(value))
     {
-        schema_str = string_printf(
-            "%s.%d",
-            us->_original_schema_name.c_str(),
-            us->_original_schema_version
+        schema_str = (
+                us->_original_schema_name 
+                + "." 
+                + std::to_string(us->_original_schema_version)
         );
     }
     else
     {
         // otherwise, use the schema_name and schema_version attributes
-        schema_str = string_printf(
-            "%s.%d",
-            schema_name.c_str(),
-            schema_version
-        );
+        schema_str = schema_name + "." + std::to_string(schema_version);
     }
 
     _encoder.start_object();

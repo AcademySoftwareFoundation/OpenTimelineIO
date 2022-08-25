@@ -55,7 +55,6 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             so_cp = copy.copy(so)
 
         # deep copy
-        import ipdb; ipdb.set_trace()
         so_cp = copy.deepcopy(so)
         self.assertIsNotNone(so_cp)
         self.assertIsOTIOEquivalentTo(so, so_cp)
@@ -211,9 +210,6 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         class FakeThing(otio.core.SerializableObject):
             _serializable_label = "FakeThingToDowngrade.2"
             foo_two = otio.core.serializable_field("foo_2")
-
-        print("running otio from:")
-        print(otio.__file__)
 
         @otio.core.downgrade_function_for(FakeThing, 2)
         def downgrade_2_to_1(_data_dict):

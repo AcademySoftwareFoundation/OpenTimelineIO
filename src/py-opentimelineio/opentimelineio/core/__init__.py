@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
+print("this file is being read")
+
 from .. _otio import ( # noqa
     # errors
     CannotComputeAvailableRangeError,

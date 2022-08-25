@@ -121,7 +121,6 @@ TypeRegistry::TypeRegistry()
         AnyDictionary active_ref = AnyDictionary();
         if (active_reference_key != "") {
             active_ref = media_refs.get_default(active_reference_key, AnyDictionary());
-            std::cerr << "found reference: ";
         }
 
         (*d)["media_reference"] = active_ref;

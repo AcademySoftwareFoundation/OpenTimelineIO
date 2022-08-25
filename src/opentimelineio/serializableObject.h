@@ -535,6 +535,7 @@ public:
         bool _any_equals(any const& lhs, any const& rhs);
 
         std::string _no_key;
+        // @TODO: should probably be unordered maps
         std::map<std::type_info const*, std::function<void(any const&)>>
             _write_dispatch_table;
         std::map<

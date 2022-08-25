@@ -68,6 +68,14 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             with open(temp_file, 'r') as f:
                 on_disk = f.read()
 
+            self.maxDiff = None
+
+            with open("/var/tmp/in_memory.otio", "w") as fo:
+                fo.write(in_memory)
+
+            with open("/var/tmp/on_disk.otio", "w") as fo:
+                fo.write(on_disk)
+
             self.assertEqual(in_memory, on_disk)
 
     def test_adapters_fetch(self):

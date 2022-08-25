@@ -53,6 +53,8 @@ public:
 
     bool has_errored() { return is_error(_error_status); }
 
+    virtual bool encoding_to_anydict() { return false; }
+
     virtual void start_object() = 0;
     virtual void end_object()   = 0;
 
@@ -110,6 +112,20 @@ public:
     }
 
     virtual ~CloningEncoder() {}
+
+    /**
+     * 1.
+     * e = JSONEncoder(_downgrade)
+     * SerializableObject::Writer::write_root(e, _downgrade)
+     * [recurse until downgrade]
+     *      ce = CloningEncoder(_downgrade)
+     *      SerializableObject::Writer::write_root(e), 
+     */
+    virtual bool 
+    encoding_to_anydict() override 
+    {
+        return (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary);
+    }
 
     void write_key(std::string const& key)
     {
@@ -308,7 +324,8 @@ public:
         if (_stack.empty())
         {
             _internal_error(
-                "Encoder::end_object() called without matching start_object()");
+                "Encoder::end_object() called without matching start_object()"
+            );
             return;
         }
 
@@ -345,78 +362,101 @@ public:
         AnyDictionary m;
         m.swap(top.dict);
 
-        const std::string schema_string = m.get_default(
-                "OTIO_SCHEMA",
-                std::string("")
-        );
-
-        const int sep = schema_string.rfind(".");
-        const std::string schema_name = schema_string.substr(0, sep);
-        const std::string schema_vers = schema_string.substr(sep+1);
-
-        // @TODO: need to pull the version number from the schema string rather
-        //        than the type record - in case there are some kind of weird
-        //        mixed types in the document that don't match the desired 
-        //        target -- OR it'll only downgrade from latest/current down 
-        //        to target and assume that you've intentionally done something
-        //        weird.  Need to consider this I guess.
-        // int vers = -1;
-
-        if (!schema_vers.empty()) 
+        if (_downgrade_version_manifest.has_value())
         {
-            
-        }
-
-        const auto dg_version_it = (
-                (*_downgrade_version_manifest)->find(schema_name)
-        );
-
-        // @TODO: should this check to also make sure its in the
-        // schema table?
-        if (
-                !schema_name.empty()
-                && !schema_vers.empty()
-                && dg_version_it != (*_downgrade_version_manifest)->end()
-        )
-        {
-            const int target_version = (dg_version_it->second);
-
-            const auto type_rec = (
-                    TypeRegistry::instance()._find_type_record(
-                        schema_name
-                    )
+            const std::string schema_string = m.get_default(
+                    "OTIO_SCHEMA",
+                    std::string("")
             );
 
-            int current_version = type_rec->schema_version;
-
-            while (target_version < current_version) 
+            if (!schema_string.empty())
             {
-                auto next_dg_fn = (
-                    type_rec->downgrade_functions.find(
-                        current_version
-                    )
-                );
+                const int sep = schema_string.rfind(".");
+                const std::string schema_name = schema_string.substr(0, sep);
+                const std::string schema_vers = schema_string.substr(sep+1);
 
-                if (
-                        next_dg_fn 
-                        == type_rec->downgrade_functions.end()
-                ) 
+                // @TODO: need to pull the version number from the schema string rather
+                //        than the type record - in case there are some kind of weird
+                //        mixed types in the document that don't match the desired 
+                //        target -- OR it'll only downgrade from latest/current down 
+                //        to target and assume that you've intentionally done something
+                //        weird.  Need to consider this I guess.
+                int vers = -1;
+                if (!schema_vers.empty()) 
+                {
+                    vers = std::stoi(schema_vers);
+                }
+
+                if (vers < 0)
                 {
                     _internal_error(
-                        string_printf(
-                            "No downgrader function available for "
-                            "going from version %d to version %d.",
-                            current_version,
-                            target_version
-                        )
-                    );
+                            string_printf(
+                                "Could not parse version number from Schema string: %s",
+                                schema_string.c_str()
+                                )
+                            );
                     return;
                 }
 
-                // apply it
-                next_dg_fn->second(&m);
+                if (_downgrade_version_manifest.has_value())
+                {
+                    // @TODO: fill this in
+                    const auto dg_version_it = (
+                            (*_downgrade_version_manifest)->find(schema_name)
+                    );
 
-                current_version --;
+                    // @TODO: should this check to also make sure its in the
+                    // schema table?
+                    if (dg_version_it != (*_downgrade_version_manifest)->end())
+                    {
+                        const int target_version = (dg_version_it->second);
+
+                        int current_version = vers;
+
+                        const auto type_rec = (
+                                TypeRegistry::instance()._find_type_record(
+                                    schema_name
+                                )
+                        );
+
+                        while (target_version < current_version) 
+                        {
+                            auto next_dg_fn = (
+                                    type_rec->downgrade_functions.find(
+                                        current_version
+                                    )
+                            );
+
+                            if (
+                                    next_dg_fn 
+                                    == type_rec->downgrade_functions.end()
+                            ) 
+                            {
+                                _internal_error(
+                                        string_printf(
+                                            "No downgrader function available for "
+                                            "going from version %d to version %d.",
+                                            current_version,
+                                            target_version
+                                        )
+                                );
+                                return;
+                            }
+
+                            // apply it
+                            next_dg_fn->second(&m);
+
+                            current_version --;
+                        }
+
+                        vers = target_version;
+                    }
+                }
+
+                if (!schema_name.empty() && vers > 0) 
+                {
+                    m["OTIO_SCHEMA"] = string_printf("%s.%d", schema_name.c_str(), vers);
+                }
             }
         }
 
@@ -452,6 +492,7 @@ private:
         AnyVector     array;
         std::string   cur_key;
     };
+
 
     void _internal_error(std::string const& err_msg)
     {
@@ -628,6 +669,7 @@ SerializableObject::Writer::_build_dispatch_tables()
     /*
      * These are basically atomic writes to the encoder:
      */
+
     auto& wt          = _write_dispatch_table;
     wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
     wt[&typeid(bool)] = [this](any const& value) {
@@ -866,7 +908,10 @@ SerializableObject::Writer::write(
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, TimeTransform value)
+SerializableObject::Writer::write(
+        std::string const& key,
+        TimeTransform value
+)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
@@ -874,8 +919,10 @@ SerializableObject::Writer::write(std::string const& key, TimeTransform value)
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, SerializableObject const* value)
-{
+    std::string const& key,
+    SerializableObject const* value
+)
+{ 
     _encoder_write_key(key);
     if (!value)
     {
@@ -883,7 +930,6 @@ SerializableObject::Writer::write(
         return;
     }
 
-    // look for the multiple instances of the same thing in the id map
     auto e = _id_for_object.find(value);
     if (e != _id_for_object.end())
     {
@@ -913,15 +959,56 @@ SerializableObject::Writer::write(
         _next_id_for_type[schema_type_name] = 0;
     }
 
-    // build a unique id for this instance of this type, to store in the id map
-    // table
     std::string next_id = schema_type_name + "-" +
                           std::to_string(++_next_id_for_type[schema_type_name]);
     _id_for_object[value] = next_id;
 
-    _encoder.start_object();
-
     std::string schema_str = "";
+
+    // detect if downgrading needs to happen
+    const std::string& schema_name = value->schema_name();
+    int schema_version = value->schema_version();
+
+    optional<AnyDictionary> downgraded = {};
+
+    // if there is a manifest & the encoder is not already converting to 
+    // AnyDictionary
+    if (
+            _downgrade_version_manifest.has_value()    
+            && _encoder.encoding_to_anydict()
+    ) 
+    {
+        const auto& target_version_it = (
+                (*_downgrade_version_manifest)->find(schema_name)
+        );
+
+        // ...and if that downgrade manifest specifies a target version for
+        // this schema
+        if (target_version_it != (*_downgrade_version_manifest)->end())
+        {
+            const int target_version = target_version_it->second;
+
+            // and the current_version is greater than the target version
+            if (schema_version > target_version) 
+            {
+                CloningEncoder e(
+                        CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
+                        { *_downgrade_version_manifest }
+                );
+
+                Writer w(e, {} );
+                w.write(w._no_key, value);
+
+                if (e.has_errored(&_encoder._error_status))
+                {
+                    return;
+                }
+
+                downgraded = { e.root() };
+                schema_version = target_version;
+            }
+        }
+    }
 
     // if its an unknown schema, the schema name is computed from the
     // _original_schema_name and _original_schema_version attributes
@@ -940,96 +1027,33 @@ SerializableObject::Writer::write(
         schema_str = string_printf(
             "%s.%d",
             value->schema_name().c_str(),
-            value->schema_version()
+            schema_version
         );
     }
 
-    // cache in case transformed
-    const std::string schema_name = value->schema_name();
-    const int schema_version = value->schema_version();
+    _encoder.start_object();
 
-    optional<AnyDictionary> downgraded = {};
-
-    // if there is a valid schema string
-    if (!schema_name.empty()) 
-    {
-        if (_downgrade_version_manifest.has_value()) 
-        {
-            const auto& target_version_it = (
-                    (*_downgrade_version_manifest)->find(schema_name)
-            );
-
-            // down the manifest specify a target version
-            if (target_version_it != (*_downgrade_version_manifest)->end())
-            {
-                const int target_version = target_version_it->second;
-
-                const auto& tr = TypeRegistry::instance()._find_type_record(schema_name);
-                const auto& downgrade_fn_map = tr->downgrade_functions;
-
-                int current_version = schema_version;
-
-                downgraded = { AnyDictionary() };
-
-                // build the dictionary to downgrade
-                for (auto kv: value->_dynamic_fields) 
-                {
-                    (*downgraded)[kv.first] = kv.second;
-                }
-
-                while (current_version > target_version)
-                {
-                    // downgrade in place
-                    auto dg_fn = downgrade_fn_map.find(current_version);
-                    if (dg_fn == downgrade_fn_map.end()) 
-                    {
-                        _encoder._error(
-                                ErrorStatus(
-                                    ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
-                                    string_printf(
-                                        "Could not find a downgrade function"
-                                        "from %d to %d for schema %s",
-                                        current_version,
-                                        current_version - 1,
-                                        schema_name.c_str()
-                                    )
-                                )
-                        );
-                        return;
-                    }
-                    dg_fn->second(&(*downgraded));
-
-                    current_version--;
-                }
-
-                schema_str = string_printf(
-                        "%s.%d",
-                        schema_name.c_str(),
-                        target_version
-                );
-            }
-        }
-
-        // @TODO: probably this is why metadata is getting a null schema_str
-        _encoder.write_key("OTIO_SCHEMA");
-        _encoder.write_value(schema_str);
-    }
+    _encoder.write_key("OTIO_SCHEMA");
+    _encoder.write_value(schema_str);
 
 #ifdef OTIO_INSTANCING_SUPPORT
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
 #endif
 
-    if (!downgraded)
+    // write the contents of the object to the encoder, either the downgraded
+    // anydictionary or the SerializableObject
+    if (downgraded.has_value())
     {
-        value->write_to(*this);
-    }
-    else
-    {
-        for (auto kv : *downgraded) 
+        // the inner loop of write(
+        for (const auto& kv : (*downgraded))
         {
             this->write(kv.first, kv.second);
         }
+    }
+    else
+    {
+        value->write_to(*this);
     }
 
     _encoder.end_object();
@@ -1090,8 +1114,16 @@ SerializableObject::Writer::write(
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, any const& value)
+SerializableObject::Writer::write(
+        std::string const& key,
+        any const& value)
 {
+    // if (value.empty()) 
+    // {
+    //     _encoder.write_key(key);
+    //     _encoder.write_null_value();
+    //     return;
+    // }
     std::type_info const& type = value.type();
 
     _encoder_write_key(key);
@@ -1196,11 +1228,16 @@ SerializableObject::clone(ErrorStatus* error_status) const
 
     e._resolver.finalize(error_function);
 
+    const auto t = &e._root.type();
+    const auto tid_retainer = &typeid(SerializableObject::Retainer<>);
+    const auto equi = (t == tid_retainer);
+
     return e._root.type() == typeid(SerializableObject::Retainer<>)
                ? any_cast<SerializableObject::Retainer<>&>(e._root).take_value()
                : nullptr;
 }
 
+// to json_string
 std::string
 serialize_json_to_string(
     const any& value,
@@ -1209,6 +1246,22 @@ serialize_json_to_string(
     int indent
 )
 {
+
+    CloningEncoder e(
+            CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
+            downgrade_version_manifest
+    );
+    if (!SerializableObject::Writer::write_root(
+                value,
+                e,
+                downgrade_version_manifest,
+                error_status
+            )
+    ) 
+    {
+        return std::string();
+    }
+
     OTIO_rapidjson::StringBuffer output_string_buffer;
 
     OTIO_rapidjson::PrettyWriter<
@@ -1228,7 +1281,8 @@ serialize_json_to_string(
 
     if (
             !SerializableObject::Writer::write_root(
-                value,
+                // value,
+                e.root(),
                 json_encoder,
                 downgrade_version_manifest,
                 error_status
@@ -1259,6 +1313,7 @@ serialize_json_to_file(
 #else // _WINDOWS
     std::ofstream os(file_name);
 #endif // _WINDOWS
+
     if (!os.is_open())
     {
         if (error_status)
@@ -1290,7 +1345,8 @@ serialize_json_to_file(
         value, 
         json_encoder,
         downgrade_version_manifest,
-        error_status);
+        error_status
+    );
 
     return status;
 }

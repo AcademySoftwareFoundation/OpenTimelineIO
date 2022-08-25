@@ -55,7 +55,9 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             so_cp = copy.copy(so)
 
         # deep copy
+        import ipdb; ipdb.set_trace()
         so_cp = copy.deepcopy(so)
+        self.assertIsNotNone(so_cp)
         self.assertIsOTIOEquivalentTo(so, so_cp)
 
         so_cp.metadata["foo"] = "bar"
@@ -138,6 +140,10 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_schema_versioning(self):
         """ test basic upgrade function and unsupported schema error """
+
+        # ensure that the type hasn't already been registered
+        self.assertNotIn("Stuff", otio.core.type_version_map())
+
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
             _serializable_label = "Stuff.1"
@@ -154,12 +160,16 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 {"foo": "bar"}
             )
 
+        version_map = otio.core.type_version_map()
+        self.assertEqual(version_map["Stuff"], 1)
+
         ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
         self.assertEqual(ft._dynamic_fields['foo'], "bar")
 
     def test_upgrading_skips_versions(self):
         """ test that the upgrading system skips versions that don't have
         upgrade functions"""
+
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
@@ -182,6 +192,49 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
         self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+
+    def test_upgrade_rename(self):
+        """test that upgrading system handles schema renames correctly"""
+
+        @otio.core.register_type
+        class FakeThingToRename(otio.core.SerializableObject):
+            _serializable_label = "ThingToRename.2"
+            my_field = otio.core.serializable_field("my_field", doc="example")
+
+        thing = otio.core.type_version_map()
+        self.assertTrue(thing)
+
+    def test_downgrade_version(self):
+        """ test a python defined downgrade function"""
+
+        @otio.core.register_type
+        class FakeThing(otio.core.SerializableObject):
+            _serializable_label = "FakeThingToDowngrade.2"
+            foo_two = otio.core.serializable_field("foo_2")
+
+        print("running otio from:")
+        print(otio.__file__)
+
+        @otio.core.downgrade_function_for(FakeThing, 2)
+        def downgrade_2_to_1(_data_dict):
+            return {"foo": _data_dict["foo_2"]}
+
+        f = FakeThing()
+        f.foo_two = "a thing here"
+
+        self.assertDictEqual(
+                eval(
+                    otio.adapters.otio_json.write_to_string(
+                        f,
+                        downgrade_version_manifest={"FakeThingToDowngrade": 1}
+                    )
+                ),
+                {
+                    "OTIO_SCHEMA": "FakeThingToDowngrade.1",
+                    "foo": "a thing here", 
+                }
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

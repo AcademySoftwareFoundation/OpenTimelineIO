@@ -131,12 +131,15 @@ public:
             const containedType& default_value
     )
     {
-        any value_any = (*this)[key];
-        if (value_any.type() == typeid(containedType)) {
-            return any_cast<containedType>(value_any);
-        } else {
-            return default_value;
-        }
+        const auto& it = this->find(key);
+
+        return (
+                 it != this->end() 
+                 && it->second.type().hash_code() == typeid(containedType).hash_code()
+        ) ?
+            any_cast<containedType>(it->second) 
+            : default_value
+        ;
     }
 
     inline bool
@@ -154,11 +157,15 @@ public:
             const containedType& default_value
     )
     {
-        if (this->has_key(key)) {
-            return this->get_default(key, default_value);
-        } else {
-            (*this)[key] = default_value;
-            return this->get_default(key, default_value);
+        const auto& d_it =  this->find(key);
+        if (d_it != this->end()) 
+        {
+            return any_cast<containedType>(d_it->second);
+        } 
+        else 
+        {
+            this->insert({key, default_value});
+            return default_value;
         }
     }
 

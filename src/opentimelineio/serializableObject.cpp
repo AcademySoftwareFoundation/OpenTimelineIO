@@ -114,13 +114,13 @@ SerializableObject::is_unknown_schema() const
 std::string
 SerializableObject::to_json_string(
         ErrorStatus* error_status,
-        optional<const schema_version_map*>downgrade_version_manifest,
+        optional<family_label_spec> target_family_label_spec,
         int indent
 ) const
 {
     return serialize_json_to_string(
         any(Retainer<>(this)), 
-        downgrade_version_manifest,
+        target_family_label_spec,
         error_status,
         indent
     );
@@ -130,13 +130,13 @@ bool
 SerializableObject::to_json_file(
     std::string const& file_name,
     ErrorStatus* error_status,
-    optional<const schema_version_map*>downgrade_version_manifest,
+    optional<family_label_spec> target_family_label_spec,
     int indent) const
 {
     return serialize_json_to_file(
         any(Retainer<>(this)),
         file_name,
-        downgrade_version_manifest,
+        target_family_label_spec,
         error_status,
         indent
     );

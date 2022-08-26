@@ -72,16 +72,26 @@ __all__ = [
 ]
 
 
-def serialize_json_to_string(root, downgrade_version_manifest=None, indent=4):
+def serialize_json_to_string(root, target_family_label_spec=None, indent=4):
     return _serialize_json_to_string(
             _value_to_any(root),
-            downgrade_version_manifest or {},
+            target_family_label_spec,
             indent
     )
 
 
-def serialize_json_to_file(root, filename, indent=4):
-    return _serialize_json_to_file(_value_to_any(root), filename, indent)
+def serialize_json_to_file(
+        root,
+        filename,
+        target_family_label_spec=None,
+        indent=4
+):
+    return _serialize_json_to_file(
+            _value_to_any(root),
+            filename,
+            target_family_label_spec,
+            indent
+    )
 
 
 def register_type(classobj, schemaname=None):

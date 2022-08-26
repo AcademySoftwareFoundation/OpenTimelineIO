@@ -155,6 +155,7 @@ Serializes an OpenTimelineIO object into a file
 ```
   - input_otio
   - filepath
+  - target_family_label_spec
   - indent
 - write_to_string: 
 ```
@@ -169,6 +170,7 @@ Serializes an OpenTimelineIO object into a string
       str: A json serialized string representation
 ```
   - input_otio
+  - target_family_label_spec
   - indent
 
 

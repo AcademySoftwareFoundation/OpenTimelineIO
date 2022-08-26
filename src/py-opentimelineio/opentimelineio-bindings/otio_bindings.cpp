@@ -104,13 +104,13 @@ PYBIND11_MODULE(_otio, m) {
             "_serialize_json_to_string",
             [](
                 PyAny* pyAny,
-                const std::unordered_map<std::string, int>& downgrade_version_manifest,
+                optional<family_label_spec> target_family_label_spec,
                 int indent
               ) 
             {
                 auto result = serialize_json_to_string(
                             pyAny->a,
-                            {&downgrade_version_manifest},
+                            target_family_label_spec,
                             ErrorStatusHandler(),
                             indent
                     );
@@ -118,13 +118,28 @@ PYBIND11_MODULE(_otio, m) {
                 return result;
             },
             "value"_a,
-            "downgrade_version_manifest"_a,
+            py::arg("target_family_label_spec") = nullopt,
             "indent"_a
     )
      .def("_serialize_json_to_file",
-          [](PyAny* pyAny, std::string filename, int indent) {
-              return serialize_json_to_file(pyAny->a, filename, {}, ErrorStatusHandler(), indent);
-          }, "value"_a, "filename"_a, "indent"_a)
+          [](
+              PyAny* pyAny,
+              std::string filename,
+              optional<family_label_spec> target_family_label_spec,
+              int indent
+          ) {
+              return serialize_json_to_file(
+                      pyAny->a,
+                      filename,
+                      target_family_label_spec,
+                      ErrorStatusHandler(),
+                      indent
+              );
+          },
+          "value"_a,
+          "filename"_a,
+          py::arg("target_family_label_spec") = nullopt,
+          "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {
               any result;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
+#include "nonstd/optional.hpp"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serialization.h"
 #include "opentimelineio/anyDictionary.h"
@@ -1247,15 +1248,35 @@ SerializableObject::clone(ErrorStatus* error_status) const
                : nullptr;
 }
 
+schema_version_map
+_fetch_downgrade_manifest(
+        family_label_spec target_family_label_spec
+)
+{
+    // @TODO: error handling
+    return (FAMILY_LABEL_MAP[
+        target_family_label_spec.first
+    ][target_family_label_spec.second]);
+}
+
 // to json_string
 std::string
 serialize_json_to_string(
     const any& value,
-    optional<const schema_version_map*> downgrade_version_manifest,
+    optional<family_label_spec> target_family_label_spec,
     ErrorStatus* error_status,
     int indent
 )
 {
+    // @TODO: gross
+    optional<const schema_version_map*> downgrade_version_manifest = {};
+    schema_version_map mp;
+    if (target_family_label_spec.has_value())
+    {
+        mp =  _fetch_downgrade_manifest(*target_family_label_spec);
+        downgrade_version_manifest = { &mp };
+    }
+
     OTIO_rapidjson::StringBuffer output_string_buffer;
 
     OTIO_rapidjson::PrettyWriter<
@@ -1293,10 +1314,19 @@ bool
 serialize_json_to_file(
     any const&         value,
     std::string const& file_name,
-    optional<const schema_version_map*>downgrade_version_manifest,
+    optional<family_label_spec> target_family_label_spec,
     ErrorStatus*       error_status,
     int                indent)
 {
+    // @TODO: gross
+    optional<const schema_version_map*> downgrade_version_manifest = {};
+    schema_version_map mp;
+    if (target_family_label_spec.has_value())
+    {
+        mp =  _fetch_downgrade_manifest(*target_family_label_spec);
+        downgrade_version_manifest = { &mp };
+    }
+
 #if defined(_WINDOWS)
     const int wlen =
         MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);

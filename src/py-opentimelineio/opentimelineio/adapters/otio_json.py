@@ -37,7 +37,7 @@ def read_from_string(input_str):
     return core.deserialize_json_from_string(input_str)
 
 
-def write_to_string(input_otio, downgrade_version_manifest=None, indent=4):
+def write_to_string(input_otio, target_family_label_spec=None, indent=4):
     """
     Serializes an OpenTimelineIO object into a string
 
@@ -51,7 +51,7 @@ def write_to_string(input_otio, downgrade_version_manifest=None, indent=4):
     """
     return core.serialize_json_to_string(
             input_otio,
-            downgrade_version_manifest or {},
+            target_family_label_spec,
             indent
     )
 
@@ -59,7 +59,7 @@ def write_to_string(input_otio, downgrade_version_manifest=None, indent=4):
 def write_to_file(
         input_otio,
         filepath,
-        downgrade_version_manifest=None,
+        target_family_label_spec=None,
         indent=4
 ):
     """
@@ -78,4 +78,9 @@ def write_to_file(
     Raises:
         ValueError: on write error
     """
-    return core.serialize_json_to_file(input_otio, filepath, indent)
+    return core.serialize_json_to_file(
+            input_otio,
+            filepath,
+            target_family_label_spec,
+            indent
+    )

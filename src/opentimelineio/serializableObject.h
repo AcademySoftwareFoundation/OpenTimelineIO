@@ -14,6 +14,7 @@
 #include "opentimelineio/version.h"
 
 #include "ImathBox.h"
+#include "serialization.h"
 
 #include <list>
 #include <type_traits>
@@ -49,13 +50,13 @@ public:
     to_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr,
-            optional<const schema_version_map*>downgrade_version_manifest = {},
+        optional<family_label_spec> target_family_label_spec = {},
         int                indent       = 4) const;
 
     std::string
     to_json_string(
             ErrorStatus* error_status = nullptr,
-            optional<const schema_version_map*>downgrade_version_manifest = {},
+            optional<family_label_spec> target_family_label_spec = {},
             int indent = 4) const;
 
     static SerializableObject* from_json_file(

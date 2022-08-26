@@ -63,16 +63,14 @@ main(
         assert(cl->name() == cl_clone->name());
     }
 
-    otio::schema_version_map downgrade_version_manifest = {
-        {"Clip", 1}
-    };
+    otio::family_label_spec target_version = {"OTIO_CORE", "test"};
 
     if (RUN_STRUCT.SINGLE_CLIP_DOWNGRADE_TEST)
     {
         otio::SerializableObject::Retainer<otio::Clip> cl = new otio::Clip("test");
         cl->metadata()["example thing"] = "banana";
         chrono_time_point begin = std::chrono::steady_clock::now();
-        cl->to_json_file("/var/tmp/clip.otio", &err, &downgrade_version_manifest);
+        cl->to_json_file("/var/tmp/clip.otio", &err, target_version);
         chrono_time_point end = std::chrono::steady_clock::now();
         print_elapsed_time("downgrade clip", begin, end);
     }
@@ -101,8 +99,7 @@ main(
         begin = std::chrono::steady_clock::now();
         const std::string result = timeline.value->to_json_string(
                 &err,
-                // {}
-                &downgrade_version_manifest
+                target_version
         );
         end = std::chrono::steady_clock::now();
 
@@ -134,7 +131,7 @@ main(
         timeline.value->to_json_file(
                 "/var/tmp/io_perf_test.otio",
                 &err,
-                &downgrade_version_manifest
+                target_version
         );
         end = std::chrono::steady_clock::now();
         print_elapsed_time("serialize_json_to_file", begin, end);

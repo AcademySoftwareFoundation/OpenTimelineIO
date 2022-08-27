@@ -38,19 +38,17 @@ using label_to_schema_version_map = std::unordered_map<std::string, schema_versi
 using family_to_label_map = std::unordered_map<std::string, label_to_schema_version_map>;
 using family_label_spec = std::pair<std::string, std::string>;
 
-static family_to_label_map FAMILY_LABEL_MAP {
-    { 
-        "OTIO_CORE", 
-            { 
-                { "test", 
-                    { 
-                        { "Clip", 1 } 
-                    } 
-                } 
-            } 
-    }
-};
+/// add a new family:version:schema_version_map for downgrading
+bool
+add_family_label_version(
+        const std::string& family, 
+        const std::string& label,
+        const schema_version_map& new_map,
+        ErrorStatus* err
+);
 
+const family_to_label_map
+family_label_version_map();
 
 std::string 
 serialize_json_to_string(

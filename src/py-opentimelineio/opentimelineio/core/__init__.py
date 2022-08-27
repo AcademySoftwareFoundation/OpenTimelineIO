@@ -27,6 +27,8 @@ from .. _otio import ( # noqa
     _serialize_json_to_string,
     _serialize_json_to_file,
     type_version_map,
+    add_family_label_version,
+    family_label_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -63,6 +65,8 @@ __all__ = [
     'add_method',
     'upgrade_function_for',
     'downgrade_function_for',
+    'add_family_label_version',
+    'family_label_version_map',
     'serializable_field',
     'deprecated_field',
     'serialize_json_to_string',

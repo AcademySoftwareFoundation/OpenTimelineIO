@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
+#include "errorStatus.h"
 #include "nonstd/optional.hpp"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serialization.h"
@@ -28,6 +29,63 @@
 #endif
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+// built in version labels (@TODO: move this into a generated .h/.cpp file)
+static family_to_label_map FAMILY_LABEL_MAP {
+    { 
+        "OTIO_CORE", 
+            { 
+                { "test", 
+                    { 
+                        { "Clip", 1 } 
+                    } 
+                } 
+            } 
+    }
+};
+
+bool
+add_family_label_version(
+        const std::string& family, 
+        const std::string& label,
+        const schema_version_map& new_map,
+        ErrorStatus* err
+)
+{
+    auto fam_map_it = FAMILY_LABEL_MAP.find(family);
+
+    if (fam_map_it == FAMILY_LABEL_MAP.end())
+    {
+        FAMILY_LABEL_MAP[family] = label_to_schema_version_map {};
+    }
+
+    auto& fam_map = FAMILY_LABEL_MAP[family];
+
+    // check to see if label already exists, not allowed to overwrite
+    auto label_map_it = fam_map.find(label);
+    if (label_map_it != fam_map.end())
+    {
+        *err = ErrorStatus(
+                ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
+                (
+                 "version label: " + label 
+                 + " already exists in version family: " + family 
+                 + ", cannot add."
+                )
+        );
+        return false;
+    }
+
+    fam_map[label] = new_map;
+
+    return true;
+}
+
+const family_to_label_map
+family_label_version_map()
+{
+    return FAMILY_LABEL_MAP;
+}
 
 /**
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)

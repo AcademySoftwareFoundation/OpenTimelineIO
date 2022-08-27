@@ -48,8 +48,37 @@ main(
         return 1;
     }
 
-    // unit test of clone
     otio::ErrorStatus err;
+
+    // inject a test version
+    otio::add_family_label_version(
+            "io_perf_test",
+            "label", 
+            {
+                {"FakeSchema", 3},
+                {"OtherThing", 12000}
+            },
+            &err
+    );
+
+    std::cerr << "current version map: "  << std::endl;
+    auto fammap = otio::family_label_version_map();
+    for (auto kv_fam : fammap)
+    {
+        std::cerr << kv_fam.first << std::endl;
+        for (auto kv_lbl: kv_fam.second)
+        {
+            std::cerr << "  " << kv_lbl.first << std::endl;
+            for (auto kv_schema_version : kv_lbl.second)
+            {
+                std::cerr << "    \"" << kv_schema_version.first << "\": ";
+                std::cerr << kv_schema_version.second << std::endl;
+            }
+        }
+    }
+
+
+    // unit test of clone
 
     if (RUN_STRUCT.CLONE_TEST)
     {

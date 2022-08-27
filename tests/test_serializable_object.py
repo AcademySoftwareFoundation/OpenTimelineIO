@@ -218,17 +218,31 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         f = FakeThing()
         f.foo_two = "a thing here"
 
+        # @TODO: detect when conflicting version requests are made for schemas
+        fam = "OTIO_UNIT_TESTS"
+        lbl = "FakeThingDowngradeTest"
+        svm = {"FakeThingToDowngrade": 1}
+        otio.core.add_family_label_version(fam, lbl, svm)
+
+        family_map = otio.core.family_label_version_map()
+
+        self.assertIn(fam, family_map)
+        self.assertIn(lbl, family_map[fam])
+        self.assertEqual(family_map[fam][lbl], svm)
+
+        result = eval(
+            otio.adapters.otio_json.write_to_string(
+                f,
+                ("OTIO_UNIT_TESTS", "FakeThingDowngradeTest")
+            )
+        )
+
         self.assertDictEqual(
-                eval(
-                    otio.adapters.otio_json.write_to_string(
-                        f,
-                        downgrade_version_manifest={"FakeThingToDowngrade": 1}
-                    )
-                ),
-                {
-                    "OTIO_SCHEMA": "FakeThingToDowngrade.1",
-                    "foo": "a thing here", 
-                }
+            result,
+            {
+                "OTIO_SCHEMA": "FakeThingToDowngrade.1",
+                "foo": "a thing here",
+            }
         )
 
 

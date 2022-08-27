@@ -169,7 +169,6 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         """ test that the upgrading system skips versions that don't have
         upgrade functions"""
 
-
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
             _serializable_label = "NewStuff.4"
@@ -218,13 +217,38 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         f = FakeThing()
         f.foo_two = "a thing here"
 
-        # @TODO: detect when conflicting version requests are made for schemas
         fam = "OTIO_UNIT_TESTS"
         lbl = "FakeThingDowngradeTest"
         svm = {"FakeThingToDowngrade": 1}
         otio.core.add_family_label_version(fam, lbl, svm)
 
         family_map = otio.core.family_label_version_map()
+
+        # @TODO: probably not the right exception to raise here
+        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
+            otio.core.add_family_label_version(
+                    "OTIO_UNIT_TESTS",
+                    "test",
+                    {"Clip": 3}
+            )
+            otio.core.add_family_label_version(
+                    "OTIO_UNIT_TESTS",
+                    "test2",
+                    {"Clip": 2}
+            )
+            otio.core.add_family_label_version(
+                    "OTIO_UNIT_TESTS",
+                    "test",
+                    {"Clip": 1}
+            )
+
+        # never allowed to insert mappings into the OTIO_CORE family
+        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
+            otio.core.add_family_label_version(
+                    "OTIO_CORE",
+                    "not_allowed",
+                    {"Clip": 3}
+            )
 
         self.assertIn(fam, family_map)
         self.assertIn(lbl, family_map[fam])

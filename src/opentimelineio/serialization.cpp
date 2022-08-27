@@ -52,6 +52,18 @@ add_family_label_version(
         ErrorStatus* err
 )
 {
+    if (family == "OTIO_CORE")
+    {
+        *err = ErrorStatus(
+                ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
+                (
+                 "Not allowed to insert new version maps into the OTIO_CORE"
+                 " version family."
+                )
+        );
+        return false;
+    }
+
     auto fam_map_it = FAMILY_LABEL_MAP.find(family);
 
     if (fam_map_it == FAMILY_LABEL_MAP.end())

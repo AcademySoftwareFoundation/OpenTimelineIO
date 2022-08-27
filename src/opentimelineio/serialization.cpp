@@ -249,9 +249,6 @@ public:
     void write_value(std::string const& value) override { _store(any(value)); }
     void write_value(double value) override { _store(any(value)); }
 
-    // @{ @TODO: these three the json serializer knows how to dereference them
-    //           ... probably better to scooch that into this class... EXCEPT
-    //               the equivalence test wants to use their == methods
     void 
     write_value(RationalTime const& value) override
     { 
@@ -538,12 +535,6 @@ private:
         const std::string& schema_vers = schema_string.substr(sep+1);
         int current_version = -1;
 
-        // @TODO: need to pull the version number from the schema string rather
-        //        than the type record - in case there are some kind of weird
-        //        mixed types in the document that don't match the desired 
-        //        target -- OR it'll only downgrade from latest/current down 
-        //        to target and assume that you've intentionally done something
-        //        weird.  Need to consider this I guess.
         if (!schema_vers.empty()) 
         {
             current_version = std::stoi(schema_vers);
@@ -1323,10 +1314,11 @@ _fetch_downgrade_manifest(
         family_label_spec target_family_label_spec
 )
 {
+    const auto& family = target_family_label_spec.first;
+    const auto& label = target_family_label_spec.second;
+
     // @TODO: error handling
-    return (FAMILY_LABEL_MAP[
-        target_family_label_spec.first
-    ][target_family_label_spec.second]);
+    return FAMILY_LABEL_MAP[family][label];
 }
 
 // to json_string

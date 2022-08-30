@@ -36,12 +36,35 @@ print_elapsed_time(
     std::cout << message << ": " << dur/1000000.0 << " [s]" << std::endl;
 }
 
+void
+print_version_map()
+{
+    std::cerr << "current version map: "  << std::endl;
+    auto fammap = otio::family_label_version_map();
+    for (auto kv_fam : fammap)
+    {
+        std::cerr << kv_fam.first << std::endl;
+        for (auto kv_lbl: kv_fam.second)
+        {
+            std::cerr << "  " << kv_lbl.first << std::endl;
+            for (auto kv_schema_version : kv_lbl.second)
+            {
+                std::cerr << "    \"" << kv_schema_version.first << "\": ";
+                std::cerr << kv_schema_version.second << std::endl;
+            }
+        }
+    }
+
+}
+
 int
 main(
         int argc,
         char *argv[]
 )
 {
+    print_version_map();
+
     if (argc < 2) {
         std::cerr << "usage: otio_io_perf_test path/to/timeline.otio";
         std::cerr << std::endl;
@@ -61,22 +84,7 @@ main(
             &err
     );
 
-    std::cerr << "current version map: "  << std::endl;
-    auto fammap = otio::family_label_version_map();
-    for (auto kv_fam : fammap)
-    {
-        std::cerr << kv_fam.first << std::endl;
-        for (auto kv_lbl: kv_fam.second)
-        {
-            std::cerr << "  " << kv_lbl.first << std::endl;
-            for (auto kv_schema_version : kv_lbl.second)
-            {
-                std::cerr << "    \"" << kv_schema_version.first << "\": ";
-                std::cerr << kv_schema_version.second << std::endl;
-            }
-        }
-    }
-
+    print_version_map();
 
     // unit test of clone
 

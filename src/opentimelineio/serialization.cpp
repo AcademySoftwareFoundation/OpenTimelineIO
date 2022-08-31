@@ -30,20 +30,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-// built in version labels (@TODO: move this into a generated .h/.cpp file)
-static family_to_label_map FAMILY_LABEL_MAP {
-    { 
-        "OTIO_CORE", 
-            { 
-                { "test", 
-                    { 
-                        { "Clip", 1 } 
-                    } 
-                } 
-            } 
-    }
-};
-
 bool
 add_family_label_version(
         const std::string& family, 

@@ -38,6 +38,8 @@ using label_to_schema_version_map = std::unordered_map<std::string, schema_versi
 using family_to_label_map = std::unordered_map<std::string, label_to_schema_version_map>;
 using family_label_spec = std::pair<std::string, std::string>;
 
+extern family_to_label_map FAMILY_LABEL_MAP;
+
 /// add a new family:version:schema_version_map for downgrading
 bool
 add_family_label_version(

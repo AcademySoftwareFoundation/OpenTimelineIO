@@ -137,8 +137,8 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
 
 class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
-    def test_schema_versioning(self):
-        """ test basic upgrade function and unsupported schema error """
+    def test_schema_definition(self):
+        """define a schema and instantiate it from python"""
 
         # ensure that the type hasn't already been registered
         self.assertNotIn("Stuff", otio.core.type_version_map())
@@ -165,9 +165,8 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
         self.assertEqual(ft._dynamic_fields['foo'], "bar")
 
-    def test_upgrading_skips_versions(self):
-        """ test that the upgrading system skips versions that don't have
-        upgrade functions"""
+    def test_upgrade_versions(self):
+        """Test adding an upgrade functions for a type"""
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
@@ -181,6 +180,12 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         @otio.core.upgrade_function_for(FakeThing, 3)
         def upgrade_one_to_two_three(_data_dict):
             return {"foo_3": _data_dict["foo_2"]}
+
+        # not allowed to overwrite registered functions
+        with self.assertRaises(ValueError):
+            @otio.core.upgrade_function_for(FakeThing, 3)
+            def upgrade_one_to_two_three_again(_data_dict):
+                raise RuntimeError("shouldn't see this ever")
 
         ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
         self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
@@ -213,6 +218,12 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         @otio.core.downgrade_function_for(FakeThing, 2)
         def downgrade_2_to_1(_data_dict):
             return {"foo": _data_dict["foo_2"]}
+
+        # not allowed to overwrite registered functions
+        with self.assertRaises(ValueError):
+            @otio.core.downgrade_function_for(FakeThing, 2)
+            def downgrade_2_to_1_again(_data_dict):
+                raise RuntimeError("shouldn't see this ever")
 
         f = FakeThing()
         f.foo_two = "a thing here"

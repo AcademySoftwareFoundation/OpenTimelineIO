@@ -51,8 +51,23 @@ static bool register_upgrade_function(std::string const& schema_name,
         upgrade_function_obj(dobj);
     };
     
-    return TypeRegistry::instance().register_upgrade_function(schema_name, version_to_upgrade_to,
-                                                             upgrade_function);
+    if (
+            !TypeRegistry::instance().register_upgrade_function(
+                schema_name,
+                version_to_upgrade_to,
+                upgrade_function
+            )
+    )
+    {
+        auto err = ErrorStatusHandler();
+        err.error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "Upgrade function already exists for " + schema_name
+        );
+        return false;
+    }
+
+    return true;
 }
 
 static bool 
@@ -71,12 +86,24 @@ register_downgrade_function(
                 downgrade_function_obj(dobj);
             }
     );
+
+    if (
+            !TypeRegistry::instance().register_downgrade_function(
+                schema_name,
+                version_to_downgrade_from,
+                downgrade_function
+            )
+    )
+    {
+        auto err = ErrorStatusHandler();
+        err.error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "Downgrade function already exists for " + schema_name
+        );
+        return false;
+    }
     
-    return TypeRegistry::instance().register_downgrade_function(
-            schema_name,
-            version_to_downgrade_from,
-            downgrade_function
-    );
+    return true;
 }
 
 static void set_type_record(SerializableObject* so, std::string schema_name) {

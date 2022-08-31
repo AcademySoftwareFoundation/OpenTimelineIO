@@ -14,7 +14,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-label_to_schema_version_map CORE_VERSION_MAP {
+const label_to_schema_version_map CORE_VERSION_MAP {
     { "0.15.0.dev1",
         {
             { "Adapter", 1 },

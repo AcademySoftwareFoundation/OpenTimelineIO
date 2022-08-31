@@ -24,7 +24,7 @@ class AnyDictionary;
 using schema_version_map = std::unordered_map<std::string, int>;
 using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
 
-extern label_to_schema_version_map CORE_VERSION_MAP;
+extern const label_to_schema_version_map CORE_VERSION_MAP;
 
 class TypeRegistry
 {

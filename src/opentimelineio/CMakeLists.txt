@@ -72,7 +72,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     transition.cpp
     typeRegistry.cpp
     unknownSchema.cpp 
-    FAMILY_LABEL_MAP.cpp
+    CORE_VERSION_MAP.cpp
     ${OPENTIMELINEIO_HEADER_FILES})
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)

@@ -79,6 +79,7 @@ main(
             "label", 
             {
                 {"FakeSchema", 3},
+                {"Clip", 1},
                 {"OtherThing", 12000}
             },
             &err
@@ -100,7 +101,7 @@ main(
         assert(cl->name() == cl_clone->name());
     }
 
-    otio::family_label_spec target_version = {"OTIO_CORE", "test"};
+    otio::family_label_spec target_version = {"io_perf_test", "label"};
 
     if (RUN_STRUCT.SINGLE_CLIP_DOWNGRADE_TEST)
     {

@@ -135,7 +135,8 @@ TypeRegistry::TypeRegistry()
         )["downgrade_Clip.2_to_Clip.1"] = downgrade_md;
 
         d->erase("media_references");
-        d->erase("active_reference_key");
+        d->erase("active_media_reference_key");
+        d->erase("enabled");
     });
 }
 

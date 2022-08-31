@@ -7,21 +7,19 @@
 
 import os
 import argparse
-import json
 import tempfile
 
 import opentimelineio as otio
 
 
-FAMILY = "OTIO_CORE"
 LABEL_MAP_TEMPLATE = """{{ "{label}",
-                {{
+        {{
 {sv_map}
-                }}
-            }},
-            // {{next}}"""
+        }}
+    }},
+    // {{next}}"""
 MAP_ITEM_TEMPLATE = '{indent}{{ "{key}", {value} }},'
-INDENT = 20
+INDENT = 12
 
 
 def _parsed_args():

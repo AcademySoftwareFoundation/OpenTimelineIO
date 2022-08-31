@@ -9,14 +9,24 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <map>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
 class Encoder;
 class AnyDictionary;
+
+// typedefs for the schema downgrading system
+using schema_version_map = std::unordered_map<std::string, int>;
+using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
+using family_to_label_map = std::unordered_map<std::string, label_to_schema_version_map>;
+using family_label_spec = std::pair<std::string, std::string>;
+
+extern family_to_label_map FAMILY_LABEL_MAP;
 
 class TypeRegistry
 {
@@ -203,5 +213,21 @@ private:
     friend class SerializableObject;
     friend class CloningEncoder;
 };
+
+// Functions for dealing with schema versioning
+
+/// add a new family:version:schema_version_map for downgrading
+bool
+add_family_label_version(
+        const std::string& family, 
+        const std::string& label,
+        const schema_version_map& new_map,
+        ErrorStatus* err
+);
+
+const family_to_label_map
+family_label_version_map();
+
+
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

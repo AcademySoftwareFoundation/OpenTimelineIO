@@ -149,6 +149,13 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             foo_two = otio.core.serializable_field("foo_2", doc="test")
         ft = FakeThing()
 
+        # not allowed to register a type twice
+        with self.assertRaises(ValueError):
+            @otio.core.register_type
+            class FakeThing(otio.core.SerializableObject):
+                _serializable_label = "Stuff.1"
+                foo_two = otio.core.serializable_field("foo_2", doc="test")
+
         self.assertEqual(ft.schema_name(), "Stuff")
         self.assertEqual(ft.schema_version(), 1)
 

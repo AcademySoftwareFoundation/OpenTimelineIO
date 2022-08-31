@@ -36,8 +36,21 @@ static void register_python_type(py::object class_object,
             return r.take_value();
     };
 
-    TypeRegistry::instance().register_type(schema_name, schema_version,
-                                           nullptr, create, schema_name);
+    if (
+            !TypeRegistry::instance().register_type(
+                schema_name,
+                schema_version,
+                nullptr,
+                create,
+                schema_name
+            )
+    ) {
+        auto err = ErrorStatusHandler();
+        err.error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "Schema: " + schema_name + " has already been registered."
+        );
+    }
 }
 
 static bool register_upgrade_function(std::string const& schema_name,

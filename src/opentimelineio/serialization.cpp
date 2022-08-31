@@ -30,59 +30,10 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-bool
-add_family_label_version(
-        const std::string& family, 
-        const std::string& label,
-        const schema_version_map& new_map,
-        ErrorStatus* err
-)
+const label_to_schema_version_map
+core_label_to_schema_version_map()
 {
-    if (family == "OTIO_CORE")
-    {
-        *err = ErrorStatus(
-                ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
-                (
-                 "Not allowed to insert new version maps into the OTIO_CORE"
-                 " version family."
-                )
-        );
-        return false;
-    }
-
-    auto fam_map_it = FAMILY_LABEL_MAP.find(family);
-
-    if (fam_map_it == FAMILY_LABEL_MAP.end())
-    {
-        FAMILY_LABEL_MAP[family] = label_to_schema_version_map {};
-    }
-
-    auto& fam_map = FAMILY_LABEL_MAP[family];
-
-    // check to see if label already exists, not allowed to overwrite
-    auto label_map_it = fam_map.find(label);
-    if (label_map_it != fam_map.end())
-    {
-        *err = ErrorStatus(
-                ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
-                (
-                 "version label: " + label 
-                 + " already exists in version family: " + family 
-                 + ", cannot add."
-                )
-        );
-        return false;
-    }
-
-    fam_map[label] = new_map;
-
-    return true;
-}
-
-const family_to_label_map
-family_label_version_map()
-{
-    return FAMILY_LABEL_MAP;
+    return CORE_VERSION_MAP;
 }
 
 /**
@@ -160,10 +111,10 @@ public:
 
     CloningEncoder(
             CloningEncoder::ResultObjectPolicy result_object_policy,
-            optional<const schema_version_map*> downgrade_version_manifest = {}
+            optional<const schema_version_map*> schema_version_targets = {}
     ) : 
         _result_object_policy(result_object_policy),
-        _downgrade_version_manifest(downgrade_version_manifest)
+        _downgrade_version_manifest(schema_version_targets)
     {
         using namespace std::placeholders;
         _error_function = std::bind(&CloningEncoder::_error, this, _1);
@@ -892,11 +843,11 @@ bool
 SerializableObject::Writer::write_root(
     any const& value,
     Encoder& encoder,
-    optional<const schema_version_map*> downgrade_version_manifest,
+    optional<const schema_version_map*> schema_version_targets,
     ErrorStatus* error_status
 )
 {
-    Writer w(encoder, downgrade_version_manifest);
+    Writer w(encoder, schema_version_targets);
     w.write(w._no_key, value);
     return !encoder.has_errored(error_status);
 }
@@ -1295,36 +1246,16 @@ SerializableObject::clone(ErrorStatus* error_status) const
                : nullptr;
 }
 
-schema_version_map
-_fetch_downgrade_manifest(
-        family_label_spec target_family_label_spec
-)
-{
-    const auto& family = target_family_label_spec.first;
-    const auto& label = target_family_label_spec.second;
-
-    // @TODO: error handling
-    return FAMILY_LABEL_MAP[family][label];
-}
 
 // to json_string
 std::string
 serialize_json_to_string(
     const any& value,
-    optional<family_label_spec> target_family_label_spec,
+    optional<const schema_version_map*> schema_version_targets,
     ErrorStatus* error_status,
     int indent
 )
 {
-    // @TODO: gross
-    optional<const schema_version_map*> downgrade_version_manifest = {};
-    schema_version_map mp;
-    if (target_family_label_spec.has_value())
-    {
-        mp =  _fetch_downgrade_manifest(*target_family_label_spec);
-        downgrade_version_manifest = { &mp };
-    }
-
     OTIO_rapidjson::StringBuffer output_string_buffer;
 
     OTIO_rapidjson::PrettyWriter<
@@ -1346,7 +1277,7 @@ serialize_json_to_string(
             !SerializableObject::Writer::write_root(
                 value,
                 json_encoder,
-                downgrade_version_manifest,
+                schema_version_targets,
                 error_status
             )
     )
@@ -1362,18 +1293,10 @@ bool
 serialize_json_to_file(
     any const&         value,
     std::string const& file_name,
-    optional<family_label_spec> target_family_label_spec,
+    optional<const schema_version_map*> schema_version_targets,
     ErrorStatus*       error_status,
     int                indent)
 {
-    // @TODO: gross
-    optional<const schema_version_map*> downgrade_version_manifest = {};
-    schema_version_map mp;
-    if (target_family_label_spec.has_value())
-    {
-        mp =  _fetch_downgrade_manifest(*target_family_label_spec);
-        downgrade_version_manifest = { &mp };
-    }
 
 #if defined(_WINDOWS)
     const int wlen =
@@ -1415,7 +1338,7 @@ serialize_json_to_file(
     status = SerializableObject::Writer::write_root(
         value, 
         json_encoder,
-        downgrade_version_manifest,
+        schema_version_targets,
         error_status
     );
 

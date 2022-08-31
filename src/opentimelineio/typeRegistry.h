@@ -23,10 +23,8 @@ class AnyDictionary;
 // typedefs for the schema downgrading system
 using schema_version_map = std::unordered_map<std::string, int>;
 using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
-using family_to_label_map = std::unordered_map<std::string, label_to_schema_version_map>;
-using family_label_spec = std::pair<std::string, std::string>;
 
-extern family_to_label_map FAMILY_LABEL_MAP;
+extern label_to_schema_version_map CORE_VERSION_MAP;
 
 class TypeRegistry
 {
@@ -225,8 +223,9 @@ add_family_label_version(
         ErrorStatus* err
 );
 
-const family_to_label_map
-family_label_version_map();
+// fetch the map of core release:schema version maps
+const label_to_schema_version_map
+core_release_to_schema_version_map();
 
 
 

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "opentimelineio/clip.h"
+#include "opentimelineio/typeRegistry.h"
 #include "util.h"
 #include <opentimelineio/any.h>
 #include <opentimelineio/serialization.h>
@@ -40,18 +41,13 @@ void
 print_version_map()
 {
     std::cerr << "current version map: "  << std::endl;
-    auto fammap = otio::family_label_version_map();
-    for (auto kv_fam : fammap)
+    for (auto kv_lbl: opentimelineio::v1_0::core_release_to_schema_version_map())
     {
-        std::cerr << kv_fam.first << std::endl;
-        for (auto kv_lbl: kv_fam.second)
+        std::cerr << "  " << kv_lbl.first << std::endl;
+        for (auto kv_schema_version : kv_lbl.second)
         {
-            std::cerr << "  " << kv_lbl.first << std::endl;
-            for (auto kv_schema_version : kv_lbl.second)
-            {
-                std::cerr << "    \"" << kv_schema_version.first << "\": ";
-                std::cerr << kv_schema_version.second << std::endl;
-            }
+            std::cerr << "    \"" << kv_schema_version.first << "\": ";
+            std::cerr << kv_schema_version.second << std::endl;
         }
     }
 
@@ -73,21 +69,13 @@ main(
 
     otio::ErrorStatus err;
 
-    // inject a test version
-    otio::add_family_label_version(
-            "io_perf_test",
-            "label", 
-            {
-                {"FakeSchema", 3},
-                {"Clip", 1},
-                {"OtherThing", 12000}
-            },
-            &err
-    );
+    otio::schema_version_map downgrade_manifest = {
+        {"FakeSchema", 3},
+        {"Clip", 1},
+        {"OtherThing", 12000}
+    };
 
     print_version_map();
-
-    // unit test of clone
 
     if (RUN_STRUCT.CLONE_TEST)
     {
@@ -101,14 +89,12 @@ main(
         assert(cl->name() == cl_clone->name());
     }
 
-    otio::family_label_spec target_version = {"io_perf_test", "label"};
-
     if (RUN_STRUCT.SINGLE_CLIP_DOWNGRADE_TEST)
     {
         otio::SerializableObject::Retainer<otio::Clip> cl = new otio::Clip("test");
         cl->metadata()["example thing"] = "banana";
         chrono_time_point begin = std::chrono::steady_clock::now();
-        cl->to_json_file("/var/tmp/clip.otio", &err, target_version);
+        cl->to_json_file("/var/tmp/clip.otio", &err, &downgrade_manifest);
         chrono_time_point end = std::chrono::steady_clock::now();
         print_elapsed_time("downgrade clip", begin, end);
     }
@@ -137,7 +123,7 @@ main(
         begin = std::chrono::steady_clock::now();
         const std::string result = timeline.value->to_json_string(
                 &err,
-                target_version
+                &downgrade_manifest
         );
         end = std::chrono::steady_clock::now();
 
@@ -169,7 +155,7 @@ main(
         timeline.value->to_json_file(
                 "/var/tmp/io_perf_test.otio",
                 &err,
-                target_version
+                &downgrade_manifest
         );
         end = std::chrono::steady_clock::now();
         print_elapsed_time("serialize_json_to_file", begin, end);

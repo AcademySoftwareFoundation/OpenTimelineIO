@@ -35,7 +35,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 std::string 
 serialize_json_to_string(
     const any& value,
-    optional<family_label_spec> target_family_label_spec = {},
+    optional<const schema_version_map*> schema_version_targets = {},
     ErrorStatus* error_status = nullptr,
     int indent = 4
 );
@@ -48,7 +48,7 @@ serialize_json_to_file(
     //        but that isn't allowed, so maybe a const family_label_spec*?
     //        (to avoid the copy).
     //        these aren't inner loop functions, so isn't *that* crucial anyway.
-    optional<family_label_spec> target_family_label_spec = {},
+    optional<const schema_version_map*> schema_version_targets = {},
     ErrorStatus*       error_status = nullptr,
     int                indent       = 4
 );

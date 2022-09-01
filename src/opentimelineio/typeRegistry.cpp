@@ -150,24 +150,24 @@ TypeRegistry::register_type(
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
 
-    auto existing_tr = _find_type_record(schema_name);
-
-    // if the exact type record has already been added (happens in unit tests
-    // and re-setting manifest stuff)
-    if (existing_tr)
-    {
-        if (
-                existing_tr->schema_name == schema_name
-                && existing_tr->schema_version == schema_version
-                && existing_tr->class_name == class_name
-                && (
-                    existing_tr->create.target<SerializableObject*()>() 
-                    == create.target<SerializableObject*()>()
-                )
-        ) {
-            return true;
-        }
-    }
+    // auto existing_tr = _find_type_record(schema_name);
+    //
+    // // if the exact type record has already been added (happens in unit tests
+    // // and re-setting manifest stuff)
+    // if (existing_tr)
+    // {
+    //     if (
+    //             existing_tr->schema_name == schema_name
+    //             && existing_tr->schema_version == schema_version
+    //             && existing_tr->class_name == class_name
+    //             && (
+    //                 existing_tr->create.target<SerializableObject*()>() 
+    //                 == create.target<SerializableObject*()>()
+    //             )
+    //     ) {
+    //         return true;
+    //     }
+    // }
 
     if (!_find_type_record(schema_name))
     {

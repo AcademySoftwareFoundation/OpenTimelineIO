@@ -27,6 +27,7 @@ from .. _otio import ( # noqa
     _serialize_json_to_string,
     _serialize_json_to_file,
     type_version_map,
+    release_to_schema_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -73,14 +74,25 @@ __all__ = [
 ]
 
 
+def full_version_map():
+    return {
+            "OTIO_CORE": release_to_schema_version_map()
+    }
+
+
 def fetch_version_map(family, label):
-    raise NotImplementedError()
+    if family != "OTIO_CORE":
+        raise NotImplementedError
+
+    src = release_to_schema_version_map()
+
+    return src[label]
 
 
 def serialize_json_to_string(root, schema_version_targets=None, indent=4):
     return _serialize_json_to_string(
             _value_to_any(root),
-            schema_version_targets,
+            schema_version_targets or {},
             indent
     )
 
@@ -94,7 +106,7 @@ def serialize_json_to_file(
     return _serialize_json_to_file(
             _value_to_any(root),
             filename,
-            schema_version_targets,
+            schema_version_targets or {},
             indent
     )
 

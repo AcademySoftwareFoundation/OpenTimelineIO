@@ -16,6 +16,9 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// temporarily disabling this feature while I chew on it
+const static bool EXCEPTION_ON_DOUBLE_REGISTER = false;
+
 static void register_python_type(py::object class_object,
                                  std::string schema_name,
                                  int schema_version) {
@@ -44,6 +47,7 @@ static void register_python_type(py::object class_object,
                 create,
                 schema_name
             )
+            && EXCEPTION_ON_DOUBLE_REGISTER
     ) {
         auto err = ErrorStatusHandler();
         err.error_status = ErrorStatus(
@@ -69,7 +73,7 @@ static bool register_upgrade_function(std::string const& schema_name,
                 schema_name,
                 version_to_upgrade_to,
                 upgrade_function
-            )
+            ) //&& EXCEPTION_ON_DOUBLE_REGISTER
     )
     {
         auto err = ErrorStatusHandler();
@@ -105,7 +109,7 @@ register_downgrade_function(
                 schema_name,
                 version_to_downgrade_from,
                 downgrade_function
-            )
+            ) //&& EXCEPTION_ON_DOUBLE_REGISTER
     )
     {
         auto err = ErrorStatusHandler();
@@ -144,13 +148,18 @@ PYBIND11_MODULE(_otio, m) {
             "_serialize_json_to_string",
             [](
                 PyAny* pyAny,
-                optional<const schema_version_map*> schema_version_targets,
+                const schema_version_map& schema_version_targets,
                 int indent
               ) 
             {
+              optional<const schema_version_map*> pass_through = {};
+              if (!schema_version_targets.empty())
+              {
+                pass_through = {&schema_version_targets};
+              }
                 auto result = serialize_json_to_string(
                             pyAny->a,
-                            schema_version_targets,
+                            pass_through,
                             ErrorStatusHandler(),
                             indent
                     );
@@ -158,27 +167,32 @@ PYBIND11_MODULE(_otio, m) {
                 return result;
             },
             "value"_a,
-            py::arg("schema_version_targets") = nullopt,
+            "schema_version_targets"_a,
             "indent"_a
     )
      .def("_serialize_json_to_file",
           [](
               PyAny* pyAny,
               std::string filename,
-              optional<const schema_version_map*> schema_version_targets,
+              const schema_version_map& schema_version_targets,
               int indent
           ) {
+              optional<const schema_version_map*> pass_through = {};
+              if (!schema_version_targets.empty())
+              {
+                pass_through = {&schema_version_targets};
+              }
               return serialize_json_to_file(
                       pyAny->a,
                       filename,
-                      schema_version_targets,
+                      pass_through,
                       ErrorStatusHandler(),
                       indent
               );
           },
           "value"_a,
           "filename"_a,
-          py::arg("schema_version_targets") = nullopt,
+          "schema_version_targets"_a,
           "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {
@@ -243,7 +257,10 @@ Return an instance of the schema from data in the data_dict.
           "schema_name"_a,
           "version_to_downgrade_from"_a,
           "downgrade_function"_a);
-    m.def("release_to_schema_version_map", &core_release_to_schema_version_map);
+    m.def(
+            "release_to_schema_version_map",
+            [](){ return label_to_schema_version_map(CORE_VERSION_MAP);}
+    );
     m.def("flatten_stack", [](Stack* s) {
             return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);

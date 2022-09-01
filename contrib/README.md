@@ -8,7 +8,7 @@ The team is in the process of phasing out this area in favor of using individual
 repos within the
 [OpenTimelineIO GitHub Organization](https://github.com/OpenTimelineIO/).
 
-New contrib submissions should be created in standalone repos and can be later
+New contributions should be created in standalone repos, and those can later be
 migrated to the OTIO GitHub organization after review.
 
 ## Creating New Contrib Adapters and Plugins

@@ -1,8 +1,8 @@
 # OpenTimelineIO Contrib Area
 
-The contrib area was a place to host adapters and application plugins submit
-from the community, that have challenging external dependencies, or may not
-have the same level of support as the core.
+The contrib area was a place to host adapters and application plugins submitted
+by the OpenTimelineIO community. Those contributions may have involved challenging external 
+dependencies, and may not have the same level of support as the core.
 
 The team is in the process of phasing out this area in favor of using individual
 repos within the

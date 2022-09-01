@@ -182,6 +182,13 @@ doc-plugins:
 doc-plugins-update:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_plugin_documentation.py -o docs/tutorials/otio-plugins.md --public-only --sanitized-paths
 
+# build the CORE_VERSION_MAP cpp file
+version-map:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp --dryrun
+
+version-map-update:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp -o src/opentimelineio/CORE_VERSION_MAP.cpp
+
 # generate documentation in html
 doc-html:
 	@# if you just want to build the docs yourself outside of RTD

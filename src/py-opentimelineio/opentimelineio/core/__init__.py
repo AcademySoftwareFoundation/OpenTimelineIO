@@ -27,8 +27,6 @@ from .. _otio import ( # noqa
     _serialize_json_to_string,
     _serialize_json_to_file,
     type_version_map,
-    add_family_label_version,
-    family_label_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -65,8 +63,7 @@ __all__ = [
     'add_method',
     'upgrade_function_for',
     'downgrade_function_for',
-    'add_family_label_version',
-    'family_label_version_map',
+    'fetch_version_map',
     'serializable_field',
     'deprecated_field',
     'serialize_json_to_string',
@@ -76,10 +73,14 @@ __all__ = [
 ]
 
 
-def serialize_json_to_string(root, target_family_label_spec=None, indent=4):
+def fetch_version_map(family, label):
+    raise NotImplementedError()
+
+
+def serialize_json_to_string(root, schema_version_targets=None, indent=4):
     return _serialize_json_to_string(
             _value_to_any(root),
-            target_family_label_spec,
+            schema_version_targets,
             indent
     )
 
@@ -87,13 +88,13 @@ def serialize_json_to_string(root, target_family_label_spec=None, indent=4):
 def serialize_json_to_file(
         root,
         filename,
-        target_family_label_spec=None,
+        schema_version_targets=None,
         indent=4
 ):
     return _serialize_json_to_file(
             _value_to_any(root),
             filename,
-            target_family_label_spec,
+            schema_version_targets,
             indent
     )
 

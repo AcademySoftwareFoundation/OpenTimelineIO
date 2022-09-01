@@ -243,20 +243,7 @@ Return an instance of the schema from data in the data_dict.
           "schema_name"_a,
           "version_to_downgrade_from"_a,
           "downgrade_function"_a);
-    m.def(
-            "add_family_label_version",
-            [](
-                const std::string& fam, 
-                const std::string& lbl,
-                const schema_version_map& new_map
-            ) {
-                return add_family_label_version(fam, lbl, new_map, ErrorStatusHandler());
-            },
-            "family"_a,
-            "label"_a,
-            "new_map"_a
-    );
-    m.def("family_label_version_map", &family_label_version_map);
+    m.def("release_to_schema_version_map", &core_release_to_schema_version_map);
     m.def("flatten_stack", [](Stack* s) {
             return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);

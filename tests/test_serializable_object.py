@@ -235,48 +235,15 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         f = FakeThing()
         f.foo_two = "a thing here"
 
-        fam = "OTIO_UNIT_TESTS"
-        lbl = "FakeThingDowngradeTest"
-        svm = {"FakeThingToDowngrade": 1}
-        otio.core.add_family_label_version(fam, lbl, svm)
+        # downgrade_target = otio.core.fetch_version_map(
+        #         "OTIO_CORE",
+        #         otio.__version__
+        # )
 
-        family_map = otio.core.family_label_version_map()
-
-        # @TODO: probably not the right exception to raise here
-        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
-            otio.core.add_family_label_version(
-                    "OTIO_UNIT_TESTS",
-                    "test",
-                    {"Clip": 3}
-            )
-            otio.core.add_family_label_version(
-                    "OTIO_UNIT_TESTS",
-                    "test2",
-                    {"Clip": 2}
-            )
-            otio.core.add_family_label_version(
-                    "OTIO_UNIT_TESTS",
-                    "test",
-                    {"Clip": 1}
-            )
-
-        # never allowed to insert mappings into the OTIO_CORE family
-        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
-            otio.core.add_family_label_version(
-                    "OTIO_CORE",
-                    "not_allowed",
-                    {"Clip": 3}
-            )
-
-        self.assertIn(fam, family_map)
-        self.assertIn(lbl, family_map[fam])
-        self.assertEqual(family_map[fam][lbl], svm)
+        downgrade_target = {"FakeThingToDowngrade": 1}
 
         result = eval(
-            otio.adapters.otio_json.write_to_string(
-                f,
-                ("OTIO_UNIT_TESTS", "FakeThingDowngradeTest")
-            )
+            otio.adapters.otio_json.write_to_string(f, downgrade_target)
         )
 
         self.assertDictEqual(

@@ -223,10 +223,4 @@ add_family_label_version(
         ErrorStatus* err
 );
 
-// fetch the map of core release:schema version maps
-const label_to_schema_version_map
-core_release_to_schema_version_map();
-
-
-
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

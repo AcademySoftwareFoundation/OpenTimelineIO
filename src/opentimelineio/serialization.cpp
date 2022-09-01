@@ -30,12 +30,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-const label_to_schema_version_map
-core_label_to_schema_version_map()
-{
-    return CORE_VERSION_MAP;
-}
-
 /**
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
  * we need to do our dynamically classed hierarchy to abstract away which writer

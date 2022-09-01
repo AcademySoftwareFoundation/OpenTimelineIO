@@ -41,7 +41,7 @@ void
 print_version_map()
 {
     std::cerr << "current version map: "  << std::endl;
-    for (auto kv_lbl: opentimelineio::v1_0::core_release_to_schema_version_map())
+    for (auto kv_lbl: otio::CORE_VERSION_MAP)
     {
         std::cerr << "  " << kv_lbl.first << std::endl;
         for (auto kv_schema_version : kv_lbl.second)
@@ -74,8 +74,6 @@ main(
         {"Clip", 1},
         {"OtherThing", 12000}
     };
-
-    print_version_map();
 
     if (RUN_STRUCT.CLONE_TEST)
     {

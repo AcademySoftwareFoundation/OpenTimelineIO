@@ -405,10 +405,4 @@ TypeRegistry::type_version_map(
     }
 }
 
-const label_to_schema_version_map
-core_release_to_schema_version_map()
-{
-    return CORE_VERSION_MAP;
-}
-
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

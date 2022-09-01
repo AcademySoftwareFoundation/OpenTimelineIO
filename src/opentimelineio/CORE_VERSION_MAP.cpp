@@ -14,7 +14,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-// @TODO: could slit this into "current" and "last" files, that get swizzled
 const label_to_schema_version_map CORE_VERSION_MAP {
     { "0.15.0.dev1",
         {

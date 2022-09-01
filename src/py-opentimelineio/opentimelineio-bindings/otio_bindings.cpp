@@ -144,13 +144,13 @@ PYBIND11_MODULE(_otio, m) {
             "_serialize_json_to_string",
             [](
                 PyAny* pyAny,
-                optional<family_label_spec> target_family_label_spec,
+                optional<const schema_version_map*> schema_version_targets,
                 int indent
               ) 
             {
                 auto result = serialize_json_to_string(
                             pyAny->a,
-                            target_family_label_spec,
+                            schema_version_targets,
                             ErrorStatusHandler(),
                             indent
                     );
@@ -158,27 +158,27 @@ PYBIND11_MODULE(_otio, m) {
                 return result;
             },
             "value"_a,
-            py::arg("target_family_label_spec") = nullopt,
+            py::arg("schema_version_targets") = nullopt,
             "indent"_a
     )
      .def("_serialize_json_to_file",
           [](
               PyAny* pyAny,
               std::string filename,
-              optional<family_label_spec> target_family_label_spec,
+              optional<const schema_version_map*> schema_version_targets,
               int indent
           ) {
               return serialize_json_to_file(
                       pyAny->a,
                       filename,
-                      target_family_label_spec,
+                      schema_version_targets,
                       ErrorStatusHandler(),
                       indent
               );
           },
           "value"_a,
           "filename"_a,
-          py::arg("target_family_label_spec") = nullopt,
+          py::arg("schema_version_targets") = nullopt,
           "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {

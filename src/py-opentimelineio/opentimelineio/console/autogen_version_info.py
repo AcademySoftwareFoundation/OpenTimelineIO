@@ -3,9 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""Generate the schema-version map for this version of OTIO"""
+"""Generate the CORE_VERSION_MAP for this version of OTIO"""
 
-import os
 import argparse
 import tempfile
 
@@ -23,8 +22,6 @@ INDENT = 12
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
-
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -45,20 +42,31 @@ def _parsed_args():
             help="Version label to assign this schema map to."
     )
     parser.add_argument(
+        "-i",
+        "--input",
+        type=str,
+        default=None,
+        required=True,
+        help="Path to CORE_VERSION_MAP.last.cpp"
+    )
+    parser.add_argument(
         "-o",
         "--output",
         type=str,
         default=None,
-        help="Filepath to write result to."
+        help="Path to where CORE_VERSION_MAP.cpp should be written to."
     )
 
     return parser.parse_args()
 
 
-def _insert_current_schema_version_map(src_text, label, version_map):
+def generate_core_version_map(src_text, label, version_map):
+    # turn the braces in the .cpp file into python-format template compatible
+    # form ({{ }} where needed)
     src_text = src_text.replace("{", "{{").replace("}", "}}")
     src_text = src_text.replace("// {{next}}", "{next}")
 
+    # iterate over the map and print the template out
     map_text = []
     for key, value in version_map.items():
         map_text.append(
@@ -70,27 +78,23 @@ def _insert_current_schema_version_map(src_text, label, version_map):
         )
     map_text = '\n'.join(map_text)
 
+    # assemble the result
     next_text = LABEL_MAP_TEMPLATE.format(label=label, sv_map=map_text)
     return src_text.format(label=label, next=next_text)
 
 
 def main():
-    """  main entry point  """
-
     args = _parsed_args()
 
-    dirname = os.path.dirname(__file__)
-
-    with open(os.path.join(dirname, "built_in_version_header.cpp"), 'r') as fi:
+    with open(args.input, 'r') as fi:
         input = fi.read()
 
-    result = _insert_current_schema_version_map(
+    result = generate_core_version_map(
             input,
             args.label,
             otio.core.type_version_map()
     )
 
-    # print it out somewhere
     if args.dryrun:
         print(result)
         return
@@ -99,14 +103,14 @@ def main():
     if not output:
         output = tempfile.NamedTemporaryFile(
             'w',
-            suffix="built_in_version_header.cpp",
+            suffix="CORE_VERSION_MAP.cpp",
             delete=False
         ).name
 
     with open(output, 'w') as fo:
         fo.write(result)
 
-    print("Wrote schema-version map to: '{}'.".format(output))
+    print("Wrote CORE_VERSION_MAP to: '{}'.".format(output))
 
 
 if __name__ == '__main__':

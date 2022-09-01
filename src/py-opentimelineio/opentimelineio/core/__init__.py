@@ -74,21 +74,6 @@ __all__ = [
 ]
 
 
-def full_version_map():
-    return {
-            "OTIO_CORE": release_to_schema_version_map()
-    }
-
-
-def fetch_version_map(family, label):
-    if family != "OTIO_CORE":
-        raise NotImplementedError
-
-    src = release_to_schema_version_map()
-
-    return src[label]
-
-
 def serialize_json_to_string(root, schema_version_targets=None, indent=4):
     return _serialize_json_to_string(
             _value_to_any(root),

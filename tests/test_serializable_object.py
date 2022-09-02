@@ -175,7 +175,7 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # not allowed to register a type twice
         with self.assertRaises(ValueError):
             @otio.core.register_type
-            class DoubleReg(otio.core.SerializableObject):  # noqa F811
+            class DoubleReg(otio.core.SerializableObject):  # noqa: F811
                 _serializable_label = "Stuff.1"
 
     def test_upgrade_versions(self):

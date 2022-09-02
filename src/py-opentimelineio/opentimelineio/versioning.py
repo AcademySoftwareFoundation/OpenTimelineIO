@@ -10,6 +10,7 @@ def full_map():
     """Return the full map of schema version sets, including core and plugins.
 
     Organized as follows:
+    ```
     {
         "FAMILY_NAME": {
             "LABEL": {
@@ -20,10 +21,12 @@ def full_map():
             }
         }
     }
+    ```
 
     The "OTIO_CORE" family is always provided and represents the built in
     schemas defined in the C++ core.
     IE:
+    ```
     {
             "OTIO_CORE": {
                 "0.15.0": {
@@ -32,6 +35,7 @@ def full_map():
                 }
             }
     }
+    ```
     """
     result = copy.deepcopy(plugins.ActiveManifest().version_manifests)
     result.update(

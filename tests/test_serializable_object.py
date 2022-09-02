@@ -168,7 +168,7 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     @unittest.skip("@TODO: disabled pending discussion")
     def test_double_register_schema(self):
         @otio.core.register_type
-        class DoubleReg(otio.core.SerializableObject):  
+        class DoubleReg(otio.core.SerializableObject):
             _serializable_label = "Stuff.1"
             foo_two = otio.core.serializable_field("foo_2", doc="test")
         _ = DoubleReg()  # quiet pyflakes

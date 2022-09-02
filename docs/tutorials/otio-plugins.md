@@ -136,41 +136,14 @@ De-serializes an OpenTimelineIO object from a json string
       OpenTimeline: An OpenTimeline object
 ```
   - input_str
-- write_to_file: 
-```
-Serializes an OpenTimelineIO object into a file
-
-  Args:
-
-      input_otio (OpenTimeline): An OpenTimeline object
-      filepath (str): The name of an otio file to write to
-      indent (int): number of spaces for each json indentation level.
-  Use -1 for no indentation or newlines.
-
-  Returns:
-      bool: Write success
-
-  Raises:
-      ValueError: on write error
-```
+- write_to_file:
   - input_otio
   - filepath
-  - target_family_label_spec
+  - target_schema_versions
   - indent
-- write_to_string: 
-```
-Serializes an OpenTimelineIO object into a string
-
-  Args:
-      input_otio (OpenTimeline): An OpenTimeline object
-      indent (int): number of spaces for each json indentation level. Use
-  -1 for no indentation or newlines.
-
-  Returns:
-      str: A json serialized string representation
-```
+- write_to_string:
   - input_otio
-  - target_family_label_spec
+  - target_schema_versions
   - indent
 
 

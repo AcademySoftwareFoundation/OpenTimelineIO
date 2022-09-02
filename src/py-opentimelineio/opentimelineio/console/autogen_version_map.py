@@ -68,7 +68,7 @@ def generate_core_version_map(src_text, label, version_map):
 
     # iterate over the map and print the template out
     map_text = []
-    for key, value in version_map.items():
+    for key, value in sorted(version_map.items()):
         map_text.append(
             MAP_ITEM_TEMPLATE.format(
                 indent=' ' * INDENT,

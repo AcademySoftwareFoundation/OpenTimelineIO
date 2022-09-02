@@ -107,7 +107,7 @@ def main():
             delete=False
         ).name
 
-    with open(output, 'w') as fo:
+    with open(output, 'w', newline="\n") as fo:
         fo.write(result)
 
     print("Wrote CORE_VERSION_MAP to: '{}'.".format(output))

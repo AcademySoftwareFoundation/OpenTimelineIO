@@ -4,6 +4,7 @@
 """unit tests for the version manifest plugin system"""
 
 import unittest
+import os
 
 import opentimelineio as otio
 from tests import utils
@@ -15,9 +16,14 @@ class TestPlugin_VersionManifest(unittest.TestCase):
         self.man = utils.create_manifest()
         otio.plugins.manifest._MANIFEST = self.man
 
+        if "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" in os.environ:
+            del os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"]
+
     def tearDown(self):
         otio.plugins.manifest._MANIFEST = self.bak
         utils.remove_manifest(self.man)
+        if "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" in os.environ:
+            del os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"]
 
     def test_read_in_manifest(self):
         self.assertIn("TEST_FAMILY_NAME", self.man.version_manifests)
@@ -35,10 +41,37 @@ class TestPlugin_VersionManifest(unittest.TestCase):
         )
 
     def test_fetch_map(self):
-        self.assertEquals(
+        self.assertEqual(
                 otio.versioning.fetch_map("TEST_FAMILY_NAME", "TEST_LABEL"),
-                {"ExampleSchema": 1, "Clip": 1}
+                {"ExampleSchema": 2, "EnvVarTestSchema":1, "Clip": 1}
         )
+
+    def test_env_variable_downgrade(self):
+        @otio.core.register_type
+        class EnvVarTestSchema(otio.core.SerializableObject):
+            _serializable_label = "EnvVarTestSchema.2"
+            foo_two = otio.core.serializable_field("foo_2")
+
+        @otio.core.downgrade_function_for(EnvVarTestSchema, 2)
+        def downgrade_2_to_1(_data_dict):
+            return {"foo": _data_dict["foo_2"]}
+
+        evt = EnvVarTestSchema()
+        evt.foo_two = "asdf"
+
+        result = eval(otio.adapters.otio_json.write_to_string(evt))
+        self.assertEqual(result["OTIO_SCHEMA"], "EnvVarTestSchema.2")
+
+        # env variable should make a downgrade by default...
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
+                "TEST_FAMILY_NAME:TEST_LABEL"
+        )
+        result = eval(otio.adapters.otio_json.write_to_string(evt))
+        self.assertEqual(result["OTIO_SCHEMA"], "EnvVarTestSchema.1")
+
+        # ...but can still be overridden by passing in an argument
+        result = eval(otio.adapters.otio_json.write_to_string(evt, {}))
+        self.assertEqual(result["OTIO_SCHEMA"], "EnvVarTestSchema.2")
 
 
 if __name__ == '__main__':

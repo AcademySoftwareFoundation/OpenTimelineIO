@@ -27,7 +27,8 @@
     "version_manifests" : {
         "TEST_FAMILY_NAME": {
             "TEST_LABEL": {
-                "ExampleSchema":1,
+                "ExampleSchema":2,
+                "EnvVarTestSchema":1,
                 "Clip": 1
             }
         }

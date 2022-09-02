@@ -6,8 +6,6 @@ import os
 import sys
 import subprocess
 
-import opentimelineio as otio
-
 from opentimelineio.console import (
     autogen_serialized_datamodel as asd,
     autogen_plugin_documentation as apd,

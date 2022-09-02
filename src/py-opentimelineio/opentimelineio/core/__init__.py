@@ -76,9 +76,9 @@ __all__ = [
 
 def serialize_json_to_string(root, schema_version_targets=None, indent=4):
     return _serialize_json_to_string(
-            _value_to_any(root),
-            schema_version_targets or {},
-            indent
+        _value_to_any(root),
+        schema_version_targets or {},
+        indent
     )
 
 
@@ -89,10 +89,10 @@ def serialize_json_to_file(
         indent=4
 ):
     return _serialize_json_to_file(
-            _value_to_any(root),
-            filename,
-            schema_version_targets or {},
-            indent
+        _value_to_any(root),
+        filename,
+        schema_version_targets or {},
+        indent
     )
 
 
@@ -189,8 +189,11 @@ def downgrade_function_for(cls, version_to_upgrade_to):
             data.clear()
             data.update(modified)
 
-        register_downgrade_function(cls._serializable_label.split(".")[0],
-                version_to_upgrade_to, wrapped_update)
+        register_downgrade_function(
+            cls._serializable_label.split(".")[0],
+            version_to_upgrade_to,
+            wrapped_update
+        )
         return func
 
     return decorator_func

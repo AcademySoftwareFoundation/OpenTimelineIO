@@ -35,9 +35,9 @@ def full_map():
     """
     result = copy.deepcopy(plugins.ActiveManifest().version_manifests)
     result.update(
-            {
-                "OTIO_CORE": core.release_to_schema_version_map(),
-            }
+        {
+            "OTIO_CORE": core.release_to_schema_version_map(),
+        }
     )
     return result
 

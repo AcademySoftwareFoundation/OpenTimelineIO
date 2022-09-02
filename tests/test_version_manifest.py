@@ -28,22 +28,22 @@ class TestPlugin_VersionManifest(unittest.TestCase):
     def test_read_in_manifest(self):
         self.assertIn("TEST_FAMILY_NAME", self.man.version_manifests)
         self.assertIn(
-                "TEST_LABEL",
-                self.man.version_manifests["TEST_FAMILY_NAME"]
+            "TEST_LABEL",
+            self.man.version_manifests["TEST_FAMILY_NAME"]
         )
 
     def test_full_map(self):
         d = otio.versioning.full_map()
         self.assertIn("TEST_FAMILY_NAME", d)
         self.assertIn(
-                "TEST_LABEL",
-                d["TEST_FAMILY_NAME"]
+            "TEST_LABEL",
+            d["TEST_FAMILY_NAME"]
         )
 
     def test_fetch_map(self):
         self.assertEqual(
-                otio.versioning.fetch_map("TEST_FAMILY_NAME", "TEST_LABEL"),
-                {"ExampleSchema": 2, "EnvVarTestSchema":1, "Clip": 1}
+            otio.versioning.fetch_map("TEST_FAMILY_NAME", "TEST_LABEL"),
+            {"ExampleSchema": 2, "EnvVarTestSchema": 1, "Clip": 1}
         )
 
     def test_env_variable_downgrade(self):
@@ -64,7 +64,7 @@ class TestPlugin_VersionManifest(unittest.TestCase):
 
         # env variable should make a downgrade by default...
         os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
-                "TEST_FAMILY_NAME:TEST_LABEL"
+            "TEST_FAMILY_NAME:TEST_LABEL"
         )
         result = eval(otio.adapters.otio_json.write_to_string(evt))
         self.assertEqual(result["OTIO_SCHEMA"], "EnvVarTestSchema.1")

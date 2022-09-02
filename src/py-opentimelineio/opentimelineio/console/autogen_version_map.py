@@ -27,19 +27,19 @@ def _parsed_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-            "-d",
-            "--dryrun",
-            default=False,
-            action="store_true",
-            help="write to stdout instead of printing to file."
+        "-d",
+        "--dryrun",
+        default=False,
+        action="store_true",
+        help="write to stdout instead of printing to file."
     )
     parser.add_argument(
-            "-l",
-            "--label",
-            default=otio.__version__,
-            # @TODO - should we strip the .dev1 label?  that would probably be
-            #         more consistent since we don't do sub-beta releases
-            help="Version label to assign this schema map to."
+        "-l",
+        "--label",
+        default=otio.__version__,
+        # @TODO - should we strip the .dev1 label?  that would probably be
+        #         more consistent since we don't do sub-beta releases
+        help="Version label to assign this schema map to."
     )
     parser.add_argument(
         "-i",
@@ -70,11 +70,11 @@ def generate_core_version_map(src_text, label, version_map):
     map_text = []
     for key, value in version_map.items():
         map_text.append(
-                MAP_ITEM_TEMPLATE.format(
-                    indent=' ' * INDENT,
-                    key=key,
-                    value=value
-                )
+            MAP_ITEM_TEMPLATE.format(
+                indent=' ' * INDENT,
+                key=key,
+                value=value
+            )
         )
     map_text = '\n'.join(map_text)
 
@@ -90,9 +90,9 @@ def main():
         input = fi.read()
 
     result = generate_core_version_map(
-            input,
-            args.label,
-            otio.core.type_version_map()
+        input,
+        args.label,
+        otio.core.type_version_map()
     )
 
     if args.dryrun:

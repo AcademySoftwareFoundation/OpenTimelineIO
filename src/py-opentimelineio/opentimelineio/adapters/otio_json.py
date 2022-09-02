@@ -50,8 +50,8 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
 
     If target_schema_versions is None and the environment variable
     "{}" is set, will read a map out of
-    that for downgrade target.  The variable should be of the form FAMILY:LABEL,
-    for example "MYSTUDIO:JUNE2022".
+    that for downgrade target.  The variable should be of the form
+    FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
     Returns:
         str: A json serialized string representation
@@ -60,7 +60,7 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
     if target_schema_versions is None and DEFAULT_VERSION_ENVVAR in os.environ:
         version_envvar = os.environ[DEFAULT_VERSION_ENVVAR]
         family, label = version_envvar.split(":")
-        # @TODO: something isn't right, I shouldn't need to do this extra hop...
+        # @TODO: something isn't right, I shouldn't need to do this extra hop-
         #        if I don't, I end up with an AnyDictionary instead of a python
         #        {}, which pybind doesn't quite map into the std::map the way
         #        I'd hope when calling serialize_json_to_string()
@@ -70,9 +70,9 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
         target_schema_versions = d
 
     return core.serialize_json_to_string(
-            input_otio,
-            target_schema_versions,
-            indent
+        input_otio,
+        target_schema_versions,
+        indent
     )
 
 
@@ -94,8 +94,8 @@ def write_to_file(
 
     If target_schema_versions is None and the environment variable
     "{}" is set, will read a map out of
-    that for downgrade target.  The variable should be of the form FAMILY:LABEL,
-    for example "MYSTUDIO:JUNE2022".
+    that for downgrade target.  The variable should be of the form
+    FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
     Returns:
         bool: Write success
@@ -110,8 +110,8 @@ def write_to_file(
         target_schema_versions = versioning.fetch_map(family, label)
 
     return core.serialize_json_to_file(
-            input_otio,
-            filepath,
-            target_schema_versions,
-            indent
+        input_otio,
+        filepath,
+        target_schema_versions,
+        indent
     )

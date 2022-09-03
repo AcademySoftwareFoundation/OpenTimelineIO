@@ -95,9 +95,9 @@ def read_mix(mix, rate):
     before_mix_cut = time(value, rate)
 
     mix_range = otio.opentime.TimeRange.range_from_start_end_time(
-            start_time=time(mix.get('in'), rate),
-            end_time_exclusive=(time(mix.get('out'), rate))
-        )
+        start_time=time(mix.get('in'), rate),
+        end_time_exclusive=(time(mix.get('out'), rate))
+    )
     after_mix_cut = mix_range.duration - before_mix_cut
     reverse = bool(int(read_property(mix, 'reverse')))
 
@@ -183,7 +183,8 @@ def resize_item(item, delta, right):
     """Resize an item and keep its position (no ripple)
     by resizing the neighbors too"""
     item.source_range = otio.opentime.TimeRange(
-        start_time=item.source_range.start_time - (delta if not right else otio.opentime.RationalTime(0)),
+        start_time=(item.source_range.start_time
+                    - (delta if not right else otio.opentime.RationalTime(0))),
         duration=item.source_range.duration + delta
     )
     if right:
@@ -218,7 +219,8 @@ def read_from_string(input_str):
     bin_producer_name = {}
     for entry in main_bin.findall('entry'):
         producer = byid[entry.get('producer')]
-        bin_producer_name[read_property(producer, 'kdenlive:id')] = producer.get('id')
+        kdenlive_id = read_property(producer, 'kdenlive:id')
+        bin_producer_name[kdenlive_id] = producer.get('id')
 
     timeline = otio.schema.Timeline(
         name=mlt.get('name', 'Kdenlive imported timeline'))
@@ -256,35 +258,43 @@ def read_from_string(input_str):
 
         # 1. step: flaten internal mix tracks to one track
         for mix in mixes:
-            mix_range, before_mix_cut, after_mix_cut, reverse = read_mix(mix, rate)
+            (mix_range, before_mix_cut,
+             after_mix_cut, reverse) = read_mix(mix, rate)
             if mix_range is None:
                 continue
 
             found_clip = stack[0].clip_if(search_range=mix_range)[0]
-            resize_item(found_clip, - (after_mix_cut if reverse else before_mix_cut), not reverse)
+            resize_item(found_clip,
+                        - (after_mix_cut if reverse else before_mix_cut),
+                        not reverse)
 
             found_clip = stack[1].clip_if(search_range=mix_range)[0]
-            resize_item(found_clip, - (before_mix_cut if reverse else after_mix_cut), reverse)
+            resize_item(found_clip,
+                        - (before_mix_cut if reverse else after_mix_cut),
+                        reverse)
 
         track = otio.algorithms.flatten_stack(stack)
 
         # 2. step: build and insert transitions
         for mix in mixes:
-            mix_range, before_mix_cut, after_mix_cut, reverse = read_mix(mix, rate)
+            (mix_range, before_mix_cut,
+             after_mix_cut, reverse) = read_mix(mix, rate)
             if mix_range is None:
                 continue
 
-            found_clip = track.clip_if(search_range=otio.opentime.TimeRange.range_from_start_end_time(
-                    start_time=time(mix.get('in'), rate) - otio.opentime.RationalTime(1 if before_mix_cut.value == 0 else 1),
+            found_clip = track.clip_if(
+                search_range=otio.opentime.TimeRange.range_from_start_end_time(
+                    start_time=(time(mix.get('in'), rate)
+                                - otio.opentime.RationalTime(
+                                    1 if before_mix_cut.value == 0 else 1)),
                     end_time_exclusive=(time(mix.get('out'), rate))
                 ))[0]
             index = track.index(found_clip)
             track.insert(index + 1, otio.schema.Transition(
-                    transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
-                    in_offset=after_mix_cut,
-                    out_offset=before_mix_cut
-                    )
-            )
+                transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+                in_offset=after_mix_cut,
+                out_offset=before_mix_cut
+            ))
 
         track.name = read_property(subtractor, 'kdenlive:track_name')
         if bool(read_property(subtractor, 'kdenlive:audio_track')):
@@ -297,14 +307,17 @@ def read_from_string(input_str):
     for transition in maintractor.findall('transition'):
         kdenlive_id = read_property(transition, 'kdenlive_id')
         if kdenlive_id == 'wipe':
-            timeline.tracks[int(read_property(transition, 'b_track')) - 1].append(
+            b_track = int(read_property(transition, 'b_track'))
+            timeline.tracks[b_track - 1].append(
                 otio.schema.Transition(
                     transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
                     in_offset=time(transition.get('in'), rate),
                     out_offset=time(transition.get('out'), rate)))
 
     # process timeline markers
-    read_markers(timeline.tracks.markers, read_property(main_bin, "kdenlive:docproperties.guides"), rate)
+    read_markers(timeline.tracks.markers,
+                 read_property(main_bin, "kdenlive:docproperties.guides"),
+                 rate)
 
     return timeline
 
@@ -343,7 +356,7 @@ def write_markers(markers):
             marker_type = [
                 key for key in marker_types.items() if key[1] == marker.color
             ][0][0]
-        except:
+        except Exception:
             marker_type = 0
         markers_array.append(
             {
@@ -359,7 +372,8 @@ def write_to_string(input_otio):
     """Write a timeline to Kdenlive project
     Re-creating the bin storing all used source clips
     and constructing the tracks"""
-    if not isinstance(input_otio, otio.schema.Timeline) and len(input_otio) > 1:
+    if (not isinstance(input_otio, otio.schema.Timeline)
+            and len(input_otio) > 1):
         print('WARNING: Only one timeline supported, using the first one.')
         input_otio = input_otio[0]
     # Project header & metadata
@@ -631,7 +645,8 @@ def _decode_media_reference_url(url):
     return unquote(urlparse(url).path)
 
 
-def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audio=None):
+def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None,
+                   is_audio=None):
     producer = None
     service, resource, effect_speed, _ = _prod_key_from_item(item, is_audio)
     if service and resource:
@@ -647,10 +662,10 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
                 mlt, 'producer',
                 {
                     'id': producer_id,
-                    'in': clock(item.media_reference.available_range.start_time),
-                    'out': clock(
-                        item.media_reference.available_range.end_time_inclusive()
-                    ),
+                    'in':
+                        clock(item.media_reference.available_range.start_time),
+                    'out':
+                        clock(item.media_reference.available_range.end_time_inclusive())
                 },
             )
             write_property(producer, 'global_feed', '1')
@@ -660,12 +675,15 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
             if speed is not None:
                 kdenlive_id = media_prod[(service, resource, None, None)][1]
                 write_property(producer, 'mlt_service', "timewarp")
-                write_property(producer, 'resource', ":".join((str(speed), resource)))
+                write_property(producer,
+                               'resource', ":".join((str(speed), resource)))
                 write_property(producer, 'warp_speed', str(speed))
                 write_property(producer, 'warp_resource', resource)
                 write_property(producer, 'warp_pitch', "0")
-                write_property(producer, 'set.test_audio', "0" if is_audio else "1")
-                write_property(producer, 'set.test_image', "1" if is_audio else "0")
+                write_property(producer,
+                               'set.test_audio', "0" if is_audio else "1")
+                write_property(producer,
+                               'set.test_image', "1" if is_audio else "0")
                 start_time = otio.opentime.RationalTime(
                     round(
                         item.media_reference.available_range.start_time.value
@@ -696,7 +714,8 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
                 str(int(duration.value)),
             )
             write_property(producer, 'kdenlive:id', kdenlive_id)
-            if (isinstance(item.media_reference, otio.schema.GeneratorReference)
+            if (isinstance(item.media_reference,
+                           otio.schema.GeneratorReference)
                     and item.media_reference.generator_kind == 'SMPTEBars'):
                 # set the type of the test pattern to SMPTE (value 4)
                 write_property(producer, '0', '4')

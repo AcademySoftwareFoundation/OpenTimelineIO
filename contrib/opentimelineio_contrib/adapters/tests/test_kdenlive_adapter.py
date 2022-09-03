@@ -65,7 +65,8 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         for n, marker in enumerate(timeline.tracks.markers):
             self.assertEqual(0, marker.marked_range.duration.value)
-            self.assertEqual(markers_data[n][0], marker.marked_range.start_time.value)
+            self.assertEqual(markers_data[n][0],
+                             marker.marked_range.start_time.value)
             self.assertEqual(markers_data[n][1], marker.name)
             self.assertEqual(markers_data[n][2], marker.color)
 
@@ -160,17 +161,17 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(clips_mix), 8)
 
         normal_item_order = [
-                otio.schema.Clip,
-                otio.schema.Clip,
-                otio.schema.Gap,
-                otio.schema.Clip,
-                otio.schema.Clip,
-                otio.schema.Clip,
-                otio.schema.Clip,
-                otio.schema.Gap,
-                otio.schema.Clip,
-                otio.schema.Clip
-            ]
+            otio.schema.Clip,
+            otio.schema.Clip,
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Clip,
+            otio.schema.Clip,
+            otio.schema.Clip,
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Clip
+        ]
         self.assertEqual(
             [type(item) for item in video_track_normal],
             normal_item_order
@@ -181,22 +182,22 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         mix_item_order = [
-                otio.schema.Clip,
-                otio.schema.Transition,
-                otio.schema.Clip,
-                otio.schema.Gap,
-                otio.schema.Clip,
-                otio.schema.Transition,
-                otio.schema.Clip,
-                otio.schema.Transition,
-                otio.schema.Clip,
-                otio.schema.Transition,
-                otio.schema.Clip,
-                otio.schema.Gap,
-                otio.schema.Clip,
-                otio.schema.Transition,
-                otio.schema.Clip
-            ]
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Clip,
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Clip,
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Clip
+        ]
         self.assertEqual(
             [type(item) for item in video_track_mix],
             mix_item_order
@@ -239,7 +240,8 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         mixcut.text = '16'
         reverese_prop = ET.SubElement(mix, 'property', {'name': 'reverse'})
         reverese_prop.text = '1'
-        mix_range, before_mix_cut, after_mix_cut, reverse = kdenlive_adapter.read_mix(mix, rate)
+        (mix_range, before_mix_cut,
+         after_mix_cut, reverse) = kdenlive_adapter.read_mix(mix, rate)
         self.assertIsNotNone(mix_range)
         self.assertIsNotNone(before_mix_cut)
         self.assertIsNotNone(after_mix_cut)
@@ -249,7 +251,9 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             duration=otio.opentime.RationalTime(2 * rate, rate)
         ))
         self.assertEqual(before_mix_cut, otio.opentime.RationalTime(16, rate))
-        self.assertEqual(after_mix_cut, otio.opentime.RationalTime(2 * rate, rate) - otio.opentime.RationalTime(16, rate))
+        self.assertEqual(after_mix_cut,
+                         otio.opentime.RationalTime(2 * rate, rate)
+                         - otio.opentime.RationalTime(16, rate))
         self.assertEqual(reverse, True)
 
     def test_read_clip_markers(self):
@@ -274,12 +278,14 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             for clip in filter(only_clips, track):
                 self.assertEqual(len(clip.markers), 2)
 
-                markers_data = ((1782, 'Lila', otio.schema.MarkerColor.PURPLE),
-                                (2899, 'Orange', otio.schema.MarkerColor.ORANGE))
+                markers_data = (
+                    (1782, 'Lila', otio.schema.MarkerColor.PURPLE),
+                    (2899, 'Orange', otio.schema.MarkerColor.ORANGE))
 
                 for n, marker in enumerate(clip.markers):
                     self.assertEqual(0, marker.marked_range.duration.value)
-                    self.assertEqual(markers_data[n][0], marker.marked_range.start_time.value)
+                    self.assertEqual(markers_data[n][0],
+                                     marker.marked_range.start_time.value)
                     self.assertEqual(markers_data[n][1], marker.name)
                     self.assertEqual(markers_data[n][2], marker.color)
 

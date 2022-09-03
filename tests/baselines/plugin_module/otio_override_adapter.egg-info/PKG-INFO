@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: otio-override-adapter
+Version: 1.0.0
+Summary: Dummy Adapter used for testing.
+Home-page: http://opentimeline.io
+Author: Contributors to the OpenTimelineIO project
+Author-email: otio-discussion@lists.aswf.io
+License: Modified Apache 2.0 License
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Platform: any

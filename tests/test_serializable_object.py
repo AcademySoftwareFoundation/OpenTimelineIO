@@ -230,13 +230,13 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             _serializable_label = "FakeThingToDowngrade.2"
             foo_two = otio.core.serializable_field("foo_2")
 
-        @otio.core.downgrade_function_for(FakeThing, 2)
+        @otio.core.downgrade_function_from(FakeThing, 2)
         def downgrade_2_to_1(_data_dict):
             return {"foo": _data_dict["foo_2"]}
 
         # not allowed to overwrite registered functions
         with self.assertRaises(ValueError):
-            @otio.core.downgrade_function_for(FakeThing, 2)
+            @otio.core.downgrade_function_from(FakeThing, 2)
             def downgrade_2_to_1_again(_data_dict):
                 raise RuntimeError("shouldn't see this ever")
 

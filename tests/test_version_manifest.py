@@ -89,7 +89,7 @@ class TestPlugin_VersionManifest(unittest.TestCase):
             _serializable_label = "EnvVarTestSchema.2"
             foo_two = otio.core.serializable_field("foo_2")
 
-        @otio.core.downgrade_function_for(EnvVarTestSchema, 2)
+        @otio.core.downgrade_function_from(EnvVarTestSchema, 2)
         def downgrade_2_to_1(_data_dict):
             return {"foo": _data_dict["foo_2"]}
 

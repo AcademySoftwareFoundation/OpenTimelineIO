@@ -63,7 +63,7 @@ __all__ = [
     'set_type_record',
     'add_method',
     'upgrade_function_for',
-    'downgrade_function_for',
+    'downgrade_function_from',
     'fetch_version_map',
     'serializable_field',
     'deprecated_field',
@@ -155,35 +155,30 @@ def upgrade_function_for(cls, version_to_upgrade_to):
     return decorator_func
 
 
-def downgrade_function_for(cls, version_to_upgrade_to):
+def downgrade_function_from(cls, version_to_downgrade_from):
     """
-    @TODO <- fix docs
-    Decorator for identifying schema class downgrade functions.
-
     Example:
 
     .. code-block:: python
 
-        @upgrade_function_for(MyClass, 5)
-        def upgrade_to_version_five(data):
-            pass
+        @downgrade_function_from(MyClass, 5)
+        def downgrade_from_five_to_four(data):
+            return {"old_attr": data["new_attr"]}
 
-    This will get called to upgrade a schema of MyClass to version 5. MyClass
-    must be a class deriving from :class:`~SerializableObject`.
+    This will get called to downgrade a schema of MyClass from version 5 to
+    version 4. MyClass must be a class deriving from
+    :class:`~SerializableObject`.
 
-    The upgrade function should take a single argument - the dictionary to
-    upgrade, and return a dictionary with the fields upgraded.
+    The downgrade function should take a single argument - the dictionary to
+    downgrade, and return a dictionary with the fields downgraded.
 
-    Remember that you don't need to provide an upgrade function for upgrades
-    that add or remove fields, only for schema versions that change the field
-    names.
-
-    :param type cls: class to upgrade
-    :param int version_to_upgrade_to: the version to upgrade to
+    :param type cls: class to downgrade
+    :param int version_to_downgrade_from: the function downgrading from this
+                                          version to (version - 1)
     """
 
     def decorator_func(func):
-        """ Decorator for marking upgrade functions """
+        """ Decorator for marking downgrade functions """
         def wrapped_update(data):
             modified = func(data)
             data.clear()
@@ -191,7 +186,7 @@ def downgrade_function_for(cls, version_to_upgrade_to):
 
         register_downgrade_function(
             cls._serializable_label.split(".")[0],
-            version_to_upgrade_to,
+            version_to_downgrade_from,
             wrapped_update
         )
         return func

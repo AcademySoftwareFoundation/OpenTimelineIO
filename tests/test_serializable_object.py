@@ -7,6 +7,7 @@ import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
 import unittest
+import json
 
 
 class OpenTimeTypeSerializerTest(unittest.TestCase):
@@ -249,7 +250,7 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         downgrade_target = {"FakeThingToDowngrade": 1}
 
-        result = eval(
+        result = json.loads(
             otio.adapters.otio_json.write_to_string(f, downgrade_target)
         )
 

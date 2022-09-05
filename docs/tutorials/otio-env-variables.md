@@ -5,7 +5,7 @@ various aspects of OTIO.
 
 ## Plugin Configuration
 
-These variables must be set _before_ the OpenTimelineIO python library is imported.  They only impact the python library.  The C++ has no environment variables.
+These variables must be set _before_ the OpenTimelineIO python library is imported.  They only impact the python library.  The C++ library has no environment variables.
 
 - `OTIO_PLUGIN_MANIFEST_PATH`: a ":" separated string with paths to .manifest.json files that contain OTIO plugin manifests.  See: [Tutorial on how to write an adapter plugin](write-an-adapter).
 - `OTIO_DEFAULT_MEDIA_LINKER`: the name of the default media linker to use after reading a file, if "" then no media linker is automatically invoked.

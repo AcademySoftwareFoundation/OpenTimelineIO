@@ -14,23 +14,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-//
-// {
-//  "OTIO_CORE": {
-//  ^ family
-//      "0.14.0": {
-//      ^ family_label
-//          "Clip": 1,
-//          ^ schema  ^ schema_version
-//          ...
-//      },
-//      "0.15.0": {
-//          ...
-//      },
-//      ...
-//  },
-//  "MY_COMPANY_PLUGIN_SETS": {}
-// }
 
 std::string 
 serialize_json_to_string(

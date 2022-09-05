@@ -13,12 +13,12 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 using chrono_time_point = std::chrono::steady_clock::time_point;
 
 constexpr struct {
-    bool TO_JSON_STRING = true;
+    bool TO_JSON_STRING              = true;
     bool TO_JSON_STRING_NO_DOWNGRADE = true;
-    bool TO_JSON_FILE = true;
-    bool TO_JSON_FILE_NO_DOWNGRADE = true;
-    bool CLONE_TEST = true;
-    bool SINGLE_CLIP_DOWNGRADE_TEST = true;
+    bool TO_JSON_FILE                = true;
+    bool TO_JSON_FILE_NO_DOWNGRADE   = true;
+    bool CLONE_TEST                  = true;
+    bool SINGLE_CLIP_DOWNGRADE_TEST  = true;
 } RUN_STRUCT ;
 
 /// utility function for printing std::chrono elapsed time

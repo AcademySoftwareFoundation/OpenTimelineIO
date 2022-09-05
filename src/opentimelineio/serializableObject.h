@@ -536,18 +536,17 @@ public:
         bool _any_equals(any const& lhs, any const& rhs);
 
         std::string _no_key;
-        // @TODO: should probably be unordered maps
-        std::map<std::type_info const*, std::function<void(any const&)>>
+        std::unordered_map<std::type_info const*, std::function<void(any const&)>>
             _write_dispatch_table;
-        std::map<
+        std::unordered_map<
             std::type_info const*,
             std::function<bool(any const&, any const&)>>
             _equality_dispatch_table;
 
-        std::map<std::string, std::function<void(any const&)>>
+        std::unordered_map<std::string, std::function<void(any const&)>>
             _write_dispatch_table_by_name;
-        std::map<SerializableObject const*, std::string> _id_for_object;
-        std::map<std::string, int>                       _next_id_for_type;
+        std::unordered_map<SerializableObject const*, std::string> _id_for_object;
+        std::unordered_map<std::string, int>                       _next_id_for_type;
 
         class Encoder& _encoder;
         optional<const schema_version_map*> _downgrade_version_manifest;

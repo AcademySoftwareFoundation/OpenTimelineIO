@@ -137,7 +137,7 @@ def write_to_file(
         otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
             with the default environment variable
             "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
-    """.format(_DEFAULT_VERSION_ENVVAR)
+    """
 
     if (
         target_schema_versions is None

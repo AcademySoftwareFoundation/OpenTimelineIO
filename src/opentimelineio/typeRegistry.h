@@ -207,15 +207,4 @@ private:
     friend class CloningEncoder;
 };
 
-// Functions for dealing with schema versioning
-
-/// add a new family:version:schema_version_map for downgrading
-bool
-add_family_label_version(
-        const std::string& family, 
-        const std::string& label,
-        const schema_version_map& new_map,
-        ErrorStatus* err
-);
-
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

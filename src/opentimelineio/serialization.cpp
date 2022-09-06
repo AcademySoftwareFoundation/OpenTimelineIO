@@ -978,8 +978,6 @@ SerializableObject::Writer::write(
                           std::to_string(++_next_id_for_type[schema_type_name]);
     _id_for_object[value] = next_id;
 
-    std::string schema_str = "";
-
     // detect if downgrading needs to happen
     const std::string& schema_name = value->schema_name();
     int schema_version = value->schema_version();
@@ -1022,6 +1020,8 @@ SerializableObject::Writer::write(
             }
         }
     }
+
+    std::string schema_str = "";
 
     // if its an unknown schema, the schema name is computed from the
     // _original_schema_name and _original_schema_version attributes

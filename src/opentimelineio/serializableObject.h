@@ -22,8 +22,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-using schema_version_map = std::unordered_map<std::string, int>;
-
 class SerializableObject
 {
 public:

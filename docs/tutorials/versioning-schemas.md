@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes OpenTimelineIO's systems for dealing with different schema versions when reading files, writing files, and finally as part of the development process.  It is intended for developers who are integrating OpenTimelineIO into their pipelines or applications.
+This document describes OpenTimelineIO's systems for dealing with different schema versions when reading files, writing files, or during development of the library itself.  It is intended for developers who are integrating OpenTimelineIO into their pipelines or applications, or working directly on OpenTimelineIO.
 
 TL;DR for users: OpenTimelineIO should be able to read files produced by older versions of the library and be able to write files that are compatible with older versions of the library from newer versions.
 
@@ -277,7 +277,9 @@ If a change to a schema is to add a field, for which the default value is the co
 
 Additionally, upgrade functions will be called in order, but they need not cover every version number.  So if there is an upgrade function for version 2 and 4, to get to version 4, OTIO will automatically apply function 2 and then function 4 in order, skipping the missing 3.
 
-Example of adding a field:
+Downgrade functions must be called in order with no gaps.
+
+Example of adding a field (`other_field`):
 
 ```python
 @otio.core.register_type
@@ -287,7 +289,7 @@ class SimpleClass(otio.core.SerializeableObject):
   other_field = otio.core.serializeable_field("other_field", int)
 ```
 
-Removing a field:
+Removing a field (`my_field`):
 
 ```python
 @otio.core.register_type
@@ -296,4 +298,4 @@ class SimpleClass(otio.core.SerializeableObject):
   other_field = otio.core.serializeable_field("other_field", int)
 ```
 
-Similarly, when deleting a field, if the field is now ignored and does not contribute to computation, no upgrade is needed.
+Similarly, when deleting a field, if the field is now ignored and does not contribute to computation, no upgrade or downgrade function is needed.

@@ -2,11 +2,12 @@
 #include "opentimelineio/typeRegistry.h"
 #include <stdint.h>
 
-// demonstrates a minimal custom SerializableObject written in C++ with an
-// upgrade function
+// demonstrates a minimal custom SerializableObject written in C++ with upgrade
+// and downgrade functions
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
+// define the custom class
 class SimpleClass : public otio::SerializableObject
 {
 public:
@@ -24,8 +25,9 @@ protected:
 
     virtual ~SimpleClass() = default;
 
+    // methods for serialization
     virtual bool 
-    read_from(Reader& reader) 
+    read_from(Reader& reader) override
     {
         auto result = (
             reader.read("new_field", &_new_field) 
@@ -35,8 +37,9 @@ protected:
         return result;
     }
 
+    // ...and deserialization
     virtual void 
-    write_to(Writer& writer) const 
+    write_to(Writer& writer) const override
     {
         Parent::write_to(writer);
         writer.write("new_field", _new_field);
@@ -99,6 +102,8 @@ main(
     );
 
     assert(sc2->new_field() == sc->new_field());
+
+    std::cout << "Upgrade/Downgrade demo complete." << std::endl;
 
     return 0;
 }

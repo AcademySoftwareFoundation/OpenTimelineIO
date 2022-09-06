@@ -21,7 +21,9 @@ class Encoder;
 class AnyDictionary;
 
 // typedefs for the schema downgrading system
-using schema_version_map = std::unordered_map<std::string, int>;
+// @TODO: should we make version an int64_t?  That would match what we can
+//        serialize natively, since we only serialize 64 bit signed ints.
+using schema_version_map = std::unordered_map<std::string, int64_t>;
 using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
 
 extern const label_to_schema_version_map CORE_VERSION_MAP;

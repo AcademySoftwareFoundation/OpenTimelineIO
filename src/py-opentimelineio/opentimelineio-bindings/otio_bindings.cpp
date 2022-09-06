@@ -93,6 +93,10 @@ register_downgrade_function(
         int version_to_downgrade_from,
         py::object const& downgrade_function_obj) 
 {
+    // @TODO: I'm actually surprised this works, since the python function
+    //        seems to often make new dictionaries and relies on the return
+    //        vallue... but here it doesn't seem like the return value matters.
+    //        ...the C++ functions definitely work in place though.
     std::function<void (AnyDictionary* d)> downgrade_function = ( 
             [downgrade_function_obj](AnyDictionary* d) 
             {

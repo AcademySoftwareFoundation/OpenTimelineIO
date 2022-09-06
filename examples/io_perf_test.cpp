@@ -12,7 +12,8 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
 using chrono_time_point = std::chrono::steady_clock::time_point;
 
-constexpr struct {
+const struct {
+    bool PRINT_CPP_VERSION_FAMILY    = false;
     bool TO_JSON_STRING              = true;
     bool TO_JSON_STRING_NO_DOWNGRADE = true;
     bool TO_JSON_FILE                = true;
@@ -59,9 +60,13 @@ main(
         char *argv[]
 )
 {
-    print_version_map();
+    if (RUN_STRUCT.PRINT_CPP_VERSION_FAMILY)
+    {
+        print_version_map();
+    }
 
-    if (argc < 2) {
+    if (argc < 2) 
+    {
         std::cerr << "usage: otio_io_perf_test path/to/timeline.otio";
         std::cerr << std::endl;
         return 1;

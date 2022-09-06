@@ -133,7 +133,7 @@ public:
     get_if_set(
             const std::string& key,
             containedType* result
-    )
+    ) const
     {
         const auto it = this->find(key);
 
@@ -157,7 +157,7 @@ public:
     inline bool
     has_key(
             const std::string& key
-    )
+    ) const
     {
         return (this->find(key) != this->end());
     }

@@ -82,7 +82,7 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
             -1 for no indentation or newlines.
 
     If target_schema_versions is None and the environment variable
-    "{0}" is set, will read a map out of
+    "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" is set, will read a map out of
     that for downgrade target.  The variable should be of the form
     FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
@@ -91,8 +91,9 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
 
     Raises:
         otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-            with the default environment variable "{0}".
-    """.format(_DEFAULT_VERSION_ENVVAR)
+            with the default environment variable
+            "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+    """
 
     if (
             target_schema_versions is None
@@ -124,7 +125,7 @@ def write_to_file(
             Use -1 for no indentation or newlines.
 
     If target_schema_versions is None and the environment variable
-    "{0}" is set, will read a map out of
+    "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" is set, will read a map out of
     that for downgrade target.  The variable should be of the form
     FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
@@ -134,7 +135,8 @@ def write_to_file(
     Raises:
         ValueError: on write error
         otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-            with the default environment variable "{0}".
+            with the default environment variable
+            "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
     """.format(_DEFAULT_VERSION_ENVVAR)
 
     if (

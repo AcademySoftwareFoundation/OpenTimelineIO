@@ -141,7 +141,28 @@ De-serializes an OpenTimelineIO object from a json string
   - filepath
   - target_schema_versions
   - indent
-- write_to_string:
+- write_to_string: 
+```
+Serializes an OpenTimelineIO object into a string
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+      indent (int): number of spaces for each json indentation level. Use
+  -1 for no indentation or newlines.
+
+  If target_schema_versions is None and the environment variable
+  "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" is set, will read a map out of
+  that for downgrade target.  The variable should be of the form
+  FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
+
+  Returns:
+      str: A json serialized string representation
+
+  Raises:
+      otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
+          with the default environment variable
+          "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+```
   - input_otio
   - target_schema_versions
   - indent

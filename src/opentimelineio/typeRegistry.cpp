@@ -3,6 +3,7 @@
 
 #include "opentimelineio/typeRegistry.h"
 
+#include "anyDictionary.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
@@ -113,21 +114,35 @@ TypeRegistry::TypeRegistry()
     });
 
     // 2->1
-    register_downgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
-        AnyDictionary media_refs = d->get_default("media_references", AnyDictionary());
-        const std::string active_reference_key = (
-                d->get_default("active_media_reference_key", std::string(""))
-        );
-        AnyDictionary active_ref = AnyDictionary();
-        if (active_reference_key != "") {
-            active_ref = media_refs.get_default(active_reference_key, AnyDictionary());
-        }
+    register_downgrade_function(
+            Clip::Schema::name,
+            2,
+            [](AnyDictionary* d) 
+            {
+                AnyDictionary mrefs;
+                std::string active_rkey = ""; 
 
-        (*d)["media_reference"] = active_ref;
+                if (d->get_if_set("media_references", &mrefs))
+                {
+                    if (
+                            d->get_if_set(
+                                "active_media_reference_key",
+                                &active_rkey
+                            )
+                    )
+                    {
+                        AnyDictionary active_ref;
+                        if (mrefs.get_if_set(active_rkey, &active_ref))
+                        {
+                            (*d)["media_reference"] = active_ref;
+                        }
+                    }
+                }
 
-        d->erase("media_references");
-        d->erase("active_media_reference_key");
-    });
+                d->erase("media_references");
+                d->erase("active_media_reference_key");
+            }
+    );
 }
 
 bool

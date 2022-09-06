@@ -123,23 +123,35 @@ public:
         map::swap(other);
     }
 
-    /// @TODO: need the right policy for accessing/returning membors
+    /// @TODO: remove all of these @{
+
+    // if key is in this, and the type of key matches the type of result, then
+    // set result to the value of any_cast<type>(this[key]) and return true,
+    // otherwise return false
     template<typename containedType>
-    containedType
-    get_default(
+    bool
+    get_if_set(
             const std::string& key,
-            const containedType& default_value
+            containedType* result
     )
     {
-        const auto& it = this->find(key);
+        const auto it = this->find(key);
 
-        return (
-                 it != this->end() 
-                 && it->second.type().hash_code() == typeid(containedType).hash_code()
-        ) ?
-            any_cast<containedType>(it->second) 
-            : default_value
-        ;
+        if (
+                 (it != this->end())
+                 && (
+                     it->second.type().hash_code() 
+                     == typeid(containedType).hash_code()
+                )
+        ) 
+        {
+            *result = any_cast<containedType>(it->second);
+            return true;
+        } 
+        else
+        {
+            return false;
+        }
     }
 
     inline bool
@@ -150,22 +162,28 @@ public:
         return (this->find(key) != this->end());
     }
 
+    // if key is in this, place the value in result and return true, otherwise
+    // store the value in result at key and return false
     template<typename containedType>
-    containedType
+    bool
     set_default(
             const std::string& key, 
-            const containedType& default_value
+            containedType* result
     )
     {
-        const auto& d_it =  this->find(key);
-        if (d_it != this->end()) 
+        const auto d_it =  this->find(key);
+        if (
+                (d_it != this->end())
+                && (d_it->second.type() == typeid(containedType))
+        )
         {
-            return any_cast<containedType>(d_it->second);
+            *result = any_cast<containedType>(d_it->second);
+            return true;
         } 
         else 
         {
-            this->insert({key, default_value});
-            return default_value;
+            this->insert({key, *result});
+            return false;
         }
     }
 

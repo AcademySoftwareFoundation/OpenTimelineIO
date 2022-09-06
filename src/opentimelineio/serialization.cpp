@@ -435,17 +435,14 @@ private:
             AnyDictionary& m
     )
     {
-        const std::string& schema_string = m.get_default(
-                "OTIO_SCHEMA",
-                std::string("")
-        );
+        std::string schema_string = "";
 
-        if (schema_string.empty())
+        if (!m.get_if_set("OTIO_SCHEMA", &schema_string))
         {
             return;
         }
 
-        const int sep = schema_string.rfind('.');
+        const auto sep = schema_string.rfind('.');
         const std::string& schema_name = schema_string.substr(0, sep);
 
         const auto dg_version_it = _downgrade_version_manifest->find(

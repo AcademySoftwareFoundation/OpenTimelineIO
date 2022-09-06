@@ -5,12 +5,13 @@
 
 from .. import (
     core,
-    versioning
+    versioning,
+    exceptions
 )
 
 import os
 
-DEFAULT_VERSION_ENVVAR = "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"
+_DEFAULT_VERSION_ENVVAR = "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"
 
 
 def read_from_file(filepath):
@@ -39,6 +40,38 @@ def read_from_string(input_str):
     return core.deserialize_json_from_string(input_str)
 
 
+def _fetch_downgrade_map_from_env():
+    version_envvar = os.environ[_DEFAULT_VERSION_ENVVAR]
+
+    try:
+        family, label = version_envvar.split(":")
+    except ValueError:
+        raise exceptions.InvalidEnvironmentVariableError(
+            "Environment variable '{}' is incorrectly formatted with '{}'."
+            "Variable must be formatted as 'FAMILY:LABEL'".format(
+                _DEFAULT_VERSION_ENVVAR,
+                version_envvar,
+            )
+        )
+
+    try:
+        # technically fetch_map returns an AnyDictionary, but the pybind11
+        # code wrapping the call to the serializer expects a python
+        # dictionary.  This turns it back into a normal dictionary.
+        return dict(versioning.fetch_map(family, label))
+    except KeyError:
+        raise exceptions.InvalidEnvironmentVariableError(
+            "Environment variable '{}' is requesting family '{}' and label"
+            " '{}', however this combination does not exist in the "
+            "currently loaded manifests.  Full version map: {}".format(
+                _DEFAULT_VERSION_ENVVAR,
+                family,
+                label,
+                versioning.full_map()
+            )
+        )
+
+
 def write_to_string(input_otio, target_schema_versions=None, indent=4):
     """
     Serializes an OpenTimelineIO object into a string
@@ -49,25 +82,23 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
             -1 for no indentation or newlines.
 
     If target_schema_versions is None and the environment variable
-    "{}" is set, will read a map out of
+    "{0}" is set, will read a map out of
     that for downgrade target.  The variable should be of the form
     FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
     Returns:
         str: A json serialized string representation
-    """.format(DEFAULT_VERSION_ENVVAR)
 
-    if target_schema_versions is None and DEFAULT_VERSION_ENVVAR in os.environ:
-        version_envvar = os.environ[DEFAULT_VERSION_ENVVAR]
-        family, label = version_envvar.split(":")
-        # @TODO: something isn't right, I shouldn't need to do this extra hop-
-        #        if I don't, I end up with an AnyDictionary instead of a python
-        #        {}, which pybind doesn't quite map into the std::map the way
-        #        I'd hope when calling serialize_json_to_string()
-        target_schema_versions = versioning.fetch_map(family, label)
-        d = {}
-        d.update(target_schema_versions)
-        target_schema_versions = d
+    Raises:
+        otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
+            with the default environment variable "{0}".
+    """.format(_DEFAULT_VERSION_ENVVAR)
+
+    if (
+            target_schema_versions is None
+            and _DEFAULT_VERSION_ENVVAR in os.environ
+    ):
+        target_schema_versions = _fetch_downgrade_map_from_env()
 
     return core.serialize_json_to_string(
         input_otio,
@@ -93,7 +124,7 @@ def write_to_file(
             Use -1 for no indentation or newlines.
 
     If target_schema_versions is None and the environment variable
-    "{}" is set, will read a map out of
+    "{0}" is set, will read a map out of
     that for downgrade target.  The variable should be of the form
     FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
 
@@ -102,12 +133,15 @@ def write_to_file(
 
     Raises:
         ValueError: on write error
-    """.format(DEFAULT_VERSION_ENVVAR)
+        otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
+            with the default environment variable "{0}".
+    """.format(_DEFAULT_VERSION_ENVVAR)
 
-    if target_schema_versions is None and DEFAULT_VERSION_ENVVAR in os.environ:
-        version_envvar = os.environ[DEFAULT_VERSION_ENVVAR]
-        family, label = version_envvar.split(":")
-        target_schema_versions = versioning.fetch_map(family, label)
+    if (
+        target_schema_versions is None
+        and _DEFAULT_VERSION_ENVVAR in os.environ
+    ):
+        target_schema_versions = _fetch_downgrade_map_from_env()
 
     return core.serialize_json_to_file(
         input_otio,

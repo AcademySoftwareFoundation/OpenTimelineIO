@@ -110,6 +110,24 @@ class TestPlugin_VersionManifest(unittest.TestCase):
         result = json.loads(otio.adapters.otio_json.write_to_string(evt, {}))
         self.assertEqual(result["OTIO_SCHEMA"], "EnvVarTestSchema.2")
 
+    def test_garbage_env_variables(self):
+        cl = otio.schema.Clip()
+        invalid_env_error = otio.exceptions.InvalidEnvironmentVariableError
+
+        # missing ":"
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
+            "invalid_formatting"
+        )
+        with self.assertRaises(invalid_env_error):
+            otio.adapters.otio_json.write_to_string(cl)
+
+        # asking for family/label that doesn't exist in the plugins
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
+            "nosuch:labelorfamily"
+        )
+        with self.assertRaises(invalid_env_error):
+            otio.adapters.otio_json.write_to_string(cl)
+
     def test_two_version_manifests(self):
         """test that two manifests layer correctly"""
 

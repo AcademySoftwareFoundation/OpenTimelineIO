@@ -125,15 +125,6 @@ TypeRegistry::TypeRegistry()
 
         (*d)["media_reference"] = active_ref;
 
-        auto downgrade_md = AnyDictionary();
-        downgrade_md["media_references"] = media_refs;
-        downgrade_md["active_media_reference_key"] = active_reference_key;
-
-        d->set_default(
-                "metadata",
-                AnyDictionary()
-        )["downgrade_Clip.2_to_Clip.1"] = downgrade_md;
-
         d->erase("media_references");
         d->erase("active_media_reference_key");
     });

@@ -116,14 +116,6 @@ public:
 
     virtual ~CloningEncoder() {}
 
-    /**
-     * 1.
-     * e = JSONEncoder(_downgrade)
-     * SerializableObject::Writer::write_root(e, _downgrade)
-     * [recurse until downgrade]
-     *      ce = CloningEncoder(_downgrade)
-     *      SerializableObject::Writer::write_root(e), 
-     */
     virtual bool 
     encoding_to_anydict() override 
     {

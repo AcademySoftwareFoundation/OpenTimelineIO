@@ -8,6 +8,7 @@
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
+#include <cstddef>
 #include <string>
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
@@ -105,7 +106,7 @@ public:
 
     CloningEncoder(
             CloningEncoder::ResultObjectPolicy result_object_policy,
-            optional<const schema_version_map*> schema_version_targets = {}
+            const schema_version_map* schema_version_targets = nullptr
     ) : 
         _result_object_policy(result_object_policy),
         _downgrade_version_manifest(schema_version_targets)
@@ -380,7 +381,7 @@ public:
         AnyDictionary m;
         m.swap(top.dict);
 
-        if (_downgrade_version_manifest.has_value())
+        if (_downgrade_version_manifest != nullptr)
         {
             _downgrade_dictionary(m);
         }
@@ -427,7 +428,7 @@ private:
     friend class SerializableObject;
     std::vector<_DictOrArray> _stack;
     ResultObjectPolicy        _result_object_policy;
-    optional<const schema_version_map*> _downgrade_version_manifest = {};
+    const schema_version_map* _downgrade_version_manifest = nullptr;
 
     void
     _downgrade_dictionary(
@@ -447,10 +448,11 @@ private:
         const int sep = schema_string.rfind('.');
         const std::string& schema_name = schema_string.substr(0, sep);
 
-        const auto& dg_man = *(*_downgrade_version_manifest);
-        const auto dg_version_it = dg_man.find(schema_name);
+        const auto dg_version_it = _downgrade_version_manifest->find(
+                schema_name
+        );
 
-        if (dg_version_it == dg_man.end())
+        if (dg_version_it == _downgrade_version_manifest->end())
         {
             return;
         }
@@ -829,7 +831,7 @@ bool
 SerializableObject::Writer::write_root(
     any const& value,
     Encoder& encoder,
-    optional<const schema_version_map*> schema_version_targets,
+    const schema_version_map* schema_version_targets,
     ErrorStatus* error_status
 )
 {
@@ -978,16 +980,17 @@ SerializableObject::Writer::write(
 
     // if there is a manifest & the encoder is not converting to AnyDictionary
     if (
-            _downgrade_version_manifest.has_value()    
+            _downgrade_version_manifest != nullptr    
             && !_encoder.encoding_to_anydict()
     ) 
     {
-        const auto& dg_man = *(*_downgrade_version_manifest);
-        const auto& target_version_it = dg_man.find(schema_name);
+        const auto& target_version_it = _downgrade_version_manifest->find(
+                schema_name
+        );
 
         // ...and if that downgrade manifest specifies a target version for
         // this schema
-        if (target_version_it != dg_man.end())
+        if (target_version_it != _downgrade_version_manifest->end())
         {
             const int target_version = target_version_it->second;
 
@@ -1237,7 +1240,7 @@ SerializableObject::clone(ErrorStatus* error_status) const
 std::string
 serialize_json_to_string(
     const any& value,
-    optional<const schema_version_map*> schema_version_targets,
+    const schema_version_map* schema_version_targets,
     ErrorStatus* error_status,
     int indent
 )
@@ -1279,7 +1282,7 @@ bool
 serialize_json_to_file(
     any const&         value,
     std::string const& file_name,
-    optional<const schema_version_map*> schema_version_targets,
+    const schema_version_map* schema_version_targets,
     ErrorStatus*       error_status,
     int                indent)
 {

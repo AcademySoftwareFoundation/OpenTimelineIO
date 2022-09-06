@@ -16,6 +16,7 @@
 #include "ImathBox.h"
 #include "serialization.h"
 
+#include <cstddef>
 #include <list>
 #include <type_traits>
 #include <unordered_map>
@@ -48,13 +49,13 @@ public:
     to_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr,
-        optional<const schema_version_map*> target_family_label_spec = {},
+        const schema_version_map* target_family_label_spec = nullptr,
         int                indent       = 4) const;
 
     std::string
     to_json_string(
             ErrorStatus* error_status = nullptr,
-            optional<const schema_version_map*> target_family_label_spec = {},
+            const schema_version_map* target_family_label_spec = nullptr,
             int indent = 4) const;
 
     static SerializableObject* from_json_file(
@@ -402,7 +403,7 @@ public:
         static bool write_root(
             any const&     value,
             class Encoder& encoder,
-            optional<const schema_version_map*> downgrade_version_manifest= {},
+            const schema_version_map* downgrade_version_manifest=nullptr,
             ErrorStatus*   error_status = nullptr);
 
         void write(std::string const& key, bool value);
@@ -513,7 +514,7 @@ public:
 
         Writer(
                 class Encoder& encoder,
-                optional<const schema_version_map*> downgrade_version_manifest
+                const schema_version_map* downgrade_version_manifest
         )
             : _encoder(encoder),
             _downgrade_version_manifest(downgrade_version_manifest)
@@ -547,7 +548,7 @@ public:
         std::unordered_map<std::string, int>                       _next_id_for_type;
 
         class Encoder& _encoder;
-        optional<const schema_version_map*> _downgrade_version_manifest;
+        const schema_version_map* _downgrade_version_manifest;
         friend class SerializableObject;
     };
 

@@ -156,17 +156,12 @@ PYBIND11_MODULE(_otio, m) {
                 int indent
               ) 
             {
-              optional<const schema_version_map*> pass_through = {};
-              if (!schema_version_targets.empty())
-              {
-                pass_through = {&schema_version_targets};
-              }
                 auto result = serialize_json_to_string(
-                            pyAny->a,
-                            pass_through,
-                            ErrorStatusHandler(),
-                            indent
-                    );
+                        pyAny->a,
+                        &schema_version_targets,
+                        ErrorStatusHandler(),
+                        indent
+                );
 
                 return result;
             },
@@ -181,15 +176,10 @@ PYBIND11_MODULE(_otio, m) {
               const schema_version_map& schema_version_targets,
               int indent
           ) {
-              optional<const schema_version_map*> pass_through = {};
-              if (!schema_version_targets.empty())
-              {
-                pass_through = {&schema_version_targets};
-              }
               return serialize_json_to_file(
                       pyAny->a,
                       filename,
-                      pass_through,
+                      &schema_version_targets,
                       ErrorStatusHandler(),
                       indent
               );

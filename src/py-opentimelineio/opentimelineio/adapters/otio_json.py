@@ -91,8 +91,8 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
 
     Raises:
         otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-            with the default environment variable
-            "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+        with the default environment variable
+        "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
     """
 
     if (
@@ -135,8 +135,8 @@ def write_to_file(
     Raises:
         ValueError: on write error
         otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-            with the default environment variable
-            "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+        with the default environment variable
+        "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
     """
 
     if (

@@ -158,8 +158,8 @@ Serializes an OpenTimelineIO object into a file
   Raises:
       ValueError: on write error
       otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-          with the default environment variable
-          "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+      with the default environment variable
+      "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
 ```
   - input_otio
   - filepath
@@ -184,8 +184,8 @@ Serializes an OpenTimelineIO object into a string
 
   Raises:
       otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
-          with the default environment variable
-          "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
+      with the default environment variable
+      "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
 ```
   - input_otio
   - target_schema_versions

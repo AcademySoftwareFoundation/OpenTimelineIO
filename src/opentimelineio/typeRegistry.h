@@ -142,15 +142,8 @@ public:
         std::string const& schema_name,
         ErrorStatus*       error_status = nullptr);
 
-    int 
-    version_number_of_schema(
-            const std::string& schema_name)
-    {
-        return _find_type_record(schema_name)->schema_version;
-    }
-
     // for inspecting the type registry, build a map of schema name to version
-    void type_version_map(std::map<std::string, int>& result);
+    void type_version_map(schema_version_map& result);
 
 private:
     TypeRegistry();

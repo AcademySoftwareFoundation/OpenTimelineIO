@@ -249,7 +249,7 @@ Return an instance of the schema from data in the data_dict.
 )docstring");
     m.def("type_version_map",
              []() {
-                std::map<std::string, int> tmp;
+                schema_version_map tmp;
                 TypeRegistry::instance().type_version_map(tmp);
                 return tmp;
              });

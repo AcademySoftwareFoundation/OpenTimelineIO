@@ -395,7 +395,7 @@ TypeRegistry::set_type_record(
 
 void
 TypeRegistry::type_version_map(
-        std::map<std::string, int32_t>& result)
+        schema_version_map& result)
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
 

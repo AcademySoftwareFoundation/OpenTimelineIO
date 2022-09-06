@@ -136,7 +136,6 @@ TypeRegistry::TypeRegistry()
 
         d->erase("media_references");
         d->erase("active_media_reference_key");
-        d->erase("enabled");
     });
 }
 

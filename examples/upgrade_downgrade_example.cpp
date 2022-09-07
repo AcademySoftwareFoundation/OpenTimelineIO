@@ -18,7 +18,7 @@ public:
     };
 
     void set_new_field(int64_t val) { _new_field = val; }
-    const int64_t new_field() const { return _new_field; }
+    int64_t new_field() const { return _new_field; }
 
 protected:
     using Parent = SerializableObject;

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 
 #include "opentimelineio/clip.h"
 #include "opentimelineio/typeRegistry.h"
@@ -67,10 +68,22 @@ main(
 
     if (argc < 2) 
     {
-        std::cerr << "usage: otio_io_perf_test path/to/timeline.otio";
+        std::cerr << "usage: otio_io_perf_test path/to/timeline.otio [--keep-tmp]";
         std::cerr << std::endl;
         return 1;
     }
+
+    bool keep_tmp = false;
+    if (argc > 2)
+    {
+        const std::string arg = argv[2];
+        if (arg == "--keep-tmp")
+        {
+            keep_tmp = true;
+        }
+    }
+
+    const std::string tmp_dir_path = examples::create_temp_dir();
 
     otio::ErrorStatus err;
 
@@ -97,7 +110,11 @@ main(
         otio::SerializableObject::Retainer<otio::Clip> cl = new otio::Clip("test");
         cl->metadata()["example thing"] = "banana";
         chrono_time_point begin = std::chrono::steady_clock::now();
-        cl->to_json_file("/var/tmp/clip.otio", &err, &downgrade_manifest);
+        cl->to_json_file(
+                examples::normalize_path(tmp_dir_path + "/clip.otio"),
+                &err,
+                &downgrade_manifest
+        );
         chrono_time_point end = std::chrono::steady_clock::now();
         print_elapsed_time("downgrade clip", begin, end);
     }
@@ -105,10 +122,14 @@ main(
     otio::any tl;
     std::string fname = std::string(argv[1]);
 
+    // read file
     chrono_time_point begin = std::chrono::steady_clock::now();
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
             dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file(argv[1], &err)
+                otio::Timeline::from_json_file(
+                    examples::normalize_path(argv[1]),
+                    &err
+                )
             )
     );
     chrono_time_point end = std::chrono::steady_clock::now();
@@ -156,7 +177,7 @@ main(
     {
         begin = std::chrono::steady_clock::now();
         timeline.value->to_json_file(
-                "/var/tmp/io_perf_test.otio",
+                examples::normalize_path(tmp_dir_path + "/io_perf_test.otio"),
                 &err,
                 &downgrade_manifest
         );
@@ -167,9 +188,35 @@ main(
     if (RUN_STRUCT.TO_JSON_FILE_NO_DOWNGRADE)
     {
         begin = std::chrono::steady_clock::now();
-        timeline.value->to_json_file("/var/tmp/io_perf_test.nodowngrade.otio", &err, {});
+        timeline.value->to_json_file(
+                examples::normalize_path(
+                    tmp_dir_path 
+                    + "/io_perf_test.nodowngrade.otio"
+                ),
+                &err,
+                {}
+        );
         end = std::chrono::steady_clock::now();
         print_elapsed_time("serialize_json_to_file [no downgrade]", begin, end);
+    }
+
+    std::cout << "All files written to: " << tmp_dir_path << std::endl;
+    if (keep_tmp)
+    {
+        std::cout << "Temp directory preserved.  All files written to: ";
+        std::cout << tmp_dir_path << std::endl;
+    }
+    else
+    {
+        // clean up
+        const auto tmp_files = examples::glob(tmp_dir_path, "*");
+        for (auto fp : tmp_files)
+        {
+            remove(fp.c_str());
+        }
+        remove(tmp_dir_path.c_str());
+        std::cout << "cleaned up tmp dir, pass --keep-tmp to preserve";
+        std::cout << " output." << std::endl;
     }
 
     return 0;

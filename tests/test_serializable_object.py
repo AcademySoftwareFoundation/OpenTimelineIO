@@ -243,11 +243,6 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         f = FakeThing()
         f.foo_two = "a thing here"
 
-        # downgrade_target = otio.core.fetch_version_map(
-        #         "OTIO_CORE",
-        #         otio.__version__
-        # )
-
         downgrade_target = {"FakeThingToDowngrade": 1}
 
         result = json.loads(

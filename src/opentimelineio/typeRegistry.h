@@ -6,12 +6,12 @@
 #include "opentimelineio/any.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
+
 #include <algorithm>
 #include <functional>
-#include <map>
-#include <map>
 #include <mutex>
 #include <string>
+#include <map>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {

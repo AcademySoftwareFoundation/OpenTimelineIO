@@ -24,7 +24,7 @@ const struct {
 } RUN_STRUCT ;
 
 /// utility function for printing std::chrono elapsed time
-const void
+void
 print_elapsed_time(
         const std::string& message,
         const chrono_time_point& begin,

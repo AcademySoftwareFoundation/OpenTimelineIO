@@ -87,7 +87,7 @@ class CoreVersionMapGenerationTester(unittest.TestCase):
         target_fp = os.path.join(root, "CORE_VERSION_MAP.cpp")
 
         with open(target_fp) as fi:
-            baseline_text = fi.read()
+            baseline_text = "\n".join(ln for ln in fi.read().splitlines())
 
         proc = subprocess.Popen(
             [
@@ -103,6 +103,9 @@ class CoreVersionMapGenerationTester(unittest.TestCase):
         stdout, _ = proc.communicate()
 
         test_text = stdout.decode("utf-8")[:-1]
+
+        # sanitize the line endings
+        test_text = "\n".join(ln for ln in test_text.splitlines())
 
         self.maxDiff = None
         self.longMessage = True

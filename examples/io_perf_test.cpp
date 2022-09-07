@@ -200,7 +200,6 @@ main(
         print_elapsed_time("serialize_json_to_file [no downgrade]", begin, end);
     }
 
-    std::cout << "All files written to: " << tmp_dir_path << std::endl;
     if (keep_tmp)
     {
         std::cout << "Temp directory preserved.  All files written to: ";

@@ -112,9 +112,9 @@ class CoreVersionMapGenerationTester(unittest.TestCase):
 
         # sanitize the line endings
         test_text = "\n".join(
-                ln
-                for ln in fi.read().splitlines()
-                if ln
+            ln
+            for ln in fi.read().splitlines()
+            if ln
         )
 
         self.maxDiff = None

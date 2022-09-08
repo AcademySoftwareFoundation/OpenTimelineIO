@@ -96,6 +96,20 @@ def serialize_json_to_file(
 
 
 def register_type(classobj, schemaname=None):
+    """Decorator for registering a SerializableObject type
+
+    Example:
+
+    .. code-block:: python
+
+        @otio.core.register_type
+        class SimpleClass(otio.core.SerializableObject):
+          serializable_label = "SimpleClass.2"
+          ...
+
+    :param typing.Type[SerializableObject] cls: class to register
+    :param str schemaname: Schema name (default: parse from serializable_label)
+    """
     label = classobj._serializable_label
     if schemaname is None:
         schema_name, schema_version = label.split(".", 2)
@@ -156,6 +170,8 @@ def upgrade_function_for(cls, version_to_upgrade_to):
 
 def downgrade_function_from(cls, version_to_downgrade_from):
     """
+    Decorator for identifying schema class downgrade functions.
+
     Example:
 
     .. code-block:: python

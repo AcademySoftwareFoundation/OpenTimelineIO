@@ -113,7 +113,7 @@ class CoreVersionMapGenerationTester(unittest.TestCase):
         # sanitize the line endings
         test_text = "\n".join(
             ln
-            for ln in fi.read().splitlines()
+            for ln in test_text.splitlines()
             if ln
         )
 

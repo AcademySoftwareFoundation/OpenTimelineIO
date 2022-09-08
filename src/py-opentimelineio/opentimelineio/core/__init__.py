@@ -74,6 +74,16 @@ __all__ = [
 
 
 def serialize_json_to_string(root, schema_version_targets=None, indent=4):
+    """Serialize root to a json string.  Optionally downgrade resulting schemas
+    to schema_version_targets.
+
+    :param SerializableObject root: root object to serialize
+    :param dict[str, int] schema_version_targets: optional dictionary mapping schema name to desired schema version, for downgrading the result to be compatible with older versions of OpenTimelineIO.
+    :param int indent: number of spaces for each json indentation level. Use -1 for no indentation or newlines.
+
+    :returns: resulting json string
+    :rtype: str
+    """
     return _serialize_json_to_string(
         _value_to_any(root),
         schema_version_targets or {},
@@ -87,6 +97,16 @@ def serialize_json_to_file(
         schema_version_targets=None,
         indent=4
 ):
+    """Serialize root to a json file.  Optionally downgrade resulting schemas
+    to schema_version_targets.
+
+    :param SerializableObject root: root object to serialize
+    :param dict[str, int] schema_version_targets: optional dictionary mapping schema name to desired schema version, for downgrading the result to be compatible with older versions of OpenTimelineIO.
+    :param int indent: number of spaces for each json indentation level. Use -1 for no indentation or newlines.
+
+    :returns: true for success, false for failure
+    :rtype: bool
+    """
     return _serialize_json_to_file(
         _value_to_any(root),
         filename,

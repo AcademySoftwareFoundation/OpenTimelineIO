@@ -26,8 +26,6 @@ from .. _otio import ( # noqa
     set_type_record,
     _serialize_json_to_string,
     _serialize_json_to_file,
-    type_version_map,
-    release_to_schema_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -70,7 +68,6 @@ __all__ = [
     'serialize_json_to_string',
     'serialize_json_to_file',
     'register_type',
-    'type_version_map',
 ]
 
 

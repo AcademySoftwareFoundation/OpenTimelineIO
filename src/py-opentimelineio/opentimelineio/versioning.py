@@ -43,6 +43,9 @@ def full_map():
                 }
             }
         }
+
+    :returns: full map of schema version sets, including core and plugins
+    :rtype: dict[str, dict[str, dict[str, int]]]
     """
 
     result = copy.deepcopy(plugins.ActiveManifest().version_manifests)
@@ -72,6 +75,10 @@ def fetch_map(family, label):
             ...
         }
 
+    :param str family: family of labels (ie: "OTIO_CORE")
+    :param str label: label of schema-version map (ie: "0.15.0")
+    :returns: a dictionary mapping Schema name to schema version
+    :rtype: dict[str, int]
     """
 
     if family == "OTIO_CORE":

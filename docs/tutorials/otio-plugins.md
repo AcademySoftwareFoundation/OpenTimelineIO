@@ -106,7 +106,7 @@ OpenTimelineIO Final Cut Pro 7 XML Adapter.
 ### otio_json
 
 ```
-This adapter lets you read and write native .otio files
+Adapter for reading and writing native .otio json files.
 ```
 
 *source*: `opentimelineio/adapters/otio_json.py`

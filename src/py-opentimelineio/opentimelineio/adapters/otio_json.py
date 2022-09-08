@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""This adapter lets you read and write native .otio files"""
+"""Adapter for reading and writing native .otio json files."""
 
 from .. import (
     core,

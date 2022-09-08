@@ -8,15 +8,15 @@ TL;DR for users: OpenTimelineIO should be able to read files produced by older v
 
 ## Schema/Version Introduction
 
-Each SerializeableObject (the base class of OpenTimelineIO) has `schema_name` and `schema_version` fields.  The `schema_name` is a string naming the schema, for example, `Clip`, and the `schema_version` is an integer of the current version number, for example, `3`.
+Each SerializableObject (the base class of OpenTimelineIO) has `schema_name` and `schema_version` fields.  The `schema_name` is a string naming the schema, for example, `Clip`, and the `schema_version` is an integer of the current version number, for example, `3`.
 
-SerializeableObjects can be queried for these using the `.schema_name()` and `.schema_version()` methods.  For a given release of the OpenTimelineIO library, in-memory objects the library creates will always be the same schema version.  In other words, if `otio.schema.Clip()` instantiates an object with `schema_version` 2, there is no way to get an in-memory `Clip` object with version 1.
+SerializableObjects can be queried for these using the `.schema_name()` and `.schema_version()` methods.  For a given release of the OpenTimelineIO library, in-memory objects the library creates will always be the same schema version.  In other words, if `otio.schema.Clip()` instantiates an object with `schema_version` 2, there is no way to get an in-memory `Clip` object with version 1.
 
 OpenTimelineIO can still interoperate with older and newer versions of the library by way of the schema upgrading/downgrading system.  As OpenTimelineIO deserializes json from a string or disk, it will upgrade the schemas to the version supported by the library before instantiating the concrete in-memory object.  Similarly, when serializing OpenTimelineIO back to disk, the user can instruct OpenTimelineIO to downgrade the JSON to older versions of the schemas.  In this way, a newer version of OpenTimelineIO can read files with older schemas, and a newer version of OpenTimelineIO can generate JSON with older schemas in it.
 
 ## Schema Upgrading
 
-Once a type is registerd to OpenTimelineIO, deveopers may also register upgrade functions.  In python, each upgrade function takes a dictionary and returns a dictionary.  In C++, the AnyDictionary is manipulated in place.  Each upgrade function is associated with a version number - this is the version number that it upgrades to.
+Once a type is registered to OpenTimelineIO, developers may also register upgrade functions.  In python, each upgrade function takes a dictionary and returns a dictionary.  In C++, the AnyDictionary is manipulated in place.  Each upgrade function is associated with a version number - this is the version number that it upgrades to.
 
 C++ Example (can be viewed/run in [examples/upgrade_downgrade_example.cpp](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/examples/upgrade_downgrade_example.cpp)):
 
@@ -81,9 +81,9 @@ Python Example:
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.2"
-  my_field = otio.core.serializeable_field("new_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.2"
+  my_field = otio.core.serializable_field("new_field", int)
 
 @otio.core.upgrade_function_for(SimpleClass, 2)
 def upgrade_one_to_two(data):
@@ -209,9 +209,9 @@ Given `SimpleClass`:
 import opentimelineio as otio
 
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.1"
-  my_field = otio.core.serializeable_field("my_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.1"
+  my_field = otio.core.serializable_field("my_field", int)
 ```
 
 And `my_field` needs to be renamed to `new_field`.  To do this:
@@ -222,9 +222,9 @@ And `my_field` needs to be renamed to `new_field`.  To do this:
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.2"
-  new_field = otio.core.serializeable_field("new_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.2"
+  new_field = otio.core.serializable_field("new_field", int)
 
 @otio.core.upgrade_function_for(SimpleClass, 2)
 def upgrade_one_to_two(data):
@@ -239,9 +239,9 @@ Changing it again, now `new_field` becomes `even_newer_field`.
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.2"
-  even_newer_field = otio.core.serializeable_field("even_newer_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.2"
+  even_newer_field = otio.core.serializable_field("even_newer_field", int)
 
 @otio.core.upgrade_function_for(SimpleClass, 2)
 def upgrade_one_to_two(data):
@@ -268,9 +268,9 @@ Starting from the same class:
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.1"
-  my_field = otio.core.serializeable_field("my_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.1"
+  my_field = otio.core.serializable_field("my_field", int)
 ```
 
 If a change to a schema is to add a field, for which the default value is the correct value for an old schema, then no upgrade or downgrade function is needed.  The parser ignores values that aren't in the schema.
@@ -283,19 +283,19 @@ Example of adding a field (`other_field`):
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.2"
-  my_field = otio.core.serializeable_field("my_field", int)
-  other_field = otio.core.serializeable_field("other_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.2"
+  my_field = otio.core.serializable_field("my_field", int)
+  other_field = otio.core.serializable_field("other_field", int)
 ```
 
 Removing a field (`my_field`):
 
 ```python
 @otio.core.register_type
-class SimpleClass(otio.core.SerializeableObject):
-  serializeable_label = "SimpleClass.3"
-  other_field = otio.core.serializeable_field("other_field", int)
+class SimpleClass(otio.core.SerializableObject):
+  serializable_label = "SimpleClass.3"
+  other_field = otio.core.serializable_field("other_field", int)
 ```
 
 Similarly, when deleting a field, if the field is now ignored and does not contribute to computation, no upgrade or downgrade function is needed.

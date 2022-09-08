@@ -91,7 +91,7 @@ private:
 };
 
 /**
- * This encoder builds up a dictionary as its method of "encoding".
+ * This encoder builds up a AnyDictionary as its method of "encoding".
  * The dictionary is than handed off to a CloningDecoder, to complete
  * copying of a SerializableObject instance.
  */
@@ -388,20 +388,6 @@ public:
 
         _stack.pop_back();
         _store(any(std::move(m)));
-    }
-
-    // @TODO: what kind of ownership policy here?
-    AnyDictionary
-    root() 
-    {
-        if (_root.type() == typeid(AnyDictionary))
-        {
-            return any_cast<AnyDictionary>(_root);
-        }
-        else 
-        {
-            return AnyDictionary();
-        }
     }
 
 private:
@@ -973,12 +959,13 @@ SerializableObject::Writer::write(
     const std::string& schema_name = value->schema_name();
     int schema_version = value->schema_version();
 
-    optional<AnyDictionary> downgraded = {};
+    any downgraded = {};
 
     // if there is a manifest & the encoder is not converting to AnyDictionary
     if (
-            _downgrade_version_manifest != nullptr    
-            && !_encoder.encoding_to_anydict()
+            (_downgrade_version_manifest != nullptr)
+            && (!_downgrade_version_manifest->empty())
+            && (!_encoder.encoding_to_anydict())
     ) 
     {
         const auto& target_version_it = _downgrade_version_manifest->find(
@@ -1007,7 +994,7 @@ SerializableObject::Writer::write(
                     return;
                 }
 
-                downgraded = { e.root() };
+                downgraded.swap(e._root);
                 schema_version = target_version;
             }
         }
@@ -1040,10 +1027,9 @@ SerializableObject::Writer::write(
 
     // write the contents of the object to the encoder, either the downgraded
     // anydictionary or the SerializableObject
-    if (downgraded.has_value())
+    if (!(downgraded.empty()))
     {
-        // the inner loop of write(
-        for (const auto& kv : (*downgraded))
+        for (const auto& kv : any_cast<AnyDictionary>(downgraded))
         {
             this->write(kv.first, kv.second);
         }

@@ -377,11 +377,13 @@ public:
             return;
         }
 
-        // otherwise, build out as an anydictionary & downgrade
         AnyDictionary m;
         m.swap(top.dict);
 
-        if (_downgrade_version_manifest != nullptr)
+        if (
+                (_downgrade_version_manifest != nullptr)
+                && (!_downgrade_version_manifest->empty())
+        )
         {
             _downgrade_dictionary(m);
         }
@@ -448,6 +450,7 @@ private:
             current_version = std::stoi(schema_vers);
         }
 
+        // @TODO: is 0 a legitimate schema version?
         if (current_version < 0)
         {
             _internal_error(
@@ -455,8 +458,8 @@ private:
                         "Could not parse version number from Schema"
                         " string: %s",
                         schema_string.c_str()
-                        )
-                    );
+                    )
+            );
             return;
         }
 
@@ -464,14 +467,12 @@ private:
 
         const auto& type_rec = (
                 TypeRegistry::instance()._find_type_record(schema_name)
-                );
+        );
 
-        while (current_version > target_version ) 
+        while (current_version > target_version) 
         {
             const auto& next_dg_fn = (
-                    type_rec->downgrade_functions.find(
-                        current_version
-                    )
+                    type_rec->downgrade_functions.find(current_version)
             );
 
             if (next_dg_fn == type_rec->downgrade_functions.end()) 
@@ -482,8 +483,8 @@ private:
                             "going from version %d to version %d.",
                             current_version,
                             target_version
-                            )
-                        );
+                        )
+                );
                 return;
             }
 

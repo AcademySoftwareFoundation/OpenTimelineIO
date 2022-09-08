@@ -140,6 +140,41 @@ public:
         _stack.back().cur_key = key;
     }
 
+    void _replace_back(AnyDictionary&& a)
+    {
+        if (has_errored())
+        {
+            return;
+        }
+
+        if (_stack.size() == 1)
+        {
+            any newstack(std::move(a));
+            _root.swap(newstack);
+        }
+        else
+        {
+            // if (_stack[_stack.size() - 1].is_dict)
+            // {
+            //     _stack[_stack.size() - 1].dict.swap(a);
+            // }
+
+            _stack.pop_back();
+            auto& top = _stack.back();
+            if (top.is_dict)
+            {
+                // top.dict.swap(a);
+                top.dict.emplace(_stack.back().cur_key, a);
+            }
+            else
+            {
+                any newstack(std::move(a));
+                top.array.emplace_back(newstack);
+            }
+        }
+
+    }
+
     void _store(any&& a)
     {
         if (has_errored())
@@ -388,8 +423,7 @@ public:
             _downgrade_dictionary(m);
         }
 
-        _stack.pop_back();
-        _store(any(std::move(m)));
+        _replace_back(std::move(m));
     }
 
 private:

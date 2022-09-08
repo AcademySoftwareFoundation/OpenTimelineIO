@@ -18,7 +18,7 @@ OpenTimelineIO can still interoperate with older and newer versions of the libra
 
 Once a type is registerd to OpenTimelineIO, deveopers may also register upgrade functions.  In python, each upgrade function takes a dictionary and returns a dictionary.  In C++, the AnyDictionary is manipulated in place.  Each upgrade function is associated with a version number - this is the version number that it upgrades to.
 
-C++ Example (can be viewed/run in `examples/upgrade_downgrade_example.cpp`):
+C++ Example (can be viewed/run in [examples/upgrade_downgrade_example.cpp](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/examples/upgrade_downgrade_example.cpp)):
 
 ```cpp
 class SimpleClass : public otio::SerializableObject

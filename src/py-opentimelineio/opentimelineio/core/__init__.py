@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
+"""Core implementation details and wrappers around the C++ library"""
+
 from .. _otio import ( # noqa
     # errors
     CannotComputeAvailableRangeError,
@@ -26,6 +28,8 @@ from .. _otio import ( # noqa
     set_type_record,
     _serialize_json_to_string,
     _serialize_json_to_file,
+    type_version_map,
+    release_to_schema_version_map,
 )
 
 from . _core_utils import ( # noqa
@@ -55,19 +59,17 @@ __all__ = [
     'flatten_stack',
     'install_external_keepalive_monitor',
     'instance_from_schema',
-    'register_serializable_object_type',
-    'register_upgrade_function',
-    'register_downgrade_function',
     'set_type_record',
     'add_method',
     'upgrade_function_for',
     'downgrade_function_from',
-    'fetch_version_map',
     'serializable_field',
     'deprecated_field',
     'serialize_json_to_string',
     'serialize_json_to_file',
     'register_type',
+    'type_version_map',
+    'release_to_schema_version_map',
 ]
 
 
@@ -134,7 +136,7 @@ def upgrade_function_for(cls, version_to_upgrade_to):
     that add or remove fields, only for schema versions that change the field
     names.
 
-    :param type cls: class to upgrade
+    :param typing.Type[SerializableObject] cls: class to upgrade
     :param int version_to_upgrade_to: the version to upgrade to
     """
 
@@ -169,7 +171,7 @@ def downgrade_function_from(cls, version_to_downgrade_from):
     The downgrade function should take a single argument - the dictionary to
     downgrade, and return a dictionary with the fields downgraded.
 
-    :param type cls: class to downgrade
+    :param typing.Type[SerializableObject] cls: class to downgrade
     :param int version_to_downgrade_from: the function downgrading from this
                                           version to (version - 1)
     """

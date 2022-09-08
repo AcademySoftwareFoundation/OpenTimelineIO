@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
+
+"""Tools for fetching the family->label->schema:version maps"""
+
 import copy
 
 from . import (

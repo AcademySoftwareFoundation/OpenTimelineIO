@@ -31,7 +31,7 @@ public:
     };
 
     void set_new_field(int64_t val) { _new_field = val; }
-    const int64_t new_field() const { return _new_field; }
+    int64_t new_field() const { return _new_field; }
 
 protected:
     using Parent = SerializableObject;
@@ -96,7 +96,7 @@ When upgrading schemas, OpenTimelineIO will call each upgrade function in order 
 
 Similarly, once a type is registered, downgrade functions may be registered.  Downgrade functions take a dictionary of the version specified and return a dictionary of the schema version one lower.  For example, if a downgrade function is registered for version 5, that will downgrade from 5 to 4.
 
-C++ Example, building off the prior section SimpleClass example (can be viewed/run in `examples/upgrade_downgrade_example.cpp`):
+C++ Example, building off the prior section SimpleClass example (can be viewed/run in [examples/upgrade_downgrade_example.cpp](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/examples/upgrade_downgrade_example.cpp)):
 
 ```cpp
 // 2->1
@@ -195,7 +195,7 @@ otio.adapters.write_to_file(
 )
 ```
 
-See the `versioning` module for more information on accessing these.
+See the [versioning module](../api/python/opentimelineio.versioning.rst) for more information on accessing these.
 
 ## For Developers
 

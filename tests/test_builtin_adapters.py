@@ -70,11 +70,12 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
             self.maxDiff = None
 
-            with open("/var/tmp/in_memory.otio", "w") as fo:
-                fo.write(in_memory)
-
-            with open("/var/tmp/on_disk.otio", "w") as fo:
-                fo.write(on_disk)
+            # for debugging
+            # with open("/var/tmp/in_memory.otio", "w") as fo:
+            #     fo.write(in_memory)
+            #
+            # with open("/var/tmp/on_disk.otio", "w") as fo:
+            #     fo.write(on_disk)
 
             self.assertEqual(in_memory, on_disk)
 

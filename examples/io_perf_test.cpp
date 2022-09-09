@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
+#include <cstddef>
 #include <iostream>
 #include <cstdio>
 
@@ -17,6 +18,7 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 using chrono_time_point = std::chrono::steady_clock::time_point;
 
 const struct {
+    bool FIXED_TMP = true;
     bool PRINT_CPP_VERSION_FAMILY    = false;
     bool TO_JSON_STRING              = true;
     bool TO_JSON_STRING_NO_DOWNGRADE = true;
@@ -46,7 +48,7 @@ void
 print_version_map()
 {
     std::cerr << "current version map: "  << std::endl;
-    for (auto kv_lbl: otio::CORE_VERSION_MAP)
+    for (const auto& kv_lbl: otio::CORE_VERSION_MAP)
     {
         std::cerr << "  " << kv_lbl.first << std::endl;
         for (auto kv_schema_version : kv_lbl.second)
@@ -71,8 +73,8 @@ main(
 
     if (argc < 2) 
     {
-        std::cerr << "usage: otio_io_perf_test path/to/timeline.otio [--keep-tmp]";
-        std::cerr << std::endl;
+        std::cerr << "usage: otio_io_perf_test path/to/timeline.otio ";
+        std::cerr << "[--keep-tmp]" << std::endl;
         return 1;
     }
 
@@ -86,9 +88,14 @@ main(
         }
     }
 
-    const std::string tmp_dir_path = examples::create_temp_dir();
+    const std::string tmp_dir_path = (
+        RUN_STRUCT.FIXED_TMP 
+        ? "/var/tmp/ioperftest" 
+        : examples::create_temp_dir()
+    );
 
     otio::ErrorStatus err;
+    assert(!otio::is_error(err));
 
     otio::schema_version_map downgrade_manifest = {
         {"FakeSchema", 3},
@@ -119,6 +126,7 @@ main(
                 &downgrade_manifest
         );
         chrono_time_point end = std::chrono::steady_clock::now();
+        assert(!otio::is_error(err));
         print_elapsed_time("downgrade clip", begin, end);
     }
 
@@ -136,6 +144,7 @@ main(
             )
     );
     chrono_time_point end = std::chrono::steady_clock::now();
+    assert(!otio::is_error(err));
     if (!timeline)
     {
         examples::print_error(err);
@@ -153,6 +162,7 @@ main(
                 &downgrade_manifest
         );
         end = std::chrono::steady_clock::now();
+        assert(!otio::is_error(err));
 
         if (otio::is_error(err))
         {
@@ -167,6 +177,7 @@ main(
         begin = std::chrono::steady_clock::now();
         const std::string result = timeline.value->to_json_string(&err, {});
         end = std::chrono::steady_clock::now();
+        assert(!otio::is_error(err));
 
         if (otio::is_error(err))
         {
@@ -185,6 +196,7 @@ main(
                 &downgrade_manifest
         );
         end = std::chrono::steady_clock::now();
+        assert(!otio::is_error(err));
         print_elapsed_time("serialize_json_to_file", begin, end);
     }
 
@@ -200,10 +212,11 @@ main(
                 {}
         );
         end = std::chrono::steady_clock::now();
+        assert(!otio::is_error(err));
         print_elapsed_time("serialize_json_to_file [no downgrade]", begin, end);
     }
 
-    if (keep_tmp)
+    if (keep_tmp || RUN_STRUCT.FIXED_TMP)
     {
         std::cout << "Temp directory preserved.  All files written to: ";
         std::cout << tmp_dir_path << std::endl;

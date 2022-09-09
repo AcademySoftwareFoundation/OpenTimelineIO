@@ -23,6 +23,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+class CloningEncoder;
+
 class SerializableObject
 {
 public:
@@ -450,7 +452,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -462,7 +464,7 @@ public:
         static any _to_any(std::map<std::string, T> const& value)
         {
             AnyDictionary am;
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 am.emplace(e.first, _to_any(e.second));
             }
@@ -476,7 +478,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -523,6 +525,8 @@ public:
             _build_dispatch_tables();
         }
 
+        ~Writer();
+
         Writer(Writer const&) = delete;
         Writer operator=(Writer const&) = delete;
 
@@ -546,6 +550,9 @@ public:
             _write_dispatch_table_by_name;
         std::unordered_map<SerializableObject const*, std::string> _id_for_object;
         std::unordered_map<std::string, int>                       _next_id_for_type;
+
+        Writer* _child_writer = nullptr;
+        CloningEncoder* _child_cloning_encoder = nullptr;
 
         class Encoder& _encoder;
         const schema_version_map* _downgrade_version_manifest;

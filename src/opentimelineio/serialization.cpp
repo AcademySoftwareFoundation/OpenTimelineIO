@@ -154,17 +154,11 @@ public:
         }
         else
         {
-            // if (_stack[_stack.size() - 1].is_dict)
-            // {
-            //     _stack[_stack.size() - 1].dict.swap(a);
-            // }
-
             _stack.pop_back();
             auto& top = _stack.back();
             if (top.is_dict)
             {
-                // top.dict.swap(a);
-                top.dict.emplace(_stack.back().cur_key, a);
+                top.dict.emplace(top.cur_key, a);
             }
             else
             {
@@ -1016,20 +1010,26 @@ SerializableObject::Writer::write(
             // and the current_version is greater than the target version
             if (schema_version > target_version) 
             {
-                CloningEncoder e(
-                        CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
-                        _downgrade_version_manifest
-                );
+                if (_child_writer == nullptr)
+                {
+                    _child_cloning_encoder = new CloningEncoder(
+                            CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
+                            _downgrade_version_manifest
+                    );
+                    _child_writer = new Writer(*_child_cloning_encoder, {});
+                }
+                else {
+                    _child_cloning_encoder->_stack.clear();
+                }
 
-                Writer w(e, {});
-                w.write(w._no_key, value);
+                _child_writer->write(_child_writer->_no_key, value);
 
-                if (e.has_errored(&_encoder._error_status))
+                if (_child_cloning_encoder->has_errored(&_encoder._error_status))
                 {
                     return;
                 }
 
-                downgraded.swap(e._root);
+                downgraded.swap(_child_cloning_encoder->_root);
                 schema_version = target_version;
             }
         }
@@ -1138,12 +1138,6 @@ SerializableObject::Writer::write(
         std::string const& key,
         any const& value)
 {
-    // if (value.empty()) 
-    // {
-    //     _encoder.write_key(key);
-    //     _encoder.write_null_value();
-    //     return;
-    // }
     std::type_info const& type = value.type();
 
     _encoder_write_key(key);
@@ -1152,19 +1146,24 @@ SerializableObject::Writer::write(
     if (e == _write_dispatch_table.end())
     {
         /*
-         * Using the address of a type_info suffers from aliasing across compilation units.
-         * If we fail on a lookup, we fallback on the by_name table, but that's slow because
-         * we have to keep making a string each time.
+         * Using the address of a type_info suffers from aliasing across
+         * compilation units. If we fail on a lookup, we fallback on the
+         * by_name table, but that's slow because we have to keep making a
+         * string each time.
          *
-         * So when we fail, we insert the address of the type_info that failed to be found,
-         * so that we'll catch it the next time.  This ensures we fail exactly once per alias
-         * per type while using this writer.
+         * So when we fail, we insert the address of the type_info that failed
+         * to be found, so that we'll catch it the next time.  This ensures we
+         * fail exactly once per alias per type while using this writer.
          */
-        auto backup_e = _write_dispatch_table_by_name.find(type.name());
+        const auto& backup_e = _write_dispatch_table_by_name.find(type.name());
         if (backup_e != _write_dispatch_table_by_name.end())
         {
-            _write_dispatch_table[&type] = backup_e->second;
-            e                            = _write_dispatch_table.find(&type);
+            e = _write_dispatch_table.insert(
+                    {
+                        &type,
+                        backup_e->second
+                    }
+            ).first;
         }
     }
 
@@ -1352,5 +1351,17 @@ serialize_json_to_file(
     return status;
 }
 
+
+SerializableObject::Writer::~Writer()
+{
+    if (_child_writer) 
+    {
+        delete _child_writer;
+    }
+    if (_child_cloning_encoder)
+    {
+        delete _child_cloning_encoder;
+    }
+}
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

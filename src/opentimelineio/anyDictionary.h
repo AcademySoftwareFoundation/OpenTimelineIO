@@ -135,6 +135,11 @@ public:
             containedType* result
     ) const
     {
+        if (result == nullptr)
+        {
+            return false;
+        }
+
         const auto it = this->find(key);
 
         if (
@@ -171,10 +176,19 @@ public:
             containedType* result
     )
     {
+        if (result == nullptr)
+        {
+            return false;
+        }
+
         const auto d_it =  this->find(key);
+
         if (
                 (d_it != this->end())
-                && (d_it->second.type() == typeid(containedType))
+                && (
+                    d_it->second.type().hash_code() 
+                    == typeid(containedType).hash_code()
+                )
         )
         {
             *result = any_cast<containedType>(d_it->second);

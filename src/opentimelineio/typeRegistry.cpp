@@ -236,12 +236,13 @@ TypeRegistry::register_upgrade_function(
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (auto r = _find_type_record(schema_name))
     {
-        if (r->upgrade_functions.find(version_to_upgrade_to) ==
-            r->upgrade_functions.end())
-        {
-            r->upgrade_functions[version_to_upgrade_to] = upgrade_function;
-            return true;
-        }
+        auto result = r->upgrade_functions.insert(
+                { 
+                    version_to_upgrade_to,
+                    upgrade_function 
+                }
+        );
+        return result.second;
     }
 
     return false;
@@ -256,14 +257,13 @@ TypeRegistry::register_downgrade_function(
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (auto r = _find_type_record(schema_name))
     {
-        if (r->downgrade_functions.find(version_to_downgrade_from) ==
-            r->downgrade_functions.end())
-        {
-            r->downgrade_functions[version_to_downgrade_from] = (
-                    downgrade_function
-            );
-            return true;
-        }
+        auto result = r->downgrade_functions.insert(
+                { 
+                    version_to_downgrade_from,
+                    downgrade_function 
+                }
+        );
+        return result.second;
     }
 
     return false;

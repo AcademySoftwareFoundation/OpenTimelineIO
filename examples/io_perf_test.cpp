@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
-#include <cstddef>
 #include <iostream>
-#include <cstdio>
 
 #include "opentimelineio/clip.h"
 #include "opentimelineio/typeRegistry.h"
+#include "opentimelineio/any.h"
+#include "opentimelineio/serialization.h"
+#include "opentimelineio/deserialization.h"
+#include "opentimelineio/timeline.h"
+
 #include "util.h"
-#include <opentimelineio/any.h>
-#include <opentimelineio/serialization.h>
-#include <opentimelineio/deserialization.h>
-#include <opentimelineio/timeline.h>
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
@@ -28,6 +27,11 @@ const struct {
     bool SINGLE_CLIP_DOWNGRADE_TEST  = true;
 } RUN_STRUCT ;
 
+// typedef std::chrono::duration<float> fsec;
+    // auto t0 = Time::now();
+    // auto t1 = Time::now();
+    // fsec fs = t1 - t0;
+
 /// utility function for printing std::chrono elapsed time
 double
 print_elapsed_time(
@@ -36,16 +40,11 @@ print_elapsed_time(
         const chrono_time_point& end
 )
 {
-    const auto dur = (
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                end - begin
-            ).count()
-    );
+    const std::chrono::duration<float> dur = end - begin;
 
-    double result = dur/1000000.0;
-    std::cout << message << ": " << result << " [s]" << std::endl;
+    std::cout << message << ": " << dur.count() << " [s]" << std::endl;
 
-    return result;
+    return dur.count();
 }
 
 void

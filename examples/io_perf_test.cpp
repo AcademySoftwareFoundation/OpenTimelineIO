@@ -250,7 +250,7 @@ main(
     {
         // clean up
         const auto tmp_files = examples::glob(tmp_dir_path, "*");
-        for (auto fp : tmp_files)
+        for (const auto& fp : tmp_files)
         {
             remove(fp.c_str());
         }

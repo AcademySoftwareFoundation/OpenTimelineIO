@@ -8,7 +8,6 @@
 
 #include <assert.h>
 #include <map>
-#include <vector>
 #include <string>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {

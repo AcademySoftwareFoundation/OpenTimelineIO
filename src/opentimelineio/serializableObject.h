@@ -16,9 +16,7 @@
 #include "ImathBox.h"
 #include "serialization.h"
 
-#include <cstddef>
 #include <list>
-#include <type_traits>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {

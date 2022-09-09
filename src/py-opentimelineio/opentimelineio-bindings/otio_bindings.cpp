@@ -39,6 +39,9 @@ static void register_python_type(py::object class_object,
             return r.take_value();
     };
 
+
+    // @TODO: further discussion required about preventing double registering
+#if 0
     if (
             !TypeRegistry::instance().register_type(
                 schema_name,
@@ -55,6 +58,15 @@ static void register_python_type(py::object class_object,
                 "Schema: " + schema_name + " has already been registered."
         );
     }
+#else
+    TypeRegistry::instance().register_type(
+            schema_name,
+            schema_version,
+            nullptr,
+            create,
+            schema_name
+    );
+#endif
 }
 
 static bool register_upgrade_function(std::string const& schema_name,
@@ -68,6 +80,8 @@ static bool register_upgrade_function(std::string const& schema_name,
         upgrade_function_obj(dobj);
     };
     
+    // further discussion required about preventing double registering
+#if 0
     if (
             !TypeRegistry::instance().register_upgrade_function(
                 schema_name,
@@ -85,6 +99,13 @@ static bool register_upgrade_function(std::string const& schema_name,
     }
 
     return true;
+#else
+    return TypeRegistry::instance().register_upgrade_function(
+            schema_name,
+            version_to_upgrade_to,
+            upgrade_function
+    );
+#endif
 }
 
 static bool 
@@ -93,10 +114,6 @@ register_downgrade_function(
         int version_to_downgrade_from,
         py::object const& downgrade_function_obj) 
 {
-    // @TODO: I'm actually surprised this works, since the python function
-    //        seems to often make new dictionaries and relies on the return
-    //        vallue... but here it doesn't seem like the return value matters.
-    //        ...the C++ functions definitely work in place though.
     std::function<void (AnyDictionary* d)> downgrade_function = ( 
             [downgrade_function_obj](AnyDictionary* d) 
             {
@@ -108,6 +125,8 @@ register_downgrade_function(
             }
     );
 
+    // further discussion required about preventing double registering
+#if 0
     if (
             !TypeRegistry::instance().register_downgrade_function(
                 schema_name,
@@ -123,8 +142,15 @@ register_downgrade_function(
         );
         return false;
     }
-    
     return true;
+#else
+    return TypeRegistry::instance().register_downgrade_function(
+            schema_name,
+            version_to_downgrade_from,
+            downgrade_function
+    ) ;
+#endif
+    
 }
 
 static void set_type_record(SerializableObject* so, std::string schema_name) {

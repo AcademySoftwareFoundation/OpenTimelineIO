@@ -29,7 +29,7 @@ const struct {
 } RUN_STRUCT ;
 
 /// utility function for printing std::chrono elapsed time
-void
+double
 print_elapsed_time(
         const std::string& message,
         const chrono_time_point& begin,
@@ -41,7 +41,11 @@ print_elapsed_time(
                 end - begin
             ).count()
     );
-    std::cout << message << ": " << dur/1000000.0 << " [s]" << std::endl;
+
+    double result = dur/1000000.0;
+    std::cout << message << ": " << result << " [s]" << std::endl;
+
+    return result;
 }
 
 void
@@ -154,6 +158,7 @@ main(
     print_elapsed_time("deserialize_json_from_file", begin, end);
 
 
+    double str_dg, str_nodg;
     if (RUN_STRUCT.TO_JSON_STRING)
     {
         begin = std::chrono::steady_clock::now();
@@ -169,7 +174,7 @@ main(
             examples::print_error(err);
             return 1;
         }
-        print_elapsed_time("serialize_json_to_string", begin, end);
+        str_dg = print_elapsed_time("serialize_json_to_string", begin, end);
     }
 
     if (RUN_STRUCT.TO_JSON_STRING_NO_DOWNGRADE)
@@ -184,9 +189,20 @@ main(
             examples::print_error(err);
             return 1;
         }
-        print_elapsed_time("serialize_json_to_string [no downgrade]", begin, end);
+        str_nodg = print_elapsed_time(
+                "serialize_json_to_string [no downgrade]",
+                begin,
+                end
+        );
     }
 
+    if (RUN_STRUCT.TO_JSON_STRING && RUN_STRUCT.TO_JSON_STRING_NO_DOWNGRADE)
+    {
+        std::cout << "  JSON to string no_dg/dg: " << str_dg / str_nodg;
+        std::cout << std::endl;
+    }
+
+    double file_dg, file_nodg;
     if (RUN_STRUCT.TO_JSON_FILE)
     {
         begin = std::chrono::steady_clock::now();
@@ -197,7 +213,7 @@ main(
         );
         end = std::chrono::steady_clock::now();
         assert(!otio::is_error(err));
-        print_elapsed_time("serialize_json_to_file", begin, end);
+        file_dg = print_elapsed_time("serialize_json_to_file", begin, end);
     }
 
     if (RUN_STRUCT.TO_JSON_FILE_NO_DOWNGRADE)
@@ -213,7 +229,17 @@ main(
         );
         end = std::chrono::steady_clock::now();
         assert(!otio::is_error(err));
-        print_elapsed_time("serialize_json_to_file [no downgrade]", begin, end);
+        file_nodg = print_elapsed_time(
+                "serialize_json_to_file [no downgrade]",
+                begin,
+                end
+        );
+    }
+
+    if (RUN_STRUCT.TO_JSON_FILE && RUN_STRUCT.TO_JSON_FILE_NO_DOWNGRADE)
+    {
+        std::cout << "  JSON to file no_dg/dg: " << file_dg / file_nodg;
+        std::cout << std::endl;
     }
 
     if (keep_tmp || RUN_STRUCT.FIXED_TMP)

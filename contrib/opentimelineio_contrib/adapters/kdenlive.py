@@ -8,12 +8,25 @@ import sys
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
+import json
 try:
     from urllib.parse import urlparse, unquote
 except ImportError:
     # Python 2
     from urlparse import urlparse
     from urllib import unquote
+
+marker_types = {
+    0: otio.schema.MarkerColor.PURPLE,
+    1: otio.schema.MarkerColor.CYAN,
+    2: otio.schema.MarkerColor.BLUE,
+    3: otio.schema.MarkerColor.GREEN,
+    4: otio.schema.MarkerColor.YELLOW,
+    5: otio.schema.MarkerColor.ORANGE,
+    6: otio.schema.MarkerColor.RED,
+    7: otio.schema.MarkerColor.PINK,
+    8: otio.schema.MarkerColor.MAGENTA
+}
 
 
 def read_property(element, name):
@@ -57,16 +70,158 @@ def read_keyframes(kfstring, rate):
                 for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring))
 
 
+def read_markers(markers_array, json_string, rate):
+    """Convert Kdenlive's marker structure (JSON string) to otio markers"""
+    if json_string:
+        markers = json.loads(json_string)
+        for json_marker in markers:
+            time_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(json_marker["pos"], rate),
+                otio.opentime.RationalTime(0, rate)
+            )
+            marker = otio.schema.Marker(
+                name=json_marker["comment"],
+                marked_range=time_range,
+                color=marker_types[json_marker["type"]]
+            )
+            markers_array.append(marker)
+
+
+def read_mix(mix, rate):
+    value = read_property(mix, 'kdenlive:mixcut')
+    if value == '':
+        # missing mixcut property: this is a transition, but not a mix
+        return None, None, None, None
+    before_mix_cut = time(value, rate)
+
+    mix_range = otio.opentime.TimeRange.range_from_start_end_time(
+        start_time=time(mix.get('in'), rate),
+        end_time_exclusive=(time(mix.get('out'), rate))
+    )
+    after_mix_cut = mix_range.duration - before_mix_cut
+    reverse = bool(int(read_property(mix, 'reverse')))
+
+    return mix_range, before_mix_cut, after_mix_cut, reverse
+
+
+def item_from_xml(xml_item, rate, byid, bin_producer_name):
+    """Create an otio item from xml"""
+    if xml_item.tag == 'blank':
+        # the item is a gap
+        gap = otio.schema.Gap(
+            duration=time(xml_item.get('length'), rate))
+        return gap
+    elif xml_item.tag == 'entry':
+        # the item is a link to a producer
+        producer = byid[xml_item.get('producer')]
+        service = read_property(producer, 'mlt_service')
+        available_range = otio.opentime.TimeRange.range_from_start_end_time(
+            start_time=time(producer.get('in'), rate),
+            end_time_exclusive=(
+                time(producer.get('out'), rate)
+                + otio.opentime.RationalTime(1, rate)
+            ),
+        )
+        source_range = otio.opentime.TimeRange.range_from_start_end_time(
+            start_time=time(xml_item.get('in'), rate),
+            end_time_exclusive=(
+                time(xml_item.get('out'), rate)
+                + otio.opentime.RationalTime(1, rate)
+            ),
+        )
+        # media reference clip
+        reference = None
+        if service in ['avformat', 'avformat-novalidate', 'qimage']:
+            # producer is a file based clip
+            reference = otio.schema.ExternalReference(
+                target_url=read_property(
+                    producer, 'kdenlive:originalurl') or
+                read_property(producer, 'resource'),
+                available_range=available_range)
+        elif service == 'color':
+            # producer is a color clip
+            reference = otio.schema.GeneratorReference(
+                generator_kind='SolidColor',
+                parameters={'color': read_property(producer, 'resource')},
+                available_range=available_range)
+        elif (service == 'frei0r.test_pat_B'
+              and read_property(producer, '0') == '4'):
+            # producer is a smpt bar clip
+            reference = otio.schema.GeneratorReference(
+                generator_kind='SMPTEBars',
+                available_range=available_range)
+        clip = otio.schema.Clip(
+            name=read_property(producer, 'kdenlive:clipname'),
+            source_range=source_range,
+            media_reference=reference or otio.schema.MissingReference())
+        # process clip markers, they are only stored in the bin producer
+        bin_producer = byid[bin_producer_name[read_property(producer, 'kdenlive:id')]]
+        read_markers(clip.markers,
+                     read_property(bin_producer, 'kdenlive:markers'), rate)
+        # process effects
+        for effect in xml_item.findall('filter'):
+            kdenlive_id = read_property(effect, 'kdenlive_id')
+            if kdenlive_id in ['fadein', 'fade_from_black',
+                               'fadeout', 'fade_to_black']:
+                clip.effects.append(otio.schema.Effect(
+                    effect_name=kdenlive_id,
+                    metadata={'duration':
+                              time(effect.get('out'), rate)
+                              - time(effect.get('in',
+                                                producer.get('in')), rate)
+                              }))
+            elif kdenlive_id in ['volume', 'brightness']:
+                clip.effects.append(otio.schema.Effect(
+                    effect_name=kdenlive_id,
+                    metadata={'keyframes': read_keyframes(
+                        read_property(effect, 'level'), rate)}))
+        return clip
+    return None
+
+
+def resize_item(item, delta, right):
+    """Resize an item and keep its position (no ripple)
+    by resizing the neighbors too"""
+    item.source_range = otio.opentime.TimeRange(
+        start_time=(item.source_range.start_time
+                    - (delta if not right else otio.opentime.RationalTime(0))),
+        duration=item.source_range.duration + delta
+    )
+    if right:
+        after = item.parent().neighbors_of(item)[1]
+        if after:
+            after.source_range = otio.opentime.TimeRange(
+                start_time=after.source_range.start_time,
+                duration=after.source_range.duration - delta
+            )
+    else:
+        before = item.parent().neighbors_of(item)[0]
+        if before:
+            before.source_range = otio.opentime.TimeRange(
+                start_time=before.source_range.start_time,
+                duration=before.source_range.duration - delta
+            )
+
+
 def read_from_string(input_str):
     """Read a Kdenlive project (MLT XML)
     Kdenlive uses a given MLT project layout, similar to Shotcut,
     combining a "main_bin" playlist to organize source media,
     and a "global_feed" tractor for timeline.
-    (in Kdenlive 19.x, timeline tracks include virtual sub-track, unused for now)"""
+    Timeline tracks include virtual sub-track,
+    used for same-track transitions"""
     mlt, byid = ET.XMLID(input_str)
     profile = mlt.find('profile')
     rate = (float(profile.get('frame_rate_num'))
             / float(profile.get('frame_rate_den', 1)))
+
+    main_bin = mlt.find("playlist[@id='main_bin']")
+    bin_producer_name = {}
+    for entry in main_bin.findall('entry'):
+        producer = byid[entry.get('producer')]
+        kdenlive_id = read_property(producer, 'kdenlive:id')
+        bin_producer_name[kdenlive_id] = producer.get('id')
+
     timeline = otio.schema.Timeline(
         name=mlt.get('name', 'Kdenlive imported timeline'))
 
@@ -85,79 +240,84 @@ def read_from_string(input_str):
         if maintrack.get('producer') == 'black_track':
             continue
         subtractor = byid[maintrack.get('producer')]
-        track = otio.schema.Track(
-            name=read_property(subtractor, 'kdenlive:track_name'))
+        stack = otio.schema.Stack()
+
+        subtracks = subtractor.findall('track')
+        for sub in subtracks:
+            mixTrack = otio.schema.Track()
+            playlist = byid[sub.get('producer')]
+            for xml_item in playlist.iter():
+                item = item_from_xml(xml_item, rate, byid, bin_producer_name)
+                if item:
+                    mixTrack.append(item)
+            if mixTrack.clip_if():
+                stack.append(mixTrack)
+
+        # process "mixes" (same-track-transitions)
+        mixes = subtractor.findall('transition')
+
+        # 1. step: flaten internal mix tracks to one track
+        for mix in mixes:
+            (mix_range, before_mix_cut,
+             after_mix_cut, reverse) = read_mix(mix, rate)
+            if mix_range is None:
+                continue
+
+            found_clip = stack[0].clip_if(search_range=mix_range)[0]
+            resize_item(found_clip,
+                        - (after_mix_cut if reverse else before_mix_cut),
+                        not reverse)
+
+            found_clip = stack[1].clip_if(search_range=mix_range)[0]
+            resize_item(found_clip,
+                        - (before_mix_cut if reverse else after_mix_cut),
+                        reverse)
+
+        track = otio.algorithms.flatten_stack(stack)
+
+        # 2. step: build and insert transitions
+        for mix in mixes:
+            (mix_range, before_mix_cut,
+             after_mix_cut, reverse) = read_mix(mix, rate)
+            if mix_range is None:
+                continue
+
+            found_clip = track.clip_if(
+                search_range=otio.opentime.TimeRange.range_from_start_end_time(
+                    start_time=(time(mix.get('in'), rate)
+                                - otio.opentime.RationalTime(
+                                    1 if before_mix_cut.value == 0 else 1)),
+                    end_time_exclusive=(time(mix.get('out'), rate))
+                ))[0]
+            index = track.index(found_clip)
+            track.insert(index + 1, otio.schema.Transition(
+                transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+                in_offset=after_mix_cut,
+                out_offset=before_mix_cut
+            ))
+
+        track.name = read_property(subtractor, 'kdenlive:track_name')
         if bool(read_property(subtractor, 'kdenlive:audio_track')):
             track.kind = otio.schema.TrackKind.Audio
         else:
             track.kind = otio.schema.TrackKind.Video
-        for subtrack in subtractor.findall('track'):
-            playlist = byid[subtrack.get('producer')]
-            for item in playlist.iter():
-                if item.tag == 'blank':
-                    gap = otio.schema.Gap(
-                        duration=time(item.get('length'), rate))
-                    track.append(gap)
-                elif item.tag == 'entry':
-                    producer = byid[item.get('producer')]
-                    service = read_property(producer, 'mlt_service')
-                    available_range = otio.opentime.TimeRange.range_from_start_end_time(
-                        start_time=time(producer.get('in'), rate),
-                        end_time_exclusive=(
-                            time(producer.get('out'), rate)
-                            + otio.opentime.RationalTime(1, rate)
-                        ),
-                    )
-                    source_range = otio.opentime.TimeRange.range_from_start_end_time(
-                        start_time=time(item.get('in'), rate),
-                        end_time_exclusive=(
-                            time(item.get('out'), rate)
-                            + otio.opentime.RationalTime(1, rate)
-                        ),
-                    )
-                    # media reference clip
-                    reference = None
-                    if service in ['avformat', 'avformat-novalidate', 'qimage']:
-                        reference = otio.schema.ExternalReference(
-                            target_url=read_property(
-                                producer, 'kdenlive:originalurl') or
-                            read_property(producer, 'resource'),
-                            available_range=available_range)
-                    elif service == 'color':
-                        reference = otio.schema.GeneratorReference(
-                            generator_kind='SolidColor',
-                            parameters={'color': read_property(producer, 'resource')},
-                            available_range=available_range)
-                    clip = otio.schema.Clip(
-                        name=read_property(producer, 'kdenlive:clipname'),
-                        source_range=source_range,
-                        media_reference=reference or otio.schema.MissingReference())
-                    for effect in item.findall('filter'):
-                        kdenlive_id = read_property(effect, 'kdenlive_id')
-                        if kdenlive_id in ['fadein', 'fade_from_black',
-                                           'fadeout', 'fade_to_black']:
-                            clip.effects.append(otio.schema.Effect(
-                                effect_name=kdenlive_id,
-                                metadata={'duration':
-                                          time(effect.get('out'), rate)
-                                          - time(effect.get('in',
-                                                 producer.get('in')), rate)}))
-                        elif kdenlive_id in ['volume', 'brightness']:
-                            clip.effects.append(otio.schema.Effect(
-                                effect_name=kdenlive_id,
-                                metadata={'keyframes': read_keyframes(
-                                    read_property(effect, 'level'), rate)}))
-                    track.append(clip)
         timeline.tracks.append(track)
 
+    # process "compositions" (transitions between clips in different tracks)
     for transition in maintractor.findall('transition'):
         kdenlive_id = read_property(transition, 'kdenlive_id')
         if kdenlive_id == 'wipe':
-            timeline.tracks[int(read_property(transition, 'b_track')) - 1].append(
+            b_track = int(read_property(transition, 'b_track'))
+            timeline.tracks[b_track - 1].append(
                 otio.schema.Transition(
                     transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
                     in_offset=time(transition.get('in'), rate),
                     out_offset=time(transition.get('out'), rate)))
+
+    # process timeline markers
+    read_markers(timeline.tracks.markers,
+                 read_property(main_bin, "kdenlive:docproperties.guides"),
+                 rate)
 
     return timeline
 
@@ -188,11 +348,32 @@ def write_keyframes(kfdict):
                     for t, v in kfdict.items())
 
 
+def write_markers(markers):
+    """Convert otio markers to Kdenlive's marker structure (JSON string)"""
+    markers_array = []
+    for marker in markers:
+        try:
+            marker_type = [
+                key for key in marker_types.items() if key[1] == marker.color
+            ][0][0]
+        except Exception:
+            marker_type = 0
+        markers_array.append(
+            {
+                "pos": int(marker.marked_range.start_time.value),
+                "comment": marker.name,
+                "type": marker_type
+            }
+        )
+    return json.dumps(markers_array)
+
+
 def write_to_string(input_otio):
     """Write a timeline to Kdenlive project
     Re-creating the bin storing all used source clips
     and constructing the tracks"""
-    if not isinstance(input_otio, otio.schema.Timeline) and len(input_otio) > 1:
+    if (not isinstance(input_otio, otio.schema.Timeline)
+            and len(input_otio) > 1):
         print('WARNING: Only one timeline supported, using the first one.')
         input_otio = input_otio[0]
     # Project header & metadata
@@ -234,13 +415,12 @@ def write_to_string(input_otio):
     write_property(main_bin, 'kdenlive:docproperties.version', '0.98')
     write_property(main_bin, 'xml_retain', '1')
 
+    # Process timeline markers
+    write_property(main_bin, 'kdenlive:docproperties.guides',
+                   write_markers(input_otio.tracks.markers))
+
     producer_count = 0
 
-    # Build media library, indexed by url
-    main_bin = ET.Element('playlist', dict(id='main_bin'))
-    write_property(main_bin, 'kdenlive:docproperties.decimalPoint', '.')
-    write_property(main_bin, 'kdenlive:docproperties.version', '0.98')
-    write_property(main_bin, 'xml_retain', '1')
     media_prod = {}
     for clip in input_otio.each_clip():
         producer, producer_count = _make_producer(
@@ -261,28 +441,6 @@ def write_to_string(input_otio):
             )
             write_property(entry, 'kdenlive:id', kdenlive_id)
 
-    # Substitute source clip to be referred to when meeting an unsupported clip
-    unsupported = ET.SubElement(
-        mlt, 'producer',
-        {
-            'id': 'unsupported',
-            'in': '0',
-            'out': '10000',
-        },
-    )
-    write_property(unsupported, 'mlt_service', 'qtext')
-    write_property(unsupported, 'family', 'Courier')
-    write_property(unsupported, 'fgcolour', '#ff808080')
-    write_property(unsupported, 'bgcolour', '#00000000')
-    write_property(unsupported, 'text', 'Unsupported clip type')
-    write_property(unsupported, 'kdenlive:id', '3')
-
-    entry = ET.SubElement(
-        main_bin, 'entry',
-        dict(producer='unsupported'),
-    )
-    write_property(entry, 'kdenlive:id', '3')
-
     mlt.append(main_bin)
 
     # Background clip
@@ -293,6 +451,8 @@ def write_to_string(input_otio):
     # Timeline & tracks
     maintractor = ET.Element('tractor', {'global_feed': '1'})
     ET.SubElement(maintractor, 'track', {'producer': 'black_track'})
+
+    unsupported_count = 0
 
     for i, track in enumerate(input_otio.tracks):
         is_audio = track.kind == otio.schema.TrackKind.Audio
@@ -350,19 +510,28 @@ def write_to_string(input_otio):
                     )
                     clip_in = source_range.start_time
                     clip_out = source_range.end_time_inclusive()
-                elif (
-                    isinstance(item.media_reference,
-                               otio.schema.GeneratorReference)
-                    and item.media_reference.generator_kind == 'SolidColor'
-                ):
-                    producer_id, kdenlive_id = media_prod[
-                        (
-                            "color",
-                            item.media_reference.parameters['color'],
-                            None,
-                            None,
-                        )
-                    ]
+                elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+                    if item.media_reference.generator_kind == 'SolidColor':
+                        producer_id, kdenlive_id = media_prod[
+                            (
+                                "color",
+                                item.media_reference.parameters['color'],
+                                None,
+                                None,
+                            )
+                        ]
+                    elif item.media_reference.generator_kind == 'SMPTEBars':
+                        producer_id, kdenlive_id = media_prod[
+                            (
+                                "frei0r.test_pat_B",
+                                "&lt;producer&gt;",
+                                None,
+                                None,
+                            )
+                        ]
+
+                if producer_id == "unsupported":
+                    unsupported_count += 1
 
                 entry = ET.SubElement(
                     playlist, 'entry',
@@ -423,6 +592,34 @@ def write_to_string(input_otio):
 
     mlt.append(maintractor)
 
+    # in case we need it: add substitute source clip to be referred to
+    # when meeting an unsupported clip
+    if unsupported_count > 0:
+        unsupported = ET.Element(
+            'producer',
+            {
+                'id': 'unsupported',
+                'in': '0',
+                'out': '10000',
+            },
+        )
+        write_property(unsupported, 'mlt_service', 'qtext')
+        write_property(unsupported, 'family', 'Courier')
+        write_property(unsupported, 'fgcolour', '#ff808080')
+        write_property(unsupported, 'bgcolour', '#00000000')
+        write_property(unsupported, 'text',
+                       'Unsupported clip type')
+        write_property(unsupported, 'kdenlive:clipname',
+                       'Placeholder: Unsupported clip type')
+        write_property(unsupported, 'kdenlive:id', '3')
+        mlt.insert(1, unsupported)
+
+        entry = ET.SubElement(
+            main_bin, 'entry',
+            dict(producer='unsupported'),
+        )
+        write_property(entry, 'kdenlive:id', '3')
+
     return minidom.parseString(ET.tostring(mlt)).toprettyxml(
         encoding=sys.getdefaultencoding(),
     ).decode(sys.getdefaultencoding())
@@ -448,7 +645,8 @@ def _decode_media_reference_url(url):
     return unquote(urlparse(url).path)
 
 
-def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audio=None):
+def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None,
+                   is_audio=None):
     producer = None
     service, resource, effect_speed, _ = _prod_key_from_item(item, is_audio)
     if service and resource:
@@ -457,17 +655,17 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
 
         key = (service, resource, speed, is_audio)
         # check not already in our library
-        if key not in media_prod:
+        if key not in media_prod and item.media_reference.available_range:
             # add ids to library
             media_prod[key] = producer_id, kdenlive_id
             producer = ET.SubElement(
                 mlt, 'producer',
                 {
                     'id': producer_id,
-                    'in': clock(item.media_reference.available_range.start_time),
-                    'out': clock(
-                        item.media_reference.available_range.end_time_inclusive()
-                    ),
+                    'in':
+                        clock(item.media_reference.available_range.start_time),
+                    'out':
+                        clock(item.media_reference.available_range.end_time_inclusive())
                 },
             )
             write_property(producer, 'global_feed', '1')
@@ -477,12 +675,15 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
             if speed is not None:
                 kdenlive_id = media_prod[(service, resource, None, None)][1]
                 write_property(producer, 'mlt_service', "timewarp")
-                write_property(producer, 'resource', ":".join((str(speed), resource)))
+                write_property(producer,
+                               'resource', ":".join((str(speed), resource)))
                 write_property(producer, 'warp_speed', str(speed))
                 write_property(producer, 'warp_resource', resource)
                 write_property(producer, 'warp_pitch', "0")
-                write_property(producer, 'set.test_audio', "0" if is_audio else "1")
-                write_property(producer, 'set.test_image', "1" if is_audio else "0")
+                write_property(producer,
+                               'set.test_audio', "0" if is_audio else "1")
+                write_property(producer,
+                               'set.test_image', "1" if is_audio else "0")
                 start_time = otio.opentime.RationalTime(
                     round(
                         item.media_reference.available_range.start_time.value
@@ -513,6 +714,11 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
                 str(int(duration.value)),
             )
             write_property(producer, 'kdenlive:id', kdenlive_id)
+            if (isinstance(item.media_reference,
+                           otio.schema.GeneratorReference)
+                    and item.media_reference.generator_kind == 'SMPTEBars'):
+                # set the type of the test pattern to SMPTE (value 4)
+                write_property(producer, '0', '4')
 
             count += 1
 
@@ -558,12 +764,13 @@ def _prod_key_from_item(item, is_audio):
                 if speed is None:
                     speed = 1
                 speed *= effect.time_scalar
-    elif (
-        isinstance(item.media_reference, otio.schema.GeneratorReference)
-        and item.media_reference.generator_kind == 'SolidColor'
-    ):
-        service = 'color'
-        resource = item.media_reference.parameters['color']
+    elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+        if item.media_reference.generator_kind == 'SolidColor':
+            service = 'color'
+            resource = item.media_reference.parameters['color']
+        elif item.media_reference.generator_kind == 'SMPTEBars':
+            service = 'frei0r.test_pat_B'
+            resource = '&lt;producer&gt;'
     return service, resource, speed, None if speed is None else is_audio
 
 

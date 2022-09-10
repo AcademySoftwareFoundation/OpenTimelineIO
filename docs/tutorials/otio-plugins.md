@@ -577,7 +577,8 @@ Read a Kdenlive project (MLT XML)
   Kdenlive uses a given MLT project layout, similar to Shotcut,
   combining a "main_bin" playlist to organize source media,
   and a "global_feed" tractor for timeline.
-  (in Kdenlive 19.x, timeline tracks include virtual sub-track, unused for now)
+  Timeline tracks include virtual sub-track,
+  used for same-track transitions
 ```
   - input_str
 - write_to_string: 

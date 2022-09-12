@@ -5,6 +5,7 @@
 #include "opentimelineio/deserialization.h"
 #include "opentimelineio/serialization.h"
 #include "stringUtils.h"
+#include "typeRegistry.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -112,18 +113,34 @@ SerializableObject::is_unknown_schema() const
 }
 
 std::string
-SerializableObject::to_json_string(ErrorStatus* error_status, int indent) const
+SerializableObject::to_json_string(
+        ErrorStatus* error_status,
+        const schema_version_map* schema_version_targets,
+        int indent
+) const
 {
     return serialize_json_to_string(
-        any(Retainer<>(this)), error_status, indent);
+        any(Retainer<>(this)), 
+        schema_version_targets,
+        error_status,
+        indent
+    );
 }
 
 bool
 SerializableObject::to_json_file(
-    std::string const& file_name, ErrorStatus* error_status, int indent) const
+    std::string const& file_name,
+    ErrorStatus* error_status,
+    const schema_version_map* schema_version_targets,
+    int indent) const
 {
     return serialize_json_to_file(
-        any(Retainer<>(this)), file_name, error_status, indent);
+        any(Retainer<>(this)),
+        file_name,
+        schema_version_targets,
+        error_status,
+        indent
+    );
 }
 
 SerializableObject*

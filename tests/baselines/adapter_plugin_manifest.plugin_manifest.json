@@ -23,5 +23,14 @@
         "post_adapter_read" : [],
         "post_adapter_write" : ["post write example hook"],
         "post_media_linker" : ["example hook"]
+    },
+    "version_manifests" : {
+        "TEST_FAMILY_NAME": {
+            "TEST_LABEL": {
+                "ExampleSchema":2,
+                "EnvVarTestSchema":1,
+                "Clip": 1
+            }
+        }
     }
 }

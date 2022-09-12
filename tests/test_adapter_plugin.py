@@ -222,7 +222,8 @@ class TestPluginManifest(unittest.TestCase):
             if bak_env is not None:
                 os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
             else:
-                del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+                if "OTIO_PLUGIN_MANIFEST_PATH" in os.environ:
+                    del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
     def test_find_manifest_by_environment_variable(self):
         basename = "unittest.plugin_manifest.json"

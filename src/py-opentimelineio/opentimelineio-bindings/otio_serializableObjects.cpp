@@ -163,10 +163,10 @@ static void define_bases1(py::module m) {
         .def("clone", [](SerializableObject* so) {
                 return so->clone(ErrorStatusHandler()); })
         .def("to_json_string", [](SerializableObject* so, int indent) {
-                return so->to_json_string(ErrorStatusHandler(), indent); },
+                return so->to_json_string(ErrorStatusHandler(), {}, indent); },
             "indent"_a = 4)
         .def("to_json_file", [](SerializableObject* so, std::string file_name, int indent) {
-                return so->to_json_file(file_name, ErrorStatusHandler(), indent); },
+                return so->to_json_file(file_name, ErrorStatusHandler(), {}, indent); },
             "file_name"_a,
             "indent"_a = 4)
         .def_static("from_json_file", [](std::string file_name) {

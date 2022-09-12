@@ -254,6 +254,7 @@ parameters:
 - *hooks*: Hooks that hooks scripts can be attached to.
 - *media_linkers*: Media Linkers this manifest describes.
 - *schemadefs*: Schemadefs this manifest describes.
+- *version_manifests*: Sets of versions to downgrade schemas to.
 
 ### SerializableObject.1
 

@@ -14,11 +14,14 @@
 #include "opentimelineio/version.h"
 
 #include "ImathBox.h"
+#include "serialization.h"
 
 #include <list>
-#include <type_traits>
+#include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+class CloningEncoder;
 
 class SerializableObject
 {
@@ -42,12 +45,18 @@ public:
      */
     bool possibly_delete();
 
-    bool to_json_file(
+    bool 
+    to_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr,
+        const schema_version_map* target_family_label_spec = nullptr,
         int                indent       = 4) const;
+
     std::string
-    to_json_string(ErrorStatus* error_status = nullptr, int indent = 4) const;
+    to_json_string(
+            ErrorStatus* error_status = nullptr,
+            const schema_version_map* target_family_label_spec = nullptr,
+            int indent = 4) const;
 
     static SerializableObject* from_json_file(
         std::string const& file_name, ErrorStatus* error_status = nullptr);
@@ -394,6 +403,7 @@ public:
         static bool write_root(
             any const&     value,
             class Encoder& encoder,
+            const schema_version_map* downgrade_version_manifest=nullptr,
             ErrorStatus*   error_status = nullptr);
 
         void write(std::string const& key, bool value);
@@ -440,7 +450,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -452,7 +462,7 @@ public:
         static any _to_any(std::map<std::string, T> const& value)
         {
             AnyDictionary am;
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 am.emplace(e.first, _to_any(e.second));
             }
@@ -466,7 +476,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -502,11 +512,18 @@ public:
         }
         ///@}
 
-        Writer(class Encoder& encoder)
-            : _encoder(encoder)
+        Writer(
+                class Encoder& encoder,
+                const schema_version_map* downgrade_version_manifest
+        )
+            : _encoder(encoder),
+            _downgrade_version_manifest(downgrade_version_manifest)
+
         {
             _build_dispatch_tables();
         }
+
+        ~Writer();
 
         Writer(Writer const&) = delete;
         Writer operator=(Writer const&) = delete;
@@ -520,19 +537,23 @@ public:
         bool _any_equals(any const& lhs, any const& rhs);
 
         std::string _no_key;
-        std::map<std::type_info const*, std::function<void(any const&)>>
+        std::unordered_map<std::type_info const*, std::function<void(any const&)>>
             _write_dispatch_table;
-        std::map<
+        std::unordered_map<
             std::type_info const*,
             std::function<bool(any const&, any const&)>>
             _equality_dispatch_table;
 
-        std::map<std::string, std::function<void(any const&)>>
+        std::unordered_map<std::string, std::function<void(any const&)>>
             _write_dispatch_table_by_name;
-        std::map<SerializableObject const*, std::string> _id_for_object;
-        std::map<std::string, int>                       _next_id_for_type;
+        std::unordered_map<SerializableObject const*, std::string> _id_for_object;
+        std::unordered_map<std::string, int>                       _next_id_for_type;
+
+        Writer* _child_writer = nullptr;
+        CloningEncoder* _child_cloning_encoder = nullptr;
 
         class Encoder& _encoder;
+        const schema_version_map* _downgrade_version_manifest;
         friend class SerializableObject;
     };
 

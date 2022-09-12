@@ -6,16 +6,27 @@
 #include "opentimelineio/any.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
+
 #include <algorithm>
 #include <functional>
-#include <map>
 #include <mutex>
 #include <string>
+#include <map>
+#include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
+class Encoder;
 class AnyDictionary;
+
+// typedefs for the schema downgrading system
+// @TODO: should we make version an int64_t?  That would match what we can
+//        serialize natively, since we only serialize 64 bit signed ints.
+using schema_version_map = std::unordered_map<std::string, int64_t>;
+using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
+
+extern const label_to_schema_version_map CORE_VERSION_MAP;
 
 class TypeRegistry
 {
@@ -93,6 +104,24 @@ public:
             CLASS::schema_name, version_to_upgrade_to, upgrade_function);
     }
 
+    /// Downgrade function from version_to_downgrade_from to
+    /// version_to_downgrade_from - 1
+    bool register_downgrade_function(
+        std::string const&                  schema_name,
+        int                                 version_to_downgrade_from,
+        std::function<void(AnyDictionary*)> downgrade_function);
+
+    /// Convenience API for C++ developers.  See the documentation of the
+    /// non-templated register_downgrade_function() for details.
+    template <typename CLASS>
+    bool register_downgrade_function(
+        int                                 version_to_upgrade_to,
+        std::function<void(AnyDictionary*)> upgrade_function)
+    {
+        return register_downgrade_function(
+            CLASS::schema_name, version_to_upgrade_to, upgrade_function);
+    }
+
     SerializableObject* instance_from_schema(
         std::string const& schema_name,
         int                schema_version,
@@ -113,6 +142,9 @@ public:
         std::string const& schema_name,
         ErrorStatus*       error_status = nullptr);
 
+    // for inspecting the type registry, build a map of schema name to version
+    void type_version_map(schema_version_map& result);
+
 private:
     TypeRegistry();
 
@@ -127,6 +159,7 @@ private:
         std::function<SerializableObject*()> create;
 
         std::map<int, std::function<void(AnyDictionary*)>> upgrade_functions;
+        std::map<int, std::function<void(AnyDictionary*)>> downgrade_functions;
 
         _TypeRecord(
             std::string                          _schema_name,
@@ -144,6 +177,7 @@ private:
 
         friend class TypeRegistry;
         friend class SerializableObject;
+        friend class CloningEncoder;
     };
 
     // helper functions for lookup
@@ -170,6 +204,7 @@ private:
     std::map<std::string, _TypeRecord*> _type_records_by_type_name;
 
     friend class SerializableObject;
+    friend class CloningEncoder;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

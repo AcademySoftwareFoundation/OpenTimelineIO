@@ -6,18 +6,30 @@
 #include "opentimelineio/any.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
+#include "opentimelineio/typeRegistry.h"
+#include <opentimelineio/optional.h>
 
 #include <string>
+#include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-std::string serialize_json_to_string(
-    const any& value, ErrorStatus* error_status = nullptr, int indent = 4);
 
-bool serialize_json_to_file(
+std::string 
+serialize_json_to_string(
+    const any& value,
+    const schema_version_map* schema_version_targets = nullptr,
+    ErrorStatus* error_status = nullptr,
+    int indent = 4
+);
+
+bool 
+serialize_json_to_file(
     const any&         value,
     std::string const& file_name,
+    const schema_version_map* schema_version_targets = nullptr,
     ErrorStatus*       error_status = nullptr,
-    int                indent       = 4);
+    int                indent       = 4
+);
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

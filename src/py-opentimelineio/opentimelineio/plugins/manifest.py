@@ -32,6 +32,7 @@ OTIO_PLUGIN_TYPES = [
     'schemadefs',
     'hook_scripts',
     'hooks',
+    'version_manifests',
 ]
 
 
@@ -90,6 +91,8 @@ class Manifest(core.SerializableObject):
         self.hooks = {}
         self.hook_scripts = []
 
+        self.version_manifests = {}
+
     adapters = core.serializable_field(
         "adapters",
         type([]),
@@ -115,6 +118,11 @@ class Manifest(core.SerializableObject):
         type([]),
         "Scripts that can be attached to hooks."
     )
+    version_manifests = core.serializable_field(
+        "version_manifests",
+        type({}),
+        "Sets of versions to downgrade schemas to."
+    )
 
     def extend(self, another_manifest):
         """
@@ -131,7 +139,17 @@ class Manifest(core.SerializableObject):
         self.media_linkers.extend(another_manifest.media_linkers)
         self.hook_scripts.extend(another_manifest.hook_scripts)
 
+        for family, label_map in another_manifest.version_manifests.items():
+            # because self.version_manifests is an AnyDictionary instead of a
+            # vanilla python dictionary, it does not support the .set_default()
+            # method.
+            if family not in self.version_manifests:
+                self.version_manifests[family] = {}
+            self.version_manifests[family].update(label_map)
+
         for trigger_name, hooks in another_manifest.hooks.items():
+            # because self.hooks is an AnyDictionary instead of a vanilla
+            # python dictionary, it does not support the .set_default() method.
             if trigger_name not in self.hooks:
                 self.hooks[trigger_name] = []
             self.hooks[trigger_name].extend(hooks)

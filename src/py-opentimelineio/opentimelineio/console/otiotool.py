@@ -17,7 +17,7 @@ import re
 import sys
 
 try:
-    from  urllib.request import urlopen
+    from urllib.request import urlopen
 
 except ImportError:
     # Python2

@@ -537,7 +537,10 @@ def trim_timeline(start, end, timeline):
     times given. Each of the start and end times can be specified as either
     a timecode string (e.g. "HH:MM:SS:FF") or a string with a floating
     point value measured in seconds."""
-    rate = timeline.global_start_time.rate
+    if timeline.global_start_time is not None:
+        rate = timeline.global_start_time.rate
+    else:
+        rate = timeline.duration().rate
     try:
         start_time = time_from_string(start, rate)
         end_time = time_from_string(end, rate)
@@ -653,7 +656,7 @@ def copy_media_to_folder(timeline, folder):
 
 def print_timeline_stats(timeline):
     """Print some statistics about the given timeline."""
-    print("Name: {}", timeline.name)
+    print("Name: {}".format(timeline.name))
     trimmed_range = timeline.tracks.trimmed_range()
     print("Start:    {}\nEnd:      {}\nDuration: {}".format(
         otio.opentime.to_timecode(trimmed_range.start_time),

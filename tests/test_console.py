@@ -34,6 +34,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 MULTITRACK_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
+TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition.otio")
 
 
 def CreateShelloutTest(cl):
@@ -315,6 +316,19 @@ OTIOPlugInfoTest_ShellOut = CreateShelloutTest(OTIOStatTest)
 class OTIOToolTest(ConsoleTester, unittest.TestCase):
     test_module = otio_console.otiotool
 
+    def test_list_tracks(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--list-tracks'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+TRACK: Sequence (Video)
+TRACK: Sequence 2 (Video)
+TRACK: Sequence 3 (Video)
+""", sys.stdout.getvalue())
+
     def test_list_clips(self):
         sys.argv = [
             'otiotool',
@@ -334,18 +348,21 @@ class OTIOToolTest(ConsoleTester, unittest.TestCase):
   CLIP: ZZ100_510B (LAY1)
 """, sys.stdout.getvalue())
 
-    def test_list_tracks(self):
+    def test_list_markers(self):
         sys.argv = [
             'otiotool',
-            '-i', MULTITRACK_PATH,
-            '--list-tracks'
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--list-markers'
         ]
         self.run_test()
-        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
-TRACK: Sequence (Video)
-TRACK: Sequence 2 (Video)
-TRACK: Sequence 3 (Video)
-""", sys.stdout.getvalue())
+        self.maxDiff = None
+        self.assertEqual(
+            ("TIMELINE: sc01_sh010_layerA\n"
+             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: RED name: dsf\n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: RED name: \n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: RED name: \n"),  # noqa: E501 line too long
+            sys.stdout.getvalue())
 
     def test_list_tracks_and_clips(self):
         sys.argv = [
@@ -364,6 +381,130 @@ TRACK: Sequence 2 (Video)
   CLIP: t-hawk (loop)-HD.mp4
 TRACK: Sequence 3 (Video)
   CLIP: KOLL-HD.mp4
+""", sys.stdout.getvalue())
+
+    def test_list_tracks_and_clips_and_media(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--list-tracks',
+            '--list-clips',
+            '--list-media'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+TRACK: Sequence (Video)
+  CLIP: tech.fux (loop)-HD.mp4
+    MEDIA: None
+  CLIP: out-b (loop)-HD.mp4
+    MEDIA: None
+  CLIP: brokchrd (loop)-HD.mp4
+    MEDIA: None
+TRACK: Sequence 2 (Video)
+  CLIP: t-hawk (loop)-HD.mp4
+    MEDIA: None
+TRACK: Sequence 3 (Video)
+  CLIP: KOLL-HD.mp4
+    MEDIA: None
+""", sys.stdout.getvalue())
+
+    def test_list_tracks_and_clips_and_media_and_markers(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--list-tracks',
+            '--list-clips',
+            '--list-media',
+            '--list-markers'
+        ]
+        self.run_test()
+        self.assertEqual(
+            ("TIMELINE: sc01_sh010_layerA\n"
+             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: RED name: dsf\n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: RED name: \n"  # noqa E501 line too long
+             "TRACK:  (Video)\n"
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
+             "TRACK:  (Video)\n"
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
+             "  CLIP: sc01_sh020_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh020_anim.mov\n"
+             "  CLIP: sc01_sh030_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh030_anim.mov\n"
+             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: RED name: \n"  # noqa E501 line too long
+             "TRACK:  (Video)\n"
+             "  CLIP: test_title\n"
+             "    MEDIA: None\n"
+             "TRACK:  (Video)\n"
+             "  CLIP: sc01_master_layerA_sh030_temp.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov\n"  # noqa E501 line too long
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
+             "TRACK:  (Audio)\n"
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
+             "TRACK:  (Audio)\n"
+             "  CLIP: sc01_placeholder.wav\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_placeholder.wav\n"
+             "TRACK:  (Audio)\n"
+             "  CLIP: track_08.wav\n"
+             "    MEDIA: file://localhost/D%3a/media/track_08.wav\n"
+             "TRACK:  (Audio)\n"
+             "  CLIP: sc01_master_layerA_sh030_temp.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov\n"  # noqa E501 line too long
+             "  CLIP: sc01_sh010_anim.mov\n"
+             "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"),
+            sys.stdout.getvalue())
+
+    def test_verify_media(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--list-tracks',
+            '--list-clips',
+            '--list-media',
+            '--verify-media'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: sc01_sh010_layerA
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
+  CLIP: sc01_sh020_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh020_anim.mov
+  CLIP: sc01_sh030_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh030_anim.mov
+TRACK:  (Video)
+  CLIP: test_title
+    MEDIA: None
+TRACK:  (Video)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_placeholder.wav
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_placeholder.wav
+TRACK:  (Audio)
+  CLIP: track_08.wav
+    MEDIA NOT FOUND: file://localhost/D%3a/media/track_08.wav
+TRACK:  (Audio)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+    MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
 """, sys.stdout.getvalue())
 
     def test_video_only(self):
@@ -417,7 +558,7 @@ TRACK: Sequence 3 (Video)
         sys.argv = [
             'otiotool',
             '-i', MULTITRACK_PATH,
-            '--only-tracks-with-index', 3,
+            '--only-tracks-with-index', '3',
             '--list-clips'
         ]
         self.run_test()
@@ -429,7 +570,7 @@ TRACK: Sequence 3 (Video)
         sys.argv = [
             'otiotool',
             '-i', MULTITRACK_PATH,
-            '--only-tracks-with-index', 2, 3,
+            '--only-tracks-with-index', '2', '3',
             '--list-clips'
         ]
         self.run_test()
@@ -491,6 +632,268 @@ TRACK:  (Audio)
 TRACK:  (Audio)
   CLIP: sc01_sh010_anim.mov
 """, sys.stdout.getvalue())
+
+    def test_remote_transition(self):
+        sys.argv = [
+            'otiotool',
+            '-i', TRANSITION_PATH,
+            '-o', '-',
+            '--remove-transitions'
+        ]
+        self.run_test()
+        self.assertNotIn('"OTIO_SCHEMA": "Transition.', sys.stdout.getvalue())
+
+    def test_trim(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--trim', '20', '40',
+            '--list-clips',
+            '--inspect', 't-hawk'
+        ]
+        self.run_test()
+        self.assertEqual(
+            ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "  ITEM: t-hawk (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
+             "    source_range: TimeRange(RationalTime(0, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    trimmed_range: TimeRange(RationalTime(0, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    visible_range: TimeRange(RationalTime(0, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    range_in_parent: TimeRange(RationalTime(2, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    trimmed range in timeline: TimeRange(RationalTime(2, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    visible range in timeline: TimeRange(RationalTime(2, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    range in Sequence 2 (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(2, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(2, 24), RationalTime(478, 24))\n"  # noqa E501 line too long
+             "TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "  CLIP: tech.fux (loop)-HD.mp4\n"
+             "  CLIP: out-b (loop)-HD.mp4\n"
+             "  CLIP: t-hawk (loop)-HD.mp4\n"),
+            sys.stdout.getvalue())
+
+    def test_flatten(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--flatten', 'video',
+            '--list-clips',
+            '--list-tracks',
+            '--inspect', 'out-b'
+        ]
+        self.run_test()
+        self.assertEqual(
+            ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "  ITEM: out-b (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
+             "    source_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    trimmed_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    visible_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range_in_parent: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    trimmed range in timeline: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    visible range in timeline: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range in Flattened (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "TRACK: Flattened (Video)\n"
+             "  CLIP: tech.fux (loop)-HD.mp4\n"
+             "  CLIP: t-hawk (loop)-HD.mp4\n"
+             "  CLIP: out-b (loop)-HD.mp4\n"
+             "  CLIP: KOLL-HD.mp4\n"
+             "  CLIP: brokchrd (loop)-HD.mp4\n"),
+            sys.stdout.getvalue())
+
+    def test_keep_flattened_tracks(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--flatten', 'video',
+            '--keep-flattened-tracks',
+            '--list-clips',
+            '--list-tracks',
+            '--inspect', 'out-b'
+        ]
+        self.run_test()
+        self.assertEqual(
+            ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "  ITEM: out-b (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
+             "    source_range: TimeRange(RationalTime(0, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    trimmed_range: TimeRange(RationalTime(0, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    visible_range: TimeRange(RationalTime(0, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    range_in_parent: TimeRange(RationalTime(803, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    trimmed range in timeline: TimeRange(RationalTime(803, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    visible range in timeline: TimeRange(RationalTime(803, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    range in Sequence (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(803, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(803, 24), RationalTime(722, 24))\n"  # noqa E501 line too long
+             "  ITEM: out-b (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
+             "    source_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    trimmed_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    visible_range: TimeRange(RationalTime(159, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range_in_parent: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    trimmed range in timeline: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    visible range in timeline: TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range in Flattened (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(962, 24), RationalTime(236, 24))\n"  # noqa E501 line too long
+             "TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "TRACK: Sequence (Video)\n"
+             "  CLIP: tech.fux (loop)-HD.mp4\n"
+             "  CLIP: out-b (loop)-HD.mp4\n"
+             "  CLIP: brokchrd (loop)-HD.mp4\n"
+             "TRACK: Sequence 2 (Video)\n"
+             "  CLIP: t-hawk (loop)-HD.mp4\n"
+             "TRACK: Sequence 3 (Video)\n"
+             "  CLIP: KOLL-HD.mp4\n"
+             "TRACK: Flattened (Video)\n"
+             "  CLIP: tech.fux (loop)-HD.mp4\n"
+             "  CLIP: t-hawk (loop)-HD.mp4\n"
+             "  CLIP: out-b (loop)-HD.mp4\n"
+             "  CLIP: KOLL-HD.mp4\n"
+             "  CLIP: brokchrd (loop)-HD.mp4\n"),
+            sys.stdout.getvalue())
+
+    def test_stack(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH, PREMIERE_EXAMPLE_PATH,
+            '--stack',
+            '--list-clips',
+            '--list-tracks',
+            '--stats'
+        ]
+        self.run_test()
+        self.maxDiff = None
+        self.assertEqual("""Name: Stacked 2 Timelines
+Start:    00:00:00:00
+End:      00:02:16:18
+Duration: 00:02:16:18
+TIMELINE: Stacked 2 Timelines
+TRACK: Sequence (Video)
+  CLIP: tech.fux (loop)-HD.mp4
+  CLIP: out-b (loop)-HD.mp4
+  CLIP: brokchrd (loop)-HD.mp4
+TRACK: Sequence 2 (Video)
+  CLIP: t-hawk (loop)-HD.mp4
+TRACK: Sequence 3 (Video)
+  CLIP: KOLL-HD.mp4
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh020_anim.mov
+  CLIP: sc01_sh030_anim.mov
+TRACK:  (Video)
+  CLIP: test_title
+TRACK:  (Video)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_placeholder.wav
+TRACK:  (Audio)
+  CLIP: track_08.wav
+TRACK:  (Audio)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
+
+    def test_concat(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH, PREMIERE_EXAMPLE_PATH,
+            '--concat',
+            '--list-clips',
+            '--list-tracks',
+            '--stats'
+        ]
+        self.run_test()
+        self.maxDiff = None
+        self.assertEqual("""Name: Concatenated 2 Timelines
+Start:    00:00:00:00
+End:      00:02:59:03
+Duration: 00:02:59:03
+TIMELINE: Concatenated 2 Timelines
+TRACK:  (Video)
+TRACK: Sequence (Video)
+  CLIP: tech.fux (loop)-HD.mp4
+  CLIP: out-b (loop)-HD.mp4
+  CLIP: brokchrd (loop)-HD.mp4
+TRACK: Sequence 2 (Video)
+  CLIP: t-hawk (loop)-HD.mp4
+TRACK: Sequence 3 (Video)
+  CLIP: KOLL-HD.mp4
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh020_anim.mov
+  CLIP: sc01_sh030_anim.mov
+TRACK:  (Video)
+  CLIP: test_title
+TRACK:  (Video)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_placeholder.wav
+TRACK:  (Audio)
+  CLIP: track_08.wav
+TRACK:  (Audio)
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
+
+    def test_redact(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--redact',
+            '--list-clips',
+            '--list-tracks'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: Timeline #1
+TRACK: Track #1 (Video)
+  CLIP: Clip #1
+  CLIP: Clip #2
+  CLIP: Clip #3
+TRACK: Track #2 (Video)
+  CLIP: Clip #4
+TRACK: Track #3 (Video)
+  CLIP: Clip #5
+""", sys.stdout.getvalue())
+
+    def test_stats(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--stats'
+        ]
+        self.run_test()
+        self.assertEqual("""Name: OTIO TEST - multitrack.Exported.01
+Start:    00:00:00:00
+End:      00:02:16:18
+Duration: 00:02:16:18
+""", sys.stdout.getvalue())
+
+    def test_inspect(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--inspect', 'KOLL'
+        ]
+        self.run_test()
+        self.assertEqual(
+            ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
+             "  ITEM: KOLL-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"
+             "    source_range: TimeRange(RationalTime(0, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    trimmed_range: TimeRange(RationalTime(0, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    visible_range: TimeRange(RationalTime(0, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    range_in_parent: TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    trimmed range in timeline: TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    visible range in timeline: TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    range in Sequence 3 (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
+             "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"),  # noqa E501 line too long
+            sys.stdout.getvalue())
 
 
 if __name__ == '__main__':

@@ -32,6 +32,8 @@ import opentimelineio.console as otio_console
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
+MULTITRACK_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 
 
 def CreateShelloutTest(cl):
@@ -308,6 +310,187 @@ class OTIOPlugInfoTest(ConsoleTester, unittest.TestCase):
 
 
 OTIOPlugInfoTest_ShellOut = CreateShelloutTest(OTIOStatTest)
+
+
+class OTIOToolTest(ConsoleTester, unittest.TestCase):
+    test_module = otio_console.otiotool
+
+    def test_list_clips(self):
+        sys.argv = [
+            'otiotool',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: Example_Screening.01
+  CLIP: ZZ100_501 (LAY3)
+  CLIP: ZZ100_502A (LAY3)
+  CLIP: ZZ100_503A (LAY1)
+  CLIP: ZZ100_504C (LAY1)
+  CLIP: ZZ100_504B (LAY1)
+  CLIP: ZZ100_507C (LAY2)
+  CLIP: ZZ100_508 (LAY2)
+  CLIP: ZZ100_510 (LAY1)
+  CLIP: ZZ100_510B (LAY1)
+""", sys.stdout.getvalue())
+
+    def test_list_tracks(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--list-tracks'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+TRACK: Sequence (Video)
+TRACK: Sequence 2 (Video)
+TRACK: Sequence 3 (Video)
+""", sys.stdout.getvalue())
+
+    def test_list_tracks_and_clips(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--list-tracks',
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+TRACK: Sequence (Video)
+  CLIP: tech.fux (loop)-HD.mp4
+  CLIP: out-b (loop)-HD.mp4
+  CLIP: brokchrd (loop)-HD.mp4
+TRACK: Sequence 2 (Video)
+  CLIP: t-hawk (loop)-HD.mp4
+TRACK: Sequence 3 (Video)
+  CLIP: KOLL-HD.mp4
+""", sys.stdout.getvalue())
+
+    def test_video_only(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--video-only',
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: sc01_sh010_layerA
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh020_anim.mov
+  CLIP: sc01_sh030_anim.mov
+  CLIP: test_title
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
+
+    def test_audio_only(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--audio-only',
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: sc01_sh010_layerA
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_placeholder.wav
+  CLIP: track_08.wav
+  CLIP: sc01_master_layerA_sh030_temp.mov
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
+
+    def test_only_tracks_with_name(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--only-tracks-with-name', 'Sequence 3',
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+  CLIP: KOLL-HD.mp4
+""", sys.stdout.getvalue())
+
+    def test_only_tracks_with_index(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--only-tracks-with-index', 3,
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+  CLIP: KOLL-HD.mp4
+""", sys.stdout.getvalue())
+
+    def test_only_tracks_with_index2(self):
+        sys.argv = [
+            'otiotool',
+            '-i', MULTITRACK_PATH,
+            '--only-tracks-with-index', 2, 3,
+            '--list-clips'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
+  CLIP: t-hawk (loop)-HD.mp4
+  CLIP: KOLL-HD.mp4
+""", sys.stdout.getvalue())
+
+    def test_only_clips_with_name(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--list-clips',
+            '--list-tracks',
+            '--only-clips-with-name', 'sc01_sh010_anim.mov'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: sc01_sh010_layerA
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Video)
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+TRACK:  (Audio)
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
+
+    def test_only_clips_with_regex(self):
+        sys.argv = [
+            'otiotool',
+            '-i', PREMIERE_EXAMPLE_PATH,
+            '--list-clips',
+            '--list-tracks',
+            '--only-clips-with-name-regex', 'anim'
+        ]
+        self.run_test()
+        self.assertEqual("""TIMELINE: sc01_sh010_layerA
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh020_anim.mov
+  CLIP: sc01_sh030_anim.mov
+TRACK:  (Video)
+TRACK:  (Video)
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+  CLIP: sc01_sh010_anim.mov
+TRACK:  (Audio)
+TRACK:  (Audio)
+TRACK:  (Audio)
+  CLIP: sc01_sh010_anim.mov
+""", sys.stdout.getvalue())
 
 
 if __name__ == '__main__':

@@ -462,7 +462,8 @@ def stack_timelines(timelines):
     """Return a single timeline with all of the tracks from all of the input
     timelines stacked on top of each other. The resulting timeline should be
     as long as the longest input timeline."""
-    stacked_timeline = otio.schema.Timeline()
+    name = "Stacked {} Timelines".format(len(timelines))
+    stacked_timeline = otio.schema.Timeline(name)
     for timeline in timelines:
         stacked_timeline.tracks.extend(deepcopy(timeline.tracks[:]))
     return stacked_timeline
@@ -472,10 +473,14 @@ def concatenate_timelines(timelines):
     """Return a single timeline with all of the input timelines concatenated
     end-to-end. The resulting timeline should be as long as the sum of the
     durations of the input timelines."""
+    name = "Concatenated {} Timelines".format(len(timelines))
     concatenated_track = otio.schema.Track()
     for timeline in timelines:
         concatenated_track.append(deepcopy(timeline.tracks))
-    concatenated_timeline = otio.schema.Timeline(tracks=[concatenated_track])
+    concatenated_timeline = otio.schema.Timeline(
+        name=name,
+        tracks=[concatenated_track]
+    )
     return concatenated_timeline
 
 

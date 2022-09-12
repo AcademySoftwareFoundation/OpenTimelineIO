@@ -202,10 +202,10 @@ def load_manifest():
 
     The order of loading (and precedence) is:
 
-       1. manifests specfied via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
-       2. builtin plugin manifest
-       3. contrib plugin manifest
-       4. ``setuptools.pkg_resources`` based plugin manifests
+       1. Manifests specified via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
+       2. Entrypoint based plugin manifests
+       3. Builtin plugin manifest
+       4. Contrib plugin manifest
     """
 
     result = Manifest()
@@ -231,32 +231,6 @@ def load_manifest():
                 continue
 
             result.extend(manifest_from_file(json_path))
-
-    # the builtin plugin manifest
-    builtin_manifest_path = os.path.join(
-        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
-        "adapters",
-        "builtin_adapters.plugin_manifest.json"
-    )
-    if os.path.abspath(builtin_manifest_path) not in result.source_files:
-        plugin_manifest = manifest_from_file(builtin_manifest_path)
-        result.extend(plugin_manifest)
-
-    # the contrib plugin manifest (located in the opentimelineio_contrib package)
-    try:
-        import opentimelineio_contrib as otio_c
-
-        contrib_manifest_path = os.path.join(
-            os.path.dirname(inspect.getsourcefile(otio_c)),
-            "adapters",
-            "contrib_adapters.plugin_manifest.json"
-        )
-        if os.path.abspath(contrib_manifest_path) not in result.source_files:
-            contrib_manifest = manifest_from_file(contrib_manifest_path)
-            result.extend(contrib_manifest)
-
-    except ImportError:
-        pass
 
     # setuptools.pkg_resources based plugins
     if pkg_resources:
@@ -322,6 +296,32 @@ def load_manifest():
     else:
         # XXX: Should we print some kind of warning that pkg_resources isn't
         #        available?
+        pass
+
+    # the builtin plugin manifest
+    builtin_manifest_path = os.path.join(
+        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
+        "adapters",
+        "builtin_adapters.plugin_manifest.json"
+    )
+    if os.path.abspath(builtin_manifest_path) not in result.source_files:
+        plugin_manifest = manifest_from_file(builtin_manifest_path)
+        result.extend(plugin_manifest)
+
+    # the contrib plugin manifest (located in the opentimelineio_contrib package)
+    try:
+        import opentimelineio_contrib as otio_c
+
+        contrib_manifest_path = os.path.join(
+            os.path.dirname(inspect.getsourcefile(otio_c)),
+            "adapters",
+            "contrib_adapters.plugin_manifest.json"
+        )
+        if os.path.abspath(contrib_manifest_path) not in result.source_files:
+            contrib_manifest = manifest_from_file(contrib_manifest_path)
+            result.extend(contrib_manifest)
+
+    except ImportError:
         pass
 
     # force the schemadefs to load and add to schemadef module namespace

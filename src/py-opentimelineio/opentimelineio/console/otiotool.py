@@ -15,7 +15,13 @@ import argparse
 import os
 import re
 import sys
-import urllib.request
+
+try:
+    from  urllib.request import urlopen
+
+except ImportError:
+    # Python2
+    from urllib2 import urlopen
 
 from copy import deepcopy
 
@@ -591,7 +597,7 @@ def copy_media(url, destination_path):
         data = open(url, "rb").read()
     else:
         print("DOWNLOADING: {}".format(url))
-        data = urllib.request.urlopen(url).read()
+        data = urlopen(url).read()
     open(destination_path, "wb").write(data)
     return destination_path
 

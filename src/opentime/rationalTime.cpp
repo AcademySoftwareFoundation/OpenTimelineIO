@@ -128,10 +128,16 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
 
     ret = (double) uintPart;
 
-    // check for fractional part
-    if (pCurr == pEnd || *pCurr != '.') {
+    // check for end of string or delimiter
+    if (pCurr == pEnd || *pCurr == '\0') {
         *result = sign * ret;
-        return true;   // no decimal, not a float, stop parsing
+        return true;
+    }
+
+    // if the next character is not a decimal point, the string is malformed.
+    if (*pCurr != '.') {
+        *result = 0.f; // zero consistent with earlier error condition
+        return false;
     }
 
     ++pCurr; // skip decimal

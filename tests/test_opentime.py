@@ -98,11 +98,11 @@ class TestTime(unittest.TestCase):
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
 
     def test_negative_timecode(self):
-        with self.assertRaises(ValueError) as exception_manager:
+        with self.assertRaises(ValueError):
             otio.opentime.from_timecode('-01:00:13:13', 24)
 
     def test_bogus_timecode(self):
-        with self.assertRaises(ValueError) as exception_manager:
+        with self.assertRaises(ValueError):
             otio.opentime.from_timecode('pink elephants', 13)
 
     def test_time_timecode_convert_bad_rate(self):

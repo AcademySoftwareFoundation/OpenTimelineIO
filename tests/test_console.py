@@ -97,12 +97,16 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
         else:
             self.test_module.main()
 
+        # pre-fetch these strings for easy access
+        stdout = sys.stdout.getvalue()
+        stderr = sys.stderr.getvalue()
+
         if platform.system() == 'Windows':
             # Normalize line-endings for assertEqual(expected, actual)
-            out = sys.stdout.getvalue().replace('\r\n', '\n')
-            err = sys.stderr.getvalue().replace('\r\n', '\n')
+            stdout = stdout.replace('\r\n', '\n')
+            stderr = stderr.replace('\r\n', '\n')
 
-        return out, err
+        return stdout, stderr
 
     def tearDown(self):
         sys.stdout = self.old_stdout

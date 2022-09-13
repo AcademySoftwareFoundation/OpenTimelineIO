@@ -896,5 +896,8 @@ Duration: 00:02:16:18
             sys.stdout.getvalue())
 
 
+OTIOToolTest_ShellOut = CreateShelloutTest(OTIOToolTest)
+
+
 if __name__ == '__main__':
     unittest.main()

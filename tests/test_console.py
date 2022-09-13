@@ -97,6 +97,13 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
         else:
             self.test_module.main()
 
+        if platform.system() == 'Windows':
+            # Normalize line-endings for assertEqual(expected, actual)
+            out = sys.stdout.getvalue().replace('\r\n', '\n')
+            err = sys.stderr.getvalue().replace('\r\n', '\n')
+
+        return out, err
+
     def tearDown(self):
         sys.stdout = self.old_stdout
         sys.stderr = self.old_stderr
@@ -322,12 +329,12 @@ class OTIOToolTest(ConsoleTester, unittest.TestCase):
             '-i', MULTITRACK_PATH,
             '--list-tracks'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
 TRACK: Sequence (Video)
 TRACK: Sequence 2 (Video)
 TRACK: Sequence 3 (Video)
-""", sys.stdout.getvalue())
+""", out)
 
     def test_list_clips(self):
         sys.argv = [
@@ -335,7 +342,7 @@ TRACK: Sequence 3 (Video)
             '-i', SCREENING_EXAMPLE_PATH,
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: Example_Screening.01
   CLIP: ZZ100_501 (LAY3)
   CLIP: ZZ100_502A (LAY3)
@@ -346,7 +353,7 @@ TRACK: Sequence 3 (Video)
   CLIP: ZZ100_508 (LAY2)
   CLIP: ZZ100_510 (LAY1)
   CLIP: ZZ100_510B (LAY1)
-""", sys.stdout.getvalue())
+""", out)
 
     def test_list_markers(self):
         sys.argv = [
@@ -354,15 +361,14 @@ TRACK: Sequence 3 (Video)
             '-i', PREMIERE_EXAMPLE_PATH,
             '--list-markers'
         ]
-        self.run_test()
-        self.maxDiff = None
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: sc01_sh010_layerA\n"
              "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa: E501 line too long
              "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: RED name: dsf\n"  # noqa: E501 line too long
              "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: RED name: \n"  # noqa: E501 line too long
              "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: RED name: \n"),  # noqa: E501 line too long
-            sys.stdout.getvalue())
+            out)
 
     def test_list_tracks_and_clips(self):
         sys.argv = [
@@ -371,7 +377,7 @@ TRACK: Sequence 3 (Video)
             '--list-tracks',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
 TRACK: Sequence (Video)
   CLIP: tech.fux (loop)-HD.mp4
@@ -381,7 +387,7 @@ TRACK: Sequence 2 (Video)
   CLIP: t-hawk (loop)-HD.mp4
 TRACK: Sequence 3 (Video)
   CLIP: KOLL-HD.mp4
-""", sys.stdout.getvalue())
+""", out)
 
     def test_list_tracks_and_clips_and_media(self):
         sys.argv = [
@@ -391,7 +397,7 @@ TRACK: Sequence 3 (Video)
             '--list-clips',
             '--list-media'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
 TRACK: Sequence (Video)
   CLIP: tech.fux (loop)-HD.mp4
@@ -406,7 +412,7 @@ TRACK: Sequence 2 (Video)
 TRACK: Sequence 3 (Video)
   CLIP: KOLL-HD.mp4
     MEDIA: None
-""", sys.stdout.getvalue())
+""", out)
 
     def test_list_tracks_and_clips_and_media_and_markers(self):
         sys.argv = [
@@ -417,7 +423,7 @@ TRACK: Sequence 3 (Video)
             '--list-media',
             '--list-markers'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: sc01_sh010_layerA\n"
              "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa E501 line too long
@@ -458,7 +464,7 @@ TRACK: Sequence 3 (Video)
              "    MEDIA: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov\n"  # noqa E501 line too long
              "  CLIP: sc01_sh010_anim.mov\n"
              "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"),
-            sys.stdout.getvalue())
+            out)
 
     def test_verify_media(self):
         sys.argv = [
@@ -469,7 +475,7 @@ TRACK: Sequence 3 (Video)
             '--list-media',
             '--verify-media'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: sc01_sh010_layerA
 TRACK:  (Video)
   CLIP: sc01_sh010_anim.mov
@@ -505,7 +511,7 @@ TRACK:  (Audio)
     MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov
   CLIP: sc01_sh010_anim.mov
     MEDIA NOT FOUND: file://localhost/D%3a/media/sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_video_only(self):
         sys.argv = [
@@ -514,7 +520,7 @@ TRACK:  (Audio)
             '--video-only',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: sc01_sh010_layerA
   CLIP: sc01_sh010_anim.mov
   CLIP: sc01_sh010_anim.mov
@@ -523,7 +529,7 @@ TRACK:  (Audio)
   CLIP: test_title
   CLIP: sc01_master_layerA_sh030_temp.mov
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_audio_only(self):
         sys.argv = [
@@ -532,7 +538,7 @@ TRACK:  (Audio)
             '--audio-only',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: sc01_sh010_layerA
   CLIP: sc01_sh010_anim.mov
   CLIP: sc01_sh010_anim.mov
@@ -540,7 +546,7 @@ TRACK:  (Audio)
   CLIP: track_08.wav
   CLIP: sc01_master_layerA_sh030_temp.mov
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_only_tracks_with_name(self):
         sys.argv = [
@@ -549,10 +555,10 @@ TRACK:  (Audio)
             '--only-tracks-with-name', 'Sequence 3',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
   CLIP: KOLL-HD.mp4
-""", sys.stdout.getvalue())
+""", out)
 
     def test_only_tracks_with_index(self):
         sys.argv = [
@@ -561,10 +567,10 @@ TRACK:  (Audio)
             '--only-tracks-with-index', '3',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
   CLIP: KOLL-HD.mp4
-""", sys.stdout.getvalue())
+""", out)
 
     def test_only_tracks_with_index2(self):
         sys.argv = [
@@ -573,11 +579,11 @@ TRACK:  (Audio)
             '--only-tracks-with-index', '2', '3',
             '--list-clips'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: OTIO TEST - multitrack.Exported.01
   CLIP: t-hawk (loop)-HD.mp4
   CLIP: KOLL-HD.mp4
-""", sys.stdout.getvalue())
+""", out)
 
     def test_only_clips_with_name(self):
         sys.argv = [
@@ -587,7 +593,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--only-clips-with-name', 'sc01_sh010_anim.mov'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: sc01_sh010_layerA
 TRACK:  (Video)
   CLIP: sc01_sh010_anim.mov
@@ -603,7 +609,7 @@ TRACK:  (Audio)
 TRACK:  (Audio)
 TRACK:  (Audio)
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_only_clips_with_regex(self):
         sys.argv = [
@@ -613,7 +619,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--only-clips-with-name-regex', 'anim'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: sc01_sh010_layerA
 TRACK:  (Video)
   CLIP: sc01_sh010_anim.mov
@@ -631,7 +637,7 @@ TRACK:  (Audio)
 TRACK:  (Audio)
 TRACK:  (Audio)
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_remote_transition(self):
         sys.argv = [
@@ -640,8 +646,8 @@ TRACK:  (Audio)
             '-o', '-',
             '--remove-transitions'
         ]
-        self.run_test()
-        self.assertNotIn('"OTIO_SCHEMA": "Transition.', sys.stdout.getvalue())
+        out, err = self.run_test()
+        self.assertNotIn('"OTIO_SCHEMA": "Transition.', out)
 
     def test_trim(self):
         sys.argv = [
@@ -651,7 +657,7 @@ TRACK:  (Audio)
             '--list-clips',
             '--inspect', 't-hawk'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
              "  ITEM: t-hawk (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
@@ -667,7 +673,7 @@ TRACK:  (Audio)
              "  CLIP: tech.fux (loop)-HD.mp4\n"
              "  CLIP: out-b (loop)-HD.mp4\n"
              "  CLIP: t-hawk (loop)-HD.mp4\n"),
-            sys.stdout.getvalue())
+            out)
 
     def test_flatten(self):
         sys.argv = [
@@ -678,7 +684,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--inspect', 'out-b'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
              "  ITEM: out-b (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
@@ -697,7 +703,7 @@ TRACK:  (Audio)
              "  CLIP: out-b (loop)-HD.mp4\n"
              "  CLIP: KOLL-HD.mp4\n"
              "  CLIP: brokchrd (loop)-HD.mp4\n"),
-            sys.stdout.getvalue())
+            out)
 
     def test_keep_flattened_tracks(self):
         sys.argv = [
@@ -709,7 +715,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--inspect', 'out-b'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
              "  ITEM: out-b (loop)-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"  # noqa E501 line too long
@@ -745,7 +751,7 @@ TRACK:  (Audio)
              "  CLIP: out-b (loop)-HD.mp4\n"
              "  CLIP: KOLL-HD.mp4\n"
              "  CLIP: brokchrd (loop)-HD.mp4\n"),
-            sys.stdout.getvalue())
+            out)
 
     def test_stack(self):
         sys.argv = [
@@ -756,7 +762,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--stats'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.maxDiff = None
         self.assertEqual("""Name: Stacked 2 Timelines
 Start:    00:00:00:00
@@ -792,7 +798,7 @@ TRACK:  (Audio)
 TRACK:  (Audio)
   CLIP: sc01_master_layerA_sh030_temp.mov
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_concat(self):
         sys.argv = [
@@ -803,7 +809,7 @@ TRACK:  (Audio)
             '--list-tracks',
             '--stats'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.maxDiff = None
         self.assertEqual("""Name: Concatenated 2 Timelines
 Start:    00:00:00:00
@@ -840,7 +846,7 @@ TRACK:  (Audio)
 TRACK:  (Audio)
   CLIP: sc01_master_layerA_sh030_temp.mov
   CLIP: sc01_sh010_anim.mov
-""", sys.stdout.getvalue())
+""", out)
 
     def test_redact(self):
         sys.argv = [
@@ -850,7 +856,7 @@ TRACK:  (Audio)
             '--list-clips',
             '--list-tracks'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""TIMELINE: Timeline #1
 TRACK: Track #1 (Video)
   CLIP: Clip #1
@@ -860,7 +866,7 @@ TRACK: Track #2 (Video)
   CLIP: Clip #4
 TRACK: Track #3 (Video)
   CLIP: Clip #5
-""", sys.stdout.getvalue())
+""", out)
 
     def test_stats(self):
         sys.argv = [
@@ -868,12 +874,12 @@ TRACK: Track #3 (Video)
             '-i', MULTITRACK_PATH,
             '--stats'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual("""Name: OTIO TEST - multitrack.Exported.01
 Start:    00:00:00:00
 End:      00:02:16:18
 Duration: 00:02:16:18
-""", sys.stdout.getvalue())
+""", out)
 
     def test_inspect(self):
         sys.argv = [
@@ -881,7 +887,7 @@ Duration: 00:02:16:18
             '-i', MULTITRACK_PATH,
             '--inspect', 'KOLL'
         ]
-        self.run_test()
+        out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: OTIO TEST - multitrack.Exported.01\n"
              "  ITEM: KOLL-HD.mp4 (<class 'opentimelineio._otio.Clip'>)\n"
@@ -893,7 +899,7 @@ Duration: 00:02:16:18
              "    visible range in timeline: TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
              "    range in Sequence 3 (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
              "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"),  # noqa E501 line too long
-            sys.stdout.getvalue())
+            out)
 
 
 OTIOToolTest_ShellOut = CreateShelloutTest(OTIOToolTest)

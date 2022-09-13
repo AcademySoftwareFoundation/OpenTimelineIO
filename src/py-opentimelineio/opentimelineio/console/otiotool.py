@@ -597,7 +597,7 @@ def redact_timeline(timeline):
                 has_target_url = hasattr(media_reference, 'target_url')
                 if has_target_url and media_reference.target_url:
                     media_reference.target_url = "URL #{}".format(counter)
-                    media_reference.metadata.clear()
+                media_reference.metadata.clear()
 
 
 def copy_media(url, destination_path):

@@ -148,8 +148,8 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
         ++pCurr;
     }
 
-    ret = (double) uintPart;
-    if (uintPart != (uint64_t) ret)
+    ret = static_cast<double>(uintPart);
+    if (uintPart != static_cast<uint64_t>(ret))
     {
         // if the double cannot be casted precisely back to uint64_t, fail
         // A double has 15 digits of precision, but a uint64_t can encode more.
@@ -181,7 +181,7 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
         {
             break;
         }
-        ret = ret + (double)(c - '0') * position_scale;
+        ret = ret + static_cast<double>(c - '0') * position_scale;
         ++pCurr;
         position_scale *= 0.1;
     }

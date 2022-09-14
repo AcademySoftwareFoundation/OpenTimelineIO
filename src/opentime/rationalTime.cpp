@@ -97,7 +97,8 @@ is_dropframe_rate(double rate)
 static bool
 parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* result)
 {
-    if (pCurr >= pEnd || !pCurr) {
+    if (pCurr >= pEnd || !pCurr)
+    {
         *result = 0.0;
         return false;
     }
@@ -106,10 +107,14 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     double sign = 1.0;
 
     if (*pCurr == '+')
+    {
         ++pCurr;
-    else if (*pCurr == '-') {
-        if (!allow_negative) {
-            *result = 0.f;
+    }
+    else if (*pCurr == '-') 
+    {
+        if (!allow_negative) 
+        {
+            *result = 0.0;
             return false;
         }
         sign = -1.0;
@@ -118,38 +123,53 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
 
     // get integer part
     uint32_t uintPart = 0;
-    while (pCurr < pEnd) {
+    while (pCurr < pEnd) 
+    {
         char c = *pCurr;
         if (c < '0' || c > '9')
+        {
             break;
-        uintPart = uintPart * 10 + c - '0';
+        }
+        uint32_t accumulated = uintPart * 10 + c - '0';
+        if (accumulated < uintPart)
+        {
+            // if there are too many digits, resulting in an overflow, fail
+            *result = 0.0;
+            return false;
+        }
+        uintPart = accumulated;
         ++pCurr;
     }
 
     ret = (double) uintPart;
 
     // check for end of string or delimiter
-    if (pCurr == pEnd || *pCurr == '\0') {
+    if (pCurr == pEnd || *pCurr == '\0') 
+    {
         *result = sign * ret;
         return true;
     }
 
     // if the next character is not a decimal point, the string is malformed.
-    if (*pCurr != '.') {
-        *result = 0.f; // zero consistent with earlier error condition
+    if (*pCurr != '.') 
+    {
+        *result = 0.0; // zero consistent with earlier error condition
         return false;
     }
 
     ++pCurr; // skip decimal
 
-    double scaler = 0.1;
-    while (pCurr < pEnd) {
+    double position_scale = 0.1;
+    while (pCurr < pEnd) 
+    {
         char c = *pCurr;
         if (c < '0' || c > '9')
+        {
             break;
-        ret = ret + (double)(c - '0') * scaler;
+        }
+        ret = ret + (double)(c - '0') * position_scale;
         ++pCurr;
-        scaler *= 0.1;
+        position_scale *= 0.1;
     }
 
     *result = sign * ret;
@@ -286,7 +306,8 @@ RationalTime
 RationalTime::from_time_string(
     std::string const& time_string, double rate, ErrorStatus* error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate)) {
+    if (!RationalTime::is_valid_timecode_rate(rate)) 
+    {
         set_error(time_string, ErrorStatus::INVALID_TIMECODE_RATE, error_status);
         return RationalTime::_invalid_time;
     }
@@ -305,48 +326,67 @@ RationalTime::from_time_string(
 
     double accumulator = 0.0;
     int radix = 0;
-    while (start <= current) {
-        if (*current == ':') {
+    while (start <= current) 
+    {
+        if (*current == ':') 
+        {
             parse_end = current + 1;
             char c = *parse_end;
-            if (c != '\0' && c != ':') {
-                if (c< '0' || c > '9') {
+            if (c != '\0' && c != ':') 
+            {
+                if (c< '0' || c > '9') 
+                {
                     set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
                     return RationalTime::_invalid_time;
                 }
                 double val = 0.0;
-                parseFloat(parse_end, prev_parse_end + 1, false, &val);
+                if (!parseFloat(parse_end, prev_parse_end + 1, false, &val))
+                {
+                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    return RationalTime::_invalid_time;
+                }
                 prev_parse_end = nullptr;
-                if (radix < 2 && val >= 60.0) {
+                if (radix < 2 && val >= 60.0) 
+                {
                     set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
                     return RationalTime::_invalid_time;
                 }
                 accumulator += val * power[radix];
             }
             ++radix;
-            if (radix == sizeof(power) / sizeof(power[0])) {
+            if (radix == sizeof(power) / sizeof(power[0])) 
+            {
                 set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
                 return RationalTime::_invalid_time;
             }
         }
         else if (current < prev_parse_end &&
                  (*current < '0' || *current > '9') &&
-                 *current != '.') {
+                 *current != '.') 
+        {
             set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
             return RationalTime::_invalid_time;
         }
 
-        if (start == current) {
-            if (prev_parse_end) {
+        if (start == current) 
+        {
+            if (prev_parse_end) 
+            {
                 double val = 0.0;
-                parseFloat(start, prev_parse_end + 1, true, &val);
+                if (!parseFloat(start, prev_parse_end + 1, true, &val))
+                {
+                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    return RationalTime::_invalid_time;
+                 }
                 accumulator += val * power[radix];
             }
             break;
         }
         --current;
-        if (!prev_parse_end)
+        if (!prev_parse_end) 
+        {
             prev_parse_end = current;
+        }
     }
 
     return from_seconds(accumulator).rescaled_to(rate);

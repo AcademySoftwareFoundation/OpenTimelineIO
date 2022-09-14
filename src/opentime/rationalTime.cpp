@@ -122,7 +122,14 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     }
 
     // get integer part
-    uint32_t uintPart = 0;
+    //
+    // Note that uint64_t is used because overflow is well defined for
+    // unsigned integers, but it is undefined behavior for signed integers,
+    // and floating point values are couched in the specification with
+    // the caveat that an implementation may be IEEE-754 compliant, or only
+    // partially compliant.
+    //
+    uint64_t uintPart = 0;
     while (pCurr < pEnd) 
     {
         char c = *pCurr;
@@ -130,7 +137,7 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
         {
             break;
         }
-        uint32_t accumulated = uintPart * 10 + c - '0';
+        uint64_t accumulated = uintPart * 10 + c - '0';
         if (accumulated < uintPart)
         {
             // if there are too many digits, resulting in an overflow, fail
@@ -142,6 +149,13 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     }
 
     ret = (double) uintPart;
+    if (uintPart != (uint64_t) ret)
+    {
+        // if the double cannot be casted precisely back to uint64_t, fail
+        // A double has 15 digits of precision, but a uint64_t can encode more.
+        *result = 0.0;
+        return false;
+    }
 
     // check for end of string or delimiter
     if (pCurr == pEnd || *pCurr == '\0') 

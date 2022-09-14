@@ -311,8 +311,9 @@ set_error(std::string const& time_string,
         *err = ErrorStatus(
             code,
             string_printf(
-                "Input time string '%s' is an invalid time string",
-                time_string.c_str()));
+                "Error: '%s' - %s",
+                time_string.c_str(),
+                ErrorStatus::outcome_to_string(code).c_str()));
     }
 }
 

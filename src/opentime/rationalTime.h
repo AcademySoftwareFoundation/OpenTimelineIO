@@ -127,6 +127,11 @@ public:
         std::string const& timecode,
         double             rate,
         ErrorStatus*       error_status = nullptr);
+
+    // parse a string in the form
+    // hours:minutes:seconds
+    // which may have a leading negative sign. seconds may have up to
+    // microsecond precision.
     static RationalTime from_time_string(
         std::string const& time_string,
         double             rate,
@@ -154,9 +159,13 @@ public:
         return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
 
+    // produce a string in the form
+    // hours:minutes:seconds
+    // which may have a leading negative sign. seconds may have up to
+    // microsecond precision.
     std::string to_time_string() const;
 
-   RationalTime const& operator+=(RationalTime other) noexcept
+    RationalTime const& operator+=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {
@@ -170,7 +179,7 @@ public:
         return *this;
     }
 
-   RationalTime const& operator-=(RationalTime other) noexcept
+    RationalTime const& operator-=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {

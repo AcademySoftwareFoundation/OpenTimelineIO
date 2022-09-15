@@ -40,7 +40,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
     def setUp(self):
         # Get the location of the mock plugin module metadata
         mock_module_path = os.path.join(
-            baseline_reader.path_to_baseline_directory(),
+            os.path.normpath(baseline_reader.path_to_baseline_directory()),
             'plugin_module',
         )
         self.mock_module_manifest_path = os.path.join(

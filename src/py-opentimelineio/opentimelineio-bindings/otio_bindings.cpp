@@ -167,7 +167,7 @@ static SerializableObject* instance_from_schema(std::string schema_name,
 
 PYBIND11_MODULE(_otio, m) {
     // Import _opentime before actually creating the bindings
-    // for _otio. This allows to import _otio without
+    // for _otio. This allows the import of _otio without
     // manually importing _opentime before. For example: python -c 'import opentimelineio._otio'
     py::module_::import("opentimelineio._opentime");
 

@@ -13,6 +13,7 @@ from . import (
     otioconvert,
     otiocat,
     otiostat,
+    otiotool,
     console_utils,
     autogen_serialized_datamodel,
     otiopluginfo,

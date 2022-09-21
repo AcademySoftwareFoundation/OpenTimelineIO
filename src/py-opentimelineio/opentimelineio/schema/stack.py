@@ -15,8 +15,8 @@ def each_clip(self, search_range=None, shallow_search=False):
 
     :param TimeRange search_range: if specified, only children whose range overlaps
                                    with the search range will be yielded.
-    :param bool shallow_search: if True, will only search children of self and not recurse
-                                into children of children.
+    :param bool shallow_search: if True, will only search children of self and not
+                                recurse into children of children.
     """
     for child in self.clip_if(search_range, shallow_search):
         yield child

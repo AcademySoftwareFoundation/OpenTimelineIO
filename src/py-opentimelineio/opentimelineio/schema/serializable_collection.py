@@ -32,7 +32,7 @@ def __repr__(self):
 
 @add_method(_otio.SerializableCollection)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable,
-    shallow_search=False):
+               shallow_search=False):
     """ Generator that returns each child contained in the serializable
     collection in the order in which it is found.
 

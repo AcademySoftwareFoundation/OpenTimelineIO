@@ -10,16 +10,15 @@ OpenTimelineIO
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2288/badge)](https://bestpractices.coreinfrastructure.org/projects/2288)
 
-Main web site: http://opentimeline.io/
+Links
+-----
 
-Documentation: https://opentimelineio.readthedocs.io/
-
-GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
-
-Discussion group: https://lists.aswf.io/g/otio-discussion
-
-Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
-To join, create an account here first: https://slack.aswf.io/
+* Main web site: http://opentimeline.io/
+* Documentation: https://opentimelineio.readthedocs.io/
+* GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
+* [Discussion group](https://lists.aswf.io/g/otio-discussion)
+* [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)
+  * To join, create an account here first: https://slack.aswf.io/
 
 PUBLIC BETA NOTICE
 ------------------
@@ -36,14 +35,16 @@ OpenTimelineIO is an interchange format and API for editorial cut information.
 OTIO is not a container format for media, rather it contains information about
 the order and length of cuts and references to external media.
 
-OTIO includes both a file format and an API for manipulating that format. It
-also includes a plugin architecture for writing adapters to convert
-from/to existing editorial timeline formats. It also implements a dependency-
-less library for dealing strictly with time, `opentime`.
+For integration with applications, the core OTIO library is implemented in C++
+and provides an in-memory data model, as well as library functions for
+interpreting, manipulating, and serializing that data model. Within the core is
+a dependency-less library for dealing strictly with time, `opentime`.
 
-You can provide adapters for your video editing tool or pipeline as needed.
-Each adapter allows for import/export between that proprietary tool and the
-OpenTimelineIO format.
+The project also supports an official python binding, which is intended to be
+an idiomatic and ergonomic binding for python developers.  The python binding
+includes a plugin system which supports a number of different types of plugins,
+most notably adapters, which can be used to read and write legacy formats into
+the OTIO data model.
 
 Documentation
 --------------
@@ -58,18 +59,19 @@ The current release supports:
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)
 
-Adapters
---------
+Adapter Plugins
+---------------
 
-OpenTimelineIO supports, or plans to support, conversion adapters for many
-existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
+To provide interoperability with other file formats or applications lacking a
+native integration, the opentimelineio community has built a number of python
+adapter plugins. This includes Final Cut Pro XML, AAF, CMX 3600 EDL, and more.
 
-See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
+For more information about this, including supported formats, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
 Other Plugins
 -------------
 
-OTIO also supports several other kinds of plugins, for more information see:
+The OTIO python bindings also support several other kinds of plugins, for more information see:
 
 * [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.
 * [HookScripts](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-hookscript.html) - Scripts that can run at various points during OTIO execution (_ie_ before the media linker)
@@ -88,12 +90,44 @@ For detailed installation instructions and notes on how to run the included view
 Example Usage
 -------------
 
-```
+Python:
+
+```python
 import opentimelineio as otio
 
 timeline = otio.adapters.read_from_file("foo.aaf")
-for clip in timeline.each_clip():
+for clip in timeline.clip_if():
   print(clip.name, clip.duration())
+```
+
+C++:
+
+```c++
+#include <iostream>
+
+#include "opentimelineio/timeline.h"
+
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
+void
+example()
+{
+    otio::ErrorStatus err;
+    otio::SerializableObject::Retainer<otio::Timeline> tl(
+            dynamic_cast<otio::Timeline*>(
+                otio::Timeline::from_json_file("/var/tmp/ioperftest/clip.otio", &err)
+        )
+    );
+    const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (
+            tl->clip_if()
+    );
+    for (const auto& cl : clips)
+    {
+        otio::RationalTime dur = cl->duration();
+        std::cout << "Name: " << cl->name() << " [";
+        std::cout << dur.value() << "/" << dur.rate() << "]" << std::endl;
+    }
+}
 ```
 
 There are more code examples here: https://github.com/AcademySoftwareFoundation/OpenTimelineIO/tree/main/examples

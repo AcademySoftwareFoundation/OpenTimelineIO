@@ -35,7 +35,7 @@ main(int argc, char** argv)
         opentimelineio::v1_0::ErrorStatus err;
         auto result = sc->children_if<otio::Clip>(&err, {}, false);
         assertEqual(result.size(), 1);
-        assertTrue(result[0] = cl);
+        assertEqual(result[0].value, cl.value);
     });
     tests.add_test(
         "test_children_if_search_range", [] {
@@ -64,7 +64,7 @@ main(int argc, char** argv)
         opentimelineio::v1_0::ErrorStatus err;
         auto result = sc->children_if<otio::Clip>(&err, range);
         assertEqual(result.size(), 1);
-        assertTrue(result[0] = cl0);
+        assertEqual(result[0].value, cl0.value);
     });
     tests.add_test(
         "test_children_if_shallow_search", [] {
@@ -85,7 +85,7 @@ main(int argc, char** argv)
         assertEqual(result.size(), 0);
         result = sc->children_if<otio::Clip>(&err, nullopt, false);
         assertEqual(result.size(), 1);
-        assertTrue(result[0] = cl);
+        assertEqual(result[0].value, cl.value);
     });
 
     tests.run(argc, argv);

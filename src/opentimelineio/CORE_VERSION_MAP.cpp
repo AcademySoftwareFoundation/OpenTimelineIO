@@ -47,7 +47,7 @@ const label_to_schema_version_map CORE_VERSION_MAP {
             { "UnknownSchema", 1 },
         }
     },
-    { "0.15.0.dev1",
+    { "0.15.0",
         {
             { "Adapter", 1 },
             { "Clip", 2 },

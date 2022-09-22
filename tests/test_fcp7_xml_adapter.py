@@ -1256,11 +1256,33 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             )
         )
 
+        timeline.tracks.markers.append(
+            schema.Marker(
+                name='test_timeline_marker_range',
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(123, RATE),
+                    opentime.RationalTime(11, RATE),
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
+        )
+
         v1[1].markers.append(
             schema.Marker(
                 name='test_clip_marker',
                 marked_range=opentime.TimeRange(
                     opentime.RationalTime(125, RATE)
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
+        )
+
+        v1[1].markers.append(
+            schema.Marker(
+                name='test_clip_marker_range',
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(125, RATE),
+                    opentime.RationalTime(6, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )

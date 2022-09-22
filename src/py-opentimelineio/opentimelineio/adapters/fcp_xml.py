@@ -1846,7 +1846,12 @@ def _build_marker(marker):
         marker_e, 'in',
         text='{:.0f}'.format(marked_range.start_time.value)
     )
-    _append_new_sub_element(marker_e, 'out', text='-1')
+    _append_new_sub_element(
+        marker_e, 'out',
+        text='{:.0f}'.format(
+            marked_range.start_time.value + marked_range.duration.value
+        )
+    )
 
     return marker_e
 

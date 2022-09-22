@@ -81,7 +81,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         sc.append(tl)
         result = sc.children_if(otio.schema.Clip)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl)
+        self.assertEqual(result[0], cl)
 
     def test_children_if_search_range(self):
         range = otio.opentime.TimeRange(
@@ -103,7 +103,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         sc.append(tl)
         result = sc.children_if(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl0)
+        self.assertEqual(result[0], cl0)
 
     def test_children_if_shallow_search(self):
         cl = otio.schema.Clip()
@@ -117,7 +117,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(result), 0)
         result = sc.children_if(otio.schema.Clip, shallow_search=False)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl)
+        self.assertEqual(result[0], cl)
 
 
 if __name__ == '__main__':

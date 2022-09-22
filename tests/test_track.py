@@ -17,7 +17,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tr.append(cl)
         result = tr.children_if(otio.schema.Clip)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl)
+        self.assertEqual(result[0], cl)
 
     def test_children_if_search_range(self):
         range = otio.opentime.TimeRange(
@@ -35,7 +35,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tr.append(cl2)
         result = tr.children_if(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl0)
+        self.assertEqual(result[0], cl0)
 
     def test_children_if_shallow_search(self):
         cl0 = otio.schema.Clip()
@@ -47,11 +47,11 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tr.append(st)
         result = tr.children_if(otio.schema.Clip, shallow_search=True)
         self.assertEqual(len(result), 1)
-        self.assertTrue(result[0], cl0)
+        self.assertEqual(result[0], cl0)
         result = tr.children_if(otio.schema.Clip, shallow_search=False)
         self.assertEqual(len(result), 2)
-        self.assertTrue(result[0], cl0)
-        self.assertTrue(result[1], cl1)
+        self.assertEqual(result[0], cl0)
+        self.assertEqual(result[1], cl1)
 
 
 if __name__ == '__main__':

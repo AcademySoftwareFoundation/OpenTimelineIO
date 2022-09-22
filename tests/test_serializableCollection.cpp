@@ -21,73 +21,69 @@ main(int argc, char** argv)
     tests.add_test(
         "test_children_if", [] {
         using namespace otio;
-        {
-            // Find a clip in a serializable collection.
-            otio::SerializableObject::Retainer<otio::Clip> cl =
-                new otio::Clip();
-            otio::SerializableObject::Retainer<otio::Track> tr =
-                new otio::Track();
-            tr->append_child(cl);
-            otio::SerializableObject::Retainer<otio::Timeline> tl =
-                new otio::Timeline();
-            tl->tracks()->append_child(tr);
-            otio::SerializableObject::Retainer<otio::SerializableCollection>
-                sc = new otio::SerializableCollection();
-            sc->insert_child(0, tl);
-            opentimelineio::v1_0::ErrorStatus err;
-            auto result = sc->children_if<otio::Clip>(&err, {}, false);
-            assertEqual(result.size(), 1);
-        }
-        {
-            // Test the search range parameter.
-            TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
-            otio::SerializableObject::Retainer<otio::Clip> cl0 =
-                new otio::Clip();
-            cl0->set_source_range(range);
-            otio::SerializableObject::Retainer<otio::Clip> cl1 =
-                new otio::Clip();
-            cl1->set_source_range(range);
-            otio::SerializableObject::Retainer<otio::Clip> cl2 =
-                new otio::Clip();
-            cl2->set_source_range(range);
-            otio::SerializableObject::Retainer<otio::Track> tr =
-                new otio::Track();
-            tr->append_child(cl0);
-            tr->append_child(cl1);
-            tr->append_child(cl2);
-            otio::SerializableObject::Retainer<otio::Timeline> tl =
-                new otio::Timeline();
-            tl->tracks()->append_child(tr);
-            otio::SerializableObject::Retainer<otio::SerializableCollection>
-                sc = new otio::SerializableCollection();
-            sc->insert_child(0, tl);
-            opentimelineio::v1_0::ErrorStatus err;
-            auto result = sc->children_if<otio::Clip>(
-                &err,
-                TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
-            assertEqual(result.size(), 1);
-            assertTrue(result[0] = cl0);
-        }
-        {
-            // Test the shallow search parameter.
-            otio::SerializableObject::Retainer<otio::Clip> cl =
-                new otio::Clip();
-            otio::SerializableObject::Retainer<otio::Track> tr =
-                new otio::Track();
-            tr->append_child(cl);
-            otio::SerializableObject::Retainer<otio::Timeline> tl =
-                new otio::Timeline();
-            tl->tracks()->append_child(tr);
-            otio::SerializableObject::Retainer<otio::SerializableCollection>
-                sc = new otio::SerializableCollection();
-            sc->insert_child(0, tl);
-            opentimelineio::v1_0::ErrorStatus err;
-            auto result = sc->children_if<otio::Clip>(&err, nullopt, true);
-            assertEqual(result.size(), 0);
-            result = sc->children_if<otio::Clip>(&err, nullopt, false);
-            assertEqual(result.size(), 1);
-            assertTrue(result[0] = cl);
-        }
+        otio::SerializableObject::Retainer<otio::Clip> cl =
+            new otio::Clip();
+        otio::SerializableObject::Retainer<otio::Track> tr =
+            new otio::Track();
+        tr->append_child(cl);
+        otio::SerializableObject::Retainer<otio::Timeline> tl =
+            new otio::Timeline();
+        tl->tracks()->append_child(tr);
+        otio::SerializableObject::Retainer<otio::SerializableCollection>
+            sc = new otio::SerializableCollection();
+        sc->insert_child(0, tl);
+        opentimelineio::v1_0::ErrorStatus err;
+        auto result = sc->children_if<otio::Clip>(&err, {}, false);
+        assertEqual(result.size(), 1);
+        assertTrue(result[0] = cl);
+    });
+    tests.add_test(
+        "test_children_if_search_range", [] {
+        const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
+        otio::SerializableObject::Retainer<otio::Clip> cl0 =
+            new otio::Clip();
+        cl0->set_source_range(range);
+        otio::SerializableObject::Retainer<otio::Clip> cl1 =
+            new otio::Clip();
+        cl1->set_source_range(range);
+        otio::SerializableObject::Retainer<otio::Clip> cl2 =
+            new otio::Clip();
+        cl2->set_source_range(range);
+        otio::SerializableObject::Retainer<otio::Track> tr =
+            new otio::Track();
+        tr->append_child(cl0);
+        tr->append_child(cl1);
+        tr->append_child(cl2);
+        otio::SerializableObject::Retainer<otio::Timeline> tl =
+            new otio::Timeline();
+        tl->tracks()->append_child(tr);
+        otio::SerializableObject::Retainer<otio::SerializableCollection>
+            sc = new otio::SerializableCollection();
+        sc->insert_child(0, tl);
+        opentimelineio::v1_0::ErrorStatus err;
+        auto result = sc->children_if<otio::Clip>(&err, range);
+        assertEqual(result.size(), 1);
+        assertTrue(result[0] = cl0);
+    });
+    tests.add_test(
+        "test_children_if_shallow_search", [] {
+        otio::SerializableObject::Retainer<otio::Clip> cl =
+            new otio::Clip();
+        otio::SerializableObject::Retainer<otio::Track> tr =
+            new otio::Track();
+        tr->append_child(cl);
+        otio::SerializableObject::Retainer<otio::Timeline> tl =
+            new otio::Timeline();
+        tl->tracks()->append_child(tr);
+        otio::SerializableObject::Retainer<otio::SerializableCollection>
+            sc = new otio::SerializableCollection();
+        sc->insert_child(0, tl);
+        opentimelineio::v1_0::ErrorStatus err;
+        auto result = sc->children_if<otio::Clip>(&err, nullopt, true);
+        assertEqual(result.size(), 0);
+        result = sc->children_if<otio::Clip>(&err, nullopt, false);
+        assertEqual(result.size(), 1);
+        assertTrue(result[0] = cl);
     });
 
     tests.run(argc, argv);

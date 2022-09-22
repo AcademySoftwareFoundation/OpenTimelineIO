@@ -115,7 +115,7 @@ example()
     otio::ErrorStatus err;
     otio::SerializableObject::Retainer<otio::Timeline> tl(
             dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file("/var/tmp/ioperftest/clip.otio", &err)
+                otio::Timeline::from_json_file("taco.otio", &err)
         )
     );
     const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (

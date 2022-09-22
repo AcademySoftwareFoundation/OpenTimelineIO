@@ -99,8 +99,8 @@ SerializableCollection::children_if(
             out.push_back(valid_child);
         }
 
-        // if not a shallow_search, for children that are serialiable collections, compositions,
-        // or timelines, recurse into their children
+        // if not a shallow_search, for children that are serializable collections,
+        // compositions, or timelines, recurse into their children
         if (!shallow_search)
         {
             if (auto collection =

@@ -35,6 +35,7 @@ main(int argc, char** argv)
     });
     tests.add_test(
         "test_children_if_search_range", [] {
+        using namespace otio;
         const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
         otio::SerializableObject::Retainer<otio::Clip> cl0 =
             new otio::Clip();
@@ -60,6 +61,7 @@ main(int argc, char** argv)
     });
     tests.add_test(
         "test_children_if_shallow_search", [] {
+        using namespace otio;
         otio::SerializableObject::Retainer<otio::Clip> cl =
             new otio::Clip();
         otio::SerializableObject::Retainer<otio::Track> tr =

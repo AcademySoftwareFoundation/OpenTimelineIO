@@ -8,6 +8,7 @@ import unittest
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
+
 class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_children_if(self):
@@ -17,7 +18,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = tr.children_if(otio.schema.Clip)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0], cl)
-        
+
     def test_children_if_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
@@ -35,7 +36,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = tr.children_if(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0], cl0)
-    
+
     def test_children_if_shallow_search(self):
         cl0 = otio.schema.Clip()
         cl1 = otio.schema.Clip()
@@ -51,6 +52,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(result), 2)
         self.assertTrue(result[0], cl0)
         self.assertTrue(result[1], cl1)
+
 
 if __name__ == '__main__':
     unittest.main()

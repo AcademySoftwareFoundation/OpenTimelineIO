@@ -566,7 +566,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = tl.children_if(otio.schema.Clip)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0], cl)
-        
+
     def test_children_if_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
@@ -586,7 +586,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = tl.children_if(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0], cl0)
-    
+
     def test_children_if_shallow_search(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()
@@ -598,6 +598,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = tl.children_if(otio.schema.Clip, shallow_search=False)
         self.assertEqual(len(result), 1)
         self.assertTrue(result[0], cl)
+
 
 if __name__ == '__main__':
     unittest.main()

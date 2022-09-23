@@ -7,6 +7,7 @@
 #include <opentimelineio/deserialization.h>
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/missingReference.h>
+#include <opentimelineio/serializableCollection.h>
 #include <opentimelineio/timeline.h>
 
 #include <iostream>

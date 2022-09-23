@@ -289,12 +289,12 @@ A :class:`~SerializableCollection` is useful for serializing multiple timelines,
         .def("__iter__", [](SerializableCollection* c) {
                 return new SerializableCollectionIterator(c);
             })
-        .def("clip_if", [](SerializableCollection* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt)
-        .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
-                return children_if(t, descended_from_type, search_range);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+        .def("clip_if", [](SerializableCollection* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(t, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return children_if(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
 
 }
 
@@ -611,9 +611,9 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "markers"_a = py::none(),
              "effects"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
-        .def("clip_if", [](Stack* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt);
+        .def("clip_if", [](Stack* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(t, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false);
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -641,12 +641,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             })
         .def("video_tracks", &Timeline::video_tracks)
         .def("audio_tracks", &Timeline::audio_tracks)
-        .def("clip_if", [](Timeline* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt)
-        .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
-                return children_if(t, descended_from_type, search_range);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+        .def("clip_if", [](Timeline* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(t, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return children_if(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
 }
 
 static void define_effects(py::module m) {

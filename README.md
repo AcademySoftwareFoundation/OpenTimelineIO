@@ -19,6 +19,7 @@ Links
 * [Discussion group](https://lists.aswf.io/g/otio-discussion)
 * [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)
   * To join, create an account here first: https://slack.aswf.io/
+* [Presentations](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki/Presentations)
 
 PUBLIC BETA NOTICE
 ------------------

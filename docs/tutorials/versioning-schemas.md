@@ -204,7 +204,7 @@ See the [versioning module](../api/python/opentimelineio.versioning.rst) for mor
 If you are using multiple pieces of software built with mismatched versions of OTIO, you may need to configure the newer one(s) to write out OTIO in an older format without recompiling or modifying the software.
 
 You can accomplish this in two ways:
-- The OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL environment variable can specify a family and version.
+- The `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable can specify a family and version.
 - The `otioconvert` utility program can downgrade an OTIO file to an older version.
 
 ### OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL Environment Variable
@@ -212,11 +212,11 @@ You can accomplish this in two ways:
 If your software uses OTIO's Python adapter system, then you can set the `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable with a `FAMILY:VERSION` value.
 For example, in a *nix shell: `env OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL=OTIO_CORE:0.14.0 my_program`
 
-The `OTIO_CORE` family is pre-populated with OTIO releases. If you have custom schema that needs to be downgraded as well, you will need to specify your own family and version mapping, as described above.
+The `OTIO_CORE` family is pre-populated with the core OTIO schema versions for previous OTIO releases, for example `0.14.0`. If you have custom schema that needs to be downgraded as well, you will need to specify your own family and version mapping, as described above.
 
 ### Downgrading with otioconvert
 
-If your software uses OTIO's C++ API, then it does not look for the OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL environment variable, but you can convert an OTIO file after it has been created with the `otioconvert` utiilty.
+If your software uses OTIO's C++ API, then it does not look for the `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable, but you can convert an OTIO file after it has been created with the `otioconvert` utility.
 
 You can either use a family like this:
 ```

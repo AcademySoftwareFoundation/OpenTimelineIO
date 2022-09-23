@@ -15,10 +15,10 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 const label_to_schema_version_map CORE_VERSION_MAP {
-    { "0.15.0.dev1",
+    { "0.14.0",
         {
             { "Adapter", 1 },
-            { "Clip", 2 },
+            { "Clip", 1 },
             { "Composable", 1 },
             { "Composition", 1 },
             { "Effect", 1 },
@@ -48,10 +48,10 @@ const label_to_schema_version_map CORE_VERSION_MAP {
             { "UnknownSchema", 1 },
         }
     },
-    { "0.14.0",
+    { "0.15.0.dev1",
         {
             { "Adapter", 1 },
-            { "Clip", 1 },
+            { "Clip", 2 },
             { "Composable", 1 },
             { "Composition", 1 },
             { "Effect", 1 },

@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.18.2)
 
 #------------------------------------------------------------------------------
-# Project Meta data
+# Project Metadata
 # TODO: read this information from a configuration file, here, and in setup.py
 
 set(OTIO_VERSION_MAJOR "0")
@@ -181,11 +181,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested
 #
-# fetching submodules does not work in Travis, so override the OTIO_AUTOMATIC_SUBMODULES option
-# TODO: Travis is no longer used for CI of OpenTimelineIO, so the ENV var that overrides
-# the automatic submodule feature should be renamed.
-
-if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
+if (OTIO_AUTOMATIC_SUBMODULES)
     # make sure that git submodules are up to date when building
     find_package(Git QUIET)
     if (GIT_FOUND)

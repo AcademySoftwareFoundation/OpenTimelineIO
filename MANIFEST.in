@@ -12,7 +12,6 @@ exclude .readthedocs.yml
 exclude readthedocs-conda.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
-exclude .travis.yml
 exclude *.pdf
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md

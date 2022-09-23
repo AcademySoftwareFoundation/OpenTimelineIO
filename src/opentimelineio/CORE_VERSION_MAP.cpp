@@ -40,7 +40,6 @@ const label_to_schema_version_map CORE_VERSION_MAP {
             { "SerializableObject", 1 },
             { "SerializableObjectWithMetadata", 1 },
             { "Stack", 1 },
-            { "Test", 1 },
             { "TimeEffect", 1 },
             { "Timeline", 1 },
             { "Track", 1 },

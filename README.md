@@ -91,16 +91,6 @@ For detailed installation instructions and notes on how to run the included view
 Example Usage
 -------------
 
-Python:
-
-```python
-import opentimelineio as otio
-
-timeline = otio.adapters.read_from_file("foo.aaf")
-for clip in timeline.clip_if():
-  print(clip.name, clip.duration())
-```
-
 C++:
 
 ```c++
@@ -111,7 +101,7 @@ C++:
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
 void
-example()
+main()
 {
     otio::ErrorStatus err;
     otio::SerializableObject::Retainer<otio::Timeline> tl(
@@ -129,6 +119,16 @@ example()
         std::cout << dur.value() << "/" << dur.rate() << "]" << std::endl;
     }
 }
+```
+
+Python:
+
+```python
+import opentimelineio as otio
+
+timeline = otio.adapters.read_from_file("foo.aaf")
+for clip in timeline.clip_if():
+  print(clip.name, clip.duration())
 ```
 
 There are more code examples here: https://github.com/AcademySoftwareFoundation/OpenTimelineIO/tree/main/examples

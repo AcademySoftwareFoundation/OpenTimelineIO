@@ -11,7 +11,6 @@ small, simple utility function. These functions also serve
 as concise examples of how OTIO can be used to perform common
 workflow tasks."""
 
-from __future__ import print_function
 import argparse
 import os
 import re

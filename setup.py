@@ -343,11 +343,6 @@ setup(
 
     install_requires=[
         'pyaaf2>=1.4,<1.7',
-        'backports.tempfile; python_version<"3.0"',
-        # Enables the builtins module in the XGES adapter
-        'future; python_version<"3.0"',
-        # Used in the otioz adapter to conform to unix paths
-        'pathlib2; python_version<"3.0"'
     ],
     entry_points={
         'console_scripts': [
@@ -377,10 +372,6 @@ setup(
     },
 
     test_suite='setup.test_otio',
-
-    tests_require=[
-        'mock;python_version<"3.3"',
-    ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

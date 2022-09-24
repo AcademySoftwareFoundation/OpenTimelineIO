@@ -10,12 +10,7 @@ import os
 import tempfile
 import shutil
 
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
+import urllib.parse as urlparse
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils

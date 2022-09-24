@@ -108,15 +108,6 @@ OUTPUT_PLAYLIST_VERSION = "7"
 # TODO: make sure all strings get sanitized through encoding and decoding
 PLAYLIST_STRING_ENCODING = "utf-8"
 
-# Enable isinstance(my_instance, basestring) tests in Python 3
-# This can be phased out when Python 2 support is dropped. Replace tests with:
-# isinstance(my_instance, str)
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
 """
 Matches a single key/value pair from an HLS Attribute List.
 See section 4.2 of draft-pantos-http-live-streaming for more detail.
@@ -231,7 +222,7 @@ class AttributeList(dict):
             out_value = ''
             if isinstance(v, AttributeListEnum):
                 out_value = v
-            elif isinstance(v, basestring):
+            elif isinstance(v, str):
                 out_value = '"{}"'.format(v)
             else:
                 out_value = str(v)

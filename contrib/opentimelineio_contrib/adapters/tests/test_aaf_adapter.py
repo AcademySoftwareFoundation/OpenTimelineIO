@@ -16,12 +16,7 @@ from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
     AAFValidationError
 )
 
-try:
-    # python2
-    import StringIO as io
-except ImportError:
-    # python3
-    import io
+import io
 
 
 TRANSCRIPTION_RESULT = """---
@@ -203,16 +198,6 @@ MARKER_OVER_AUDIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "marker-over-audio.aaf"
 )
-
-
-def safe_str(maybe_str):
-    """To help with testing between python 2 and 3, this function attempts to
-    decode a string, and if it cannot decode it just returns the string.
-    """
-    try:
-        return maybe_str.decode('utf-8')
-    except AttributeError:
-        return maybe_str
 
 
 try:
@@ -883,12 +868,12 @@ class AAFReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
             (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
-            safe_str(timeline.name)
+            timeline.name.decode('utf-8')
         )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
         self.assertEqual(
-            safe_str(first_clip.name),
+            first_clip.name.decode('utf-8'),
             (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(

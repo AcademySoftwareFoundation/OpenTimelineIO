@@ -12,12 +12,7 @@ import argparse
 import tempfile
 import textwrap
 
-try:
-    # python2
-    import StringIO as io
-except ImportError:
-    # python3
-    import io
+import io
 
 import opentimelineio as otio
 

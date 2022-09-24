@@ -5,19 +5,9 @@
 
 import os
 
-try:
-    # Python 2.7
-    import urlparse
-    import urllib
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
-    from urllib import request as urllib
-
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
+import urllib.parse as urlparse
+from urllib import request as urllib
+import pathlib
 
 
 def url_from_filepath(fpath):

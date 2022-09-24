@@ -483,13 +483,12 @@ class SVGWriter:
         text_elem.text = text
 
     def get_image(self):
-        # Python 3 produces a bytestring with the tostring() method, whereas Python 2
-        # gives an str object. The try-except block below checks for this case.
-        xmlstr = tostring(self.svg_elem, encoding='utf-8', method='xml')
-        try:
-            xmlstr = xmlstr.decode("utf8")
-        except UnicodeDecodeError:
-            pass
+        xmlstr = tostring(
+            self.svg_elem,
+            encoding='utf-8',
+            method='xml'
+        ).decode('utf8')
+
         return minidom.parseString(xmlstr).toprettyxml(indent='  ')
 
 

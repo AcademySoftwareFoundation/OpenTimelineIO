@@ -9,12 +9,7 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
 import json
-try:
-    from urllib.parse import urlparse, unquote
-except ImportError:
-    # Python 2
-    from urlparse import urlparse
-    from urllib import unquote
+from urllib.parse import urlparse, unquote
 
 marker_types = {
     0: otio.schema.MarkerColor.PURPLE,

@@ -17,12 +17,7 @@ import os
 import re
 import sys
 
-try:
-    from urllib.request import urlopen
-
-except ImportError:
-    # Python2
-    from urllib2 import urlopen
+from urllib.request import urlopen
 
 from copy import deepcopy
 

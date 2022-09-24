@@ -491,7 +491,7 @@ private:
             return;
         }
 
-        const int target_version = (dg_version_it->second);
+        const int target_version = static_cast<int>(dg_version_it->second);
 
         const auto& type_rec = (
                 TypeRegistry::instance()._find_type_record(schema_name)
@@ -1005,7 +1005,7 @@ SerializableObject::Writer::write(
         // this schema
         if (target_version_it != _downgrade_version_manifest->end())
         {
-            const int target_version = target_version_it->second;
+            const int target_version = static_cast<int>(target_version_it->second);
 
             // and the current_version is greater than the target version
             if (schema_version > target_version) 

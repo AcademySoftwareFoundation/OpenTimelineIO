@@ -247,7 +247,7 @@ RationalTime::from_timecode(
         seconds = std::stoi(fields[2]);
         frames  = std::stoi(fields[3]);
     }
-    catch (std::exception const& e)
+    catch (std::exception const&)
     {
         if (error_status)
         {

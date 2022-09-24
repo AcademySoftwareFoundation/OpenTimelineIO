@@ -29,11 +29,7 @@ from . import (
     otio_json
 )
 
-try:
-    import pathlib
-except ImportError:
-    # python2
-    import pathlib2 as pathlib
+import pathlib
 
 
 def read_from_file(filepath, extract_to_directory=None):

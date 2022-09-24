@@ -6,16 +6,10 @@ import re
 import os
 import warnings
 import numbers
-try:
-    from urllib.parse import quote
-    from urllib.parse import unquote
-    from urllib.parse import urlparse
-    from urllib.parse import parse_qs
-except ImportError:  # python2
-    from urllib import quote
-    from urllib import unquote
-    from urlparse import urlparse
-    from urlparse import parse_qs
+from urllib.parse import quote
+from urllib.parse import unquote
+from urllib.parse import urlparse
+from urllib.parse import parse_qs
 
 from builtins import int
 from fractions import Fraction

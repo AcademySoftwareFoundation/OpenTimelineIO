@@ -12,18 +12,10 @@ import numbers
 import os
 import sys
 
-try:
-    # Python 2
-    text_type = unicode
-except NameError:
-    # Python 3
-    text_type = str
+text_type = str
 
-try:
-    # Python 3.3+
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc
+# Python 3.3+
+import collections.abc as collections_abc
 import fractions
 import opentimelineio as otio
 

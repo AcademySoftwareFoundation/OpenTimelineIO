@@ -52,7 +52,6 @@ class ImageSequenceReferenceTests(
             otio.schema.ImageSequenceReference.MissingFramePolicy.hold,
         )
 
-    @unittest.skipIf(IS_PYTHON_2, "unicode strings do funny things in python2")
     def test_str(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
@@ -89,7 +88,6 @@ class ImageSequenceReferenceTests(
             ')'
         )
 
-    @unittest.skipIf(IS_PYTHON_2, "unicode strings do funny things in python2")
     def test_repr(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

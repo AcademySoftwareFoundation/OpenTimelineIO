@@ -13,13 +13,7 @@ from .. import (
     url_utils,
 )
 
-
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
+import urllib.parse as urlparse
 
 
 # versioning

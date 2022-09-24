@@ -187,11 +187,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
 # check the python version first
 if (
-    sys.version_info[0] < 2 or
-    (sys.version_info[0] == 2 and sys.version_info[1] < 7)
+    sys.version_info[0] < 3 or
+    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
 ):
     sys.exit(
-        'OpenTimelineIO requires python2.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.7 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -299,8 +299,6 @@ setup(
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: Other/Proprietary License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -341,7 +339,7 @@ setup(
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
+    python_requires='>3.6, !=3.9.0',  # noqa: E501
 
     install_requires=[
         'pyaaf2>=1.4,<1.7',

@@ -12,22 +12,8 @@ import re
 from xml.etree import cElementTree
 from xml.dom import minidom
 
-# urlparse's name changes in Python 3
-try:
-    # Python 2.7
-    import urlparse as urllib_parse
-except ImportError:
-    # Python 3
-    basestring = str
-    import urllib.parse as urllib_parse
-
-# Same with the ABC classes from collections
-try:
-    # Python 3
-    from collections.abc import Mapping
-except ImportError:
-    # Python 2.7
-    from collections import Mapping
+import urllib.parse as urllib_parse
+from collections.abc import Mapping
 
 from .. import (
     core,
@@ -422,7 +408,7 @@ def _dict_to_xml_tree(data_dict, tag):
             pass
 
         # test for list-like objects (but not string-derived)
-        if not isinstance(python_value, basestring):
+        if not isinstance(python_value, str):
             try:
                 iter(python_value)
                 return itertools.chain.from_iterable(

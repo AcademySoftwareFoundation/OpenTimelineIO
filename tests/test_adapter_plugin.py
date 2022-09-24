@@ -8,14 +8,7 @@ import opentimelineio as otio
 from tests import baseline_reader, utils
 
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
-
+import tempfile
 
 """Unit tests for the adapter plugin system."""
 

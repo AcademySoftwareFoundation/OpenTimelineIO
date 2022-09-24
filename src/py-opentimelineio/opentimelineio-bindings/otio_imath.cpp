@@ -18,7 +18,7 @@ CLASS _type_checked(py::object const& rhs, char const* op) {
     }
     catch (...) {
         std::string rhs_type = py::cast<std::string>(rhs.get_type().attr("__name__"));
-        throw py::type_error(string_printf("unsupported operand type(s) for %s: "
+        throw py::type_error(string_printf("Unsupported operand type(s) for %s: "
                                            "%s and %s", typeid(CLASS).name(), op, rhs_type.c_str()));
     }
 }

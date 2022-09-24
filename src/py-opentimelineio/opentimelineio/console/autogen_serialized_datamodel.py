@@ -152,7 +152,7 @@ def _generate_model_for_module(mod, classes, modules):
     modules.add(mod)
 
     # fetch the classes from this module
-    serializeable_classes = [
+    serializable_classes = [
         thing for thing in mod.__dict__.values()
         if (
             inspect.isclass(thing)
@@ -168,7 +168,7 @@ def _generate_model_for_module(mod, classes, modules):
 
     # serialize/deserialize the classes to capture their serialized parameters
     model = {}
-    for cl in serializeable_classes:
+    for cl in serializable_classes:
         if cl in SKIP_CLASSES:
             continue
 

@@ -114,7 +114,7 @@ AnyDictionary py_to_any_dictionary(py::object const& o) {
     any a;
     py_to_any(o, &a);
     if (!compare_typeids(a.type(), typeid(AnyDictionary))) {
-        throw py::type_error(string_printf("expected an AnyDictionary (i.e. metadata); got %s instead",
+        throw py::type_error(string_printf("Expected an AnyDictionary (i.e. metadata); got %s instead",
                                            type_name_for_error_message(a).c_str()));
     }
 

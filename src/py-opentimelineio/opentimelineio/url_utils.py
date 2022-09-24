@@ -21,7 +21,7 @@ except ImportError:
 
 
 def url_from_filepath(fpath):
-    """convert a filesystem path to an url in a portable way using / path sep"""
+    """Convert a filesystem path to an url in a portable way using / path sep"""
 
     try:
         # appears to handle absolute windows paths better, which are absolute

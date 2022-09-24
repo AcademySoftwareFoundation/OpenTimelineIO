@@ -379,7 +379,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         '''
         Create a doubly linked list to navigate from track to track:
             track->get_next_up & track->get_next_up
-        "map_to_wodget" : Create a map to retrieve the pyside widget from
+        "map_to_widget" : Create a map to retrieve the pyside widget from
         the otio item
         '''
         data_cache = dict()
@@ -785,7 +785,7 @@ class Timeline(QtWidgets.QTabWidget):
             self.add_stack(timeline.tracks)
 
     def add_stack(self, stack):
-        """open a tab for the stack or go to it if already present"""
+        """Open a tab for the stack or go to it if already present"""
 
         # find the tab for the stack if the tab has already been opened
         tab_index = next(

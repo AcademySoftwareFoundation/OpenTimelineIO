@@ -6,7 +6,8 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 UnknownSchema::UnknownSchema(
-    std::string const& original_schema_name, int original_schema_version)
+    std::string const& original_schema_name,
+    int                original_schema_version)
     : _original_schema_name(original_schema_name)
     , _original_schema_version(original_schema_version)
 {}

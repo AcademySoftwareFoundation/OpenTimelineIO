@@ -22,9 +22,9 @@ Marker::~Marker()
 bool
 Marker::read_from(Reader& reader)
 {
-    return reader.read_if_present("color", &_color) &&
-           reader.read("marked_range", &_marked_range) &&
-           Parent::read_from(reader);
+    return reader.read_if_present("color", &_color)
+           && reader.read("marked_range", &_marked_range)
+           && Parent::read_from(reader);
 }
 
 void

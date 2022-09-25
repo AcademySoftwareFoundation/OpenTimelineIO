@@ -45,7 +45,8 @@ Composition::clear_children()
 
 bool
 Composition::set_children(
-    std::vector<Composable*> const& children, ErrorStatus* error_status)
+    std::vector<Composable*> const& children,
+    ErrorStatus*                    error_status)
 {
     for (auto child: children)
     {
@@ -71,7 +72,9 @@ Composition::set_children(
 
 bool
 Composition::insert_child(
-    int index, Composable* child, ErrorStatus* error_status)
+    int          index,
+    Composable*  child,
+    ErrorStatus* error_status)
 {
     if (child->parent())
     {
@@ -207,14 +210,15 @@ Composition::is_parent_of(Composable const* other) const
 
 std::pair<optional<RationalTime>, optional<RationalTime>>
 Composition::handles_of_child(
-    Composable const* /* child */, ErrorStatus* /* error_status */) const
+    Composable const* /* child */,
+    ErrorStatus* /* error_status */) const
 {
     return std::make_pair(optional<RationalTime>(), optional<RationalTime>());
 }
 
 int
-Composition::_index_of_child(
-    Composable const* child, ErrorStatus* error_status) const
+Composition::_index_of_child(Composable const* child, ErrorStatus* error_status)
+    const
 {
     for (size_t i = 0; i < _children.size(); i++)
     {
@@ -234,7 +238,8 @@ Composition::_index_of_child(
 
 std::vector<Composition*>
 Composition::_path_from_child(
-    Composable const* child, ErrorStatus* error_status) const
+    Composable const* child,
+    ErrorStatus*      error_status) const
 {
     auto                      current = child->parent();
     std::vector<Composition*> parents{ current };
@@ -258,8 +263,8 @@ Composition::_path_from_child(
 }
 
 TimeRange
-Composition::range_of_child_at_index(
-    int /* index */, ErrorStatus* error_status) const
+Composition::range_of_child_at_index(int /* index */, ErrorStatus* error_status)
+    const
 {
     if (error_status)
     {
@@ -270,7 +275,8 @@ Composition::range_of_child_at_index(
 
 TimeRange
 Composition::trimmed_range_of_child_at_index(
-    int /* index */, ErrorStatus* error_status) const
+    int /* index */,
+    ErrorStatus* error_status) const
 {
     if (error_status)
     {
@@ -291,8 +297,8 @@ Composition::range_of_all_children(ErrorStatus* error_status) const
 
 // XXX should have reference_space argument or something
 TimeRange
-Composition::range_of_child(
-    Composable const* child, ErrorStatus* error_status) const
+Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
+    const
 {
     auto parents = _path_from_child(child, error_status);
     if (is_error(error_status))
@@ -333,16 +339,18 @@ Composition::range_of_child(
         current = parent;
     }
 
-    return (reference_space != this)
-               ? transformed_time_range(
-                     *result_range, reference_space, error_status)
-               : *result_range;
+    return (reference_space != this) ? transformed_time_range(
+               *result_range,
+               reference_space,
+               error_status)
+                                     : *result_range;
 }
 
 // XXX should have reference_space argument or something
 optional<TimeRange>
 Composition::trimmed_range_of_child(
-    Composable const* child, ErrorStatus* error_status) const
+    Composable const* child,
+    ErrorStatus*      error_status) const
 {
     auto parents = _path_from_child(child, error_status);
     if (is_error(error_status))
@@ -395,8 +403,8 @@ Composition::trimmed_range_of_child(
 
     auto new_duration = std::min(
                             result_range->end_time_exclusive(),
-                            source_range()->end_time_exclusive()) -
-                        new_start_time;
+                            source_range()->end_time_exclusive())
+                        - new_start_time;
     if (new_duration.value() < 0)
     {
         return nullopt;
@@ -443,13 +451,15 @@ Composition::trim_child_range(TimeRange child_range) const
     if (child_range.start_time() < sr.start_time())
     {
         child_range = TimeRange::range_from_start_end_time(
-            sr.start_time(), child_range.end_time_exclusive());
+            sr.start_time(),
+            child_range.end_time_exclusive());
     }
 
     if (child_range.end_time_exclusive() > sr.end_time_exclusive())
     {
         child_range = TimeRange::range_from_start_end_time(
-            child_range.start_time(), sr.end_time_exclusive());
+            child_range.start_time(),
+            sr.end_time_exclusive());
     }
 
     return child_range;
@@ -535,7 +545,9 @@ Composition::child_at_time(
     }
 
     result = composition.value->child_at_time(
-        child_search_time, error_status, shallow_search);
+        child_search_time,
+        error_status,
+        shallow_search);
     if (is_error(error_status))
     {
         return result;
@@ -545,7 +557,8 @@ Composition::child_at_time(
 
 std::vector<SerializableObject::Retainer<Composable>>
 Composition::children_in_range(
-    TimeRange const& search_range, ErrorStatus* error_status) const
+    TimeRange const& search_range,
+    ErrorStatus*     error_status) const
 {
     std::vector<Retainer<Composable>> children;
 

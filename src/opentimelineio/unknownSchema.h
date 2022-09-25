@@ -18,7 +18,8 @@ public:
     };
 
     UnknownSchema(
-        std::string const& original_schema_name, int original_schema_version);
+        std::string const& original_schema_name,
+        int                original_schema_version);
 
     std::string original_schema_name() const noexcept
     {

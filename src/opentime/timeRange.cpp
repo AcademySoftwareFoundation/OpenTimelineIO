@@ -2,4 +2,3 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include "opentime/timeRange.h"
-

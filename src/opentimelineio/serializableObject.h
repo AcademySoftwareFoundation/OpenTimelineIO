@@ -45,23 +45,23 @@ public:
      */
     bool possibly_delete();
 
-    bool 
-    to_json_file(
-        std::string const& file_name,
-        ErrorStatus*       error_status = nullptr,
+    bool to_json_file(
+        std::string const&        file_name,
+        ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
-        int                indent       = 4) const;
+        int                       indent                   = 4) const;
 
-    std::string
-    to_json_string(
-            ErrorStatus* error_status = nullptr,
-            const schema_version_map* target_family_label_spec = nullptr,
-            int indent = 4) const;
+    std::string to_json_string(
+        ErrorStatus*              error_status             = nullptr,
+        const schema_version_map* target_family_label_spec = nullptr,
+        int                       indent                   = 4) const;
 
     static SerializableObject* from_json_file(
-        std::string const& file_name, ErrorStatus* error_status = nullptr);
+        std::string const& file_name,
+        ErrorStatus*       error_status = nullptr);
     static SerializableObject* from_json_string(
-        std::string const& input, ErrorStatus* error_status = nullptr);
+        std::string const& input,
+        ErrorStatus*       error_status = nullptr);
 
     bool is_equivalent_to(SerializableObject const& other) const;
 
@@ -149,10 +149,10 @@ public:
             _error(ErrorStatus(
                 ErrorStatus::TYPE_MISMATCH,
                 std::string(
-                    "Expected object of type " +
-                    fwd_type_name_for_error_message(typeid(T)) +
-                    "; read type " + fwd_type_name_for_error_message(so) +
-                    " instead")));
+                    "Expected object of type "
+                    + fwd_type_name_for_error_message(typeid(T))
+                    + "; read type " + fwd_type_name_for_error_message(so)
+                    + " instead")));
             return false;
         }
 
@@ -191,7 +191,10 @@ public:
                 {
                     int line_number = line_number_for_object[e.first];
                     Reader::_fix_reference_ids(
-                        e.second, error_function, *this, line_number);
+                        e.second,
+                        error_function,
+                        *this,
+                        line_number);
                     Reader r(e.second, error_function, e.first, line_number);
                     e.first->read_from(r);
                 }
@@ -382,7 +385,7 @@ public:
             _Resolver&,
             int line_number);
 
-        Reader(Reader const&) = delete;
+        Reader(Reader const&)           = delete;
         Reader operator=(Reader const&) = delete;
 
         AnyDictionary           _dict;
@@ -401,10 +404,10 @@ public:
     {
     public:
         static bool write_root(
-            any const&     value,
-            class Encoder& encoder,
-            const schema_version_map* downgrade_version_manifest=nullptr,
-            ErrorStatus*   error_status = nullptr);
+            any const&                value,
+            class Encoder&            encoder,
+            const schema_version_map* downgrade_version_manifest = nullptr,
+            ErrorStatus*              error_status               = nullptr);
 
         void write(std::string const& key, bool value);
         void write(std::string const& key, int64_t value);
@@ -513,11 +516,10 @@ public:
         ///@}
 
         Writer(
-                class Encoder& encoder,
-                const schema_version_map* downgrade_version_manifest
-        )
-            : _encoder(encoder),
-            _downgrade_version_manifest(downgrade_version_manifest)
+            class Encoder&            encoder,
+            const schema_version_map* downgrade_version_manifest)
+            : _encoder(encoder)
+            , _downgrade_version_manifest(downgrade_version_manifest)
 
         {
             _build_dispatch_tables();
@@ -525,7 +527,7 @@ public:
 
         ~Writer();
 
-        Writer(Writer const&) = delete;
+        Writer(Writer const&)           = delete;
         Writer operator=(Writer const&) = delete;
 
         void _build_dispatch_tables();
@@ -537,7 +539,9 @@ public:
         bool _any_equals(any const& lhs, any const& rhs);
 
         std::string _no_key;
-        std::unordered_map<std::type_info const*, std::function<void(any const&)>>
+        std::unordered_map<
+            std::type_info const*,
+            std::function<void(any const&)>>
             _write_dispatch_table;
         std::unordered_map<
             std::type_info const*,
@@ -546,13 +550,14 @@ public:
 
         std::unordered_map<std::string, std::function<void(any const&)>>
             _write_dispatch_table_by_name;
-        std::unordered_map<SerializableObject const*, std::string> _id_for_object;
-        std::unordered_map<std::string, int>                       _next_id_for_type;
+        std::unordered_map<SerializableObject const*, std::string>
+                                             _id_for_object;
+        std::unordered_map<std::string, int> _next_id_for_type;
 
-        Writer* _child_writer = nullptr;
+        Writer*         _child_writer          = nullptr;
         CloningEncoder* _child_cloning_encoder = nullptr;
 
-        class Encoder& _encoder;
+        class Encoder&            _encoder;
         const schema_version_map* _downgrade_version_manifest;
         friend class SerializableObject;
     };
@@ -624,7 +629,7 @@ protected:
     virtual bool _is_deletable();
 
 private:
-    SerializableObject(SerializableObject const&) = delete;
+    SerializableObject(SerializableObject const&)            = delete;
     SerializableObject& operator=(SerializableObject const&) = delete;
     template <typename T>
     friend struct Retainer;
@@ -645,7 +650,8 @@ public:
     };
 
     void install_external_keepalive_monitor(
-        std::function<void()> monitor, bool apply_now);
+        std::function<void()> monitor,
+        bool                  apply_now);
 
     int current_ref_count() const;
 

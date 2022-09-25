@@ -41,10 +41,14 @@ public:
         ErrorStatus*                    error_status = nullptr);
 
     bool insert_child(
-        int index, Composable* child, ErrorStatus* error_status = nullptr);
+        int          index,
+        Composable*  child,
+        ErrorStatus* error_status = nullptr);
 
     bool set_child(
-        int index, Composable* child, ErrorStatus* error_status = nullptr);
+        int          index,
+        Composable*  child,
+        ErrorStatus* error_status = nullptr);
 
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
@@ -57,18 +61,23 @@ public:
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
     handles_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
     virtual TimeRange range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange trimmed_range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
 
     // leaving out reference_space argument for now:
     TimeRange range_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
     optional<TimeRange> trimmed_range_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
     optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
@@ -110,9 +119,11 @@ protected:
     virtual void write_to(Writer&) const;
 
     int _index_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
     std::vector<Composition*> _path_from_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
 private:
     // XXX: python implementation is O(n^2) in number of children
@@ -197,7 +208,9 @@ Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(
-                        *search_range, composition, error_status);
+                        *search_range,
+                        composition,
+                        error_status);
                     if (is_error(error_status))
                     {
                         return out;
@@ -205,7 +218,9 @@ Composition::children_if(
                 }
 
                 const auto valid_children = composition->children_if<T>(
-                    error_status, search_range, shallow_search);
+                    error_status,
+                    search_range,
+                    shallow_search);
                 if (is_error(error_status))
                 {
                     return out;

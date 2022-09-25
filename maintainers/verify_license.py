@@ -10,7 +10,7 @@ import argparse
 import os
 import sys
 
-licenses = {
+LICENSES = {
     ".py": """# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 """,
@@ -53,6 +53,13 @@ def _parsed_args():
         type=str,
         help=("Directory to start searching for files in.")
     )
+    parser.add_argument(
+        '-f',
+        '--fix',
+        default=False,
+        action="store_true",
+        help="Fix licenses in place when possible"
+    )
 
     return parser.parse_args()
 
@@ -70,7 +77,7 @@ def main():
             if any(d in root for d in SKIP_DIRS):
                 continue
             fullpath = os.path.join(root, filename)
-            for ext, lic in licenses.items():
+            for ext, lic in LICENSES.items():
                 if filename.endswith(ext):
                     total += 1
                     try:
@@ -89,6 +96,13 @@ def main():
                         incorrect_license += 1
                     else:
                         correct_license += 1
+
+                    if args.fix:
+                        content = LICENSES[os.path.splitext(fullpath)[1]]
+                        with open(fullpath, 'r') as fi:
+                            content += fi.read()
+                        with open(fullpath, 'w') as fo:
+                            fo.write(content)
 
     print(
         "{} of {} files have the correct license.".format(

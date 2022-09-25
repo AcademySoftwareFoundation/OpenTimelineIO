@@ -94,15 +94,16 @@ def main():
                     if len(content) > 0 and lic not in content:
                         print("MISSING: {}".format(os.path.relpath(fullpath)))
                         incorrect_license += 1
+
+                        if args.fix:
+                            content = LICENSES[os.path.splitext(fullpath)[1]]
+                            with open(fullpath, 'r') as fi:
+                                content += fi.read()
+                            with open(fullpath, 'w') as fo:
+                                fo.write(content)
                     else:
                         correct_license += 1
 
-                    if args.fix:
-                        content = LICENSES[os.path.splitext(fullpath)[1]]
-                        with open(fullpath, 'r') as fi:
-                            content += fi.read()
-                        with open(fullpath, 'w') as fo:
-                            fo.write(content)
 
     print(
         "{} of {} files have the correct license.".format(

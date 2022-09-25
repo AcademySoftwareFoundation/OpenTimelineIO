@@ -84,8 +84,8 @@ def main():
                         )
                         continue
 
-                    if len(content) > 10 and lic not in content:
-                        print("MISSING: {}".format(fullpath))
+                    if len(content) > 0 and lic not in content:
+                        print("MISSING: {}".format(os.path.relpath(fullpath)))
                         incorrect_license += 1
                     else:
                         correct_license += 1
@@ -98,15 +98,16 @@ def main():
     )
 
     if incorrect_license != 0:
-        sys.stderr.write(
+        raise RuntimeError(
             "ERROR: {} files do NOT have the correct license.\n".format(
                 incorrect_license
             )
         )
-        return False
 
-    return True
 
 if __name__ == "__main__":
-    if not main():
+    try:
+        main()
+    except RuntimeError as err:
+        sys.stderr.write(err.args[0])
         sys.exit(1)

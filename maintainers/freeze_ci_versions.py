@@ -9,22 +9,15 @@ process.
 """
 
 import argparse
-import os
-import sys
 import re
 import urllib.request
 
-try:
-    import yaml
-except ImportError:
-    sys.stderr.write(
-        "Error: Could not import 'yaml', might need to `pip install pyyaml`\n"
-    )
-    raise
-
 CI_WORKFLOW_FP = ".github/workflows/python-package.yml"
-GITHUB_README_URL = "https://raw.githubusercontent.com/actions/runner-images/main/README.md"
+GITHUB_README_URL = (
+    "https://raw.githubusercontent.com/actions/runner-images/main/README.md"
+)
 PLATFORMS = ["ubuntu", "macos", "windows"]
+
 
 def _parsed_args():
     parser = argparse.ArgumentParser(
@@ -33,14 +26,14 @@ def _parsed_args():
 
     op_grp = parser.add_mutually_exclusive_group(required=True)
     op_grp.add_argument(
-        "-f", 
+        "-f",
         "--freeze",
         default=False,
         action="store_true",
         help="freeze the ci version from latest to their version."
     )
     op_grp.add_argument(
-        "-u", 
+        "-u",
         "--unfreeze",
         default=False,
         action="store_true",
@@ -126,6 +119,7 @@ def unfreeze_ci(plat_map, dryrun=False):
         return True
 
     return False
+
 
 if __name__ == "__main__":
     main()

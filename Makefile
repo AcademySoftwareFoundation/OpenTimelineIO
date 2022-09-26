@@ -204,6 +204,13 @@ doc-cpp:
 	@echo "wrote doxygen output to: doxygen/output/html/index.html"
 	
 # release related targets
+confirm-release-intent:
+ifndef OTIO_DO_RELEASE
+	$(error \
+		"If you are sure you want to perform a release, set OTIO_DO_RELEASE=1")
+endif
+	@echo "Starting release process..."
+
 check-git-status:
 ifneq ($(GITSTATUS), 0)
 	$(error \
@@ -253,6 +260,7 @@ new-version-commit:
 
 # make target for preparing a release candidate 
 release: \
+	confirm-release-intent \
 	check-git-status \
 	check-github-token \
 	verify-license \

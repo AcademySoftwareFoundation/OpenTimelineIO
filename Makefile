@@ -256,7 +256,10 @@ release-commit:
 	$(GIT) commit -am "Autocommit by `make release`, as part of the release process"
 
 new-version-commit:
-	$(GIT) commit -am "Autocommit by `make bump-version`, as part of the new version process"
+	@echo $(GIT) commit -am "Autocommit by `make bump-version`, as part of the new version process"
+
+dev-python-install:
+	@python setup.py install
 
 # make target for preparing a release candidate 
 release: \
@@ -279,6 +282,11 @@ release: \
 bump-otio-minor-version:
 	@python maintainers/bump_version_number.py -i minor
 
+shuffle-core-version-map:
+	@cp -f src/opentimelineio/CORE_VERSION_MAP.cpp \
+		src/opentimelineio/CORE_VERSION_MAP.last.cpp
+	@echo "set the current version map as the next one"
+
 # make target for starting a new version (after a release is completed)
 start-dev-new-minor-version: \
 	check-git-status \
@@ -286,6 +294,7 @@ start-dev-new-minor-version: \
 	bump-otio-minor-version \
 	shuffle-core-version-map \
 	add-dev-suffix \
+	dev-python-install \
 	version-map-update \
 	new-version-commit
 	@echo "New version made.  Push and open a PR!"

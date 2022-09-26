@@ -266,3 +266,13 @@ release: \
 	release-commit
 	@echo "Release completed.  Push and open a PR!"
 
+# make target for starting a new version (after a release is completed)
+bump-version: \
+	check-git-status \
+	unfreeze-ci-versions \
+	bump-otio-version \
+	shuffle-core-version-map \
+	add-dev-suffix \
+	version-map-update \
+	new-version-commit
+	@echo "New version made.  Push and open a PR!"

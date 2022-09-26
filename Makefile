@@ -300,5 +300,5 @@ start-dev-new-minor-version: \
 	add-dev-suffix \
 	dev-python-install \
 	version-map-update \
-	new-version-commit
-	@echo "New version made.  Push and open a PR!"
+	test-core
+	@echo "New version made.  Commit, push and open a PR!"

@@ -55,6 +55,8 @@ def main():
     request = urllib.request.Request(GITHUB_README_URL)
     response = urllib.request.urlopen(request).read().decode('utf-8')
 
+    # HACK: pull the image version corresponding to -latest out of the
+    #       README.md for the github repo where they are stored
     lines = response.split("\n")
     plat_map = {}
     for plat in PLATFORMS:

@@ -198,3 +198,37 @@ doc-cpp:
 	@cd doxygen ; doxygen config/dox_config ; cd .. 
 	@echo "wrote doxygen output to: doxygen/output/html/index.html"
 	
+# release related targets
+verify-license:
+	@echo "Verifying licenses in files..."
+	@python maintainers/verify_license.py -s .
+
+fix-license:
+	@python maintainers/verify_license.py -s . -f
+
+freeze-ci-versions:
+	@echo "freezing CI versions..."
+	@python maintainers/freeze_ci_versions.py -f
+
+unfreeze-ci-versions:
+	@echo "unfreezing CI versions..."
+	@python maintainers/freeze_ci_versions.py -u
+
+# needs to happen _before_ version-map-update so that version in 
+# CORE_VERSION_MAP does not have the .dev1 suffix at release time
+remove-dev-suffix:
+	@echo "Removing .dev1 suffix"
+	@python maintainers/remove_dev_suffix.py -r
+
+update-contributors:
+	$(error "update-contributors not implemented")
+
+# make target for preparing a release candidate PR
+release: \
+	verify-license \
+	freeze-ci-versions \
+	remove-dev-suffix \
+	version-map-update \
+	format \
+	update-contributors
+

@@ -47,7 +47,9 @@ SerializableCollection::insert_child(int index, SerializableObject* child)
 
 bool
 SerializableCollection::set_child(
-    int index, SerializableObject* child, ErrorStatus* error_status)
+    int                 index,
+    SerializableObject* child,
+    ErrorStatus*        error_status)
 {
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size()))

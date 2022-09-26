@@ -20,8 +20,8 @@ LinearTimeWarp::~LinearTimeWarp()
 bool
 LinearTimeWarp::read_from(Reader& reader)
 {
-    return reader.read("time_scalar", &_time_scalar) &&
-           Parent::read_from(reader);
+    return reader.read("time_scalar", &_time_scalar)
+           && Parent::read_from(reader);
 }
 
 void

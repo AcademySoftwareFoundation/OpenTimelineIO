@@ -80,8 +80,8 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
 }
 
 TimeRange
-Stack::trimmed_range_of_child_at_index(
-    int index, ErrorStatus* error_status) const
+Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
+    const
 {
     auto range = range_of_child_at_index(index, error_status);
     if (is_error(error_status) || !source_range())
@@ -91,7 +91,8 @@ Stack::trimmed_range_of_child_at_index(
 
     const TimeRange sr = *source_range();
     return TimeRange(
-        sr.start_time(), std::min(range.duration(), sr.duration()));
+        sr.start_time(),
+        std::min(range.duration(), sr.duration()));
 }
 
 TimeRange

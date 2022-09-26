@@ -76,7 +76,10 @@ TypeRegistry::TypeRegistry()
     register_type<SerializableObjectWithMetadata>();
     register_type<SerializableCollection>();
     register_type_from_existing_type(
-        "SerializeableCollection", 1, "SerializableCollection", nullptr);
+        "SerializeableCollection",
+        1,
+        "SerializableCollection",
+        nullptr);
 
     register_type<Stack>();
     register_type<TimeEffect>();
@@ -114,35 +117,25 @@ TypeRegistry::TypeRegistry()
     });
 
     // 2->1
-    register_downgrade_function(
-            Clip::Schema::name,
-            2,
-            [](AnyDictionary* d) 
+    register_downgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
+        AnyDictionary mrefs;
+        std::string   active_rkey = "";
+
+        if (d->get_if_set("media_references", &mrefs))
+        {
+            if (d->get_if_set("active_media_reference_key", &active_rkey))
             {
-                AnyDictionary mrefs;
-                std::string active_rkey = ""; 
-
-                if (d->get_if_set("media_references", &mrefs))
+                AnyDictionary active_ref;
+                if (mrefs.get_if_set(active_rkey, &active_ref))
                 {
-                    if (
-                            d->get_if_set(
-                                "active_media_reference_key",
-                                &active_rkey
-                            )
-                    )
-                    {
-                        AnyDictionary active_ref;
-                        if (mrefs.get_if_set(active_rkey, &active_ref))
-                        {
-                            (*d)["media_reference"] = active_ref;
-                        }
-                    }
+                    (*d)["media_reference"] = active_ref;
                 }
-
-                d->erase("media_references");
-                d->erase("active_media_reference_key");
             }
-    );
+        }
+
+        d->erase("media_references");
+        d->erase("active_media_reference_key");
+    });
 }
 
 bool
@@ -166,7 +159,7 @@ TypeRegistry::register_type(
     //             && existing_tr->schema_version == schema_version
     //             && existing_tr->class_name == class_name
     //             && (
-    //                 existing_tr->create.target<SerializableObject*()>() 
+    //                 existing_tr->create.target<SerializableObject*()>()
     //                 == create.target<SerializableObject*()>()
     //             )
     //     ) {
@@ -200,16 +193,18 @@ TypeRegistry::register_type_from_existing_type(
     {
         if (!_find_type_record(schema_name))
         {
-            _type_records[schema_name] = new _TypeRecord{
-                r->schema_name, r->schema_version, r->class_name, r->create
-            };
+            _type_records[schema_name] = new _TypeRecord{ r->schema_name,
+                                                          r->schema_version,
+                                                          r->class_name,
+                                                          r->create };
             return true;
         }
 
         if (error_status)
         {
             *error_status = ErrorStatus(
-                ErrorStatus::SCHEMA_ALREADY_REGISTERED, schema_name);
+                ErrorStatus::SCHEMA_ALREADY_REGISTERED,
+                schema_name);
         }
         return false;
     }
@@ -237,11 +232,7 @@ TypeRegistry::register_upgrade_function(
     if (auto r = _find_type_record(schema_name))
     {
         auto result = r->upgrade_functions.insert(
-                { 
-                    version_to_upgrade_to,
-                    upgrade_function 
-                }
-        );
+            { version_to_upgrade_to, upgrade_function });
         return result.second;
     }
 
@@ -258,11 +249,7 @@ TypeRegistry::register_downgrade_function(
     if (auto r = _find_type_record(schema_name))
     {
         auto result = r->downgrade_functions.insert(
-                { 
-                    version_to_downgrade_from,
-                    downgrade_function 
-                }
-        );
+            { version_to_downgrade_from, downgrade_function });
         return result.second;
     }
 
@@ -323,8 +310,8 @@ TypeRegistry::_instance_from_schema(
     {
         for (const auto& e: type_record->upgrade_functions)
         {
-            if (schema_version <= e.first &&
-                e.first <= type_record->schema_version)
+            if (schema_version <= e.first
+                && e.first <= type_record->schema_version)
             {
                 e.second(&dict);
             }
@@ -399,13 +386,13 @@ TypeRegistry::set_type_record(
 }
 
 void
-TypeRegistry::type_version_map(
-        schema_version_map& result)
+TypeRegistry::type_version_map(schema_version_map& result)
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
 
-    for (const auto& pair: _type_records) {
-        const auto record_ptr = pair.second;
+    for (const auto& pair: _type_records)
+    {
+        const auto record_ptr           = pair.second;
         result[record_ptr->schema_name] = record_ptr->schema_version;
     }
 }

@@ -27,10 +27,11 @@ MediaReference::is_missing_reference() const
 bool
 MediaReference::read_from(Reader& reader)
 {
-    return reader.read_if_present("available_range", &_available_range) &&
-           reader.read_if_present(
-               "available_image_bounds", &_available_image_bounds) &&
-           Parent::read_from(reader);
+    return reader.read_if_present("available_range", &_available_range)
+           && reader.read_if_present(
+               "available_image_bounds",
+               &_available_image_bounds)
+           && Parent::read_from(reader);
 }
 
 void

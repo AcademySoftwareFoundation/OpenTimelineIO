@@ -109,8 +109,8 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
 }
 
 TimeRange
-Track::trimmed_range_of_child_at_index(
-    int index, ErrorStatus* error_status) const
+Track::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
+    const
 {
     auto child_range = range_of_child_at_index(index, error_status);
     if (is_error(error_status))
@@ -165,8 +165,8 @@ Track::available_range(ErrorStatus* error_status) const
 }
 
 std::pair<optional<RationalTime>, optional<RationalTime>>
-Track::handles_of_child(
-    Composable const* child, ErrorStatus* error_status) const
+Track::handles_of_child(Composable const* child, ErrorStatus* error_status)
+    const
 {
     optional<RationalTime> head, tail;
     auto                   neighbors = neighbors_of(child, error_status);
@@ -272,7 +272,8 @@ Track::range_of_all_children(ErrorStatus* error_status) const
         else if (auto item = dynamic_retainer_cast<Item>(child))
         {
             auto last_range = TimeRange(
-                last_end_time, item->trimmed_range(error_status).duration());
+                last_end_time,
+                item->trimmed_range(error_status).duration());
             result[child] = last_range;
             last_end_time = last_range.end_time_exclusive();
         }

@@ -28,7 +28,7 @@ public:
 
     constexpr double rate() const noexcept { return _rate; }
 
-    constexpr TimeTransform(TimeTransform const&) noexcept = default;
+    constexpr TimeTransform(TimeTransform const&) noexcept  = default;
     TimeTransform& operator=(TimeTransform const&) noexcept = default;
 
     TimeRange applied_to(TimeRange other) const noexcept
@@ -47,18 +47,17 @@ public:
 
     RationalTime applied_to(RationalTime other) const noexcept
     {
-        RationalTime result{
-            RationalTime{ other._value * _scale, other._rate } + _offset
-        };
-        double target_rate = _rate > 0 ? _rate : other._rate;
+        RationalTime result{ RationalTime{ other._value * _scale, other._rate }
+                             + _offset };
+        double       target_rate = _rate > 0 ? _rate : other._rate;
         return target_rate > 0 ? result.rescaled_to(target_rate) : result;
     }
 
     friend constexpr bool
     operator==(TimeTransform lhs, TimeTransform rhs) noexcept
     {
-        return lhs._offset == rhs._offset && lhs._scale == rhs._scale &&
-               lhs._rate == rhs._rate;
+        return lhs._offset == rhs._offset && lhs._scale == rhs._scale
+               && lhs._rate == rhs._rate;
     }
 
     friend constexpr bool

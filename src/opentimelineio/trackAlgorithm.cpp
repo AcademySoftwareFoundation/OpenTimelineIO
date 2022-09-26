@@ -8,7 +8,9 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Track*
 track_trimmed_to_range(
-    Track* in_track, TimeRange trim_range, ErrorStatus* error_status)
+    Track*       in_track,
+    TimeRange    trim_range,
+    ErrorStatus* error_status)
 {
     Track* new_track = dynamic_cast<Track*>(in_track->clone(error_status));
     if (is_error(error_status) || !new_track)
@@ -23,7 +25,8 @@ track_trimmed_to_range(
     }
 
     std::vector<Composable*> children_copy(
-        new_track->children().begin(), new_track->children().end());
+        new_track->children().begin(),
+        new_track->children().end());
 
     for (size_t i = children_copy.size(); i--;)
     {

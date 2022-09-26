@@ -44,15 +44,18 @@ public:
     void set_kind(std::string const& kind) { _kind = kind; }
 
     virtual TimeRange range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange trimmed_range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
     handles_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
     std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
         Composable const* item,

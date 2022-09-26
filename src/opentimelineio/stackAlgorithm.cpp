@@ -51,7 +51,8 @@ _flatten_next_item(
     else
     {
         auto result = range_track_map.emplace(
-            track, track->range_of_all_children(error_status));
+            track,
+            track->range_of_all_children(error_status));
         if (is_error(error_status))
         {
             return;
@@ -155,7 +156,12 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
 
     RangeTrackMap range_track_map;
     _flatten_next_item(
-        range_track_map, flat_track, tracks, -1, nullopt, error_status);
+        range_track_map,
+        flat_track,
+        tracks,
+        -1,
+        nullopt,
+        error_status);
     return flat_track;
 }
 
@@ -167,7 +173,12 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
 
     RangeTrackMap range_track_map;
     _flatten_next_item(
-        range_track_map, flat_track, tracks, -1, nullopt, error_status);
+        range_track_map,
+        flat_track,
+        tracks,
+        -1,
+        nullopt,
+        error_status);
     return flat_track;
 }
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

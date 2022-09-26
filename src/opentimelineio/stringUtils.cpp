@@ -18,7 +18,8 @@ cxxabi_type_name_for_error_mesage(const char* name)
     int status = -4; // some arbitrary value to eliminate the compiler warning
 
     std::unique_ptr<char, void (*)(void*)> res{
-        abi::__cxa_demangle(name, NULL, NULL, &status), std::free
+        abi::__cxa_demangle(name, NULL, NULL, &status),
+        std::free
     };
 
     return (status == 0) ? res.get() : name;

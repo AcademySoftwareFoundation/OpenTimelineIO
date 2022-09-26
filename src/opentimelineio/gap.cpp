@@ -21,11 +21,11 @@ Gap::Gap(
     std::vector<Marker*> const& markers,
     AnyDictionary const&        metadata)
     : Parent(
-          name,
-          TimeRange(RationalTime(0, duration.rate()), duration),
-          metadata,
-          effects,
-          markers)
+        name,
+        TimeRange(RationalTime(0, duration.rate()), duration),
+        metadata,
+        effects,
+        markers)
 {}
 
 Gap::~Gap()

@@ -114,38 +114,36 @@ SerializableObject::is_unknown_schema() const
 
 std::string
 SerializableObject::to_json_string(
-        ErrorStatus* error_status,
-        const schema_version_map* schema_version_targets,
-        int indent
-) const
+    ErrorStatus*              error_status,
+    const schema_version_map* schema_version_targets,
+    int                       indent) const
 {
     return serialize_json_to_string(
-        any(Retainer<>(this)), 
+        any(Retainer<>(this)),
         schema_version_targets,
         error_status,
-        indent
-    );
+        indent);
 }
 
 bool
 SerializableObject::to_json_file(
-    std::string const& file_name,
-    ErrorStatus* error_status,
+    std::string const&        file_name,
+    ErrorStatus*              error_status,
     const schema_version_map* schema_version_targets,
-    int indent) const
+    int                       indent) const
 {
     return serialize_json_to_file(
         any(Retainer<>(this)),
         file_name,
         schema_version_targets,
         error_status,
-        indent
-    );
+        indent);
 }
 
 SerializableObject*
 SerializableObject::from_json_string(
-    std::string const& input, ErrorStatus* error_status)
+    std::string const& input,
+    ErrorStatus*       error_status)
 {
     any dest;
 
@@ -172,7 +170,8 @@ SerializableObject::from_json_string(
 
 SerializableObject*
 SerializableObject::from_json_file(
-    std::string const& file_name, ErrorStatus* error_status)
+    std::string const& file_name,
+    ErrorStatus*       error_status)
 {
     any dest;
 
@@ -244,7 +243,8 @@ SerializableObject::_managed_release()
 
 void
 SerializableObject::install_external_keepalive_monitor(
-    std::function<void()> monitor, bool apply_now)
+    std::function<void()> monitor,
+    bool                  apply_now)
 {
     {
         std::lock_guard<std::mutex> lock(_mutex);

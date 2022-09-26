@@ -64,7 +64,7 @@ def main():
 
         if modified and not args.dryrun:
             with open(fp, 'w') as fo:
-                fo.write(content)
+                fo.write(modified)
             print("Wrote modified {}.".format(fp))
 
 
@@ -77,8 +77,7 @@ def add_suffix(content, version):
         return False
 
     print("adding suffix, version will be: {}".format(version + ".dev1"))
-    content.replace(version, version + ".dev1")
-    return True
+    return content.replace(version, version + ".dev1")
 
 
 def remove_suffix(content, version):
@@ -89,8 +88,8 @@ def remove_suffix(content, version):
         )
         return False
 
-    content.replace(version + ' .dev1', version)
-    return True
+    print("removing suffix, version will be: {}".format(version))
+    return content.replace(version + '.dev1', version)
 
 
 if __name__ == "__main__":

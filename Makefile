@@ -191,6 +191,7 @@ version-map:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp --dryrun
 
 version-map-update:
+	@echo "updating the CORE_VERSION_MAP..."
 	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp -o src/opentimelineio/CORE_VERSION_MAP.cpp
 
 # generate documentation in html
@@ -239,6 +240,7 @@ ifndef OTIO_RELEASE_GITHUB_TOKEN
 endif
 
 update-contributors: check-github-token
+	@echo "Updating CONTRIBUTORS.md..."
 	@python maintainers/fetch_contributors.py \
 		--repo AcademySoftwareFoundation/OpenTimelineIO \
 		--token $(OTIO_RELEASE_GITHUB_TOKEN)

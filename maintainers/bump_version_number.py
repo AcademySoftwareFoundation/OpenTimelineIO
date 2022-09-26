@@ -11,10 +11,6 @@ import json
 
 OTIO_VERSION_JSON_PATH = "OTIO_VERSION.json"
 
-TARGET_FILES = [
-    "setup.py"
-]
-
 
 def version():
     with open(OTIO_VERSION_JSON_PATH, 'r') as fi:
@@ -80,19 +76,57 @@ def main():
         print(".".join(str(v) for v in (major, minor, patch)))
         return
 
-    for fp in TARGET_FILES:
-        with open(fp, 'r') as fi:
-            content = fi.read()
+    print("Setting version to: {}.{}.{}".format(major, minor, patch))
 
-        if args.add:
-            modified = add_suffix(content, version)
-        elif args.remove:
-            modified = remove_suffix(content, version)
+    # update the OTIO_VERSION file
+    with open(OTIO_VERSION_JSON_PATH, "w") as fo:
+        fo.write(
+            json.dumps({"version": [str(v) for v in (major, minor, patch)]})
+        )
+    print("Updated {}".format(OTIO_VERSION_JSON_PATH))
 
-        if modified and not args.dryrun:
-            with open(fp, 'w') as fo:
-                fo.write(content)
-            print("Wrote modified {}.".format(fp))
+    #  update the CMakeLists.txt
+    with open("CMakeLists.txt", 'r') as fi:
+        cmake_input = fi.read()
+
+    cmake_output = []
+    key_map = {"MAJOR": major, "MINOR": minor, "PATCH": patch}
+    for ln in cmake_input.split("\n"):
+        for label, new_value in key_map.items():
+            if "set(OTIO_VERSION_{} \"".format(label) in ln:
+                cmake_output.append(
+                    "set(OTIO_VERSION_{} \"{}\")".format(label, new_value)
+                )
+                break
+        else:
+            cmake_output.append(ln)
+
+    with open("CMakeLists.txt", 'w') as fo:
+        fo.write("\n".join(cmake_output))
+    print("Updated {}".format("CMakeLists.txt"))
+
+    # update the setup.py
+    with open("setup.py", 'r') as fi:
+        setup_input = fi.read()
+
+    setup_output = []
+    for ln in setup_input.split("\n"):
+        if "\"version\": " in ln:
+
+            setup_output.append(
+                "    \"version\": \"{}.{}.{}{}\",".format(
+                    major,
+                    minor,
+                    patch,
+                    (".dev1" in ln) and ".dev1" or ""
+                )
+            )
+        else:
+            setup_output.append(ln)
+
+    with open("setup.py", 'w') as fo:
+        fo.write("\n".join(setup_output))
+    print("Updated {}".format("setup.py"))
 
 
 def add_suffix(content, version):

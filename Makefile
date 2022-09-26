@@ -274,8 +274,13 @@ release: \
 	release-commit
 	@echo "Release completed.  Push and open a PR!"
 
+# targets for creating a new version (after making a release, to start the next
+# development cycle)
+bump-otio-minor-version:
+	@python maintainers/bump_version_number.py -i minor
+
 # make target for starting a new version (after a release is completed)
-bump-minor-version: \
+start-dev-new-minor-version: \
 	check-git-status \
 	unfreeze-ci-versions \
 	bump-otio-minor-version \

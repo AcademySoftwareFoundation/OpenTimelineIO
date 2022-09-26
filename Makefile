@@ -33,6 +33,10 @@ CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
+GIT = git
+GITSTATUS := $(shell git diff-index --quiet HEAD . 1>&2 2> /dev/null; echo $$?)
+
+
 ifeq ($(VERBOSE), 1)
 	TEST_ARGS:=-v
 endif
@@ -199,6 +203,14 @@ doc-cpp:
 	@echo "wrote doxygen output to: doxygen/output/html/index.html"
 	
 # release related targets
+check-git-status:
+ifneq ($(GITSTATUS), 0)
+	$(error \
+		"Git repository is dirty, cannot create release. Run 'git status' \
+		for more info")
+endif
+	@echo "Git status is clean, ready to proceed with release."
+
 verify-license:
 	@echo "Verifying licenses in files..."
 	@python maintainers/verify_license.py -s .
@@ -220,15 +232,33 @@ remove-dev-suffix:
 	@echo "Removing .dev1 suffix"
 	@python maintainers/remove_dev_suffix.py -r
 
-update-contributors:
-	$(error "update-contributors not implemented")
+check-github-token:
+ifndef OTIO_RELEASE_GITHUB_TOKEN
+	$(error \
+		OTIO_RELEASE_GITHUB_TOKEN is not set, unable to update contributors)
+endif
 
-# make target for preparing a release candidate PR
+update-contributors: check-github-token
+	@python maintainers/fetch_contributors.py \
+		--repo AcademySoftwareFoundation/OpenTimelineIO \
+		--token $(OTIO_RELEASE_GITHUB_TOKEN)
+
+release-commit:
+	$(GIT) commit -am "Autocommit by `make release`, as part of the release process"
+
+new-version-commit:
+	$(GIT) commit -am "Autocommit by `make bump-version`, as part of the new version process"
+
+# make target for preparing a release candidate 
 release: \
+	check-git-status \
+	check-github-token \
 	verify-license \
 	freeze-ci-versions \
 	remove-dev-suffix \
 	version-map-update \
 	format \
-	update-contributors
+	update-contributors \
+	release-commit
+	@echo "Release completed.  Push and open a PR!"
 

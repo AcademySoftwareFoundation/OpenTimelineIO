@@ -287,6 +287,10 @@ shuffle-core-version-map:
 		src/opentimelineio/CORE_VERSION_MAP.last.cpp
 	@echo "set the current version map as the next one"
 
+add-dev-suffix:
+	@echo "Adding .dev1 suffix"
+	@python maintainers/remove_dev_suffix.py -a
+
 # make target for starting a new version (after a release is completed)
 start-dev-new-minor-version: \
 	check-git-status \

@@ -54,7 +54,7 @@ def main():
     version = _target_version()
 
     for fp in TARGET_FILES:
-        with open(fp, 'r') as fi:
+        with open(fp) as fi:
             content = fi.read()
 
         if args.add:
@@ -65,7 +65,7 @@ def main():
         if modified and not args.dryrun:
             with open(fp, 'w') as fo:
                 fo.write(modified)
-            print("Wrote modified {}.".format(fp))
+            print(f"Wrote modified {fp}.")
 
 
 def add_suffix(content, version):
@@ -88,7 +88,7 @@ def remove_suffix(content, version):
         )
         return False
 
-    print("removing suffix, version will be: {}".format(version))
+    print(f"removing suffix, version will be: {version}")
     return content.replace(version + '.dev1', version)
 
 

@@ -931,7 +931,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
     adapter = adapters.from_name('fcp_xml').module()
 
     def __init__(self, *args, **kwargs):
-        super(AdaptersFcp7XmlTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.maxDiff = None
 
     def test_build_empty_file(self):
@@ -1355,8 +1355,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.
-        with open(FCP7_XML_EXAMPLE_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
+        with open(FCP7_XML_EXAMPLE_PATH) as original_file:
+            with open(tmp_path) as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_hiero_flavored_xml(self):
@@ -1411,8 +1411,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         # Similar to the test_roundtrip_disk2mem2disk above
         # the track name element among others will not be present in a new xml.
-        with open(HIERO_XML_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
+        with open(HIERO_XML_PATH) as original_file:
+            with open(tmp_path) as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_xml_with_empty_elements(self):

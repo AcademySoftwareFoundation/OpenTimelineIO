@@ -23,7 +23,7 @@ class TestAdapterSuffixes(unittest.TestCase):
         result = otio.adapters.suffixes_with_defined_adapters()
         self.assertIsNotNone(result)
         self.assertNotEqual(result, [])
-        self.assertNotEqual(result, set([]))
+        self.assertNotEqual(result, set())
 
 
 class TestPluginAdapters(unittest.TestCase):
@@ -40,8 +40,8 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertEqual(self.adp.name, "example")
         self.assertEqual(self.adp.execution_scope, "in process")
         self.assertEqual(self.adp.filepath, "example.py")
-        self.assertEqual(self.adp.suffixes[0], u"example")
-        self.assertEqual(list(self.adp.suffixes), [u'example'])
+        self.assertEqual(self.adp.suffixes[0], "example")
+        self.assertEqual(list(self.adp.suffixes), ['example'])
 
         self.assertMultiLineEqual(
             str(self.adp),

@@ -183,7 +183,7 @@ def _generate_model_for_module(mod, classes, modules):
                 except AttributeError:
                     pass
             else:
-                sys.stderr.write("ERROR: could not fetch property: {}".format(k))
+                sys.stderr.write(f"ERROR: could not fetch property: {k}")
 
         # Stashing the OTIO_SCHEMA back into the dictionary since the
         # documentation uses this information in its header.
@@ -249,12 +249,10 @@ def _remap_to_python_modules(cl):
     ]
 
     # the C++ modules
-    IGNORE_MODS = set(
-        [
+    IGNORE_MODS = {
             otio._otio,
             otio._opentime
-        ]
-    )
+    }
 
     for mod in SEARCH_MODULES:
         result = _search_mod_recursively(cl, mod, IGNORE_MODS)
@@ -347,7 +345,7 @@ def main():
     with open(output_only_fields, 'w') as fo:
         fo.write(without_docs)
 
-    print("wrote documentation to {} and {}".format(output, output_only_fields))
+    print(f"wrote documentation to {output} and {output_only_fields}")
 
 
 def generate_and_write_documentation():

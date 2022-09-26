@@ -419,7 +419,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
                 pl_string = f.read()
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_MASTER_PLAYLIST_REF_VALUE)
@@ -691,7 +691,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
                 pl_string = f.read()
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE)

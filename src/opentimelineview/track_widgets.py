@@ -40,7 +40,7 @@ MARKER_COLORS = {
 class BaseItem(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, item, timeline_range, *args, **kwargs):
-        super(BaseItem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.item = item
         self.timeline_range = timeline_range
 
@@ -73,7 +73,7 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
     def paint(self, *args, **kwargs):
         new_args = [args[0],
                     QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(BaseItem, self).paint(*new_args, **kwargs)
+        super().paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -92,7 +92,7 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
                 self.parentItem().zValue() - 1
             )
 
-        return super(BaseItem, self).itemChange(change, value)
+        return super().itemChange(change, value)
 
     def _add_markers(self):
         trimmed_range = self.item.trimmed_range()
@@ -226,7 +226,7 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
 class GapItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
-        super(GapItem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
         )
@@ -236,19 +236,19 @@ class GapItem(BaseItem):
 class TrackNameItem(BaseItem):
 
     def __init__(self, track, rect, *args, **kwargs):
-        super(TrackNameItem, self).__init__(None, None, rect,
+        super().__init__(None, None, rect,
                                             *args, **kwargs)
         self.track = track
         self.track_name = 'Track' if not track.name else track.name
         self.full_track_name = self.track_name
         if len(self.track_name) > SHORT_NAME_LENGTH:
             self.track_name = self.track_name[:SHORT_NAME_LENGTH] + '...'
-        self.source_name_label.setText(self.track_name + '\n({})'.format(track.kind))
+        self.source_name_label.setText(self.track_name + f'\n({track.kind})')
         self.source_name_label.setY(
             (TRACK_HEIGHT -
              self.source_name_label.boundingRect().height()) / 2.0
         )
-        self.setToolTip('{} items'.format(len(track)))
+        self.setToolTip(f'{len(track)} items')
         self.track_widget = None
         self.name_toggle = False
         self.font = self.source_name_label.font()
@@ -262,7 +262,7 @@ class TrackNameItem(BaseItem):
             )
 
     def mouseDoubleClickEvent(self, event):
-        super(TrackNameItem, self).mouseDoubleClickEvent(event)
+        super().mouseDoubleClickEvent(event)
         if self.name_toggle:
             track_name_rect = QtCore.QRectF(
                 0,
@@ -272,7 +272,7 @@ class TrackNameItem(BaseItem):
             )
             self.setRect(track_name_rect)
             self.source_name_label.setText(
-                self.track_name + '\n({})'.format(self.track.kind))
+                self.track_name + f'\n({self.track.kind})')
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.short_width
             self.name_toggle = False
@@ -285,7 +285,7 @@ class TrackNameItem(BaseItem):
             )
             self.setRect(track_name_rect)
             self.source_name_label.setText(
-                self.full_track_name + '\n({})'.format(self.track.kind))
+                self.full_track_name + f'\n({self.track.kind})')
             for widget in self.track_widget.widget_items:
                 widget.current_x_offset = self.full_width
             self.name_toggle = True
@@ -320,7 +320,7 @@ class TrackNameItem(BaseItem):
 class EffectItem(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, item, rect, *args, **kwargs):
-        super(EffectItem, self).__init__(rect, *args, **kwargs)
+        super().__init__(rect, *args, **kwargs)
         self.item = item
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.init()
@@ -354,13 +354,13 @@ class EffectItem(QtWidgets.QGraphicsRectItem):
         for effect in self.item:
             name = effect.name if effect.name else ""
             effect_name = effect.effect_name if effect.effect_name else ""
-            tool_tips.append("{} {}".format(name, effect_name))
+            tool_tips.append(f"{name} {effect_name}")
         self.setToolTip("\n".join(tool_tips))
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
                     QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(EffectItem, self).paint(*new_args, **kwargs)
+        super().paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -374,14 +374,14 @@ class EffectItem(QtWidgets.QGraphicsRectItem):
                 self.zValue() + 1 if self.isSelected() else self.zValue() - 1
             )
 
-        return super(EffectItem, self).itemChange(change, value)
+        return super().itemChange(change, value)
 
 
 class TransitionItem(BaseItem):
 
     def __init__(self, item, timeline_range, rect, *args, **kwargs):
         rect.setHeight(TRANSITION_HEIGHT)
-        super(TransitionItem, self).__init__(
+        super().__init__(
             item,
             timeline_range,
             rect,
@@ -419,7 +419,7 @@ class TransitionItem(BaseItem):
 class ClipItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
-        super(ClipItem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255) if self.item.enabled
                                    else QtGui.QColor(100, 100, 100, 255)))
         self.source_name_label.setText(self.item.name)
@@ -428,7 +428,7 @@ class ClipItem(BaseItem):
 class NestedItem(BaseItem):
 
     def __init__(self, *args, **kwargs):
-        super(NestedItem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(255, 113, 91, 255))
         )
@@ -436,11 +436,11 @@ class NestedItem(BaseItem):
         self.source_name_label.setText(self.item.name)
 
     def mouseDoubleClickEvent(self, event):
-        super(NestedItem, self).mouseDoubleClickEvent(event)
+        super().mouseDoubleClickEvent(event)
         self.scene().views()[0].open_stack.emit(self.item)
 
     def keyPressEvent(self, key_event):
-        super(NestedItem, self).keyPressEvent(key_event)
+        super().keyPressEvent(key_event)
         key = key_event.key()
 
         if key == QtCore.Qt.Key_Return:
@@ -450,7 +450,7 @@ class NestedItem(BaseItem):
 class Track(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, track, *args, **kwargs):
-        super(Track, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.track = track
         self.widget_items = []
         self.track_name_item = None
@@ -495,7 +495,7 @@ class Track(QtWidgets.QGraphicsRectItem):
             elif isinstance(item, otio.schema.Transition):
                 new_item = TransitionItem(item, timeline_range, rect)
             else:
-                print("Warning: could not add item {} to UI.".format(item))
+                print(f"Warning: could not add item {item} to UI.")
                 continue
 
             new_item.setParentItem(self)
@@ -520,7 +520,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         poly.append(QtCore.QPointF(0, MARKER_SIZE))
         poly.append(QtCore.QPointF(-0.5 * MARKER_SIZE, 0.5 * MARKER_SIZE))
         poly.append(QtCore.QPointF(-0.5 * MARKER_SIZE, -0.5 * MARKER_SIZE))
-        super(Marker, self).__init__(poly, *args, **kwargs)
+        super().__init__(poly, *args, **kwargs)
 
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
         color = MARKER_COLORS.get(marker.color, (121, 212, 177, 255))
@@ -532,7 +532,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
     def paint(self, *args, **kwargs):
         new_args = [args[0],
                     QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(Marker, self).paint(*new_args, **kwargs)
+        super().paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -540,7 +540,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
                 QtGui.QColor(0, 255, 0, 255) if self.isSelected()
                 else QtGui.QColor(0, 0, 0, 255)
             )
-        return super(Marker, self).itemChange(change, value)
+        return super().itemChange(change, value)
 
     def counteract_zoom(self, zoom_level=1.0):
         self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
@@ -549,7 +549,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
 class TimeSlider(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, *args, **kwargs):
-        super(TimeSlider, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
         pen = QtGui.QPen()
         pen.setWidth(0)
@@ -564,7 +564,7 @@ class TimeSlider(QtWidgets.QGraphicsRectItem):
             MARKER_SIZE))
         self._ruler.update_frame()
 
-        super(TimeSlider, self).mousePressEvent(mouse_event)
+        super().mousePressEvent(mouse_event)
 
     def add_ruler(self, ruler):
         self._ruler = ruler

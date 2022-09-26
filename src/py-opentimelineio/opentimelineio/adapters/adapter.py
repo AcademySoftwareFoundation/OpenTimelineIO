@@ -114,7 +114,7 @@ class Adapter(plugins.PythonPlugin):
             not self.has_feature("read_from_file") and
             self.has_feature("read_from_string")
         ):
-            with open(filepath, 'r') as fo:
+            with open(filepath) as fo:
                 contents = fo.read()
             result = self._execute_function(
                 "read_from_string",
@@ -319,7 +319,7 @@ class Adapter(plugins.PythonPlugin):
     def plugin_info_map(self):
         """Adds extra adapter-specific information to call to the parent fn."""
 
-        result = super(Adapter, self).plugin_info_map()
+        result = super().plugin_info_map()
 
         features = collections.OrderedDict()
         result["supported features"] = features

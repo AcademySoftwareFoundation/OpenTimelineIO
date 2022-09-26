@@ -34,7 +34,7 @@ import pathlib
 
 def read_from_file(filepath, extract_to_directory=None):
     if not zipfile.is_zipfile(filepath):
-        raise exceptions.OTIOError("Not a zipfile: {}".format(filepath))
+        raise exceptions.OTIOError(f"Not a zipfile: {filepath}")
 
     if extract_to_directory:
         output_media_directory = os.path.join(
@@ -76,7 +76,7 @@ def write_to_file(
 
     if os.path.exists(filepath):
         raise exceptions.OTIOError(
-            "'{}' exists, will not overwrite.".format(filepath)
+            f"'{filepath}' exists, will not overwrite."
         )
 
     # general algorithm for the file bundle adapters:

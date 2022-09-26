@@ -22,11 +22,11 @@ print("Read {} video tracks and {} audio tracks.".format(
 # Take just the video tracks - and flatten them into one.
 # This will trim away any overlapping segments, collapsing everything
 # into a single track.
-print("Flattening {} video tracks into one...".format(len(video_tracks)))
+print(f"Flattening {len(video_tracks)} video tracks into one...")
 onetrack = otio.algorithms.flatten_stack(video_tracks)
 
 # Now make a new empty Timeline and put that one Track into it
-newtimeline = otio.schema.Timeline(name="{} Flattened".format(timeline.name))
+newtimeline = otio.schema.Timeline(name=f"{timeline.name} Flattened")
 newtimeline.tracks[:] = [onetrack]
 
 # keep the audio track(s) as-is

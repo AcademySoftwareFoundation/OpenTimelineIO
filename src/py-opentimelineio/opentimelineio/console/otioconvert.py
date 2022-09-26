@@ -155,7 +155,7 @@ def _parsed_args():
 
     # print version information to the shell
     if result.version:
-        print("OpenTimelineIO version: {}".format(otio.__version__))
+        print(f"OpenTimelineIO version: {otio.__version__}")
 
         if pkg_resources:
             pkg_resource_plugins = list(
@@ -164,7 +164,7 @@ def _parsed_args():
             if pkg_resource_plugins:
                 print("Plugins from pkg_resources:")
                 for plugin in pkg_resource_plugins:
-                    print("   {}".format(plugin.dist))
+                    print(f"   {plugin.dist}")
             else:
                 print("No pkg_resource plugins installed.")
         parser.exit()
@@ -255,7 +255,7 @@ def main():
         for track in args.tracks.split(","):
             tr = result_tl.tracks[int(track)]
             del result_tl.tracks[int(track)]
-            print("track {0} is of kind: '{1}'".format(track, tr.kind))
+            print(f"track {track} is of kind: '{tr.kind}'")
             result_tracks.append(tr)
         result_tl.tracks = result_tracks
 

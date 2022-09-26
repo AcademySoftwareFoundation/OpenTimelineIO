@@ -16,7 +16,7 @@ try:
 except ImportError:
     # Fallback for older python (not included in standard library)
     try:
-        import mock
+        from unittest import mock
         could_import_mock = True
     except ImportError:
         # Mock appears to not be installed
@@ -50,7 +50,7 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """
 
     def __init__(self, *args, **kwargs):
-        super(AdaptersFcpXXmlTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.maxDiff = None
 
     def test_library_roundtrip(self):

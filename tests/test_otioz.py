@@ -77,7 +77,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in self.tl.each_clip():
             # write with a non-file schema
             cl.media_reference = otio.schema.ExternalReference(
-                target_url="http://{}".format(fname)
+                target_url=f"http://{fname}"
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -231,7 +231,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.adapters.file_bundle_utils.BUNDLE_VERSION_FILE
         )
         self.assertTrue(os.path.exists(version_file_path))
-        with open(version_file_path, 'r') as fi:
+        with open(version_file_path) as fi:
             self.assertEqual(
                 fi.read(),
                 otio.adapters.file_bundle_utils.BUNDLE_VERSION

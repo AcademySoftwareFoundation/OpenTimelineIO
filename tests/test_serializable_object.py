@@ -89,12 +89,12 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_equivalence_symmetry(self):
         def test_equivalence(A, B, msg):
-            self.assertTrue(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
-            self.assertTrue(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+            self.assertTrue(A.is_equivalent_to(B), f"{msg}: A ~= B")
+            self.assertTrue(B.is_equivalent_to(A), f"{msg}: B ~= A")
 
         def test_difference(A, B, msg):
-            self.assertFalse(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
-            self.assertFalse(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+            self.assertFalse(A.is_equivalent_to(B), f"{msg}: A ~= B")
+            self.assertFalse(B.is_equivalent_to(A), f"{msg}: B ~= A")
 
         A = otio.core.Composable()
         B = otio.core.Composable()

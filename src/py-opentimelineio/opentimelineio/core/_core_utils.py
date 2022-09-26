@@ -85,7 +85,7 @@ def _value_to_any(value, ids=None):
         d = AnyDictionary()
         for (k, v) in _iteritems(value):
             if not _is_str(k):
-                raise ValueError("key '{}' is not a string".format(k))
+                raise ValueError(f"key '{k}' is not a string")
             if id(v) in ids:
                 raise ValueError(
                     "circular reference converting dictionary to C++ datatype"
@@ -200,16 +200,16 @@ def _add_mutable_mapping_methods(mapClass):
 
     def __copy__(self):
         m = mapClass()
-        m.update(dict((k, v) for (k, v) in _iteritems(self)))
+        m.update({k: v for (k, v) in _iteritems(self)})
         return m
 
     def __deepcopy__(self, memo):
         m = mapClass()
         m.update(
-            dict(
-                (k, copy.deepcopy(v, memo))
+            {
+                k: copy.deepcopy(v, memo)
                 for (k, v) in _iteritems(self)
-            )
+            }
         )
         return m
 
@@ -262,7 +262,7 @@ def _add_mutable_sequence_methods(
             return list(self) + list(other)
         else:
             raise TypeError(
-                "Cannot add types '{}' and '{}'".format(type(self), type(other))
+                f"Cannot add types '{type(self)}' and '{type(other)}'"
             )
 
     def __radd__(self, other):

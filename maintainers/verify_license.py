@@ -81,7 +81,7 @@ def main():
                 if filename.endswith(ext):
                     total += 1
                     try:
-                        content = open(fullpath, 'r').read()
+                        content = open(fullpath).read()
                     except Exception as ex:
                         sys.stderr.write(
                             "ERROR: Unable to read file: {}\n{}".format(
@@ -92,10 +92,10 @@ def main():
                         continue
 
                     if len(content) > 0 and lic not in content:
-                        print("MISSING: {}".format(os.path.relpath(fullpath)))
+                        print(f"MISSING: {os.path.relpath(fullpath)}")
                         if args.fix:
                             content = LICENSES[os.path.splitext(fullpath)[1]]
-                            with open(fullpath, 'r') as fi:
+                            with open(fullpath) as fi:
                                 content += fi.read()
                             with open(fullpath, 'w') as fo:
                                 fo.write(content)

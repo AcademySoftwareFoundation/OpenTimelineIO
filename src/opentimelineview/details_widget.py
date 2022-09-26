@@ -13,7 +13,7 @@ class Details(QtWidgets.QTextEdit):
     """Text widget with the JSON string of the specified OTIO object."""
 
     def __init__(self, *args, **kwargs):
-        super(Details, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setReadOnly(True)
         self.font = QtGui.QFontDatabase.systemFont(
             QtGui.QFontDatabase.FixedFont)
@@ -44,7 +44,7 @@ class Details(QtWidgets.QTextEdit):
 
 class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, palette, parent=None):
-        super(OTIOSyntaxHighlighter, self).__init__(parent)
+        super().__init__(parent)
 
         self.punctuation_format = QtGui.QTextCharFormat()
         self.punctuation_format.setForeground(palette.link())

@@ -239,7 +239,7 @@ class ImageSequenceReferenceTests(
 
     def test_target_url_for_image_number(self):
         all_images_urls = [
-            "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
             for i in range(1, 49)
         ]
         ref = otio.schema.ImageSequenceReference(
@@ -278,7 +278,7 @@ class ImageSequenceReferenceTests(
         )
 
         all_images_urls = [
-            "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
             for i in range(1, 49, 2)
         ]
         generated_urls = [
@@ -289,7 +289,7 @@ class ImageSequenceReferenceTests(
 
         ref.frame_step = 3
         all_images_urls_threes = [
-            "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
             for i in range(1, 49, 3)
         ]
         generated_urls_threes = [
@@ -301,7 +301,7 @@ class ImageSequenceReferenceTests(
         ref.frame_step = 2
         ref.start_frame = 0
         all_images_urls_zero_first = [
-            "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
             for i in range(0, 48, 2)
         ]
         generated_urls_zero_first = [
@@ -622,7 +622,7 @@ class ImageSequenceReferenceTests(
         for i in range(1, ref.number_of_images_in_sequence()):
             self.assertEqual(
                 ref.target_url_for_image_number(i),
-                "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i - 1),
+                f"file:///show/seq/shot/rndr/show_shot.{i - 1:04}.exr",
             )
 
     def test_target_url_for_image_number_with_missing_timing_info(self):
@@ -684,7 +684,7 @@ class ImageSequenceReferenceTests(
             cln = copy.deepcopy(isr)
             cln = isr.clone()
         except ValueError as exc:
-            self.fail("Cloning raised an exception: {}".format(exc))
+            self.fail(f"Cloning raised an exception: {exc}")
 
         self.assertJsonEqual(isr, cln)
 

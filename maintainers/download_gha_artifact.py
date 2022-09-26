@@ -44,12 +44,12 @@ args = parser.parse_args()
 
 headers = {
     "Accept": "application/vnd.github.v3+json",
-    "Authorization": "token {args.token}".format(args=args),
+    "Authorization": f"token {args.token}",
 }
 
 if os.path.exists(args.directory) and os.listdir(args.directory):
     sys.stderr.write(
-        "{0!r} directory contains files. It should be empty.".format(args.directory)
+        f"{args.directory!r} directory contains files. It should be empty."
     )
     sys.exit(1)
 
@@ -68,7 +68,7 @@ for run in workflow_runs:
         break
 else:
     sys.stderr.write(
-        "No run for a workflow named {0!r} found for commit {1!r}.".format(
+        "No run for a workflow named {!r} found for commit {!r}.".format(
             args.workflow, args.sha
         )
     )
@@ -76,14 +76,14 @@ else:
 
 
 print("Found workflow:")
-print("  Name:       {0}".format(workflow_run["name"]))
-print("  Branch:     {0}".format(workflow_run["head_branch"]))
-print("  Commit:     {0}".format(workflow_run["head_sha"]))
-print("  Committer:  {0}".format(workflow_run["head_commit"]["committer"]))
-print("  Run Number: {0}".format(workflow_run["run_number"]))
-print("  Status:     {0}".format(workflow_run["status"]))
-print("  Conclusion: {0}".format(workflow_run["conclusion"]))
-print("  URL:        {0}".format(workflow_run["html_url"]))
+print("  Name:       {}".format(workflow_run["name"]))
+print("  Branch:     {}".format(workflow_run["head_branch"]))
+print("  Commit:     {}".format(workflow_run["head_sha"]))
+print("  Committer:  {}".format(workflow_run["head_commit"]["committer"]))
+print("  Run Number: {}".format(workflow_run["run_number"]))
+print("  Status:     {}".format(workflow_run["status"]))
+print("  Conclusion: {}".format(workflow_run["conclusion"]))
+print("  URL:        {}".format(workflow_run["html_url"]))
 
 
 print("Getting list of artifacts")
@@ -95,11 +95,11 @@ for artifact in artifacts:
         artifact_download_url = artifact["archive_download_url"]
         break
 else:
-    sys.stderr.write("No artifact named {0!r} found.".format(args.artifact))
+    sys.stderr.write(f"No artifact named {args.artifact!r} found.")
     sys.exit(1)
 
 print(
-    "Downloading {0!r} artifact and unzipping to {1!r}".format(
+    "Downloading {!r} artifact and unzipping to {!r}".format(
         args.artifact, args.directory
     )
 )
@@ -111,7 +111,7 @@ zip_file = zipfile.ZipFile(io.BytesIO(file_content))
 for zip_info in zip_file.infolist():
     output_path = os.path.join(args.directory, zip_info.filename)
 
-    print("Writing {0!r} to {1!r}".format(zip_info.filename, output_path))
+    print(f"Writing {zip_info.filename!r} to {output_path!r}")
     with open(output_path, "wb") as fd:
         fd.write(zip_file.open(zip_info).read())
 

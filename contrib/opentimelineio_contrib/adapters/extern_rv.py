@@ -29,7 +29,7 @@ _RV_TYPE_MAP = {
 
 
 # because json.loads returns a unicode type
-_UNICODE_TYPE = type(u"")
+_UNICODE_TYPE = str
 
 
 def main():

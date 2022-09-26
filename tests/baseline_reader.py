@@ -34,7 +34,7 @@ def json_from_string(jsonstr):
 
 
 def json_from_file_as_string(fpath):
-    with open(fpath, 'r') as fo:
+    with open(fpath) as fo:
         return json_from_string(fo.read())
 
 
@@ -43,7 +43,7 @@ def path_to_baseline_directory():
 
 
 def path_to_baseline(name):
-    return os.path.join(path_to_baseline_directory(), "{0}.json".format(name))
+    return os.path.join(path_to_baseline_directory(), f"{name}.json")
 
 
 def json_baseline(name):

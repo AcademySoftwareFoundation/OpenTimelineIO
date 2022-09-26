@@ -186,7 +186,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             self.run_test()
 
             # read results back in
-            with open(temp_file, 'r') as fi:
+            with open(temp_file) as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
 
     def test_begin_end(self):

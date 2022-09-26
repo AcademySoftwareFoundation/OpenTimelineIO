@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
@@ -155,7 +154,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             else:
                 self.assertTrue(
                     math.isnan(md[name]),
-                    "Expected {} to be a nan, got {}".format(name, md[name])
+                    f"Expected {name} to be a nan, got {md[name]}"
                 )
 
             self.assertEqual(
@@ -240,7 +239,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for (name, value, exc) in unsupported_values:
             with self.assertRaises(
                     exc,
-                    msg="Expected {} to raise an exception.".format(name)
+                    msg=f"Expected {name} to raise an exception."
             ):
                 md[name] = value
 

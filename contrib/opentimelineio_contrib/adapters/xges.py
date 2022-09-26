@@ -11,7 +11,6 @@ from urllib.parse import unquote
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
 
-from builtins import int
 from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -25,7 +24,7 @@ _TRANSITION_MAP = {
     "crossfade": otio.schema.TransitionTypes.SMPTE_Dissolve
 }
 # Two way map
-_TRANSITION_MAP.update(dict([(v, k) for k, v in _TRANSITION_MAP.items()]))
+_TRANSITION_MAP.update({v: k for k, v in _TRANSITION_MAP.items()})
 
 
 class XGESReadError(otio.exceptions.OTIOError):
@@ -36,7 +35,7 @@ class UnhandledValueError(otio.exceptions.OTIOError):
     """Received value is not handled."""
     def __init__(self, name, value):
         otio.exceptions.OTIOError.__init__(
-            self, "Unhandled value {!r} for {}.".format(value, name))
+            self, f"Unhandled value {value!r} for {name}.")
 
 
 class InvalidValueError(otio.exceptions.OTIOError):
@@ -103,7 +102,7 @@ def _force_gst_structure_name(struct, struct_name, owner=""):
     """
     if struct.name != struct_name:
         if owner:
-            start = "{}'s".format(owner)
+            start = f"{owner}'s"
         else:
             start = "The"
         warnings.warn(
@@ -116,7 +115,7 @@ def _force_gst_structure_name(struct, struct_name, owner=""):
 # TODO: remove unicode_to_str once python2 has ended:
 def unicode_to_str(value):
     """If python2, returns unicode as a utf8 str"""
-    if type(value) is not str and isinstance(value, type(u"")):
+    if type(value) is not str and isinstance(value, str):
         value = value.encode("utf8")
     return value
 
@@ -1270,7 +1269,7 @@ class XGESOtio:
                 # NOTE: asset_id must be unique for both the
                 # GESTimeline and GESUriClip extractable types
                 break
-            asset_id = orig_asset_id + "_{:d}".format(i)
+            asset_id = orig_asset_id + f"_{i:d}"
         # create a timeline asset
         asset = self._insert_new_sub_element(
             ressources, "asset", attrib={
@@ -1449,7 +1448,7 @@ class XGESOtio:
         for i in itertools.count(start=1):
             if tmpname not in self.all_names:
                 break
-            tmpname = name + "_{:d}".format(i)
+            tmpname = name + f"_{i:d}"
         self.all_names.add(tmpname)
         self._set_structure_value(properties, "name", "string", tmpname)
         return properties
@@ -2261,7 +2260,7 @@ class GstStructure(otio.core.SerializableObject):
             self.set(key, *entry)
 
     def __repr__(self):
-        return "GstStructure({!r}, {!r})".format(self.name, self.fields)
+        return f"GstStructure({self.name!r}, {self.fields!r})"
 
     UNKNOWN_PREFIX = "[UNKNOWN]"
 
@@ -2299,12 +2298,12 @@ class GstStructure(otio.core.SerializableObject):
         else:
             self._check_type(_type)
             value = self.serialize_value(_type, value)
-        return "{}=({}){}".format(key, _type, value)
+        return f"{key}=({_type}){value}"
 
     def _fields_to_str(self):
         write = []
         for key in self.fields:
-            write.append(", {}".format(self._field_to_str(key)))
+            write.append(f", {self._field_to_str(key)}")
         return "".join(write)
 
     def _name_to_str(self):
@@ -2315,7 +2314,7 @@ class GstStructure(otio.core.SerializableObject):
 
     def __str__(self):
         """Emulates gst_structure_to_string"""
-        return "{}{};".format(self._name_to_str(), self._fields_to_str())
+        return f"{self._name_to_str()}{self._fields_to_str()};"
 
     def get_type_name(self, key):
         """Return the field type"""
@@ -2587,7 +2586,7 @@ class GstStructure(otio.core.SerializableObject):
             values.append(value)
         if not read:
             raise DeserializeError(
-                read, "ended before {} could be found".format(end))
+                read, f"ended before {end} could be found")
         read = read[1:]  # skip past 'end'
         match = cls.END_REGEX.match(read)  # skip whitespace
         read = read[match.end("end"):]
@@ -2705,7 +2704,7 @@ class GstStructure(otio.core.SerializableObject):
     @staticmethod
     def _val_read_err(typ, val):
         raise DeserializeError(
-            val, "does not translated to the {} type".format(typ))
+            val, f"does not translated to the {typ} type")
 
     @classmethod
     def deserialize_value(cls, _type, value):
@@ -2846,7 +2845,7 @@ class GstStructure(otio.core.SerializableObject):
             if byte in cls.GST_ASCII_CHARS:
                 ser_string_list.append(chr(byte))
             elif byte < 0x20 or byte >= 0x7f:
-                ser_string_list.append("\\{:03o}".format(byte))
+                ser_string_list.append(f"\\{byte:03o}")
                 added_wrap = True
             else:
                 ser_string_list.append("\\" + chr(byte))
@@ -3437,7 +3436,7 @@ class GstCaps(otio.core.SerializableObject):
                 # GST_FEATURE_MEMORY_SYSTEM_MEMORY feature, since this
                 # considered equal to being an empty features.
                 # We do not seem to require this behaviour
-                write.append("({!s})".format(features))
+                write.append(f"({features!s})")
             write.append(struct._fields_to_str())
         return "".join(write)
 

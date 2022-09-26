@@ -99,7 +99,7 @@ def _prepped_otio_for_bundle_and_manifest(
         if media_policy == MediaReferencePolicy.AllMissing:
             cl.media_reference = reference_cloned_and_missing(
                 cl.media_reference,
-                "{} specified as the MediaReferencePolicy".format(media_policy)
+                f"{media_policy} specified as the MediaReferencePolicy"
             )
             continue
 

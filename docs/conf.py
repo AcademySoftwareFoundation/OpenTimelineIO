@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
@@ -47,15 +46,15 @@ pygments_style = 'sphinx'
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-htmlhelp_basename = '{}doc'.format(project.lower())
+htmlhelp_basename = f'{project.lower()}doc'
 
 
 # -- Options for LaTeX output ----------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 
 latex_documents = [
-    ('index', '{}.tex'.format(project.lower()),
-     u'{} Documentation'.format(project),
+    ('index', f'{project.lower()}.tex',
+     f'{project} Documentation',
      author, 'manual'),
 ]
 
@@ -63,7 +62,7 @@ latex_documents = [
 # sphinx-doc.org/en/master/usage/configuration.html#options-for-manual-page-output
 
 man_pages = [
-    ('index', project.lower(), '{} Documentation'.format(project),
+    ('index', project.lower(), f'{project} Documentation',
      [author], 1)
 ]
 
@@ -71,7 +70,7 @@ man_pages = [
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-texinfo-output
 
 texinfo_documents = [
-    ('index', project.lower(), '{} Documentation'.format(project),
+    ('index', project.lower(), f'{project} Documentation',
      author, project, 'One line description of project.',
      'Miscellaneous'),
 ]
@@ -145,7 +144,7 @@ def process_signature(
                 nameToMatch = name.split(".")[-1] if not isClass else "__init__"
 
                 # Maybe get use sphinx.util.inspect.signature_from_str ?
-                if match := re.search(f"^\d+\.\s{nameToMatch}(\(.*)", line):
+                if match := re.search(fr"^\d+\.\s{nameToMatch}(\(.*)", line):
                     signatures.append(match.group(1))
         elif signature:
             signatures.append(signature)
@@ -154,7 +153,7 @@ def process_signature(
 
     # Remove self from signatures.
     for index, sig in enumerate(signatures):
-        newsig = re.sub("self\: [a-zA-Z0-9._]+(,\s)?", "", sig)
+        newsig = re.sub(r"self\: [a-zA-Z0-9._]+(,\s)?", "", sig)
         signatures[index] = newsig
 
     signature = "\n".join(signatures)
@@ -180,8 +179,8 @@ def process_docstring(
         #
         # "self" is a distraction that can be removed to improve readability.
         # This should be removed once https://github.com/pybind/pybind11/pull/2621 is merged.
-        if re.match(f'\d+\. {name.split("."[0])}', line):
-            line = re.sub("self\: [a-zA-Z0-9._]+(,\s)?", "", line)
+        if re.match(fr'\d+\. {name.split("."[0])}', line):
+            line = re.sub(r"self\: [a-zA-Z0-9._]+(,\s)?", "", line)
             lines[index] = line
 
 

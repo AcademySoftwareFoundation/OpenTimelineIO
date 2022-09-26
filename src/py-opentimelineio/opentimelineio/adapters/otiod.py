@@ -59,7 +59,7 @@ def write_to_file(
 
     if os.path.exists(filepath):
         raise exceptions.OTIOError(
-            "'{}' exists, will not overwrite.".format(filepath)
+            f"'{filepath}' exists, will not overwrite."
         )
 
     if not os.path.exists(os.path.dirname(filepath)):

@@ -104,10 +104,10 @@ class Point:
         self.y = y
 
     def svg_point_string(self):
-        return "{:.8f},{:.8f}".format(self.x, self.y)
+        return f"{self.x:.8f},{self.y:.8f}"
 
 
-class Rect(object):
+class Rect:
     origin = Point(0, 0)
     width = 0.0
     height = 0.0
@@ -195,8 +195,8 @@ class SVGWriter:
         self.vertical_drawing_index = -1
         self.svg_elem = Element("svg",
                                 {
-                                    "height": "{:.8f}".format(self.image_height),
-                                    "width": "{:.8f}".format(self.image_width),
+                                    "height": f"{self.image_height:.8f}",
+                                    "width": f"{self.image_width:.8f}",
                                     "version": "4.0",
                                     "xmlns": "http://www.w3.org/2000/svg",
                                     "xmlns:xlink": "http://www.w3.org/1999/xlink",
@@ -214,10 +214,10 @@ class SVGWriter:
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
         SubElement(self.svg_elem, "rect",
                    {
-                       "x": "{:.8f}".format(svg_rect.origin.x),
-                       "y": "{:.8f}".format(svg_rect.origin.y),
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "x": f"{svg_rect.origin.x:.8f}",
+                       "y": f"{svg_rect.origin.y:.8f}",
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "style": "fill:rgb(255,255,255);stroke-width:{:.8f};"
                                 "stroke:{};opacity:1;fill-opacity:0;".format(
                            stroke_width,
@@ -237,8 +237,8 @@ class SVGWriter:
                             })
         SubElement(g_elem, "rect",
                    {
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "style": "fill:{};stroke-width:{:.8f};"
                                 "stroke:{};opacity:1;".format(
                            fill_color.svg_color(),
@@ -247,14 +247,14 @@ class SVGWriter:
                    })
         sub_svg_elem = SubElement(g_elem, "svg",
                                   {
-                                      "width": "{:.8f}".format(svg_rect.width),
-                                      "height": "{:.8f}".format(svg_rect.height)
+                                      "width": f"{svg_rect.width:.8f}",
+                                      "height": f"{svg_rect.height:.8f}"
                                   })
         text_elem = SubElement(sub_svg_elem, "text",
                                {
                                    "x": "50%",
                                    "y": "50%",
-                                   "font-size": "{:.8f}".format(label_size),
+                                   "font-size": f"{label_size:.8f}",
                                    "font-family": self.font_family,
                                    "style":
                                        "stroke:{};stroke-width:{:.8f};"
@@ -272,10 +272,10 @@ class SVGWriter:
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
         SubElement(self.svg_elem, "rect",
                    {
-                       "x": "{:.8f}".format(svg_rect.origin.x),
-                       "y": "{:.8f}".format(svg_rect.origin.y),
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "x": f"{svg_rect.origin.x:.8f}",
+                       "y": f"{svg_rect.origin.y:.8f}",
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "stroke-dasharray": "5",
                        "style": "fill:{};stroke-width:{:.8f};stroke:{};"
                                 "opacity:1;fill-opacity:{:.8f}".format(
@@ -298,8 +298,8 @@ class SVGWriter:
                             })
         SubElement(g_elem, "rect",
                    {
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "stroke-dasharray": "5",
                        "style": "fill:{};stroke-width:{:.8f};"
                                 "stroke:{};opacity:{:.8f};".format(
@@ -310,14 +310,14 @@ class SVGWriter:
                    })
         sub_svg_elem = SubElement(g_elem, "svg",
                                   {
-                                      "width": "{:.8f}".format(svg_rect.width),
-                                      "height": "{:.8f}".format(svg_rect.height)
+                                      "width": f"{svg_rect.width:.8f}",
+                                      "height": f"{svg_rect.height:.8f}"
                                   })
         text_elem = SubElement(sub_svg_elem, "text",
                                {
                                    "x": "50%",
                                    "y": "50%",
-                                   "font-size": "{:.8f}".format(label_size),
+                                   "font-size": f"{label_size:.8f}",
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{:.8f};"
                                             "fill:{};opacity:{:.8f};".format(
@@ -334,10 +334,10 @@ class SVGWriter:
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
         SubElement(self.svg_elem, "rect",
                    {
-                       "x": "{:.8f}".format(svg_rect.origin.x),
-                       "y": "{:.8f}".format(svg_rect.origin.y),
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "x": f"{svg_rect.origin.x:.8f}",
+                       "y": f"{svg_rect.origin.y:.8f}",
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "style": "fill:{};stroke-width:0;"
                                 "stroke:rgb(0,0,0);opacity:{:.8f};".format(
                            fill_color.svg_color(),
@@ -350,10 +350,10 @@ class SVGWriter:
         svg_rect = convert_rect_to_svg_coordinates(rect, self.image_height)
         SubElement(self.svg_elem, "rect",
                    {
-                       "x": "{:.8f}".format(svg_rect.origin.x),
-                       "y": "{:.8f}".format(svg_rect.origin.y),
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "x": f"{svg_rect.origin.x:.8f}",
+                       "y": f"{svg_rect.origin.y:.8f}",
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "style": "fill:{};stroke-width:{:.8f};"
                                 "stroke:{};opacity:{:.8f};".format(
                            fill_color.svg_color(),
@@ -375,8 +375,8 @@ class SVGWriter:
                             })
         SubElement(g_elem, "rect",
                    {
-                       "width": "{:.8f}".format(svg_rect.width),
-                       "height": "{:.8f}".format(svg_rect.height),
+                       "width": f"{svg_rect.width:.8f}",
+                       "height": f"{svg_rect.height:.8f}",
                        "style": "fill:{};stroke-width:{:.8f};"
                                 "stroke:{};opacity:{:.8f};".format(
                            fill_color.svg_color(),
@@ -386,14 +386,14 @@ class SVGWriter:
                    })
         sub_svg_elem = SubElement(g_elem, "svg",
                                   {
-                                      "width": "{:.8f}".format(svg_rect.width),
-                                      "height": "{:.8f}".format(svg_rect.height)
+                                      "width": f"{svg_rect.width:.8f}",
+                                      "height": f"{svg_rect.height:.8f}"
                                   })
         text_elem = SubElement(sub_svg_elem, "text",
                                {
                                    "x": "50%",
                                    "y": "50%",
-                                   "font-size": "{:.8f}".format(label_size),
+                                   "font-size": f"{label_size:.8f}",
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{:.8f};"
                                             "fill:{};opacity:{:.8f};".format(
@@ -418,10 +418,10 @@ class SVGWriter:
             style_str = style_str + "stroke-dasharray:4 1"
         SubElement(self.svg_elem, "line",
                    {
-                       "x1": "{:.8f}".format(point1.x),
-                       "y1": "{:.8f}".format(point1.y),
-                       "x2": "{:.8f}".format(point2.x),
-                       "y2": "{:.8f}".format(point2.y),
+                       "x1": f"{point1.x:.8f}",
+                       "y1": f"{point1.y:.8f}",
+                       "x2": f"{point2.x:.8f}",
+                       "y2": f"{point2.y:.8f}",
                        "style": style_str
                    })
 
@@ -447,10 +447,10 @@ class SVGWriter:
                               point2.y - arrowhead_half_width * perpendicular_dir.y)
         SubElement(self.svg_elem, "line",
                    {
-                       "x1": "{:.8f}".format(point1.x),
-                       "y1": "{:.8f}".format(point1.y),
-                       "x2": "{:.8f}".format(point2.x),
-                       "y2": "{:.8f}".format(point2.y),
+                       "x1": f"{point1.x:.8f}",
+                       "y1": f"{point1.y:.8f}",
+                       "x2": f"{point2.x:.8f}",
+                       "y2": f"{point2.y:.8f}",
                        "style": "stroke-width:{:.8f};stroke:{};opacity:{:.8f};"
                                 "stroke-linecap:butt;".format(
                            stroke_width,
@@ -461,7 +461,7 @@ class SVGWriter:
                    {
                        "points": " ".join(p.svg_point_string() for p in
                                           [triangle_tip, triangle_pt_1, triangle_pt_2]),
-                       "style": "fill:{};".format(stroke_color.svg_color())
+                       "style": f"fill:{stroke_color.svg_color()};"
                    })
 
     def draw_text(self, text, location,
@@ -469,9 +469,9 @@ class SVGWriter:
         location_svg = convert_point_to_svg_coordinates(location, self.image_height)
         text_elem = SubElement(self.svg_elem, "text",
                                {
-                                   "x": "{:.8f}".format(location_svg.x),
-                                   "y": "{:.8f}".format(location_svg.y),
-                                   "font-size": "{:.8f}".format(text_size),
+                                   "x": f"{location_svg.x:.8f}",
+                                   "y": f"{location_svg.y:.8f}",
+                                   "font-size": f"{text_size:.8f}",
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{:.8f};"
                                             "fill:{};opacity:{:.8f};".format(
@@ -492,7 +492,7 @@ class SVGWriter:
         return minidom.parseString(xmlstr).toprettyxml(indent='  ')
 
 
-class ClipData(object):
+class ClipData:
 
     def __init__(self, src_start=0.0, src_end=0.0, avlbl_start=0.0,
                  avlbl_end=0.0, avlbl_duration=0.0,
@@ -718,7 +718,7 @@ def _draw_stack(stack, svg_writer, extra_data=()):
         svg_writer.draw_arrow(start_point=arrow_start, end_point=arrow_end,
                               stroke_width=2.0,
                               stroke_color=COLORS['black'])
-    arrow_label_text = r'children[{}]'.format(len(svg_writer.trackwise_clip_count))
+    arrow_label_text = fr'children[{len(svg_writer.trackwise_clip_count)}]'
     arrow_label_location = Point(arrow_start.x + svg_writer.arrow_label_margin,
                                  stack_origin.y - svg_writer.clip_rect_height * 0.5)
     svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
@@ -799,7 +799,7 @@ def _draw_track(track, svg_writer, extra_data=()):
     svg_writer.draw_arrow(start_point=arrow_start, end_point=arrow_end,
                           stroke_width=2.0,
                           stroke_color=COLORS['black'])
-    arrow_label_text = r'children[{}]'.format(item_count + transition_count)
+    arrow_label_text = fr'children[{item_count + transition_count}]'
     arrow_label_location = Point(arrow_start.x + svg_writer.arrow_label_margin,
                                  track_origin.y - svg_writer.clip_rect_height * 0.5)
     svg_writer.draw_text(arrow_label_text, arrow_label_location, svg_writer.font_size)
@@ -839,7 +839,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
     clip_rect = Rect(clip_origin, clip_data.trim_duration * svg_writer.scale_x,
                      svg_writer.clip_rect_height)
     clip_text_size = 0.4 * svg_writer.clip_rect_height
-    clip_text = r'Clip-{}'.format(clip_data.clip_id) if len(
+    clip_text = fr'Clip-{clip_data.clip_id}' if len(
         clip.name) == 0 else clip.name
     svg_writer.draw_labeled_solid_rect_with_border(
         clip_rect,
@@ -889,7 +889,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         Rect(media_origin, clip_data.avlbl_duration * svg_writer.scale_x,
              svg_writer.clip_rect_height))
     media_text_size = 0.4 * svg_writer.clip_rect_height
-    media_text = r'Media-{}'.format(clip_data.clip_id) if len(
+    media_text = fr'Media-{clip_data.clip_id}' if len(
         clip.media_reference.name) == 0 else clip.media_reference.name
     svg_writer.draw_labeled_solid_rect_with_border(
         Rect(trim_media_origin, clip_data.trim_duration * svg_writer.scale_x,
@@ -920,7 +920,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
         if clip.media_reference.target_url is None:
             target_url_text = r'target_url: {}'.format('Media Unavailable')
         else:
-            target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
+            target_url_text = fr'target_url: {clip.media_reference.target_url}'
         target_url_location = Point(media_origin.x + svg_writer.font_size,
                                     media_origin.y - 2.0 * svg_writer.font_size)
         svg_writer.draw_text(target_url_text, target_url_location, svg_writer.font_size)

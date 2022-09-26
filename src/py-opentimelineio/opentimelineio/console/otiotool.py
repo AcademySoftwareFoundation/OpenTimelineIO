@@ -457,7 +457,7 @@ def stack_timelines(timelines):
     """Return a single timeline with all of the tracks from all of the input
     timelines stacked on top of each other. The resulting timeline should be
     as long as the longest input timeline."""
-    name = "Stacked {} Timelines".format(len(timelines))
+    name = f"Stacked {len(timelines)} Timelines"
     stacked_timeline = otio.schema.Timeline(name)
     for timeline in timelines:
         stacked_timeline.tracks.extend(deepcopy(timeline.tracks[:]))
@@ -468,7 +468,7 @@ def concatenate_timelines(timelines):
     """Return a single timeline with all of the input timelines concatenated
     end-to-end. The resulting timeline should be as long as the sum of the
     durations of the input timelines."""
-    name = "Concatenated {} Timelines".format(len(timelines))
+    name = f"Concatenated {len(timelines)} Timelines"
     concatenated_track = otio.schema.Track()
     for timeline in timelines:
         concatenated_track.append(deepcopy(timeline.tracks))
@@ -567,22 +567,22 @@ def redact_timeline(timeline):
     timeline. Only the structure, schema and timing will remain."""
 
     counter = _counter(timeline.schema_name())
-    timeline.name = "{} #{}".format(timeline.schema_name(), counter)
+    timeline.name = f"{timeline.schema_name()} #{counter}"
     timeline.metadata.clear()
 
     for child in [timeline.tracks] + list(timeline.each_child()):
         counter = _counter(child.schema_name())
-        child.name = "{} #{}".format(child.schema_name(), counter)
+        child.name = f"{child.schema_name()} #{counter}"
         child.metadata.clear()
         if hasattr(child, 'markers'):
             for marker in child.markers:
                 counter = _counter(marker.schema_name())
-                marker.name = "{} #{}".format(marker.schema_name(), counter)
+                marker.name = f"{marker.schema_name()} #{counter}"
                 marker.metadata.clear()
         if hasattr(child, 'effects'):
             for effect in child.effects:
                 counter = _counter(effect.schema_name())
-                effect.name = "{} #{}".format(effect.schema_name(), counter)
+                effect.name = f"{effect.schema_name()} #{counter}"
                 effect.metadata.clear()
         if hasattr(child, 'media_reference'):
             media_reference = child.media_reference
@@ -590,16 +590,16 @@ def redact_timeline(timeline):
                 counter = _counter(media_reference.schema_name())
                 has_target_url = hasattr(media_reference, 'target_url')
                 if has_target_url and media_reference.target_url:
-                    media_reference.target_url = "URL #{}".format(counter)
+                    media_reference.target_url = f"URL #{counter}"
                 media_reference.metadata.clear()
 
 
 def copy_media(url, destination_path):
     if url.startswith("/"):
-        print("COPYING: {}".format(url))
+        print(f"COPYING: {url}")
         data = open(url, "rb").read()
     else:
-        print("DOWNLOADING: {}".format(url))
+        print(f"DOWNLOADING: {url}")
         data = urlopen(url).read()
     open(destination_path, "wb").write(data)
     return destination_path
@@ -645,13 +645,13 @@ def copy_media_to_folder(timeline, folder):
                         media_reference.target_url = destination_path
                         already_copied_this.add(destination_path)
                     except Exception as ex:
-                        print("ERROR: Problem copying/downloading media {}".format(ex))
+                        print(f"ERROR: Problem copying/downloading media {ex}")
                         # don't relink this one, since the copy failed
 
 
 def print_timeline_stats(timeline):
     """Print some statistics about the given timeline."""
-    print("Name: {}".format(timeline.name))
+    print(f"Name: {timeline.name}")
     trimmed_range = timeline.tracks.trimmed_range()
     print("Start:    {}\nEnd:      {}\nDuration: {}".format(
         otio.opentime.to_timecode(trimmed_range.start_time),
@@ -667,7 +667,7 @@ def inspect_timelines(name_regex, timeline):
     items_to_inspect = [_filter(item, [], name_regex) for item in timeline.each_child()]
     items_to_inspect = list(filter(None, items_to_inspect))
     for item in items_to_inspect:
-        print("  ITEM: {} ({})".format(item.name, type(item)))
+        print(f"  ITEM: {item.name} ({type(item)})")
         print("    source_range:", item.source_range)
         print("    trimmed_range:", item.trimmed_range())
         print("    visible_range:", item.visible_range())
@@ -708,7 +708,7 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
     for child in [timeline.tracks] + list(timeline.each_child()):
         if isinstance(child, otio.schema.Track):
             if list_tracks:
-                print("TRACK: {} ({})".format(child.name, child.kind))
+                print(f"TRACK: {child.name} ({child.kind})")
         if isinstance(child, otio.schema.Clip):
             if list_clips:
                 print("  CLIP:", child.name)
@@ -723,7 +723,7 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                         detail = " EXISTS"
                     else:
                         detail = " NOT FOUND"
-                print("    MEDIA{}: {}".format(detail, url))
+                print(f"    MEDIA{detail}: {url}")
 
         if list_markers and hasattr(child, 'markers'):
             top_level = child

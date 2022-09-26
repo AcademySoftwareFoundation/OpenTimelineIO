@@ -69,12 +69,12 @@ bounds = [
 ]
 
 for clipnum, box in zip(range(1, 4), bounds):
-    clip_name = 'clip{n}'.format(n=clipnum)
+    clip_name = f'clip{clipnum}'
     track.append(
         otio.schema.Clip(
             clip_name,
             media_reference=otio.schema.ExternalReference(
-                target_url="{clip_name}.mov".format(clip_name=clip_name),
+                target_url=f"{clip_name}.mov",
                 available_range=otio.opentime.TimeRange(
                     otio.opentime.RationalTime(1, 24),
                     otio.opentime.RationalTime(50, 24)
@@ -197,7 +197,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                     time.sleep(.5)
 
                 if attempts == 20:
-                    raise socket.error(
+                    raise OSError(
                         "Unable to connect to RV!"
                     )
 
@@ -277,7 +277,7 @@ def _exec_command(rvc, command, literal=True):
 def _source_at_frame(rvc, frame):
     return _exec_command(
         rvc,
-        "rv.commands.sourcesAtFrame({0})".format(frame)
+        f"rv.commands.sourcesAtFrame({frame})"
     )[0]
 
 
@@ -285,7 +285,7 @@ def rv_media_name_at_frame(rvc, frame):
     source_name = _source_at_frame(rvc, frame)
     return _exec_command(
         rvc,
-        "rv.commands.sourceMedia('{0}')".format(source_name)
+        f"rv.commands.sourceMedia('{source_name}')"
     )[0]
 
 
@@ -294,26 +294,26 @@ def rv_transform_at_frame(rvc, frame):
 
     source_group = _exec_command(
         rvc,
-        """rv.commands.nodeGroup('{0}')""".format(source),
+        f"""rv.commands.nodeGroup('{source}')""",
         literal=False
     )
 
     transform = _exec_command(
         rvc,
         """rv.extra_commands.nodesInGroupOfType(
-            '{0}', 'RVTransform2D')""".format(source_group)
+            '{}', 'RVTransform2D')""".format(source_group)
     )[0]
 
     scale = _exec_command(
         rvc,
         """rv.commands.getFloatProperty(
-            '{0}.transform.scale')""".format(transform)
+            '{}.transform.scale')""".format(transform)
     )
 
     translate = _exec_command(
         rvc,
         """rv.commands.getFloatProperty(
-            '{0}.transform.translate')""".format(transform)
+            '{}.transform.translate')""".format(transform)
     )
 
     return scale, translate

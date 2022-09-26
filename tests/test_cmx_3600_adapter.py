@@ -351,8 +351,8 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
 
             # But the EDL text on disk are *not* byte-for-byte identical
-            with open(SCREENING_EXAMPLE_PATH, "r") as original_file:
-                with open(tmp_path, "r") as output_file:
+            with open(SCREENING_EXAMPLE_PATH) as original_file:
+                with open(tmp_path) as output_file:
                     self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_regex_flexibility(self):
@@ -625,7 +625,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
                 timeline = otio.adapters.read_from_file(edl_file)
                 tmp_path = os.path.join(
                     temp_dir,
-                    'test_edl_round_trip_{}'.format(edl_name)
+                    f'test_edl_round_trip_{edl_name}'
                 )
                 otio.adapters.write_to_file(timeline, tmp_path)
 

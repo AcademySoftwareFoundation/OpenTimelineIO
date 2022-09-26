@@ -59,7 +59,7 @@ def create_rv_node_from_otio(otio_obj, context=None):
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, context)
 
     raise NoMappingForOtioTypeError(
-        str(type(otio_obj)) + " on object: {}".format(otio_obj)
+        str(type(otio_obj)) + f" on object: {otio_obj}"
     )
 
 
@@ -264,7 +264,7 @@ def _create_item(it, context=None):
 
     if not range_to_read:
         raise otio.exceptions.OTIOError(
-            "No valid range on clip: {0}.".format(
+            "No valid range on clip: {}.".format(
                 str(it)
             )
         )
@@ -281,7 +281,7 @@ def _create_item(it, context=None):
     except Exception as e:
         # Perhaps the media was missing, if so, lets load an error
         # source
-        print('ERROR: {}'.format(e))
+        print(f'ERROR: {e}')
         error_media = _create_movieproc(range_to_read, 'smptebars')
         src = commands.addSourceVerbose([error_media])
 
@@ -358,33 +358,33 @@ def _add_source_bounds(media_ref, src, context):
     transform_node = extra_commands.associatedNode('RVTransform2D', src)
 
     commands.setFloatProperty(
-        "{}.transform.scale".format(transform_node),
+        f"{transform_node}.transform.scale",
         [scale.x / aspect_ratio, scale.y]
     )
     commands.setFloatProperty(
-        "{}.transform.translate".format(transform_node),
+        f"{transform_node}.transform.translate",
         [translate.x, translate.y]
     )
 
     # write the bounds global_scale and global_translate to the node so we can
     # preserve the original values if we round-trip
     commands.newProperty(
-        "{}.otio.global_scale".format(transform_node),
+        f"{transform_node}.otio.global_scale",
         commands.FloatType,
         2
     )
     commands.newProperty(
-        "{}.otio.global_translate".format(transform_node),
+        f"{transform_node}.otio.global_translate",
         commands.FloatType,
         2
     )
     commands.setFloatProperty(
-        "{}.otio.global_scale".format(transform_node),
+        f"{transform_node}.otio.global_scale",
         [global_scale.x, global_scale.y],
         True
     )
     commands.setFloatProperty(
-        "{}.otio.global_translate".format(transform_node),
+        f"{transform_node}.otio.global_translate",
         [global_translate.x, global_translate.y],
         True
     )

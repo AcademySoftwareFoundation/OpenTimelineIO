@@ -69,7 +69,7 @@ def write_to_file(input_otio, filepath):
     # helpful message from the subprocess.
     try:
         proc.stdin.write(json.dumps(simplified_data).encode())
-    except IOError:
+    except OSError:
         pass
 
     out, err = proc.communicate()
@@ -77,9 +77,9 @@ def write_to_file(input_otio, filepath):
     err = err.decode()
 
     if out.strip():
-        print("stdout: {}".format(out))
+        print(f"stdout: {out}")
     if err.strip():
-        print("stderr: {}".format(err))
+        print(f"stderr: {err}")
 
     if proc.returncode:
         raise RuntimeError(
@@ -114,7 +114,7 @@ def write_otio(otio_obj, to_session, track_kind=None):
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session, track_kind)
 
     raise NoMappingForOtioTypeError(
-        str(type(otio_obj)) + " on object: {}".format(otio_obj)
+        str(type(otio_obj)) + f" on object: {otio_obj}"
     )
 
 
@@ -376,7 +376,7 @@ def _write_item(it, to_session, track_kind=None):
 
     if not range_to_read:
         raise otio.exceptions.OTIOError(
-            "No valid range on clip: {0}.".format(
+            "No valid range on clip: {}.".format(
                 str(it)
             )
         )

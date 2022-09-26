@@ -38,7 +38,7 @@ PLAT_TO_CMAKE = {
 
 def _debugInstance(x):
     for a in sorted(dir(x)):
-        print("%s:     %s" % (a, getattr(x, a)))
+        print("{}:     {}".format(a, getattr(x, a)))
 
 
 class CMakeExtension(Extension):
@@ -170,7 +170,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if self.is_windows() and not self.is_mingw():
             multi_proc = '/m'
         else:
-            multi_proc = '-j{}'.format(multiprocessing.cpu_count())
+            multi_proc = f'-j{multiprocessing.cpu_count()}'
 
         subprocess.check_call(
             [
@@ -232,7 +232,7 @@ def _append_version_info_to_init_scripts(build_lib):
         )
 
         # get the base data from the original file
-        with open(source_file, 'r') as fi:
+        with open(source_file) as fi:
             src_data = fi.read()
 
         # write that + the suffix to the target file

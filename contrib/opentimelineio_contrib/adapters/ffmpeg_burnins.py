@@ -101,15 +101,15 @@ class Options(dict):
     }
 
     def __init__(self, **kwargs):
-        super(Options, self).__init__()
+        super().__init__()
         params = self._params.copy()
         params.update(kwargs)
-        super(Options, self).update(**params)
+        super().update(**params)
 
     def __setitem__(self, key, value):
         if key not in self._params:
             raise KeyError("Not a valid option key '%s'" % key)
-        super(Options, self).update({key: value})
+        super().update({key: value})
 
 
 class FrameNumberOptions(Options):
@@ -132,7 +132,7 @@ class FrameNumberOptions(Options):
             'frame_offset': 0,
             'expression': None
         })
-        super(FrameNumberOptions, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
 class TextOptions(Options):
@@ -170,10 +170,10 @@ class TimeCodeOptions(Options):
             'frame_offset': 0,
             'fps': 24
         })
-        super(TimeCodeOptions, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
 
-class Burnins(object):
+class Burnins:
     """
     Class that provides convenience API for building filter
     flags for the FFMPEG command.
@@ -399,7 +399,7 @@ def _drawtext(align, resolution, text, options):
 
 
 def _frames_to_timecode(frames, framerate):
-    return '{0:02d}:{1:02d}:{2:02d}:{3:02d}'.format(
+    return '{:02d}:{:02d}:{:02d}:{:02d}'.format(
         int(frames / (3600 * framerate)),
         int(frames / (60 * framerate) % 60),
         int(frames / framerate % 60),

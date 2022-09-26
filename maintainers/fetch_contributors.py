@@ -54,18 +54,18 @@ def main():
     # response = urllib.request.urlopen(request).read().decode('utf-8')
     # print("Rate limit: {}".format(response))
 
-    with open(CONTRIBUTORS_FILE, 'r') as fi:
+    with open(CONTRIBUTORS_FILE) as fi:
         input_contributors = fi.read()
 
     request = urllib.request.Request(
-        "https://api.github.com/repos/{}/stats/contributors".format(args.repo),
-        headers={"Authorization": "token {}".format(args.token)}
+        f"https://api.github.com/repos/{args.repo}/stats/contributors",
+        headers={"Authorization": f"token {args.token}"}
     )
     response = urllib.request.urlopen(request).read().decode('utf-8')
 
     # this just ensures that response is really waited on so that json.loads
     # works
-    print("Response size: {}".format(len(response)))
+    print(f"Response size: {len(response)}")
 
     contributors = json.loads(response[:])
 
@@ -82,8 +82,8 @@ def main():
         total = contributor['total']
 
         request = urllib.request.Request(
-            "https://api.github.com/users/{}".format(login),
-            headers={"Authorization": "token {}".format(args.token)}
+            f"https://api.github.com/users/{login}",
+            headers={"Authorization": f"token {args.token}"}
         )
         response = urllib.request.urlopen(request).read().decode('utf-8')
 
@@ -95,10 +95,10 @@ def main():
             and name not in input_contributors
             and "?" not in name
         ):
-            print("Missing: {} [{}] # commits: {}".format(name, login, total))
+            print(f"Missing: {name} [{login}] # commits: {total}")
 
             # Print the output in markdown format
-            output_lines.append("* {} ([{}]({}))".format(name, login, url))
+            output_lines.append(f"* {name} ([{login}]({url}))")
 
     if output_lines:
         # split the input_contributors into preamble and contributors list
@@ -126,7 +126,7 @@ def main():
         with open(CONTRIBUTORS_FILE, 'w') as fo:
             fo.write(result)
     else:
-        print("All contributors present in {}".format(CONTRIBUTORS_FILE))
+        print(f"All contributors present in {CONTRIBUTORS_FILE}")
 
     # print("\n".join(sorted(output_lines, key=str.casefold)))
 

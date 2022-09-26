@@ -59,7 +59,7 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             temp_file = os.path.join(temp_dir, "test_disk_vs_string.otio")
             otio.adapters.write_to_file(timeline, temp_file)
             in_memory = otio.adapters.write_to_string(timeline, 'otio_json')
-            with open(temp_file, 'r') as f:
+            with open(temp_file) as f:
                 on_disk = f.read()
 
             self.maxDiff = None

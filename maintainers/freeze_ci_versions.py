@@ -86,7 +86,7 @@ def freeze_ci(plat_map, dryrun=False):
             print("Platform {} appears to already be frozen.".format(plat))
             continue
 
-        output_content.replace(plat_latest, plat_map[plat])
+        output_content = output_content.replace(plat_latest, plat_map[plat])
         modified = True
         print("Platform {} frozen to version: {}".format(plat, plat_map[plat]))
 
@@ -113,7 +113,7 @@ def unfreeze_ci(plat_map, dryrun=False):
             )
             continue
 
-        output_content.replace(plat_current, plat_latest)
+        output_content = output_content.replace(plat_current, plat_latest)
         modified = True
         print("Platform {} unfrozen back to: {}".format(plat, plat_latest))
 

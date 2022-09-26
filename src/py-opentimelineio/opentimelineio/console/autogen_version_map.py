@@ -12,13 +12,12 @@ import opentimelineio as otio
 
 
 LABEL_MAP_TEMPLATE = """{{ "{label}",
-        {{
+      {{
 {sv_map}
-        }}
-    }},
+      }} }},
     // {{next}}"""
 MAP_ITEM_TEMPLATE = '{indent}{{ "{key}", {value} }},'
-INDENT = 12
+INDENT = 10
 
 
 def _parsed_args():

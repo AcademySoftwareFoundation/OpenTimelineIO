@@ -64,7 +64,9 @@ def main():
         for ln in lines:
             if plat_latest not in ln:
                 continue
-            plat_map[plat] = re.match(".*("+plat+"-.*)`.*", ln).groups(0)[0]
+            plat_map[plat] = (
+                re.match(".*(" + plat + "-.*)`.*", ln).groups(0)[0]
+            )
 
     if args.freeze:
         freeze_ci(plat_map, args.dryrun)

@@ -44,7 +44,8 @@ def _parsed_args():
 
 
 def _target_version():
-    return "0.15.0"
+    import bump_version_number
+    return ".".join(bump_version_number.version())
 
 
 def main():
@@ -81,14 +82,14 @@ def add_suffix(content, version):
 
 
 def remove_suffix(content, version):
-    if version+'.dev1' not in content:
+    if version + '.dev1' not in content:
         sys.stderr.write(
             "Version+Suffix {} not found, suffix may have already been "
-            "removed.\n".format(version+'.dev1')
+            "removed.\n".format(version + '.dev1')
         )
         return False
 
-    content.replace(version+'.dev1', version)
+    content.replace(version + ' .dev1', version)
     return True
 
 

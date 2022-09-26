@@ -9,7 +9,6 @@
 import os
 import sys
 import ast
-import socket
 import zipfile
 import tempfile
 import unittest

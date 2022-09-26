@@ -236,8 +236,7 @@ class GapItem(BaseItem):
 class TrackNameItem(BaseItem):
 
     def __init__(self, track, rect, *args, **kwargs):
-        super().__init__(None, None, rect,
-                                            *args, **kwargs)
+        super().__init__(None, None, rect, *args, **kwargs)
         self.track = track
         self.track_name = 'Track' if not track.name else track.name
         self.full_track_name = self.track_name

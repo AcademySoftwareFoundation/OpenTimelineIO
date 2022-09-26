@@ -12,8 +12,6 @@ import numbers
 import os
 import sys
 
-text_type = str
-
 # Python 3.3+
 import collections.abc as collections_abc
 import fractions

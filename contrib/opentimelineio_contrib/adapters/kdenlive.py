@@ -61,8 +61,10 @@ def read_keyframes(kfstring, rate):
     which are in a semicolon (;) separated list of time/value pair
     separated by = (linear interp) or ~= (spline) or |= (step)
     becomes a dict with RationalTime keys"""
-    return {str(time(t, rate).value): v
-                for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring)}
+    return {
+        str(time(t, rate).value): v
+        for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring)
+    }
 
 
 def read_markers(markers_array, json_string, rate):

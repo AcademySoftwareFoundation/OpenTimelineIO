@@ -258,8 +258,10 @@ release: \
 	verify-license \
 	freeze-ci-versions \
 	remove-dev-suffix \
-	version-map-update \
 	format \
+	dev-python-install \
+	version-map-update \
+	test-core \
 	update-contributors \
 	release-commit
 	@echo "Release completed.  Push and open a PR!"

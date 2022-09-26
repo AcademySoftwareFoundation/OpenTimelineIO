@@ -275,10 +275,10 @@ release: \
 	@echo "Release completed.  Push and open a PR!"
 
 # make target for starting a new version (after a release is completed)
-bump-version: \
+bump-minor-version: \
 	check-git-status \
 	unfreeze-ci-versions \
-	bump-otio-version \
+	bump-otio-minor-version \
 	shuffle-core-version-map \
 	add-dev-suffix \
 	version-map-update \

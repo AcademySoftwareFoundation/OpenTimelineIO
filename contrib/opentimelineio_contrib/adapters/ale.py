@@ -137,7 +137,7 @@ def _parse_data_line(line, columns, fps, ale_name_column_key='Name'):
 
 def _cdl_values_from_metadata(asc_sop_string):
 
-    if not isinstance(asc_sop_string, (str, str)):
+    if not isinstance(asc_sop_string, str):
         return {}
 
     asc_sop_values = ASC_SOP_REGEX.findall(asc_sop_string)

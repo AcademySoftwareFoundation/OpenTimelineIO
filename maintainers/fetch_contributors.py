@@ -6,6 +6,9 @@
 import argparse
 import json
 import urllib.request
+import os
+
+CONTRIBUTORS_FILE = "CONTRIBUTORS.md"
 
 
 def parse_args():
@@ -20,7 +23,8 @@ def parse_args():
     )
     parser.add_argument(
         '--token',
-        required=True,
+        required=False,
+        default=None,
         help='GitHub personal access token, used for authorization.'
         ' Get one here: https://github.com/settings/tokens/new'
     )
@@ -29,6 +33,13 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    token = args.token or os.environ.get("OTIO_RELEASE_GITHUB_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "Error: a github token is required to run {}.  Either pass it in "
+            "via --token or set $OTIO_RELEASE_GITHUB_TOKEN".format(__file__)
+        )
 
     # Note: un-authenticated requests have a strict rate limit.
     # We avoid this by using authentication for all our requests,
@@ -43,23 +54,32 @@ def main():
     # response = urllib.request.urlopen(request).read().decode('utf-8')
     # print("Rate limit: {}".format(response))
 
+    with open(CONTRIBUTORS_FILE, 'r') as fi:
+        input_contributors = fi.read()
+
     request = urllib.request.Request(
         "https://api.github.com/repos/{}/stats/contributors".format(args.repo),
         headers={"Authorization": "token {}".format(args.token)}
     )
     response = urllib.request.urlopen(request).read().decode('utf-8')
 
-    contributors = json.loads(response)
+    # this just ensures that response is really waited on so that json.loads
+    # works
+    print("Response size: {}".format(len(response)))
+
+    contributors = json.loads(response[:])
 
     output_lines = []
 
     if not contributors:
         print("No contributors found, something likely went wrong.")
+        print(response)
 
     for contributor in contributors:
 
         login = contributor['author']['login']
         url = contributor['author']['html_url']
+        total = contributor['total']
 
         request = urllib.request.Request(
             "https://api.github.com/users/{}".format(login),
@@ -70,10 +90,45 @@ def main():
         user = json.loads(response)
         name = user['name'] or "?"
 
-        # Print the output in markdown format
-        output_lines.append("* {} ([{}]({}))".format(name, login, url))
+        if (
+            login not in input_contributors
+            and name not in input_contributors
+            and "?" not in name
+        ):
+            print("Missing: {} [{}] # commits: {}".format(name, login, total))
 
-    print("\n".join(sorted(output_lines, key=str.casefold)))
+            # Print the output in markdown format
+            output_lines.append("* {} ([{}]({}))".format(name, login, url))
+
+    if output_lines:
+        # split the input_contributors into preamble and contributors list
+        split_contribs = input_contributors.split('\n')
+
+        header = []
+        body = []
+        in_body = False
+        for ln in split_contribs:
+            if not in_body and ln.startswith("* "):
+                in_body = True
+
+            if not in_body:
+                header.append(ln)
+                continue
+
+            if ln.strip():
+                body.append(ln)
+
+        body.extend(output_lines)
+        body.sort(key=lambda v: v.lower())
+
+        result = '\n'.join(header + body)
+
+        with open(CONTRIBUTORS_FILE, 'w') as fo:
+            fo.write(result)
+    else:
+        print("All contributors present in {}".format(CONTRIBUTORS_FILE))
+
+    # print("\n".join(sorted(output_lines, key=str.casefold)))
 
 
 if __name__ == '__main__':

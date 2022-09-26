@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
 import pkg_resources
 
 from opentimelineio.plugins import manifest

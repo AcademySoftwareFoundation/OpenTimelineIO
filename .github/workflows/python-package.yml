@@ -6,7 +6,7 @@ name: OpenTimelineIO
 # for configuring which build will be a C++ coverage build / coverage report
 env:
   GH_COV_PY: 3.7
-  GH_COV_OS: ubuntu-20.04
+  GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 
 on:
@@ -24,15 +24,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2022, macos-11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
-        - os: ubuntu-20.04
+        - os: ubuntu-latest
           OTIO_TEST_TARGET: test
-        - os: windows-2022
+        - os: windows-latest
           OTIO_TEST_TARGET: RUN_TESTS
-        - os: macos-11
+        - os: macos-latest
           OTIO_TEST_TARGET: test
 
     env:
@@ -86,13 +86,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2022, macos-11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['2.7', '3.7', '3.8', '3.9', '3.10']
         include:
-          - { os: ubuntu-20.04, shell: bash }
-          - { os: macos-11, shell: bash }
-          - { os: windows-2022, shell: pwsh }
-          - { os: windows-2022, shell: msys2, python-version: 'mingw64' }
+          - { os: ubuntu-latest, shell: bash }
+          - { os: macos-latest, shell: bash }
+          - { os: windows-latest, shell: pwsh }
+          - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
 
     defaults:
       run:
@@ -158,7 +158,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2022, macos-11]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-build: ['cp27*', 'cp37*', 'cp38*', 'cp39*', 'cp310*']
     steps:
       - uses: actions/checkout@v3
@@ -206,7 +206,7 @@ jobs:
 
   package_sdist:
     needs: py_build_test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
       with:

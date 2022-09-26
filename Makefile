@@ -252,12 +252,6 @@ update-contributors: check-github-token
 		--repo AcademySoftwareFoundation/OpenTimelineIO \
 		--token $(OTIO_RELEASE_GITHUB_TOKEN)
 
-release-commit:
-	$(GIT) commit -am "Autocommit by `make release`, as part of the release process"
-
-new-version-commit:
-	@echo $(GIT) commit -am "Autocommit by `make bump-version`, as part of the new version process"
-
 dev-python-install:
 	@python setup.py install
 
@@ -273,9 +267,8 @@ release: \
 	dev-python-install \
 	version-map-update \
 	test-core \
-	update-contributors \
-	release-commit
-	@echo "Release completed.  Push and open a PR!"
+	update-contributors 
+	@echo "Release is ready.  Commit, push and open a PR!"
 
 # targets for creating a new version (after making a release, to start the next
 # development cycle)

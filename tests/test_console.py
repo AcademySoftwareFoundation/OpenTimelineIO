@@ -10,21 +10,10 @@ import subprocess
 import sysconfig
 import platform
 
-try:
-    # python2
-    import StringIO as io
-except ImportError:
-    # python3
-    import io
+import io
 
-
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+from tempfile import TemporaryDirectory  # noqa: F401
+import tempfile
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils

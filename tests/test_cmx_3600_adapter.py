@@ -13,13 +13,8 @@ import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+from tempfile import TemporaryDirectory  # noqa: F401
+import tempfile
 
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")

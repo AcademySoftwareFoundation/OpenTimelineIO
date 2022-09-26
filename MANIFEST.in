@@ -22,6 +22,7 @@ exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude */.DS_Store
 exclude .clang-format
+exclude OTIO_VERSION.json
 global-exclude *.pyc
 
 prune maintainers

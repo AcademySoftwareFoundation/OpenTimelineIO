@@ -12,8 +12,7 @@ import numbers
 import os
 import sys
 
-# Python 3.3+
-import collections.abc as collections_abc
+import collections
 import fractions
 import opentimelineio as otio
 
@@ -814,7 +813,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, collections_abc.Iterable):
+    elif isinstance(item, collections.abc.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
         _transcribe_log(msg, indent)

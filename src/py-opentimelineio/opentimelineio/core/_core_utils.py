@@ -2,13 +2,8 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import types
-try:
-    # Python 3.3+
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc
+import collections.abc
 import copy
-import collections
 
 from .. import (
     _otio,
@@ -40,7 +35,7 @@ def _is_str(v):
 
 
 def _is_nonstring_sequence(v):
-    return isinstance(v, collections_abc.Sequence) and not _is_str(v)
+    return isinstance(v, collections.abc.Sequence) and not _is_str(v)
 
 
 def _value_to_any(value, ids=None):
@@ -49,7 +44,7 @@ def _value_to_any(value, ids=None):
 
     if isinstance(value, SerializableObject):
         return PyAny(value)
-    if isinstance(value, collections_abc.Mapping):
+    if isinstance(value, collections.abc.Mapping):
         if ids is None:
             ids = set()
         d = AnyDictionary()
@@ -119,7 +114,7 @@ def _value_to_any(value, ids=None):
 
 
 def _value_to_so_vector(value, ids=None):
-    if not isinstance(value, collections_abc.Sequence) or _is_str(value):
+    if not isinstance(value, collections.abc.Sequence) or _is_str(value):
         raise TypeError(
             "Expected list/sequence of SerializableObjects;"
             " found type '{}'".format(type(value))
@@ -176,13 +171,13 @@ def _add_mutable_mapping_methods(mapClass):
         m.update({k: copy.deepcopy(v, memo) for (k, v) in self.items()})
         return m
 
-    collections_abc.MutableMapping.register(mapClass)
+    collections.abc.MutableMapping.register(mapClass)
     mapClass.__setitem__ = __setitem__
     mapClass.__str__ = __str__
     mapClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections_abc.MutableMapping, collections_abc.Mapping):
+    for klass in (collections.abc.MutableMapping, collections.abc.Mapping):
         for name in klass.__dict__.keys():
             if name in seen:
                 continue
@@ -249,7 +244,7 @@ def _add_mutable_sequence_methods(
         if not isinstance(index, slice):
             self.__internal_setitem__(index, conversion_func(item))
         else:
-            if not isinstance(item, collections_abc.Iterable):
+            if not isinstance(item, collections.abc.Iterable):
                 raise TypeError("can only assign an iterable")
 
             indices = range(*index.indices(len(self)))
@@ -257,7 +252,7 @@ def _add_mutable_sequence_methods(
             if index.step in (1, None):
                 if (
                         not side_effecting_insertions
-                        and isinstance(item, collections_abc.MutableSequence)
+                        and isinstance(item, collections.abc.MutableSequence)
                         and len(item) == len(indices)
                 ):
                     for i0, i in enumerate(indices):
@@ -286,7 +281,7 @@ def _add_mutable_sequence_methods(
                             self.extend(cached_items)
                             raise e
             else:
-                if not isinstance(item, collections_abc.Sequence):
+                if not isinstance(item, collections.abc.Sequence):
                     raise TypeError("can only assign a sequence")
                 if len(item) != len(indices):
                     raise ValueError(
@@ -324,7 +319,7 @@ def _add_mutable_sequence_methods(
             if conversion_func else item
         )
 
-    collections_abc.MutableSequence.register(sequenceClass)
+    collections.abc.MutableSequence.register(sequenceClass)
     sequenceClass.__radd__ = __radd__
     sequenceClass.__add__ = __add__
     sequenceClass.__getitem__ = __getitem__
@@ -335,7 +330,7 @@ def _add_mutable_sequence_methods(
     sequenceClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections_abc.MutableSequence, collections_abc.Sequence):
+    for klass in (collections.abc.MutableSequence, collections.abc.Sequence):
         for name in klass.__dict__.keys():
             if name not in seen:
                 seen.add(name)

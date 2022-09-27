@@ -3,13 +3,9 @@
 
 """Test harness for Image Sequence References."""
 import unittest
-import sys
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
-
-
-IS_PYTHON_2 = (sys.version_info < (3, 0))
 
 
 class ImageSequenceReferenceTests(

@@ -40,8 +40,6 @@ def main():
     output_fname = sys.argv[1]
 
     simplified_data = json.loads(sys.stdin.read())
-    if sys.version_info.major <= 2:
-        simplified_data = _remove_unicode(simplified_data)
 
     result = execute_rv_commands(simplified_data, session_file)
 

@@ -9,7 +9,6 @@ except ImportError:
     import collections as collections_abc
 import copy
 import collections
-import sys
 
 from .. import (
     _otio,
@@ -174,7 +173,7 @@ def _add_mutable_mapping_methods(mapClass):
 
     def __deepcopy__(self, memo):
         m = mapClass()
-        m.update({k: copy.deepcopy(v, memo) for (k, v) in self.items})
+        m.update({k: copy.deepcopy(v, memo) for (k, v) in self.items()})
         return m
 
     collections_abc.MutableMapping.register(mapClass)
@@ -351,7 +350,7 @@ def _add_mutable_sequence_methods(
 
                     # Hide the method frm Sphinx doc.
                     # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
-                    getattr(sequenceClass, name).__doc__ += '\n\n:meta private:'
+                    getattr(sequenceClass, name).__doc__ += '\()n\n:meta private:'
 
     if not issubclass(sequenceClass, SerializableObject):
         def __copy__(self):

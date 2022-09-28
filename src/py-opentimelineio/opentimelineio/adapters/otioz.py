@@ -125,6 +125,17 @@ def write_to_file(
         target.writestr(
             utils.BUNDLE_VERSION_FILE,
             utils.BUNDLE_VERSION,
+            # XXX: OTIOZ was introduced when python 2.7 was still a supported
+            #      platform. The newer algorithms, like BZIP2 and LZMA, are not
+            #      available in python2, so it uses the zlib based
+            #      ZIP_DEFLATED.  Now that OTIO is Python3+, this could switch
+            #      to using BZIP2 or LZMA instead... with the caveat that this
+            #      would make OTIOZ files incompatible with python 2 based OTIO
+            #      installs.
+            #
+            #      For example, if we used ZIP_LZMA, then otio release v0.15
+            #      would still be able to open these files as long as the
+            #      python interpreter was version 3+.
             compress_type=zipfile.ZIP_DEFLATED
         )
 
@@ -132,7 +143,7 @@ def write_to_file(
         target.writestr(
             utils.BUNDLE_PLAYLIST_PATH,
             otio_str,
-            # Python 3 use ZIP_LZMA
+            # XXX: See comment above about ZIP_DEFLATED vs other algorithms
             compress_type=zipfile.ZIP_DEFLATED
         )
 

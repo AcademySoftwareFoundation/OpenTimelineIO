@@ -9,19 +9,6 @@ import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio_contrib.adapters.fcpx_xml import format_name
 
-try:
-    # Python 3.3 forward includes the mock module
-    from unittest import mock
-    could_import_mock = True
-except ImportError:
-    # Fallback for older python (not included in standard library)
-    try:
-        from unittest import mock
-        could_import_mock = True
-    except ImportError:
-        # Mock appears to not be installed
-        could_import_mock = False
-
 SAMPLE_LIBRARY_XML = os.path.join(
     os.path.dirname(__file__),
     "sample_data",
@@ -172,16 +159,17 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         new_timeline = otio.adapters.read_from_string(fcpx_xml, "fcpx_xml")
         self.assertJsonEqual(container, new_timeline)
 
-    @unittest.skipIf(
-        not could_import_mock,
-        "mock module not found. Install mock from pypi or use python >= 3.3."
-    )
     def test_format_name(self):
-        rvalue = subprocess.check_output([sys.executable, '-c', 'print("640x360")'])
-        with mock.patch.object(subprocess, 'check_output', return_value=rvalue):
-            with mock.patch.object(os.path, 'exists', return_value=True):
-                self.assertEqual(format_name(
-                    25, "file:///dummy.me"), 'FFVideoFormat640x360p25')
+        rvalue = subprocess.check_output(
+            [sys.executable, '-c', 'print("640x360")']
+        )
+        mock_patch = unittest.mock.patch.object
+        with mock_patch(subprocess, 'check_output', return_value=rvalue):
+            with mock_patch(os.path, 'exists', return_value=True):
+                self.assertEqual(
+                    format_name(25, "file:///dummy.me"),
+                    'FFVideoFormat640x360p25'
+                )
 
 
 if __name__ == '__main__':

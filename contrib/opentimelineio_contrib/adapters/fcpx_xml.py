@@ -8,11 +8,7 @@ from xml.etree import cElementTree
 from xml.dom import minidom
 from fractions import Fraction
 from datetime import date
-
-try:
-    from urllib import unquote
-except ImportError:
-    from urllib.parse import unquote
+from urllib import unquote
 
 import opentimelineio as otio
 

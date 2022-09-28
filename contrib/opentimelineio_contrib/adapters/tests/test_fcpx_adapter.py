@@ -5,6 +5,7 @@ import os
 import subprocess
 import sys
 import unittest
+import unittest.mock
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio_contrib.adapters.fcpx_xml import format_name

@@ -5,8 +5,10 @@
 
 import os
 
-import urllib.parse as urlparse
-from urllib import request as urllib
+from urllib import (
+    parse as urlparse,
+    request
+)
 import pathlib
 
 
@@ -36,5 +38,6 @@ def url_from_filepath(fpath):
 
 def filepath_from_url(urlstr):
     """ Take a url and return a filepath """
+
     parsed_result = urlparse.urlparse(urlstr)
-    return urllib.url2pathname(parsed_result.path)
+    return request.url2pathname(parsed_result.path)

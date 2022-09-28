@@ -73,14 +73,12 @@ And a `plugin_manifest.json` like:
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "adapter_x",
-            "execution_scope" : "in process",
             "filepath" : "adapters/my_adapter_x.py",
             "suffixes" : ["xxx"]
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "adapter_y",
-            "execution_scope" : "in process",
             "filepath" : "adapters/my_adapter_y.py",
             "suffixes" : ["yyy", "why"]
         }
@@ -89,7 +87,6 @@ And a `plugin_manifest.json` like:
         {
             "OTIO_SCHEMA" : "MediaLinker.1",
             "name" : "my_studios_media_linker",
-            "execution_scope" : "in process",
             "filepath" : "operations/my_linker.py"
         }
     ]
@@ -105,13 +102,10 @@ For example, to register `myadapter.py` that supports files with a `.myext` file
 {
     "OTIO_SCHEMA" : "Adapter.1",
     "name" : "myadapter",
-    "execution_scope" : "in process",
     "filepath" : "myadapter.py",
     "suffixes" : ["myext"]
 }
 ```
-
-Currently (as of OTIO Beta 14) only execution_scope "in process" is supported.
 
 ## Required Functions
 

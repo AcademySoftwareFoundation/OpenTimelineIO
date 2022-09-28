@@ -4,7 +4,6 @@
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "cmx_3600",
-            "execution_scope" : "in process",
             "filepath" : "adapter.py",
             "suffixes" : ["edl"]
         }

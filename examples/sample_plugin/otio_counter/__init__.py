@@ -27,7 +27,6 @@ as a file in this package).
             {
                 "OTIO_SCHEMA": "Adapter.1",
                 "name": "track_counter",
-                "execution_scope": "in process",
                 "filepath": "adapter.py",
                 "suffixes": ["count"]
             }
@@ -43,7 +42,6 @@ as below.
     {
         "OTIO_SCHEMA" : "MediaLinker.1",
         "name" : "linker_example",
-        "execution_scope" : "in process",
         "filepath" : "linker.py"
     }
 

@@ -31,7 +31,6 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
         {
             "OTIO_SCHEMA" : "HookScript.1",
             "name" : "example hook",
-            "execution_scope" : "in process",
             "filepath" : "myhooks.py"
         }
     ],

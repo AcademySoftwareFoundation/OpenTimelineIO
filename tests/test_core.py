@@ -38,6 +38,6 @@ class TestCoreFunctions(unittest.TestCase):
     def test_serialize_json_to_file_errors_windows(self):
         """Verify the bindings return the correct errors based on the errno"""
 
-        with self.assertRaises(FileNotFoundError) as exc:
+        with self.assertRaises(PermissionError) as exc:
             otio.core.serialize_json_to_file({}, self.tmpDir)
-        self.assertIsInstance(exc.exception, FileNotFoundError)
+        self.assertIsInstance(exc.exception, PermissionError)

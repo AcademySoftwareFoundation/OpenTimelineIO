@@ -88,8 +88,6 @@ def _get_class_name(item):
 
 
 def _transcribe_property(prop, owner=None):
-    # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
-    # so we have to use type(u"") which works in both Python 2 and 3.
     if isinstance(prop, (str, numbers.Integral, float, dict)):
         return prop
     elif isinstance(prop, set):

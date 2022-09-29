@@ -25,7 +25,7 @@ OpenTimelineIO's development.  These include:
 
 ## Core schema or Plugin?
 
-A reminder that OpenTimelineIO has a number of plugin mechanisms, including the
+OpenTimelineIO has a number of plugin mechanisms, including the
 [Schemadef](write-a-schemadef).  Plugin schemadefs are great for things that
 won't be broadly useful to folks or are specific to a particular studio,
 workflow, or practice.  Example of this might be a reference to a proprietary

@@ -13,7 +13,7 @@ OTIO_VERSION_JSON_PATH = "OTIO_VERSION.json"
 
 
 def version():
-    with open(OTIO_VERSION_JSON_PATH, 'r') as fi:
+    with open(OTIO_VERSION_JSON_PATH) as fi:
         return json.load(fi)['version']
 
 
@@ -76,26 +76,26 @@ def main():
         print(".".join(str(v) for v in (major, minor, patch)))
         return
 
-    print("Setting version to: {}.{}.{}".format(major, minor, patch))
+    print(f"Setting version to: {major}.{minor}.{patch}")
 
     # update the OTIO_VERSION file
     with open(OTIO_VERSION_JSON_PATH, "w") as fo:
         fo.write(
             json.dumps({"version": [str(v) for v in (major, minor, patch)]})
         )
-    print("Updated {}".format(OTIO_VERSION_JSON_PATH))
+    print(f"Updated {OTIO_VERSION_JSON_PATH}")
 
     #  update the CMakeLists.txt
-    with open("CMakeLists.txt", 'r') as fi:
+    with open("CMakeLists.txt") as fi:
         cmake_input = fi.read()
 
     cmake_output = []
     key_map = {"MAJOR": major, "MINOR": minor, "PATCH": patch}
     for ln in cmake_input.split("\n"):
         for label, new_value in key_map.items():
-            if "set(OTIO_VERSION_{} \"".format(label) in ln:
+            if f"set(OTIO_VERSION_{label} \"" in ln:
                 cmake_output.append(
-                    "set(OTIO_VERSION_{} \"{}\")".format(label, new_value)
+                    f"set(OTIO_VERSION_{label} \"{new_value}\")"
                 )
                 break
         else:
@@ -106,7 +106,7 @@ def main():
     print("Updated {}".format("CMakeLists.txt"))
 
     # update the setup.py
-    with open("setup.py", 'r') as fi:
+    with open("setup.py") as fi:
         setup_input = fi.read()
 
     setup_output = []

@@ -56,5 +56,4 @@ def each_child(
     :param bool shallow_search: if True, will only search children of self, not
                                 and not recurse into children of children.
     """
-    for child in self.children_if(descended_from_type, search_range, shallow_search):
-        yield child
+    yield from self.children_if(descended_from_type, search_range, shallow_search)

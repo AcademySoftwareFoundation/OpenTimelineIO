@@ -9,12 +9,7 @@ from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
 import json
-try:
-    from urllib.parse import urlparse, unquote
-except ImportError:
-    # Python 2
-    from urlparse import urlparse
-    from urllib import unquote
+from urllib.parse import urlparse, unquote
 
 marker_types = {
     0: otio.schema.MarkerColor.PURPLE,
@@ -33,7 +28,7 @@ def read_property(element, name):
     """Decode an MLT item property
     which value is contained in a "property" XML element
     with matching "name" attribute"""
-    return element.findtext("property[@name='{}']".format(name), '')
+    return element.findtext(f"property[@name='{name}']", '')
 
 
 def time(clock, rate):
@@ -66,8 +61,10 @@ def read_keyframes(kfstring, rate):
     which are in a semicolon (;) separated list of time/value pair
     separated by = (linear interp) or ~= (spline) or |= (step)
     becomes a dict with RationalTime keys"""
-    return dict((str(time(t, rate).value), v)
-                for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring))
+    return {
+        str(time(t, rate).value): v
+        for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring)
+    }
 
 
 def read_markers(markers_array, json_string, rate):
@@ -344,7 +341,7 @@ def clock(time):
 
 def write_keyframes(kfdict):
     """Build a MLT keyframe string"""
-    return ';'.join('{}={}'.format(t, v)
+    return ';'.join(f'{t}={v}'
                     for t, v in kfdict.items())
 
 
@@ -395,7 +392,7 @@ def write_to_string(input_otio):
     ET.SubElement(
         mlt, 'profile',
         dict(
-            description='HD 1080p {} fps'.format(rate),
+            description=f'HD 1080p {rate} fps',
             frame_rate_num=str(rate_num),
             frame_rate_den=str(rate_den),
             width='1920',
@@ -457,7 +454,7 @@ def write_to_string(input_otio):
     for i, track in enumerate(input_otio.tracks):
         is_audio = track.kind == otio.schema.TrackKind.Audio
 
-        tractor_id = 'tractor{}'.format(i)
+        tractor_id = f'tractor{i}'
         subtractor = ET.Element('tractor', dict(id=tractor_id))
         write_property(subtractor, 'kdenlive:track_name', track.name)
 
@@ -626,7 +623,7 @@ def write_to_string(input_otio):
 
 
 def _make_playlist(count, hide, subtractor, mlt):
-    playlist_id = 'playlist{}'.format(count)
+    playlist_id = f'playlist{count}'
     playlist = ET.Element(
         'playlist',
         dict(id=playlist_id),
@@ -650,7 +647,7 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None,
     producer = None
     service, resource, effect_speed, _ = _prod_key_from_item(item, is_audio)
     if service and resource:
-        producer_id = "producer{}".format(count)
+        producer_id = f"producer{count}"
         kdenlive_id = str(count + 4)  # unsupported starts with id 3
 
         key = (service, resource, speed, is_audio)
@@ -776,7 +773,7 @@ def _prod_key_from_item(item, is_audio):
 
 if __name__ == '__main__':
     timeline = read_from_string(
-        open('tests/sample_data/kdenlive_example.kdenlive', 'r').read())
+        open('tests/sample_data/kdenlive_example.kdenlive').read())
     print(str(timeline).replace('otio.schema', "\notio.schema"))
     xml = write_to_string(timeline)
     print(str(xml))

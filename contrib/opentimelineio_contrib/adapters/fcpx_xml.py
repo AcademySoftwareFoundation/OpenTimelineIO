@@ -8,11 +8,7 @@ from xml.etree import cElementTree
 from xml.dom import minidom
 from fractions import Fraction
 from datetime import date
-
-try:
-    from urllib import unquote
-except ImportError:
-    from urllib.parse import unquote
+from urllib.parse import unquote
 
 import opentimelineio as otio
 
@@ -77,7 +73,7 @@ def format_name(frame_rate, path):
     if frame_size.endswith("1280"):
         frame_size = "720"
 
-    return "FFVideoFormat{}p{}".format(frame_size, frame_rate)
+    return f"FFVideoFormat{frame_size}p{frame_rate}"
 
 
 def to_rational_time(rational_number, fps):
@@ -123,11 +119,11 @@ def from_rational_time(rational_time):
         float(rational_time.value) / float(rational_time.rate)
     ).limit_denominator()
     if str(result.denominator) == "1":
-        return "{}s".format(result.numerator)
-    return "{}/{}s".format(result.numerator, result.denominator)
+        return f"{result.numerator}s"
+    return f"{result.numerator}/{result.denominator}s"
 
 
-class FcpxOtio(object):
+class FcpxOtio:
     """
     This object is responsible for knowing how to convert an otio into an
     FCP X XML
@@ -342,7 +338,7 @@ class FcpxOtio(object):
             format_id = asset.get("format")
 
         format_element = self.resource_element.find(
-            "./format[@id='{}']".format(format_id)
+            f"./format[@id='{format_id}']"
         )
         total, rate = format_element.get("frameDuration").split("/")
         rate = rate.replace("s", "")
@@ -640,7 +636,7 @@ class FcpxOtio(object):
 
     def _resource_id_generator(self):
         self.resource_count += 1
-        return "r{}".format(self.resource_count)
+        return f"r{self.resource_count}"
 
     def _event_name(self):
         if self.otio_timeline.name:
@@ -648,26 +644,26 @@ class FcpxOtio(object):
         return date.strftime(date.today(), "%m-%e-%y")
 
     def _asset_by_path(self, path):
-        return self.resource_element.find("./asset[@src='{}']".format(path))
+        return self.resource_element.find(f"./asset[@src='{path}']")
 
     def _asset_by_id(self, asset_id):
-        return self.resource_element.find("./asset[@id='{}']".format(asset_id))
+        return self.resource_element.find(f"./asset[@id='{asset_id}']")
 
     def _media_by_name(self, name):
-        return self.resource_element.find("./media[@name='{}']".format(name))
+        return self.resource_element.find(f"./media[@name='{name}']")
 
     def _media_by_id(self, media_id):
-        return self.resource_element.find("./media[@id='{}']".format(media_id))
+        return self.resource_element.find(f"./media[@id='{media_id}']")
 
     def _format_by_frame_rate(self, frame_rate):
         frame_duration = self._framerate_to_frame_duration(frame_rate)
         return self.resource_element.find(
-            "./format[@frameDuration='{}']".format(frame_duration)
+            f"./format[@frameDuration='{frame_duration}']"
         )
 
     def _asset_clip_by_name(self, name):
         return self.event_resource.find(
-            "./asset-clip[@name='{}']".format(name)
+            f"./asset-clip[@name='{name}']"
         )
 
     # --------------------
@@ -686,20 +682,20 @@ class FcpxOtio(object):
         if (clip.media_reference and
                 not clip.media_reference.is_missing_reference):
             return clip.media_reference.target_url
-        return "file:///tmp/{}".format(clip.name)
+        return f"file:///tmp/{clip.name}"
 
     @staticmethod
     def _calculate_rational_number(duration, rate):
         if int(duration) == 0:
             return "0s"
         result = Fraction(float(duration) / float(rate)).limit_denominator()
-        return "{}/{}s".format(result.numerator, result.denominator)
+        return f"{result.numerator}/{result.denominator}s"
 
     @staticmethod
     def _compound_clip_name(compound_clip, resource_id):
         if compound_clip.name:
             return compound_clip.name
-        return "compound_clip_{}".format(resource_id)
+        return f"compound_clip_{resource_id}"
 
     @staticmethod
     def _item_in_compound_clip(item):
@@ -752,7 +748,7 @@ class FcpxOtio(object):
         return note_element
 
 
-class FcpxXml(object):
+class FcpxXml:
     """
     This object is responsible for knowing how to convert an FCP X XML
     otio into an otio timeline
@@ -1094,24 +1090,24 @@ class FcpxXml(object):
 
     def _asset_by_id(self, asset_id):
         return self.fcpx_xml.find(
-            "./resources/asset[@id='{}']".format(asset_id)
+            f"./resources/asset[@id='{asset_id}']"
         )
 
     def _assetclip_by_ref(self, asset_id):
         event = self.fcpx_xml.find("./event")
         if event is None:
-            return self.fcpx_xml.find("./asset-clip[@ref='{}']".format(asset_id))
+            return self.fcpx_xml.find(f"./asset-clip[@ref='{asset_id}']")
         else:
-            return event.find("./asset-clip[@ref='{}']".format(asset_id))
+            return event.find(f"./asset-clip[@ref='{asset_id}']")
 
     def _format_by_id(self, format_id):
         return self.fcpx_xml.find(
-            "./resources/format[@id='{}']".format(format_id)
+            f"./resources/format[@id='{format_id}']"
         )
 
     def _compound_clip_by_id(self, compound_id):
         return self.fcpx_xml.find(
-            "./resources/media[@id='{}']".format(compound_id)
+            f"./resources/media[@id='{compound_id}']"
         )
 
     # --------------------

@@ -77,18 +77,18 @@ def main():
 
 def freeze_ci(plat_map, dryrun=False):
     modified = False
-    with open(CI_WORKFLOW_FP, 'r') as fi:
+    with open(CI_WORKFLOW_FP) as fi:
         output_content = fi.read()
 
     for plat in plat_map:
         plat_latest = plat + "-latest"
         if plat_latest not in output_content:
-            print("Platform {} appears to already be frozen.".format(plat))
+            print(f"Platform {plat} appears to already be frozen.")
             continue
 
         output_content = output_content.replace(plat_latest, plat_map[plat])
         modified = True
-        print("Platform {} frozen to version: {}".format(plat, plat_map[plat]))
+        print(f"Platform {plat} frozen to version: {plat_map[plat]}")
 
     if modified and not dryrun:
         with open(CI_WORKFLOW_FP, 'w') as fo:
@@ -100,7 +100,7 @@ def freeze_ci(plat_map, dryrun=False):
 
 def unfreeze_ci(plat_map, dryrun=False):
     modified = False
-    with open(CI_WORKFLOW_FP, 'r') as fi:
+    with open(CI_WORKFLOW_FP) as fi:
         output_content = fi.read()
 
     for plat, plat_current in plat_map.items():
@@ -115,7 +115,7 @@ def unfreeze_ci(plat_map, dryrun=False):
 
         output_content = output_content.replace(plat_current, plat_latest)
         modified = True
-        print("Platform {} unfrozen back to: {}".format(plat, plat_latest))
+        print(f"Platform {plat} unfrozen back to: {plat_latest}")
 
     if modified and not dryrun:
         with open(CI_WORKFLOW_FP, 'w') as fo:

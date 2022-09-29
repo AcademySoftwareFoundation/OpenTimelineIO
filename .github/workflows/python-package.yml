@@ -87,7 +87,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
@@ -130,9 +130,6 @@ jobs:
     - name: Install python build dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
-    - name: install mock for python 2.7 tests only
-      if: matrix.python-version == 2.7
-      run: python -m pip install --upgrade mock
     - name: Run check-manifest and lint check
       run: make ci-prebuild
     - name: Build and Install
@@ -172,22 +169,6 @@ jobs:
       # by CMake. CMake is able to find the right toolchain, thanks to
       # the -A argument that we specify in the setup.py to set the
       # target platform (x86, x64, etc).
-      - name: Set Windows Python 2.7 environment variables
-        if: matrix.python-build == 'cp27*' && runner.os == 'Windows'
-        shell: bash
-        run: |
-          echo "DISTUTILS_USE_SDK=1" >> $GITHUB_ENV
-          echo "MSSdk=1" >> $GITHUB_ENV
-
-      - name: Build wheels (Python 2.7)
-        if: matrix.python-build == 'cp27*'
-        # cibuildwheel 1.12.0 is the last release that supported Python 2.7.
-        uses: pypa/cibuildwheel@v1.12.0
-        with:
-          output-dir: wheelhouse
-        env:
-          CIBW_BUILD: ${{ matrix.python-build }}
-
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@v2.3.1
         if: matrix.python-build != 'cp27*'

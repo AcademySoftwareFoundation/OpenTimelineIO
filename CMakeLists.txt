@@ -114,18 +114,6 @@ else()
         # Note that this has no effect on Windows.
         set(CMAKE_CXX_VISIBILITY_PRESET hidden)
         set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-
-        if(MSVC AND Python_VERSION_MAJOR VERSION_LESS 3)
-            # Statically link run-time library (vcruntime and msvcp)
-            # See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=msvc-160
-            # This allows us to compile OTIO bindings with a newer MSVC version
-            # than the one used by the interpreter where OTIO will be installed.
-            # This is only required for Python < 3 because only these are
-            # compiled with an older compiler (9.0). CPython 3.5+ uses at least
-            # Visual C++ 14.X.
-            # See https://wiki.python.org/moin/WindowsCompilers#Which_Microsoft_Visual_C.2B-.2B-_compiler_to_use_with_a_specific_Python_version_.3F
-            add_compile_options(/MT)
-        endif()
     endif()
 endif()
 

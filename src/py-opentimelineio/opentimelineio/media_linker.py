@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""
+r"""
 MediaLinker plugins fire after an adapter has read a file in order to
 produce :class:`.MediaReference`\s that point at valid, site specific media.
 
@@ -104,7 +104,7 @@ class MediaLinker(plugins.PythonPlugin):
         execution_scope=None,
         filepath=None,
     ):
-        super(MediaLinker, self).__init__(name, execution_scope, filepath)
+        super().__init__(name, execution_scope, filepath)
 
     def link_media_reference(self, in_clip, media_linker_argument_map=None):
         media_linker_argument_map = media_linker_argument_map or {}
@@ -121,7 +121,7 @@ class MediaLinker(plugins.PythonPlugin):
     def plugin_info_map(self):
         """Adds extra adapter-specific information to call to the parent fn."""
 
-        result = super(MediaLinker, self).plugin_info_map()
+        result = super().plugin_info_map()
 
         fn_doc = inspect.getdoc(self.module().link_media_reference)
         if fn_doc:

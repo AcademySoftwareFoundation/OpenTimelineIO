@@ -13,13 +13,8 @@ import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+from tempfile import TemporaryDirectory  # noqa: F401
+import tempfile
 
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -351,8 +346,8 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
 
             # But the EDL text on disk are *not* byte-for-byte identical
-            with open(SCREENING_EXAMPLE_PATH, "r") as original_file:
-                with open(tmp_path, "r") as output_file:
+            with open(SCREENING_EXAMPLE_PATH) as original_file:
+                with open(tmp_path) as output_file:
                     self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_regex_flexibility(self):
@@ -625,7 +620,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
                 timeline = otio.adapters.read_from_file(edl_file)
                 tmp_path = os.path.join(
                     temp_dir,
-                    'test_edl_round_trip_{}'.format(edl_name)
+                    f'test_edl_round_trip_{edl_name}'
                 )
                 otio.adapters.write_to_file(timeline, tmp_path)
 

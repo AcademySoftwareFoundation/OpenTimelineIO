@@ -26,7 +26,7 @@ def prepare_for_check(timeline):
 class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def __init__(self, *args, **kwargs):
-        super(AdaptersKdenliveTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def test_library_roundtrip(self):
         timeline = otio.adapters.read_from_file(

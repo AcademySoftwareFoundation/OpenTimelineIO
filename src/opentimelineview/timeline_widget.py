@@ -98,7 +98,7 @@ def group_filters(bitmask):
 class CompositionWidget(QtWidgets.QGraphicsScene):
 
     def __init__(self, composition, *args, **kwargs):
-        super(CompositionWidget, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.composition = composition
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(33, 33, 33)))
 
@@ -439,11 +439,11 @@ class CompositionView(QtWidgets.QGraphicsView):
     selection_changed = QtCore.Signal(otio.core.SerializableObject)
 
     def __init__(self, stack, *args, **kwargs):
-        super(CompositionView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setScene(CompositionWidget(stack, parent=self))
-        self.setAlignment((QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop))
+        self.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.setStyleSheet('border: 0px;')
         self.scene().selectionChanged.connect(self.parse_selection_change)
         self._navigation_filter = None
@@ -470,10 +470,10 @@ class CompositionView(QtWidgets.QGraphicsView):
         )
         self.setInteractive(not modifiers == QtCore.Qt.AltModifier)
 
-        super(CompositionView, self).mousePressEvent(mouse_event)
+        super().mousePressEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-        super(CompositionView, self).mouseReleaseEvent(mouse_event)
+        super().mouseReleaseEvent(mouse_event)
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def wheelEvent(self, event):
@@ -672,7 +672,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         return newSelectedItem
 
     def keyPressEvent(self, key_event):
-        super(CompositionView, self).keyPressEvent(key_event)
+        super().keyPressEvent(key_event)
         self.setInteractive(True)
 
         # Remove ruler_widget.Ruler instance from selection
@@ -764,7 +764,7 @@ class Timeline(QtWidgets.QTabWidget):
     navigationfilter_changed = QtCore.Signal(int)
 
     def __init__(self, *args, **kwargs):
-        super(Timeline, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.timeline = None
 
         self.setTabsClosable(True)

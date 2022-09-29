@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
@@ -16,12 +15,7 @@ from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
     AAFValidationError
 )
 
-try:
-    # python2
-    import StringIO as io
-except ImportError:
-    # python3
-    import io
+import io
 
 
 TRANSCRIPTION_RESULT = """---
@@ -203,16 +197,6 @@ MARKER_OVER_AUDIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "marker-over-audio.aaf"
 )
-
-
-def safe_str(maybe_str):
-    """To help with testing between python 2 and 3, this function attempts to
-    decode a string, and if it cannot decode it just returns the string.
-    """
-    try:
-        return maybe_str.decode('utf-8')
-    except AttributeError:
-        return maybe_str
 
 
 try:
@@ -600,7 +584,7 @@ class AAFReaderTests(unittest.TestCase):
         correctWords = [
             "test1",
             "testing 1 2 3",
-            u"Eyjafjallaj\xf6kull",
+            "Eyjafjallaj\xf6kull",
             "'s' \"d\" `b`",
             None,   # Gap
             None
@@ -882,20 +866,20 @@ class AAFReaderTests(unittest.TestCase):
     def test_utf8_names(self):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
-            (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
-            safe_str(timeline.name)
+            ("Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
+            timeline.name
         )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
         self.assertEqual(
-            safe_str(first_clip.name),
-            (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
+            first_clip.name,
+            ("Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(
             (
                 first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]
             ).encode('utf-8'),
-            (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
+            ("Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode()
         )
 
     def test_multiple_top_level_mobs(self):
@@ -1650,12 +1634,12 @@ class AAFWriterTests(unittest.TestCase):
         for prop in ['source_range']:
             self.assertEqual(getattr(first_clip_in_original_timeline, prop),
                              getattr(first_clip_in_aaf_timeline, prop),
-                             "`{}` did not match".format(prop))
+                             f"`{prop}` did not match")
 
         for method in ['visible_range', 'trimmed_range']:
             self.assertEqual(getattr(first_clip_in_original_timeline, method)(),
                              getattr(first_clip_in_aaf_timeline, method)(),
-                             "`{}` did not match".format(method))
+                             f"`{method}` did not match")
 
     def test_aaf_writer_nesting(self):
         self._verify_aaf(NESTING_EXAMPLE_PATH)

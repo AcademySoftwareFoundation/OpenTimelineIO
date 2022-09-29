@@ -501,7 +501,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        with open(self.tmp_path, "r") as f:
+        with open(self.tmp_path) as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count('movie = "blank'), 1)
@@ -524,7 +524,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             ' "/path/to/audio.wav" ]'
         )
 
-        with open(self.tmp_path, "r") as f:
+        with open(self.tmp_path) as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count("string movie"), 2)
@@ -554,7 +554,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             'string movie = "/path/to/some/video.mov"'
         )
 
-        with open(self.tmp_path, "r") as f:
+        with open(self.tmp_path) as f:
             rv_session = f.read()
             self.assertEqual(rv_session.count(video_source), 2)
             self.assertEqual(rv_session.count(audio_video_source), 2)

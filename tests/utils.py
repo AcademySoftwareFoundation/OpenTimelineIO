@@ -2,7 +2,6 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Reusable utilities for tests."""
-from __future__ import absolute_import
 
 # import built-in modules
 import os

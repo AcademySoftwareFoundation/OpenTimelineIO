@@ -89,7 +89,7 @@ FCM: NON-DROP FRAME
             )
             for value_comp, ref_comp in comparisons:
                 self.assertAlmostEqual(
-                    value_comp, ref_comp, msg="mismatch in {}".format(function)
+                    value_comp, ref_comp, msg=f"mismatch in {function}"
                 )
 
     def test_cdl_round_trip(self):

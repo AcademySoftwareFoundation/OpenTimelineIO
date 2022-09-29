@@ -19,13 +19,6 @@ from .. import (
 )
 
 
-try:
-    # Python 3.0+
-    getfullargspec = inspect.getfullargspec
-except AttributeError:
-    getfullargspec = inspect.getargspec
-
-
 @core.register_type
 class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.
@@ -114,7 +107,7 @@ class Adapter(plugins.PythonPlugin):
             not self.has_feature("read_from_file") and
             self.has_feature("read_from_string")
         ):
-            with open(filepath, 'r') as fo:
+            with open(filepath) as fo:
                 contents = fo.read()
             result = self._execute_function(
                 "read_from_string",
@@ -319,7 +312,7 @@ class Adapter(plugins.PythonPlugin):
     def plugin_info_map(self):
         """Adds extra adapter-specific information to call to the parent fn."""
 
-        result = super(Adapter, self).plugin_info_map()
+        result = super().plugin_info_map()
 
         features = collections.OrderedDict()
         result["supported features"] = features
@@ -335,7 +328,7 @@ class Adapter(plugins.PythonPlugin):
                 for fn_name in _FEATURE_MAP[feature]:
                     if hasattr(self.module(), fn_name):
                         fn = getattr(self.module(), fn_name)
-                        args = getfullargspec(fn)
+                        args = inspect.getfullargspec(fn)
                         docs = inspect.getdoc(fn)
                         break
 

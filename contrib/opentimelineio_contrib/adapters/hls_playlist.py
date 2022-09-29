@@ -108,15 +108,6 @@ OUTPUT_PLAYLIST_VERSION = "7"
 # TODO: make sure all strings get sanitized through encoding and decoding
 PLAYLIST_STRING_ENCODING = "utf-8"
 
-# Enable isinstance(my_instance, basestring) tests in Python 3
-# This can be phased out when Python 2 support is dropped. Replace tests with:
-# isinstance(my_instance, str)
-
-try:
-    basestring
-except NameError:
-    basestring = str
-
 """
 Matches a single key/value pair from an HLS Attribute List.
 See section 4.2 of draft-pantos-http-live-streaming for more detail.
@@ -231,12 +222,12 @@ class AttributeList(dict):
             out_value = ''
             if isinstance(v, AttributeListEnum):
                 out_value = v
-            elif isinstance(v, basestring):
-                out_value = '"{}"'.format(v)
+            elif isinstance(v, str):
+                out_value = f'"{v}"'
             else:
                 out_value = str(v)
 
-            attr_list_entries.append('{}={}'.format(k, out_value))
+            attr_list_entries.append(f'{k}={out_value}')
 
         return ','.join(attr_list_entries)
 
@@ -281,7 +272,7 @@ BYTE_OFFSET_KEY = 'byte_offset'
 BYTE_COUNT_KEY = 'byte_count'
 
 
-class Byterange(object):
+class Byterange:
     """Offers interpretation of HLS byte ranges in various forms."""
 
     count = None
@@ -320,7 +311,7 @@ class Byterange(object):
 
         out_str = str(self.count)
         if self.offset is not None:
-            out_str += '@{}'.format(str(self.offset))
+            out_str += f'@{str(self.offset)}'
 
         return out_str
 
@@ -398,17 +389,17 @@ The constants below define which tags belong to which schema.
 Basic tags appear in both media and master playlists.
 See section 4.3.1 of draft-pantos-http-live-streaming for more detail.
 """
-BASIC_TAGS = set([
+BASIC_TAGS = {
     "EXTM3U",
     "EXT-X-VERSION"
-])
+}
 
 """
 Media segment tags apply to either the following media or all subsequent
 segments. They MUST NOT appear in master playlists.
 See section 4.3.2 of draft-pantos-http-live-streaming for more detail.
 """
-MEDIA_SEGMENT_TAGS = set([
+MEDIA_SEGMENT_TAGS = {
     'EXTINF',
     'EXT-X-BYTERANGE',
     'EXT-X-DISCONTINUITY',
@@ -416,40 +407,40 @@ MEDIA_SEGMENT_TAGS = set([
     'EXT-X-MAP',
     'EXT-X-PROGRAM-DATE-TIME',
     'EXT-X-DATERANGE'
-])
+}
 
 """ The subset of above tags that apply to every segment following them """
-MEDIA_SEGMENT_SUBSEQUENT_TAGS = set([
+MEDIA_SEGMENT_SUBSEQUENT_TAGS = {
     'EXT-X-KEY',
     'EXT-X-MAP',
-])
+}
 
 """
 Media Playlist tags must only occur once per playlist, and must not appear in
 Master Playlists.
 See section 4.3.3 of draft-pantos-http-live-streaming for more detail.
 """
-MEDIA_PLAYLIST_TAGS = set([
+MEDIA_PLAYLIST_TAGS = {
     'EXT-X-TARGETDURATION',
     'EXT-X-MEDIA-SEQUENCE',
     'EXT-X-DISCONTINUITY-SEQUENCE',
     'EXT-X-ENDLIST',
     'EXT-X-PLAYLIST-TYPE',
     'EXT-X-I-FRAMES-ONLY'
-])
+}
 
 """
 Master playlist tags declare global parameters for the presentation.
 They must not appear in media playlists.
 See section 4.3.4 of draft-pantos-http-live-streaming for more detail.
 """
-MASTER_PLAYLIST_TAGS = set([
+MASTER_PLAYLIST_TAGS = {
     'EXT-X-MEDIA',
     'EXT-X-STREAM-INF',
     'EXT-X-I-FRAME-STREAM-INF',
     'EXT-X-SESSION-DATA',
     'EXT-X-SESSION-KEY',
-])
+}
 
 """
 Media or Master Playlist tags can appear in either media or master playlists.
@@ -458,10 +449,10 @@ These tags SHOULD appear in either the media or master playlist. If they occur
 in both, their values MUST agree.
 These values MUST NOT appear more than once in a playlist.
 """
-MEDIA_OR_MASTER_TAGS = set([
+MEDIA_OR_MASTER_TAGS = {
     "EXT-X-INDEPENDENT-SEGMENTS",
     "EXT-X-START"
-])
+}
 
 """
 Some special tags used by the parser.
@@ -475,12 +466,12 @@ PLAYLIST_SEGMENT_INF_TAG = "EXTINF"
 attribute list entries to omit from EXT-I-FRAME-STREAM-INF tags
 See section 4.3.4.3 of draft-pantos-http-live-streaming for more detail.
 """
-I_FRAME_OMIT_ATTRS = set([
+I_FRAME_OMIT_ATTRS = {
     'FRAME-RATE',
     'AUDIO',
     'SUBTITLES',
     'CLOSED-CAPTIONS'
-])
+}
 
 """ enum for kinds of playlist entries """
 EntryType = type('EntryType', (), {
@@ -503,12 +494,12 @@ HLS_TRACK_TYPE_TO_OTIO_KIND = {
 }
 
 """ mapping from otio ``TrackKind`` to HLS track type """
-OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
-    (v, k) for k, v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
-))
+OTIO_TRACK_KIND_TO_HLS_TYPE = {
+    v: k for k, v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
+}
 
 
-class HLSPlaylistEntry(object):
+class HLSPlaylistEntry:
     """An entry in an HLS playlist.
 
     Entries can be a tag, a comment, or a URI. All HLS playlists are parsed
@@ -558,9 +549,9 @@ class HLSPlaylistEntry(object):
                 repr(self.tag_value)
             )
         elif self.type == EntryType.comment:
-            base_str += ', comment={}'.format(repr(self.comment_string))
+            base_str += f', comment={repr(self.comment_string)}'
         elif self.type == EntryType.URI:
-            base_str += ', URI={}'.format(repr(self.uri))
+            base_str += f', URI={repr(self.uri)}'
 
         return base_str + ')'
 
@@ -571,7 +562,7 @@ class HLSPlaylistEntry(object):
         :return: (:class:`str`) HLS playlist entry string.
         """
         if self.type == EntryType.comment and self.comment_string:
-            return "# {}".format(self.comment_string)
+            return f"# {self.comment_string}"
         elif self.type == EntryType.comment:
             # empty comments are blank lines
             return ""
@@ -580,9 +571,9 @@ class HLSPlaylistEntry(object):
         elif self.type == EntryType.tag:
             out_tag_name = self.tag_name
             if self.tag_value is not None:
-                return '#{}:{}'.format(out_tag_name, self.tag_value)
+                return f'#{out_tag_name}:{self.tag_value}'
             else:
-                return '#{}'.format(out_tag_name)
+                return f'#{out_tag_name}'
 
     @classmethod
     def tag_entry(cls, name, value=None):
@@ -706,7 +697,7 @@ class HLSPlaylistEntry(object):
         return group_dict
 
 
-class HLSPlaylistParser(object):
+class HLSPlaylistParser:
     """Bootstraps HLS parsing and hands the playlist string off to the
     appropriate parser for the type
     """
@@ -778,7 +769,7 @@ class HLSPlaylistParser(object):
                 self.timeline.tracks.append(parser.track)
 
 
-class MediaPlaylistParser(object):
+class MediaPlaylistParser:
     """Parses an HLS Media playlist returning a SEQUENCE"""
 
     def __init__(self, playlist_entries, playlist_version=None):
@@ -990,7 +981,7 @@ def entries_for_segment(
 
     # add the EXTINF
     name = segment_name if segment_name is not None else ''
-    tag_value = '{0:.5f},{1}'.format(
+    tag_value = '{:.5f},{}'.format(
         otio.opentime.to_seconds(segment_duration),
         name
     )
@@ -1060,7 +1051,7 @@ def master_playlist_to_string(master_timeline):
 
     # start with a version number of 1, as features are encountered, we will
     # update the version accordingly
-    version_requirements = set([1])
+    version_requirements = {1}
 
     # TODO: detect rather than forcing version 6
     version_requirements.add(6)
@@ -1103,10 +1094,10 @@ def master_playlist_to_string(master_timeline):
             group_id = streaming_metadata['group_id']
         except KeyError:
             sub_id = hls_type_count.setdefault(hls_type, 1)
-            group_id = '{}{}'.format(hls_type, sub_id)
+            group_id = f'{hls_type}{sub_id}'
             hls_type_count[hls_type] += 1
 
-        media_playlist_default_uri = "{}.m3u8".format(track.name)
+        media_playlist_default_uri = f"{track.name}.m3u8"
         try:
             track_uri = track.metadata[FORMAT_METADATA_KEY].get(
                 'uri',
@@ -1183,7 +1174,7 @@ def master_playlist_to_string(master_timeline):
         al = stream_inf_attr_list_for_track(track)
 
         # Create the uri
-        media_playlist_default_uri = "{}.m3u8".format(track.name)
+        media_playlist_default_uri = f"{track.name}.m3u8"
         try:
             track_uri = track.metadata[FORMAT_METADATA_KEY].get(
                 'uri', media_playlist_default_uri
@@ -1213,7 +1204,7 @@ def master_playlist_to_string(master_timeline):
                 )
 
             combo_al = copy.copy(al)
-            combo_al['CODECS'] += ',{}'.format(aud_codec)
+            combo_al['CODECS'] += f',{aud_codec}'
             combo_al['AUDIO'] = aud_group
             combo_al['BANDWIDTH'] += aud_bandwidth
 
@@ -1258,7 +1249,7 @@ def master_playlist_to_string(master_timeline):
     out_entries += playlist_entries
 
     playlist_string = '\n'.join(
-        (str(entry) for entry in out_entries)
+        str(entry) for entry in out_entries
     )
 
     return playlist_string
@@ -1287,7 +1278,7 @@ class MediaPlaylistWriter():
         # Whenever an entry is added that has a minimum version requirement,
         # we add that version to this set. The max value from this set is the
         # playlist's version requirement
-        self._versions_used = set([1])
+        self._versions_used = {1}
 
         # TODO: detect rather than forcing version 7
         self._versions_used.add(7)
@@ -1715,7 +1706,7 @@ class MediaPlaylistWriter():
         """Returns the string representation of the playlist entries"""
 
         return '\n'.join(
-            (str(entry) for entry in self._playlist_entries)
+            str(entry) for entry in self._playlist_entries
         )
 
 # Public interface

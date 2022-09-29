@@ -15,7 +15,7 @@ import opentimelineio as otio
 import otio_reader
 
 
-class Mode(object):
+class Mode:
     sleeping = 1
     loading = 2
     processing = 3
@@ -23,7 +23,7 @@ class Mode(object):
 
 class ExampleOTIOReaderPlugin(rvtypes.MinorMode):
     def __init__(self):
-        super(ExampleOTIOReaderPlugin, self).__init__()
+        super().__init__()
         self.init("example_otio_reader",
                   [("incoming-source-path",
                     self.incoming_source_path,
@@ -55,7 +55,7 @@ class ExampleOTIOReaderPlugin(rvtypes.MinorMode):
 
         if ext in otio.adapters.suffixes_with_defined_adapters(read=True):
             self.mode = Mode.loading
-            movieproc = 'blank,otioFile={}.movieproc'.format(in_path)
+            movieproc = f'blank,otioFile={in_path}.movieproc'
             event.setReturnContent(movieproc)
 
     def after_progressive_loading(self, event):

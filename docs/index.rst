@@ -47,6 +47,7 @@ Tutorials
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
    tutorials/spatial-coordinates
+   tutorials/developing-a-new-schema
    tutorials/versioning-schemas
 
 Use Cases

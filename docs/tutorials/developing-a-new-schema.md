@@ -16,7 +16,7 @@ The process includes several steps:
 
 ## Examples
 
-There have been at this point a number of schemas introduced well into
+A number of schemas have been proposed and introduced during
 OpenTimelineIO's development.  These include:
 
 * [ImageSequenceReference](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/602)

@@ -40,7 +40,7 @@ is preferred so that interested parties can form a working group if necessary.
 The goal of a TSC presentation would be to find view points / impacts that might not have been considered
 and advertise the development to the community at large.
 
-Including an example JSON blob which has the fields you think might be needed
+Including an example JSON excerpt which has the fields you think might be needed
 can help.
 
 References that are particularly helpful are examples from existing

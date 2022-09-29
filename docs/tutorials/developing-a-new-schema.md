@@ -45,7 +45,7 @@ can help.
 
 References that are particularly helpful are examples from existing
 applications/formats, information about how (or if) the schema participates in
-temporal transformations, or other citations.
+temporal transformations, and other relevant citations.
 
 ## Implementing and Iterating on a branch
 
@@ -54,7 +54,7 @@ review than normal development.  To facilitate this, generally the project will
 open a branch on the repository so that pull requests can be merged into the
 prototype without disturbing the main branch.  For example, the
 [ImageSequenceReference](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/602)
-branch.
+branch demonstrates that workflow.
 
 A complete implementation should have a:
 

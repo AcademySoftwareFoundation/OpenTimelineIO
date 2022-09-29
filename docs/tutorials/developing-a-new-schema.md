@@ -37,7 +37,7 @@ particular schema before proposing it to the community for adoption.
 A proposal can be as fleshed out as a proposed implementation, or as vague as an
 idea.  Presenting the proposal at a Technical Steering Committee for discussion
 is preferred so that interested parties can form a working group if necessary.
-The goal is to find view points / impacts that might not have been considered
+The goal of a TSC presentation would be to find view points / impacts that might not have been considered
 and advertise the development to the community at large.
 
 Including an example JSON blob which has the fields you think might be needed

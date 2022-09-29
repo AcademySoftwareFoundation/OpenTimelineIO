@@ -34,7 +34,7 @@ particular schema before proposing it to the community for adoption.
 
 ## Proposal
 
-A proposal can be as fleshed out as a proposed implementation or as vague as an
+A proposal can be as fleshed out as a proposed implementation, or as vague as an
 idea.  Presenting the proposal at a Technical Steering Committee for discussion
 is preferred so that interested parties can form a working group if necessary.
 The goal is to find view points / impacts that might not have been considered

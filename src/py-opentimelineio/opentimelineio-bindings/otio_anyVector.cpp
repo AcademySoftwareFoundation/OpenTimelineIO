@@ -15,11 +15,7 @@ using namespace pybind11::literals;
 void otio_any_vector_bindings(py::module m) {
     py::class_<AnyVectorProxy::Iterator>(m, "AnyVectorIterator")
         .def("__iter__", &AnyVectorProxy::Iterator::iter)
-    #if PY_MAJOR_VERSION >= 3
         .def("__next__", &AnyVectorProxy::Iterator::next);
-    #else
-        .def("next", &AnyVectorProxy::Iterator::next);
-    #endif
     
     py::class_<AnyVectorProxy>(m, "AnyVector")
         .def(py::init<>())

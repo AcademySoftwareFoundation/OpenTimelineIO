@@ -17,7 +17,7 @@ struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
     using MutationStamp = AnyDictionary::MutationStamp;
 
     static void throw_dictionary_was_deleted() {
-        throw py::value_error("underlying C++ AnyDictionary has been destroyed");
+        throw py::value_error("Underlying C++ AnyDictionary has been destroyed");
     }
 
     struct Iterator {

@@ -156,7 +156,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-build: ['cp27*', 'cp37*', 'cp38*', 'cp39*', 'cp310*']
+        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*']
     steps:
       - uses: actions/checkout@v3
 
@@ -171,7 +171,6 @@ jobs:
       # target platform (x86, x64, etc).
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@v2.3.1
-        if: matrix.python-build != 'cp27*'
         with:
           output-dir: wheelhouse
         env:

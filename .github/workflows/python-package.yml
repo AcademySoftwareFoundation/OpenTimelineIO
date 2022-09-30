@@ -160,17 +160,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # cibuildwheel 1.12.0 gates Python 2.7 wheels builds
-      # by using two environment variables, DISTUTILS_USE_SDK and MSSdk.
-      # https://cibuildwheel.readthedocs.io/en/1.x/cpp_standards/#windows-and-python-27
-      # Note that normally these are used by setuptools/distutils, but in our case
-      # they are really just used for cibuildwheel as we don't use any of the
-      # setuptools/distutils build tools. Our builds are entirely handled
-      # by CMake. CMake is able to find the right toolchain, thanks to
-      # the -A argument that we specify in the setup.py to set the
-      # target platform (x86, x64, etc).
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.3.1
+        uses: pypa/cibuildwheel@v2.10.2
         with:
           output-dir: wheelhouse
         env:

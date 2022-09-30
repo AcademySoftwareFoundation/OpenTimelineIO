@@ -122,6 +122,65 @@ public:
         map::swap(other);
     }
 
+    /// @TODO: remove all of these @{
+
+    // if key is in this, and the type of key matches the type of result, then
+    // set result to the value of any_cast<type>(this[key]) and return true,
+    // otherwise return false
+    template <typename containedType>
+    bool get_if_set(const std::string& key, containedType* result) const
+    {
+        if (result == nullptr)
+        {
+            return false;
+        }
+
+        const auto it = this->find(key);
+
+        if ((it != this->end())
+            && (it->second.type().hash_code()
+                == typeid(containedType).hash_code()))
+        {
+            *result = any_cast<containedType>(it->second);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    inline bool has_key(const std::string& key) const
+    {
+        return (this->find(key) != this->end());
+    }
+
+    // if key is in this, place the value in result and return true, otherwise
+    // store the value in result at key and return false
+    template <typename containedType>
+    bool set_default(const std::string& key, containedType* result)
+    {
+        if (result == nullptr)
+        {
+            return false;
+        }
+
+        const auto d_it = this->find(key);
+
+        if ((d_it != this->end())
+            && (d_it->second.type().hash_code()
+                == typeid(containedType).hash_code()))
+        {
+            *result = any_cast<containedType>(d_it->second);
+            return true;
+        }
+        else
+        {
+            this->insert({ key, *result });
+            return false;
+        }
+    }
+
     using map::empty;
     using map::max_size;
     using map::size;
@@ -161,7 +220,7 @@ public:
             assert(d);
         }
 
-        MutationStamp(MutationStamp const&) = delete;
+        MutationStamp(MutationStamp const&)            = delete;
         MutationStamp& operator=(MutationStamp const&) = delete;
 
         ~MutationStamp()

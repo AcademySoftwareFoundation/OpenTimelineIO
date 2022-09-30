@@ -15,30 +15,18 @@ The otio.adapters module will look at the file extension (in this case ".edl" or
 
 Note that the OTIO JSON format is treated like an adapter as well. The ".otio" format is the only format that is lossless. It can store and retrieve all of the objects, metadata and features available in OpenTimelineIO. Other formats are lossy - they will only store and retrieve features that are supported by that format (and by the adapter implementation). Some adapters may choose to put extra information, not supported by OTIO, into metadata on any OTIO object.
 
-## Registering Your Contrib Adapter
+## Sharing an Adapter You’ve Written With the Community
 
-To create a new contrib OTIO Adapter, you need to create a file `myadapter.py` in the `opentimelineio_contrib/adapters` folder. Then add an entry to `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest.json` that registers your new adapter.  Note that contrib adapters are community supported, and not supported by the OTIO team.  They must still provide unit tests and pass both testing and linting before they are accepted into the repository.
-
-### Custom Adapters
-
-Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).
-
-For example, to register `myadapter.py` that supports files with a `.myext` file extension:
-```json
-{
-    "OTIO_SCHEMA" : "Adapter.1",
-    "name" : "myadapter",
-    "execution_scope" : "in process",
-    "filepath" : "myadapter.py",
-    "suffixes" : ["myext"]
-}
-```
-
-Currently (as of OTIO Beta 8) only execution_scope "in process" is supported. If your adapter needs to execute non-Python code, then we intend to support execution_scope "external process" in the future.
+If you've written an adapter that might be useful to others, please contact the [OpenTimelineIO team](https://github.com/AcademySoftwareFoundation/OpenTimelineIO)
+so we can add it to the list of [Tools and Projects Using OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki/Tools-and-Projects-Using-OpenTimelineIO). If the adapter is of broad enough interest to adopt as an OTIO community supported adapter, we can discuss transitioning it to the [OpenTimelineIO GitHub Organization](https://github.com/OpenTimelineIO/). Keep in mind, code should be [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt) or [MIT](https://opensource.org/licenses/MIT) licensed if it is intended to transition to the OpenTimelineIO project.
 
 ### Packaging and Sharing Custom Adapters
 
-Adapters may also be organized into their own independent Python project for subsequent [packaging](https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives), [distribution](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) and [installation](https://packaging.python.org/tutorials/packaging-projects/#installing-your-newly-uploaded-package) by [`pip`](https://packaging.python.org/key_projects/#pip). We recommend you organize your project like so:
+Adapters may also be organized into their own independent Python project for subsequent [packaging](https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives), [distribution](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) and [installation](https://packaging.python.org/tutorials/packaging-projects/#installing-your-newly-uploaded-package) by [`pip`](https://packaging.python.org/key_projects/#pip).
+
+The easist way is to [otio-plugin-template repo](https://github.com/OpenTimelineIO/otio-plugin-template) and click "Use this template". This will get you started with plugin boilerplate and allow you to develop the adapter in your own GitHub account.
+
+If you'd like to work from scratch, we recommend you organize your project like so:
 ```
 .
 ├── setup.py
@@ -107,6 +95,23 @@ And a `plugin_manifest.json` like:
     ]
 }
 ```
+
+### Custom Adapters
+
+Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).
+
+For example, to register `myadapter.py` that supports files with a `.myext` file extension:
+```json
+{
+    "OTIO_SCHEMA" : "Adapter.1",
+    "name" : "myadapter",
+    "execution_scope" : "in process",
+    "filepath" : "myadapter.py",
+    "suffixes" : ["myext"]
+}
+```
+
+Currently (as of OTIO Beta 14) only execution_scope "in process" is supported.
 
 ## Required Functions
 

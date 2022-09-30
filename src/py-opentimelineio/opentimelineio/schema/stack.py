@@ -6,7 +6,7 @@ from .. import _otio
 
 
 @add_method(_otio.Stack)
-def each_clip(self, search_range=None):
+def each_clip(self, search_range=None, shallow_search=False):
     """Generator that returns each clip contained in the stack
     in the order in which it is found.
 
@@ -15,6 +15,7 @@ def each_clip(self, search_range=None):
 
     :param TimeRange search_range: if specified, only children whose range overlaps
                                    with the search range will be yielded.
+    :param bool shallow_search: if True, will only search children of self and not
+                                recurse into children of children.
     """
-    for child in self.clip_if(search_range):
-        yield child
+    yield from self.clip_if(search_range, shallow_search)

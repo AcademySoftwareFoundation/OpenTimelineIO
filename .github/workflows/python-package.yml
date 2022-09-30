@@ -71,7 +71,7 @@ jobs:
 # \todo Should the Codecov web pages show the results of the C++ or Python tests?
 #    - name: Upload coverage to Codecov
 #      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-#      uses: codecov/codecov-action@v2.1.0
+#      uses: codecov/codecov-action@v3.1.1
 #      with:
 #        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
 #        flags: unittests
@@ -87,7 +87,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['2.7', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+        include:
+          - { os: ubuntu-latest, shell: bash }
+          - { os: macos-latest, shell: bash }
+          - { os: windows-latest, shell: pwsh }
+          - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
+
+    defaults:
+      run:
+        shell: '${{ matrix.shell }} {0}'
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
@@ -97,7 +106,20 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: 'recursive'
+    - name: Set up MSYS2
+      if: matrix.python-version == 'mingw64'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        install: >-
+          mingw-w64-x86_64-python
+          mingw-w64-x86_64-python-pip
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-cmake
+          make
+          git
     - name: Set up Python ${{ matrix.python-version }}
+      if: matrix.python-version != 'mingw64'
       uses: actions/setup-python@v4.1.0
       with:
         python-version: ${{ matrix.python-version }}
@@ -107,10 +129,7 @@ jobs:
         sudo apt-get install lcov
     - name: Install python build dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel flake8>=3.5 check-manifest
-    - name: install mock for python 2.7 tests only
-      if: matrix.python-version == 2.7
-      run: python -m pip install --upgrade mock
+        python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
     - name: Run check-manifest and lint check
       run: make ci-prebuild
     - name: Build and Install
@@ -125,7 +144,7 @@ jobs:
       run: make lcov
     - name: Upload coverage to Codecov
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      uses: codecov/codecov-action@v2.1.0
+      uses: codecov/codecov-action@v3.1.1
       with:
         flags: py-unittests
         name: py-opentimelineio-codecov
@@ -150,22 +169,6 @@ jobs:
       # by CMake. CMake is able to find the right toolchain, thanks to
       # the -A argument that we specify in the setup.py to set the
       # target platform (x86, x64, etc).
-      - name: Set Windows Python 2.7 environment variables
-        if: matrix.python-build == 'cp27*' && runner.os == 'Windows'
-        shell: bash
-        run: |
-          echo "DISTUTILS_USE_SDK=1" >> $GITHUB_ENV
-          echo "MSSdk=1" >> $GITHUB_ENV
-
-      - name: Build wheels (Python 2.7)
-        if: matrix.python-build == 'cp27*'
-        # cibuildwheel 1.12.0 is the last release that supported Python 2.7.
-        uses: pypa/cibuildwheel@v1.12.0
-        with:
-          output-dir: wheelhouse
-        env:
-          CIBW_BUILD: ${{ matrix.python-build }}
-
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@v2.3.1
         if: matrix.python-build != 'cp27*'
@@ -177,7 +180,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
           CIBW_MANYLINUX_I686_IMAGE: manylinux2010
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: wheels
           path: ./wheelhouse/*.whl
@@ -198,7 +201,7 @@ jobs:
     - name: Generate sdist
       run: python -m build -s .
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: sdist
         path: dist

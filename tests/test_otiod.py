@@ -102,7 +102,8 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             self.assertEqual(len(manifest[fname]), count)
 
     def test_round_trip(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -132,7 +133,8 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_all_missing_references(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(
             self.tl,
             tmp_path,
@@ -154,7 +156,8 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
     def test_round_trip_absolute_paths(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
 
         # ...but can be optionally told to generate absolute paths

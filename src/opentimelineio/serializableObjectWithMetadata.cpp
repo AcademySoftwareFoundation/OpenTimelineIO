@@ -6,7 +6,8 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 SerializableObjectWithMetadata::SerializableObjectWithMetadata(
-    std::string const& name, AnyDictionary const& metadata)
+    std::string const&   name,
+    AnyDictionary const& metadata)
     : _name(name)
     , _metadata(metadata)
 {}
@@ -17,9 +18,9 @@ SerializableObjectWithMetadata::~SerializableObjectWithMetadata()
 bool
 SerializableObjectWithMetadata::read_from(Reader& reader)
 {
-    return reader.read_if_present("metadata", &_metadata) &&
-           reader.read_if_present("name", &_name) &&
-           SerializableObject::read_from(reader);
+    return reader.read_if_present("metadata", &_metadata)
+           && reader.read_if_present("name", &_name)
+           && SerializableObject::read_from(reader);
 }
 
 void

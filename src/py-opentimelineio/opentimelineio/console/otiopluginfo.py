@@ -84,8 +84,8 @@ def _supported_features_formatted(feature_map, _):
     extra_features = []
     for kind in ["read", "write"]:
         if (
-            "{}_from_string".format(kind) in feature_map
-            and "{}_from_file".format(kind) not in feature_map
+            f"{kind}_from_string" in feature_map
+            and f"{kind}_from_file" not in feature_map
         ):
             extra_features.append(
                 "{0}_from_file (calls: {0}_from_string)".format(kind)
@@ -94,13 +94,13 @@ def _supported_features_formatted(feature_map, _):
     if extra_features:
         print("    implicit supported features:")
         for feat in extra_features:
-            print("      {}".format(feat))
+            print(f"      {feat}")
 
 
 def _schemadefs_formatted(feature_map, args):
     print("    SchemaDefs:")
     for sd in feature_map.keys():
-        print("      {}".format(sd))
+        print(f"      {sd}")
         _docs_formatted(feature_map[sd]['doc'], args, indent=8)
 
 
@@ -163,7 +163,7 @@ def _print_field(key, val, **args):
         _FORMATTER[key](val, args)
         return
 
-    print("    {}: {}".format(key, val))
+    print(f"    {key}: {val}")
 
 
 def main():
@@ -181,7 +181,7 @@ def main():
 
     # print version information to the shell
     if args.version:
-        print("OpenTimelineIO version: {}".format(otio.__version__))
+        print(f"OpenTimelineIO version: {otio.__version__}")
 
         if pkg_resources:
             pkg_resource_plugins = list(
@@ -190,14 +190,14 @@ def main():
             if pkg_resource_plugins:
                 print("Plugins from pkg_resources:")
                 for plugin in pkg_resource_plugins:
-                    print("   {}".format(plugin.dist))
+                    print(f"   {plugin.dist}")
             else:
                 print("No pkg_resource plugins installed.")
 
     # list the loaded manifests
     print("Manifests loaded:")
     for mf in active_plugin_manifest.source_files:
-        print("  {}".format(mf))
+        print(f"  {mf}")
 
     for pt in plugin_types:
         # hooks have special code (see below)
@@ -206,7 +206,7 @@ def main():
 
         # header
         print("")
-        print("{}:".format(pt))
+        print(f"{pt}:")
 
         # filter plugins by the patterns passed in on the command line
         plugin_by_type = getattr(active_plugin_manifest, pt)
@@ -220,7 +220,7 @@ def main():
             print("    (none found)")
 
         for plug in plugins:
-            print("  {}".format(plug.name))
+            print(f"  {plug.name}")
 
             try:
                 info = plug.plugin_info_map()
@@ -253,9 +253,9 @@ def main():
             args.plugpattern
         )
         for hookname in hooknames:
-            print("  {}".format(hookname))
+            print(f"  {hookname}")
             for hook_script in active_plugin_manifest.hooks[hookname]:
-                print("    {}".format(hook_script))
+                print(f"    {hook_script}")
             if not active_plugin_manifest.hooks[hookname]:
                 print("    (no hook scripts attached)")
 

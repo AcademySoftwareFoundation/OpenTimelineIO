@@ -17,6 +17,11 @@ class TestTime(unittest.TestCase):
         self.assertIsNotNone(t)
         self.assertEqual(t.value, t_val)
 
+        t_val = -30.2
+        t = otio.opentime.RationalTime(t_val)
+        self.assertIsNotNone(t)
+        self.assertEqual(t.value, t_val)
+
         t = otio.opentime.RationalTime()
         self.assertEqual(t.value, 0)
         self.assertEqual(t.rate, 1.0)
@@ -73,7 +78,6 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t2, otio.opentime.RationalTime(18, 24))
 
     def test_base_conversion(self):
-
         # from a number
         t = otio.opentime.RationalTime(10, 24)
         with self.assertRaises(TypeError):
@@ -92,6 +96,14 @@ class TestTime(unittest.TestCase):
         timecode = "00:06:56:17"
         t = otio.opentime.from_timecode(timecode, 24)
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
+
+    def test_negative_timecode(self):
+        with self.assertRaises(ValueError):
+            otio.opentime.from_timecode('-01:00:13:13', 24)
+
+    def test_bogus_timecode(self):
+        with self.assertRaises(ValueError):
+            otio.opentime.from_timecode('pink elephants', 13)
 
     def test_time_timecode_convert_bad_rate(self):
         with self.assertRaises(ValueError) as exception_manager:

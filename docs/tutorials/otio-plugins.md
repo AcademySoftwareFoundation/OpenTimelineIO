@@ -106,7 +106,7 @@ OpenTimelineIO Final Cut Pro 7 XML Adapter.
 ### otio_json
 
 ```
-This adapter lets you read and write native .otio files
+Adapter for reading and writing native .otio json files.
 ```
 
 *source*: `opentimelineio/adapters/otio_json.py`
@@ -147,14 +147,23 @@ Serializes an OpenTimelineIO object into a file
       indent (int): number of spaces for each json indentation level.
   Use -1 for no indentation or newlines.
 
+  If target_schema_versions is None and the environment variable
+  "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" is set, will read a map out of
+  that for downgrade target.  The variable should be of the form
+  FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
+
   Returns:
       bool: Write success
 
   Raises:
       ValueError: on write error
+      otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
+      with the default environment variable
+      "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
 ```
   - input_otio
   - filepath
+  - target_schema_versions
   - indent
 - write_to_string: 
 ```
@@ -165,10 +174,21 @@ Serializes an OpenTimelineIO object into a string
       indent (int): number of spaces for each json indentation level. Use
   -1 for no indentation or newlines.
 
+  If target_schema_versions is None and the environment variable
+  "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL" is set, will read a map out of
+  that for downgrade target.  The variable should be of the form
+  FAMILY:LABEL, for example "MYSTUDIO:JUNE2022".
+
   Returns:
       str: A json serialized string representation
+
+  Raises:
+      otio.exceptions.InvalidEnvironmentVariableError: if there is a problem
+      with the default environment variable
+      "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
 ```
   - input_otio
+  - target_schema_versions
   - indent
 
 
@@ -577,7 +597,8 @@ Read a Kdenlive project (MLT XML)
   Kdenlive uses a given MLT project layout, similar to Shotcut,
   combining a "main_bin" playlist to organize source media,
   and a "global_feed" tractor for timeline.
-  (in Kdenlive 19.x, timeline tracks include virtual sub-track, unused for now)
+  Timeline tracks include virtual sub-track,
+  used for same-track transitions
 ```
   - input_str
 - write_to_string: 

@@ -23,8 +23,9 @@ GeneratorReference::~GeneratorReference()
 bool
 GeneratorReference::read_from(Reader& reader)
 {
-    return reader.read("generator_kind", &_generator_kind) &&
-           reader.read("parameters", &_parameters) && Parent::read_from(reader);
+    return reader.read("generator_kind", &_generator_kind)
+           && reader.read("parameters", &_parameters)
+           && Parent::read_from(reader);
 }
 
 void

@@ -68,10 +68,11 @@ ImageSequenceReference::number_of_images_in_sequence() const
 
 int
 ImageSequenceReference::frame_for_time(
-    RationalTime const& time, ErrorStatus* error_status) const
+    RationalTime const& time,
+    ErrorStatus*        error_status) const
 {
-    if (!this->available_range().has_value() ||
-        !this->available_range().value().contains(time))
+    if (!this->available_range().has_value()
+        || !this->available_range().value().contains(time))
     {
         if (error_status)
         {
@@ -94,7 +95,8 @@ ImageSequenceReference::frame_for_time(
 
 std::string
 ImageSequenceReference::target_url_for_image_number(
-    int image_number, ErrorStatus* error_status) const
+    int          image_number,
+    ErrorStatus* error_status) const
 {
     if (_rate == 0)
     {
@@ -107,8 +109,8 @@ ImageSequenceReference::target_url_for_image_number(
         return std::string();
     }
     else if (
-        !this->available_range().has_value() ||
-        this->available_range().value().duration().value() == 0)
+        !this->available_range().has_value()
+        || this->available_range().value().duration().value() == 0)
     {
         if (error_status)
         {
@@ -147,14 +149,14 @@ ImageSequenceReference::target_url_for_image_number(
     // If the base does not include a trailing slash, add it
     std::string path_sep            = std::string();
     const auto  target_url_base_len = _target_url_base.length();
-    if (target_url_base_len > 0 &&
-        _target_url_base.compare(target_url_base_len - 1, 1, "/") != 0)
+    if (target_url_base_len > 0
+        && _target_url_base.compare(target_url_base_len - 1, 1, "/") != 0)
     {
         path_sep = "/";
     }
 
-    std::string out_string = _target_url_base + path_sep + _name_prefix + sign +
-                             zero_pad + image_num_string + _name_suffix;
+    std::string out_string = _target_url_base + path_sep + _name_prefix + sign
+                             + zero_pad + image_num_string + _name_suffix;
     if (error_status)
     {
         *error_status = ErrorStatus(ErrorStatus::OK);
@@ -164,7 +166,8 @@ ImageSequenceReference::target_url_for_image_number(
 
 RationalTime
 ImageSequenceReference::presentation_time_for_image_number(
-    int image_number, ErrorStatus* error_status) const
+    int          image_number,
+    ErrorStatus* error_status) const
 {
     if (image_number >= this->number_of_images_in_sequence())
     {
@@ -188,13 +191,14 @@ ImageSequenceReference::read_from(Reader& reader)
     int64_t frame_step_value         = 0;
     int64_t frame_zero_padding_value = 0;
 
-    auto result = reader.read("target_url_base", &_target_url_base) &&
-                  reader.read("name_prefix", &_name_prefix) &&
-                  reader.read("name_suffix", &_name_suffix) &&
-                  reader.read("start_frame", &start_frame_value) &&
-                  reader.read("frame_step", &frame_step_value) &&
-                  reader.read("rate", &_rate) &&
-                  reader.read("frame_zero_padding", &frame_zero_padding_value);
+    auto result =
+        reader.read("target_url_base", &_target_url_base)
+        && reader.read("name_prefix", &_name_prefix)
+        && reader.read("name_suffix", &_name_suffix)
+        && reader.read("start_frame", &start_frame_value)
+        && reader.read("frame_step", &frame_step_value)
+        && reader.read("rate", &_rate)
+        && reader.read("frame_zero_padding", &frame_zero_padding_value);
 
     _start_frame        = static_cast<int>(start_frame_value);
     _frame_step         = static_cast<int>(frame_step_value);

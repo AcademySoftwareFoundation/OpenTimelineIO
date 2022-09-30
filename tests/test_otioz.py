@@ -10,12 +10,7 @@ import os
 import tempfile
 import shutil
 
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
+import urllib.parse as urlparse
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -82,7 +77,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in self.tl.each_clip():
             # write with a non-file schema
             cl.media_reference = otio.schema.ExternalReference(
-                target_url="http://{}".format(fname)
+                target_url=f"http://{fname}"
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -124,7 +119,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         shutil.rmtree(tempdir)
 
     def test_round_trip(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -155,7 +151,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_with_extraction(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -213,7 +210,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
     def test_round_trip_with_extraction_no_media(self):
-        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            tmp_path = bogusfile.name
         otio.adapters.write_to_file(
             self.tl,
             tmp_path,
@@ -233,7 +231,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.adapters.file_bundle_utils.BUNDLE_VERSION_FILE
         )
         self.assertTrue(os.path.exists(version_file_path))
-        with open(version_file_path, 'r') as fi:
+        with open(version_file_path) as fi:
             self.assertEqual(
                 fi.read(),
                 otio.adapters.file_bundle_utils.BUNDLE_VERSION

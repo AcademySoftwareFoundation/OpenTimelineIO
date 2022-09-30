@@ -109,8 +109,8 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
 }
 
 TimeRange
-Track::trimmed_range_of_child_at_index(
-    int index, ErrorStatus* error_status) const
+Track::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
+    const
 {
     auto child_range = range_of_child_at_index(index, error_status);
     if (is_error(error_status))
@@ -135,7 +135,7 @@ TimeRange
 Track::available_range(ErrorStatus* error_status) const
 {
     RationalTime duration;
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto item = dynamic_retainer_cast<Item>(child))
         {
@@ -165,8 +165,8 @@ Track::available_range(ErrorStatus* error_status) const
 }
 
 std::pair<optional<RationalTime>, optional<RationalTime>>
-Track::handles_of_child(
-    Composable const* child, ErrorStatus* error_status) const
+Track::handles_of_child(Composable const* child, ErrorStatus* error_status)
+    const
 {
     optional<RationalTime> head, tail;
     auto                   neighbors = neighbors_of(child, error_status);
@@ -261,7 +261,7 @@ Track::range_of_all_children(ErrorStatus* error_status) const
     }
 
     RationalTime last_end_time(0, rate);
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto transition = dynamic_retainer_cast<Transition>(child))
         {
@@ -272,7 +272,8 @@ Track::range_of_all_children(ErrorStatus* error_status) const
         else if (auto item = dynamic_retainer_cast<Item>(child))
         {
             auto last_range = TimeRange(
-                last_end_time, item->trimmed_range(error_status).duration());
+                last_end_time,
+                item->trimmed_range(error_status).duration());
             result[child] = last_range;
             last_end_time = last_range.end_time_exclusive();
         }
@@ -300,7 +301,7 @@ Track::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<Imath::Box2d> box;
     bool                   found_first_clip = false;
-    for (auto child: children())
+    for (const auto& child: children())
     {
         if (auto clip = dynamic_cast<Clip*>(child.value))
         {

@@ -44,7 +44,7 @@ class SchemaDef(plugins.PythonPlugin):
         """Adds extra schemadef-specific information to call to the parent fn.
         """
 
-        result = super(SchemaDef, self).plugin_info_map()
+        result = super().plugin_info_map()
 
         features = collections.OrderedDict()
         for name in dir(self.module()):

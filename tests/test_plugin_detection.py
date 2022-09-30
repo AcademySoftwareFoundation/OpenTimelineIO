@@ -8,44 +8,30 @@ import os
 import pkg_resources
 import sys
 
-try:
-    # Python 3.3 forward includes the mock module
-    from unittest import mock
-    could_import_mock = True
-except ImportError:
-    # Fallback for older python (not included in standard library)
-    try:
-        import mock
-        could_import_mock = True
-    except ImportError:
-        # Mock appears to not be installed
-        could_import_mock = False
+from unittest import mock
 
-try:
-    # Python3:  use importlib.reload
-    from importlib import reload as import_reload
-except ImportError:
-    # Python2:
-    from imp import reload as import_reload
+from importlib import reload as import_reload
 
 import opentimelineio as otio
 from tests import baseline_reader
 
 
-@unittest.skipIf(
-    not could_import_mock,
-    "mock module not found. Install mock from pypi or use python >= 3.3."
-)
 class TestSetuptoolsPlugin(unittest.TestCase):
     def setUp(self):
         # Get the location of the mock plugin module metadata
         mock_module_path = os.path.join(
-            baseline_reader.path_to_baseline_directory(),
+            os.path.normpath(baseline_reader.path_to_baseline_directory()),
             'plugin_module',
         )
         self.mock_module_manifest_path = os.path.join(
             mock_module_path,
             "otio_jsonplugin",
+            "plugin_manifest.json"
+        )
+
+        self.override_adapter_manifest_path = os.path.join(
+            mock_module_path,
+            "otio_override_adapter",
             "plugin_manifest.json"
         )
 
@@ -68,7 +54,10 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         self.sys_patch.stop()
         self.entry_patcher.stop()
         if 'otio_mockplugin' in sys.modules:
-            del(sys.modules['otio_mockplugin'])
+            del sys.modules['otio_mockplugin']
+
+        if 'otio_override_adapter' in sys.modules:
+            del sys.modules['otio_override_adapter']
 
     def test_detect_plugin(self):
         """This manifest uses the plugin_manifest function"""
@@ -91,6 +80,28 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
+    def test_overrride_adapter(self):
+        # Test that entrypoint plugins load before builtin and contrib
+        man = otio.plugins.manifest.load_manifest()
+
+        # The override_adapter creates another cmx_3600 adapter
+        adapters = [adapter for adapter in man.adapters
+                    if adapter.name == "cmx_3600"]
+
+        # More then one cmx_3600 adapter should exist.
+        self.assertTrue(len(adapters) > 1)
+
+        # Override adapter should be the first adapter found
+        manifest = adapters[0].plugin_info_map().get('from manifest', None)
+        self.assertEqual(manifest, os.path.abspath(self.override_adapter_manifest_path))
+
+        self.assertTrue(
+            any(
+                True for p in man.source_files
+                if self.override_adapter_manifest_path in p
+            )
+        )
+
     def test_pkg_resources_disabled(self):
         os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"] = "1"
         import_reload(otio.plugins.manifest)
@@ -99,6 +110,10 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         # reload to ensure that it is triggered
         with self.assertRaises(AssertionError):
             self.test_detect_plugin()
+
+        # override adapter should not be loaded either
+        with self.assertRaises(AssertionError):
+            self.test_overrride_adapter()
 
         # remove the environment variable and reload again for usage in the
         # other tests

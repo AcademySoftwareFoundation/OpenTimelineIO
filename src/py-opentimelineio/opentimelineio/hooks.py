@@ -89,7 +89,7 @@ class HookScript(plugins.PythonPlugin):
     ):
         """HookScript plugin constructor."""
 
-        super(HookScript, self).__init__(name, execution_scope, filepath)
+        super().__init__(name, execution_scope, filepath)
 
     def run(self, in_timeline, argument_map={}):
         """Run the hook_function associated with this plugin."""
@@ -141,7 +141,7 @@ def available_hookscripts():
 
 
 def scripts_attached_to(hook):
-    """Return an editable list of all the hook scriptss that are attached to
+    """Return an editable list of all the hook scripts that are attached to
     the specified hook, in execution order.  Changing this list will change the
     order that scripts run in, and deleting a script will remove it from
     executing

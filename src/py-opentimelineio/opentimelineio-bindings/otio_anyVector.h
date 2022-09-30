@@ -14,7 +14,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
     static void throw_array_was_deleted() {
-        throw py::value_error("underlying C++ AnyVector object has been destroyed");
+        throw py::value_error("Underlying C++ AnyVector object has been destroyed");
     }
 
     struct Iterator {

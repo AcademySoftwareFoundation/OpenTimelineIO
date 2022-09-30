@@ -53,7 +53,8 @@ public:
     }
 
     TimeRange range_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const
     {
         return _tracks.value->range_of_child(child, error_status);
     }
@@ -105,7 +106,9 @@ Timeline::children_if(
     bool                shallow_search) const
 {
     return _tracks.value->children_if<T>(
-        error_status, search_range, shallow_search);
+        error_status,
+        search_range,
+        shallow_search);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

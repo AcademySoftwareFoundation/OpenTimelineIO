@@ -235,6 +235,13 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(it, decoded)
         self.assertEqual(decoded.metadata["foo"], it.metadata["foo"])
 
+        foo = it.metadata.pop("foo")
+        self.assertEqual(foo, "bar")
+        foo = it.metadata.pop("foo", "default")
+        self.assertEqual(foo, "default")
+        with self.assertRaises(KeyError):
+            it.metadata.pop("foo")
+
     def test_add_effect(self):
         tr = otio.opentime.TimeRange(
             duration=otio.opentime.RationalTime(10, 1)

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
@@ -8,13 +7,7 @@ import os
 import sys
 import unittest
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+import tempfile
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -59,18 +52,14 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(md["neg_smallest_int64"], -2147483648)
         self.assertEqual(md["negverybig"], -3450100000)
 
-        big_int_type = int
-        if sys.version_info[0] < 3:
-            big_int_type = long  # noqa: F821
-
         # from memory
         supported_integers = [
             # name       value to enter
-            ('minint32', -big_int_type(2**31 - 1)),
-            ('maxint32', big_int_type(2**31 - 1)),
-            ('maxuint32', big_int_type(2**32 - 1)),
-            ('minint64', -big_int_type(2**63 - 1)),
-            ('maxint64', big_int_type(2**63 - 1)),
+            ('minint32', -int(2**31 - 1)),
+            ('maxint32', int(2**31 - 1)),
+            ('maxuint32', int(2**32 - 1)),
+            ('minint64', -int(2**63 - 1)),
+            ('maxint64', int(2**63 - 1)),
         ]
 
         for (name, value) in supported_integers:
@@ -86,11 +75,11 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
             self.assertEqual(
                 type(md[name]),
-                big_int_type,
+                int,
                 "{} didn't match expected type: got {} expected {}".format(
                     name,
                     type(md[name]),
-                    big_int_type
+                    int
                 )
             )
 
@@ -161,7 +150,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             else:
                 self.assertTrue(
                     math.isnan(md[name]),
-                    "Expected {} to be a nan, got {}".format(name, md[name])
+                    f"Expected {name} to be a nan, got {md[name]}"
                 )
 
             self.assertEqual(
@@ -246,7 +235,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for (name, value, exc) in unsupported_values:
             with self.assertRaises(
                     exc,
-                    msg="Expected {} to raise an exception.".format(name)
+                    msg=f"Expected {name} to raise an exception."
             ):
                 md[name] = value
 
@@ -256,10 +245,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         md = result.tracks[0][0].metadata['unicode']
 
         utf8_test_str = "Viel glück und hab spaß!"
-
-        # python2
-        if sys.version_info[0] < 3:
-            utf8_test_str = utf8_test_str.decode('utf8')
 
         self.assertEqual(md['utf8'], utf8_test_str)
 
@@ -273,7 +258,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
 
-    @unittest.skipIf(sys.version_info < (3, 0), "unicode does funny things in python2")
     def test_unicode_file_name(self):
         with tempfile.TemporaryDirectory() as temp_dir:
 
@@ -556,6 +540,48 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(tl.audio_tracks()), 0)
         self.assertEqual(len(tl.video_tracks()), 0)
         self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
+
+    def test_children_if(self):
+        cl = otio.schema.Clip()
+        tr = otio.schema.Track()
+        tr.append(cl)
+        tl = otio.schema.Timeline()
+        tl.tracks.append(tr)
+        result = tl.children_if(otio.schema.Clip)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], cl)
+
+    def test_children_if_search_range(self):
+        range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0.0, 24.0),
+            otio.opentime.RationalTime(24.0, 24.0))
+        cl0 = otio.schema.Clip()
+        cl0.source_range = range
+        cl1 = otio.schema.Clip()
+        cl1.source_range = range
+        cl2 = otio.schema.Clip()
+        cl2.source_range = range
+        tr = otio.schema.Track()
+        tr.append(cl0)
+        tr.append(cl1)
+        tr.append(cl2)
+        tl = otio.schema.Timeline()
+        tl.tracks.append(tr)
+        result = tl.children_if(otio.schema.Clip, range)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], cl0)
+
+    def test_children_if_shallow_search(self):
+        cl = otio.schema.Clip()
+        tr = otio.schema.Track()
+        tr.append(cl)
+        tl = otio.schema.Timeline()
+        tl.tracks.append(tr)
+        result = tl.children_if(otio.schema.Clip, shallow_search=True)
+        self.assertEqual(len(result), 0)
+        result = tl.children_if(otio.schema.Clip, shallow_search=False)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0], cl)
 
 
 if __name__ == '__main__':

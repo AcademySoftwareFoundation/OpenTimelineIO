@@ -49,5 +49,7 @@
         "post_media_linker" : [],
         "pre_adapter_write" : [],
         "post_adapter_write" : []
+    },
+    "version_manifests": {
     }
 }

@@ -3,23 +3,23 @@ OpenTimelineIO
 [![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2018--2021-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.7%2C%203.8%2C%203.9%2C%203.10-blue)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2020--2023-lightgrey.svg)](http://www.vfxplatform.com/)
+![Supported Versions](https://img.shields.io/badge/python-3.7%2C%203.8%2C%203.9%2C%203.10-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2288/badge)](https://bestpractices.coreinfrastructure.org/projects/2288)
 
-Main web site: http://opentimeline.io/
+Links
+-----
 
-Documentation: https://opentimelineio.readthedocs.io/
-
-GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
-
-Discussion group: https://lists.aswf.io/g/otio-discussion
-
-Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
-To join, create an account here first: https://slack.aswf.io/
+* Main web site: http://opentimeline.io/
+* Documentation: https://opentimelineio.readthedocs.io/
+* GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
+* [Discussion group](https://lists.aswf.io/g/otio-discussion)
+* [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)
+  * To join, create an account here first: https://slack.aswf.io/
+* [Presentations](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki/Presentations)
 
 PUBLIC BETA NOTICE
 ------------------
@@ -33,17 +33,19 @@ Overview
 --------
 
 OpenTimelineIO is an interchange format and API for editorial cut information.
-OTIO is not a container format for media, rather it contains information about
-the order and length of cuts and references to external media.
+OTIO contains information about the order and length of cuts and
+ references to external media. It is not however, a container format for media.
 
-OTIO includes both a file format and an API for manipulating that format. It
-also includes a plugin architecture for writing adapters to convert
-from/to existing editorial timeline formats. It also implements a dependency-
-less library for dealing strictly with time, `opentime`.
+For integration with applications, the core OTIO library is implemented in C++
+and provides an in-memory data model, as well as library functions for
+interpreting, manipulating, and serializing that data model. Within the core is
+a dependency-less library for dealing strictly with time, `opentime`.
 
-You can provide adapters for your video editing tool or pipeline as needed.
-Each adapter allows for import/export between that proprietary tool and the
-OpenTimelineIO format.
+The project also supports an official python binding, which is intended to be
+an idiomatic and ergonomic binding for python developers.  The python binding
+includes a plugin system which supports a number of different types of plugins,
+most notably adapters, which can be used to read and write legacy formats into
+the OTIO data model.
 
 Documentation
 --------------
@@ -52,24 +54,25 @@ Documentation, including quick start, architecture, use cases, API docs, and muc
 Supported VFX Platforms
 -----------------
 The current release supports:
-- VFX platform 2021, 2020, 2019, 2018
-- Python 2.7 - 3.10
+- VFX platform 2023, 2022, 2021, 2020
+- Python 3.7 - 3.10
 
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)
 
-Adapters
---------
+Adapter Plugins
+---------------
 
-OpenTimelineIO supports, or plans to support, conversion adapters for many
-existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
+To provide interoperability with other file formats or applications lacking a
+native integration, the opentimelineio community has built a number of python
+adapter plugins. This includes Final Cut Pro XML, AAF, CMX 3600 EDL, and more.
 
-See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
+For more information about this, including supported formats, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
 Other Plugins
 -------------
 
-OTIO also supports several other kinds of plugins, for more information see:
+The OTIO python bindings also support several other kinds of plugins, for more information see:
 
 * [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.
 * [HookScripts](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-hookscript.html) - Scripts that can run at various points during OTIO execution (_ie_ before the media linker)
@@ -88,11 +91,43 @@ For detailed installation instructions and notes on how to run the included view
 Example Usage
 -------------
 
+C++:
+
+```c++
+#include <iostream>
+
+#include "opentimelineio/timeline.h"
+
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
+void
+main()
+{
+    otio::ErrorStatus err;
+    otio::SerializableObject::Retainer<otio::Timeline> tl(
+            dynamic_cast<otio::Timeline*>(
+                otio::Timeline::from_json_file("taco.otio", &err)
+        )
+    );
+    const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (
+            tl->clip_if()
+    );
+    for (const auto& cl : clips)
+    {
+        otio::RationalTime dur = cl->duration();
+        std::cout << "Name: " << cl->name() << " [";
+        std::cout << dur.value() << "/" << dur.rate() << "]" << std::endl;
+    }
+}
 ```
+
+Python:
+
+```python
 import opentimelineio as otio
 
 timeline = otio.adapters.read_from_file("foo.aaf")
-for clip in timeline.each_clip():
+for clip in timeline.clip_if():
   print(clip.name, clip.duration())
 ```
 
@@ -120,8 +155,8 @@ You can also install the PySide2 dependency with `python -m pip install .[view]`
 
 You may need to escape the `[` depending on your shell, `\[view\]` .
 
-Currently the code base is written against python 2.7, 3.7, 3.8 and 3.9,
-in keeping with the pep8 style.  We ask that before developers submit pull
+Currently the code base is written against python 3.7, 3.8, 3.9, and 3.10, in
+keeping with the pep8 style.  We ask that before developers submit pull
 request, they:
 
 - run `make test` -- to ensure that none of the unit tests were broken

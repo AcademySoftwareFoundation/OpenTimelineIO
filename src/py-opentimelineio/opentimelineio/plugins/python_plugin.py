@@ -126,7 +126,7 @@ class PythonPlugin(core.SerializableObject):
         with file_obj:
             # this will reload the module if it has already been loaded.
             mod = imp.load_module(
-                "opentimelineio.{}.{}".format(namespace, self.name),
+                f"opentimelineio.{namespace}.{self.name}",
                 file_obj,
                 pathname,
                 description
@@ -148,6 +148,6 @@ class PythonPlugin(core.SerializableObject):
         # collects the error handling into a common place.
         if not hasattr(self.module(), func_name):
             raise exceptions.AdapterDoesntSupportFunctionError(
-                "Sorry, {} doesn't support {}.".format(self.name, func_name)
+                f"Sorry, {self.name} doesn't support {func_name}."
             )
         return (getattr(self.module(), func_name)(**kwargs))

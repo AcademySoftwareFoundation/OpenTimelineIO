@@ -8,14 +8,7 @@ import opentimelineio as otio
 from tests import baseline_reader, utils
 
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
-
+import tempfile
 
 """Unit tests for the adapter plugin system."""
 
@@ -30,7 +23,7 @@ class TestAdapterSuffixes(unittest.TestCase):
         result = otio.adapters.suffixes_with_defined_adapters()
         self.assertIsNotNone(result)
         self.assertNotEqual(result, [])
-        self.assertNotEqual(result, set([]))
+        self.assertNotEqual(result, set())
 
 
 class TestPluginAdapters(unittest.TestCase):
@@ -47,8 +40,8 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertEqual(self.adp.name, "example")
         self.assertEqual(self.adp.execution_scope, "in process")
         self.assertEqual(self.adp.filepath, "example.py")
-        self.assertEqual(self.adp.suffixes[0], u"example")
-        self.assertEqual(list(self.adp.suffixes), [u'example'])
+        self.assertEqual(self.adp.suffixes[0], "example")
+        self.assertEqual(list(self.adp.suffixes), ['example'])
 
         self.assertMultiLineEqual(
             str(self.adp),
@@ -222,7 +215,8 @@ class TestPluginManifest(unittest.TestCase):
             if bak_env is not None:
                 os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
             else:
-                del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+                if "OTIO_PLUGIN_MANIFEST_PATH" in os.environ:
+                    del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
     def test_find_manifest_by_environment_variable(self):
         basename = "unittest.plugin_manifest.json"

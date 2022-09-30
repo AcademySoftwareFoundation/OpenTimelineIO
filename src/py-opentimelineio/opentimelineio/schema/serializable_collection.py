@@ -31,7 +31,8 @@ def __repr__(self):
 
 
 @add_method(_otio.SerializableCollection)
-def each_child(self, search_range=None, descended_from_type=_otio.Composable):
+def each_child(self, search_range=None, descended_from_type=_otio.Composable,
+               shallow_search=False):
     """ Generator that returns each child contained in the serializable
     collection in the order in which it is found.
 
@@ -42,13 +43,14 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
                                    with the search range will be yielded.
     :param type descended_from_type: if specified, only children who are a descendent
                                      of the descended_from_type will be yielded.
+    :param bool shallow_search: if True, will only search children of self and not
+                                recurse into children of children.
     """
-    for child in self.children_if(descended_from_type, search_range):
-        yield child
+    yield from self.children_if(descended_from_type, search_range, shallow_search)
 
 
 @add_method(_otio.SerializableCollection)
-def each_clip(self, search_range=None):
+def each_clip(self, search_range=None, shallow_search=False):
     """ Generator that returns each clip contained in the serializable
     collection in the order in which it is found.
 
@@ -57,6 +59,7 @@ def each_clip(self, search_range=None):
 
     :param TimeRange search_range: if specified, only children whose range overlaps
                                    with the search range will be yielded.
+    :param bool shallow_search: if True, will only search children of self and not
+                                recurse into children of children.
     """
-    for child in self.clip_if(search_range):
-        yield child
+    yield from self.clip_if(search_range, shallow_search)

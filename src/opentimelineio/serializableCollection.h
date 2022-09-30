@@ -5,6 +5,7 @@
 
 #include "opentimelineio/composition.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
+#include "opentimelineio/timeline.h"
 #include "opentimelineio/version.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -98,8 +99,8 @@ SerializableCollection::children_if(
             out.push_back(valid_child);
         }
 
-        // if not a shallow_search, for children that are serialiable collections or compositions,
-        // recurse into their children
+        // if not a shallow_search, for children that are serializable collections,
+        // compositions, or timelines, recurse into their children
         if (!shallow_search)
         {
             if (auto collection =
@@ -120,6 +121,19 @@ SerializableCollection::children_if(
             {
                 const auto valid_children =
                     composition->children_if<T>(error_status, search_range);
+                if (is_error(error_status))
+                {
+                    return out;
+                }
+                for (const auto& valid_child: valid_children)
+                {
+                    out.push_back(valid_child);
+                }
+            }
+            else if (auto timeline = dynamic_cast<Timeline*>(child.value))
+            {
+                const auto valid_children =
+                    timeline->children_if<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;

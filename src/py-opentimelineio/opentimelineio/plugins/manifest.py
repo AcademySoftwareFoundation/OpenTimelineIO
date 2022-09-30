@@ -32,6 +32,7 @@ OTIO_PLUGIN_TYPES = [
     'schemadefs',
     'hook_scripts',
     'hooks',
+    'version_manifests',
 ]
 
 
@@ -55,10 +56,10 @@ def manifest_from_string(input_string):
     stack = inspect.stack()
     if len(stack) > 1 and len(stack[1]) > 3:
         #                     filename     function name
-        name = "{}:{}".format(stack[1][1], stack[1][3])
+        name = f"{stack[1][1]}:{stack[1][3]}"
 
     # set the value in the manifest
-    src_string = "call to manifest_from_string() in {}".format(name)
+    src_string = f"call to manifest_from_string() in {name}"
     result.source_files.append(src_string)
     result._update_plugin_source(src_string)
 
@@ -90,6 +91,8 @@ class Manifest(core.SerializableObject):
         self.hooks = {}
         self.hook_scripts = []
 
+        self.version_manifests = {}
+
     adapters = core.serializable_field(
         "adapters",
         type([]),
@@ -115,6 +118,11 @@ class Manifest(core.SerializableObject):
         type([]),
         "Scripts that can be attached to hooks."
     )
+    version_manifests = core.serializable_field(
+        "version_manifests",
+        type({}),
+        "Sets of versions to downgrade schemas to."
+    )
 
     def extend(self, another_manifest):
         """
@@ -131,7 +139,17 @@ class Manifest(core.SerializableObject):
         self.media_linkers.extend(another_manifest.media_linkers)
         self.hook_scripts.extend(another_manifest.hook_scripts)
 
+        for family, label_map in another_manifest.version_manifests.items():
+            # because self.version_manifests is an AnyDictionary instead of a
+            # vanilla python dictionary, it does not support the .set_default()
+            # method.
+            if family not in self.version_manifests:
+                self.version_manifests[family] = {}
+            self.version_manifests[family].update(label_map)
+
         for trigger_name, hooks in another_manifest.hooks.items():
+            # because self.hooks is an AnyDictionary instead of a vanilla
+            # python dictionary, it does not support the .set_default() method.
             if trigger_name not in self.hooks:
                 self.hooks[trigger_name] = []
             self.hooks[trigger_name].extend(hooks)
@@ -198,14 +216,14 @@ _MANIFEST = None
 
 
 def load_manifest():
-    """ Walk the plugin manifest discovery systems and accumulate manifests.
+    """Walk the plugin manifest discovery systems and accumulate manifests.
 
     The order of loading (and precedence) is:
 
-       1. manifests specfied via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
-       2. builtin plugin manifest
-       3. contrib plugin manifest
-       4. ``setuptools.pkg_resources`` based plugin manifests
+       1. Manifests specified via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
+       2. Entrypoint based plugin manifests
+       3. Builtin plugin manifest
+       4. Contrib plugin manifest
     """
 
     result = Manifest()
@@ -231,32 +249,6 @@ def load_manifest():
                 continue
 
             result.extend(manifest_from_file(json_path))
-
-    # the builtin plugin manifest
-    builtin_manifest_path = os.path.join(
-        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
-        "adapters",
-        "builtin_adapters.plugin_manifest.json"
-    )
-    if os.path.abspath(builtin_manifest_path) not in result.source_files:
-        plugin_manifest = manifest_from_file(builtin_manifest_path)
-        result.extend(plugin_manifest)
-
-    # the contrib plugin manifest (located in the opentimelineio_contrib package)
-    try:
-        import opentimelineio_contrib as otio_c
-
-        contrib_manifest_path = os.path.join(
-            os.path.dirname(inspect.getsourcefile(otio_c)),
-            "adapters",
-            "contrib_adapters.plugin_manifest.json"
-        )
-        if os.path.abspath(contrib_manifest_path) not in result.source_files:
-            contrib_manifest = manifest_from_file(contrib_manifest_path)
-            result.extend(contrib_manifest)
-
-    except ImportError:
-        pass
 
     # setuptools.pkg_resources based plugins
     if pkg_resources:
@@ -314,7 +306,7 @@ def load_manifest():
 
             except Exception:
                 logging.exception(
-                    "could not load plugin: {}".format(plugin_name)
+                    f"could not load plugin: {plugin_name}"
                 )
                 continue
 
@@ -322,6 +314,32 @@ def load_manifest():
     else:
         # XXX: Should we print some kind of warning that pkg_resources isn't
         #        available?
+        pass
+
+    # the builtin plugin manifest
+    builtin_manifest_path = os.path.join(
+        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
+        "adapters",
+        "builtin_adapters.plugin_manifest.json"
+    )
+    if os.path.abspath(builtin_manifest_path) not in result.source_files:
+        plugin_manifest = manifest_from_file(builtin_manifest_path)
+        result.extend(plugin_manifest)
+
+    # the contrib plugin manifest (located in the opentimelineio_contrib package)
+    try:
+        import opentimelineio_contrib as otio_c
+
+        contrib_manifest_path = os.path.join(
+            os.path.dirname(inspect.getsourcefile(otio_c)),
+            "adapters",
+            "contrib_adapters.plugin_manifest.json"
+        )
+        if os.path.abspath(contrib_manifest_path) not in result.source_files:
+            contrib_manifest = manifest_from_file(contrib_manifest_path)
+            result.extend(contrib_manifest)
+
+    except ImportError:
         pass
 
     # force the schemadefs to load and add to schemadef module namespace

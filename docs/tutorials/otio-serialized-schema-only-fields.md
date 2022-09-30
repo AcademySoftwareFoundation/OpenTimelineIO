@@ -121,6 +121,7 @@ parameters:
 - *hooks*
 - *media_linkers*
 - *schemadefs*
+- *version_manifests*
 
 ### SerializableObject.1
 

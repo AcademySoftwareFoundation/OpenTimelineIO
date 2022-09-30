@@ -5,23 +5,15 @@
 
 import os
 
-try:
-    # Python 2.7
-    import urlparse
-    import urllib
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
-    from urllib import request as urllib
-
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
+from urllib import (
+    parse as urlparse,
+    request
+)
+import pathlib
 
 
 def url_from_filepath(fpath):
-    """convert a filesystem path to an url in a portable way using / path sep"""
+    """Convert a filesystem path to an url in a portable way using / path sep"""
 
     try:
         # appears to handle absolute windows paths better, which are absolute
@@ -46,5 +38,6 @@ def url_from_filepath(fpath):
 
 def filepath_from_url(urlstr):
     """ Take a url and return a filepath """
+
     parsed_result = urlparse.urlparse(urlstr)
-    return urllib.url2pathname(parsed_result.path)
+    return request.url2pathname(parsed_result.path)

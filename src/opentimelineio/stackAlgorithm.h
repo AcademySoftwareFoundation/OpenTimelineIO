@@ -11,6 +11,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status = nullptr);
 Track* flatten_stack(
-    std::vector<Track*> const& tracks, ErrorStatus* error_status = nullptr);
+    std::vector<Track*> const& tracks,
+    ErrorStatus*               error_status = nullptr);
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

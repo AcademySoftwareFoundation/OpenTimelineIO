@@ -68,8 +68,8 @@ double
 RationalTime::nearest_valid_timecode_rate(double rate)
 {
     double nearest_rate = 0;
-    double min_diff = std::numeric_limits<double>::max();
-    for (auto valid_rate : smpte_timecode_rates)
+    double min_diff     = std::numeric_limits<double>::max();
+    for (auto valid_rate: smpte_timecode_rates)
     {
         if (valid_rate == rate)
         {
@@ -80,7 +80,7 @@ RationalTime::nearest_valid_timecode_rate(double rate)
         {
             continue;
         }
-        min_diff = diff;
+        min_diff     = diff;
         nearest_rate = valid_rate;
     }
     return nearest_rate;
@@ -94,9 +94,111 @@ is_dropframe_rate(double rate)
     return std::find(b, e, rate) != e;
 }
 
+static bool
+parseFloat(
+    char const* pCurr,
+    char const* pEnd,
+    bool        allow_negative,
+    double*     result)
+{
+    if (pCurr >= pEnd || !pCurr)
+    {
+        *result = 0.0;
+        return false;
+    }
+
+    double ret  = 0.0;
+    double sign = 1.0;
+
+    if (*pCurr == '+')
+    {
+        ++pCurr;
+    }
+    else if (*pCurr == '-')
+    {
+        if (!allow_negative)
+        {
+            *result = 0.0;
+            return false;
+        }
+        sign = -1.0;
+        ++pCurr;
+    }
+
+    // get integer part
+    //
+    // Note that uint64_t is used because overflow is well defined for
+    // unsigned integers, but it is undefined behavior for signed integers,
+    // and floating point values are couched in the specification with
+    // the caveat that an implementation may be IEEE-754 compliant, or only
+    // partially compliant.
+    //
+    uint64_t uintPart = 0;
+    while (pCurr < pEnd)
+    {
+        char c = *pCurr;
+        if (c < '0' || c > '9')
+        {
+            break;
+        }
+        uint64_t accumulated = uintPart * 10 + c - '0';
+        if (accumulated < uintPart)
+        {
+            // if there are too many digits, resulting in an overflow, fail
+            *result = 0.0;
+            return false;
+        }
+        uintPart = accumulated;
+        ++pCurr;
+    }
+
+    ret = static_cast<double>(uintPart);
+    if (uintPart != static_cast<uint64_t>(ret))
+    {
+        // if the double cannot be casted precisely back to uint64_t, fail
+        // A double has 15 digits of precision, but a uint64_t can encode more.
+        *result = 0.0;
+        return false;
+    }
+
+    // check for end of string or delimiter
+    if (pCurr == pEnd || *pCurr == '\0')
+    {
+        *result = sign * ret;
+        return true;
+    }
+
+    // if the next character is not a decimal point, the string is malformed.
+    if (*pCurr != '.')
+    {
+        *result = 0.0; // zero consistent with earlier error condition
+        return false;
+    }
+
+    ++pCurr; // skip decimal
+
+    double position_scale = 0.1;
+    while (pCurr < pEnd)
+    {
+        char c = *pCurr;
+        if (c < '0' || c > '9')
+        {
+            break;
+        }
+        ret = ret + static_cast<double>(c - '0') * position_scale;
+        ++pCurr;
+        position_scale *= 0.1;
+    }
+
+    *result = sign * ret;
+    return true;
+}
+
 RationalTime
 RationalTime::from_timecode(
-    std::string const& timecode, double rate, ErrorStatus* error_status)
+    std::string const& timecode,
+    double             rate,
+    ErrorStatus*       error_status)
 {
     if (!RationalTime::is_valid_timecode_rate(rate))
     {
@@ -150,7 +252,7 @@ RationalTime::from_timecode(
         seconds = std::stoi(fields[2]);
         frames  = std::stoi(fields[3]);
     }
-    catch (std::exception const& e)
+    catch (std::exception const&)
     {
         if (error_status)
         {
@@ -198,67 +300,149 @@ RationalTime::from_timecode(
 
     // convert to frames
     const int value =
-        (((total_minutes * 60) + seconds) * nominal_fps + frames -
-         (dropframes *
-          (total_minutes - static_cast<int>(std::floor(total_minutes / 10)))));
+        (((total_minutes * 60) + seconds) * nominal_fps + frames
+         - (dropframes
+            * (total_minutes
+               - static_cast<int>(std::floor(total_minutes / 10)))));
 
     return RationalTime{ double(value), rate };
 }
 
+static void
+set_error(
+    std::string const&   time_string,
+    ErrorStatus::Outcome code,
+    ErrorStatus*         err)
+{
+    if (err)
+    {
+        *err = ErrorStatus(
+            code,
+            string_printf(
+                "Error: '%s' - %s",
+                time_string.c_str(),
+                ErrorStatus::outcome_to_string(code).c_str()));
+    }
+}
+
 RationalTime
 RationalTime::from_time_string(
-    std::string const& time_string, double rate, ErrorStatus* error_status)
+    std::string const& time_string,
+    double             rate,
+    ErrorStatus*       error_status)
 {
     if (!RationalTime::is_valid_timecode_rate(rate))
     {
-        if (error_status)
-        {
-            *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
-        }
+        set_error(
+            time_string,
+            ErrorStatus::INVALID_TIMECODE_RATE,
+            error_status);
         return RationalTime::_invalid_time;
     }
 
-    std::vector<std::string> fields(3, std::string());
+    const char* start          = time_string.data();
+    const char* end            = start + time_string.length();
+    char*       current        = const_cast<char*>(end);
+    char*       parse_end      = current;
+    char*       prev_parse_end = current;
 
-    // split the fields
-    int last_pos = 0;
+    double power[3] = {
+        1.0,   // seconds
+        60.0,  // minutes
+        3600.0 // hours
+    };
 
-    for (int i = 0; i < 2; i++)
+    double accumulator = 0.0;
+    int    radix       = 0;
+    while (start <= current)
     {
-        fields[i] = time_string.substr(last_pos, 2);
-        last_pos  = last_pos + 3;
-    }
-
-    fields[2] = time_string.substr(last_pos, time_string.length());
-
-    double hours, minutes, seconds;
-
-    try
-    {
-        hours   = std::stod(fields[0]);
-        minutes = std::stod(fields[1]);
-        seconds = std::stod(fields[2]);
-    }
-    catch (std::exception const& e)
-    {
-        if (error_status)
+        if (*current == ':')
         {
-            *error_status = ErrorStatus(
+            parse_end = current + 1;
+            char c    = *parse_end;
+            if (c != '\0' && c != ':')
+            {
+                if (c < '0' || c > '9')
+                {
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
+                    return RationalTime::_invalid_time;
+                }
+                double val = 0.0;
+                if (!parseFloat(parse_end, prev_parse_end + 1, false, &val))
+                {
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
+                    return RationalTime::_invalid_time;
+                }
+                prev_parse_end = nullptr;
+                if (radix < 2 && val >= 60.0)
+                {
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
+                    return RationalTime::_invalid_time;
+                }
+                accumulator += val * power[radix];
+            }
+            ++radix;
+            if (radix == sizeof(power) / sizeof(power[0]))
+            {
+                set_error(
+                    time_string,
+                    ErrorStatus::INVALID_TIME_STRING,
+                    error_status);
+                return RationalTime::_invalid_time;
+            }
+        }
+        else if (
+            current < prev_parse_end && (*current < '0' || *current > '9')
+            && *current != '.')
+        {
+            set_error(
+                time_string,
                 ErrorStatus::INVALID_TIME_STRING,
-                string_printf(
-                    "Input time string '%s' is an invalid time string",
-                    time_string.c_str()));
+                error_status);
+            return RationalTime::_invalid_time;
         }
-        return RationalTime::_invalid_time;
+
+        if (start == current)
+        {
+            if (prev_parse_end)
+            {
+                double val = 0.0;
+                if (!parseFloat(start, prev_parse_end + 1, true, &val))
+                {
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
+                    return RationalTime::_invalid_time;
+                }
+                accumulator += val * power[radix];
+            }
+            break;
+        }
+        --current;
+        if (!prev_parse_end)
+        {
+            prev_parse_end = current;
+        }
     }
 
-    return from_seconds(seconds + minutes * 60 + hours * 60 * 60)
-        .rescaled_to(rate);
+    return from_seconds(accumulator).rescaled_to(rate);
 }
 
 std::string
 RationalTime::to_timecode(
-    double rate, IsDropFrameRate drop_frame, ErrorStatus* error_status) const
+    double          rate,
+    IsDropFrameRate drop_frame,
+    ErrorStatus*    error_status) const
 {
     if (error_status)
     {
@@ -354,10 +538,11 @@ RationalTime::to_timecode(
 
         if (frames_over_ten_minutes > dropframes)
         {
-            value += (dropframes * 9 * ten_minute_chunks) +
-                     dropframes * std::floor(
-                                      (frames_over_ten_minutes - dropframes) /
-                                      frames_per_minute);
+            value += (dropframes * 9 * ten_minute_chunks)
+                     + dropframes
+                           * std::floor(
+                               (frames_over_ten_minutes - dropframes)
+                               / frames_per_minute);
         }
         else
         {
@@ -377,7 +562,12 @@ RationalTime::to_timecode(
         static_cast<int>(std::floor(std::floor(seconds_total / 60) / 60));
 
     return string_printf(
-        "%02d:%02d:%02d%c%02d", hours, minutes, seconds, div, frames);
+        "%02d:%02d:%02d%c%02d",
+        hours,
+        minutes,
+        seconds,
+        div,
+        frames);
 }
 
 std::string

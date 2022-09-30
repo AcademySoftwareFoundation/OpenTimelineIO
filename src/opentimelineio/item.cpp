@@ -75,7 +75,8 @@ Item::visible_range(ErrorStatus* error_status) const
         if (head_tail.second)
         {
             result = TimeRange(
-                result.start_time(), result.duration() + *head_tail.second);
+                result.start_time(),
+                result.duration() + *head_tail.second);
         }
     }
     return result;
@@ -107,7 +108,9 @@ Item::range_in_parent(ErrorStatus* error_status) const
 
 RationalTime
 Item::transformed_time(
-    RationalTime time, Item const* to_item, ErrorStatus* error_status) const
+    RationalTime time,
+    Item const*  to_item,
+    ErrorStatus* error_status) const
 {
     if (!to_item)
     {
@@ -157,7 +160,9 @@ Item::transformed_time(
 
 TimeRange
 Item::transformed_time_range(
-    TimeRange time_range, Item const* to_item, ErrorStatus* error_status) const
+    TimeRange    time_range,
+    Item const*  to_item,
+    ErrorStatus* error_status) const
 {
     return TimeRange(
         transformed_time(time_range.start_time(), to_item, error_status),
@@ -167,11 +172,11 @@ Item::transformed_time_range(
 bool
 Item::read_from(Reader& reader)
 {
-    return reader.read_if_present("source_range", &_source_range) &&
-           reader.read_if_present("effects", &_effects) &&
-           reader.read_if_present("markers", &_markers) &&
-           reader.read_if_present("enabled", &_enabled) &&
-           Parent::read_from(reader);
+    return reader.read_if_present("source_range", &_source_range)
+           && reader.read_if_present("effects", &_effects)
+           && reader.read_if_present("markers", &_markers)
+           && reader.read_if_present("enabled", &_enabled)
+           && Parent::read_from(reader);
 }
 
 void

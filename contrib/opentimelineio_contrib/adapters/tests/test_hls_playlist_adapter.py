@@ -6,14 +6,7 @@ import unittest
 
 import opentimelineio as otio
 
-
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+import tempfile
 
 # Reference data
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -327,7 +320,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
 
         # Configure the playlist to be an iframe list
         track_hls_metadata = timeline.tracks[0].metadata['HLS']
-        del(track_hls_metadata['EXT-X-INDEPENDENT-SEGMENTS'])
+        del track_hls_metadata['EXT-X-INDEPENDENT-SEGMENTS']
         track_hls_metadata['EXT-X-I-FRAMES-ONLY'] = None
 
         # Write out the playlist
@@ -426,7 +419,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
                 pl_string = f.read()
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_MASTER_PLAYLIST_REF_VALUE)
@@ -698,7 +691,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
                 pl_string = f.read()
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE)

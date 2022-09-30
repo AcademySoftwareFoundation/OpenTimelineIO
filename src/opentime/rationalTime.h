@@ -38,7 +38,7 @@ public:
         , _rate{ rate }
     {}
 
-    constexpr RationalTime(RationalTime const&) noexcept = default;
+    constexpr RationalTime(RationalTime const&) noexcept  = default;
     RationalTime& operator=(RationalTime const&) noexcept = default;
 
     bool is_invalid_time() const noexcept
@@ -77,28 +77,30 @@ public:
     }
 
     static RationalTime constexpr duration_from_start_end_time(
-        RationalTime start_time, RationalTime end_time_exclusive) noexcept
+        RationalTime start_time,
+        RationalTime end_time_exclusive) noexcept
     {
         return start_time._rate == end_time_exclusive._rate
-                   ? RationalTime{ end_time_exclusive._value -
-                                       start_time._value,
+                   ? RationalTime{ end_time_exclusive._value
+                                       - start_time._value,
                                    start_time._rate }
                    : RationalTime{ end_time_exclusive.value_rescaled_to(
-                                       start_time) -
-                                       start_time._value,
+                                       start_time)
+                                       - start_time._value,
                                    start_time._rate };
     }
 
     static RationalTime constexpr duration_from_start_end_time_inclusive(
-        RationalTime start_time, RationalTime end_time_inclusive) noexcept
+        RationalTime start_time,
+        RationalTime end_time_inclusive) noexcept
     {
         return start_time._rate == end_time_inclusive._rate
-                   ? RationalTime{ end_time_inclusive._value -
-                                       start_time._value + 1,
+                   ? RationalTime{ end_time_inclusive._value - start_time._value
+                                       + 1,
                                    start_time._rate }
                    : RationalTime{ end_time_inclusive.value_rescaled_to(
-                                       start_time) -
-                                       start_time._value + 1,
+                                       start_time)
+                                       - start_time._value + 1,
                                    start_time._rate };
     }
 
@@ -127,6 +129,11 @@ public:
         std::string const& timecode,
         double             rate,
         ErrorStatus*       error_status = nullptr);
+
+    // parse a string in the form
+    // hours:minutes:seconds
+    // which may have a leading negative sign. seconds may have up to
+    // microsecond precision.
     static RationalTime from_time_string(
         std::string const& time_string,
         double             rate,
@@ -154,9 +161,13 @@ public:
         return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
 
+    // produce a string in the form
+    // hours:minutes:seconds
+    // which may have a leading negative sign. seconds may have up to
+    // microsecond precision.
     std::string to_time_string() const;
 
-   RationalTime const& operator+=(RationalTime other) noexcept
+    RationalTime const& operator+=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {
@@ -170,7 +181,7 @@ public:
         return *this;
     }
 
-   RationalTime const& operator-=(RationalTime other) noexcept
+    RationalTime const& operator-=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {
@@ -188,11 +199,11 @@ public:
     operator+(RationalTime lhs, RationalTime rhs) noexcept
     {
         return (lhs._rate < rhs._rate)
-                   ? RationalTime{ lhs.value_rescaled_to(rhs._rate) +
-                                       rhs._value,
+                   ? RationalTime{ lhs.value_rescaled_to(rhs._rate)
+                                       + rhs._value,
                                    rhs._rate }
-                   : RationalTime{ rhs.value_rescaled_to(lhs._rate) +
-                                       lhs._value,
+                   : RationalTime{ rhs.value_rescaled_to(lhs._rate)
+                                       + lhs._value,
                                    lhs._rate };
     }
 
@@ -200,11 +211,11 @@ public:
     operator-(RationalTime lhs, RationalTime rhs) noexcept
     {
         return (lhs._rate < rhs._rate)
-                   ? RationalTime{ lhs.value_rescaled_to(rhs._rate) -
-                                       rhs._value,
+                   ? RationalTime{ lhs.value_rescaled_to(rhs._rate)
+                                       - rhs._value,
                                    rhs._rate }
-                   : RationalTime{ lhs._value -
-                                       rhs.value_rescaled_to(lhs._rate),
+                   : RationalTime{ lhs._value
+                                       - rhs.value_rescaled_to(lhs._rate),
                                    lhs._rate };
     }
 

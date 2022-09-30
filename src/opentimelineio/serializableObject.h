@@ -14,11 +14,14 @@
 #include "opentimelineio/version.h"
 
 #include "ImathBox.h"
+#include "serialization.h"
 
 #include <list>
-#include <type_traits>
+#include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+class CloningEncoder;
 
 class SerializableObject
 {
@@ -35,7 +38,7 @@ public:
      * You cannot directly delete a SerializableObject* (or, hopefully, anything
      * derived from it, as all derivations are required to protect the destructor).
      *
-     * Instead, call the member funtion possibly_delete(), which deletes the object
+     * Instead, call the member function possibly_delete(), which deletes the object
      * (and, recursively, the objects owned by this object), provided the objects
      * are not under external management (e.g. prevented from being deleted because an
      * external scripting system is holding a reference to them).
@@ -43,16 +46,22 @@ public:
     bool possibly_delete();
 
     bool to_json_file(
-        std::string const& file_name,
-        ErrorStatus*       error_status = nullptr,
-        int                indent       = 4) const;
-    std::string
-    to_json_string(ErrorStatus* error_status = nullptr, int indent = 4) const;
+        std::string const&        file_name,
+        ErrorStatus*              error_status             = nullptr,
+        const schema_version_map* target_family_label_spec = nullptr,
+        int                       indent                   = 4) const;
+
+    std::string to_json_string(
+        ErrorStatus*              error_status             = nullptr,
+        const schema_version_map* target_family_label_spec = nullptr,
+        int                       indent                   = 4) const;
 
     static SerializableObject* from_json_file(
-        std::string const& file_name, ErrorStatus* error_status = nullptr);
+        std::string const& file_name,
+        ErrorStatus*       error_status = nullptr);
     static SerializableObject* from_json_string(
-        std::string const& input, ErrorStatus* error_status = nullptr);
+        std::string const& input,
+        ErrorStatus*       error_status = nullptr);
 
     bool is_equivalent_to(SerializableObject const& other) const;
 
@@ -63,7 +72,7 @@ public:
     // is set appropriately.
     SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
 
-    // Allow external system (e.g. Python, Swifft) to add serializable fields
+    // Allow external system (e.g. Python, Swift) to add serializable fields
     // on the fly.  C++ implementations should have no need for this functionality.
     AnyDictionary& dynamic_fields() { return _dynamic_fields; }
 
@@ -140,10 +149,10 @@ public:
             _error(ErrorStatus(
                 ErrorStatus::TYPE_MISMATCH,
                 std::string(
-                    "Expected object of type " +
-                    fwd_type_name_for_error_message(typeid(T)) +
-                    "; read type " + fwd_type_name_for_error_message(so) +
-                    " instead")));
+                    "Expected object of type "
+                    + fwd_type_name_for_error_message(typeid(T))
+                    + "; read type " + fwd_type_name_for_error_message(so)
+                    + " instead")));
             return false;
         }
 
@@ -182,7 +191,10 @@ public:
                 {
                     int line_number = line_number_for_object[e.first];
                     Reader::_fix_reference_ids(
-                        e.second, error_function, *this, line_number);
+                        e.second,
+                        error_function,
+                        *this,
+                        line_number);
                     Reader r(e.second, error_function, e.first, line_number);
                     e.first->read_from(r);
                 }
@@ -373,7 +385,7 @@ public:
             _Resolver&,
             int line_number);
 
-        Reader(Reader const&) = delete;
+        Reader(Reader const&)           = delete;
         Reader operator=(Reader const&) = delete;
 
         AnyDictionary           _dict;
@@ -392,9 +404,10 @@ public:
     {
     public:
         static bool write_root(
-            any const&     value,
-            class Encoder& encoder,
-            ErrorStatus*   error_status = nullptr);
+            any const&                value,
+            class Encoder&            encoder,
+            const schema_version_map* downgrade_version_manifest = nullptr,
+            ErrorStatus*              error_status               = nullptr);
 
         void write(std::string const& key, bool value);
         void write(std::string const& key, int64_t value);
@@ -440,7 +453,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -452,7 +465,7 @@ public:
         static any _to_any(std::map<std::string, T> const& value)
         {
             AnyDictionary am;
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 am.emplace(e.first, _to_any(e.second));
             }
@@ -466,7 +479,7 @@ public:
             AnyVector av;
             av.reserve(value.size());
 
-            for (auto e: value)
+            for (const auto& e: value)
             {
                 av.emplace_back(_to_any(e));
             }
@@ -502,13 +515,19 @@ public:
         }
         ///@}
 
-        Writer(class Encoder& encoder)
+        Writer(
+            class Encoder&            encoder,
+            const schema_version_map* downgrade_version_manifest)
             : _encoder(encoder)
+            , _downgrade_version_manifest(downgrade_version_manifest)
+
         {
             _build_dispatch_tables();
         }
 
-        Writer(Writer const&) = delete;
+        ~Writer();
+
+        Writer(Writer const&)           = delete;
         Writer operator=(Writer const&) = delete;
 
         void _build_dispatch_tables();
@@ -520,19 +539,26 @@ public:
         bool _any_equals(any const& lhs, any const& rhs);
 
         std::string _no_key;
-        std::map<std::type_info const*, std::function<void(any const&)>>
+        std::unordered_map<
+            std::type_info const*,
+            std::function<void(any const&)>>
             _write_dispatch_table;
-        std::map<
+        std::unordered_map<
             std::type_info const*,
             std::function<bool(any const&, any const&)>>
             _equality_dispatch_table;
 
-        std::map<std::string, std::function<void(any const&)>>
+        std::unordered_map<std::string, std::function<void(any const&)>>
             _write_dispatch_table_by_name;
-        std::map<SerializableObject const*, std::string> _id_for_object;
-        std::map<std::string, int>                       _next_id_for_type;
+        std::unordered_map<SerializableObject const*, std::string>
+                                             _id_for_object;
+        std::unordered_map<std::string, int> _next_id_for_type;
 
-        class Encoder& _encoder;
+        Writer*         _child_writer          = nullptr;
+        CloningEncoder* _child_cloning_encoder = nullptr;
+
+        class Encoder&            _encoder;
+        const schema_version_map* _downgrade_version_manifest;
         friend class SerializableObject;
     };
 
@@ -603,7 +629,7 @@ protected:
     virtual bool _is_deletable();
 
 private:
-    SerializableObject(SerializableObject const&) = delete;
+    SerializableObject(SerializableObject const&)            = delete;
     SerializableObject& operator=(SerializableObject const&) = delete;
     template <typename T>
     friend struct Retainer;
@@ -624,7 +650,8 @@ public:
     };
 
     void install_external_keepalive_monitor(
-        std::function<void()> monitor, bool apply_now);
+        std::function<void()> monitor,
+        bool                  apply_now);
 
     int current_ref_count() const;
 

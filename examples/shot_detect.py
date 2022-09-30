@@ -82,7 +82,7 @@ def _media_start_end_of(media_path, fps):
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {0}, output: {1}".format(
+            "FFProbe Failed with error: {}, output: {}".format(
                 err, out
             )
         )
@@ -158,7 +158,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
         ).rescaled_to(fps)
 
         clip = otio.schema.Clip()
-        clip.name = "shot {0}".format(shot_index)
+        clip.name = f"shot {shot_index}"
         clip.source_range = otio.opentime.range_from_start_end_time(
             start_time,
             end_time_exclusive
@@ -196,7 +196,7 @@ def _verify_ffprobe():
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {0}, output: {1}".format(
+            "FFProbe Failed with error: {}, output: {}".format(
                 err, out
             )
         )
@@ -209,14 +209,16 @@ def _ffprobe_fps(name, full_path, dryrun=False):
         name,
         full_path,
         dryrun,
-        arguments=["{0}".format(full_path)],
+        arguments=[f"{full_path}"],
         message="framerate"
     )
 
     if dryrun:
         return 1.0
 
-    for line in err.split('\n'):
+    err_str = err.decode("utf-8")
+
+    for line in err_str.split('\n'):
         if not ("Stream" in line and "Video" in line):
             continue
 
@@ -245,11 +247,11 @@ def _ffprobe_output(
         "compact=p=0",
         "-f",
         "lavfi",
-        "movie={0},select=gt(scene\\,.1)".format(full_path)
+        f"movie={full_path},select=gt(scene\\,.1)"
     ]
 
     if message:
-        print("Scanning {0} for {1}...".format(name, message))
+        print(f"Scanning {name} for {message}...")
 
     cmd = ["ffprobe"] + arguments
 
@@ -264,7 +266,7 @@ def _ffprobe_output(
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {0}, output: {1}".format(
+            "FFProbe Failed with error: {}, output: {}".format(
                 err, out
             )
         )
@@ -293,7 +295,7 @@ def main():
         otio_filename = os.path.splitext(name)[0] + ".otio"
         otio.adapters.write_to_file(new_tl, otio_filename)
         print(
-            "SAVED: {0} with {1} clips.".format(
+            "SAVED: {} with {} clips.".format(
                 otio_filename,
                 len(new_tl.tracks[0])
             )

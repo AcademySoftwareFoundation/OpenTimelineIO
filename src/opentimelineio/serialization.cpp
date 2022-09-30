@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
+#include "opentimelineio/serialization.h"
+#include "errorStatus.h"
+#include "nonstd/optional.hpp"
+#include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
+#include <cstddef>
+#include <string>
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/ostreamwrapper.h>
@@ -51,6 +57,8 @@ public:
 
     bool has_errored() { return is_error(_error_status); }
 
+    virtual bool encoding_to_anydict() { return false; }
+
     virtual void start_object() = 0;
     virtual void end_object()   = 0;
 
@@ -83,23 +91,38 @@ private:
 };
 
 /**
- * This encoder builds up a dictionary as its method of "encoding".
+ * This encoder builds up a AnyDictionary as its method of "encoding".
  * The dictionary is than handed off to a CloningDecoder, to complete
  * copying of a SerializableObject instance.
  */
 class CloningEncoder : public Encoder
 {
 public:
-    CloningEncoder(bool actually_clone)
+    enum class ResultObjectPolicy
+    {
+        CloneBackToSerializableObject = 0,
+        MathTypesConcreteAnyDictionaryResult,
+        OnlyAnyDictionary,
+    };
+
+    CloningEncoder(
+        CloningEncoder::ResultObjectPolicy result_object_policy,
+        const schema_version_map*          schema_version_targets = nullptr)
+        : _result_object_policy(result_object_policy)
+        , _downgrade_version_manifest(schema_version_targets)
     {
         using namespace std::placeholders;
         _error_function = std::bind(&CloningEncoder::_error, this, _1);
-        _actually_clone = actually_clone;
     }
 
     virtual ~CloningEncoder() {}
 
-    void write_key(std::string const& key)
+    virtual bool encoding_to_anydict() override
+    {
+        return (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary);
+    }
+
+    void write_key(std::string const& key) override
     {
         if (has_errored())
         {
@@ -114,6 +137,34 @@ public:
         }
 
         _stack.back().cur_key = key;
+    }
+
+    void _replace_back(AnyDictionary&& a)
+    {
+        if (has_errored())
+        {
+            return;
+        }
+
+        if (_stack.size() == 1)
+        {
+            any newstack(std::move(a));
+            _root.swap(newstack);
+        }
+        else
+        {
+            _stack.pop_back();
+            auto& top = _stack.back();
+            if (top.is_dict)
+            {
+                top.dict.emplace(top.cur_key, a);
+            }
+            else
+            {
+                any newstack(std::move(a));
+                top.array.emplace_back(newstack);
+            }
+        }
     }
 
     void _store(any&& a)
@@ -141,36 +192,118 @@ public:
         }
     }
 
-    void write_null_value() { _store(any()); }
+    void write_null_value() override { _store(any()); }
+    void write_value(bool value) override { _store(any(value)); }
+    void write_value(int value) override { _store(any(value)); }
+    void write_value(int64_t value) override { _store(any(value)); }
+    void write_value(uint64_t value) override { _store(any(value)); }
+    void write_value(std::string const& value) override { _store(any(value)); }
+    void write_value(double value) override { _store(any(value)); }
 
-    void write_value(bool value) { _store(any(value)); }
-
-    void write_value(int value) { _store(any(value)); }
-
-    void write_value(int64_t value) { _store(any(value)); }
-
-    void write_value(uint64_t value) { _store(any(value)); }
-
-    void write_value(std::string const& value) { _store(any(value)); }
-
-    void write_value(double value) { _store(any(value)); }
-
-    void write_value(RationalTime const& value) { _store(any(value)); }
-
-    void write_value(TimeRange const& value) { _store(any(value)); }
-
-    void write_value(TimeTransform const& value) { _store(any(value)); }
-
-    void write_value(SerializableObject::ReferenceId value)
+    void write_value(RationalTime const& value) override
     {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result = {
+                { "OTIO_SCHEMA", "RationalTime.1" },
+                { "value", value.value() },
+                { "rate", value.rate() },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
+    }
+    void write_value(TimeRange const& value) override
+    {
+
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result = {
+                { "OTIO_SCHEMA", "TimeRange.1" },
+                { "duration", value.duration() },
+                { "start_time", value.start_time() },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
+    }
+    void write_value(TimeTransform const& value) override
+    {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result{
+                { "OTIO_SCHEMA", "TimeTransform.1" },
+                { "offset", value.offset() },
+                { "rate", value.rate() },
+                { "scale", value.scale() },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
+    }
+    void write_value(SerializableObject::ReferenceId value) override
+    {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result{
+                { "OTIO_SCHEMA", "SerializableObjectRef.1" },
+                { "id", value.id.c_str() },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
         _store(any(value));
     }
 
-    void write_value(Imath::V2d const& value) { _store(any(value)); }
+    void write_value(Imath::V2d const& value)
+    {
 
-    void write_value(Imath::Box2d const& value) { _store(any(value)); }
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result{
+                { "OTIO_SCHEMA", "V2d.1" },
+                { "x", value.x },
+                { "y", value.y },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
+    }
 
-    void start_array(size_t /* n */)
+    void write_value(Imath::Box2d const& value) override
+    {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result{
+                { "OTIO_SCHEMA", "Box2d.1" },
+                { "min", value.min },
+                { "max", value.max },
+            };
+            _store(any(std::move(result)));
+        }
+        else
+        {
+            _store(any(value));
+        }
+    }
+    // @}
+
+    void start_array(size_t /* n */) override
     {
         if (has_errored())
         {
@@ -180,7 +313,7 @@ public:
         _stack.emplace_back(_DictOrArray{ false /* is_dict*/ });
     }
 
-    void start_object()
+    void start_object() override
     {
         if (has_errored())
         {
@@ -190,7 +323,7 @@ public:
         _stack.emplace_back(_DictOrArray{ true /* is_dict*/ });
     }
 
-    void end_array()
+    void end_array() override
     {
         if (has_errored())
         {
@@ -221,7 +354,7 @@ public:
         }
     }
 
-    void end_object()
+    void end_object() override
     {
         if (has_errored())
         {
@@ -232,37 +365,45 @@ public:
         {
             _internal_error(
                 "Encoder::end_object() called without matching start_object()");
+            return;
         }
-        else
+
+        auto& top = _stack.back();
+        if (!top.is_dict)
         {
-            auto& top = _stack.back();
-            if (!top.is_dict)
-            {
-                _internal_error(
-                    "Encoder::end_object() called without matching start_object()");
-                _stack.pop_back();
-            }
-            else
-            {
-                /*
-                 * Convert back to SerializableObject* right here.
-                 */
-                if (_actually_clone)
-                {
-                    SerializableObject::Reader reader(
-                        top.dict, _error_function, nullptr);
-                    _stack.pop_back();
-                    _store(reader._decode(_resolver));
-                }
-                else
-                {
-                    AnyDictionary m;
-                    m.swap(top.dict);
-                    _stack.pop_back();
-                    _store(any(std::move(m)));
-                }
-            }
+            _internal_error(
+                "Encoder::end_object() called without matching start_object()");
+            _stack.pop_back();
+
+            return;
         }
+
+        /*
+         * Convert back to SerializableObject* right here.
+         */
+        if (_result_object_policy
+            == ResultObjectPolicy::CloneBackToSerializableObject)
+        {
+            SerializableObject::Reader reader(
+                top.dict,
+                _error_function,
+                nullptr);
+            _stack.pop_back();
+            _store(reader._decode(_resolver));
+
+            return;
+        }
+
+        AnyDictionary m;
+        m.swap(top.dict);
+
+        if ((_downgrade_version_manifest != nullptr)
+            && (!_downgrade_version_manifest->empty()))
+        {
+            _downgrade_dictionary(m);
+        }
+
+        _replace_back(std::move(m));
     }
 
 private:
@@ -287,7 +428,75 @@ private:
 
     friend class SerializableObject;
     std::vector<_DictOrArray> _stack;
-    bool                      _actually_clone;
+    ResultObjectPolicy        _result_object_policy;
+    const schema_version_map* _downgrade_version_manifest = nullptr;
+
+    void _downgrade_dictionary(AnyDictionary& m)
+    {
+        std::string schema_string = "";
+
+        if (!m.get_if_set("OTIO_SCHEMA", &schema_string))
+        {
+            return;
+        }
+
+        const auto         sep         = schema_string.rfind('.');
+        const std::string& schema_name = schema_string.substr(0, sep);
+
+        const auto dg_version_it =
+            _downgrade_version_manifest->find(schema_name);
+
+        if (dg_version_it == _downgrade_version_manifest->end())
+        {
+            return;
+        }
+
+        const std::string& schema_vers     = schema_string.substr(sep + 1);
+        int                current_version = -1;
+
+        if (!schema_vers.empty())
+        {
+            current_version = std::stoi(schema_vers);
+        }
+
+        // @TODO: is 0 a legitimate schema version?
+        if (current_version < 0)
+        {
+            _internal_error(string_printf(
+                "Could not parse version number from Schema"
+                " string: %s",
+                schema_string.c_str()));
+            return;
+        }
+
+        const int target_version = static_cast<int>(dg_version_it->second);
+
+        const auto& type_rec =
+            (TypeRegistry::instance()._find_type_record(schema_name));
+
+        while (current_version > target_version)
+        {
+            const auto& next_dg_fn =
+                (type_rec->downgrade_functions.find(current_version));
+
+            if (next_dg_fn == type_rec->downgrade_functions.end())
+            {
+                _internal_error(string_printf(
+                    "No downgrader function available for "
+                    "going from version %d to version %d.",
+                    current_version,
+                    target_version));
+                return;
+            }
+
+            // apply it
+            next_dg_fn->second(&m);
+
+            current_version--;
+        }
+
+        m["OTIO_SCHEMA"] = schema_name + "." + std::to_string(current_version);
+    }
 };
 
 template <typename RapidJSONWriterType>
@@ -428,8 +637,8 @@ template <typename T>
 bool
 _simple_any_comparison(any const& lhs, any const& rhs)
 {
-    return lhs.type() == typeid(T) && rhs.type() == typeid(T) &&
-           any_cast<T const&>(lhs) == any_cast<T const&>(rhs);
+    return lhs.type() == typeid(T) && rhs.type() == typeid(T)
+           && any_cast<T const&>(lhs) == any_cast<T const&>(rhs);
 }
 
 template <>
@@ -443,9 +652,9 @@ template <>
 bool
 _simple_any_comparison<char const*>(any const& lhs, any const& rhs)
 {
-    return lhs.type() == typeid(char const*) &&
-           rhs.type() == typeid(char const*) &&
-           !strcmp(any_cast<char const*>(lhs), any_cast<char const*>(rhs));
+    return lhs.type() == typeid(char const*)
+           && rhs.type() == typeid(char const*)
+           && !strcmp(any_cast<char const*>(lhs), any_cast<char const*>(rhs));
 }
 
 void
@@ -454,6 +663,7 @@ SerializableObject::Writer::_build_dispatch_tables()
     /*
      * These are basically atomic writes to the encoder:
      */
+
     auto& wt          = _write_dispatch_table;
     wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
     wt[&typeid(bool)] = [this](any const& value) {
@@ -506,7 +716,7 @@ SerializableObject::Writer::_build_dispatch_tables()
      * Install a backup table, using the actual type name as a key.
      * This is to deal with type aliasing across compilation units.
      */
-    for (auto e: wt)
+    for (const auto& e: wt)
     {
         _write_dispatch_table_by_name[e.first->name()] = e.second;
     }
@@ -540,8 +750,8 @@ SerializableObject::Writer::_build_dispatch_tables()
 bool
 SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
 {
-    if (lhs.type() != typeid(AnyDictionary) ||
-        rhs.type() != typeid(AnyDictionary))
+    if (lhs.type() != typeid(AnyDictionary)
+        || rhs.type() != typeid(AnyDictionary))
     {
         return false;
     }
@@ -551,15 +761,15 @@ SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
 
     auto r_it = rd.begin();
 
-    for (auto l_it: ld)
+    for (const auto& l_it: ld)
     {
         if (r_it == rd.end())
         {
             return false;
         }
 
-        if (l_it.first != r_it->first ||
-            !_any_equals(l_it.second, r_it->second))
+        if (l_it.first != r_it->first
+            || !_any_equals(l_it.second, r_it->second))
         {
             return false;
         }
@@ -604,9 +814,12 @@ SerializableObject::Writer::_any_equals(any const& lhs, any const& rhs)
 
 bool
 SerializableObject::Writer::write_root(
-    any const& value, Encoder& encoder, ErrorStatus* error_status)
+    any const&                value,
+    Encoder&                  encoder,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status)
 {
-    Writer w(encoder);
+    Writer w(encoder, schema_version_targets);
     w.write(w._no_key, value);
     return !encoder.has_errored(error_status);
 }
@@ -643,7 +856,8 @@ SerializableObject::Writer::write(std::string const& key, double value)
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, std::string const& value)
+    std::string const& key,
+    std::string const& value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
@@ -665,7 +879,8 @@ SerializableObject::Writer::write(std::string const& key, TimeRange value)
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, optional<RationalTime> value)
+    std::string const&     key,
+    optional<RationalTime> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -673,7 +888,8 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, optional<TimeRange> value)
+    std::string const&  key,
+    optional<TimeRange> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -681,7 +897,8 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, optional<Imath::Box2d> value)
+    std::string const&     key,
+    optional<Imath::Box2d> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -696,7 +913,8 @@ SerializableObject::Writer::write(std::string const& key, TimeTransform value)
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, SerializableObject const* value)
+    std::string const&        key,
+    SerializableObject const* value)
 {
     _encoder_write_key(key);
     if (!value)
@@ -734,32 +952,99 @@ SerializableObject::Writer::write(
         _next_id_for_type[schema_type_name] = 0;
     }
 
-    std::string next_id = schema_type_name + "-" +
-                          std::to_string(++_next_id_for_type[schema_type_name]);
+    std::string next_id =
+        schema_type_name + "-"
+        + std::to_string(++_next_id_for_type[schema_type_name]);
     _id_for_object[value] = next_id;
 
-    _encoder.start_object();
+    // detect if downgrading needs to happen
+    const std::string& schema_name    = value->schema_name();
+    int                schema_version = value->schema_version();
 
-    _encoder.write_key("OTIO_SCHEMA");
+    any downgraded = {};
 
+    // if there is a manifest & the encoder is not converting to AnyDictionary
+    if ((_downgrade_version_manifest != nullptr)
+        && (!_downgrade_version_manifest->empty())
+        && (!_encoder.encoding_to_anydict()))
+    {
+        const auto& target_version_it =
+            _downgrade_version_manifest->find(schema_name);
+
+        // ...and if that downgrade manifest specifies a target version for
+        // this schema
+        if (target_version_it != _downgrade_version_manifest->end())
+        {
+            const int target_version =
+                static_cast<int>(target_version_it->second);
+
+            // and the current_version is greater than the target version
+            if (schema_version > target_version)
+            {
+                if (_child_writer == nullptr)
+                {
+                    _child_cloning_encoder = new CloningEncoder(
+                        CloningEncoder::ResultObjectPolicy::OnlyAnyDictionary,
+                        _downgrade_version_manifest);
+                    _child_writer = new Writer(*_child_cloning_encoder, {});
+                }
+                else
+                {
+                    _child_cloning_encoder->_stack.clear();
+                }
+
+                _child_writer->write(_child_writer->_no_key, value);
+
+                if (_child_cloning_encoder->has_errored(
+                        &_encoder._error_status))
+                {
+                    return;
+                }
+
+                downgraded.swap(_child_cloning_encoder->_root);
+                schema_version = target_version;
+            }
+        }
+    }
+
+    std::string schema_str = "";
+
+    // if its an unknown schema, the schema name is computed from the
+    // _original_schema_name and _original_schema_version attributes
     if (UnknownSchema const* us = dynamic_cast<UnknownSchema const*>(value))
     {
-        _encoder.write_value(string_printf(
-            "%s.%d",
-            us->_original_schema_name.c_str(),
-            us->_original_schema_version));
+        schema_str =
+            (us->_original_schema_name + "."
+             + std::to_string(us->_original_schema_version));
     }
     else
     {
-        _encoder.write_value(string_printf(
-            "%s.%d", value->schema_name().c_str(), value->schema_version()));
+        // otherwise, use the schema_name and schema_version attributes
+        schema_str = schema_name + "." + std::to_string(schema_version);
     }
+
+    _encoder.start_object();
 
 #ifdef OTIO_INSTANCING_SUPPORT
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
 #endif
-    value->write_to(*this);
+
+    // write the contents of the object to the encoder, either the downgraded
+    // anydictionary or the SerializableObject
+    if (!(downgraded.empty()))
+    {
+        for (const auto& kv: any_cast<AnyDictionary>(downgraded))
+        {
+            this->write(kv.first, kv.second);
+        }
+    }
+    else
+    {
+        _encoder.write_key("OTIO_SCHEMA");
+        _encoder.write_value(schema_str);
+        value->write_to(*this);
+    }
 
     _encoder.end_object();
 
@@ -788,13 +1073,14 @@ SerializableObject::Writer::write(std::string const& key, Imath::Box2d value)
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, AnyDictionary const& value)
+    std::string const&   key,
+    AnyDictionary const& value)
 {
     _encoder_write_key(key);
 
     _encoder.start_object();
 
-    for (auto e: value)
+    for (const auto& e: value)
     {
         write(e.first, e.second);
     }
@@ -804,13 +1090,14 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const& key, AnyVector const& value)
+    std::string const& key,
+    AnyVector const&   value)
 {
     _encoder_write_key(key);
 
     _encoder.start_array(value.size());
 
-    for (auto e: value)
+    for (const auto& e: value)
     {
         write(_no_key, e);
     }
@@ -829,19 +1116,19 @@ SerializableObject::Writer::write(std::string const& key, any const& value)
     if (e == _write_dispatch_table.end())
     {
         /*
-         * Using the address of a type_info suffers from aliasing across compilation units.
-         * If we fail on a lookup, we fallback on the by_name table, but that's slow because
-         * we have to keep making a string each time.
+         * Using the address of a type_info suffers from aliasing across
+         * compilation units. If we fail on a lookup, we fallback on the
+         * by_name table, but that's slow because we have to keep making a
+         * string each time.
          *
-         * So when we fail, we insert the address of the type_info that failed to be found,
-         * so that we'll catch it the next time.  This ensures we fail exactly once per alias
-         * per type while using this writer.
+         * So when we fail, we insert the address of the type_info that failed
+         * to be found, so that we'll catch it the next time.  This ensures we
+         * fail exactly once per alias per type while using this writer.
          */
-        auto backup_e = _write_dispatch_table_by_name.find(type.name());
+        const auto& backup_e = _write_dispatch_table_by_name.find(type.name());
         if (backup_e != _write_dispatch_table_by_name.end())
         {
-            _write_dispatch_table[&type] = backup_e->second;
-            e                            = _write_dispatch_table.find(&type);
+            e = _write_dispatch_table.insert({ &type, backup_e->second }).first;
         }
     }
 
@@ -853,10 +1140,9 @@ SerializableObject::Writer::write(std::string const& key, any const& value)
     {
         std::string s;
         std::string bad_type_name =
-            (type == typeid(UnknownType))
-                ? type_name_for_error_message(
-                      any_cast<UnknownType>(value).type_name)
-                : type_name_for_error_message(type);
+            (type == typeid(UnknownType)) ? type_name_for_error_message(
+                any_cast<UnknownType>(value).type_name)
+                                          : type_name_for_error_message(type);
 
         if (&key != &_no_key)
         {
@@ -885,23 +1171,27 @@ SerializableObject::is_equivalent_to(SerializableObject const& other) const
         return false;
     }
 
-    CloningEncoder             e1(false), e2(false);
-    SerializableObject::Writer w1(e1);
-    SerializableObject::Writer w2(e2);
+    const auto policy = (CloningEncoder::ResultObjectPolicy::
+                             MathTypesConcreteAnyDictionaryResult);
+
+    CloningEncoder             e1(policy), e2(policy);
+    SerializableObject::Writer w1(e1, {});
+    SerializableObject::Writer w2(e2, {});
 
     w1.write(w1._no_key, any(Retainer<>(this)));
     w2.write(w2._no_key, any(Retainer<>(&other)));
 
     return (
-        !e1.has_errored() && !e2.has_errored() &&
-        w1._any_equals(e1._root, e2._root));
+        !e1.has_errored() && !e2.has_errored()
+        && w1._any_equals(e1._root, e2._root));
 }
 
 SerializableObject*
 SerializableObject::clone(ErrorStatus* error_status) const
 {
-    CloningEncoder             e(true /* actually_clone*/);
-    SerializableObject::Writer w(e);
+    CloningEncoder e(
+        CloningEncoder::ResultObjectPolicy::CloneBackToSerializableObject);
+    SerializableObject::Writer w(e, {});
 
     w.write(w._no_key, any(Retainer<>(this)));
     if (e.has_errored(error_status))
@@ -924,68 +1214,62 @@ SerializableObject::clone(ErrorStatus* error_status) const
                : nullptr;
 }
 
+// to json_string
 std::string
 serialize_json_to_string(
-    any const& value, ErrorStatus* error_status, int indent)
+    const any&                value,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status,
+    int                       indent)
 {
-    OTIO_rapidjson::StringBuffer s;
+    OTIO_rapidjson::StringBuffer output_string_buffer;
 
-    if (indent < 0)
+    OTIO_rapidjson::PrettyWriter<
+        decltype(output_string_buffer),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+        json_writer(output_string_buffer);
+
+    if (indent >= 0)
     {
-        OTIO_rapidjson::Writer<
-            decltype(s),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(s);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-
-        if (!SerializableObject::Writer::write_root(
-                value, json_encoder, error_status))
-        {
-            return std::string();
-        }
-    }
-    else
-    {
-        OTIO_rapidjson::PrettyWriter<
-            decltype(s),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-            json_writer(s);
-
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-
         json_writer.SetIndent(' ', indent);
-        if (!SerializableObject::Writer::write_root(
-                value, json_encoder, error_status))
-        {
-            return std::string();
-        }
     }
 
-    return std::string(s.GetString());
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+
+    if (!SerializableObject::Writer::write_root(
+            value,
+            json_encoder,
+            schema_version_targets,
+            error_status))
+    {
+        return std::string();
+    }
+
+    return std::string(output_string_buffer.GetString());
 }
 
 bool
 serialize_json_to_file(
-    any const&         value,
-    std::string const& file_name,
-    ErrorStatus*       error_status,
-    int                indent)
+    any const&                value,
+    std::string const&        file_name,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status,
+    int                       indent)
 {
+
 #if defined(_WINDOWS)
     const int wlen =
         MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);
     std::vector<wchar_t> wchars(wlen);
     MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, wchars.data(), wlen);
     std::ofstream os(wchars.data());
-#else // _WINDOWS
+#else  // _WINDOWS
     std::ofstream os(file_name);
 #endif // _WINDOWS
+
     if (!os.is_open())
     {
         if (error_status)
@@ -999,36 +1283,39 @@ serialize_json_to_file(
     OTIO_rapidjson::OStreamWrapper osw(os);
     bool                           status;
 
-    if (indent < 0)
-    {
-        OTIO_rapidjson::Writer<
-            decltype(osw),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(osw);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
-        status = SerializableObject::Writer::write_root(
-            value, json_encoder, error_status);
-    }
-    else
-    {
-        OTIO_rapidjson::PrettyWriter<
-            decltype(osw),
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::UTF8<>,
-            OTIO_rapidjson::CrtAllocator,
-            OTIO_rapidjson::kWriteNanAndInfFlag>
-                                           json_writer(osw);
-        JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+    OTIO_rapidjson::PrettyWriter<
+        decltype(osw),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+                                       json_writer(osw);
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
+    if (indent >= 0)
+    {
         json_writer.SetIndent(' ', indent);
-        status = SerializableObject::Writer::write_root(
-            value, json_encoder, error_status);
     }
+
+    status = SerializableObject::Writer::write_root(
+        value,
+        json_encoder,
+        schema_version_targets,
+        error_status);
 
     return status;
+}
+
+SerializableObject::Writer::~Writer()
+{
+    if (_child_writer)
+    {
+        delete _child_writer;
+    }
+    if (_child_cloning_encoder)
+    {
+        delete _child_cloning_encoder;
+    }
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

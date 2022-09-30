@@ -1,0 +1,3 @@
+[opentimelineio.plugins]
+mock_plugin = otio_override_adapter
+

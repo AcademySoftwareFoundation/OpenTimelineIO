@@ -162,12 +162,12 @@ def _expand_transition(target_transition, from_track):
         )
     if target_transition.in_offset is None:
         raise RuntimeError(
-            "in_offset is None on: {}".format(target_transition)
+            f"in_offset is None on: {target_transition}"
         )
 
     if target_transition.out_offset is None:
         raise RuntimeError(
-            "out_offset is None on: {}".format(target_transition)
+            f"out_offset is None on: {target_transition}"
         )
 
     pre.name = (pre.name or "") + "_transition_pre"

@@ -1166,12 +1166,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             },
         )
 
-        v0 = schema.Track(kind=schema.track.TrackKind.Video)
-        v1 = schema.Track(kind=schema.track.TrackKind.Video)
+        v0 = schema.Track(kind=schema.TrackKind.Video)
+        v1 = schema.Track(kind=schema.TrackKind.Video)
 
         timeline.tracks.extend([v0, v1])
 
-        a0 = schema.Track(kind=schema.track.TrackKind.Audio)
+        a0 = schema.Track(kind=schema.TrackKind.Audio)
 
         timeline.tracks.append(a0)
 

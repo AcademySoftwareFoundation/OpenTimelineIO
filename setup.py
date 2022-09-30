@@ -12,6 +12,7 @@ For more information:
 
 import multiprocessing
 import os
+import shlex
 import sys
 import platform
 import subprocess
@@ -39,6 +40,10 @@ PLAT_TO_CMAKE = {
 def _debugInstance(x):
     for a in sorted(dir(x)):
         print("{}:     {}".format(a, getattr(x, a)))
+
+
+def joinArgs(args):
+    return ' '.join(map(shlex.quote, args))
 
 
 class CMakeExtension(Extension):
@@ -98,7 +103,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
             '-DOTIO_CXX_INSTALL:BOOL=OFF',
             '-DOTIO_SHARED_LIBS:BOOL=OFF',
-            '-DCMAKE_BUILD_TYPE=' + 'Debug',
+            '-DCMAKE_BUILD_TYPE=' + self.build_config,
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
             # turn off the C++ tests during a Python build
             '-DBUILD_TESTING:BOOL=OFF',
@@ -158,7 +163,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
     def cmake_generate(self):
         self.announce('running cmake generation', level=2)
+
         cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
+        self.announce(joinArgs(cmake_args), level=2)
+
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,
@@ -172,14 +180,17 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         else:
             multi_proc = f'-j{multiprocessing.cpu_count()}'
 
+        cmake_args = [
+            'cmake',
+            '--build', '.',
+            '--target', 'install',
+            '--config', self.build_config,
+            '--', multi_proc,
+        ]
+
+        self.announce(joinArgs(cmake_args), level=2)
         subprocess.check_call(
-            [
-                'cmake',
-                '--build', '.',
-                '--target', 'install',
-                '--config', self.build_config,
-                '--', multi_proc,
-            ],
+            cmake_args,
             cwd=self.build_temp_dir,
             env=os.environ.copy()
         )

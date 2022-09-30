@@ -108,7 +108,7 @@ endif
 	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	rm ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info
-	# lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
 
 
 lcov-html: lcov

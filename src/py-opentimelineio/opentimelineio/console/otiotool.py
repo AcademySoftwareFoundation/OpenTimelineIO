@@ -570,7 +570,7 @@ def redact_timeline(timeline):
     timeline.name = f"{timeline.schema_name()} #{counter}"
     timeline.metadata.clear()
 
-    for child in [timeline.tracks] + list(timeline.each_child()):
+    for child in [timeline.tracks] + list(timeline.children_if()):
         counter = _counter(child.schema_name())
         child.name = f"{child.schema_name()} #{counter}"
         child.metadata.clear()
@@ -614,7 +614,7 @@ def copy_media_to_folder(timeline, folder):
     #     os.mkdir(folder)
 
     copied_files = set()
-    for clip in timeline.each_clip():
+    for clip in timeline.clip_if():
         media_reference = clip.media_reference
         has_actual_url = (media_reference and
                           hasattr(media_reference, 'target_url') and
@@ -664,7 +664,8 @@ def inspect_timelines(name_regex, timeline):
     """Print some detailed information about the item(s) in the timeline with names
     that match the given regular expression."""
     print("TIMELINE:", timeline.name)
-    items_to_inspect = [_filter(item, [], name_regex) for item in timeline.each_child()]
+    items_to_inspect = [_filter(item, [], name_regex)
+                        for item in timeline.children_if()]
     items_to_inspect = list(filter(None, items_to_inspect))
     for item in items_to_inspect:
         print(f"  ITEM: {item.name} ({type(item)})")
@@ -705,7 +706,7 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
-    for child in [timeline.tracks] + list(timeline.each_child()):
+    for child in [timeline.tracks] + list(timeline.children_if()):
         if isinstance(child, otio.schema.Track):
             if list_tracks:
                 print(f"TRACK: {child.name} ({child.kind})")

@@ -392,27 +392,27 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
-        self.assertEqual([cl, cl2, cl3], list(tl.each_clip()))
+        self.assertEqual([cl, cl2, cl3], list(tl.clip_if()))
 
         rt_start = otio.opentime.RationalTime(0, 24)
         rt_end = otio.opentime.RationalTime(1, 24)
         search_range = otio.opentime.TimeRange(rt_start, rt_end)
-        self.assertEqual([cl], list(tl.each_clip(search_range)))
+        self.assertEqual([cl], list(tl.clip_if(search_range)))
 
         # check to see if full range works
         search_range = tl.tracks.trimmed_range()
-        self.assertEqual([cl, cl2, cl3], list(tl.each_clip(search_range)))
+        self.assertEqual([cl, cl2, cl3], list(tl.clip_if(search_range)))
 
         # just one clip
         search_range = cl2.range_in_parent()
-        self.assertEqual([cl2], list(tl.each_clip(search_range)))
+        self.assertEqual([cl2], list(tl.clip_if(search_range)))
 
         # the last two clips
         search_range = otio.opentime.TimeRange(
             start_time=cl2.range_in_parent().start_time,
             duration=cl2.trimmed_range().duration + rt_end
         )
-        self.assertEqual([cl2, cl3], list(tl.each_clip(search_range)))
+        self.assertEqual([cl2, cl3], list(tl.clip_if(search_range)))
 
         # no clips
         search_range = otio.opentime.TimeRange(
@@ -422,7 +422,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             ),
             duration=rt_end
         )
-        self.assertEqual([], list(tl.each_clip(search_range)))
+        self.assertEqual([], list(tl.clip_if(search_range)))
 
     def test_str(self):
         self.maxDiff = None

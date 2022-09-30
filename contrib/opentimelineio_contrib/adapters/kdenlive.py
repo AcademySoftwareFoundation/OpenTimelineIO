@@ -419,7 +419,7 @@ def write_to_string(input_otio):
     producer_count = 0
 
     media_prod = {}
-    for clip in input_otio.each_clip():
+    for clip in input_otio.clip_if():
         producer, producer_count = _make_producer(
             producer_count, clip, mlt, rate, media_prod
         )

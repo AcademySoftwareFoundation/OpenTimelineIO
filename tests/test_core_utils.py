@@ -24,6 +24,12 @@ class AnyDictionaryTests(unittest.TestCase):
         d['a'] = 'newvalue'
         self.assertEqual(d['a'], 'newvalue')
 
+        self.assertTrue('a' in d)  # Test __contains__
+        self.assertFalse('b' in d)
+
+        with self.assertRaises(TypeError):
+            d[1]  # AnyDictionary.__getitem__ only supports strings
+
         del d['a']
         self.assertEqual(dict(d), {})
         with self.assertRaisesRegex(KeyError, "'non-existent'"):
@@ -143,6 +149,7 @@ class AnyVectorTests(unittest.TestCase):
         self.assertTrue(1 in v)  # Test __contains__
         self.assertTrue('234' in v)
         self.assertTrue({} in v)
+        self.assertFalse(5 in v)
 
         self.assertEqual(list(reversed(v)), [{}, '234', 1])
 

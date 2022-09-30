@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #include <functional>
+#include <map>
 #include <mutex>
 #include <string>
-#include <map>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -24,7 +24,8 @@ class AnyDictionary;
 // @TODO: should we make version an int64_t?  That would match what we can
 //        serialize natively, since we only serialize 64 bit signed ints.
 using schema_version_map = std::unordered_map<std::string, int64_t>;
-using label_to_schema_version_map = std::unordered_map<std::string, schema_version_map>;
+using label_to_schema_version_map =
+    std::unordered_map<std::string, schema_version_map>;
 
 extern const label_to_schema_version_map CORE_VERSION_MAP;
 
@@ -101,7 +102,9 @@ public:
         std::function<void(AnyDictionary*)> upgrade_function)
     {
         return register_upgrade_function(
-            CLASS::schema_name, version_to_upgrade_to, upgrade_function);
+            CLASS::schema_name,
+            version_to_upgrade_to,
+            upgrade_function);
     }
 
     /// Downgrade function from version_to_downgrade_from to
@@ -119,7 +122,9 @@ public:
         std::function<void(AnyDictionary*)> upgrade_function)
     {
         return register_downgrade_function(
-            CLASS::schema_name, version_to_upgrade_to, upgrade_function);
+            CLASS::schema_name,
+            version_to_upgrade_to,
+            upgrade_function);
     }
 
     SerializableObject* instance_from_schema(
@@ -148,7 +153,7 @@ public:
 private:
     TypeRegistry();
 
-    TypeRegistry(TypeRegistry const&) = delete;
+    TypeRegistry(TypeRegistry const&)            = delete;
     TypeRegistry& operator=(TypeRegistry const&) = delete;
 
     class _TypeRecord

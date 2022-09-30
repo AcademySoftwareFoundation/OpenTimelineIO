@@ -29,9 +29,11 @@ public:
         std::vector<Marker*> const& markers      = std::vector<Marker*>());
 
     virtual TimeRange range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange trimmed_range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 

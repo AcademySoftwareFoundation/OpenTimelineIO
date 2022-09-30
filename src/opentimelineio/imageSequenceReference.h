@@ -97,13 +97,16 @@ public:
     int end_frame() const;
     int number_of_images_in_sequence() const;
     int frame_for_time(
-        RationalTime const& time, ErrorStatus* error_status = nullptr) const;
+        RationalTime const& time,
+        ErrorStatus*        error_status = nullptr) const;
 
     std::string target_url_for_image_number(
-        int image_number, ErrorStatus* error_status = nullptr) const;
+        int          image_number,
+        ErrorStatus* error_status = nullptr) const;
 
     RationalTime presentation_time_for_image_number(
-        int image_number, ErrorStatus* error_status = nullptr) const;
+        int          image_number,
+        ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~ImageSequenceReference();

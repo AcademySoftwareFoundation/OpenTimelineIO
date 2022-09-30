@@ -12,13 +12,12 @@ import opentimelineio as otio
 
 
 LABEL_MAP_TEMPLATE = """{{ "{label}",
-        {{
+      {{
 {sv_map}
-        }}
-    }},
+      }} }},
     // {{next}}"""
 MAP_ITEM_TEMPLATE = '{indent}{{ "{key}", {value} }},'
-INDENT = 12
+INDENT = 10
 
 
 def _parsed_args():
@@ -86,7 +85,7 @@ def generate_core_version_map(src_text, label, version_map):
 def main():
     args = _parsed_args()
 
-    with open(args.input, 'r') as fi:
+    with open(args.input) as fi:
         input = fi.read()
 
     result = generate_core_version_map(
@@ -110,7 +109,7 @@ def main():
     with open(output, 'w', newline="\n") as fo:
         fo.write(result)
 
-    print("Wrote CORE_VERSION_MAP to: '{}'.".format(output))
+    print(f"Wrote CORE_VERSION_MAP to: '{output}'.")
 
 
 if __name__ == '__main__':

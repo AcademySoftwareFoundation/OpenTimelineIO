@@ -73,7 +73,7 @@ def _extend_source_range_duration(obj, duration):
     obj.source_range = obj.source_range.duration_extended_by(duration)
 
 
-class EDLParser(object):
+class EDLParser:
     def __init__(self, edl_string, rate=24, ignore_timecode_mismatch=False):
         self.timeline = schema.Timeline()
 
@@ -359,7 +359,7 @@ class EDLParser(object):
                 track.source_range = None
 
 
-class ClipHandler(object):
+class ClipHandler:
     # /path/filename.[1001-1020].ext
     image_sequence_pattern = re.compile(
         r'.*\.(?P<range>\[(?P<start>[0-9]+)-(?P<end>[0-9]+)\])\.\w+$'
@@ -489,7 +489,7 @@ class ClipHandler(object):
                     power = [floats[6], floats[7], floats[8]]
                 else:
                     raise EDLParseError(
-                        'Invalid ASC_SOP found: {}'.format(asc_sop))
+                        f'Invalid ASC_SOP found: {asc_sop}')
 
             if asc_sat:
                 sat = float(asc_sat)
@@ -608,7 +608,7 @@ class ClipHandler(object):
                 )
         else:
             raise EDLParseError(
-                'incorrect number of fields [{0}] in form statement: {1}'
+                'incorrect number of fields [{}] in form statement: {}'
                 ''.format(field_count, line))
 
         # Frame numbers (not just timecode) are ok
@@ -701,7 +701,7 @@ class ClipHandler(object):
         return new_trx
 
 
-class CommentHandler(object):
+class CommentHandler:
     # this is the for that all comment 'id' tags take
     regex_template = r'\*?\s*{id}:?\s*(?P<comment_body>.*)'
 
@@ -824,7 +824,7 @@ def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     return writer.get_content_for_track_at_index(0, title=input_otio.name)
 
 
-class EDLWriter(object):
+class EDLWriter:
     def __init__(self, tracks, rate, style, reelname_len=8):
         self._tracks = tracks
         self._rate = rate
@@ -922,7 +922,7 @@ class EDLWriter(object):
                 # needed.
                 pass
 
-        content = "TITLE: {}\n\n".format(title) if title else ''
+        content = f"TITLE: {title}\n\n" if title else ''
         if track.enabled:
             # Convert each event/dissolve-event into plain text.
             for idx, event in enumerate(events):
@@ -961,7 +961,7 @@ def _relevant_timing_effect(clip):
     return timing_effect
 
 
-class Event(object):
+class Event:
     def __init__(
         self,
         clip,
@@ -1030,7 +1030,7 @@ class Event(object):
         return "\n".join(lines)
 
 
-class DissolveEvent(object):
+class DissolveEvent:
 
     def __init__(
         self,
@@ -1149,7 +1149,7 @@ class DissolveEvent(object):
         return "\n".join(lines)
 
 
-class EventLine(object):
+class EventLine:
     def __init__(self, kind, rate, reel='AX'):
         self.reel = reel
         self._kind = 'V' if kind == schema.TrackKind.Video else 'A'
@@ -1296,13 +1296,13 @@ def _generate_comment_lines(
         if not color and meta and meta.get("color"):
             color = meta.get("color").upper()
         comment = (marker.name or '').upper()
-        lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
+        lines.append(f"* LOC: {timecode} {color:7} {comment}")
 
     # If we are carrying any unhandled CMX 3600 comments on this clip
     # then output them blindly.
     extra_comments = clip.metadata.get('cmx_3600', {}).get('comments', [])
     for comment in extra_comments:
-        lines.append("* {}".format(comment))
+        lines.append(f"* {comment}")
 
     return lines
 

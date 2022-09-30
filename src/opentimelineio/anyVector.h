@@ -123,7 +123,7 @@ public:
             assert(v != nullptr);
         }
 
-        MutationStamp(MutationStamp const&) = delete;
+        MutationStamp(MutationStamp const&)            = delete;
         MutationStamp& operator=(MutationStamp const&) = delete;
 
         ~MutationStamp()

@@ -60,7 +60,7 @@ def _parse_data_line(line, columns, fps, ale_name_column_key='Name'):
             try:
                 start = otio.opentime.from_timecode(value, fps)
             except (ValueError, TypeError):
-                raise ALEParseError("Invalid Start timecode: {}".format(value))
+                raise ALEParseError(f"Invalid Start timecode: {value}")
             duration = None
             end = None
             if metadata.get("Duration", "") != "":
@@ -137,7 +137,7 @@ def _parse_data_line(line, columns, fps, ale_name_column_key='Name'):
 
 def _cdl_values_from_metadata(asc_sop_string):
 
-    if not isinstance(asc_sop_string, (type(''), type(u''))):
+    if not isinstance(asc_sop_string, str):
         return {}
 
     asc_sop_values = ASC_SOP_REGEX.findall(asc_sop_string)
@@ -285,7 +285,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
     headers = list(header.items())
     headers.sort()  # make the output predictable
     for key, val in headers:
-        result += "{}\t{}\n".format(key, val)
+        result += f"{key}\t{val}\n"
 
     # If the caller passed in a list of columns, use that, otherwise
     # we need to discover the columns that should be output.

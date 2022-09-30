@@ -45,7 +45,7 @@ def _did_parse(input):
 
 @stat_check("top level object")
 def _top_level_object(input):
-    return "{}.{}".format(input.schema_name(), input.schema_version())
+    return f"{input.schema_name()}.{input.schema_version()}"
 
 
 @stat_check("number of tracks")
@@ -137,7 +137,7 @@ def _sequences_with_non_standard_types(input):
 def _stat_otio(input_otio):
     for (test, testfunc) in TESTS:
         try:
-            print("{}: {}".format(test, testfunc(input_otio)))
+            print(f"{test}: {testfunc(input_otio)}")
         except (otio.exceptions.OTIOError) as e:
             sys.stderr.write(
                 "There was an OTIO Error: "
@@ -145,7 +145,7 @@ def _stat_otio(input_otio):
             )
             continue
         except (Exception) as e:
-            sys.stderr.write("There was a system error: {}\n".format(e))
+            sys.stderr.write(f"There was a system error: {e}\n")
             continue
 
 
@@ -163,7 +163,7 @@ def main():
             )
             continue
         except (Exception) as e:
-            sys.stderr.write("There was a system error: {}\n".format(e))
+            sys.stderr.write(f"There was a system error: {e}\n")
             continue
 
         _stat_otio(parsed_otio)

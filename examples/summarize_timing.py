@@ -35,7 +35,7 @@ def _summarize_effects(item):
 
 def _summarize_range(label, time_range):
     if time_range is None:
-        print("\t{}: None".format(label))
+        print(f"\t{label}: None")
     else:
         print(
             "\t{}: {} - {} (Duration: {})".format(
@@ -70,7 +70,7 @@ def _summarize_timeline(timeline):
         for item in track:
             if isinstance(item, otio.schema.Clip):
                 clip = item
-                print("Clip: {}".format(clip.name))
+                print(f"Clip: {clip.name}")
                 # See the documentation to understand the difference
                 # between each of these ranges:
                 # https://opentimelineio.readthedocs.io/en/latest/tutorials/time-ranges.html

@@ -2,14 +2,8 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import types
-try:
-    # Python 3.3+
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc
+import collections.abc
 import copy
-import collections
-import sys
 
 from .. import (
     _otio,
@@ -36,41 +30,12 @@ SUPPORTED_VALUE_TYPES = (
 )
 
 
-# XXX: python 2 vs python 3 guards
-if sys.version_info[0] >= 3:
-    def _is_str(v):
-        return isinstance(v, str)
-
-    def _iteritems(x):
-        return x.items()
-
-    def _im_func(func):
-        return func
-
-    def _xrange(*args):
-        return range(*args)
-
-    _methodType = types.FunctionType
-else:
-    # XXX Marked for no qa so that flake8 in python3 doesn't trip over these
-    #     lines and falsely report them as bad.
-    def _is_str(v):
-        return isinstance(v, (str, unicode)) # noqa
-
-    def _iteritems(x):
-        return x.items()
-
-    def _im_func(func):
-        return func.im_func
-
-    def _xrange(*args):
-        return xrange(*args) # noqa
-
-    _methodType = types.MethodType
+def _is_str(v):
+    return isinstance(v, str)
 
 
 def _is_nonstring_sequence(v):
-    return isinstance(v, collections_abc.Sequence) and not _is_str(v)
+    return isinstance(v, collections.abc.Sequence) and not _is_str(v)
 
 
 def _value_to_any(value, ids=None):
@@ -79,13 +44,13 @@ def _value_to_any(value, ids=None):
 
     if isinstance(value, SerializableObject):
         return PyAny(value)
-    if isinstance(value, collections_abc.Mapping):
+    if isinstance(value, collections.abc.Mapping):
         if ids is None:
             ids = set()
         d = AnyDictionary()
-        for (k, v) in _iteritems(value):
+        for (k, v) in value.items():
             if not _is_str(k):
-                raise ValueError("key '{}' is not a string".format(k))
+                raise ValueError(f"key '{k}' is not a string")
             if id(v) in ids:
                 raise ValueError(
                     "circular reference converting dictionary to C++ datatype"
@@ -124,8 +89,6 @@ def _value_to_any(value, ids=None):
         except RuntimeError:
             # communicate about integer range first
             biginttype = int
-            if sys.version_info[0] < 3:
-                biginttype = long  # noqa: F821
             if isinstance(value, biginttype):
                 raise ValueError(
                     "A value of {} is outside of the range of integers that "
@@ -151,7 +114,7 @@ def _value_to_any(value, ids=None):
 
 
 def _value_to_so_vector(value, ids=None):
-    if not isinstance(value, collections_abc.Sequence) or _is_str(value):
+    if not isinstance(value, collections.abc.Sequence) or _is_str(value):
         raise TypeError(
             "Expected list/sequence of SerializableObjects;"
             " found type '{}'".format(type(value))
@@ -200,26 +163,21 @@ def _add_mutable_mapping_methods(mapClass):
 
     def __copy__(self):
         m = mapClass()
-        m.update(dict((k, v) for (k, v) in _iteritems(self)))
+        m.update({k: v for (k, v) in self.items()})
         return m
 
     def __deepcopy__(self, memo):
         m = mapClass()
-        m.update(
-            dict(
-                (k, copy.deepcopy(v, memo))
-                for (k, v) in _iteritems(self)
-            )
-        )
+        m.update({k: copy.deepcopy(v, memo) for (k, v) in self.items()})
         return m
 
-    collections_abc.MutableMapping.register(mapClass)
+    collections.abc.MutableMapping.register(mapClass)
     mapClass.__setitem__ = __setitem__
     mapClass.__str__ = __str__
     mapClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections_abc.MutableMapping, collections_abc.Mapping):
+    for klass in (collections.abc.MutableMapping, collections.abc.Mapping):
         for name in klass.__dict__.keys():
             if name in seen:
                 continue
@@ -227,11 +185,11 @@ def _add_mutable_mapping_methods(mapClass):
             seen.add(name)
             func = getattr(klass, name)
             if (
-                    isinstance(func, _methodType)
+                    isinstance(func, types.FunctionType)
                     and name not in klass.__abstractmethods__
             ):
-                setattr(mapClass, name, _im_func(func))
-                if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
+                setattr(mapClass, name, func)
+                if name.startswith('__') or name.endswith('__'):  # noqa
                     continue
 
                 # Hide the method frm Sphinx doc.
@@ -262,7 +220,7 @@ def _add_mutable_sequence_methods(
             return list(self) + list(other)
         else:
             raise TypeError(
-                "Cannot add types '{}' and '{}'".format(type(self), type(other))
+                f"Cannot add types '{type(self)}' and '{type(other)}'"
             )
 
     def __radd__(self, other):
@@ -277,7 +235,7 @@ def _add_mutable_sequence_methods(
     def __getitem__(self, index):
         if isinstance(index, slice):
             indices = index.indices(len(self))
-            return [self.__internal_getitem__(i) for i in _xrange(*indices)]
+            return [self.__internal_getitem__(i) for i in range(*indices)]
         else:
             return self.__internal_getitem__(index)
 
@@ -286,7 +244,7 @@ def _add_mutable_sequence_methods(
         if not isinstance(index, slice):
             self.__internal_setitem__(index, conversion_func(item))
         else:
-            if not isinstance(item, collections_abc.Iterable):
+            if not isinstance(item, collections.abc.Iterable):
                 raise TypeError("can only assign an iterable")
 
             indices = range(*index.indices(len(self)))
@@ -294,7 +252,7 @@ def _add_mutable_sequence_methods(
             if index.step in (1, None):
                 if (
                         not side_effecting_insertions
-                        and isinstance(item, collections_abc.MutableSequence)
+                        and isinstance(item, collections.abc.MutableSequence)
                         and len(item) == len(indices)
                 ):
                     for i0, i in enumerate(indices):
@@ -323,7 +281,7 @@ def _add_mutable_sequence_methods(
                             self.extend(cached_items)
                             raise e
             else:
-                if not isinstance(item, collections_abc.Sequence):
+                if not isinstance(item, collections.abc.Sequence):
                     raise TypeError("can only assign a sequence")
                 if len(item) != len(indices):
                     raise ValueError(
@@ -352,7 +310,7 @@ def _add_mutable_sequence_methods(
         if not isinstance(index, slice):
             self.__internal_delitem__(index)
         else:
-            for i in reversed(_xrange(*index.indices(len(self)))):
+            for i in reversed(range(*index.indices(len(self)))):
                 self.__delitem__(i)
 
     def insert(self, index, item):
@@ -361,7 +319,7 @@ def _add_mutable_sequence_methods(
             if conversion_func else item
         )
 
-    collections_abc.MutableSequence.register(sequenceClass)
+    collections.abc.MutableSequence.register(sequenceClass)
     sequenceClass.__radd__ = __radd__
     sequenceClass.__add__ = __add__
     sequenceClass.__getitem__ = __getitem__
@@ -372,17 +330,17 @@ def _add_mutable_sequence_methods(
     sequenceClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections_abc.MutableSequence, collections_abc.Sequence):
+    for klass in (collections.abc.MutableSequence, collections.abc.Sequence):
         for name in klass.__dict__.keys():
             if name not in seen:
                 seen.add(name)
                 func = getattr(klass, name)
                 if (
-                        isinstance(func, _methodType)
+                        isinstance(func, types.FunctionType)
                         and name not in klass.__abstractmethods__
                 ):
-                    setattr(sequenceClass, name, _im_func(func))
-                    if name.startswith('__') or name.endswith('__') or sys.version_info[0] < 3:  # noqa
+                    setattr(sequenceClass, name, func)
+                    if name.startswith('__') or name.endswith('__'):
                         continue
 
                     # Hide the method frm Sphinx doc.

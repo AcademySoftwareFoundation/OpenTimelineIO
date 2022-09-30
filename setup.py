@@ -38,7 +38,7 @@ PLAT_TO_CMAKE = {
 
 def _debugInstance(x):
     for a in sorted(dir(x)):
-        print("%s:     %s" % (a, getattr(x, a)))
+        print("{}:     {}".format(a, getattr(x, a)))
 
 
 class CMakeExtension(Extension):
@@ -170,7 +170,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if self.is_windows() and not self.is_mingw():
             multi_proc = '/m'
         else:
-            multi_proc = '-j{}'.format(multiprocessing.cpu_count())
+            multi_proc = f'-j{multiprocessing.cpu_count()}'
 
         subprocess.check_call(
             [
@@ -187,11 +187,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
 # check the python version first
 if (
-    sys.version_info[0] < 2 or
-    (sys.version_info[0] == 2 and sys.version_info[1] < 7)
+    sys.version_info[0] < 3 or
+    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
 ):
     sys.exit(
-        'OpenTimelineIO requires python2.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.7 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -201,7 +201,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.15.0.dev1",
+    "version": "0.16.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
@@ -232,7 +232,7 @@ def _append_version_info_to_init_scripts(build_lib):
         )
 
         # get the base data from the original file
-        with open(source_file, 'r') as fi:
+        with open(source_file) as fi:
             src_data = fi.read()
 
         # write that + the suffix to the target file
@@ -299,8 +299,6 @@ setup(
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: Other/Proprietary License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -341,15 +339,10 @@ setup(
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
+    python_requires='>=3.7, !=3.9.0',  # noqa: E501
 
     install_requires=[
         'pyaaf2>=1.4,<1.7',
-        'backports.tempfile; python_version<"3.0"',
-        # Enables the builtins module in the XGES adapter
-        'future; python_version<"3.0"',
-        # Used in the otioz adapter to conform to unix paths
-        'pathlib2; python_version<"3.0"'
     ],
     entry_points={
         'console_scripts': [
@@ -379,10 +372,6 @@ setup(
     },
 
     test_suite='setup.test_otio',
-
-    tests_require=[
-        'mock;python_version<"3.3"',
-    ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

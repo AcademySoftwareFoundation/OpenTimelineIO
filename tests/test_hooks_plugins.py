@@ -14,13 +14,7 @@ from tests import (
     utils,
 )
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+import tempfile
 
 
 HOOKSCRIPT_PATH = "hookscript_example"

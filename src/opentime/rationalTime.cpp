@@ -68,8 +68,8 @@ double
 RationalTime::nearest_valid_timecode_rate(double rate)
 {
     double nearest_rate = 0;
-    double min_diff = std::numeric_limits<double>::max();
-    for (auto valid_rate : smpte_timecode_rates)
+    double min_diff     = std::numeric_limits<double>::max();
+    for (auto valid_rate: smpte_timecode_rates)
     {
         if (valid_rate == rate)
         {
@@ -80,7 +80,7 @@ RationalTime::nearest_valid_timecode_rate(double rate)
         {
             continue;
         }
-        min_diff = diff;
+        min_diff     = diff;
         nearest_rate = valid_rate;
     }
     return nearest_rate;
@@ -95,7 +95,11 @@ is_dropframe_rate(double rate)
 }
 
 static bool
-parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* result)
+parseFloat(
+    char const* pCurr,
+    char const* pEnd,
+    bool        allow_negative,
+    double*     result)
 {
     if (pCurr >= pEnd || !pCurr)
     {
@@ -103,16 +107,16 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
         return false;
     }
 
-    double ret = 0.0;
+    double ret  = 0.0;
     double sign = 1.0;
 
     if (*pCurr == '+')
     {
         ++pCurr;
     }
-    else if (*pCurr == '-') 
+    else if (*pCurr == '-')
     {
-        if (!allow_negative) 
+        if (!allow_negative)
         {
             *result = 0.0;
             return false;
@@ -130,7 +134,7 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     // partially compliant.
     //
     uint64_t uintPart = 0;
-    while (pCurr < pEnd) 
+    while (pCurr < pEnd)
     {
         char c = *pCurr;
         if (c < '0' || c > '9')
@@ -158,14 +162,14 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     }
 
     // check for end of string or delimiter
-    if (pCurr == pEnd || *pCurr == '\0') 
+    if (pCurr == pEnd || *pCurr == '\0')
     {
         *result = sign * ret;
         return true;
     }
 
     // if the next character is not a decimal point, the string is malformed.
-    if (*pCurr != '.') 
+    if (*pCurr != '.')
     {
         *result = 0.0; // zero consistent with earlier error condition
         return false;
@@ -174,7 +178,7 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     ++pCurr; // skip decimal
 
     double position_scale = 0.1;
-    while (pCurr < pEnd) 
+    while (pCurr < pEnd)
     {
         char c = *pCurr;
         if (c < '0' || c > '9')
@@ -190,10 +194,11 @@ parseFloat(char const* pCurr, char const* pEnd, bool allow_negative, double* res
     return true;
 }
 
-
 RationalTime
 RationalTime::from_timecode(
-    std::string const& timecode, double rate, ErrorStatus* error_status)
+    std::string const& timecode,
+    double             rate,
+    ErrorStatus*       error_status)
 {
     if (!RationalTime::is_valid_timecode_rate(rate))
     {
@@ -295,19 +300,22 @@ RationalTime::from_timecode(
 
     // convert to frames
     const int value =
-        (((total_minutes * 60) + seconds) * nominal_fps + frames -
-         (dropframes *
-          (total_minutes - static_cast<int>(std::floor(total_minutes / 10)))));
+        (((total_minutes * 60) + seconds) * nominal_fps + frames
+         - (dropframes
+            * (total_minutes
+               - static_cast<int>(std::floor(total_minutes / 10)))));
 
     return RationalTime{ double(value), rate };
 }
 
 static void
-set_error(std::string const& time_string,
-          ErrorStatus::Outcome code,
-          ErrorStatus* err)
+set_error(
+    std::string const&   time_string,
+    ErrorStatus::Outcome code,
+    ErrorStatus*         err)
 {
-    if (err) {
+    if (err)
+    {
         *err = ErrorStatus(
             code,
             string_printf(
@@ -319,19 +327,24 @@ set_error(std::string const& time_string,
 
 RationalTime
 RationalTime::from_time_string(
-    std::string const& time_string, double rate, ErrorStatus* error_status)
+    std::string const& time_string,
+    double             rate,
+    ErrorStatus*       error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate)) 
+    if (!RationalTime::is_valid_timecode_rate(rate))
     {
-        set_error(time_string, ErrorStatus::INVALID_TIMECODE_RATE, error_status);
+        set_error(
+            time_string,
+            ErrorStatus::INVALID_TIMECODE_RATE,
+            error_status);
         return RationalTime::_invalid_time;
     }
 
-    const char* start = time_string.data();
-    const char* end = start + time_string.length();
-    char* current = const_cast<char*>(end);
-    char* parse_end = current;
-    char* prev_parse_end = current;
+    const char* start          = time_string.data();
+    const char* end            = start + time_string.length();
+    char*       current        = const_cast<char*>(end);
+    char*       parse_end      = current;
+    char*       prev_parse_end = current;
 
     double power[3] = {
         1.0,   // seconds
@@ -340,65 +353,83 @@ RationalTime::from_time_string(
     };
 
     double accumulator = 0.0;
-    int radix = 0;
-    while (start <= current) 
+    int    radix       = 0;
+    while (start <= current)
     {
-        if (*current == ':') 
+        if (*current == ':')
         {
             parse_end = current + 1;
-            char c = *parse_end;
-            if (c != '\0' && c != ':') 
+            char c    = *parse_end;
+            if (c != '\0' && c != ':')
             {
-                if (c< '0' || c > '9') 
+                if (c < '0' || c > '9')
                 {
-                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
                     return RationalTime::_invalid_time;
                 }
                 double val = 0.0;
                 if (!parseFloat(parse_end, prev_parse_end + 1, false, &val))
                 {
-                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
                     return RationalTime::_invalid_time;
                 }
                 prev_parse_end = nullptr;
-                if (radix < 2 && val >= 60.0) 
+                if (radix < 2 && val >= 60.0)
                 {
-                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
                     return RationalTime::_invalid_time;
                 }
                 accumulator += val * power[radix];
             }
             ++radix;
-            if (radix == sizeof(power) / sizeof(power[0])) 
+            if (radix == sizeof(power) / sizeof(power[0]))
             {
-                set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                set_error(
+                    time_string,
+                    ErrorStatus::INVALID_TIME_STRING,
+                    error_status);
                 return RationalTime::_invalid_time;
             }
         }
-        else if (current < prev_parse_end &&
-                 (*current < '0' || *current > '9') &&
-                 *current != '.') 
+        else if (
+            current < prev_parse_end && (*current < '0' || *current > '9')
+            && *current != '.')
         {
-            set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+            set_error(
+                time_string,
+                ErrorStatus::INVALID_TIME_STRING,
+                error_status);
             return RationalTime::_invalid_time;
         }
 
-        if (start == current) 
+        if (start == current)
         {
-            if (prev_parse_end) 
+            if (prev_parse_end)
             {
                 double val = 0.0;
                 if (!parseFloat(start, prev_parse_end + 1, true, &val))
                 {
-                    set_error(time_string, ErrorStatus::INVALID_TIME_STRING, error_status);
+                    set_error(
+                        time_string,
+                        ErrorStatus::INVALID_TIME_STRING,
+                        error_status);
                     return RationalTime::_invalid_time;
-                 }
+                }
                 accumulator += val * power[radix];
             }
             break;
         }
         --current;
-        if (!prev_parse_end) 
+        if (!prev_parse_end)
         {
             prev_parse_end = current;
         }
@@ -409,7 +440,9 @@ RationalTime::from_time_string(
 
 std::string
 RationalTime::to_timecode(
-    double rate, IsDropFrameRate drop_frame, ErrorStatus* error_status) const
+    double          rate,
+    IsDropFrameRate drop_frame,
+    ErrorStatus*    error_status) const
 {
     if (error_status)
     {
@@ -505,10 +538,11 @@ RationalTime::to_timecode(
 
         if (frames_over_ten_minutes > dropframes)
         {
-            value += (dropframes * 9 * ten_minute_chunks) +
-                     dropframes * std::floor(
-                                      (frames_over_ten_minutes - dropframes) /
-                                      frames_per_minute);
+            value += (dropframes * 9 * ten_minute_chunks)
+                     + dropframes
+                           * std::floor(
+                               (frames_over_ten_minutes - dropframes)
+                               / frames_per_minute);
         }
         else
         {
@@ -528,7 +562,12 @@ RationalTime::to_timecode(
         static_cast<int>(std::floor(std::floor(seconds_total / 60) / 60));
 
     return string_printf(
-        "%02d:%02d:%02d%c%02d", hours, minutes, seconds, div, frames);
+        "%02d:%02d:%02d%c%02d",
+        hours,
+        minutes,
+        seconds,
+        div,
+        frames);
 }
 
 std::string

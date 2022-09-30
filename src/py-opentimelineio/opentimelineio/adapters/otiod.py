@@ -22,18 +22,8 @@ from .. import (
     url_utils,
 )
 
-try:
-    import pathlib
-except ImportError:
-    # python2
-    import pathlib2 as pathlib
-
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
+import pathlib
+import urllib.parse as urlparse
 
 
 def read_from_file(filepath, absolute_media_reference_paths=False):
@@ -69,7 +59,7 @@ def write_to_file(
 
     if os.path.exists(filepath):
         raise exceptions.OTIOError(
-            "'{}' exists, will not overwrite.".format(filepath)
+            f"'{filepath}' exists, will not overwrite."
         )
 
     if not os.path.exists(os.path.dirname(filepath)):

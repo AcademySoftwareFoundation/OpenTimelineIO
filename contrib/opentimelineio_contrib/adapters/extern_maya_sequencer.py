@@ -4,11 +4,7 @@
 import os
 import sys
 
-# deal with renaming of default library from python 2 / 3
-try:
-    import urlparse as urllib_parse
-except ImportError:
-    import urllib.parse as urllib_parse
+import urllib.parse
 
 # import maya and handle standalone mode
 from maya import cmds
@@ -37,7 +33,7 @@ def _url_to_path(url):
     if url is None:
         return None
 
-    return urllib_parse.urlparse(url).path
+    return urllib.parse.urlparse(url).path
 
 
 def _video_url_for_shot(shot):

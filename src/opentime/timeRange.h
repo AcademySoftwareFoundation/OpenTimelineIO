@@ -41,7 +41,8 @@ public:
     {}
 
     explicit constexpr TimeRange(
-        RationalTime start_time, RationalTime duration) noexcept
+        RationalTime start_time,
+        RationalTime duration) noexcept
         : _start_time{ start_time }
         , _duration{ duration }
     {}
@@ -82,14 +83,17 @@ public:
 
     constexpr TimeRange extended_by(TimeRange other) const noexcept
     {
-        const RationalTime new_start_time{ std::min(
-            _start_time, other._start_time) },
-            new_end_time{ std::max(
-                end_time_exclusive(), other.end_time_exclusive()) };
+        const RationalTime new_start_time{
+            std::min(_start_time, other._start_time)
+        },
+            new_end_time{
+                std::max(end_time_exclusive(), other.end_time_exclusive())
+            };
 
         return TimeRange{ new_start_time,
                           RationalTime::duration_from_start_end_time(
-                              new_start_time, new_end_time) };
+                              new_start_time,
+                              new_end_time) };
     }
 
     RationalTime clamped(RationalTime other) const noexcept
@@ -101,8 +105,9 @@ public:
     {
         const TimeRange    r{ std::max(other._start_time, _start_time),
                            other._duration };
-        const RationalTime end{ std::min(
-            r.end_time_exclusive(), end_time_exclusive()) };
+        const RationalTime end{
+            std::min(r.end_time_exclusive(), end_time_exclusive())
+        };
         return TimeRange{ r._start_time, end - r._start_time };
     }
 
@@ -142,14 +147,15 @@ public:
      * @param other
      */
     constexpr bool contains(
-        TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        TimeRange other,
+        double    epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisStart  = _start_time.to_seconds();
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return greater_than(otherStart, thisStart, epsilon_s) &&
-               lesser_than(otherEnd, thisEnd, epsilon_s);
+        return greater_than(otherStart, thisStart, epsilon_s)
+               && lesser_than(otherEnd, thisEnd, epsilon_s);
     }
 
     /**
@@ -175,15 +181,16 @@ public:
      * @param epsilon_s
      */
     constexpr bool overlaps(
-        TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        TimeRange other,
+        double    epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisStart  = _start_time.to_seconds();
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return lesser_than(thisStart, otherStart, epsilon_s) &&
-               greater_than(thisEnd, otherStart, epsilon_s) &&
-               greater_than(otherEnd, thisEnd, epsilon_s);
+        return lesser_than(thisStart, otherStart, epsilon_s)
+               && greater_than(thisEnd, otherStart, epsilon_s)
+               && greater_than(otherEnd, thisEnd, epsilon_s);
     }
 
     /**
@@ -210,7 +217,8 @@ public:
      * @param epsilon_s
      */
     constexpr bool before(
-        RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        RationalTime other,
+        double       epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisEnd   = end_time_exclusive().to_seconds();
         const double otherTime = other.to_seconds();
@@ -249,8 +257,8 @@ public:
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return fabs(otherStart - thisStart) <= epsilon_s &&
-               lesser_than(thisEnd, otherEnd, epsilon_s);
+        return fabs(otherStart - thisStart) <= epsilon_s
+               && lesser_than(thisEnd, otherEnd, epsilon_s);
     }
 
     /**
@@ -262,7 +270,8 @@ public:
      * @param other
      */
     constexpr bool begins(
-        RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        RationalTime other,
+        double       epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisStart  = _start_time.to_seconds();
         const double otherStart = other.to_seconds();
@@ -279,14 +288,15 @@ public:
      * @param epsilon_s
      */
     constexpr bool finishes(
-        TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        TimeRange other,
+        double    epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisStart  = _start_time.to_seconds();
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return fabs(thisEnd - otherEnd) <= epsilon_s &&
-               greater_than(thisStart, otherStart, epsilon_s);
+        return fabs(thisEnd - otherEnd) <= epsilon_s
+               && greater_than(thisStart, otherStart, epsilon_s);
     }
 
     /**
@@ -299,7 +309,8 @@ public:
      * @param epsilon_s
      */
     constexpr bool finishes(
-        RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        RationalTime other,
+        double       epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisEnd  = end_time_exclusive().to_seconds();
         const double otherEnd = other.to_seconds();
@@ -316,14 +327,15 @@ public:
      * @param epsilon_s
      */
     constexpr bool intersects(
-        TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const noexcept
+        TimeRange other,
+        double    epsilon_s = DEFAULT_EPSILON_s) const noexcept
     {
         const double thisStart  = _start_time.to_seconds();
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return lesser_than(thisStart, otherEnd, epsilon_s) &&
-               greater_than(thisEnd, otherStart, epsilon_s);
+        return lesser_than(thisStart, otherEnd, epsilon_s)
+               && greater_than(thisEnd, otherStart, epsilon_s);
     }
 
     /**
@@ -338,8 +350,8 @@ public:
     {
         const RationalTime start    = lhs._start_time - rhs._start_time;
         const RationalTime duration = lhs._duration - rhs._duration;
-        return fabs(start.to_seconds()) < DEFAULT_EPSILON_s &&
-               fabs(duration.to_seconds()) < DEFAULT_EPSILON_s;
+        return fabs(start.to_seconds()) < DEFAULT_EPSILON_s
+               && fabs(duration.to_seconds()) < DEFAULT_EPSILON_s;
     }
 
     /**
@@ -353,19 +365,23 @@ public:
     }
 
     static constexpr TimeRange range_from_start_end_time(
-        RationalTime start_time, RationalTime end_time_exclusive) noexcept
+        RationalTime start_time,
+        RationalTime end_time_exclusive) noexcept
     {
         return TimeRange{ start_time,
                           RationalTime::duration_from_start_end_time(
-                              start_time, end_time_exclusive) };
+                              start_time,
+                              end_time_exclusive) };
     }
 
     static constexpr TimeRange range_from_start_end_time_inclusive(
-        RationalTime start_time, RationalTime end_time_inclusive) noexcept
+        RationalTime start_time,
+        RationalTime end_time_inclusive) noexcept
     {
         return TimeRange{ start_time,
                           RationalTime::duration_from_start_end_time_inclusive(
-                              start_time, end_time_inclusive) };
+                              start_time,
+                              end_time_inclusive) };
     }
 
 private:

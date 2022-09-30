@@ -7,7 +7,7 @@ from .. import _otio
 
 @add_method(_otio.Timeline)
 def __str__(self):
-    return 'Timeline("{}", {})'.format(str(self.name), str(self.tracks))
+    return f'Timeline("{str(self.name)}", {str(self.tracks)})'
 
 
 @add_method(_otio.Timeline)
@@ -36,8 +36,7 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable,
     :param bool shallow_search: if True, will only search children of self and not
                                 recurse into children of children.
     """
-    for child in self.children_if(descended_from_type, search_range, shallow_search):
-        yield child
+    yield from self.children_if(descended_from_type, search_range, shallow_search)
 
 
 @add_method(_otio.Timeline)
@@ -53,5 +52,4 @@ def each_clip(self, search_range=None, shallow_search=False):
     :param bool shallow_search: if True, will only search children of self and not
                                 recurse into children of children.
     """
-    for child in self.clip_if(search_range, shallow_search):
-        yield child
+    yield from self.clip_if(search_range, shallow_search)

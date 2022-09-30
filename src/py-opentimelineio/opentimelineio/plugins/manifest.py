@@ -56,10 +56,10 @@ def manifest_from_string(input_string):
     stack = inspect.stack()
     if len(stack) > 1 and len(stack[1]) > 3:
         #                     filename     function name
-        name = "{}:{}".format(stack[1][1], stack[1][3])
+        name = f"{stack[1][1]}:{stack[1][3]}"
 
     # set the value in the manifest
-    src_string = "call to manifest_from_string() in {}".format(name)
+    src_string = f"call to manifest_from_string() in {name}"
     result.source_files.append(src_string)
     result._update_plugin_source(src_string)
 
@@ -306,7 +306,7 @@ def load_manifest():
 
             except Exception:
                 logging.exception(
-                    "could not load plugin: {}".format(plugin_name)
+                    f"could not load plugin: {plugin_name}"
                 )
                 continue
 

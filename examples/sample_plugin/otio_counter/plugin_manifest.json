@@ -4,7 +4,6 @@
         {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "track_counter",
-            "execution_scope": "in process",
             "filepath": "adapter.py",
             "suffixes": ["count"]
         }

@@ -38,7 +38,6 @@ class TestPluginAdapters(unittest.TestCase):
 
     def test_plugin_adapter(self):
         self.assertEqual(self.adp.name, "example")
-        self.assertEqual(self.adp.execution_scope, "in process")
         self.assertEqual(self.adp.filepath, "example.py")
         self.assertEqual(self.adp.suffixes[0], "example")
         self.assertEqual(list(self.adp.suffixes), ['example'])
@@ -48,11 +47,9 @@ class TestPluginAdapters(unittest.TestCase):
             "Adapter("
             "{}, "
             "{}, "
-            "{}, "
             "{}"
             ")".format(
                 repr(self.adp.name),
-                repr(self.adp.execution_scope),
                 repr(self.adp.filepath),
                 repr(self.adp.suffixes),
             )
@@ -61,12 +58,10 @@ class TestPluginAdapters(unittest.TestCase):
             repr(self.adp),
             "otio.adapter.Adapter("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}, "
             "suffixes={}"
             ")".format(
                 repr(self.adp.name),
-                repr(self.adp.execution_scope),
                 repr(self.adp.filepath),
                 repr(self.adp.suffixes),
             )
@@ -294,7 +289,6 @@ class TestPluginManifest(unittest.TestCase):
                     {
                         "OTIO_SCHEMA": "Adapter.1",
                         "name": "local_json",
-                        "execution_scope": "in process",
                         "filepath": "example.py",
                         "suffixes": ["example"]
                     }

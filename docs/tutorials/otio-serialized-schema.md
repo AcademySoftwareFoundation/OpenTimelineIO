@@ -49,7 +49,6 @@ Adapters convert between OTIO and other formats.
 ```
 
 parameters:
-- *execution_scope*: Describes whether this adapter is executed in the current python process or in a subshell.  Options are: ['in process', 'out of process'].
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 - *suffixes*: File suffixes associated with this adapter.
@@ -155,7 +154,6 @@ None
 ```
 
 parameters:
-- *execution_scope*: Describes whether this adapter is executed in the current python process or in a subshell.  Options are: ['in process', 'out of process'].
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 
@@ -172,7 +170,6 @@ None
 ```
 
 parameters:
-- *execution_scope*: Describes whether this adapter is executed in the current python process or in a subshell.  Options are: ['in process', 'out of process'].
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 
@@ -270,7 +267,6 @@ A class of plugin that is encoded in a python module, exposed via a
 ```
 
 parameters:
-- *execution_scope*: Describes whether this adapter is executed in the current python process or in a subshell.  Options are: ['in process', 'out of process'].
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 
@@ -658,6 +654,5 @@ None
 ```
 
 parameters:
-- *execution_scope*: Describes whether this adapter is executed in the current python process or in a subshell.  Options are: ['in process', 'out of process'].
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.

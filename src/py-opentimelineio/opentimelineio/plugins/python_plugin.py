@@ -56,26 +56,15 @@ class PythonPlugin(core.SerializableObject):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
     ):
         core.SerializableObject.__init__(self)
         self.name = name
-        self.execution_scope = execution_scope
         self.filepath = filepath
         self._json_path = None
         self._module = None
 
     name = core.serializable_field("name", doc="Adapter name.")
-    execution_scope = core.serializable_field(
-        "execution_scope",
-        str,
-        doc=(
-            "Describes whether this adapter is executed in the current python"
-            " process or in a subshell.  Options are: "
-            "['in process', 'out of process']."
-        )
-    )
     filepath = core.serializable_field(
         "filepath",
         str,

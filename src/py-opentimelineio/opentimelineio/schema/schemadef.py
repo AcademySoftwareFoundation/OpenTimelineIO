@@ -19,10 +19,9 @@ class SchemaDef(plugins.PythonPlugin):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
     ):
-        plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
+        plugins.PythonPlugin.__init__(self, name, filepath)
 
     def module(self):
         """
@@ -66,9 +65,8 @@ class SchemaDef(plugins.PythonPlugin):
         return result
 
     def __str__(self):
-        return "SchemaDef({}, {}, {})".format(
+        return "SchemaDef({}, {})".format(
             repr(self.name),
-            repr(self.execution_scope),
             repr(self.filepath)
         )
 
@@ -76,11 +74,9 @@ class SchemaDef(plugins.PythonPlugin):
         return (
             "otio.schema.SchemaDef("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath)
             )
         )

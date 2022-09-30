@@ -76,7 +76,6 @@ Then you must add it to a plugin manifest:
         {
             "OTIO_SCHEMA" : "SchemaDef.1",
             "name" : "mything",
-            "execution_scope" : "in process",
             "filepath" : "mything.py"
          }
     ]

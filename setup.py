@@ -42,7 +42,7 @@ def _debugInstance(x):
         print("{}:     {}".format(a, getattr(x, a)))
 
 
-def joinArgs(args):
+def join_args(args):
     return ' '.join(map(shlex.quote, args))
 
 
@@ -165,7 +165,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.announce('running cmake generation', level=2)
 
         cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
-        self.announce(joinArgs(cmake_args), level=2)
+        self.announce(join_args(cmake_args), level=2)
 
         subprocess.check_call(
             cmake_args,
@@ -188,7 +188,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '--', multi_proc,
         ]
 
-        self.announce(joinArgs(cmake_args), level=2)
+        self.announce(join_args(cmake_args), level=2)
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,

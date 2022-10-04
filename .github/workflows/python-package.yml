@@ -126,6 +126,7 @@ jobs:
     - name: Install coverage dependency
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
+        echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
         sudo apt-get install lcov
     - name: Install python build dependencies
       run: |

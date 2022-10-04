@@ -127,7 +127,6 @@ struct MutableSequencePyAPI : public V {
 
         pybind11::class_<This::Iterator>(m, (name + "Iterator").c_str())
             .def("__iter__", &This::Iterator::iter)
-            .def("next", &This::Iterator::next)
             .def("__next__", &This::Iterator::next);
 
         pybind11::class_<This>(m, name.c_str())

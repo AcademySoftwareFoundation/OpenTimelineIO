@@ -244,7 +244,7 @@ The marked range may have a zero duration. The marked range is in the owning ite
     using SerializableCollectionIterator = ContainerIterator<SerializableCollection, SerializableObject*>;
     py::class_<SerializableCollectionIterator>(m, "SerializableCollectionIterator", py::dynamic_attr())
         .def("__iter__", &SerializableCollectionIterator::iter)
-        .def("next", &SerializableCollectionIterator::next);
+        .def("__next__", &SerializableCollectionIterator::next);
 
     py::class_<SerializableCollection, SOWithMetadata,
                managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr(), R"docstring(
@@ -443,7 +443,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")
         .def("__iter__", &CompositionIterator::iter)
-        .def("next", &CompositionIterator::next);
+        .def("__next__", &CompositionIterator::next);
 
     py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr(), R"docstring(
 Base class for an :class:`~Item` that contains other :class:`~Item`\s.

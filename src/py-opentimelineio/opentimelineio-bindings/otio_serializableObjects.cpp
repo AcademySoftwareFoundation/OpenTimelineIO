@@ -196,22 +196,17 @@ static void define_bases1(py::module m) {
         .def(py::init([](std::string name, py::dict metadata) {
                     // AnyDictionary d = metadata.fetch_any_dictionary();
 
-                    AnyDictionary* d = new AnyDictionary();
-                    PyObject *source = metadata.ptr();
-
-                    PyObject *key, *value;
-                    Py_ssize_t pos = 0;
-
-                    while (PyDict_Next(source, &pos, &key, &value)) {
-                        if (!PyUnicode_Check(key)) {
-                            throw py::key_error("Keys should be of type string");
+                    py::print("Creating new AnyDictionary from Python");
+                    AnyDictionary d = AnyDictionary();
+                    for (auto &it : metadata) {
+                        if (!py::isinstance<py::str>(it.first)) {
+                            throw py::key_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
                         }
-
-                        const char* key_name = PyUnicode_AsUTF8(key);
-                        (*d)[key_name] = value;
+                        d[py::cast<std::string>(it.first)] = it.second;
                     }
 
-                    return new SOWithMetadata(name, (*d));
+                    py::print("Creating new SOWithMetadata");
+                    return new SOWithMetadata(name, d);
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))

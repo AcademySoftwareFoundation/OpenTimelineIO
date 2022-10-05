@@ -317,8 +317,8 @@ The CORE_VERSION_MAP maps OTIO release versions to maps of schema name to schema
     m.def("flatten_stack", [](Stack* s) {
             return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);
-    m.def("flatten_stack", [](py::object tracks) {
-            return flatten_stack(py_to_vector<Track*>(tracks), ErrorStatusHandler());
+    m.def("flatten_stack", [](std::vector<Track*> tracks) {
+            return flatten_stack(tracks, ErrorStatusHandler());
         }, "tracks"_a);        
 
     void _build_any_to_py_dispatch_table();

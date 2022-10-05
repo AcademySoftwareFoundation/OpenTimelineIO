@@ -160,27 +160,5 @@ pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
-std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o);
 
 bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
-
-template <typename T>
-std::vector<T> py_to_vector(pybind11::object const& o) {
-    std::vector<SerializableObject*> vso = py_to_so_vector(o);
-    std::vector<T> result;
-    
-    result.reserve(vso.size());
-    
-    for (auto e: vso) {
-        if (T t = dynamic_cast<T>(e)) {
-            result.push_back(t);
-            continue;
-        }
-
-        throw pybind11::type_error(string_printf("list has element of type %s; expected type %s",
-                                                 type_name_for_error_message(typeid(*e)).c_str(),
-                                                 type_name_for_error_message<T>().c_str()));
-    }
-
-    return result;
-}

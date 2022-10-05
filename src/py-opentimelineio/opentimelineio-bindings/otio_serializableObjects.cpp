@@ -187,8 +187,31 @@ static void define_bases1(py::module m) {
 
     py::class_<SOWithMetadata, SerializableObject,
                managing_ptr<SOWithMetadata>>(m, "SerializableObjectWithMetadata", py::dynamic_attr())
-        .def(py::init([](std::string name, py::object metadata) {
-                    return new SOWithMetadata(name, py_to_any_dictionary(metadata));
+        .def(py::init([](std::string name, AnyDictionaryProxy* metadata) {
+                    AnyDictionary d = metadata->fetch_any_dictionary();
+                    return new SOWithMetadata(name, d);
+                }),
+            py::arg_v("name"_a = std::string()),
+            py::arg_v("metadata"_a = py::none()))
+        .def(py::init([](std::string name, py::dict metadata) {
+                    // AnyDictionary d = metadata.fetch_any_dictionary();
+
+                    AnyDictionary* d = new AnyDictionary();
+                    PyObject *source = metadata.ptr();
+
+                    PyObject *key, *value;
+                    Py_ssize_t pos = 0;
+
+                    while (PyDict_Next(source, &pos, &key, &value)) {
+                        if (!PyUnicode_Check(key)) {
+                            throw py::key_error("Keys should be of type string");
+                        }
+
+                        const char* key_name = PyUnicode_AsUTF8(key);
+                        (*d)[key_name] = value;
+                    }
+
+                    return new SOWithMetadata(name, (*d));
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))

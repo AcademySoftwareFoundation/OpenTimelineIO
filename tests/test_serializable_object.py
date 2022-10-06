@@ -47,23 +47,26 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         d['key_2'] = {'asdasdasd': 5.6}
         so = otio.core.SerializableObjectWithMetadata(
             metadata={
-                'key1': 'myvalue',
-                'key2': -999999999999,
-                'key3': [1, 2.5, 'asd'],
-                'key4': {'map1': [345]},
-                'key5': v,
-                'key6': 123
+                'string': 'myvalue',
+                'int': -999999999999,
+                'list': [1, 2.5, 'asd'],
+                'dict': {'map1': [345]},
+                'AnyVector': v,
+                'AnyDictionary': d
             }
         )
         so.metadata['foo'] = 'bar'
         self.assertEqual(so.metadata['foo'], 'bar')
-        self.assertEqual(so.metadata['key1'], 'myvalue')
-        self.assertEqual(so.metadata['key2'], -999999999999)
-        self.assertIsInstance(so.metadata['key3'], opentimelineio._otio.AnyVector)
-        self.assertEqual(list(so.metadata['key3']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
-        self.assertIsInstance(so.metadata['key4'], opentimelineio._otio.AnyDictionary)
-        # self.assertEqual(dict(so.metadata['key4']), {'map1': [345]})
-
+        self.assertEqual(so.metadata['string'], 'myvalue')
+        self.assertEqual(so.metadata['int'], -999999999999)
+        self.assertIsInstance(so.metadata['list'], opentimelineio._otio.AnyVector)
+        self.assertEqual(list(so.metadata['list']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
+        self.assertIsInstance(so.metadata['dict'], opentimelineio._otio.AnyDictionary)
+        # self.assertDictEqual(so.metadata['dict'], {'map1': [345]})
+        self.assertIsInstance(so.metadata['AnyVector'], opentimelineio._otio.AnyVector)
+        self.assertEqual(list(so.metadata['AnyVector']), [1, 'inside any vector'])
+        self.assertIsInstance(so.metadata['AnyDictionary'], opentimelineio._otio.AnyDictionary)
+        self.assertEqual(dict(so.metadata['AnyDictionary']), {'key_1': 1234, 'key_2': {'asdasdasd': 5.6}})
 
     def test_update(self):
         so = otio.core.SerializableObjectWithMetadata()

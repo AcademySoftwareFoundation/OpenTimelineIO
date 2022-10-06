@@ -143,23 +143,15 @@ any py_to_any2(py::handle const& o) {
         return any(o.cast<std::string>());
     }
 
-    if (py::isinstance<AnyVectorProxy>(o)) {
-        return any(((AnyVectorProxy*)o.ptr())->fetch_any_vector());
-    }
-
-    if (py::isinstance<py::sequence>(o)) {
-        AnyVector av;
-        for (auto &it : o) {
-            av.push_back(py_to_any2(it));
-        }
-        return any(av);
-    }
-
+    // Convert AnyDictionaryProxy and dict before vector and sequence because
+    // a dict is a sequence.
     if (py::isinstance<AnyDictionaryProxy>(o)) {
-        return any(((AnyDictionaryProxy*)o.ptr())->fetch_any_dictionary());
+        py::print("Converting AnyDictionaryProxy");
+        return any(o.cast<AnyDictionaryProxy>().fetch_any_dictionary());
     }
 
     if (py::isinstance<py::dict>(o)) {
+        py::print("Converting py::dict");
         AnyDictionary d;
 
         py::dict pyd = o.cast<py::dict>();
@@ -173,6 +165,21 @@ any py_to_any2(py::handle const& o) {
 
         return any(d);
     }
+
+    if (py::isinstance<AnyVectorProxy>(o)) {
+        py::print("Converting AnyVectorProxy");
+        return any(o.cast<AnyVectorProxy>().fetch_any_vector());
+    }
+
+    if (py::isinstance<py::sequence>(o)) {
+        py::print("Converting py::sequence");
+        AnyVector av;
+        for (auto &it : o) {
+            av.push_back(py_to_any2(it));
+        }
+        return any(av);
+    }
+
     throw py::value_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
 }
 

@@ -11,6 +11,18 @@
 namespace py = pybind11;
 
 struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
+    AnyDictionaryProxy() {}
+    AnyDictionaryProxy(const AnyDictionaryProxy& adp) {
+        AnyDictionary* ad = new AnyDictionary();
+
+        AnyDictionary::iterator ptr;
+        for (ptr = adp.any_dictionary->begin(); ptr != adp.any_dictionary->end(); ptr++) {
+            ad->insert(*ptr);
+        }
+
+        any_dictionary = ad;
+    }
+
     ~AnyDictionaryProxy() {
     }
     

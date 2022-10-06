@@ -4,6 +4,7 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import opentimelineio as otio
+import opentimelineio._otio
 import opentimelineio.test_utils as otio_test_utils
 
 import unittest
@@ -37,12 +38,32 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(so.metadata['foo'], 'bar')
 
     def test_cons2(self):
-        so = otio.core.SerializableObjectWithMetadata(metadata={'key1': 'myvalue', 'key2': -999999999999, 'key3': [1, 2.5, 'asd']})
+        v = opentimelineio._otio.AnyVector()
+        v.append(1)
+        v.append('inside any vector')
+
+        d = opentimelineio._otio.AnyDictionary()
+        d['key_1'] = 1234
+        d['key_2'] = {'asdasdasd': 5.6}
+        so = otio.core.SerializableObjectWithMetadata(
+            metadata={
+                'key1': 'myvalue',
+                'key2': -999999999999,
+                'key3': [1, 2.5, 'asd'],
+                'key4': {'map1': [345]},
+                'key5': v,
+                'key6': 123
+            }
+        )
         so.metadata['foo'] = 'bar'
         self.assertEqual(so.metadata['foo'], 'bar')
         self.assertEqual(so.metadata['key1'], 'myvalue')
         self.assertEqual(so.metadata['key2'], -999999999999)
+        self.assertIsInstance(so.metadata['key3'], opentimelineio._otio.AnyVector)
         self.assertEqual(list(so.metadata['key3']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
+        self.assertIsInstance(so.metadata['key4'], opentimelineio._otio.AnyDictionary)
+        # self.assertEqual(dict(so.metadata['key4']), {'map1': [345]})
+
 
     def test_update(self):
         so = otio.core.SerializableObjectWithMetadata()

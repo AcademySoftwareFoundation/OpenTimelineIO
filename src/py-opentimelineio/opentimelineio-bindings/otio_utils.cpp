@@ -143,6 +143,10 @@ any py_to_any2(py::handle const& o) {
         return any(o.cast<std::string>());
     }
 
+    if (py::isinstance<AnyVectorProxy>(o)) {
+        return any(((AnyVectorProxy*)o.ptr())->fetch_any_vector());
+    }
+
     if (py::isinstance<py::sequence>(o)) {
         AnyVector av;
         for (auto &it : o) {
@@ -151,8 +155,23 @@ any py_to_any2(py::handle const& o) {
         return any(av);
     }
 
+    if (py::isinstance<AnyDictionaryProxy>(o)) {
+        return any(((AnyDictionaryProxy*)o.ptr())->fetch_any_dictionary());
+    }
+
     if (py::isinstance<py::dict>(o)) {
-        // TODO
+        AnyDictionary d;
+
+        py::dict pyd = o.cast<py::dict>();
+        for (auto &it : pyd) {
+            if (!py::isinstance<py::str>(it.first)) {
+                throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
+            }
+
+            d[it.first.cast<std::string>()] = any(py_to_any2(it.second));
+        }
+
+        return any(d);
     }
     throw py::value_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
 }

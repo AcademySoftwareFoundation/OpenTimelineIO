@@ -194,6 +194,9 @@ static void define_bases1(py::module m) {
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))
+        // TODO: We should use AnyDictionary and with the custom caster, we would no longer
+        // need py::object, py::dict or AnyDictionaryProxy to be exposed.
+        // https://stackoverflow.com/a/60744217
         .def(py::init([](std::string name, py::dict metadata) {
                     py::print("py::dict");
                     AnyDictionary d = AnyDictionary();

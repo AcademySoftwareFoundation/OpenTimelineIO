@@ -193,20 +193,20 @@ static void define_bases1(py::module m) {
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))
-        .def(py::init([](std::string name, py::dict metadata) {
+        .def(py::init([](std::string name, py::object metadata) {
                     // AnyDictionary d = metadata.fetch_any_dictionary();
 
                     py::print("Creating new AnyDictionary from Python");
-                    AnyDictionary d = AnyDictionary();
-                    for (auto &it : metadata) {
-                        if (!py::isinstance<py::str>(it.first)) {
-                            throw py::key_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
-                        }
-                        d[py::cast<std::string>(it.first)] = it.second;
-                    }
+                    // auto d = AnyDictionary();
+                    // for (auto &it : metadata) {
+                    //     if (!py::isinstance<py::str>(it.first)) {
+                    //         throw py::key_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
+                    //     }
+                    //     d[py::cast<std::string>(it.first)] = it.second;
+                    // }
 
                     py::print("Creating new SOWithMetadata");
-                    return new SOWithMetadata(name, d);
+                    return new SOWithMetadata(name, py_to_any_dictionary(metadata));
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))

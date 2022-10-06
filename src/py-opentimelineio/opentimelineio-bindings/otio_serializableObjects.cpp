@@ -188,28 +188,27 @@ static void define_bases1(py::module m) {
     py::class_<SOWithMetadata, SerializableObject,
                managing_ptr<SOWithMetadata>>(m, "SerializableObjectWithMetadata", py::dynamic_attr())
         .def(py::init([](std::string name, AnyDictionaryProxy* metadata) {
+                    py::print("AnyDictionaryProxy");
                     AnyDictionary d = metadata->fetch_any_dictionary();
                     return new SOWithMetadata(name, d);
                 }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()))
-        .def(py::init([](std::string name, py::object metadata) {
-                    // AnyDictionary d = metadata.fetch_any_dictionary();
+        .def(py::init([](std::string name, py::dict metadata) {
+                    py::print("py::dict");
+                    AnyDictionary d = AnyDictionary();
+                    for (auto &it : metadata) {
+                        if (!py::isinstance<py::str>(it.first)) {
+                            throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
+                        }
 
-                    py::print("Creating new AnyDictionary from Python");
-                    // auto d = AnyDictionary();
-                    // for (auto &it : metadata) {
-                    //     if (!py::isinstance<py::str>(it.first)) {
-                    //         throw py::key_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
-                    //     }
-                    //     d[py::cast<std::string>(it.first)] = it.second;
-                    // }
+                        d[py::cast<std::string>(it.first)] = py_to_any2(it.second);
+                    }
 
-                    py::print("Creating new SOWithMetadata");
-                    return new SOWithMetadata(name, py_to_any_dictionary(metadata));
+                    return new SOWithMetadata(name, d);
                 }),
             py::arg_v("name"_a = std::string()),
-            py::arg_v("metadata"_a = py::none()))
+            py::arg_v("metadata"_a = py::dict()))
         .def_property_readonly("metadata", [](SOWithMetadata* s) {
                 auto ptr = s->metadata().get_or_create_mutation_stamp();
             return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)

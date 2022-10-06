@@ -36,6 +36,14 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         so.metadata['foo'] = 'bar'
         self.assertEqual(so.metadata['foo'], 'bar')
 
+    def test_cons2(self):
+        so = otio.core.SerializableObjectWithMetadata(metadata={'key1': 'myvalue', 'key2': -999999999999, 'key3': [1, 2.5, 'asd']})
+        so.metadata['foo'] = 'bar'
+        self.assertEqual(so.metadata['foo'], 'bar')
+        self.assertEqual(so.metadata['key1'], 'myvalue')
+        self.assertEqual(so.metadata['key2'], -999999999999)
+        self.assertEqual(list(so.metadata['key3']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
+
     def test_update(self):
         so = otio.core.SerializableObjectWithMetadata()
         so.metadata.update({"foo": "bar"})

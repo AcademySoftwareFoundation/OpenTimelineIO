@@ -8,17 +8,10 @@
 
 #include "opentimelineio/anyDictionary.h"
 
-#include <iostream>
-
 namespace py = pybind11;
 
 struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
-    AnyDictionaryProxy() {
-        std::cout << "Constructing AnyDictionaryProxy\n";
-    }
-
     ~AnyDictionaryProxy() {
-        std::cout << "Destructing AnyDictionaryProxy\n";
     }
     
     using MutationStamp = AnyDictionary::MutationStamp;

@@ -105,6 +105,58 @@ static void py_to_any(py::object const& o, any* result) {
     result->swap(_value_to_any(o).cast<PyAny*>()->a);
 }
 
+any py_to_any2(py::handle const& o) {
+    py::type pytype = py::type::of(o);
+    if (o.ptr() == nullptr || o.is_none()) {
+        return any(nullptr);
+    }
+
+    if (py::isinstance<py::bool_>(o)) {
+        return any(o.cast<bool>());
+    }
+
+    if (py::isinstance<py::int_>(o)) {
+        try {
+            return any(o.cast<std::int32_t>());
+        } catch (...) {}
+
+        try {
+            return any(o.cast<std::int64_t>());
+        } catch (...) {}
+
+        try {
+            return any(o.cast<std::uint32_t>());
+        } catch (...) {}
+
+        try {
+            return any(o.cast<std::uint64_t>());
+        } catch (...) {}
+
+        throw std::runtime_error("Failed to convert Python int to C++ int");
+    }
+
+    if (py::isinstance<py::float_>(o)) {
+        return any(o.cast<double>());
+    }
+
+    if (py::isinstance<py::str>(o)) {
+        return any(o.cast<std::string>());
+    }
+
+    if (py::isinstance<py::sequence>(o)) {
+        AnyVector av;
+        for (auto &it : o) {
+            av.push_back(py_to_any2(it));
+        }
+        return any(av);
+    }
+
+    if (py::isinstance<py::dict>(o)) {
+        // TODO
+    }
+    throw py::value_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
+}
+
 AnyDictionary py_to_any_dictionary(py::object const& o) {
     if (o.is_none()) {
         return AnyDictionary();
@@ -118,6 +170,49 @@ AnyDictionary py_to_any_dictionary(py::object const& o) {
     }
 
     return safely_cast_any_dictionary_any(a);
+}
+
+AnyDictionary pydict_to_any_dictionary(py::dict const& o) {
+    if (o.is_none()) {
+        return AnyDictionary();
+    }
+
+    any a;
+    py_to_any(o, &a);
+    if (!compare_typeids(a.type(), typeid(AnyDictionary))) {
+        throw py::type_error(string_printf("Expected an AnyDictionary (i.e. metadata); got %s instead",
+                                           type_name_for_error_message(a).c_str()));
+    }
+
+    return safely_cast_any_dictionary_any(a);
+}
+
+std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o) {
+    if (_value_to_so_vector.is_none()) {
+        py::object core = py::module::import("opentimelineio.core");
+        _value_to_so_vector = core.attr("_value_to_so_vector");
+    }
+
+    std::vector<SerializableObject*> result;
+    if (o.is_none()) {
+        return result;
+    }
+
+    /*
+     * We're depending on _value_to_so_vector(), written in Python, to
+     * not screw up, or we're going to crash.  (1) It has to give us
+     * back an AnyVector.  (2) Every element has to be a
+     * SerializableObject::Retainer<>.
+     */
+
+    py::object obj_vector = _value_to_so_vector(o);     // need to retain this here or we'll lose the any...
+    AnyVector const& v = temp_safely_cast_any_vector_any(obj_vector.cast<PyAny*>()->a);
+
+    result.reserve(v.size());
+    for (auto e: v) {
+        result.push_back(safely_cast_retainer_any(e));
+    }
+    return result;
 }
 
 py::object any_to_py(any const& a, bool top_level) {

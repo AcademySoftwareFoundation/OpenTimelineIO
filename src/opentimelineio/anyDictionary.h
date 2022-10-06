@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <map>
 #include <string>
-#include <iostream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -35,25 +34,19 @@ public:
     AnyDictionary()
         : map{}
         , _mutation_stamp{}
-    {
-        std::cout << "Constructing AnyDictionary\n";
-    }
+    {}
 
     // to be safe, avoid brace-initialization so as to not trigger
     // list initialization behavior in older compilers:
     AnyDictionary(const AnyDictionary& other)
         : map(other)
         , _mutation_stamp{}
-    {
-        std::cout << "Constructing AnyDictionary\n";
-    }
+    {}
 
     ~AnyDictionary()
     {
-        std::cout << "Destructing AnyDictionary\n";
         if (_mutation_stamp)
         {
-            std::cout << "  There was a mutation\n";
             _mutation_stamp->stamp          = -1;
             _mutation_stamp->any_dictionary = nullptr;
         }
@@ -232,10 +225,8 @@ public:
 
         ~MutationStamp()
         {
-            std::cout << "Destructing MutationStamp\n";
             if (any_dictionary)
             {
-                std::cout << "  There was an AnyDictionary attached\n";
                 any_dictionary->_mutation_stamp = nullptr;
                 if (owning)
                 {
@@ -260,10 +251,8 @@ public:
 
     MutationStamp* get_or_create_mutation_stamp()
     {
-        std::cout << "get_or_create_mutation_stamp\n";
         if (!_mutation_stamp)
         {
-            std::cout << "  Creating mutation\n";
             _mutation_stamp = new MutationStamp(this);
         }
         return _mutation_stamp;

@@ -81,7 +81,7 @@ The OTIO python bindings also support several other kinds of plugins, for more i
 Installing / Quick-Start
 ------------------------
 
-The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
+The Python-wrapped version of OpenTimelineIO is publicly available [via PyPI](https://pypi.org/project/OpenTimelineIO/).  You can install OpenTimelineIO via:
 
 `python -m pip install opentimelineio`
 

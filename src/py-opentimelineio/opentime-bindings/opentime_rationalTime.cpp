@@ -2,15 +2,12 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <pybind11/operators.h>
-#include "nonstd/optional.hpp"
 
 #include "opentime/rationalTime.h"
 #include "opentimelineio/stringUtils.h"
+#include "opentimelineio/optional.h"
 #include "py-opentimelineio/bindings-common/casters.h"
-
-using nonstd::optional;
 
 namespace py = pybind11;
 using namespace pybind11::literals;

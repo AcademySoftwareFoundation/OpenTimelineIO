@@ -21,6 +21,7 @@ help:
 	@echo "  htmlstrict to make standalone HTML files and fails if any warnings or errors are produced"
 	@echo "  dirhtml    to make HTML files named index.html in directories"
 	@echo "  singlehtml to make a single large HTML file"
+	@echo "  livehtml   to make standalone HTML files served by a web server that will automatically reload and rebuild when a file changes"
 	@echo "  pickle     to make pickle files"
 	@echo "  json       to make JSON files"
 	@echo "  htmlhelp   to make HTML files and a HTML help project"

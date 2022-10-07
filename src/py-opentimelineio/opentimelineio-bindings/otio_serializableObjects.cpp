@@ -49,14 +49,6 @@ using TrackVectorProxy =
 using SOWithMetadata = SerializableObjectWithMetadata;
 
 namespace {
-    const std::string string_or_none_converter(py::object& thing) {
-        if (thing.is(py::none())) {
-            return std::string();
-        }
-        else {
-            return py::str(thing);
-        }
-    }
 
     template<typename T, typename U>
     bool children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
@@ -210,12 +202,12 @@ A marker indicates a marked range of time on an item in a timeline, usually with
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        optional<std::string> name,
                         TimeRange marked_range,
                         std::string const& color,
                         py::object metadata) {
                           return new Marker(
-                                  string_or_none_converter(name),
+                                  name.value_or(""),
                                   marked_range,
                                   color,
                                   py_to_any_dictionary(metadata));
@@ -551,12 +543,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .value("never", Track::NeighborGapPolicy::never);
 
     track_class
-        .def(py::init([](py::object name, py::object children,
+        .def(py::init([](optional<std::string> name, py::object children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
                           auto composable_children = py_to_vector<Composable*>(children);
                           Track* t = new Track(
-                                  string_or_none_converter(name),
+                                  name.value_or(""),
                                   source_range,
                                   kind,
                                   py_to_any_dictionary(metadata)
@@ -585,7 +577,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
-        .def(py::init([](py::object name,
+        .def(py::init([](optional<std::string> name,
                          py::object children,
                          optional<TimeRange> const& source_range,
                          py::object markers,
@@ -593,7 +585,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                          py::object metadata) {
                           auto composable_children = py_to_vector<Composable*>(children);
                           Stack* s = new Stack(
-                                  string_or_none_converter(name),
+                                  name.value_or(""),
                                   source_range,
                                   py_to_any_dictionary(metadata),
                                   py_to_vector<Effect*>(effects),
@@ -742,12 +734,12 @@ Represents media for which a concrete reference is missing.
 Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        optional<std::string> name,
                         optional<TimeRange> available_range,
                         py::object metadata,
                         optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
-                                  string_or_none_converter(name),
+                                  name.value_or(""),
                                   available_range,
                                   py_to_any_dictionary(metadata),
                                   available_image_bounds); 

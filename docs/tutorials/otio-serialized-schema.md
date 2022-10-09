@@ -79,7 +79,7 @@ parameters:
 
 ```
 
-Base class for an :class:`~Item` that contains other :class:`~Item`\s.
+Base class for an :class:`~Item` that contains :class:`~Composable`\s.
 
 Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
 

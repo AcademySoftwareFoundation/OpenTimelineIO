@@ -447,7 +447,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
         .def("__next__", &CompositionIterator::next);
 
     py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr(), R"docstring(
-Base class for an :class:`~Item` that contains other :class:`~Item`\s.
+Base class for an :class:`~Item` that contains :class:`~Composable`\s.
 
 Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
 )docstring")

@@ -33,9 +33,9 @@ To create a new OTIO Adapter, you need to create a file mymedialinker.py. Then a
         }
 ```
           
-Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).
+Then you need to add this manifest to your {term}`OTIO_PLUGIN_MANIFEST_PATH` environment variable.
 
-Finally, to specify this linker as the default media linker, set `OTIO_DEFAULT_MEDIA_LINKER` to the name of the media linker:
+Finally, to specify this linker as the default media linker, set {term}`OTIO_DEFAULT_MEDIA_LINKER` to the name of the media linker:
 
 ```bash
     export OTIO_DEFAULT_MEDIA_LINKER="awesome_studios_media_linker"

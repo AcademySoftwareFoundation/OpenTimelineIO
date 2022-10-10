@@ -164,7 +164,7 @@ sc->to_json_file("/var/tmp/simpleclass.otio", &err, &downgrade_manifest);
 
 In python, an additional level of indirection is provided, "FAMILY", which is intended to allow developers to define their own sets of target versions for their plugin schemas.  For example, a studio might have a family named "MYFAMILY" under which they organize labels for their internal releases of their own plugins.
 
-These can be defined in a plugin manifest, which is a `.plugin_manifest.json` file found on the environment variable `${OTIO_PLUGIN_MANIFEST_PATH}`.
+These can be defined in a plugin manifest, which is a `.plugin_manifest.json` file found on the environment variable {term}`OTIO_PLUGIN_MANIFEST_PATH`.
 
 For example:
 
@@ -204,19 +204,19 @@ See the [versioning module](../api/python/opentimelineio.versioning.rst) for mor
 If you are using multiple pieces of software built with mismatched versions of OTIO, you may need to configure the newer one(s) to write out OTIO in an older format without recompiling or modifying the software.
 
 You can accomplish this in two ways:
-- The `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable can specify a family and version.
+- The {term}`OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable can specify a family and version.
 - The `otioconvert` utility program can downgrade an OTIO file to an older version.
 
 ### OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL Environment Variable
 
-If your software uses OTIO's Python adapter system, then you can set the `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable with a `FAMILY:VERSION` value.
+If your software uses OTIO's Python adapter system, then you can set the {term}`OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable with a `FAMILY:VERSION` value.
 For example, in a *nix shell: `env OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL=OTIO_CORE:0.14.0 my_program`
 
 The `OTIO_CORE` family is pre-populated with the core OTIO schema versions for previous OTIO releases, for example `0.14.0`. If you have custom schema that needs to be downgraded as well, you will need to specify your own family and version mapping, as described above.
 
 ### Downgrading with otioconvert
 
-If your software uses OTIO's C++ API, then it does not look for the `OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable, but you can convert an OTIO file after it has been created with the `otioconvert` utility.
+If your software uses OTIO's C++ API, then it does not look for the {term}`OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable, but you can convert an OTIO file after it has been created with the `otioconvert` utility.
 
 You can either use a family like this:
 ```

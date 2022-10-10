@@ -220,7 +220,7 @@ def load_manifest():
 
     The order of loading (and precedence) is:
 
-       1. Manifests specified via the ``OTIO_PLUGIN_MANIFEST_PATH`` variable
+       1. Manifests specified via the :term:`OTIO_PLUGIN_MANIFEST_PATH` variable
        2. Entrypoint based plugin manifests
        3. Builtin plugin manifest
        4. Contrib plugin manifest

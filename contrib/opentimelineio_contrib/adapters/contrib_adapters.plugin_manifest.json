@@ -48,12 +48,6 @@
             "name": "xges",
             "filepath": "xges.py",
             "suffixes": ["xges"]
-        },
-        {
-            "OTIO_SCHEMA": "Adapter.1",
-            "name": "kdenlive",
-            "filepath": "kdenlive.py",
-            "suffixes": ["kdenlive"]
         }
     ],
     "schemadefs" : [

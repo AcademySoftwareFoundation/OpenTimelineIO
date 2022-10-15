@@ -738,7 +738,7 @@ class FCP7XMLParser:
         """
         local_context = context.context_pushing_element(track_element)
         name_element = track_element.find("./name")
-        track_name = (name_element.text if name_element is not None else None)
+        track_name = (name_element.text if name_element is not None else '')
 
         timeline_item_tags = {"clipitem", "generatoritem", "transitionitem"}
 

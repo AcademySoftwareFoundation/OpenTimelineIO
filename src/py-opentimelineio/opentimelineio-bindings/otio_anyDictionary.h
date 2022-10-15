@@ -12,15 +12,16 @@ namespace py = pybind11;
 
 struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
     AnyDictionaryProxy() {}
-    AnyDictionaryProxy(const AnyDictionaryProxy& adp) {
-        AnyDictionary* ad = new AnyDictionary();
+    AnyDictionaryProxy(const AnyDictionaryProxy& other) // Copy constructor. Required to convert a py::handle to an AnyDictionaryProxy.
+    {
+        AnyDictionary* d = new AnyDictionary;
 
         AnyDictionary::iterator ptr;
-        for (ptr = adp.any_dictionary->begin(); ptr != adp.any_dictionary->end(); ptr++) {
-            ad->insert(*ptr);
+        for (ptr = other.any_dictionary->begin(); ptr != other.any_dictionary->end(); ptr++) {
+            d->insert(*ptr);
         }
 
-        any_dictionary = ad;
+        any_dictionary = d;
     }
 
     ~AnyDictionaryProxy() {

@@ -14,15 +14,15 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
     AnyVectorProxy() {}
-    AnyVectorProxy(const AnyVectorProxy& avp)
+    AnyVectorProxy(const AnyVectorProxy& other) // Copy constructor. Required to convert a py::handle to an AnyVectorProxy.
     {
-        AnyVector* av = new AnyVector();
+        AnyVector* v = new AnyVector;
 
         AnyVector::iterator ptr;
-        for (ptr = avp.any_vector->begin(); ptr < avp.any_vector->end(); ptr++) {
-            av->push_back(*ptr);
+        for (ptr = other.any_vector->begin(); ptr < other.any_vector->end(); ptr++) {
+            v->push_back(*ptr);
         }
-        any_vector = av;
+        any_vector = v;
     }
 
     static void throw_array_was_deleted() {

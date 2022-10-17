@@ -985,9 +985,8 @@ class Event:
                     line.source_in.rate
                 )
             elif timing_effect.effect_name == "LinearTimeWarp":
-                value = clip.trimmed_range().duration.value / timing_effect.time_scalar
-                line.source_out = (
-                    line.source_in + opentime.RationalTime(value, rate))
+                value = clip.trimmed_range().duration.value * timing_effect.time_scalar - 1
+                line.source_out = line.source_in + opentime.RationalTime(value, rate)
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),

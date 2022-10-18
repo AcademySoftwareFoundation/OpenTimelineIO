@@ -211,12 +211,12 @@ A marker indicates a marked range of time on an item in a timeline, usually with
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
 )docstring")
         .def(py::init([](
-                        optional<std::string> name,
+                        std::string name,
                         TimeRange marked_range,
                         std::string const& color,
                         py::object metadata) {
                           return new Marker(
-                                  name.value_or(""),
+                                  name,
                                   marked_range,
                                   color,
                                   py_to_any_dictionary(metadata));
@@ -552,12 +552,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .value("never", Track::NeighborGapPolicy::never);
 
     track_class
-        .def(py::init([](optional<std::string> name, optional<std::vector<Composable*>> children,
+        .def(py::init([](std::string name, optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Track* t = new Track(
-                                  name.value_or(""),
+                                  name,
                                   source_range,
                                   kind,
                                   py_to_any_dictionary(metadata)
@@ -586,7 +586,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
-        .def(py::init([](optional<std::string> name,
+        .def(py::init([](std::string name,
                          optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
                          optional<std::vector<Marker*>> markers,
@@ -594,7 +594,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                          py::object metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Stack* s = new Stack(
-                                  name.value_or(""),
+                                  name,
                                   source_range,
                                   py_to_any_dictionary(metadata),
                                   vector_or_default<Effect>(effects),
@@ -742,12 +742,12 @@ Represents media for which a concrete reference is missing.
 Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
 )docstring")
         .def(py::init([](
-                        optional<std::string> name,
+                        std::string name,
                         optional<TimeRange> available_range,
                         py::object metadata,
                         optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
-                                  name.value_or(""),
+                                  name,
                                   available_range,
                                   py_to_any_dictionary(metadata),
                                   available_image_bounds); 

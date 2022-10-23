@@ -55,12 +55,17 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
     def run(self):
         self.announce('running OTIO build_ext', level=2)
+        # Let the original build_ext class do its job.
+        # This is rather important because build_ext.run takes care of a
+        # couple of things, one of which is to copy the built files into
+        # the source tree (in src/py-opentimelineio/opentimelineio)
+        # when building in editable mode.
         super().run()
 
     def build_extension(self, _ext: Extension):
         # This works around the fact that we build _opentime and _otio
-        # extensions as a one-shot cmake invocation. Usually we'd build each
-        # separately using build_extension.
+        # extensions as a one-shot cmake invocation. Setuptools calls
+        # build_extension for each Extension registered in the setup function.
         if not self.built:
             self.build()
             self.built = True
@@ -263,6 +268,8 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
             # Only run when not in dry-mode (a dry run should not have any side effect)
             # and in non-editable mode. We don't want to edit files when in editable
             # mode because that could lead to modifications to the source files.
+            # Note that setuptools will set self.editable_mode to True
+            # when "pip install -e ." is run.
             _append_version_info_to_init_scripts(self.build_lib)
 
 
@@ -333,6 +340,11 @@ setup(
     ),
 
     ext_modules=[
+        # The full and correct module name is required here because
+        # setuptools needs to resolve the name to find the built file
+        # and copy it into the source tree. (Because yes, editable install
+        # means that the install should point to the source tree, which
+        # means the .sos need to also be there alongside the python files).
         Extension('opentimelineio._otio', sources=[]),
         Extension('opentimelineio._opentime', sources=[]),
     ],

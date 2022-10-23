@@ -16,7 +16,6 @@ import shlex
 import sys
 import platform
 import subprocess
-import unittest
 import tempfile
 import shutil
 

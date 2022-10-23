@@ -46,23 +46,25 @@ def join_args(args):
     return ' '.join(map(shlex.quote, args))
 
 
-class CMakeExtension(Extension):
-    def __init__(self, name):
-        Extension.__init__(self, name, sources=[])
-
-
 class OTIO_build_ext(setuptools.command.build_ext.build_ext):
     """
     def initialize_options(self):
         super(setuptools.command.build_ext.build_ext, self).initialize_options()
     """
 
+    built = False
+
     def run(self):
+        self.announce('running OTIO build_ext', level=2)
+        super().run()
+
+    def build_extension(self, _ext: Extension):
         # This works around the fact that we build _opentime and _otio
         # extensions as a one-shot cmake invocation. Usually we'd build each
         # separately using build_extension.
-        self.announce('running OTIO build_ext', level=2)
-        self.build()
+        if not self.built:
+            self.build()
+            self.built = True
 
     def build(self):
         self.build_temp_dir = (
@@ -256,20 +258,13 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
     """Stamps PROJECT_METADATA into __init__ files."""
 
     def run(self):
-        setuptools.command.build_py.build_py.run(self)
+        super().run()
 
-        if not self.dry_run:
+        if not self.dry_run and not self.editable_mode:
+            # Only run when not in dry-mode (a dry run should not have any side effect)
+            # and in non-editable mode. We don't want to edit files when in editable
+            # mode because that could lead to modifications to the source files.
             _append_version_info_to_init_scripts(self.build_lib)
-
-
-def test_otio():
-    """Discovers and runs tests"""
-    try:
-        # Clear the environment of a preset media linker
-        del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
-    except KeyError:
-        pass
-    return unittest.TestLoader().discover('tests')
 
 
 # copied from first paragraph of README.md
@@ -339,8 +334,8 @@ setup(
     ),
 
     ext_modules=[
-        CMakeExtension('_opentimelineio'),
-        CMakeExtension('_opentime'),
+        Extension('opentimelineio._otio', sources=[]),
+        Extension('opentimelineio._opentime', sources=[]),
     ],
 
     package_dir={
@@ -381,8 +376,6 @@ setup(
             'PySide6~=6.2; platform.machine=="aarch64"'
         ]
     },
-
-    test_suite='setup.test_otio',
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

@@ -62,7 +62,7 @@ with OpenTimelineIO due to spaces in the path.
 
 ## To build OTIO for Python development:
 
-+ `python -m pip install .`
++ `python -m pip install -e .`
 
 ## To build OTIO for both C++ and Python development:
 

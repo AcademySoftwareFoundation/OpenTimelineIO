@@ -80,7 +80,8 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
-    def test_overrride_adapter(self):
+    def test_override_adapter(self):
+
         # Test that entrypoint plugins load before builtin and contrib
         man = otio.plugins.manifest.load_manifest()
 
@@ -113,7 +114,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # override adapter should not be loaded either
         with self.assertRaises(AssertionError):
-            self.test_overrride_adapter()
+            self.test_override_adapter()
 
         # remove the environment variable and reload again for usage in the
         # other tests

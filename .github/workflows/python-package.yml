@@ -11,7 +11,7 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'python311' ]
   pull_request:
     branches: [ main ]
 
@@ -87,7 +87,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
@@ -157,7 +157,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*']
+        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*']
     steps:
       - uses: actions/checkout@v3
 

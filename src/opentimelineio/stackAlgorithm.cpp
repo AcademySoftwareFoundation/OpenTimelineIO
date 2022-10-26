@@ -17,7 +17,8 @@ _flatten_next_item(
     std::vector<Track*> const& tracks,
     int                        track_index,
     optional<TimeRange>        trim_range,
-    ErrorStatus*               error_status)
+    ErrorStatus*               error_status,
+    TrimPolicy                 trim_policy)
 {
     if (track_index < 0)
     {
@@ -34,7 +35,7 @@ _flatten_next_item(
     SerializableObject::Retainer<Track> track_retainer;
     if (trim_range)
     {
-        track = track_trimmed_to_range(track, *trim_range, error_status);
+        track = track_trimmed_to_range(track, *trim_range, error_status, trim_policy);
         if (track == nullptr || is_error(error_status))
         {
             return;
@@ -105,7 +106,8 @@ _flatten_next_item(
                 tracks,
                 track_index - 1,
                 trim,
-                error_status);
+                error_status,
+                trim_policy);
             if (track == nullptr || is_error(error_status))
             {
                 return;
@@ -124,7 +126,9 @@ _flatten_next_item(
 }
 
 Track*
-flatten_stack(Stack* in_stack, ErrorStatus* error_status)
+flatten_stack(Stack* in_stack,
+              ErrorStatus* error_status,
+              TrimPolicy trim_policy)
 {
     std::vector<Track*> tracks;
     tracks.reserve(in_stack->children().size());
@@ -161,12 +165,15 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
         tracks,
         -1,
         nullopt,
-        error_status);
+        error_status,
+        trim_policy);
     return flat_track;
 }
 
 Track*
-flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
+flatten_stack(std::vector<Track*> const& tracks,
+              ErrorStatus* error_status,
+              TrimPolicy trim_policy)
 {
     Track* flat_track = new Track;
     flat_track->set_name("Flattened");
@@ -178,7 +185,8 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
         tracks,
         -1,
         nullopt,
-        error_status);
+        error_status,
+        trim_policy);
     return flat_track;
 }
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

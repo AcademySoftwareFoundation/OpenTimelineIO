@@ -9,9 +9,13 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status = nullptr);
+Track* flatten_stack(
+    Stack*       in_stack,
+    ErrorStatus* error_status = nullptr,
+    TrimPolicy   trim_policy = IgnoreTimeEffects);
 Track* flatten_stack(
     std::vector<Track*> const& tracks,
-    ErrorStatus*               error_status = nullptr);
+    ErrorStatus*               error_status = nullptr,
+    TrimPolicy                 trim_policy = IgnoreTimeEffects);
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

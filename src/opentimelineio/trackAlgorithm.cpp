@@ -3,14 +3,61 @@
 
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
+#include "opentimelineio/linearTimeWarp.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+static double _compute_time_scalar(Item* item)
+{
+    double time_scalar = 1.0;
+
+    for (const auto& effect : item->effects())
+    {
+        // Note: FreezeFrame is handled here because it is a subclass of
+        // LinearTimeWarp. However, generic TimeEffect is not, since non-linear
+        // warps cannot be decomposed into a simple scalar value. Non-linear
+        // warps are simply ignored here and left for future development.
+        if (const auto linear_time_warp =
+                dynamic_cast<LinearTimeWarp*>(effect.value)) {
+            time_scalar *= linear_time_warp->time_scalar();
+        }
+    }
+
+    return time_scalar;
+}
+
+static void _snap_timewarps(Item* item)
+{
+    int item_frames = item->duration().to_frames();
+    auto range = item->trimmed_range();
+    // snap the item's start time to whole frames
+    item->set_source_range(
+       TimeRange(RationalTime(range.start_time().to_frames(),
+                              range.start_time().rate()),
+                 range.duration()));
+
+    for (const auto& effect : item->effects())
+    {
+        if (const auto linear_time_warp =
+                dynamic_cast<LinearTimeWarp*>(effect.value)) {
+            // TODO: What happens with FreezeFrame here?
+            // snap the time_scalar to be a rational number
+            double time_scalar = linear_time_warp->time_scalar();
+            int media_frames = rint(item_frames * time_scalar);
+            time_scalar = (double)media_frames / item_frames;
+            linear_time_warp->set_time_scalar(time_scalar);
+        }
+    }
+}
+
+// TODO: SnappedLinearTimeWarp???
 
 Track*
 track_trimmed_to_range(
     Track*       in_track,
     TimeRange    trim_range,
-    ErrorStatus* error_status)
+    ErrorStatus* error_status,
+    TrimPolicy   trimPolicy)
 {
     Track* new_track = dynamic_cast<Track*>(in_track->clone(error_status));
     if (is_error(error_status) || !new_track)
@@ -83,26 +130,51 @@ track_trimmed_to_range(
                 return nullptr;
             }
 
+            float time_scalar = 1.0;
+            switch (trimPolicy) {
+                case HonorTimeEffectsExactly:
+                case HonorTimeEffectsWithSnapping:
+                    time_scalar = _compute_time_scalar(child_item);
+                    break;
+                case IgnoreTimeEffects:
+                default:
+                    break;
+            }
+
+            // TODO: What if there are non-linear time warp here?
+
+            // Does the trim start after this child?
+            // If so, we need to remove the beginning of the child.
             if (trim_range.start_time() > child_range.start_time())
             {
                 auto trim_amount =
-                    trim_range.start_time() - child_range.start_time();
-                child_source_range = TimeRange(
-                    child_source_range.start_time() + trim_amount,
-                    child_source_range.duration() - trim_amount);
+                trim_range.start_time() - child_range.start_time();
+                auto scaled_trim_amount =
+                    RationalTime(trim_amount.value() * time_scalar,
+                                 trim_amount.rate());
+                child_source_range =
+                    TimeRange(child_source_range.start_time() +
+                                scaled_trim_amount,
+                              child_source_range.duration() - trim_amount);
             }
 
+            // Does the trim end before this child ends?
+            // If so, we need to remove the end of the child.
             auto trim_end  = trim_range.end_time_exclusive();
             auto child_end = child_range.end_time_exclusive();
             if (trim_end < child_end)
             {
-                auto trim_amount   = child_end - trim_end;
-                child_source_range = TimeRange(
-                    child_source_range.start_time(),
-                    child_source_range.duration() - trim_amount);
+                auto trim_amount = child_end - trim_end;
+                child_source_range =
+                TimeRange(
+                          child_source_range.start_time(),
+                          child_source_range.duration() - trim_amount);
             }
 
             child_item->set_source_range(child_source_range);
+            if (trimPolicy == HonorTimeEffectsWithSnapping) {
+                _snap_timewarps(child_item);
+            }
         }
     }
 

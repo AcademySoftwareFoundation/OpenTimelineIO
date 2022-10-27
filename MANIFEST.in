@@ -23,6 +23,8 @@ exclude */.DS_Store
 exclude .clang-format
 exclude OTIO_VERSION.json
 global-exclude *.pyc
+global-exclude *.so
+global-exclude *.pyd
 
 prune maintainers
 prune tsc

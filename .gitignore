@@ -21,3 +21,5 @@ docs/_build
 .tox
 cpp_cov_html/
 lcov_html_report/
+*.so
+*.pyd

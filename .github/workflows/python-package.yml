@@ -11,7 +11,7 @@ env:
 
 on:
   push:
-    branches: [ main, 'python311' ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 

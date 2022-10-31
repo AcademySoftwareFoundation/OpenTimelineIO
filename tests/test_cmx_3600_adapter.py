@@ -37,6 +37,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
 MULTIPLE_TARGET_AUDIO_PATH = os.path.join(SAMPLE_DATA_DIR, "multi_audio.edl")
 TRANSITION_DURATION_TEST = os.path.join(SAMPLE_DATA_DIR, "transition_duration.edl")
 ENABLED_TEST = os.path.join(SAMPLE_DATA_DIR, "enabled.otio")
+SOURCE_OUT_TIMEWARP_TEST = os.path.join(SAMPLE_DATA_DIR, "source_out_timewarp.edl")
 
 
 class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -1250,6 +1251,17 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * OTIO TRUNCATED REEL NAME FROM: Clip-002
 '''
 
+        self.assertMultiLineEqual(result, expected)
+
+    def test_source_out_timewarp(self):
+        tl = otio.adapters.read_from_file(SOURCE_OUT_TIMEWARP_TEST)
+        result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+        expected = r'''TITLE: SOURCE_OUT_TIMEWARP
+
+001  B113RPTW V     C        00:32:02:06 00:32:06:19 01:34:53:09 01:34:57:13
+M2   000001		26.4			00:32:02:06
+* FROM CLIP NAME:  000001
+'''
         self.assertMultiLineEqual(result, expected)
 
 

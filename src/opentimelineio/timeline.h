@@ -122,7 +122,7 @@ Timeline::children_if(
 inline std::vector<SerializableObject::Retainer<Composable>>
 Timeline::all_children(ErrorStatus* error_status) const
 {
-    return children_if<Composable>(error_status);
+    return children_if(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

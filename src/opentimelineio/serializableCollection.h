@@ -159,7 +159,7 @@ SerializableCollection::children_if(
 inline std::vector<SerializableObject::Retainer<Composable>>
 SerializableCollection::all_children(ErrorStatus* error_status) const
 {
-    return children_if<Composable>(error_status);
+    return children_if(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -4,7 +4,7 @@ OpenTimelineIO
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2020--2023-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-3.7%2C%203.8%2C%203.9%2C%203.10-blue)
+![Supported Versions](https://img.shields.io/badge/python-3.7%2C%203.8%2C%203.9%2C%203.10%2C%203.11-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -81,7 +81,7 @@ The OTIO python bindings also support several other kinds of plugins, for more i
 Installing / Quick-Start
 ------------------------
 
-The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
+The Python-wrapped version of OpenTimelineIO is publicly available [via PyPI](https://pypi.org/project/OpenTimelineIO/).  You can install OpenTimelineIO via:
 
 `python -m pip install opentimelineio`
 
@@ -155,8 +155,8 @@ You can also install the PySide2 dependency with `python -m pip install .[view]`
 
 You may need to escape the `[` depending on your shell, `\[view\]` .
 
-Currently the code base is written against python 3.7, 3.8, 3.9, and 3.10, in
-keeping with the pep8 style.  We ask that before developers submit pull
+Currently the code base is written against python 3.7, 3.8, 3.9, 3.10 and 3.11,
+in keeping with the pep8 style.  We ask that before developers submit pull
 request, they:
 
 - run `make test` -- to ensure that none of the unit tests were broken

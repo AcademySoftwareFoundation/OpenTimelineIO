@@ -32,7 +32,6 @@ They are defined by the manifests :class:`HookScript`\\s and hooks areas.
            {
                "OTIO_SCHEMA" : "HookScript.1",
                "name" : "example hook",
-               "execution_scope" : "in process",
                "filepath" : "example.py"
            }
        ],
@@ -84,12 +83,11 @@ class HookScript(plugins.PythonPlugin):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
     ):
         """HookScript plugin constructor."""
 
-        super().__init__(name, execution_scope, filepath)
+        super().__init__(name, filepath)
 
     def run(self, in_timeline, argument_map={}):
         """Run the hook_function associated with this plugin."""
@@ -103,9 +101,8 @@ class HookScript(plugins.PythonPlugin):
         )
 
     def __str__(self):
-        return "HookScript({}, {}, {})".format(
+        return "HookScript({}, {})".format(
             repr(self.name),
-            repr(self.execution_scope),
             repr(self.filepath)
         )
 
@@ -113,11 +110,9 @@ class HookScript(plugins.PythonPlugin):
         return (
             "otio.hooks.HookScript("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath)
             )
         )

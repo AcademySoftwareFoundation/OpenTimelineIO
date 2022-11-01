@@ -45,14 +45,12 @@ class Adapter(plugins.PythonPlugin):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
         suffixes=None
     ):
         plugins.PythonPlugin.__init__(
             self,
             name,
-            execution_scope,
             filepath
         )
 
@@ -284,11 +282,9 @@ class Adapter(plugins.PythonPlugin):
             "Adapter("
             "{}, "
             "{}, "
-            "{}, "
             "{}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath),
                 repr(self.suffixes),
             )
@@ -298,12 +294,10 @@ class Adapter(plugins.PythonPlugin):
         return (
             "otio.adapter.Adapter("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}, "
             "suffixes={}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath),
                 repr(self.suffixes),
             )

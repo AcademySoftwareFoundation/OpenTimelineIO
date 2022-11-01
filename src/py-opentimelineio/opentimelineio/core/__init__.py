@@ -35,7 +35,6 @@ from .. _otio import ( # noqa
 from . _core_utils import ( # noqa
     add_method,
     _value_to_any,
-    _value_to_so_vector,
     _add_mutable_mapping_methods,
     _add_mutable_sequence_methods,
 )

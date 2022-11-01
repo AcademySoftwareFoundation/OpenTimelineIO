@@ -49,13 +49,14 @@ using TrackVectorProxy =
 using SOWithMetadata = SerializableObjectWithMetadata;
 
 namespace {
-    const std::string string_or_none_converter(py::object& thing) {
-        if (thing.is(py::none())) {
-            return std::string();
+
+    template<typename T>
+    std::vector<T*> vector_or_default(optional<std::vector<T*>> item) {
+        if (item.has_value()) {
+            return item.value();
         }
-        else {
-            return py::str(thing);
-        }
+
+        return std::vector<T*>();
     }
 
     template<typename T, typename U>
@@ -210,12 +211,12 @@ A marker indicates a marked range of time on an item in a timeline, usually with
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        std::string name,
                         TimeRange marked_range,
                         std::string const& color,
                         py::object metadata) {
                           return new Marker(
-                                  string_or_none_converter(name),
+                                  name,
                                   marked_range,
                                   color,
                                   py_to_any_dictionary(metadata));
@@ -244,7 +245,7 @@ The marked range may have a zero duration. The marked range is in the owning ite
     using SerializableCollectionIterator = ContainerIterator<SerializableCollection, SerializableObject*>;
     py::class_<SerializableCollectionIterator>(m, "SerializableCollectionIterator", py::dynamic_attr())
         .def("__iter__", &SerializableCollectionIterator::iter)
-        .def("next", &SerializableCollectionIterator::next);
+        .def("__next__", &SerializableCollectionIterator::next);
 
     py::class_<SerializableCollection, SOWithMetadata,
                managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr(), R"docstring(
@@ -256,10 +257,10 @@ a named collection.
 
 A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media references to a single file.
 )docstring")
-        .def(py::init([](std::string const& name, py::object children,
+        .def(py::init([](std::string const& name, optional<std::vector<SerializableObject*>> children,
                          py::object metadata) {
                           return new SerializableCollection(name,
-                                                py_to_vector<SerializableObject*>(children),
+                                                vector_or_default<SerializableObject>(children),
                                                 py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "children"_a = py::none(),
@@ -306,11 +307,11 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
-                         py::object effects, py::object markers, py::bool_ enabled, py::object metadata) {
+                         optional<std::vector<Effect*>> effects, optional<std::vector<Marker*>> markers, py::bool_ enabled, py::object metadata) {
                           return new Item(name, source_range,
                                           py_to_any_dictionary(metadata),
-                                          py_to_vector<Effect*>(effects),
-                                          py_to_vector<Marker*>(markers),
+                                          vector_or_default<Effect>(effects),
+                                          vector_or_default<Marker>(markers),
                                           enabled); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = nullopt,
@@ -390,22 +391,22 @@ Other effects are handled by the :class:`Effect` class.
 
 
     py::class_<Gap, Item, managing_ptr<Gap>>(m, "Gap", py::dynamic_attr())
-        .def(py::init([](std::string name, TimeRange source_range, py::object effects,
-                         py::object markers, py::object metadata) {
+        .def(py::init([](std::string name, TimeRange source_range, optional<std::vector<Effect*>> effects,
+                         optional<std::vector<Marker*>> markers, py::object metadata) {
                           return new Gap(source_range, name,
-                                         py_to_vector<Effect*>(effects),
-                                         py_to_vector<Marker*>(markers),
+                                         vector_or_default<Effect>(effects),
+                                         vector_or_default<Marker>(markers),
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = TimeRange(),
              "effects"_a = py::none(),
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
-       .def(py::init([](std::string name, RationalTime duration, py::object effects,
-                        py::object markers, py::object metadata) {
+       .def(py::init([](std::string name, RationalTime duration, optional<std::vector<Effect*>> effects,
+                        optional<std::vector<Marker*>> markers, py::object metadata) {
                           return new Gap(duration, name,
-                                         py_to_vector<Effect*>(effects),
-                                         py_to_vector<Marker*>(markers),
+                                         vector_or_default<Effect>(effects),
+                                         vector_or_default<Marker>(markers),
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "duration"_a = RationalTime(),
@@ -443,19 +444,19 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")
         .def("__iter__", &CompositionIterator::iter)
-        .def("next", &CompositionIterator::next);
+        .def("__next__", &CompositionIterator::next);
 
     py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr(), R"docstring(
-Base class for an :class:`~Item` that contains other :class:`~Item`\s.
+Base class for an :class:`~Item` that contains :class:`~Composable`\s.
 
 Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
 )docstring")
         .def(py::init([](std::string name,
-                         py::object children,
+                         optional<std::vector<Composable*>> children,
                          optional<TimeRange> source_range, py::object metadata) {
                           Composition* c = new Composition(name, source_range,
                                                            py_to_any_dictionary(metadata));
-                          c->set_children(py_to_vector<Composable*>(children), ErrorStatusHandler());
+                          c->set_children(vector_or_default<Composable>(children), ErrorStatusHandler());
                           return c;
                       }),
              py::arg_v("name"_a = std::string()),
@@ -551,12 +552,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .value("never", Track::NeighborGapPolicy::never);
 
     track_class
-        .def(py::init([](py::object name, py::object children,
+        .def(py::init([](std::string name, optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Track* t = new Track(
-                                  string_or_none_converter(name),
+                                  name,
                                   source_range,
                                   kind,
                                   py_to_any_dictionary(metadata)
@@ -585,24 +586,23 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
-        .def(py::init([](py::object name,
-                         py::object children,
+        .def(py::init([](std::string name,
+                         optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
-                         py::object markers,
-                         py::object effects,
+                         optional<std::vector<Marker*>> markers,
+                         optional<std::vector<Effect*>> effects,
                          py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Stack* s = new Stack(
-                                  string_or_none_converter(name),
+                                  name,
                                   source_range,
                                   py_to_any_dictionary(metadata),
-                                  py_to_vector<Effect*>(effects),
-                                  py_to_vector<Marker*>(markers)
+                                  vector_or_default<Effect>(effects),
+                                  vector_or_default<Marker>(markers)
                           );
                           if (!composable_children.empty()) {
                               s->set_children(composable_children, ErrorStatusHandler());
                           }
-                          auto composable_markers = py_to_vector<Marker*>(markers);
                           return s;
                       }),
              py::arg_v("name"_a = std::string()),
@@ -617,10 +617,10 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
-                         py::object children,
+                         optional<std::vector<Composable*>> children,
                          optional<RationalTime> global_start_time,
                          py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Timeline* t = new Timeline(name, global_start_time,
                                                      py_to_any_dictionary(metadata));
                           if (!composable_children.empty())
@@ -742,12 +742,12 @@ Represents media for which a concrete reference is missing.
 Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        std::string name,
                         optional<TimeRange> available_range,
                         py::object metadata,
                         optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
-                                  string_or_none_converter(name),
+                                  name,
                                   available_range,
                                   py_to_any_dictionary(metadata),
                                   available_image_bounds); 

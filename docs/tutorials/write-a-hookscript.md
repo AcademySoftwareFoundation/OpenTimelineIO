@@ -31,7 +31,6 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
         {
             "OTIO_SCHEMA" : "HookScript.1",
             "name" : "example hook",
-            "execution_scope" : "in process",
             "filepath" : "myhooks.py"
         }
     ],
@@ -46,7 +45,8 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
 
 The ``hook_scripts`` section will register the plugin with the system, and the ``hooks`` section will attach the scripts to hooks.
 
-Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).  You may also define media linkers and adapters via the same manifest.
+Then you need to add this manifest to your {term}`OTIO_PLUGIN_MANIFEST_PATH` environment variable.
+You may also define media linkers and adapters via the same manifest.
 
 ## Running a Hook Script
 

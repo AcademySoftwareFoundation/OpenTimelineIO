@@ -2,6 +2,7 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include <pybind11/pybind11.h>
+#include <pybind11/functional.h>
 #include "otio_anyDictionary.h"
 #include "otio_anyVector.h"
 #include "otio_bindings.h"
@@ -71,13 +72,12 @@ static void register_python_type(py::object class_object,
 
 static bool register_upgrade_function(std::string const& schema_name,
                                       int version_to_upgrade_to,
-                                      py::object const& upgrade_function_obj) {
+                                      std::function<void(AnyDictionaryProxy*)> const& upgrade_function_obj) {
     std::function<void (AnyDictionary* d)> upgrade_function =  [upgrade_function_obj](AnyDictionary* d) {
         py::gil_scoped_acquire acquire;
         
         auto ptr = d->get_or_create_mutation_stamp();
-        py::object dobj = py::cast((AnyDictionaryProxy*)ptr);
-        upgrade_function_obj(dobj);
+        upgrade_function_obj((AnyDictionaryProxy*)ptr);
     };
     
     // further discussion required about preventing double registering
@@ -112,7 +112,7 @@ static bool
 register_downgrade_function(
         std::string const& schema_name,
         int version_to_downgrade_from,
-        py::object const& downgrade_function_obj) 
+        std::function<void(AnyDictionaryProxy*)> const& downgrade_function_obj)
 {
     std::function<void (AnyDictionary* d)> downgrade_function = ( 
             [downgrade_function_obj](AnyDictionary* d) 
@@ -120,8 +120,7 @@ register_downgrade_function(
                 py::gil_scoped_acquire acquire;
 
                 auto ptr = d->get_or_create_mutation_stamp();
-                py::object dobj = py::cast((AnyDictionaryProxy*)ptr);
-                downgrade_function_obj(dobj);
+                downgrade_function_obj((AnyDictionaryProxy*)ptr);
             }
     );
 
@@ -318,8 +317,8 @@ The CORE_VERSION_MAP maps OTIO release versions to maps of schema name to schema
     m.def("flatten_stack", [](Stack* s) {
             return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);
-    m.def("flatten_stack", [](py::object tracks) {
-            return flatten_stack(py_to_vector<Track*>(tracks), ErrorStatusHandler());
+    m.def("flatten_stack", [](std::vector<Track*> tracks) {
+            return flatten_stack(tracks, ErrorStatusHandler());
         }, "tracks"_a);        
 
     void _build_any_to_py_dispatch_table();

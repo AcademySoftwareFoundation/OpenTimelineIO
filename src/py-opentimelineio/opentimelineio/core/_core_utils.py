@@ -113,23 +113,6 @@ def _value_to_any(value, ids=None):
             )
 
 
-def _value_to_so_vector(value, ids=None):
-    if not isinstance(value, collections.abc.Sequence) or _is_str(value):
-        raise TypeError(
-            "Expected list/sequence of SerializableObjects;"
-            " found type '{}'".format(type(value))
-        )
-
-    av = AnyVector()
-    for e in value:
-        if not isinstance(e, SerializableObject):
-            raise TypeError(
-                "Expected list/sequence of SerializableObjects;"
-                " found element of type '{}'".format(type(e)))
-        av.append(e)
-    return PyAny(av)
-
-
 _marker_ = object()
 
 
@@ -338,6 +321,7 @@ def _add_mutable_sequence_methods(
                 if (
                         isinstance(func, types.FunctionType)
                         and name not in klass.__abstractmethods__
+                        and not hasattr(sequenceClass, name)
                 ):
                     setattr(sequenceClass, name, func)
                     if name.startswith('__') or name.endswith('__'):

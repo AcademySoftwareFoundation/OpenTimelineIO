@@ -101,10 +101,9 @@ class MediaLinker(plugins.PythonPlugin):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
     ):
-        super().__init__(name, execution_scope, filepath)
+        super().__init__(name, filepath)
 
     def link_media_reference(self, in_clip, media_linker_argument_map=None):
         media_linker_argument_map = media_linker_argument_map or {}
@@ -135,9 +134,8 @@ class MediaLinker(plugins.PythonPlugin):
         return result
 
     def __str__(self):
-        return "MediaLinker({}, {}, {})".format(
+        return "MediaLinker({}, {})".format(
             repr(self.name),
-            repr(self.execution_scope),
             repr(self.filepath)
         )
 
@@ -145,11 +143,9 @@ class MediaLinker(plugins.PythonPlugin):
         return (
             "otio.media_linker.MediaLinker("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath)
             )
         )

@@ -46,6 +46,9 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.sc[0] = tmp
         self.assertEqual(self.sc[0], tmp)
 
+        with self.assertRaises(IndexError):
+            self.sc[100]
+
     def test_serialize(self):
         encoded = otio.adapters.otio_json.write_to_string(self.sc)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

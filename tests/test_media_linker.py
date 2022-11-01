@@ -31,7 +31,6 @@ class TestPluginMediaLinker(unittest.TestCase):
 
     def test_plugin_adapter(self):
         self.assertEqual(self.mln.name, "example")
-        self.assertEqual(self.mln.execution_scope, "in process")
         self.assertEqual(self.mln.filepath, "example.py")
 
     def test_load_adapter_module(self):
@@ -57,9 +56,8 @@ class TestPluginMediaLinker(unittest.TestCase):
 
         self.assertEqual(
             str(self.mln),
-            "MediaLinker({}, {}, {})".format(
+            "MediaLinker({}, {})".format(
                 repr(self.mln.name),
-                repr(self.mln.execution_scope),
                 repr(self.mln.filepath)
             )
         )
@@ -67,11 +65,9 @@ class TestPluginMediaLinker(unittest.TestCase):
             repr(self.mln),
             "otio.media_linker.MediaLinker("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}"
             ")".format(
                 repr(self.mln.name),
-                repr(self.mln.execution_scope),
                 repr(self.mln.filepath)
             )
         )

@@ -87,7 +87,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
@@ -120,12 +120,13 @@ jobs:
           git
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
-      uses: actions/setup-python@v4.1.0
+      uses: actions/setup-python@v4.3.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install coverage dependency
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
+        echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
         sudo apt-get install lcov
     - name: Install python build dependencies
       run: |
@@ -156,19 +157,19 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*']
+        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*']
     steps:
       - uses: actions/checkout@v3
 
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.10.2
+        uses: pypa/cibuildwheel@v2.11.1
         with:
           output-dir: wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.python-build }}
           CIBW_SKIP: '*musllinux*'
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2010
-          CIBW_MANYLINUX_I686_IMAGE: manylinux2010
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_I686_IMAGE: manylinux2014
 
       - uses: actions/upload-artifact@v3
         with:
@@ -183,7 +184,7 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@v4.1.0
+    - uses: actions/setup-python@v4.3.0
 
     - name: Install pypa/build
       run: python -m pip install build --user

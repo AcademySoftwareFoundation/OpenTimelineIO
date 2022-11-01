@@ -83,4 +83,10 @@ Timeline::clip_if(
     return _tracks.value->clip_if(error_status, search_range, shallow_search);
 }
 
+std::vector<SerializableObject::Retainer<Clip>>
+Timeline::all_clips(ErrorStatus* error_status) const
+{
+    return clip_if(error_status);
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

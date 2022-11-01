@@ -245,7 +245,7 @@ class FcpxOtio:
         return sequence_element
 
     def _track_for_spine(self, track, lane_id, spine, compound):
-        for child in self._lanable_items(track.children_if()):
+        for child in self._lanable_items(track.all_children()):
             if self._item_in_compound_clip(child) and not compound:
                 continue
             child_element = self._element_for_item(

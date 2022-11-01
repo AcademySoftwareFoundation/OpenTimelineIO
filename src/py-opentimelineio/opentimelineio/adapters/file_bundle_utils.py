@@ -95,7 +95,7 @@ def _prepped_otio_for_bundle_and_manifest(
     invalid_files = set()
 
     # result_otio is manipulated in place
-    for cl in result_otio.clip_if():
+    for cl in result_otio.all_clips():
         if media_policy == MediaReferencePolicy.AllMissing:
             cl.media_reference = reference_cloned_and_missing(
                 cl.media_reference,

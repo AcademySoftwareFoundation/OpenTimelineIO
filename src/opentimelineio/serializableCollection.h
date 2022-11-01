@@ -52,7 +52,7 @@ public:
 
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    // Return a vector of clips.
+    // Return child clips.
     //
     // An optional search_range may be provided to limit the search.
     //
@@ -62,7 +62,11 @@ public:
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Return a vector of all objects that match the given template type.
+    // Return all child clips recursively.
+    std::vector<Retainer<Clip>> all_clips(
+        ErrorStatus* error_status = nullptr) const;
+
+    // Return child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
@@ -72,6 +76,10 @@ public:
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
+
+    // Return all child objects recursively.
+    std::vector<Retainer<Composable>> all_children(
+        ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~SerializableCollection();
@@ -146,6 +154,12 @@ SerializableCollection::children_if(
         }
     }
     return out;
+}
+
+inline std::vector<SerializableObject::Retainer<Composable>>
+SerializableCollection::all_children(ErrorStatus* error_status) const
+{
+    return children_if<Composable>(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

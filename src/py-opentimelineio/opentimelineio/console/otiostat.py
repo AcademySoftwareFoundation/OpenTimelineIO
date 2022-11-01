@@ -90,7 +90,7 @@ def _deepest_nesting(input):
 
 @stat_check("number of clips")
 def _num_clips(input):
-    return len(list(input.clip_if()))
+    return len(list(input.all_clips()))
 
 
 @stat_check("total duration")
@@ -120,7 +120,7 @@ def _top_level_rate(input):
 
 @stat_check("clips with cdl data")
 def _clips_with_cdl_data(input):
-    return len(list(c for c in input.clip_if() if 'cdl' in c.metadata))
+    return len(list(c for c in input.all_clips() if 'cdl' in c.metadata))
 
 
 @stat_check("Tracks with non standard types")

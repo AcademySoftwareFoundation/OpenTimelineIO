@@ -62,7 +62,7 @@ public:
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
 
-    // Return a vector of clips.
+    // Return child clips.
     //
     // An optional search_range may be provided to limit the search.
     std::vector<Retainer<Clip>> clip_if(
@@ -70,7 +70,11 @@ public:
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Return a vector of all objects that match the given template type.
+    // Return all child clips recursively.
+    std::vector<Retainer<Clip>> all_clips(
+        ErrorStatus* error_status = nullptr) const;
+
+    // Return child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
@@ -80,6 +84,10 @@ public:
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
+
+    // Return all child objects recursively.
+    std::vector<Retainer<Composable>> all_children(
+        ErrorStatus* error_status = nullptr) const;
 
     optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const
@@ -109,6 +117,12 @@ Timeline::children_if(
         error_status,
         search_range,
         shallow_search);
+}
+
+inline std::vector<SerializableObject::Retainer<Composable>>
+Timeline::all_children(ErrorStatus* error_status) const
+{
+    return children_if<Composable>(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

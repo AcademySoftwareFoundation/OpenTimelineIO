@@ -102,7 +102,7 @@ def filtered_composition(
     if isinstance(mutable_object, schema.Timeline):
         header_list.append(mutable_object.tracks)
 
-    iter_list = header_list + list(mutable_object.children_if())
+    iter_list = header_list + list(mutable_object.all_children())
 
     for child in iter_list:
         if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
@@ -236,7 +236,7 @@ def filtered_with_sequence_context(
     if isinstance(mutable_object, schema.Timeline):
         header_list.append(mutable_object.tracks)
 
-    iter_list = header_list + list(mutable_object.children_if())
+    iter_list = header_list + list(mutable_object.all_children())
 
     # expand to include prev, next when appropriate
     expanded_iter_list = []

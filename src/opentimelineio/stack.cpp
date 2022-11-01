@@ -122,6 +122,12 @@ Stack::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
+std::vector<SerializableObject::Retainer<Clip>>
+Stack::all_clips(ErrorStatus* error_status) const
+{
+    return clip_if(error_status);
+}
+
 optional<Imath::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {

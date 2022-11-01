@@ -392,7 +392,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
-        self.assertEqual([cl, cl2, cl3], list(tl.clip_if()))
+        self.assertEqual([cl, cl2, cl3], list(tl.all_clips()))
 
         rt_start = otio.opentime.RationalTime(0, 24)
         rt_end = otio.opentime.RationalTime(1, 24)

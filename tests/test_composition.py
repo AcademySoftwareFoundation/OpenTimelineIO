@@ -30,7 +30,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual([i for i in co], [it])
         self.assertEqual(len(co), 1)
 
-        self.assertEqual(list(co.children_if()), [it])
+        self.assertEqual(list(co.all_children()), [it])
         self.assertEqual(
             list(co.children_if(descended_from_type=otio.schema.Clip)),
             []
@@ -160,7 +160,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(2, len(st))
         self.assertEqual(2, len(tr3))
 
-        clips = list(tl.clip_if())
+        clips = list(tl.all_clips())
         self.assertListEqual(
             [c1, c2, c3, c4, c5, c6, c7, c8],
             clips
@@ -182,7 +182,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             all_stacks
         )
 
-        all_children = list(tl.children_if())
+        all_children = list(tl.all_children())
         self.assertListEqual(
             [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
             all_children
@@ -1369,11 +1369,11 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [
                 outer_track.range_of_child(clip)
-                for clip in outer_track.clip_if()
+                for clip in outer_track.all_clips()
             ],
             [
                 long_track.range_of_child(clip)
-                for clip in long_track.clip_if()
+                for clip in long_track.all_clips()
             ]
         )
 
@@ -1693,7 +1693,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         mp = tr.range_of_all_children()
 
         # fetch all the valid children that should be in the map
-        vc = list(tr.clip_if())
+        vc = list(tr.all_clips())
 
         self.assertEqual(mp[vc[0]].start_time.value, 0)
         self.assertEqual(mp[vc[1]].start_time, mp[vc[0]].duration)
@@ -1757,7 +1757,7 @@ class EdgeCases(unittest.TestCase):
 
         # test recursive iteration
         previous = None
-        for item in track.clip_if():
+        for item in track.all_clips():
             self.assertEqual(
                 track.range_of_child(item),
                 item.range_in_parent()
@@ -1787,7 +1787,7 @@ class EdgeCases(unittest.TestCase):
 
         # compare recursive to iteration by index
         previous = None
-        for i, item in enumerate(track.clip_if()):
+        for i, item in enumerate(track.all_clips()):
             self.assertEqual(
                 track.range_of_child(item),
                 track.range_of_child_at_index(i)

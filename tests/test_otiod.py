@@ -42,7 +42,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # convert to contrived local reference
         last_rel = False
-        for cl in tl.clip_if():
+        for cl in tl.all_clips():
             # vary the relative and absolute paths, make sure that both work
             next_rel = (
                 MEDIA_EXAMPLE_PATH_URL_REL if last_rel else MEDIA_EXAMPLE_PATH_URL_ABS
@@ -65,7 +65,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         self.assertEqual(manifest, {})
-        for cl in result_otio.clip_if():
+        for cl in result_otio.all_clips():
             self.assertIsInstance(
                 cl.media_reference,
                 otio.schema.MissingReference,
@@ -112,14 +112,14 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tmp_path,
         )
 
-        for cl in result.clip_if():
+        for cl in result.all_clips():
             self.assertNotEqual(
                 cl.media_reference.target_url,
                 MEDIA_EXAMPLE_PATH_URL_REL
             )
 
         # conform media references in input to what they should be in the output
-        for cl in self.tl.clip_if():
+        for cl in self.tl.all_clips():
             # construct an absolute file path to the result
             cl.media_reference.target_url = (
                 otio.url_utils.url_from_filepath(
@@ -149,7 +149,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             absolute_media_reference_paths=True
         )
 
-        for cl in result.clip_if():
+        for cl in result.all_clips():
             self.assertIsInstance(
                 cl.media_reference,
                 otio.schema.MissingReference
@@ -166,14 +166,14 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             absolute_media_reference_paths=True
         )
 
-        for cl in result.clip_if():
+        for cl in result.all_clips():
             self.assertNotEqual(
                 cl.media_reference.target_url,
                 MEDIA_EXAMPLE_PATH_URL_REL
             )
 
         # conform media references in input to what they should be in the output
-        for cl in self.tl.clip_if():
+        for cl in self.tl.all_clips():
             # should be only field that changed
             cl.media_reference.target_url = (
                 otio.url_utils.url_from_filepath(

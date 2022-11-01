@@ -43,13 +43,17 @@ public:
     optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const;
 
-    // Return a vector of clips.
+    // Return child clips.
     //
     // An optional search_range may be provided to limit the search.
     std::vector<Retainer<Clip>> clip_if(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
+
+    // Return all child clips recursively.
+    std::vector<Retainer<Clip>> all_clips(
+        ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~Stack();

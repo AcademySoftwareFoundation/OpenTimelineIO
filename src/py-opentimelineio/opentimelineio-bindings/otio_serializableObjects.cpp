@@ -92,10 +92,28 @@ namespace {
     }
     
     template<typename T>
+    std::vector<SerializableObject*> all_children(T* t) {
+        std::vector<SerializableObject*> l;
+        for (const auto& child : t->all_children()) {
+            l.push_back(child.value);
+        }
+        return l;
+    }
+    
+    template<typename T>
     std::vector<SerializableObject*> clip_if(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
         std::vector<SerializableObject*> l;
-        for (const auto& child : t->clip_if(ErrorStatusHandler(), search_range, shallow_search)) {
-            l.push_back(child.value);
+        for (const auto& clip : t->clip_if(ErrorStatusHandler(), search_range, shallow_search)) {
+            l.push_back(clip.value);
+        }
+        return l;
+    }
+    
+    template<typename T>
+    std::vector<SerializableObject*> all_clips(T* t) {
+        std::vector<SerializableObject*> l;
+        for (const auto& clip : t->all_clips()) {
+            l.push_back(clip.value);
         }
         return l;
     }
@@ -290,12 +308,18 @@ A :class:`~SerializableCollection` is useful for serializing multiple timelines,
         .def("__iter__", [](SerializableCollection* c) {
                 return new SerializableCollectionIterator(c);
             })
-        .def("clip_if", [](SerializableCollection* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                return clip_if(t, search_range, shallow_search);
+        .def("clip_if", [](SerializableCollection* c, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(c, search_range, shallow_search);
             }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
-                return children_if(t, descended_from_type, search_range, shallow_search);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
+        .def("all_clips", [](SerializableCollection* c) {
+                return all_clips(c);
+            })
+        .def("children_if", [](SerializableCollection* c, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return children_if(c, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_children", [](SerializableCollection* c) {
+                return all_children(c);
+            });
 
 }
 
@@ -499,9 +523,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                 }
                 return l;
             }, "search_range"_a)
-        .def("children_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
-                return children_if(t, descended_from_type, search_range, shallow_search);
+        .def("children_if", [](Composition* c, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return children_if(c, descended_from_type, search_range, shallow_search);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_children", [](Composition* c) {
+                return all_children(c);
+            })
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -578,7 +605,10 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
         .def("clip_if", [](Track* t, optional<TimeRange> const& search_range, bool shallow_search) {
                 return clip_if(t, search_range, shallow_search);
-            }, "search_range"_a = nullopt, "shallow_search"_a = false);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_clips", [](Track* t) {
+                return all_clips(t);
+            });
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
@@ -611,9 +641,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "markers"_a = py::none(),
              "effects"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
-        .def("clip_if", [](Stack* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                return clip_if(t, search_range, shallow_search);
-            }, "search_range"_a = nullopt, "shallow_search"_a = false);
+        .def("clip_if", [](Stack* s, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(s, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_clips", [](Stack* s) {
+                return all_clips(s);
+            });
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -644,9 +677,15 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def("clip_if", [](Timeline* t, optional<TimeRange> const& search_range, bool shallow_search) {
                 return clip_if(t, search_range, shallow_search);
             }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_clips", [](Timeline* t) {
+                return all_clips(t);
+            })
         .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
                 return children_if(t, descended_from_type, search_range, shallow_search);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("all_children", [](Timeline* t) {
+                return all_children(t);
+            });
 }
 
 static void define_effects(py::module m) {

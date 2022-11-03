@@ -103,8 +103,8 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             )
         )
 
-    def test_pkg_resources_disabled(self):
-        os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"] = "1"
+    def test_entrypoints_disabled(self):
+        os.environ["OTIO_DISABLE_ENTRYPOINTS_PLUGINS"] = "1"
         import_reload(otio.plugins.manifest)
 
         # detection of the environment variable happens on import, force a
@@ -118,7 +118,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # remove the environment variable and reload again for usage in the
         # other tests
-        del os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"]
+        del os.environ["OTIO_DISABLE_ENTRYPOINTS_PLUGINS"]
         import_reload(otio.plugins.manifest)
 
     def test_detect_plugin_json_manifest(self):

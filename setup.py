@@ -361,6 +361,8 @@ setup(
 
     install_requires=[
         'pyaaf2>=1.4,<1.7',
+        # For python 3.7
+        'importlib_metadata==5.0.0',
     ],
     entry_points={
         'console_scripts': [

@@ -18,10 +18,10 @@ OTIO_DEFAULT_MEDIA_LINKER
    The name of the default media linker to use after reading a file, if `""` then no
    media linker is automatically invoked.
 
-OTIO_DISABLE_PKG_RESOURCE_PLUGINS
-   By default, OTIO will use the `pkg_resource` entry_points mechanism to discover plugins
-   that have been installed into the current python environment. `pkg_resources`, however, can
-   be slow in certain cases, so for users who wish to disable this behavior, this variable can be set to 1.
+OTIO_DISABLE_ENTRYPOINTS_PLUGINS
+   By default, OTIO will use the `importlib.metadata` entry_points mechanism to discover plugins
+   that have been installed into the current python environment. For users who wish to disable this
+   behavior, this variable can be set to 1.
 
 OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL
    If no downgrade arguments are passed to `write_to_file`/`write_to_string`, use the downgrade manifest

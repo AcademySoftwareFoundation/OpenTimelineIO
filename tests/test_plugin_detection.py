@@ -5,12 +5,17 @@
 
 import unittest
 import os
-import pkg_resources
 import sys
 
 from unittest import mock
 
 from importlib import reload as import_reload
+
+try:
+    import importlib.metadata as metadata
+except ImportError:
+    # For python 3.7
+    import importlib_metadata as metadata
 
 import opentimelineio as otio
 from tests import baseline_reader
@@ -36,28 +41,20 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         )
 
         # Create a WorkingSet as if the module were installed
-        entries = [mock_module_path] + pkg_resources.working_set.entries
+        entries = [mock_module_path] + sys.path
+
+        self.original_sysmodule_keys = set(sys.modules.keys())
 
         self.sys_patch = mock.patch('sys.path', entries)
         self.sys_patch.start()
 
-        working_set = pkg_resources.WorkingSet(entries)
-
-        # linker from the entry point
-        self.entry_patcher = mock.patch(
-            'pkg_resources.iter_entry_points',
-            working_set.iter_entry_points
-        )
-        self.entry_patcher.start()
-
     def tearDown(self):
         self.sys_patch.stop()
-        self.entry_patcher.stop()
-        if 'otio_mockplugin' in sys.modules:
-            del sys.modules['otio_mockplugin']
 
-        if 'otio_override_adapter' in sys.modules:
-            del sys.modules['otio_override_adapter']
+        # Remove any modules added under test.  We cannot replace sys.modules with
+        # a copy from setUp. For more, see: https://bugs.python.org/msg188914
+        for key in set(sys.modules.keys()) ^ self.original_sysmodule_keys:
+            sys.modules.pop(key)
 
     def test_detect_plugin(self):
         """This manifest uses the plugin_manifest function"""

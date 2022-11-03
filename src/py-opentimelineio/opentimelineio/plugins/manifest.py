@@ -293,9 +293,9 @@ def load_manifest():
                     plugin_manifest._update_plugin_source(filepath.as_posix())
                     plugin_manifest.source_files.append(filepath.as_posix())
 
-            except Exception:
+            except Exception as e:
                 logging.exception(
-                    f"could not load plugin: {plugin_name}"
+                    f"could not load plugin: {plugin_name}.  Exception is: {e}"
                 )
                 continue
 

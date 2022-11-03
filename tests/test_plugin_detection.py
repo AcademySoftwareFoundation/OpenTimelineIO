@@ -186,6 +186,42 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         else:
             del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
+    def test_plugin_load_failure(self):
+        """When a plugin fails to load, ensure the exception message
+        is logged (and no exception thrown)
+        """
+
+        sys.modules['otio_mock_bad_module'] = mock.Mock(
+            name='otio_mock_bad_module',
+            plugin_manifest=mock.Mock(
+                side_effect=Exception("Mock Exception")
+            )
+        )
+
+        entry_points = mock.patch(
+            'opentimelineio.plugins.manifest.metadata.entry_points',
+            return_value=[
+                metadata.EntryPoint(
+                    'mock_bad_module',
+                    'otio_mock_bad_module',
+                    'opentimelineio.plugins'
+                )
+            ]
+        )
+
+        with self.assertLogs() as cm, entry_points:
+            # Load the above mock entrypoint, expect it to fail and log
+            otio.plugins.manifest.load_manifest()
+
+            load_errors = [
+                r for r in cm.records
+                if r.message.startswith(
+                    "could not load plugin: mock_bad_module.  "
+                    "Exception is: Mock Exception"
+                )
+            ]
+            self.assertEqual(len(load_errors), 1)
+
 
 if __name__ == '__main__':
     unittest.main()

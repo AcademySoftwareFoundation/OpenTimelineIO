@@ -912,10 +912,10 @@ Duration: 00:02:16:18
             out, err = self.run_test()
             self.assertTrue(
                 ("TIMELINE: Figure 1 - Simple Cut List\n"
-                f"    MEDIA: file://{temp_dir}/Clip-001.empty\n"
-                "    MEDIA: file:///folder/wind-up.mov\n"
-                f"    MEDIA: file://{temp_dir}/Clip-003.empty\n"
-                "    MEDIA: file:///folder/credits.mov\n")
+                 f"    MEDIA: file://{temp_dir}/Clip-001.empty\n"
+                 "    MEDIA: file:///folder/wind-up.mov\n"
+                 f"    MEDIA: file://{temp_dir}/Clip-003.empty\n"
+                 "    MEDIA: file:///folder/credits.mov\n")
                 in out)
 
 

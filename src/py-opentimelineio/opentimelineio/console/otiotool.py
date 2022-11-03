@@ -655,7 +655,8 @@ def relink_by_name(timeline, path):
             for x in os.listdir(path)
         ])
     elif os.path.isfile(path):
-        print(f"ERROR: Cannot relink to '{path}': Please specify a folder instead of a file.")
+        print((f"ERROR: Cannot relink to '{path}':"
+               " Please specify a folder instead of a file."))
         return
     else:
         print(f"ERROR: Cannot relink to '{path}': No such file or folder.")
@@ -664,9 +665,7 @@ def relink_by_name(timeline, path):
     for clip in timeline.each_clip():
         url = name_to_url.get(clip.name)
         if url is not None:
-            clip.media_reference = otio.schema.ExternalReference(
-                  target_url=url
-            )
+            clip.media_reference = otio.schema.ExternalReference(target_url=url)
             count += 1
 
     print(f"Relinked {count} clips to files in folder {path}")

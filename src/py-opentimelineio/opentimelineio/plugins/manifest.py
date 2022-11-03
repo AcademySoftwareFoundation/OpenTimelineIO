@@ -307,30 +307,45 @@ def load_manifest():
         )
 
     # the builtin plugin manifest
-    builtin_manifest_path = os.path.join(
-        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
-        "adapters",
-        "builtin_adapters.plugin_manifest.json"
-    )
+    try:
+        builtin_manifest_path = (
+            resources.files("opentimelineio.adapters")
+            / "builtin_adapters.plugin_manifest.json"
+        ).as_posix()
+    except AttributeError:
+        # For python <= 3.7
+        with resources.path(
+            "opentimelineio.adapters",
+            "builtin_adapters.plugin_manifest.json"
+        ) as p:
+            builtin_manifest_path = p.as_posix()
+
     if os.path.abspath(builtin_manifest_path) not in result.source_files:
         plugin_manifest = manifest_from_file(builtin_manifest_path)
         result.extend(plugin_manifest)
 
     # the contrib plugin manifest (located in the opentimelineio_contrib package)
     try:
-        import opentimelineio_contrib as otio_c
+        try:
+            contrib_manifest_path = (
+                resources.files("opentimelineio_contrib.adapters")
+                / "contrib_adapters.plugin_manifest.json"
+            ).as_posix()
+        except AttributeError:
+            # For python <= 3.7
+            with resources.path(
+                "opentimelineio_contrib.adapters",
+                "contrib_adapters.plugin_manifest.json"
+            ) as p:
+                contrib_manifest_path = p.as_posix()
 
-        contrib_manifest_path = os.path.join(
-            os.path.dirname(inspect.getsourcefile(otio_c)),
-            "adapters",
-            "contrib_adapters.plugin_manifest.json"
-        )
+    except ModuleNotFoundError:
+        logging.debug("no opentimelineio_contrib.adapters package found")
+
+    else:
         if os.path.abspath(contrib_manifest_path) not in result.source_files:
             contrib_manifest = manifest_from_file(contrib_manifest_path)
             result.extend(contrib_manifest)
-
-    except ImportError:
-        pass
 
     # force the schemadefs to load and add to schemadef module namespace
     for s in result.schemadefs:

@@ -13,6 +13,7 @@ workflow tasks."""
 
 import argparse
 import os
+import pathlib
 import re
 import sys
 
@@ -90,6 +91,11 @@ def main():
 
     # Phase 5: Relinking media
 
+    if args.relink_by_name:
+        for timeline in timelines:
+            for folder in args.relink_by_name:
+                relink_by_name(timeline, folder)
+
     if args.copy_media_to_folder:
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
@@ -162,6 +168,10 @@ This tool works in phases, as follows:
     performed (in that order) to combine all of the input timeline(s) into one.
 
 4. Relink
+    The --relink-by-name option, will scan the specified folder(s) looking for
+    files which match the name of each clip in the input timeline(s).
+    If matching files are found, clips will be relinked to those files (using
+    file:// URLs). Clip names are matched to filenames ignoring file extension.
     If specified, the --copy-media-to-folder option, will copy or download
     all linked media, and relink the OTIO to reference the local copies.
 
@@ -293,6 +303,14 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Relink
+    parser.add_argument(
+        "--relink-by-name",
+        type=str,
+        nargs='+',
+        metavar='FOLDER(s)',
+        help="""Scan the specified folder looking for filenames which match
+        each clip's name. If found, clips are relinked to those files."""
+    )
     parser.add_argument(
         "--copy-media-to-folder",
         type=str,
@@ -613,6 +631,45 @@ def copy_media(url, destination_path):
         data = urlopen(url).read()
     open(destination_path, "wb").write(data)
     return destination_path
+
+
+def relink_by_name(timeline, path):
+    """Relink clips in the timeline to media files discovered at the
+    given folder path."""
+
+    def _conform_path(p):
+        # Turn absolute paths into file:// URIs
+        if os.path.isabs(p):
+            return pathlib.Path(p).as_uri()
+        else:
+            # Leave relative paths as-is
+            return p
+
+    count = 0
+    if os.path.isdir(path):
+        name_to_url = dict([
+            (
+                os.path.splitext(x)[0],
+                _conform_path(os.path.join(path, x))
+            )
+            for x in os.listdir(path)
+        ])
+    elif os.path.isfile(path):
+        print(f"ERROR: Cannot relink to '{path}': Please specify a folder instead of a file.")
+        return
+    else:
+        print(f"ERROR: Cannot relink to '{path}': No such file or folder.")
+        return
+
+    for clip in timeline.each_clip():
+        url = name_to_url.get(clip.name)
+        if url is not None:
+            clip.media_reference = otio.schema.ExternalReference(
+                  target_url=url
+            )
+            count += 1
+
+    print(f"Relinked {count} clips to files in folder {path}")
 
 
 def copy_media_to_folder(timeline, folder):

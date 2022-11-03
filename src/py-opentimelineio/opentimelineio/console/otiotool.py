@@ -204,6 +204,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         type=str,
         nargs='+',
         required=True,
+        metavar='PATH(s)',
         help="""Input file path(s). All formats supported by adapter plugins
         are supported. Use '-' to read OTIO from standard input."""
     )
@@ -224,26 +225,30 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--only-tracks-with-name",
         type=str,
-        nargs='*',
+        nargs='+',
+        metavar='NAME(s)',
         help="Output tracks with these name(s)"
     )
     parser.add_argument(
         "--only-tracks-with-index",
         type=int,
-        nargs='*',
+        nargs='+',
+        metavar='INDEX(es)',
         help="Output tracks with these indexes"
         " (1 based, in same order as --list-tracks)"
     )
     parser.add_argument(
         "--only-clips-with-name",
         type=str,
-        nargs='*',
+        nargs='+',
+        metavar='NAME(s)',
         help="Output only clips with these name(s)"
     )
     parser.add_argument(
         "--only-clips-with-name-regex",
         type=str,
-        nargs='*',
+        nargs='+',
+        metavar='REGEX(es)',
         help="Output only clips with names matching the given regex"
     )
     parser.add_argument(
@@ -256,6 +261,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--trim",
         type=str,
         nargs=2,
+        metavar=('START', 'END'),
         help="Trim from <start> to <end> as HH:MM:SS:FF timecode or seconds"
     )
 
@@ -264,6 +270,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "-f",
         "--flatten",
         choices=['video', 'audio', 'all'],
+        metavar='TYPE',
         help="Flatten multiple tracks into one."
     )
     parser.add_argument(
@@ -289,6 +296,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--copy-media-to-folder",
         type=str,
+        metavar='FOLDER',
         help="""Copy or download all linked media to the specified folder and
         relink all media references to the copies"""
     )
@@ -337,7 +345,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--inspect",
         type=str,
-        nargs='*',
+        nargs='+',
+        metavar='NAME(s)',
         help="Inspect details of clips with names matching the given regex"
     )
 
@@ -346,6 +355,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "-o",
         "--output",
         type=str,
+        metavar='PATH',
         help="""Output file. All formats supported by adapter plugins
         are supported. Use '-' to write OTIO to standard output."""
     )

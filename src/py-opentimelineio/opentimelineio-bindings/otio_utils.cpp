@@ -213,34 +213,6 @@ AnyDictionary pydict_to_any_dictionary(py::dict const& o) {
     return safely_cast_any_dictionary_any(a);
 }
 
-std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o) {
-    if (_value_to_so_vector.is_none()) {
-        py::object core = py::module::import("opentimelineio.core");
-        _value_to_so_vector = core.attr("_value_to_so_vector");
-    }
-
-    std::vector<SerializableObject*> result;
-    if (o.is_none()) {
-        return result;
-    }
-
-    /*
-     * We're depending on _value_to_so_vector(), written in Python, to
-     * not screw up, or we're going to crash.  (1) It has to give us
-     * back an AnyVector.  (2) Every element has to be a
-     * SerializableObject::Retainer<>.
-     */
-
-    py::object obj_vector = _value_to_so_vector(o);     // need to retain this here or we'll lose the any...
-    AnyVector const& v = temp_safely_cast_any_vector_any(obj_vector.cast<PyAny*>()->a);
-
-    result.reserve(v.size());
-    for (auto e: v) {
-        result.push_back(safely_cast_retainer_any(e));
-    }
-    return result;
-}
-
 py::object any_to_py(any const& a, bool top_level) {
     std::type_info const& tInfo = a.type();
     auto e = _py_cast_dispatch_table.find(&tInfo);

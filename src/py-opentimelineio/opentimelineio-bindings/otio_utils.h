@@ -17,13 +17,9 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
+bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
+
 namespace pybind11 { namespace detail {
-    template<typename T> struct type_caster<optional<T>>
-        : public optional_caster<optional<T>> {};
-
-    template<> struct type_caster<nullopt_t>
-        : public void_caster<nullopt_t> {};
-
     template<> struct type_caster<any> {
     public:
         /**
@@ -265,6 +261,3 @@ pybind11::object plain_int(int i);
 any py_to_any2(pybind11::handle const& o);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
 AnyDictionary pydict_to_any_dictionary(pybind11::dict const& o);
-std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o);
-
-bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);

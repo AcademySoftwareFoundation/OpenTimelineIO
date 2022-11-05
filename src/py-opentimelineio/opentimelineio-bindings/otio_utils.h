@@ -259,5 +259,13 @@ pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
 any py_to_any2(pybind11::handle const& o);
+
+bool py_to_any3(pybind11::bool_ const& o);
+template<typename T>
+T py_to_any3(pybind11::int_ const& o);
+double py_to_any3(pybind11::float_ const& o);
+std::string py_to_any3(pybind11::str const& o);
+AnyDictionary py_to_any3(pybind11::dict const& o);
+AnyVector py_to_any3(pybind11::iterable const& o);
+
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
-AnyDictionary pydict_to_any_dictionary(pybind11::dict const& o);

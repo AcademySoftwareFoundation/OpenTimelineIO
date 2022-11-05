@@ -62,9 +62,9 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsInstance(so.metadata['list'], opentimelineio._otio.AnyVector)
         self.assertEqual(list(so.metadata['list']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
         self.assertIsInstance(so.metadata['dict'], opentimelineio._otio.AnyDictionary)
-        # self.assertDictEqual(so.metadata['dict'], {'map1': [345]})
+        self.assertEqual(so.metadata['dict'], opentimelineio._otio.AnyDictionary({'map1': [345]}))
         self.assertIsInstance(so.metadata['AnyVector'], opentimelineio._otio.AnyVector)
-        self.assertEqual(list(so.metadata['AnyVector']), [1, 'inside any vector'])
+        self.assertEqual(list(so.metadata['AnyVector']), opentimelineio._otio.AnyVector([1, 'inside any vector']))
         self.assertIsInstance(so.metadata['AnyDictionary'], opentimelineio._otio.AnyDictionary)
         self.assertEqual(dict(so.metadata['AnyDictionary']), {'key_1': 1234, 'key_2': {'asdasdasd': 5.6}})
 

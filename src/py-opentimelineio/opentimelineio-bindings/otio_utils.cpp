@@ -106,41 +106,40 @@ static void py_to_any(py::object const& o, any* result) {
 }
 
 any py_to_any2(py::handle const& o) {
-    py::type pytype = py::type::of(o);
     if (o.ptr() == nullptr || o.is_none()) {
         return any(nullptr);
     }
 
     if (py::isinstance<py::bool_>(o)) {
-        return any(o.cast<bool>());
+        return any(py_to_any3(py::cast<py::bool_>(o)));
     }
 
     if (py::isinstance<py::int_>(o)) {
         try {
-            return any(o.cast<std::int32_t>());
+            return any(py_to_any3<std::int32_t>(py::cast<py::int_>(o)));
         } catch (...) {}
 
         try {
-            return any(o.cast<std::int64_t>());
+            return any(py_to_any3<std::int64_t>(py::cast<py::int_>(o)));
         } catch (...) {}
 
         try {
-            return any(o.cast<std::uint32_t>());
+            return any(py_to_any3<std::uint32_t>(py::cast<py::int_>(o)));
         } catch (...) {}
 
         try {
-            return any(o.cast<std::uint64_t>());
+            return any(py_to_any3<std::uint64_t>(py::cast<py::int_>(o)));
         } catch (...) {}
 
         throw std::runtime_error("Failed to convert Python int to C++ int");
     }
 
     if (py::isinstance<py::float_>(o)) {
-        return any(o.cast<double>());
+        return any(py_to_any3(py::cast<py::float_>(o)));
     }
 
     if (py::isinstance<py::str>(o)) {
-        return any(o.cast<std::string>());
+        return any(py_to_any3(py::cast<py::str>(o)));
     }
 
     // Convert AnyDictionaryProxy and dict before vector and sequence because
@@ -151,19 +150,7 @@ any py_to_any2(py::handle const& o) {
     }
 
     if (py::isinstance<py::dict>(o)) {
-        py::print("Converting py::dict");
-        AnyDictionary d;
-
-        py::dict pyd = o.cast<py::dict>();
-        for (auto &it : pyd) {
-            if (!py::isinstance<py::str>(it.first)) {
-                throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
-            }
-
-            d[it.first.cast<std::string>()] = any(py_to_any2(it.second));
-        }
-
-        return any(d);
+        return any(py_to_any3(py::cast<py::dict>(o)));
     }
 
     if (py::isinstance<AnyVectorProxy>(o)) {
@@ -172,33 +159,57 @@ any py_to_any2(py::handle const& o) {
     }
 
     if (py::isinstance<py::sequence>(o)) {
-        py::print("Converting py::sequence");
-        AnyVector av;
-        for (auto &it : o) {
-            av.push_back(py_to_any2(it));
-        }
-        return any(av);
+        return any(py_to_any3(py::cast<py::iterable>(o)));
     }
 
+    py::type pytype = py::type::of(o);
     throw py::value_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
 }
 
-AnyDictionary py_to_any_dictionary(py::object const& o) {
-    if (o.is_none()) {
-        return AnyDictionary();
-    }
-
-    any a;
-    py_to_any(o, &a);
-    if (!compare_typeids(a.type(), typeid(AnyDictionary))) {
-        throw py::type_error(string_printf("Expected an AnyDictionary (i.e. metadata); got %s instead",
-                                           type_name_for_error_message(a).c_str()));
-    }
-
-    return safely_cast_any_dictionary_any(a);
+bool py_to_any3(py::bool_ const& o) {
+    return o.cast<bool>();
 }
 
-AnyDictionary pydict_to_any_dictionary(py::dict const& o) {
+template<typename T>
+T py_to_any3(py::int_ const& o) {
+    return o.cast<T>();
+}
+
+double py_to_any3(py::float_ const& o) {
+    return o.cast<double>();
+}
+
+std::string py_to_any3(py::str const& o) {
+    return o.cast<std::string>();
+}
+
+AnyDictionary py_to_any3(py::dict const& o) {
+    py::print("Converting py::dict");
+    AnyDictionary d = AnyDictionary();
+
+    for (auto &it : o) {
+        if (!py::isinstance<py::str>(it.first)) {
+            throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
+        }
+
+        // Note that storing an any is expected, since AnyDictionary values
+        // can only be of type any.
+        d[it.first.cast<std::string>()] = py_to_any2(it.second);
+    }
+
+    return d;
+}
+
+AnyVector py_to_any3(py::iterable const& o) {
+    py::print("Converting py::sequence");
+    AnyVector av = AnyVector();
+    for (auto &it : o) {
+        av.push_back(py_to_any2(it));
+    }
+    return av;
+}
+
+AnyDictionary py_to_any_dictionary(py::object const& o) {
     if (o.is_none()) {
         return AnyDictionary();
     }

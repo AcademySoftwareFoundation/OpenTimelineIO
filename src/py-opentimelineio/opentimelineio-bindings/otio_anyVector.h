@@ -14,6 +14,10 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
     AnyVectorProxy() {}
+    AnyVectorProxy(MutationStamp *v) {
+        any_vector = v->any_vector;
+    }
+
     AnyVectorProxy(const AnyVectorProxy& other) // Copy constructor. Required to convert a py::handle to an AnyVectorProxy.
     {
         AnyVector* v = new AnyVector;

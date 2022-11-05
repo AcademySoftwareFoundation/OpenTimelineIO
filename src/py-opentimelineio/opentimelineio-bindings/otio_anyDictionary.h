@@ -11,7 +11,15 @@
 namespace py = pybind11;
 
 struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
+    using MutationStamp = AnyDictionary::MutationStamp;
+
     AnyDictionaryProxy() {}
+
+    // TODO: Should we instead just pass an AnyDictionary?
+    AnyDictionaryProxy(MutationStamp *d) {
+        any_dictionary = d->any_dictionary;
+    }
+
     AnyDictionaryProxy(const AnyDictionaryProxy& other) // Copy constructor. Required to convert a py::handle to an AnyDictionaryProxy.
     {
         AnyDictionary* d = new AnyDictionary;
@@ -26,8 +34,6 @@ struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
 
     ~AnyDictionaryProxy() {
     }
-    
-    using MutationStamp = AnyDictionary::MutationStamp;
 
     static void throw_dictionary_was_deleted() {
         throw py::value_error("Underlying C++ AnyDictionary has been destroyed");

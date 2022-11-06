@@ -188,7 +188,7 @@ static void define_bases1(py::module m) {
     py::class_<SOWithMetadata, SerializableObject,
                managing_ptr<SOWithMetadata>>(m, "SerializableObjectWithMetadata", py::dynamic_attr())
         .def(py::init([](std::string name, AnyDictionaryProxy* metadata) {
-                    py::print("AnyDictionaryProxy");
+                    // py::print("AnyDictionaryProxy");
                     AnyDictionary d = metadata->fetch_any_dictionary();
                     return new SOWithMetadata(name, d);
                 }),
@@ -198,14 +198,14 @@ static void define_bases1(py::module m) {
         // need py::object, py::dict or AnyDictionaryProxy to be exposed.
         // https://stackoverflow.com/a/60744217
         .def(py::init([](std::string name, py::dict metadata) {
-                    py::print("py::dict");
+                    // py::print("py::dict");
                     AnyDictionary d = AnyDictionary();
                     for (auto &it : metadata) {
                         if (!py::isinstance<py::str>(it.first)) {
                             throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
                         }
 
-                        d[py::cast<std::string>(it.first)] = py_to_any2(it.second);
+                        d[py::cast<std::string>(it.first)] = py_to_any(it.second);
                     }
 
                     return new SOWithMetadata(name, d);
@@ -234,7 +234,7 @@ The marked range may have a zero duration. The marked range is in the owning ite
                         std::string name,
                         TimeRange marked_range,
                         std::string const& color,
-                        py::object metadata) {
+                        py::dict metadata) {
                           return new Marker(
                                   name,
                                   marked_range,
@@ -244,7 +244,7 @@ The marked range may have a zero duration. The marked range is in the owning ite
              py::arg_v("name"_a = std::string()),
              "marked_range"_a = TimeRange(),
              "color"_a = std::string(Marker::Color::red),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("color", &Marker::color, &Marker::set_color, "Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.")
         .def_property("marked_range", &Marker::marked_range, &Marker::set_marked_range, "Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).");
 
@@ -278,13 +278,13 @@ a named collection.
 A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media references to a single file.
 )docstring")
         .def(py::init([](std::string const& name, optional<std::vector<SerializableObject*>> children,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new SerializableCollection(name,
                                                 vector_or_default<SerializableObject>(children),
                                                 py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "children"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def("__internal_getitem__", [](SerializableCollection* c, int index) {
                 index = adjusted_vector_index(index, c->children());
                 if (index < 0 || index >= int(c->children().size())) {
@@ -327,7 +327,7 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
-                         optional<std::vector<Effect*>> effects, optional<std::vector<Marker*>> markers, py::bool_ enabled, py::object metadata) {
+                         optional<std::vector<Effect*>> effects, optional<std::vector<Marker*>> markers, py::bool_ enabled, py::dict metadata) {
                           return new Item(name, source_range,
                                           py_to_any_dictionary(metadata),
                                           vector_or_default<Effect>(effects),
@@ -338,7 +338,7 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
              "effects"_a = py::none(),
              "markers"_a = py::none(),
              "enabled"_a = true,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("enabled", &Item::enabled, &Item::set_enabled, "If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.")
         .def_property("source_range", &Item::source_range, &Item::set_source_range)
         .def("available_range", [](Item* item) {
@@ -379,7 +379,7 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
         py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr(), "Represents a transition between the two adjacent items in a :class:`.Track`. For example, a cross dissolve or wipe.")
         .def(py::init([](std::string const& name, std::string const& transition_type,
                          RationalTime in_offset, RationalTime out_offset,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new Transition(name, transition_type,
                                                 in_offset, out_offset,
                                                 py_to_any_dictionary(metadata)); }),
@@ -387,7 +387,7 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
              "transition_type"_a = std::string(),
              "in_offset"_a = RationalTime(),
              "out_offset"_a = RationalTime(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("transition_type", &Transition::transition_type, &Transition::set_transition_type, "Kind of transition, as defined by the :class:`Type` enum.")
         .def_property("in_offset", &Transition::in_offset, &Transition::set_in_offset, "Amount of the previous clip this transition overlaps, exclusive.")
         .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset, "Amount of the next clip this transition overlaps, exclusive.")
@@ -412,7 +412,7 @@ Other effects are handled by the :class:`Effect` class.
 
     py::class_<Gap, Item, managing_ptr<Gap>>(m, "Gap", py::dynamic_attr())
         .def(py::init([](std::string name, TimeRange source_range, optional<std::vector<Effect*>> effects,
-                         optional<std::vector<Marker*>> markers, py::object metadata) {
+                         optional<std::vector<Marker*>> markers, py::dict metadata) {
                           return new Gap(source_range, name,
                                          vector_or_default<Effect>(effects),
                                          vector_or_default<Marker>(markers),
@@ -421,9 +421,9 @@ Other effects are handled by the :class:`Effect` class.
              "source_range"_a = TimeRange(),
              "effects"_a = py::none(),
              "markers"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
        .def(py::init([](std::string name, RationalTime duration, optional<std::vector<Effect*>> effects,
-                        optional<std::vector<Marker*>> markers, py::object metadata) {
+                        optional<std::vector<Marker*>> markers, py::dict metadata) {
                           return new Gap(duration, name,
                                          vector_or_default<Effect>(effects),
                                          vector_or_default<Marker>(markers),
@@ -432,7 +432,7 @@ Other effects are handled by the :class:`Effect` class.
              "duration"_a = RationalTime(),
              "effects"_a = py::none(),
              "markers"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()));
+             py::arg_v("metadata"_a = py::dict()));
 
     auto clip_class = py::class_<Clip, Item, managing_ptr<Clip>>(m, "Clip", py::dynamic_attr(), R"docstring(
 A :class:`~Clip` is a segment of editable media (usually audio or video).
@@ -440,14 +440,14 @@ A :class:`~Clip` is a segment of editable media (usually audio or video).
 Contains a :class:`.MediaReference` and a trim on that media reference.
 )docstring")
         .def(py::init([](std::string name, MediaReference* media_reference,
-                         optional<TimeRange> source_range, py::object metadata,
+                         optional<TimeRange> source_range, py::dict metadata,
                          const std::string&  active_media_reference) {
                           return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata), active_media_reference);
                       }),
              py::arg_v("name"_a = std::string()),
              "media_reference"_a = nullptr,
              "source_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()),
+             py::arg_v("metadata"_a = py::dict()),
              "active_media_reference"_a = std::string(Clip::default_media_key))
         .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
             return Clip::default_media_key; 
@@ -473,7 +473,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 )docstring")
         .def(py::init([](std::string name,
                          optional<std::vector<Composable*>> children,
-                         optional<TimeRange> source_range, py::object metadata) {
+                         optional<TimeRange> source_range, py::dict metadata) {
                           Composition* c = new Composition(name, source_range,
                                                            py_to_any_dictionary(metadata));
                           c->set_children(vector_or_default<Composable>(children), ErrorStatusHandler());
@@ -482,7 +482,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              py::arg_v("name"_a = std::string()),
              "children"_a = py::none(),
              "source_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property_readonly("composition_kind", &Composition::composition_kind)
         .def("is_parent_of", &Composition::is_parent_of, "other"_a)
         .def("range_of_child_at_index", [](Composition* c, int index) {
@@ -556,11 +556,11 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
     composable_class
         .def(py::init([](std::string const& name,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new Composable(name, py_to_any_dictionary(metadata));
                       }),
              py::arg_v("name"_a = std::string()),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def("parent", &Composable::parent)
         .def("visible", &Composable::visible)
         .def("overlapping", &Composable::overlapping);
@@ -574,7 +574,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
     track_class
         .def(py::init([](std::string name, optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
-                         std::string const& kind, py::object metadata) {
+                         std::string const& kind, py::dict metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Track* t = new Track(
                                   name,
@@ -590,7 +590,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "children"_a = py::none(),
              "source_range"_a = nullopt,
              "kind"_a = std::string(Track::Kind::video),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("kind", &Track::kind, &Track::set_kind)
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
@@ -611,7 +611,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                          optional<TimeRange> const& source_range,
                          optional<std::vector<Marker*>> markers,
                          optional<std::vector<Effect*>> effects,
-                         py::object metadata) {
+                         py::dict metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Stack* s = new Stack(
                                   name,
@@ -630,7 +630,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "source_range"_a = nullopt,
              "markers"_a = py::none(),
              "effects"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def("find_clips", [](Stack* s, optional<TimeRange> const& search_range, bool shallow_search) {
                 return find_clips(s, search_range, shallow_search);
             }, "search_range"_a = nullopt, "shallow_search"_a = false);
@@ -639,7 +639,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def(py::init([](std::string name,
                          optional<std::vector<Composable*>> children,
                          optional<RationalTime> global_start_time,
-                         py::object metadata) {
+                         py::dict metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Timeline* t = new Timeline(name, global_start_time,
                                                      py_to_any_dictionary(metadata));
@@ -650,7 +650,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              py::arg_v("name"_a = std::string()),
              "tracks"_a = py::none(),
              "global_start_time"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
         .def_property("tracks", &Timeline::tracks, &Timeline::set_tracks)
         .def("duration", [](Timeline* t) {
@@ -673,33 +673,33 @@ static void define_effects(py::module m) {
     py::class_<Effect, SOWithMetadata, managing_ptr<Effect>>(m, "Effect", py::dynamic_attr())
         .def(py::init([](std::string name,
                          std::string effect_name,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new Effect(name, effect_name, py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "effect_name"_a = std::string(),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("effect_name", &Effect::effect_name, &Effect::set_effect_name);
 
     py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr(), "Base class for all effects that alter the timing of an item.")
         .def(py::init([](std::string name,
                          std::string effect_name,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new TimeEffect(name, effect_name, py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "effect_name"_a = std::string(),
-             py::arg_v("metadata"_a = py::none()));
+             py::arg_v("metadata"_a = py::dict()));
 
     py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr(), R"docstring(
 A time warp that applies a linear speed up or slow down across the entire clip.
 )docstring")
         .def(py::init([](std::string name,
                          double time_scalar,
-                         py::object metadata) {
+                         py::dict metadata) {
                           return new LinearTimeWarp(name, "LinearTimeWarp", time_scalar,
                                                     py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "time_scalar"_a = 1.0,
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::dict()))
         .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar, R"docstring(
 Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
 0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
@@ -709,10 +709,10 @@ Instead it affects the speed of the media displayed within that item.
 )docstring");
 
     py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr(), "Hold the first frame of the clip for the duration of the clip.")
-        .def(py::init([](std::string name, py::object metadata) {
+        .def(py::init([](std::string name, py::dict metadata) {
                     return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
             py::arg_v("name"_a = std::string()),
-            py::arg_v("metadata"_a = py::none()));
+            py::arg_v("metadata"_a = py::dict()));
 }
 
 static void define_media_references(py::module m) {
@@ -720,12 +720,12 @@ static void define_media_references(py::module m) {
                managing_ptr<MediaReference>>(m, "MediaReference", py::dynamic_attr())
         .def(py::init([](std::string name,
                          optional<TimeRange> available_range,
-                         py::object metadata,
+                         py::dict metadata,
                          optional<Imath::Box2d> const& available_image_bounds) {
                           return new MediaReference(name, available_range, py_to_any_dictionary(metadata), available_image_bounds); }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()),
+             py::arg_v("metadata"_a = py::dict()),
              "available_image_bounds"_a = nullopt)
 
         .def_property("available_range", &MediaReference::available_range, &MediaReference::set_available_range)
@@ -736,7 +736,7 @@ static void define_media_references(py::module m) {
                managing_ptr<GeneratorReference>>(m, "GeneratorReference", py::dynamic_attr())
         .def(py::init([](std::string name, std::string generator_kind,
                          optional<TimeRange> const& available_range,
-                         py::object parameters, py::object metadata,
+                         py::object parameters, py::dict metadata,
                          optional<Imath::Box2d> const& available_image_bounds) {
                           return new GeneratorReference(name, generator_kind,
                                                         available_range,
@@ -747,7 +747,7 @@ static void define_media_references(py::module m) {
              "generator_kind"_a = std::string(),
              "available_range"_a = nullopt,
              "parameters"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()),
+             py::arg_v("metadata"_a = py::dict()),
              "available_image_bounds"_a = nullopt)
         .def_property("generator_kind", &GeneratorReference::generator_kind, &GeneratorReference::set_generator_kind)
         .def_property_readonly("parameters", [](GeneratorReference* g) {
@@ -764,7 +764,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
         .def(py::init([](
                         std::string name,
                         optional<TimeRange> available_range,
-                        py::object metadata,
+                        py::dict metadata,
                         optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
                                   name,
@@ -774,7 +774,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
                     }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()),
+             py::arg_v("metadata"_a = py::dict()),
              "available_image_bounds"_a = nullopt);
 
 
@@ -782,7 +782,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
                managing_ptr<ExternalReference>>(m, "ExternalReference", py::dynamic_attr())
         .def(py::init([](std::string target_url,
                          optional<TimeRange> const& available_range,
-                         py::object metadata,
+                         py::dict metadata,
                          optional<Imath::Box2d> const& available_image_bounds) {
                           return new ExternalReference(target_url,
                                                         available_range,
@@ -790,7 +790,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
                                                         available_image_bounds); }),
              "target_url"_a = std::string(),
              "available_range"_a = nullopt,
-             py::arg_v("metadata"_a = py::none()),
+             py::arg_v("metadata"_a = py::dict()),
              "available_image_bounds"_a = nullopt)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
 
@@ -878,7 +878,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                          int frame_zero_padding,
                          ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
-                         py::object metadata,
+                         py::dict metadata,
                          optional<Imath::Box2d> const& available_image_bounds) {
                           return new ImageSequenceReference(target_url_base,
                                                             name_prefix,
@@ -900,7 +900,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                         "frame_zero_padding"_a = 0,
                         "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
-                        py::arg_v("metadata"_a = py::none()),
+                        py::arg_v("metadata"_a = py::dict()),
                         "available_image_bounds"_a = nullopt)
         .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base, "Everything leading up to the file name in the ``target_url``.")
         .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix, "Everything in the file name leading up to the frame number.")

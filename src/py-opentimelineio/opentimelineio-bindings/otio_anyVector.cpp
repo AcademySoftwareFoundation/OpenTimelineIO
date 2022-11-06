@@ -22,7 +22,7 @@ void otio_any_vector_bindings(py::module m) {
         .def(py::init([](const py::iterable &it) {
             auto v = new AnyVector();
             for (py::handle h : it) {
-                v->push_back(py_to_any2(h));
+                v->push_back(py_to_any(h));
             }
 
             AnyVectorProxy* a = new AnyVectorProxy(v->get_or_create_mutation_stamp());

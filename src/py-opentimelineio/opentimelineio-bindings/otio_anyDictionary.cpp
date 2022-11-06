@@ -24,7 +24,7 @@ void otio_any_dictionary_bindings(py::module m) {
     py::class_<AnyDictionaryProxy>(m, "AnyDictionary")
         .def(py::init<>())
         .def(py::init([](py::dict item) {
-            AnyDictionary d = py_to_any3(item);
+            AnyDictionary d = py_to_cpp(item);
             auto proxy = new AnyDictionaryProxy;
             proxy->fetch_any_dictionary().swap(*d.get_or_create_mutation_stamp()->any_dictionary);
 

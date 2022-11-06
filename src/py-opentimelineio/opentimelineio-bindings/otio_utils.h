@@ -35,7 +35,7 @@ namespace pybind11 { namespace detail {
          * indicates whether implicit conversions should be applied.
          */
         bool load(handle src, bool) {
-            // TODO: Use what's in SOWithMetadata and otio_utils::py_to_any2.
+            // TODO: Use what's in SOWithMetadata and otio_utils::py_to_any.
             // The idea is that we could simply use AnyDictionary as input parameters for
             // metadata and this load method here would take care of basically
             // taking the input and converting it to AnyDictionaryProxy? Or actually
@@ -258,14 +258,14 @@ struct PyAny {
 pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
-any py_to_any2(pybind11::handle const& o);
+any py_to_any(pybind11::handle const& o);
 
-bool py_to_any3(pybind11::bool_ const& o);
+bool py_to_cpp(pybind11::bool_ const& o);
 template<typename T>
-T py_to_any3(pybind11::int_ const& o);
-double py_to_any3(pybind11::float_ const& o);
-std::string py_to_any3(pybind11::str const& o);
-AnyDictionary py_to_any3(pybind11::dict const& o);
-AnyVector py_to_any3(pybind11::iterable const& o);
+T py_to_cpp(pybind11::int_ const& o);
+double py_to_cpp(pybind11::float_ const& o);
+std::string py_to_cpp(pybind11::str const& o);
+AnyDictionary py_to_cpp(pybind11::dict const& o);
+AnyVector py_to_cpp(pybind11::iterable const& o);
 
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);

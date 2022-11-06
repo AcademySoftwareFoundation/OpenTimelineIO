@@ -118,3 +118,52 @@ struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
     }
 };
 
+// Taken from https://github.com/pybind/pybind11/issues/1176#issuecomment-343312352
+// This is a custom type caster for the AnyDictionaryProxy class. This makes AnyDictionaryProxy
+// accept both AnyDictionaryProxy and py::dict.
+namespace pybind11 { namespace detail {
+    template <> struct type_caster<AnyDictionaryProxy> : public type_caster_base<AnyDictionaryProxy> {
+        using base = type_caster_base<AnyDictionaryProxy>;
+    public:
+
+        // Override the type reported in docstings. opentimelineio.core.Metadata is defined
+        // in Python. It's defined as a union of a dict and AnyDictionary.
+        // This will allow mypy to do its job.
+        static constexpr auto name = const_name("opentimelineio.core.Metadata");
+
+        /**
+         * Conversion part 1 (Python->C++): convert a PyObject into an any
+         * instance or return false upon failure. The second argument
+         * indicates whether implicit conversions should be applied.
+         */
+        bool load(handle src, bool convert) {
+            // First try to convert using the base (default) type caster for AnyDictionaryProxy.
+            if (base::load(src, convert)) {
+                return true;
+            }
+
+            // If we got a dict, then do our own thing to convert the dict into an AnyDictionaryProxy.
+            else if (py::isinstance<py::dict>(src)) {
+                auto proxy = new AnyDictionaryProxy();
+                AnyDictionary&& d = py_to_cpp(py::cast<py::dict>(src));
+                proxy->fetch_any_dictionary().swap(d);
+                value = proxy;
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Conversion part 2 (C++ -> Python): convert an any instance into
+         * a Python object. The second and third arguments are used to
+         * indicate the return value policy and parent object (for
+         * ``return_value_policy::reference_internal``) and are generally
+         * ignored by implicit casters.
+         */
+        // static handle cast(AnyDictionaryProxy *src, return_value_policy policy, handle parent) {
+        //     /* Do any additional work here */
+        //     return base::cast(src, policy, parent);
+        // }
+    };
+}}

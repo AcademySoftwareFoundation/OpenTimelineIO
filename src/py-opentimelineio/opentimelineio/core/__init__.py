@@ -2,12 +2,18 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Core implementation details and wrappers around the C++ library"""
+from __future__ import annotations
+
+from typing import Union, Dict, TypeAlias
+
+from .. opentime import RationalTime, TimeRange, TimeTransform
 
 from .. _otio import ( # noqa
     # errors
     CannotComputeAvailableRangeError,
 
     # classes
+    AnyDictionary,
     Composable,
     Composition,
     Item,
@@ -32,6 +38,12 @@ from .. _otio import ( # noqa
     release_to_schema_version_map,
 )
 
+Metadata: TypeAlias = Union[Dict[str, 'MetadataValue'], AnyDictionary]
+"""OTIO custom metadata type."""
+
+MetadataValue: TypeAlias = Union[bool, int, float, str, None, SerializableObject, RationalTime, TimeRange, TimeTransform, Metadata]
+"""Metadata's values."""
+
 from . _core_utils import ( # noqa
     add_method,
     _value_to_any,
@@ -46,6 +58,9 @@ from . import ( # noqa
 )
 
 __all__ = [
+    'Metadata',
+    'MetadataValue',
+    'AnyDictionary',
     'Composable',
     'Composition',
     'Item',

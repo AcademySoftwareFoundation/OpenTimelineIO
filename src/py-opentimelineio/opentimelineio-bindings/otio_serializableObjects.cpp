@@ -188,26 +188,7 @@ static void define_bases1(py::module m) {
     py::class_<SOWithMetadata, SerializableObject,
                managing_ptr<SOWithMetadata>>(m, "SerializableObjectWithMetadata", py::dynamic_attr())
         .def(py::init([](std::string name, AnyDictionaryProxy* metadata) {
-                    // py::print("AnyDictionaryProxy");
                     AnyDictionary d = metadata->fetch_any_dictionary();
-                    return new SOWithMetadata(name, d);
-                }),
-            py::arg_v("name"_a = std::string()),
-            py::arg_v("metadata"_a = py::none()))
-        // TODO: We should use AnyDictionary and with the custom caster, we would no longer
-        // need py::object, py::dict or AnyDictionaryProxy to be exposed.
-        // https://stackoverflow.com/a/60744217
-        .def(py::init([](std::string name, py::dict metadata) {
-                    // py::print("py::dict");
-                    AnyDictionary d = AnyDictionary();
-                    for (auto &it : metadata) {
-                        if (!py::isinstance<py::str>(it.first)) {
-                            throw py::value_error("Keys must be of type string, not " + py::cast<std::string>(py::type::of(it.first).attr("__name__")));
-                        }
-
-                        d[py::cast<std::string>(it.first)] = py_to_any(it.second);
-                    }
-
                     return new SOWithMetadata(name, d);
                 }),
             py::arg_v("name"_a = std::string()),

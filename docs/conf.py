@@ -3,7 +3,12 @@
 # Copyright Contributors to the OpenTimelineIO project
 import re
 
+import docutils.nodes
+import sphinx.addnodes
+import sphinx.application
+import sphinx.environment
 import sphinx_rtd_theme
+
 import opentimelineio
 
 # -- Project information ---------------------------------------------------------------
@@ -184,6 +189,35 @@ def process_docstring(
             lines[index] = line
 
 
-def setup(app):
+def process_missing_reference(
+    app: sphinx.application.Sphinx,
+    env: sphinx.environment.BuildEnvironment,
+    node: sphinx.addnodes.pending_xref,
+    contnode: docutils.nodes.Element
+):
+    if node.get('refdomain') != 'py':
+        return None
+
+    if node.get('reftype') == 'class':
+        reftarget = node.get('reftarget')
+        if reftarget == 'opentimelineio.core.Metadata':
+            # This is one heck of a hack. As it is right now, when opentimelineio.core.Metadata
+            # appears in a C++ function/method signature, it cannot be properly
+            # resolved by Sphinx. Not too sure why.
+            new_node = docutils.nodes.reference('')
+            new_node['refuri'] = f'{node.get("py:module")}.html#{reftarget}'
+            new_node['reftitle'] = reftarget
+            # new_node['classname'] = 'Metadata'
+            # Note that normally we would append "contnode" since it's
+            # the node that contains the text (opentimelineio.core.Metadata),
+            # but in our case we simply append a custom Text node so that the
+            # displayed is shorter (no module name).
+            new_node.append(docutils.nodes.Text('Metadata'))
+
+            return new_node
+
+
+def setup(app: sphinx.application.Sphinx):
     app.connect("autodoc-process-signature", process_signature)
     app.connect("autodoc-process-docstring", process_docstring)
+    app.connect("missing-reference", process_missing_reference)

@@ -97,6 +97,7 @@ void _build_any_to_py_dispatch_table() {
 
 static py::object _value_to_any = py::none();
 
+// TODO: Missing RationalTime, TimeRange and TimeTransform
 any py_to_any(py::handle const& o) {
     if (o.ptr() == nullptr || o.is_none()) {
         return any(nullptr);
@@ -123,7 +124,7 @@ any py_to_any(py::handle const& o) {
             return any(py_to_cpp<std::uint64_t>(py::cast<py::int_>(o)));
         } catch (...) {}
 
-        throw std::runtime_error("Failed to convert Python int to C++ int");
+        throw py::type_error("Failed to convert Python int to C++ int");
     }
 
     if (py::isinstance<py::float_>(o)) {
@@ -155,7 +156,7 @@ any py_to_any(py::handle const& o) {
     }
 
     py::type pytype = py::type::of(o);
-    throw py::value_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
+    throw py::type_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
 }
 
 bool py_to_cpp(py::bool_ const& o) {

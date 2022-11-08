@@ -5,6 +5,7 @@
 
 import unittest
 import os
+from pathlib import Path
 import sys
 
 from unittest import mock
@@ -28,17 +29,17 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             os.path.normpath(baseline_reader.path_to_baseline_directory()),
             'plugin_module',
         )
-        self.mock_module_manifest_path = os.path.join(
+        self.mock_module_manifest_path = Path(
             mock_module_path,
             "otio_jsonplugin",
             "plugin_manifest.json"
-        )
+        ).absolute().as_posix()
 
-        self.override_adapter_manifest_path = os.path.join(
+        self.override_adapter_manifest_path = Path(
             mock_module_path,
             "otio_override_adapter",
             "plugin_manifest.json"
-        )
+        ).absolute().as_posix()
 
         # Create a WorkingSet as if the module were installed
         entries = [mock_module_path] + sys.path
@@ -91,7 +92,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Override adapter should be the first adapter found
         manifest = adapters[0].plugin_info_map().get('from manifest', None)
-        self.assertEqual(manifest, os.path.abspath(self.override_adapter_manifest_path))
+        self.assertEqual(manifest, self.override_adapter_manifest_path)
 
         self.assertTrue(
             any(

@@ -18,39 +18,28 @@ static constexpr std::array<double, 2> dropframe_timecode_rates{ {
     60000.0 / 1001.0,
 } };
 
+// See the official source of these numbers here:
+// ST 12-1:2014 - SMPTE Standard - Time and Control Code
+// https://ieeexplore.ieee.org/document/7291029
+//
 static constexpr std::array<double, 11> smpte_timecode_rates{
-    { 1.0,
-      12.0,
-      24000.0 / 1001.0,
+    { 24000.0 / 1001.0,
       24.0,
       25.0,
       30000.0 / 1001.0,
       30.0,
+      48000.0 / 1001.0,
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0 }
-};
-
-static constexpr std::array<double, 12> valid_timecode_rates{
-    { 1.0,
-      12.0,
-      24000.0 / 1001.0,
-      24.0,
-      25.0,
-      29.97,
-      30000.0 / 1001.0,
-      30.0,
-      48.0,
-      50.0,
-      60000.0 / 1001.0,
-      60.0 }
+      60.0
+    }
 };
 
 bool
 RationalTime::is_valid_timecode_rate(double fps)
 {
-    auto b = valid_timecode_rates.begin(), e = valid_timecode_rates.end();
+    auto b = smpte_timecode_rates.begin(), e = smpte_timecode_rates.end();
     return std::find(b, e, fps) != e;
 }
 

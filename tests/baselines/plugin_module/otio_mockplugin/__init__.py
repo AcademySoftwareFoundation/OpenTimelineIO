@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import pkg_resources
+from importlib import resources
+from pathlib import Path
 
 from opentimelineio.plugins import manifest
 
@@ -20,9 +21,13 @@ a non-standard json file path.
 
 
 def plugin_manifest():
+    try:
+        filepath = resources.files(__package__) / "unusually_named_plugin_manifest.json"
+    except AttributeError:
+        # For python <= 3.7
+        with resources.path(__package__, "unusually_named_plugin_manifest.json") as p:
+            filepath = Path(p)
+
     return manifest.manifest_from_string(
-        pkg_resources.resource_string(
-            __name__,
-            'unusually_named_plugin_manifest.json'
-        )
+        filepath.read_text()
     )

@@ -64,9 +64,9 @@ channel_map = {
 # the comment string for the media reference:
 #   'avid': '* FROM CLIP:' (default)
 #   'nucoda': '* FROM FILE:'
-#   'premiere': None (If Adobe Premiere's imports an EDL that uses
-#                     a "FROM" comment will cause the clips
-#                     to be name UNKNOWN)
+#   'premiere': None (If Adobe Premiere imports an EDL that uses
+#                     a "FROM" comment will result in the clips
+#                     being named UNKNOWN instead of using the reel or file name)
 # When adding a new style, please be sure to add sufficient tests
 # to verify both the new and existing styles.
 VALID_EDL_STYLES = {

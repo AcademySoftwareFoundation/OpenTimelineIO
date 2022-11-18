@@ -601,25 +601,6 @@ Maya Sequencer Adapter Harness
 
 
 
-### rv_session
-
-```
-RvSession Adapter harness
-```
-
-*source*: `opentimelineio_contrib/adapters/rv.py`
-
-
-*Supported Features (with arguments)*:
-
-- write_to_file:
-  - input_otio
-  - filepath
-
-
-
-
-
 ### xges
 
 ```

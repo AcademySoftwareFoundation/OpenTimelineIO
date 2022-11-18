@@ -8,6 +8,7 @@ import sys
 import os
 import subprocess
 import sysconfig
+import pathlib
 import platform
 
 import io
@@ -903,6 +904,8 @@ Duration: 00:02:16:18
             open(temp_file1, "w").write("A")
             open(temp_file2, "w").write("B")
 
+            temp_url = pathlib.Path(temp_dir).as_uri()
+
             sys.argv = [
                 'otiotool',
                 '-i', SIMPLE_CUT_PATH,
@@ -910,13 +913,13 @@ Duration: 00:02:16:18
                 '--list-media'
             ]
             out, err = self.run_test()
-            self.assertTrue(
+            self.assertIn(
                 ("TIMELINE: Figure 1 - Simple Cut List\n"
-                 f"    MEDIA: file://{temp_dir}/Clip-001.empty\n"
+                 f"    MEDIA: {temp_url}/Clip-001.empty\n"
                  "    MEDIA: file:///folder/wind-up.mov\n"
-                 f"    MEDIA: file://{temp_dir}/Clip-003.empty\n"
-                 "    MEDIA: file:///folder/credits.mov\n")
-                in out)
+                 f"    MEDIA: {temp_url}/Clip-003.empty\n"
+                 "    MEDIA: file:///folder/credits.mov\n"),
+                out)
 
 
 OTIOToolTest_ShellOut = CreateShelloutTest(OTIOToolTest)

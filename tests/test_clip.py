@@ -2,6 +2,7 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import unittest
+import pytest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -28,8 +29,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             # transition_in
             # transition_out
         )
-        self.assertEqual(cl.name, name)
-        self.assertEqual(cl.source_range, tr)
+        assert cl.name == name
+        assert cl.source_range == tr
         self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
@@ -38,14 +39,17 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_each_clip(self):
         cl = otio.schema.Clip(name="test_clip")
-        self.assertEqual(list(cl.each_clip()), [cl])
+        assert list(cl.each_clip()) == [cl]
 
     def test_str(self):
         cl = otio.schema.Clip(name="test_clip")
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(\'\', None, None, {}), None, {})'
+            'Clip('
+            '"test_clip", '
+            'MissingReference(\'\', None, None, {}), '
+            'None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -98,25 +102,26 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 available_range=tr
             )
         )
-        self.assertEqual(cl.duration(), cl.trimmed_range().duration)
-        self.assertEqual(cl.duration(), tr.duration)
-        self.assertEqual(cl.trimmed_range(), tr)
-        self.assertEqual(cl.available_range(), tr)
-        self.assertIsNot(cl.trimmed_range(), tr)
-        self.assertIsNot(cl.available_range(), tr)
+
+        assert cl.duration() == cl.trimmed_range().duration
+        assert cl.duration() == tr.duration
+        assert cl.trimmed_range() == tr
+        assert cl.available_range() == tr
+        assert cl.trimmed_range() is not tr
+        assert cl.available_range() is not tr
 
         cl.source_range = otio.opentime.TimeRange(
             # 1 hour + 100 frames
             start_time=otio.opentime.RationalTime(86500, 24),
             duration=otio.opentime.RationalTime(50, 24)
         )
-        self.assertNotEqual(cl.duration(), tr.duration)
-        self.assertNotEqual(cl.trimmed_range(), tr)
-        self.assertEqual(cl.duration(), cl.source_range.duration)
-        self.assertIsNot(cl.duration(), cl.source_range.duration)
 
-        self.assertEqual(cl.trimmed_range(), cl.source_range)
-        self.assertIsNot(cl.trimmed_range(), cl.source_range)
+        assert cl.duration() != tr.duration
+        assert cl.trimmed_range() != tr
+        assert cl.duration() == cl.source_range.duration
+        assert cl.duration() is not cl.source_range.duration
+        assert cl.trimmed_range() == cl.source_range
+        assert cl.trimmed_range() is not cl.source_range
 
     def test_available_image_bounds(self):
         available_image_bounds = otio.schema.Box2d(
@@ -134,16 +139,13 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             media_reference=media_reference
         )
 
-        self.assertEqual(available_image_bounds, cl.available_image_bounds)
-        self.assertEqual(
-            cl.available_image_bounds,
-            media_reference.available_image_bounds
-        )
+        assert available_image_bounds == cl.available_image_bounds
+        assert cl.available_image_bounds == media_reference.available_image_bounds
 
-        self.assertEqual(0.0, cl.available_image_bounds.min.x)
-        self.assertEqual(0.0, cl.available_image_bounds.min.y)
-        self.assertEqual(16.0, cl.available_image_bounds.max.x)
-        self.assertEqual(9.0, cl.available_image_bounds.max.y)
+        assert 0.0 == cl.available_image_bounds.min.x
+        assert 0.0 == cl.available_image_bounds.min.y
+        assert 16.0 == cl.available_image_bounds.max.x
+        assert 9.0 == cl.available_image_bounds.max.y
 
         # test range exceptions
         cl.media_reference.available_image_bounds = None
@@ -172,10 +174,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_multi_ref(self):
         cl = otio.schema.Clip()
 
-        self.assertEqual(
-            otio.schema.Clip.DEFAULT_MEDIA_KEY,
-            cl.active_media_reference_key
-        )
+        assert otio.schema.Clip.DEFAULT_MEDIA_KEY == cl.active_media_reference_key
         self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.MissingReference()
@@ -193,8 +192,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 "high_quality": otio.schema.GeneratorReference(),
                 "proxy_quality": otio.schema.ImageSequenceReference(),
             },
-            otio.schema.Clip.DEFAULT_MEDIA_KEY)
-
+            otio.schema.Clip.DEFAULT_MEDIA_KEY
+        )
         mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
             mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
@@ -214,48 +213,38 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             cl.media_reference,
             otio.schema.GeneratorReference()
         )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+        assert cl.active_media_reference_key == "high_quality"
 
         # we should get an exception if we try to use a key that is
         # not in the media_references
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             cl.active_media_reference_key = "cloud"
 
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+        assert cl.active_media_reference_key == "high_quality"
 
         # we should also get an exception if we set the references without
         # the active key
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             cl.set_media_references(
                 {
                     "cloud": otio.schema.ExternalReference()
                 },
                 "high_quality"
             )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+
+        assert cl.active_media_reference_key == "high_quality"
 
         # we should also get an exception if we set the references with
         # an empty key
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             cl.set_media_references(
                 {
                     "": otio.schema.ExternalReference()
                 },
                 ""
             )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+
+        assert cl.active_media_reference_key == "high_quality"
 
         # setting the references and the active key should resolve the problem
         cl.set_media_references(
@@ -264,7 +253,8 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             },
             "cloud"
         )
-        self.assertEqual(cl.active_media_reference_key, "cloud")
+
+        assert cl.active_media_reference_key == "cloud"
         self.assertIsOTIOEquivalentTo(
             cl.media_reference, otio.schema.ExternalReference())
 

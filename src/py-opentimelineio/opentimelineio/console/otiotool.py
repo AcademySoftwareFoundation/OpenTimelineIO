@@ -133,6 +133,13 @@ def main():
 
     # Final Phase: Output
 
+    if args.downgrade:
+        if ":" in args.downgrade:
+            label = args.downgrade
+        else:
+            label = "OTIO_CORE:" + args.downgrade
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = label
+
     if args.output:
         # Gather all of the timelines under one OTIO object
         # in preparation for final output
@@ -188,7 +195,8 @@ This tool works in phases, as follows:
     Finally, if the "--output <filename>" option is specified, the resulting
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
-    format supported by the adapter plugins.)
+    format supported by the adapter plugins.) If you need to output an older
+    schema version, see the --downgrade option.
 """.strip(),
         epilog="""Examples:
 
@@ -369,6 +377,18 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Output...
+    parser.add_argument(
+        "--downgrade",
+        type=str,
+        metavar='FAMILY:VERSION',
+        help="""Downgrade OTIO schema. Only relevant when --output is used
+        to output an OTIO file. FAMILY:VERSION specifies which schema family
+        and version to use. If FAMILY: is omitted, the default OTIO_CORE: is
+        used. For example `--downgrade OTIO_CORE:0.14.0` is equivalent to
+        `--downgrade 0.14.0`. See the OpenTimelineIO documentation for 
+        OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL for details."""
+    )
+
     parser.add_argument(
         "-o",
         "--output",

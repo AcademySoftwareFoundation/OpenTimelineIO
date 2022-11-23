@@ -8,6 +8,7 @@ import sys
 import os
 import subprocess
 import sysconfig
+import pathlib
 import platform
 
 import io
@@ -20,9 +21,11 @@ import opentimelineio.test_utils as otio_test_utils
 import opentimelineio.console as otio_console
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
+
 MULTITRACK_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
+PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SIMPLE_CUT_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
 TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition.otio")
 
 
@@ -893,6 +896,30 @@ Duration: 00:02:16:18
              "    range in Sequence 3 (<class 'opentimelineio._otio.Track'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"  # noqa E501 line too long
              "    range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))\n"),  # noqa E501 line too long
             out)
+
+    def test_relink(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file1 = os.path.join(temp_dir, "Clip-001.empty")
+            temp_file2 = os.path.join(temp_dir, "Clip-003.empty")
+            open(temp_file1, "w").write("A")
+            open(temp_file2, "w").write("B")
+
+            temp_url = pathlib.Path(temp_dir).as_uri()
+
+            sys.argv = [
+                'otiotool',
+                '-i', SIMPLE_CUT_PATH,
+                '--relink-by-name', temp_dir,
+                '--list-media'
+            ]
+            out, err = self.run_test()
+            self.assertIn(
+                ("TIMELINE: Figure 1 - Simple Cut List\n"
+                 f"    MEDIA: {temp_url}/Clip-001.empty\n"
+                 "    MEDIA: file:///folder/wind-up.mov\n"
+                 f"    MEDIA: {temp_url}/Clip-003.empty\n"
+                 "    MEDIA: file:///folder/credits.mov\n"),
+                out)
 
 
 OTIOToolTest_ShellOut = CreateShelloutTest(OTIOToolTest)

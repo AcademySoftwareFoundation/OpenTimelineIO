@@ -1717,8 +1717,9 @@ class AAFWriterTests(unittest.TestCase):
                     sequence = opgroup.segments[0]
                 self.assertTrue(isinstance(sequence, Sequence))
 
-                self.assertEqual(len(list(otio_track.find_children(shallow_search=True))),
-                                 len(sequence.components))
+                self.assertEqual(
+                    len(list(otio_track.find_children(shallow_search=True))),
+                    len(sequence.components))
                 for otio_child, aaf_component in zip(
                         otio_track.find_children(shallow_search=True),
                         sequence.components):

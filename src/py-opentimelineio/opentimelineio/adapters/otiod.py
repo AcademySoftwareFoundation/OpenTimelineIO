@@ -34,7 +34,7 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
     if not absolute_media_reference_paths:
         return result
 
-    for cl in result.all_clips():
+    for cl in result.find_clips():
         try:
             source_fpath = cl.media_reference.target_url
         except AttributeError:

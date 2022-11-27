@@ -18,7 +18,7 @@ main(int argc, char** argv)
     Tests tests;
 
     tests.add_test(
-        "test_children_if", [] {
+        "test_find_children", [] {
         using namespace otio;
         otio::SerializableObject::Retainer<otio::Clip> cl =
             new otio::Clip();
@@ -29,12 +29,12 @@ main(int argc, char** argv)
             new otio::Timeline();
         tl->tracks()->append_child(tr);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tl->children_if<otio::Clip>(&err);
+        auto result = tl->find_children<otio::Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });
     tests.add_test(
-        "test_children_if_search_range", [] {
+        "test_find_children_search_range", [] {
         using namespace otio;
         const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
         otio::SerializableObject::Retainer<otio::Clip> cl0 =
@@ -55,12 +55,12 @@ main(int argc, char** argv)
             new otio::Timeline();
         tl->tracks()->append_child(tr);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tl->children_if<otio::Clip>(&err, range);
+        auto result = tl->find_children<otio::Clip>(&err, range);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
     });
     tests.add_test(
-        "test_children_if_shallow_search", [] {
+        "test_find_children_shallow_search", [] {
         using namespace otio;
         otio::SerializableObject::Retainer<otio::Clip> cl =
             new otio::Clip();
@@ -71,9 +71,9 @@ main(int argc, char** argv)
             new otio::Timeline();
         tl->tracks()->append_child(tr);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tl->children_if<otio::Clip>(&err, nullopt, true);
+        auto result = tl->find_children<otio::Clip>(&err, nullopt, true);
         assertEqual(result.size(), 0);
-        result = tl->children_if<otio::Clip>(&err, nullopt, false);
+        result = tl->find_children<otio::Clip>(&err, nullopt, false);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });

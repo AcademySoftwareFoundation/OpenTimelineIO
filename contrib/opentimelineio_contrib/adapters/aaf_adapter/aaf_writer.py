@@ -147,7 +147,7 @@ def validate_metadata(timeline):
     all_checks = [__check(timeline, "duration().rate")]
     edit_rate = __check(timeline, "duration().rate").value
 
-    for child in timeline.all_children():
+    for child in timeline.find_children():
         checks = []
         if _is_considered_gap(child):
             checks = [
@@ -227,7 +227,7 @@ def _gather_clip_mob_ids(input_otio,
 
     clip_mob_ids = {}
 
-    for otio_clip in input_otio.all_clips():
+    for otio_clip in input_otio.find_clips():
         if _is_considered_gap(otio_clip):
             continue
         for strategy in strategies:
@@ -249,7 +249,7 @@ def _stackify_nested_groups(timeline):
     """
     copied = copy.deepcopy(timeline)
     for track in copied.tracks:
-        for i, child in enumerate(track.all_children()):
+        for i, child in enumerate(track.find_children()):
             is_nested = isinstance(child, otio.schema.Track)
             is_parent_in_stack = isinstance(child.parent(), otio.schema.Stack)
             if is_nested and not is_parent_in_stack:
@@ -282,7 +282,7 @@ class _TrackTranscriber:
         self.compositionmob = root_file_transcriber.compositionmob
         self.aaf_file = root_file_transcriber.aaf_file
         self.otio_track = otio_track
-        self.edit_rate = self.otio_track.all_children()[0].duration().rate
+        self.edit_rate = self.otio_track.find_children()[0].duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
         self.timeline_mobslot.name = self.otio_track.name
 

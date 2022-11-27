@@ -457,7 +457,7 @@ class Track(QtWidgets.QGraphicsRectItem):
         self._populate()
 
     def _populate(self):
-        track_map = self.track.range_of_all_children()
+        track_map = self.track.range_of_find_children()
         track_name_rect = QtCore.QRectF(
             0,
             0,

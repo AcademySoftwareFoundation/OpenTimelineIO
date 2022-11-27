@@ -52,34 +52,26 @@ public:
 
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    // Return child clips.
+    // Find child clips.
     //
     // An optional search_range may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into children.
-    std::vector<Retainer<Clip>> clip_if(
+    // The search is recursive unless shallow_search is set to true.
+    std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Return all child clips recursively.
-    std::vector<Retainer<Clip>> all_clips(
-        ErrorStatus* error_status = nullptr) const;
-
-    // Return child objects that match the given template type.
+    // Find child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into children.
+    // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> children_if(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
-
-    // Return all child objects recursively.
-    std::vector<Retainer<Composable>> all_children(
-        ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~SerializableCollection();
@@ -93,7 +85,7 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-SerializableCollection::children_if(
+SerializableCollection::find_children(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
@@ -115,7 +107,7 @@ SerializableCollection::children_if(
                     dynamic_cast<SerializableCollection*>(child.value))
             {
                 const auto valid_children =
-                    collection->children_if<T>(error_status, search_range);
+                    collection->find_children<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;
@@ -128,7 +120,7 @@ SerializableCollection::children_if(
             else if (auto composition = dynamic_cast<Composition*>(child.value))
             {
                 const auto valid_children =
-                    composition->children_if<T>(error_status, search_range);
+                    composition->find_children<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;
@@ -141,7 +133,7 @@ SerializableCollection::children_if(
             else if (auto timeline = dynamic_cast<Timeline*>(child.value))
             {
                 const auto valid_children =
-                    timeline->children_if<T>(error_status, search_range);
+                    timeline->find_children<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;
@@ -154,12 +146,6 @@ SerializableCollection::children_if(
         }
     }
     return out;
-}
-
-inline std::vector<SerializableObject::Retainer<Composable>>
-SerializableCollection::all_children(ErrorStatus* error_status) const
-{
-    return children_if(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

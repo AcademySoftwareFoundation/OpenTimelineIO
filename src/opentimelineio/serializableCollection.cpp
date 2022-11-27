@@ -105,18 +105,12 @@ SerializableCollection::write_to(Writer& writer) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-SerializableCollection::clip_if(
+SerializableCollection::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return children_if<Clip>(error_status, search_range, shallow_search);
-}
-
-std::vector<SerializableObject::Retainer<Clip>>
-SerializableCollection::all_clips(ErrorStatus* error_status) const
-{
-    return clip_if(error_status);
+    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

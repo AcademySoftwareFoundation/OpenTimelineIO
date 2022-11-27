@@ -30,9 +30,9 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual([i for i in co], [it])
         self.assertEqual(len(co), 1)
 
-        self.assertEqual(list(co.all_children()), [it])
+        self.assertEqual(list(co.find_children()), [it])
         self.assertEqual(
-            list(co.children_if(descended_from_type=otio.schema.Clip)),
+            list(co.find_children(descended_from_type=otio.schema.Clip)),
             []
         )
 
@@ -124,7 +124,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         co2.append(it)
         self.assertIs(it.parent(), co2)
 
-    def test_children_if_recursion(self):
+    def test_find_children_recursion(self):
         tl = otio.schema.Timeline(name="TL")
 
         tr1 = otio.schema.Track(name="tr1")
@@ -160,13 +160,13 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(2, len(st))
         self.assertEqual(2, len(tr3))
 
-        clips = list(tl.all_clips())
+        clips = list(tl.find_clips())
         self.assertListEqual(
             [c1, c2, c3, c4, c5, c6, c7, c8],
             clips
         )
 
-        all_tracks = list(tl.children_if(
+        all_tracks = list(tl.find_children(
             descended_from_type=otio.schema.Track
         ))
         self.assertListEqual(
@@ -174,7 +174,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             all_tracks
         )
 
-        all_stacks = list(tl.children_if(
+        all_stacks = list(tl.find_children(
             descended_from_type=otio.schema.Stack
         ))
         self.assertListEqual(
@@ -182,13 +182,13 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             all_stacks
         )
 
-        all_children = list(tl.all_children())
+        all_children = list(tl.find_children())
         self.assertListEqual(
             [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
             all_children
         )
 
-    def test_children_if_options(self):
+    def test_find_children_options(self):
         tl = otio.schema.Timeline(name="tl")
         tr = otio.schema.Track(name="tr")
         tl.tracks.append(tr)
@@ -229,7 +229,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [c1],
             list(
-                tr.children_if(
+                tr.find_children(
                     search_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(value=0, rate=24),
                         duration=otio.opentime.RationalTime(value=50, rate=24)
@@ -240,7 +240,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [c2],
             list(
-                tr.children_if(
+                tr.find_children(
                     search_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(value=50, rate=24),
                         duration=otio.opentime.RationalTime(value=50, rate=24)
@@ -251,7 +251,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [c1, c2],
             list(
-                tr.children_if(
+                tr.find_children(
                     search_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(value=0, rate=24),
                         duration=otio.opentime.RationalTime(value=100, rate=24)
@@ -262,7 +262,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [c1, c2, st, c3],
             list(
-                tr.children_if(
+                tr.find_children(
                     search_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(value=25, rate=24),
                         duration=otio.opentime.RationalTime(value=100, rate=24)
@@ -274,18 +274,18 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # Test descended from type
         self.assertListEqual(
             [c1, c2, c3],
-            list(tl.children_if(descended_from_type=otio.schema.Clip))
+            list(tl.find_children(descended_from_type=otio.schema.Clip))
         )
         self.assertListEqual(
             [st],
-            list(tl.children_if(descended_from_type=otio.schema.Stack))
+            list(tl.find_children(descended_from_type=otio.schema.Stack))
         )
 
         # Test shallow search
         self.assertListEqual(
             [c1, c2],
             list(
-                tr.children_if(
+                tr.find_children(
                     descended_from_type=otio.schema.Clip,
                     shallow_search=True
                 )
@@ -1369,11 +1369,11 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertListEqual(
             [
                 outer_track.range_of_child(clip)
-                for clip in outer_track.all_clips()
+                for clip in outer_track.find_clips()
             ],
             [
                 long_track.range_of_child(clip)
-                for clip in long_track.all_clips()
+                for clip in long_track.find_clips()
             ]
         )
 
@@ -1456,7 +1456,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(-1, 24)
                     )
@@ -1466,7 +1466,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(0, 24)
                     )
@@ -1476,7 +1476,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(49, 24)
                     )
@@ -1486,7 +1486,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(50, 24)
                     )
@@ -1496,7 +1496,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(99, 24)
                     )
@@ -1506,7 +1506,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(100, 24)
                     )
@@ -1516,7 +1516,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(149, 24)
                     )
@@ -1526,7 +1526,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(
             list(
-                sq.clip_if(
+                sq.find_clips(
                     otio.opentime.TimeRange(
                         otio.opentime.RationalTime(150, 24)
                     )
@@ -1693,7 +1693,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         mp = tr.range_of_all_children()
 
         # fetch all the valid children that should be in the map
-        vc = list(tr.all_clips())
+        vc = list(tr.find_clips())
 
         self.assertEqual(mp[vc[0]].start_time.value, 0)
         self.assertEqual(mp[vc[1]].start_time, mp[vc[0]].duration)
@@ -1757,7 +1757,7 @@ class EdgeCases(unittest.TestCase):
 
         # test recursive iteration
         previous = None
-        for item in track.all_clips():
+        for item in track.find_clips():
             self.assertEqual(
                 track.range_of_child(item),
                 item.range_in_parent()
@@ -1787,7 +1787,7 @@ class EdgeCases(unittest.TestCase):
 
         # compare recursive to iteration by index
         previous = None
-        for i, item in enumerate(track.all_clips()):
+        for i, item in enumerate(track.find_clips()):
             self.assertEqual(
                 track.range_of_child(item),
                 track.range_of_child_at_index(i)
@@ -2105,13 +2105,13 @@ class NestingTest(unittest.TestCase):
                 "got {}".format(playhead, expected_val, measured_val)
             )
 
-            # then test clip_if
+            # then test find_clips
             search_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(frame, 24),
                 # with a 0 duration, should have the same result as above
             )
 
-            item = list(sq.clip_if(search_range))[0]
+            item = list(sq.find_clips(search_range))[0]
             mediaframe = sq.transformed_time(playhead, item)
 
             measured_val = (item.name, otio.opentime.to_frames(mediaframe, 24))

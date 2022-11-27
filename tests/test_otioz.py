@@ -43,7 +43,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # convert to contrived local reference
         last_rel = False
-        for cl in tl.all_clips():
+        for cl in tl.find_clips():
             # vary the relative and absolute paths, make sure that both work
             next_rel = (
                 MEDIA_EXAMPLE_PATH_URL_REL
@@ -74,7 +74,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
         with tempfile.NamedTemporaryFile() as bogusfile:
             fname = bogusfile.name
-        for cl in self.tl.all_clips():
+        for cl in self.tl.find_clips():
             # write with a non-file schema
             cl.media_reference = otio.schema.ExternalReference(
                 target_url=f"http://{fname}"
@@ -82,7 +82,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
 
-        for cl in self.tl.all_clips():
+        for cl in self.tl.find_clips():
             cl.media_reference = otio.schema.ExternalReference(
                 target_url=otio.url_utils.url_from_filepath(fname)
             )
@@ -92,7 +92,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tempdir = tempfile.mkdtemp()
         fname = tempdir
         shutil.rmtree(tempdir)
-        for cl in self.tl.all_clips():
+        for cl in self.tl.find_clips():
             cl.media_reference = otio.schema.ExternalReference(target_url=fname)
 
     def test_colliding_basename(self):
@@ -105,7 +105,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             MEDIA_EXAMPLE_PATH_ABS,
             new_path
         )
-        list(self.tl.all_clips())[0].media_reference.target_url = (
+        list(self.tl.find_clips())[0].media_reference.target_url = (
             otio.url_utils.url_from_filepath(new_path)
         )
 
@@ -126,7 +126,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         result = otio.adapters.read_from_file(tmp_path)
 
-        for cl in result.all_clips():
+        for cl in result.find_clips():
             self.assertNotIn(
                 cl.media_reference.target_url,
                 [MEDIA_EXAMPLE_PATH_URL_ABS, MEDIA_EXAMPLE_PATH_URL_REL]
@@ -142,7 +142,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
         # conform media references in input to what they should be in the output
-        for cl in self.tl.all_clips():
+        for cl in self.tl.find_clips():
             # should be only field that changed
             cl.media_reference.target_url = "media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
@@ -163,14 +163,14 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         # make sure that all the references are ExternalReference
-        for cl in result.all_clips():
+        for cl in result.find_clips():
             self.assertIsInstance(
                 cl.media_reference,
                 otio.schema.ExternalReference
             )
 
         # conform media references in input to what they should be in the output
-        for cl in self.tl.all_clips():
+        for cl in self.tl.find_clips():
             # should be only field that changed
             cl.media_reference.target_url = "media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
@@ -238,7 +238,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
         # conform media references in input to what they should be in the output
-        for cl in result.all_clips():
+        for cl in result.find_clips():
             # should be all MissingReferences
             self.assertIsInstance(
                 cl.media_reference,

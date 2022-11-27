@@ -36,9 +36,9 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(cl, decoded)
 
-    def test_clip_if(self):
+    def test_find_clips(self):
         cl = otio.schema.Clip(name="test_clip")
-        self.assertEqual(list(cl.clip_if()), [cl])
+        self.assertEqual(list(cl.find_clips()), [cl])
 
     def test_str(self):
         cl = otio.schema.Clip(name="test_clip")

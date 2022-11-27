@@ -114,18 +114,12 @@ Stack::available_range(ErrorStatus* error_status) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Stack::clip_if(
+Stack::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return children_if<Clip>(error_status, search_range, shallow_search);
-}
-
-std::vector<SerializableObject::Retainer<Clip>>
-Stack::all_clips(ErrorStatus* error_status) const
-{
-    return clip_if(error_status);
+    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 optional<Imath::Box2d>
@@ -133,7 +127,7 @@ Stack::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<Imath::Box2d> box;
     bool                   found_first_child = false;
-    for (auto clip: children_if<Clip>(error_status))
+    for (auto clip: find_children<Clip>(error_status))
     {
         optional<Imath::Box2d> child_box;
         if (auto clip_box = clip->available_image_bounds(error_status))

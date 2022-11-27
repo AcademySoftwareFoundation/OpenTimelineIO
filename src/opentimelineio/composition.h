@@ -101,20 +101,16 @@ public:
         TimeRange const& search_range,
         ErrorStatus*     error_status = nullptr) const;
 
-    // Return child objects that match the given template type.
+    // Find child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into children.
+    // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> children_if(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
-
-    // Return all child objects recursively.
-    std::vector<Retainer<Composable>> all_children(
-        ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~Composition();
@@ -175,7 +171,7 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-Composition::children_if(
+Composition::find_children(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
@@ -221,7 +217,7 @@ Composition::children_if(
                     }
                 }
 
-                const auto valid_children = composition->children_if<T>(
+                const auto valid_children = composition->find_children<T>(
                     error_status,
                     search_range,
                     shallow_search);
@@ -237,12 +233,6 @@ Composition::children_if(
         }
     }
     return out;
-}
-
-inline std::vector<SerializableObject::Retainer<Composable>>
-Composition::all_children(ErrorStatus* error_status) const
-{
-    return children_if(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

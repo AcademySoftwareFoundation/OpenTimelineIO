@@ -62,32 +62,26 @@ public:
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
 
-    // Return child clips.
+    // Find child clips.
     //
     // An optional search_range may be provided to limit the search.
-    std::vector<Retainer<Clip>> clip_if(
+    //
+    // The search is recursive unless shallow_search is set to true.
+    std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Return all child clips recursively.
-    std::vector<Retainer<Clip>> all_clips(
-        ErrorStatus* error_status = nullptr) const;
-
-    // Return child objects that match the given template type.
+    // Find child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into children.
+    // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> children_if(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
-
-    // Return all child objects recursively.
-    std::vector<Retainer<Composable>> all_children(
-        ErrorStatus* error_status = nullptr) const;
 
     optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const
@@ -108,21 +102,15 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-Timeline::children_if(
+Timeline::find_children(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
 {
-    return _tracks.value->children_if<T>(
+    return _tracks.value->find_children<T>(
         error_status,
         search_range,
         shallow_search);
-}
-
-inline std::vector<SerializableObject::Retainer<Composable>>
-Timeline::all_children(ErrorStatus* error_status) const
-{
-    return children_if(error_status);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

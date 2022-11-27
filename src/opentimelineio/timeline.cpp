@@ -75,18 +75,12 @@ Timeline::audio_tracks() const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Timeline::clip_if(
+Timeline::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return _tracks.value->clip_if(error_status, search_range, shallow_search);
-}
-
-std::vector<SerializableObject::Retainer<Clip>>
-Timeline::all_clips(ErrorStatus* error_status) const
-{
-    return clip_if(error_status);
+    return _tracks.value->find_clips(error_status, search_range, shallow_search);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -288,18 +288,12 @@ Track::range_of_all_children(ErrorStatus* error_status) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Track::clip_if(
+Track::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return children_if<Clip>(error_status, search_range, shallow_search);
-}
-
-std::vector<SerializableObject::Retainer<Clip>>
-Track::all_clips(ErrorStatus* error_status) const
-{
-    return clip_if(error_status);
+    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 optional<Imath::Box2d>

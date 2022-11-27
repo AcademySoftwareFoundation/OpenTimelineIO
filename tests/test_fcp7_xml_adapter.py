@@ -1310,7 +1310,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         # serialization (things like unique ids minted by the adapter)
         # Since we seeded metadata for the generator, keep that metadata
         del new_timeline.metadata["fcp_xml"]
-        for child in new_timeline.tracks.all_children():
+        for child in new_timeline.tracks.find_children():
             try:
                 del child.metadata["fcp_xml"]
             except KeyError:
@@ -1356,7 +1356,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     except AttributeError:
                         pass
 
-            for child in timeline.tracks.all_children():
+            for child in timeline.tracks.find_children():
                 scrub_displayformat(child.metadata)
                 try:
                     scrub_displayformat(child.media_reference.metadata)
@@ -1386,7 +1386,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertTrue(len(timeline.tracks), 1)
         self.assertTrue(timeline.tracks[0].name == 'Video 1')
 
-        clips = [c for c in timeline.tracks[0].all_clips()]
+        clips = [c for c in timeline.tracks[0].find_clips()]
         self.assertTrue(len(clips), 2)
 
         self.assertTrue(clips[0].name == 'A160C005_171213_R0MN')

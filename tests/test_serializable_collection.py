@@ -37,7 +37,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             children=[self.sc]
         )
 
-        self.assertEqual(len(list(sc.all_clips())), 1)
+        self.assertEqual(len(list(sc.find_clips())), 1)
 
         # test deleting an item
         tmp = self.sc[0]
@@ -74,7 +74,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             ")"
         )
 
-    def test_children_if(self):
+    def test_find_children(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()
         tr.append(cl)
@@ -82,11 +82,11 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tl.tracks.append(tr)
         sc = otio.schema.SerializableCollection()
         sc.append(tl)
-        result = sc.children_if(otio.schema.Clip)
+        result = sc.find_children(otio.schema.Clip)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl)
 
-    def test_children_if_search_range(self):
+    def test_find_children_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
             otio.opentime.RationalTime(24.0, 24.0))
@@ -104,11 +104,11 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tl.tracks.append(tr)
         sc = otio.schema.SerializableCollection()
         sc.append(tl)
-        result = sc.children_if(otio.schema.Clip, range)
+        result = sc.find_children(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl0)
 
-    def test_children_if_shallow_search(self):
+    def test_find_children_shallow_search(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()
         tr.append(cl)
@@ -116,9 +116,9 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tl.tracks.append(tr)
         sc = otio.schema.SerializableCollection()
         sc.append(tl)
-        result = sc.children_if(otio.schema.Clip, shallow_search=True)
+        result = sc.find_children(otio.schema.Clip, shallow_search=True)
         self.assertEqual(len(result), 0)
-        result = sc.children_if(otio.schema.Clip, shallow_search=False)
+        result = sc.find_children(otio.schema.Clip, shallow_search=False)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl)
 

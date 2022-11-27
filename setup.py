@@ -361,6 +361,7 @@ setup(
 
     install_requires=[
         'pyaaf2>=1.4,<1.7',
+        'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={
         'console_scripts': [

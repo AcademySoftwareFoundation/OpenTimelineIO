@@ -64,9 +64,16 @@ channel_map = {
 # the comment string for the media reference:
 #   'avid': '* FROM CLIP:' (default)
 #   'nucoda': '* FROM FILE:'
+#   'premiere': None (If Adobe Premiere imports an EDL that uses
+#                     a "FROM" comment will result in the clips
+#                     being named UNKNOWN instead of using the reel or file name)
 # When adding a new style, please be sure to add sufficient tests
 # to verify both the new and existing styles.
-VALID_EDL_STYLES = ['avid', 'nucoda']
+VALID_EDL_STYLES = {
+    'avid': 'CLIP',
+    'nucoda': 'FILE',
+    'premiere': None,
+}
 
 
 def _extend_source_range_duration(obj, duration):
@@ -719,6 +726,7 @@ class CommentHandler:
         ('ASC_SAT', 'asc_sat'),
         ('M2', 'motion_effect'),
         ('\\* FREEZE FRAME', 'freeze_frame'),
+        ('\\* OTIO REFERENCE [a-zA-Z]+', 'media_reference'),
     ])
 
     def __init__(self, comments):
@@ -972,7 +980,13 @@ class Event:
         reelname_len
     ):
 
-        line = EventLine(kind, rate, reel=_reel_from_clip(clip, reelname_len))
+        # Premiere style uses AX for the reel name
+        if style == 'premiere':
+            reel = 'AX'
+        else:
+            reel = _reel_from_clip(clip, reelname_len)
+
+        line = EventLine(kind, rate, reel=reel)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
@@ -1212,6 +1226,10 @@ def _generate_comment_lines(
         elif hasattr(clip.media_reference, 'abstract_target_url'):
             url = _get_image_sequence_url(clip)
 
+        if url:
+            # Premiere style uses the base name of the media reference
+            if style == 'premiere':
+                clip.name = os.path.basename(clip.media_reference.target_url)
     else:
         url = clip.name
 
@@ -1240,27 +1258,36 @@ def _generate_comment_lines(
         lines.append(
             "* {from_or_to} CLIP NAME:  {name}{suffix}".format(
                 from_or_to=from_or_to,
-                name=clip.name,
+                name=os.path.basename(url) if style == 'premiere' else clip.name,
                 suffix=suffix
             )
         )
     if timing_effect and timing_effect.effect_name == "FreezeFrame":
         lines.append('* * FREEZE FRAME')
-    if url and style == 'avid':
-        lines.append("* {from_or_to} CLIP: {url}".format(
-            from_or_to=from_or_to,
-            url=url
-        ))
-    if url and style == 'nucoda':
-        lines.append("* {from_or_to} FILE: {url}".format(
-            from_or_to=from_or_to,
-            url=url
-        ))
+
+    # If the style has a spec, apply it and add it as a comment
+    style_spec = VALID_EDL_STYLES.get(style)
+    if url:
+        if style_spec:
+            lines.append("* {from_or_to} {style_spec}: {url}".format(
+                from_or_to=from_or_to,
+                style_spec=style_spec,
+                url=_flip_windows_slashes(url)
+            ))
+        else:
+            lines.append("* OTIO REFERENCE {from_or_to}: {url}".format(
+                from_or_to=from_or_to,
+                url=_flip_windows_slashes(url)
+            ))
 
     if reelname_len and not clip.metadata.get('cmx_3600', {}).get('reel'):
         lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
             url=os.path.basename(_flip_windows_slashes(url or clip.name))
         ))
+
+    if style == 'premiere':
+        clip.metadata.setdefault('cmx_3600', {})
+        clip.metadata['cmx_3600'].update({'reel': 'AX'})
 
     cdl = clip.metadata.get('cdl')
     if cdl:

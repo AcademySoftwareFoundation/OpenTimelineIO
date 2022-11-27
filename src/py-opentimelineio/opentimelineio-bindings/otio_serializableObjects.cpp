@@ -883,7 +883,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
 )docstring");
 
     py::enum_<ImageSequenceReference::MissingFramePolicy>(imagesequencereference_class, "MissingFramePolicy", "Behavior that should be used by applications when an image file in the sequence can't be found on disk.")
-        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Application should abort and raise an error.")
+        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Application should stop and raise an error.")
         .value("hold", ImageSequenceReference::MissingFramePolicy::hold, "Application should hold the last available frame before the missing frame.")
         .value("black", ImageSequenceReference::MissingFramePolicy::black, "Application should use a black frame in place of the missing frame");
 

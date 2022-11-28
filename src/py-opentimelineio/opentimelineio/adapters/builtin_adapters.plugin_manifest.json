@@ -27,12 +27,6 @@
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "cmx_3600",
-            "filepath" : "cmx_3600.py",
-            "suffixes" : ["edl"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "svg",
             "filepath" : "svg.py",
             "suffixes" : ["svg"]

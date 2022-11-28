@@ -3,9 +3,9 @@
     "adapters": [
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "cmx_3600",
+            "name" : "otio_json",
             "filepath" : "adapter.py",
-            "suffixes" : ["edl"]
+            "suffixes" : ["otio"]
         }
     ]
 }

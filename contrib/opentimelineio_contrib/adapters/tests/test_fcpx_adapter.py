@@ -43,9 +43,8 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_library_roundtrip(self):
         container = otio.adapters.read_from_file(SAMPLE_LIBRARY_XML)
-        timeline = next(
-            container.each_child(descended_from_type=otio.schema.Timeline)
-        )
+        timeline = container.find_children(
+            descended_from_type=otio.schema.Timeline)[0]
 
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 4)
@@ -81,9 +80,8 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_event_roundtrip(self):
         container = otio.adapters.read_from_file(SAMPLE_EVENT_XML)
-        timeline = next(
-            container.each_child(descended_from_type=otio.schema.Timeline)
-        )
+        timeline = container.find_children(
+            descended_from_type=otio.schema.Timeline)[0]
 
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 4)

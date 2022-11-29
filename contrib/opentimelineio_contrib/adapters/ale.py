@@ -252,7 +252,7 @@ def read_from_string(input_str, fps=24, **adapter_argument_map):
 def write_to_string(input_otio, columns=None, fps=None, video_format=None):
 
     # Get all the clips we're going to export
-    clips = list(input_otio.each_clip())
+    clips = list(input_otio.find_clips())
 
     result = ""
 

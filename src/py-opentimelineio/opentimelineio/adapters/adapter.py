@@ -346,13 +346,13 @@ def _with_linked_media_references(
     if not read_otio or not media_linker.from_name(media_linker_name):
         return read_otio
 
-    # not every object the adapter reads has an "each_clip" method, so this
+    # not every object the adapter reads has an "find_clips" method, so this
     # skips objects without one.
-    clpfn = getattr(read_otio, "each_clip", None)
+    clpfn = getattr(read_otio, "find_clips", None)
     if clpfn is None:
         return read_otio
 
-    for cl in read_otio.each_clip():
+    for cl in read_otio.find_clips():
         new_mr = media_linker.linked_media_reference(
             cl,
             media_linker_name,

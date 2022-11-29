@@ -21,7 +21,7 @@ def build_burnins(input_otio):
     key = 'burnins'
 
     burnins = []
-    for clip in input_otio.each_clip():
+    for clip in input_otio.find_clips():
 
         # per clip burnin data
         burnin_data = clip.media_reference.metadata.get(key)

@@ -90,7 +90,7 @@ def _deepest_nesting(input):
 
 @stat_check("number of clips")
 def _num_clips(input):
-    return len(list(input.each_clip()))
+    return len(list(input.find_clips()))
 
 
 @stat_check("total duration")
@@ -120,7 +120,7 @@ def _top_level_rate(input):
 
 @stat_check("clips with cdl data")
 def _clips_with_cdl_data(input):
-    return len(list(c for c in input.each_clip() if 'cdl' in c.metadata))
+    return len(list(c for c in input.find_clips() if 'cdl' in c.metadata))
 
 
 @stat_check("Tracks with non standard types")
@@ -128,7 +128,7 @@ def _sequences_with_non_standard_types(input):
     return len(
         list(
             c
-            for c in input.each_child(descended_from_type=otio.schema.Track)
+            for c in input.find_children(descended_from_type=otio.schema.Track)
             if c.kind not in (otio.schema.TrackKind.__dict__)
         )
     )

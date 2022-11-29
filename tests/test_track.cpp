@@ -18,7 +18,7 @@ main(int argc, char** argv)
     Tests tests;
 
     tests.add_test(
-        "test_children_if", [] {
+        "test_find_children", [] {
         using namespace otio;
         otio::SerializableObject::Retainer<otio::Clip> cl =
             new otio::Clip();
@@ -26,12 +26,12 @@ main(int argc, char** argv)
             new otio::Track();
         tr->append_child(cl);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tr->children_if<otio::Clip>(&err);
+        auto result = tr->find_children<otio::Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });
     tests.add_test(
-        "test_children_if_search_range", [] {
+        "test_find_children_search_range", [] {
         using namespace otio;
         const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
         otio::SerializableObject::Retainer<otio::Clip> cl0 =
@@ -49,34 +49,34 @@ main(int argc, char** argv)
         tr->append_child(cl1);
         tr->append_child(cl2);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tr->children_if<otio::Clip>(
+        auto result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->children_if<otio::Clip>(
+        result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(24.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl1.value);
-        result = tr->children_if<otio::Clip>(
+        result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(48.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl2.value);
-        result = tr->children_if<otio::Clip>(
+        result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(48.0, 24.0)));
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);
-        result = tr->children_if<otio::Clip>(
+        result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(24.0, 24.0), RationalTime(48.0, 24.0)));
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl1.value);
         assertEqual(result[1].value, cl2.value);
-        result = tr->children_if<otio::Clip>(
+        result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(72.0, 24.0)));
         assertEqual(result.size(), 3);
@@ -85,7 +85,7 @@ main(int argc, char** argv)
         assertEqual(result[2].value, cl2.value);
     });
     tests.add_test(
-        "test_children_if_shallow_search", [] {
+        "test_find_children_shallow_search", [] {
         using namespace otio;
         otio::SerializableObject::Retainer<otio::Clip> cl0 =
             new otio::Clip();
@@ -99,10 +99,10 @@ main(int argc, char** argv)
         tr->append_child(cl0);
         tr->append_child(st);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tr->children_if<otio::Clip>(&err, nullopt, true);
+        auto result = tr->find_children<otio::Clip>(&err, nullopt, true);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->children_if<otio::Clip>(&err, nullopt, false);
+        result = tr->find_children<otio::Clip>(&err, nullopt, false);
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);

@@ -1316,7 +1316,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertMultiLineEqual(result, expected)
 
         # Disable first clip in the track
-        tl.tracks[0].children_if()[0].enabled = False
+        tl.tracks[0].find_children()[0].enabled = False
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         expected = r'''TITLE: enable_test
 

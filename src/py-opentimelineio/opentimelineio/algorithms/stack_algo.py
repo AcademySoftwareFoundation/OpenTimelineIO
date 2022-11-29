@@ -37,7 +37,7 @@ def top_clip_at_time(in_stack, t):
             )
         )
 
-    # build a range to use the `each_child`method.
+    # build a range to use the `find_clips`method.
     search_range = opentime.TimeRange(
         start_time=t,
         # 0 duration so we are just sampling a point in time.
@@ -49,9 +49,9 @@ def top_clip_at_time(in_stack, t):
     # walk through the children of the stack in reverse order.
     for track in reversed(in_stack):
         valid_results = []
-        if hasattr(track, "each_child"):
+        if hasattr(track, "find_clips"):
             valid_results = list(
-                c for c in track.each_clip(search_range, shallow_search=True)
+                c for c in track.find_clips(search_range, shallow_search=True)
                 if c.visible()
             )
 

@@ -1208,11 +1208,11 @@ def _attach_markers(collection):
 
     """
     # iterate all timeline objects
-    for timeline in collection.each_child(descended_from_type=otio.schema.Timeline):
+    for timeline in collection.find_children(descended_from_type=otio.schema.Timeline):
         tracks_map = {}
 
         # build track mapping
-        for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        for track in timeline.find_children(descended_from_type=otio.schema.Track):
             metadata = track.metadata.get("AAF", {})
             slot_id = metadata.get("SlotID")
             track_number = metadata.get("PhysicalTrackNumber")
@@ -1222,7 +1222,8 @@ def _attach_markers(collection):
             tracks_map[(int(slot_id), int(track_number))] = track
 
         # iterate all tracks for their markers and attach them to the matching item
-        for current_track in timeline.each_child(descended_from_type=otio.schema.Track):
+        for current_track in timeline.find_children(
+                descended_from_type=otio.schema.Track):
             for marker in list(current_track.markers):
                 metadata = marker.metadata.get("AAF", {})
                 slot_id = metadata.get("AttachedSlotID")

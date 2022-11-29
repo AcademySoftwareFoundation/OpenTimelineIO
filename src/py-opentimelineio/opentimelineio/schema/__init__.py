@@ -44,14 +44,10 @@ from . import (
     image_sequence_reference,
     marker,
     serializable_collection,
-    stack,
     timeline,
-    track,
     transition,
     v2d,
 )
-
-track.TrackKind = TrackKind
 
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""

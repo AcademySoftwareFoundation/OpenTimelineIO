@@ -392,27 +392,27 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
-        self.assertEqual([cl, cl2, cl3], list(tl.each_clip()))
+        self.assertEqual([cl, cl2, cl3], list(tl.find_clips()))
 
         rt_start = otio.opentime.RationalTime(0, 24)
         rt_end = otio.opentime.RationalTime(1, 24)
         search_range = otio.opentime.TimeRange(rt_start, rt_end)
-        self.assertEqual([cl], list(tl.each_clip(search_range)))
+        self.assertEqual([cl], list(tl.find_clips(search_range)))
 
         # check to see if full range works
         search_range = tl.tracks.trimmed_range()
-        self.assertEqual([cl, cl2, cl3], list(tl.each_clip(search_range)))
+        self.assertEqual([cl, cl2, cl3], list(tl.find_clips(search_range)))
 
         # just one clip
         search_range = cl2.range_in_parent()
-        self.assertEqual([cl2], list(tl.each_clip(search_range)))
+        self.assertEqual([cl2], list(tl.find_clips(search_range)))
 
         # the last two clips
         search_range = otio.opentime.TimeRange(
             start_time=cl2.range_in_parent().start_time,
             duration=cl2.trimmed_range().duration + rt_end
         )
-        self.assertEqual([cl2, cl3], list(tl.each_clip(search_range)))
+        self.assertEqual([cl2, cl3], list(tl.find_clips(search_range)))
 
         # no clips
         search_range = otio.opentime.TimeRange(
@@ -422,7 +422,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             ),
             duration=rt_end
         )
-        self.assertEqual([], list(tl.each_clip(search_range)))
+        self.assertEqual([], list(tl.find_clips(search_range)))
 
     def test_str(self):
         self.maxDiff = None
@@ -541,17 +541,17 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(tl.video_tracks()), 0)
         self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
 
-    def test_children_if(self):
+    def test_find_children(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()
         tr.append(cl)
         tl = otio.schema.Timeline()
         tl.tracks.append(tr)
-        result = tl.children_if(otio.schema.Clip)
+        result = tl.find_children(otio.schema.Clip)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl)
 
-    def test_children_if_search_range(self):
+    def test_find_children_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
             otio.opentime.RationalTime(24.0, 24.0))
@@ -567,19 +567,19 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tr.append(cl2)
         tl = otio.schema.Timeline()
         tl.tracks.append(tr)
-        result = tl.children_if(otio.schema.Clip, range)
+        result = tl.find_children(otio.schema.Clip, range)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl0)
 
-    def test_children_if_shallow_search(self):
+    def test_find_children_shallow_search(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()
         tr.append(cl)
         tl = otio.schema.Timeline()
         tl.tracks.append(tr)
-        result = tl.children_if(otio.schema.Clip, shallow_search=True)
+        result = tl.find_children(otio.schema.Clip, shallow_search=True)
         self.assertEqual(len(result), 0)
-        result = tl.children_if(otio.schema.Clip, shallow_search=False)
+        result = tl.find_children(otio.schema.Clip, shallow_search=False)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], cl)
 

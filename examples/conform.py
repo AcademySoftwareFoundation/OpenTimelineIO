@@ -99,7 +99,7 @@ def _conform_timeline(timeline, folder):
 
     count = 0
 
-    for clip in timeline.each_clip():
+    for clip in timeline.find_clips():
         # look for a media file that matches the clip's name
         new_path = _find_matching_media(clip.name, folder)
 
@@ -128,7 +128,7 @@ def main():
     print(
         "Saved {} with {} clips.".format(
             args.output,
-            len(list(timeline.each_clip()))
+            len(list(timeline.find_clips()))
         )
     )
 

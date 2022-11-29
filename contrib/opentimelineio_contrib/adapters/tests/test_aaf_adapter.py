@@ -242,7 +242,7 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(len(timeline.audio_tracks()), 2)
 
-        clips = list(video_track.find_clips())
+        clips = video_track.find_clips()
 
         self.assertEqual(
             [
@@ -322,7 +322,7 @@ class AAFReaderTests(unittest.TestCase):
             ]
         )
 
-        clips = list(video_track.find_clips())
+        clips = video_track.find_clips()
 
         self.assertEqual(
             [item.name for item in video_track],
@@ -426,7 +426,7 @@ class AAFReaderTests(unittest.TestCase):
         video_track = video_tracks[0]
         self.assertEqual(len(video_track), 12)
 
-        clips = list(video_track.find_clips())
+        clips = video_track.find_clips()
         self.assertEqual(len(clips), 4)
 
         self.assertEqual(
@@ -1621,8 +1621,8 @@ class AAFWriterTests(unittest.TestCase):
     def _verify_first_clip(self, original_timeline, aaf_path):
         timeline_from_aaf = otio.adapters.read_from_file(aaf_path)
 
-        original_clips = list(original_timeline.find_clips())
-        aaf_clips = list(timeline_from_aaf.find_clips())
+        original_clips = original_timeline.find_clips()
+        aaf_clips = timeline_from_aaf.find_clips()
 
         self.assertTrue(len(original_clips) > 0)
         self.assertEqual(len(aaf_clips), len(original_clips))
@@ -1718,7 +1718,7 @@ class AAFWriterTests(unittest.TestCase):
                 self.assertTrue(isinstance(sequence, Sequence))
 
                 self.assertEqual(
-                    len(list(otio_track.find_children(shallow_search=True))),
+                    len(otio_track.find_children(shallow_search=True)),
                     len(sequence.components))
                 for otio_child, aaf_component in zip(
                         otio_track.find_children(shallow_search=True),

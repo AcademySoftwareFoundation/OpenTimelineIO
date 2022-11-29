@@ -4,7 +4,7 @@
 """Base class for OTIO plugins that are exposed by manifests."""
 
 import os
-import imp
+import importlib.util
 import inspect
 import collections
 import copy
@@ -109,19 +109,28 @@ class PythonPlugin(core.SerializableObject):
 
         pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
         pydir = os.path.dirname(self.module_abs_path())
+        pypath = os.path.join(pydir, pyname)
 
-        (file_obj, pathname, description) = imp.find_module(pyname, [pydir])
+        (file_obj, pathname, description) = importlib.util.find_spec(pypath)
+        spec = importlib.util.spec_from_file_location(
+            f"opentimelineio.{namespace}.{self.name}",
+            self.module_abs_path()
+        )
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
 
-        with file_obj:
-            # this will reload the module if it has already been loaded.
-            mod = imp.load_module(
-                f"opentimelineio.{namespace}.{self.name}",
-                file_obj,
-                pathname,
-                description
-            )
+        return mod
 
-            return mod
+        # with file_obj:
+        #     # this will reload the module if it has already been loaded.
+        #     mod = imp.load_module(
+        #         f"opentimelineio.{namespace}.{self.name}",
+        #         file_obj,
+        #         pathname,
+        #         description
+        #     )
+        #
+        #     return mod
 
     def module(self):
         """Return the module object for this adapter. """

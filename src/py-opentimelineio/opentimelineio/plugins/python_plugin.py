@@ -112,6 +112,7 @@ class PythonPlugin(core.SerializableObject):
         pypath = os.path.join(pydir, pyname)
 
         (file_obj, pathname, description) = importlib.util.find_spec(pypath)
+        print(self.module_abs_path())
         spec = importlib.util.spec_from_file_location(
             f"opentimelineio.{namespace}.{self.name}",
             self.module_abs_path()

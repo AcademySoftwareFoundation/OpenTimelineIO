@@ -10,7 +10,7 @@ import unittest
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
 SETATTR_TO_CHECK = (".ef", ".sf", ".sn", ".se", ".ssf")
 

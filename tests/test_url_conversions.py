@@ -9,7 +9,7 @@ import os
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(
         os.path.dirname(__file__),

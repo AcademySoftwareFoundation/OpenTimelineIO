@@ -33,7 +33,7 @@ class BuildSimpleTimelineExampleTest(unittest.TestCase):
             known = otio.adapters.read_from_file(temp_file)
 
             # checks against a couple of the adapters
-            for suffix in [".xml", ".edl", ".otio"]:
+            for suffix in [".otiod", ".otioz", ".otio"]:
                 this_test_file = temp_file.replace(".otio", suffix)
                 subprocess.check_call(
                     [sys.executable, examples_path, this_test_file],

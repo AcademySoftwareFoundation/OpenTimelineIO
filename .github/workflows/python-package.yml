@@ -11,9 +11,9 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, extract_adapters ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, extract_adapters ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

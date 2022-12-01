@@ -3,9 +3,9 @@
     "adapters": [
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "otio_json",
+            "name" : "otiod",
             "filepath" : "adapter.py",
-            "suffixes" : ["otio"]
+            "suffixes" : ["otiod"]
         }
     ]
 }

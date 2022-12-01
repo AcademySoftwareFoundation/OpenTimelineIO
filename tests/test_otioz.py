@@ -16,7 +16,7 @@ import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
+SIMPLE_CUT_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(
         SAMPLE_DATA_DIR,
@@ -39,7 +39,7 @@ MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
 
 class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
-        tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        tl = otio.adapters.read_from_file(SIMPLE_CUT_PATH)
 
         # convert to contrived local reference
         last_rel = False

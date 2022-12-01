@@ -83,11 +83,11 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         # Test that entrypoint plugins load before builtin and contrib
         man = otio.plugins.manifest.load_manifest()
 
-        # The override_adapter creates another otio_json adapter
+        # The override_adapter creates another cmx_3600 adapter
         adapters = [adapter for adapter in man.adapters
-                    if adapter.name == "otio_json"]
+                    if adapter.name == "cmx_3600"]
 
-        # More then one otio_json adapter should exist.
+        # More then one cmx_3600 adapter should exist.
         self.assertTrue(len(adapters) > 1)
 
         # Override adapter should be the first adapter found

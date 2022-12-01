@@ -2,9 +2,9 @@ name: docs
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, extract_adapters ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, extract_adapters ]
 
 jobs:
   check-links:

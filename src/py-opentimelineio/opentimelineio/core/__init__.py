@@ -41,7 +41,12 @@ from .. _otio import ( # noqa
 Metadata: TypeAlias = Union[Dict[str, 'MetadataValue'], AnyDictionary]
 """OTIO custom metadata type."""
 
-MetadataValue: TypeAlias = Union[bool, int, float, str, None, SerializableObject, RationalTime, TimeRange, TimeTransform, Metadata]
+MetadataValue: TypeAlias = Union[
+    bool, int, float, str, None,
+    SerializableObject,
+    RationalTime, TimeRange, TimeTransform,
+    Metadata
+]
 """Metadata's values."""
 
 from . _core_utils import ( # noqa

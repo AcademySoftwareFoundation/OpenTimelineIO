@@ -157,10 +157,9 @@ static void set_type_record(SerializableObject* so, std::string schema_name) {
 }
 
 static SerializableObject* instance_from_schema(std::string schema_name,
-                                                int schema_version, py::object data) {
-    AnyDictionary object_data = py_to_any_dictionary(data);
+                                                int schema_version, AnyDictionaryProxy* data) {
     auto result = TypeRegistry::instance().instance_from_schema(schema_name, schema_version,
-                                                         object_data, ErrorStatusHandler());
+                                                         data->fetch_any_dictionary(), ErrorStatusHandler());
     return result;
 }
 

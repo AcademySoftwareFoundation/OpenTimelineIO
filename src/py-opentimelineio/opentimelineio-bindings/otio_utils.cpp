@@ -212,14 +212,6 @@ T py_to_cpp(py::handle const& o) {
     return o.cast<T>();
 }
 
-AnyDictionary py_to_any_dictionary(py::object const& o) {
-    if (o.is_none()) {
-        return AnyDictionary();
-    }
-
-    return safely_cast_any_dictionary_any(py_to_any(o));
-}
-
 py::object any_to_py(any const& a, bool top_level) {
     std::type_info const& tInfo = a.type();
     auto e = _py_cast_dispatch_table.find(&tInfo);

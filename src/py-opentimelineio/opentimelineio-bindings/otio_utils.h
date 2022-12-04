@@ -164,5 +164,3 @@ AnyDictionary py_to_cpp(pybind11::dict const& o);
 AnyVector py_to_cpp(pybind11::iterable const& o);
 template<typename T>
 T py_to_cpp(pybind11::handle const& o);
-
-AnyDictionary py_to_any_dictionary(pybind11::object const& o);

@@ -95,9 +95,6 @@ void _build_any_to_py_dispatch_table() {
     }
 }
 
-static py::object _value_to_any = py::none();
-
-// TODO: Missing RationalTime, TimeRange and TimeTransform
 any py_to_any(py::handle const& o) {
     if (o.ptr() == nullptr || o.is_none()) {
         return any(nullptr);
@@ -138,7 +135,6 @@ any py_to_any(py::handle const& o) {
     // Convert AnyDictionaryProxy and dict before vector and sequence because
     // a dict is a sequence.
     if (py::isinstance<AnyDictionaryProxy>(o)) {
-        // py::print("Converting AnyDictionaryProxy");
         return any(o.cast<AnyDictionaryProxy>().fetch_any_dictionary());
     }
 
@@ -147,12 +143,23 @@ any py_to_any(py::handle const& o) {
     }
 
     if (py::isinstance<AnyVectorProxy>(o)) {
-        // py::print("Converting AnyVectorProxy");
         return any(o.cast<AnyVectorProxy>().fetch_any_vector());
     }
 
     if (py::isinstance<py::sequence>(o)) {
         return any(py_to_cpp(py::cast<py::iterable>(o)));
+    }
+
+    if (py::isinstance<RationalTime>(o)) {
+        return any(py_to_cpp<RationalTime>(o));
+    }
+
+    if (py::isinstance<TimeRange>(o)) {
+        return any(py_to_cpp<TimeRange>(o));
+    }
+
+    if (py::isinstance<TimeTransform>(o)) {
+        return any(py_to_cpp<TimeTransform>(o));
     }
 
     py::type pytype = py::type::of(o);
@@ -177,7 +184,6 @@ std::string py_to_cpp(py::str const& o) {
 }
 
 AnyDictionary py_to_cpp(py::dict const& o) {
-    // py::print("Converting py::dict");
     AnyDictionary d = AnyDictionary();
 
     for (auto &it : o) {
@@ -194,12 +200,16 @@ AnyDictionary py_to_cpp(py::dict const& o) {
 }
 
 AnyVector py_to_cpp(py::iterable const& o) {
-    // py::print("Converting py::sequence");
     AnyVector av = AnyVector();
     for (auto &it : o) {
         av.push_back(py_to_any(it));
     }
     return av;
+}
+
+template<typename T>
+T py_to_cpp(py::handle const& o) {
+    return o.cast<T>();
 }
 
 AnyDictionary py_to_any_dictionary(py::object const& o) {

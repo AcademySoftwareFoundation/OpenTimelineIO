@@ -70,13 +70,14 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(so.metadata['string'], 'myvalue')
         self.assertEqual(so.metadata['int'], -999999999999)
         self.assertIsInstance(so.metadata['list'], opentimelineio._otio.AnyVector)
-        self.assertEqual(list(so.metadata['list']), [1, 2.5, 'asd'])  # AnyVector. Is this right?
+        self.assertEqual(so.metadata['list'], opentimelineio._otio.AnyVector([1, 2.5, 'asd']))
         self.assertIsInstance(so.metadata['dict'], opentimelineio._otio.AnyDictionary)
-        # self.assertEqual(so.metadata['dict'], opentimelineio._otio.AnyDictionary({'map1': [345]}))
+        self.assertIsInstance(so.metadata['dict']['map1'], opentimelineio._otio.AnyVector)
+        self.assertEqual(so.metadata['dict'], opentimelineio._otio.AnyDictionary({'map1': [345]}))
         self.assertIsInstance(so.metadata['AnyVector'], opentimelineio._otio.AnyVector)
-        # self.assertEqual(list(so.metadata['AnyVector']), opentimelineio._otio.AnyVector([1, 'inside any vector']))
+        self.assertEqual(list(so.metadata['AnyVector']), opentimelineio._otio.AnyVector([1, 'inside any vector']))
         self.assertIsInstance(so.metadata['AnyDictionary'], opentimelineio._otio.AnyDictionary)
-        self.assertEqual(dict(so.metadata['AnyDictionary']), {'key_1': 1234, 'key_2': {'asdasdasd': 5.6}})
+        self.assertEqual(so.metadata['AnyDictionary'], opentimelineio._otio.AnyDictionary({'key_1': 1234, 'key_2': {'asdasdasd': 5.6}}))
         self.assertEqual(so.metadata['RationalTime'], opentimelineio.opentime.RationalTime(value=10.0, rate=5.0))
         self.assertEqual(so.metadata['TimeRange'], opentimelineio.opentime.TimeRange(
             opentimelineio.opentime.RationalTime(value=1.0),

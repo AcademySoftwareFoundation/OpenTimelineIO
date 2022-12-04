@@ -100,10 +100,10 @@ class AnyVectorTests(unittest.TestCase):
         v.append(2)
         self.assertEqual(len(v), 2)
 
-        self.assertEqual([value for value in v], [1, 2])
+        self.assertEqual(v, [1, 2])
 
         v.insert(0, 5)
-        self.assertEqual([value for value in v], [5, 1, 2])
+        self.assertEqual(v, [5, 1, 2])
         self.assertEqual(v[0], 5)
         self.assertEqual(v[-3], 5)
 
@@ -124,13 +124,11 @@ class AnyVectorTests(unittest.TestCase):
 
         del v[0]
         self.assertEqual(len(v), 2)
-        # Doesn't work...
-        # assert v == [1, 100]
-        self.assertEqual([value for value in v], [1, 100])
+        self.assertEqual(v, [1, 100])
 
         del v[1000]  # This will surprisingly delete the last item...
         self.assertEqual(len(v), 1)
-        self.assertEqual([value for value in v], [1])
+        self.assertEqual(v, [1])
 
         # Will delete the last item even if the index doesn't match.
         # It's a surprising behavior.
@@ -144,7 +142,7 @@ class AnyVectorTests(unittest.TestCase):
             items.append(value)
 
         self.assertEqual(items, [1, '234', {}])
-        self.assertFalse(v == [1, '234', {}])  # __eq__ is not implemented
+        self.assertTrue(v == [1, '234', {}])
 
         self.assertTrue(1 in v)  # Test __contains__
         self.assertTrue('234' in v)
@@ -181,13 +179,13 @@ class AnyVectorTests(unittest.TestCase):
         self.assertEqual(v3[1:7:2], [1, 3, 5])
 
         del v3[2:7]
-        self.assertEqual(list(v3), [0, 1, 7, 8, 9])
+        self.assertEqual(v3, [0, 1, 7, 8, 9])
 
         v4 = opentimelineio.core._core_utils.AnyVector()
         v4.extend(range(10))
 
         del v4[::2]
-        self.assertEqual(list(v4), [1, 3, 5, 7, 9])
+        self.assertEqual(v4, [1, 3, 5, 7, 9])
 
         v5 = opentimelineio.core._core_utils.AnyVector()
         tmplist = [1, 2]
@@ -225,7 +223,7 @@ class AnyVectorTests(unittest.TestCase):
     def test_copy(self):
         list1 = [1, 2, [3, 4], 5]
         copied = copy.copy(list1)
-        self.assertEqual(list(list1), list(copied))
+        self.assertEqual(list1, copied)
 
         v = opentimelineio.core._core_utils.AnyVector()
         v.extend([1, 2, [3, 4], 5])

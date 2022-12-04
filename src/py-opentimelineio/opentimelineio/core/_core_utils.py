@@ -302,6 +302,41 @@ def _add_mutable_sequence_methods(
             if conversion_func else item
         )
 
+    def __le__(self, other):  # Taken from collections.abc.Set
+        if not isinstance(other, collections.abc.Sequence):
+            return NotImplemented
+        if len(self) > len(other):
+            return False
+        for elem in self:
+            if elem not in other:
+                return False
+        return True
+
+    def __lt__(self, other):  # Taken from collections.abc.Set
+        if not isinstance(other, collections.abc.Sequence):
+            return NotImplemented
+        return len(self) < len(other) and self.__le__(other)
+
+    def __gt__(self, other):  # Taken from collections.abc.Set
+        if not isinstance(other, collections.abc.Sequence):
+            return NotImplemented
+        return len(self) > len(other) and self.__ge__(other)
+
+    def __ge__(self, other):  # Taken from collections.abc.Set
+        if not isinstance(other, collections.abc.Sequence):
+            return NotImplemented
+        if len(self) < len(other):
+            return False
+        for elem in other:
+            if elem not in self:
+                return False
+        return True
+
+    def __eq__(self, other):  # Taken from collections.abc.Set
+        if not isinstance(other, collections.abc.Sequence):
+            return NotImplemented
+        return len(self) == len(other) and self.__le__(other)
+
     collections.abc.MutableSequence.register(sequenceClass)
     sequenceClass.__radd__ = __radd__
     sequenceClass.__add__ = __add__
@@ -311,6 +346,11 @@ def _add_mutable_sequence_methods(
     sequenceClass.insert = insert
     sequenceClass.__str__ = __str__
     sequenceClass.__repr__ = __repr__
+    sequenceClass.__le__ = __le__
+    sequenceClass.__lt__ = __lt__
+    sequenceClass.__gt__ = __gt__
+    sequenceClass.__ge__ = __ge__
+    sequenceClass.__eq__ = __eq__
 
     seen = set()
     for klass in (collections.abc.MutableSequence, collections.abc.Sequence):

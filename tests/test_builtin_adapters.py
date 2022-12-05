@@ -17,7 +17,7 @@ import tempfile
 
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 
 
 class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):

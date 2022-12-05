@@ -24,7 +24,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 
 MULTITRACK_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 SIMPLE_CUT_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
 TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition.otio")
 
@@ -122,7 +122,7 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
     test_module = otio_console.otiocat
 
     def test_basic(self):
-        sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-a", "rate=24.0"]
+        sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH]
         self.run_test()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
@@ -172,8 +172,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
                 '-O', 'otio_json',
-                '--tracks', '0',
-                "-a", "rate=24",
+                '--tracks', '0'
             ]
             self.run_test()
 

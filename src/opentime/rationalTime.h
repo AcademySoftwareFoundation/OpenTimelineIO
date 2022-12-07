@@ -18,18 +18,6 @@ enum IsDropFrameRate : int
     ForceYes      = 1,
 };
 
-constexpr double
-fabs(double val) noexcept
-{
-    union
-    {
-        double   f;
-        uint64_t i;
-    } bits = { val };
-    bits.i &= std::numeric_limits<uint64_t>::max() / 2;
-    return bits.f;
-}
-
 class RationalTime
 {
 public:
@@ -73,7 +61,7 @@ public:
     constexpr bool
     almost_equal(RationalTime other, double delta = 0) const noexcept
     {
-        return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
+        return std::fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
     static RationalTime constexpr duration_from_start_end_time(

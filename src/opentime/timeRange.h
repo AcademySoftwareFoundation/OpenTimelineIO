@@ -257,7 +257,7 @@ public:
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return fabs(otherStart - thisStart) <= epsilon_s
+        return std::fabs(otherStart - thisStart) <= epsilon_s
                && lesser_than(thisEnd, otherEnd, epsilon_s);
     }
 
@@ -275,7 +275,7 @@ public:
     {
         const double thisStart  = _start_time.to_seconds();
         const double otherStart = other.to_seconds();
-        return fabs(otherStart - thisStart) <= epsilon_s;
+        return std::fabs(otherStart - thisStart) <= epsilon_s;
     }
 
     /**
@@ -295,7 +295,7 @@ public:
         const double thisEnd    = end_time_exclusive().to_seconds();
         const double otherStart = other._start_time.to_seconds();
         const double otherEnd   = other.end_time_exclusive().to_seconds();
-        return fabs(thisEnd - otherEnd) <= epsilon_s
+        return std::fabs(thisEnd - otherEnd) <= epsilon_s
                && greater_than(thisStart, otherStart, epsilon_s);
     }
 
@@ -314,7 +314,7 @@ public:
     {
         const double thisEnd  = end_time_exclusive().to_seconds();
         const double otherEnd = other.to_seconds();
-        return fabs(thisEnd - otherEnd) <= epsilon_s;
+        return std::fabs(thisEnd - otherEnd) <= epsilon_s;
     }
 
     /**
@@ -350,8 +350,8 @@ public:
     {
         const RationalTime start    = lhs._start_time - rhs._start_time;
         const RationalTime duration = lhs._duration - rhs._duration;
-        return fabs(start.to_seconds()) < DEFAULT_EPSILON_s
-               && fabs(duration.to_seconds()) < DEFAULT_EPSILON_s;
+        return std::fabs(start.to_seconds()) < DEFAULT_EPSILON_s
+               && std::fabs(duration.to_seconds()) < DEFAULT_EPSILON_s;
     }
 
     /**

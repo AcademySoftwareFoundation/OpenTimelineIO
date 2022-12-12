@@ -21,7 +21,7 @@ import opentimelineio.test_utils as otio_test_utils
 import opentimelineio.console as otio_console
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-
+# FIXME: remove or replace the premiere test
 MULTITRACK_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")

@@ -32,12 +32,6 @@
             "suffixes" : []
         },
         {
-            "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "AAF",
-            "filepath" : "advanced_authoring_format.py",
-            "suffixes" : ["aaf"]
-        },
-        {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "xges",
             "filepath": "xges.py",

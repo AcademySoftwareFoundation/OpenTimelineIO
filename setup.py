@@ -360,7 +360,6 @@ setup(
     python_requires='>=3.7, !=3.9.0',  # noqa: E501
 
     install_requires=[
-        'pyaaf2>=1.4,<1.7',
         'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={

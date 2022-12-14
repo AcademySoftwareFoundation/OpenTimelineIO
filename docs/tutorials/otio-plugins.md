@@ -33,26 +33,6 @@ Adapter plugins convert to and from OpenTimelineIO.
 [Tutorial on how to write an adapter](write-an-adapter).
 
 
-### fcp_xml
-
-```
-OpenTimelineIO Final Cut Pro 7 XML Adapter.
-```
-
-*source*: `opentimelineio/adapters/fcp_xml.py`
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string:
-  - input_str
-- write_to_string:
-  - input_otio
-
-
-
-
-
 ### otio_json
 
 ```

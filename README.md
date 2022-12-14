@@ -69,6 +69,9 @@ adapter plugins. This includes Final Cut Pro XML, AAF, CMX 3600 EDL, and more.
 
 For more information about this, including supported formats, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
+The **AAF Adapter** has been **relocated** to a separate repository and is located here:
+https://github.com/OpenTimelineIO/otio-aaf-adapter
+
 Other Plugins
 -------------
 

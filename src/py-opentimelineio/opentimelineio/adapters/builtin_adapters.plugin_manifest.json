@@ -18,12 +18,6 @@
             "name" : "otiod",
             "filepath" : "otiod.py",
             "suffixes" : ["otiod"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "svg",
-            "filepath" : "svg.py",
-            "suffixes" : ["svg"]
         }
     ],
     "hooks": {

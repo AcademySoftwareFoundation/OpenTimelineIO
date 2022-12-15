@@ -190,28 +190,6 @@ read on unix and windows platforms.
 
 
 
-### svg
-
-```
-OTIO to SVG Adapter
-Points in calculations are y-up.
-Points in SVG are y-down.
-```
-
-*source*: `opentimelineio/adapters/svg.py`
-
-
-*Supported Features (with arguments)*:
-
-- write_to_string:
-  - input_otio
-  - width
-  - height
-
-
-
-
-
 ## Media Linkers
 
 Media Linkers run after the adapter has read in the file and convert the media

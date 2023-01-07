@@ -66,7 +66,10 @@ Composable::duration(ErrorStatus* error_status) const
 {
     if (error_status)
     {
-        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+        *error_status = ErrorStatus(
+            ErrorStatus::OBJECT_WITHOUT_DURATION,
+            "Cannot determine duration from this kind of object",
+            this);
     }
     return RationalTime();
 }

@@ -55,8 +55,7 @@ public:
         _out_offset = out_offset;
     }
 
-    // XX is this virtual?
-    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
     optional<TimeRange>
     range_in_parent(ErrorStatus* error_status = nullptr) const;

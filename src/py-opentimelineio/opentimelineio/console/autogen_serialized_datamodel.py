@@ -294,7 +294,7 @@ def _write_documentation(model):
             modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
 
-            if(cl.__doc__ is not None):
+            if (cl.__doc__ is not None):
                 docstring = cl.__doc__.split("\n")
                 new_docstring = []
                 for line in docstring:
@@ -303,7 +303,7 @@ def _write_documentation(model):
                                          replace_whitespace=False,
                                          drop_whitespace=False,
                                          break_long_words=False)
-                    if(line == []):
+                    if (line == []):
                         line = [""]
                     for wrapped_line in line:
                         new_docstring.append(wrapped_line)

@@ -49,20 +49,21 @@ using TrackVectorProxy =
 using SOWithMetadata = SerializableObjectWithMetadata;
 
 namespace {
-    const std::string string_or_none_converter(py::object& thing) {
-        if (thing.is(py::none())) {
-            return std::string();
+
+    template<typename T>
+    std::vector<T*> vector_or_default(optional<std::vector<T*>> item) {
+        if (item.has_value()) {
+            return item.value();
         }
-        else {
-            return py::str(thing);
-        }
+
+        return std::vector<T*>();
     }
 
     template<typename T, typename U>
-    bool children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
+    bool find_children(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
         if (descended_from_type.is(py::type::handle_of<U>()))
         {
-            for (const auto& child : t->template children_if<U>(ErrorStatusHandler(), search_range, shallow_search)) {
+            for (const auto& child : t->template find_children<U>(ErrorStatusHandler(), search_range, shallow_search)) {
                 l.push_back(child.value);
             }
             return true;
@@ -71,30 +72,30 @@ namespace {
     }
 
     template<typename T>
-    std::vector<SerializableObject*> children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
+    std::vector<SerializableObject*> find_children(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
         std::vector<SerializableObject*> l;
-        if (children_if<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Item>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Stack>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Timeline>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Track>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Transition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        if (find_children<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Item>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Stack>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Timeline>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Track>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (find_children<T, Transition>(t, descended_from_type, search_range, shallow_search, l)) ;
         else
         {
-            for (const auto& child : t->template children_if<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
+            for (const auto& child : t->template find_children<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
                 l.push_back(child.value);
             }
         }
         return l;
     }
-    
+
     template<typename T>
-    std::vector<SerializableObject*> clip_if(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
+    std::vector<SerializableObject*> find_clips(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
         std::vector<SerializableObject*> l;
-        for (const auto& child : t->clip_if(ErrorStatusHandler(), search_range, shallow_search)) {
-            l.push_back(child.value);
+        for (const auto& clip : t->find_clips(ErrorStatusHandler(), search_range, shallow_search)) {
+            l.push_back(clip.value);
         }
         return l;
     }
@@ -163,10 +164,10 @@ static void define_bases1(py::module m) {
         .def("clone", [](SerializableObject* so) {
                 return so->clone(ErrorStatusHandler()); })
         .def("to_json_string", [](SerializableObject* so, int indent) {
-                return so->to_json_string(ErrorStatusHandler(), indent); },
+                return so->to_json_string(ErrorStatusHandler(), {}, indent); },
             "indent"_a = 4)
         .def("to_json_file", [](SerializableObject* so, std::string file_name, int indent) {
-                return so->to_json_file(file_name, ErrorStatusHandler(), indent); },
+                return so->to_json_file(file_name, ErrorStatusHandler(), {}, indent); },
             "file_name"_a,
             "indent"_a = 4)
         .def_static("from_json_file", [](std::string file_name) {
@@ -210,12 +211,12 @@ A marker indicates a marked range of time on an item in a timeline, usually with
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        std::string name,
                         TimeRange marked_range,
                         std::string const& color,
                         py::object metadata) {
                           return new Marker(
-                                  string_or_none_converter(name),
+                                  name,
                                   marked_range,
                                   color,
                                   py_to_any_dictionary(metadata));
@@ -244,7 +245,7 @@ The marked range may have a zero duration. The marked range is in the owning ite
     using SerializableCollectionIterator = ContainerIterator<SerializableCollection, SerializableObject*>;
     py::class_<SerializableCollectionIterator>(m, "SerializableCollectionIterator", py::dynamic_attr())
         .def("__iter__", &SerializableCollectionIterator::iter)
-        .def("next", &SerializableCollectionIterator::next);
+        .def("__next__", &SerializableCollectionIterator::next);
 
     py::class_<SerializableCollection, SOWithMetadata,
                managing_ptr<SerializableCollection>>(m, "SerializableCollection", py::dynamic_attr(), R"docstring(
@@ -256,10 +257,10 @@ a named collection.
 
 A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media references to a single file.
 )docstring")
-        .def(py::init([](std::string const& name, py::object children,
+        .def(py::init([](std::string const& name, optional<std::vector<SerializableObject*>> children,
                          py::object metadata) {
                           return new SerializableCollection(name,
-                                                py_to_vector<SerializableObject*>(children),
+                                                vector_or_default<SerializableObject>(children),
                                                 py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "children"_a = py::none(),
@@ -289,12 +290,12 @@ A :class:`~SerializableCollection` is useful for serializing multiple timelines,
         .def("__iter__", [](SerializableCollection* c) {
                 return new SerializableCollectionIterator(c);
             })
-        .def("clip_if", [](SerializableCollection* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt)
-        .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
-                return children_if(t, descended_from_type, search_range);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+        .def("find_clips", [](SerializableCollection* c, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_clips(c, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("find_children", [](SerializableCollection* c, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_children(c, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
 
 }
 
@@ -306,11 +307,11 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 
     py::class_<Item, Composable, managing_ptr<Item>>(m, "Item", py::dynamic_attr())
         .def(py::init([](std::string name, optional<TimeRange> source_range,
-                         py::object effects, py::object markers, py::bool_ enabled, py::object metadata) {
+                         optional<std::vector<Effect*>> effects, optional<std::vector<Marker*>> markers, py::bool_ enabled, py::object metadata) {
                           return new Item(name, source_range,
                                           py_to_any_dictionary(metadata),
-                                          py_to_vector<Effect*>(effects),
-                                          py_to_vector<Marker*>(markers),
+                                          vector_or_default<Effect>(effects),
+                                          vector_or_default<Marker>(markers),
                                           enabled); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = nullopt,
@@ -390,22 +391,22 @@ Other effects are handled by the :class:`Effect` class.
 
 
     py::class_<Gap, Item, managing_ptr<Gap>>(m, "Gap", py::dynamic_attr())
-        .def(py::init([](std::string name, TimeRange source_range, py::object effects,
-                         py::object markers, py::object metadata) {
+        .def(py::init([](std::string name, TimeRange source_range, optional<std::vector<Effect*>> effects,
+                         optional<std::vector<Marker*>> markers, py::object metadata) {
                           return new Gap(source_range, name,
-                                         py_to_vector<Effect*>(effects),
-                                         py_to_vector<Marker*>(markers),
+                                         vector_or_default<Effect>(effects),
+                                         vector_or_default<Marker>(markers),
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "source_range"_a = TimeRange(),
              "effects"_a = py::none(),
              "markers"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
-       .def(py::init([](std::string name, RationalTime duration, py::object effects,
-                        py::object markers, py::object metadata) {
+       .def(py::init([](std::string name, RationalTime duration, optional<std::vector<Effect*>> effects,
+                        optional<std::vector<Marker*>> markers, py::object metadata) {
                           return new Gap(duration, name,
-                                         py_to_vector<Effect*>(effects),
-                                         py_to_vector<Marker*>(markers),
+                                         vector_or_default<Effect>(effects),
+                                         vector_or_default<Marker>(markers),
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "duration"_a = RationalTime(),
@@ -443,19 +444,19 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
     using CompositionIterator = ContainerIterator<Composition, Composable*>;
     py::class_<CompositionIterator>(m, "CompositionIterator")
         .def("__iter__", &CompositionIterator::iter)
-        .def("next", &CompositionIterator::next);
+        .def("__next__", &CompositionIterator::next);
 
     py::class_<Composition, Item, managing_ptr<Composition>>(m, "Composition", py::dynamic_attr(), R"docstring(
-Base class for an :class:`~Item` that contains other :class:`~Item`\s.
+Base class for an :class:`~Item` that contains :class:`~Composable`\s.
 
 Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
 )docstring")
         .def(py::init([](std::string name,
-                         py::object children,
+                         optional<std::vector<Composable*>> children,
                          optional<TimeRange> source_range, py::object metadata) {
                           Composition* c = new Composition(name, source_range,
                                                            py_to_any_dictionary(metadata));
-                          c->set_children(py_to_vector<Composable*>(children), ErrorStatusHandler());
+                          c->set_children(vector_or_default<Composable>(children), ErrorStatusHandler());
                           return c;
                       }),
              py::arg_v("name"_a = std::string()),
@@ -498,8 +499,8 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                 }
                 return l;
             }, "search_range"_a)
-        .def("children_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
-                return children_if(t, descended_from_type, search_range, shallow_search);
+        .def("find_children", [](Composition* c, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_children(c, descended_from_type, search_range, shallow_search);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
@@ -551,12 +552,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .value("never", Track::NeighborGapPolicy::never);
 
     track_class
-        .def(py::init([](py::object name, py::object children,
+        .def(py::init([](std::string name, optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Track* t = new Track(
-                                  string_or_none_converter(name),
+                                  name,
                                   source_range,
                                   kind,
                                   py_to_any_dictionary(metadata)
@@ -575,8 +576,8 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
             }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
-        .def("clip_if", [](Track* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                return clip_if(t, search_range, shallow_search);
+        .def("find_clips", [](Track* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_clips(t, search_range, shallow_search);
             }, "search_range"_a = nullopt, "shallow_search"_a = false);
 
     py::class_<Track::Kind>(track_class, "Kind")
@@ -585,24 +586,23 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
-        .def(py::init([](py::object name,
-                         py::object children,
+        .def(py::init([](std::string name,
+                         optional<std::vector<Composable*>> children,
                          optional<TimeRange> const& source_range,
-                         py::object markers,
-                         py::object effects,
+                         optional<std::vector<Marker*>> markers,
+                         optional<std::vector<Effect*>> effects,
                          py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Stack* s = new Stack(
-                                  string_or_none_converter(name),
+                                  name,
                                   source_range,
                                   py_to_any_dictionary(metadata),
-                                  py_to_vector<Effect*>(effects),
-                                  py_to_vector<Marker*>(markers)
+                                  vector_or_default<Effect>(effects),
+                                  vector_or_default<Marker>(markers)
                           );
                           if (!composable_children.empty()) {
                               s->set_children(composable_children, ErrorStatusHandler());
                           }
-                          auto composable_markers = py_to_vector<Marker*>(markers);
                           return s;
                       }),
              py::arg_v("name"_a = std::string()),
@@ -611,16 +611,16 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "markers"_a = py::none(),
              "effects"_a = py::none(),
              py::arg_v("metadata"_a = py::none()))
-        .def("clip_if", [](Stack* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt);
+        .def("find_clips", [](Stack* s, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_clips(s, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false);
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
-                         py::object children,
+                         optional<std::vector<Composable*>> children,
                          optional<RationalTime> global_start_time,
                          py::object metadata) {
-                          auto composable_children = py_to_vector<Composable*>(children);
+                          auto composable_children = vector_or_default<Composable>(children);
                           Timeline* t = new Timeline(name, global_start_time,
                                                      py_to_any_dictionary(metadata));
                           if (!composable_children.empty())
@@ -641,12 +641,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             })
         .def("video_tracks", &Timeline::video_tracks)
         .def("audio_tracks", &Timeline::audio_tracks)
-        .def("clip_if", [](Timeline* t, optional<TimeRange> const& search_range) {
-                return clip_if(t, search_range);
-            }, "search_range"_a = nullopt)
-        .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
-                return children_if(t, descended_from_type, search_range);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+        .def("find_clips", [](Timeline* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_clips(t, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("find_children", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_children(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false);
 }
 
 static void define_effects(py::module m) {
@@ -742,12 +742,12 @@ Represents media for which a concrete reference is missing.
 Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media is not known.
 )docstring")
         .def(py::init([](
-                        py::object name,
+                        std::string name,
                         optional<TimeRange> available_range,
                         py::object metadata,
                         optional<Imath::Box2d> const& available_image_bounds) {
                     return new MissingReference(
-                                  string_or_none_converter(name),
+                                  name,
                                   available_range,
                                   py_to_any_dictionary(metadata),
                                   available_image_bounds); 
@@ -844,7 +844,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
 )docstring");
 
     py::enum_<ImageSequenceReference::MissingFramePolicy>(imagesequencereference_class, "MissingFramePolicy", "Behavior that should be used by applications when an image file in the sequence can't be found on disk.")
-        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Application should abort and raise an error.")
+        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Application should stop and raise an error.")
         .value("hold", ImageSequenceReference::MissingFramePolicy::hold, "Application should hold the last available frame before the missing frame.")
         .value("black", ImageSequenceReference::MissingFramePolicy::black, "Application should use a black frame in place of the missing frame");
 

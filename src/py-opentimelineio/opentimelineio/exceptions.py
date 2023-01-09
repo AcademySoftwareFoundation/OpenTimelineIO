@@ -75,3 +75,7 @@ class CannotTrimTransitionsError(OTIOError):
 
 class NoDefaultMediaLinkerError(OTIOError):
     pass
+
+
+class InvalidEnvironmentVariableError(OTIOError):
+    pass

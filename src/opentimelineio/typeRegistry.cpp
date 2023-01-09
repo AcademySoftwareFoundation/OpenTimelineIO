@@ -3,6 +3,7 @@
 
 #include "opentimelineio/typeRegistry.h"
 
+#include "anyDictionary.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
@@ -30,8 +31,6 @@
 
 #include <assert.h>
 #include <vector>
-//#include <sstream>
-//#include <iostream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -77,7 +76,10 @@ TypeRegistry::TypeRegistry()
     register_type<SerializableObjectWithMetadata>();
     register_type<SerializableCollection>();
     register_type_from_existing_type(
-        "SerializeableCollection", 1, "SerializableCollection", nullptr);
+        "SerializeableCollection",
+        1,
+        "SerializableCollection",
+        nullptr);
 
     register_type<Stack>();
     register_type<TimeEffect>();
@@ -113,6 +115,27 @@ TypeRegistry::TypeRegistry()
 
         d->erase("media_reference");
     });
+
+    // 2->1
+    register_downgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
+        AnyDictionary mrefs;
+        std::string   active_rkey = "";
+
+        if (d->get_if_set("media_references", &mrefs))
+        {
+            if (d->get_if_set("active_media_reference_key", &active_rkey))
+            {
+                AnyDictionary active_ref;
+                if (mrefs.get_if_set(active_rkey, &active_ref))
+                {
+                    (*d)["media_reference"] = active_ref;
+                }
+            }
+        }
+
+        d->erase("media_references");
+        d->erase("active_media_reference_key");
+    });
 }
 
 bool
@@ -124,6 +147,25 @@ TypeRegistry::register_type(
     std::string const&                   class_name)
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
+
+    // auto existing_tr = _find_type_record(schema_name);
+    //
+    // // if the exact type record has already been added (happens in unit tests
+    // // and re-setting manifest stuff)
+    // if (existing_tr)
+    // {
+    //     if (
+    //             existing_tr->schema_name == schema_name
+    //             && existing_tr->schema_version == schema_version
+    //             && existing_tr->class_name == class_name
+    //             && (
+    //                 existing_tr->create.target<SerializableObject*()>()
+    //                 == create.target<SerializableObject*()>()
+    //             )
+    //     ) {
+    //         return true;
+    //     }
+    // }
 
     if (!_find_type_record(schema_name))
     {
@@ -151,16 +193,18 @@ TypeRegistry::register_type_from_existing_type(
     {
         if (!_find_type_record(schema_name))
         {
-            _type_records[schema_name] = new _TypeRecord{
-                r->schema_name, r->schema_version, r->class_name, r->create
-            };
+            _type_records[schema_name] = new _TypeRecord{ r->schema_name,
+                                                          r->schema_version,
+                                                          r->class_name,
+                                                          r->create };
             return true;
         }
 
         if (error_status)
         {
             *error_status = ErrorStatus(
-                ErrorStatus::SCHEMA_ALREADY_REGISTERED, schema_name);
+                ErrorStatus::SCHEMA_ALREADY_REGISTERED,
+                schema_name);
         }
         return false;
     }
@@ -187,12 +231,26 @@ TypeRegistry::register_upgrade_function(
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (auto r = _find_type_record(schema_name))
     {
-        if (r->upgrade_functions.find(version_to_upgrade_to) ==
-            r->upgrade_functions.end())
-        {
-            r->upgrade_functions[version_to_upgrade_to] = upgrade_function;
-            return true;
-        }
+        auto result = r->upgrade_functions.insert(
+            { version_to_upgrade_to, upgrade_function });
+        return result.second;
+    }
+
+    return false;
+}
+
+bool
+TypeRegistry::register_downgrade_function(
+    std::string const&                  schema_name,
+    int                                 version_to_downgrade_from,
+    std::function<void(AnyDictionary*)> downgrade_function)
+{
+    std::lock_guard<std::mutex> lock(_registry_mutex);
+    if (auto r = _find_type_record(schema_name))
+    {
+        auto result = r->downgrade_functions.insert(
+            { version_to_downgrade_from, downgrade_function });
+        return result.second;
     }
 
     return false;
@@ -250,10 +308,10 @@ TypeRegistry::_instance_from_schema(
     }
     else if (schema_version < type_record->schema_version)
     {
-        for (auto e: type_record->upgrade_functions)
+        for (const auto& e: type_record->upgrade_functions)
         {
-            if (schema_version <= e.first &&
-                e.first <= type_record->schema_version)
+            if (schema_version <= e.first
+                && e.first <= type_record->schema_version)
             {
                 e.second(&dict);
             }
@@ -325,6 +383,18 @@ TypeRegistry::set_type_record(
                 schema_name.c_str()));
     }
     return false;
+}
+
+void
+TypeRegistry::type_version_map(schema_version_map& result)
+{
+    std::lock_guard<std::mutex> lock(_registry_mutex);
+
+    for (const auto& pair: _type_records)
+    {
+        const auto record_ptr           = pair.second;
+        result[record_ptr->schema_name] = record_ptr->schema_version;
+    }
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

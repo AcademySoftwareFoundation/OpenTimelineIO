@@ -4,7 +4,6 @@
         {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "mock_adapter",
-            "execution_scope": "in process",
             "filepath": "adapter.py",
             "suffixes": ["mockadapter"]
         }
@@ -13,7 +12,6 @@
         {
             "OTIO_SCHEMA" : "MediaLinker.1",
             "name" : "mock_linker",
-            "execution_scope" : "in process",
             "filepath" : "linker.py"
         }
     ]

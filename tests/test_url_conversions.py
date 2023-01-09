@@ -49,7 +49,7 @@ class TestConversions(unittest.TestCase):
         result = otio.url_utils.filepath_from_url(MEDIA_EXAMPLE_PATH_URL_REL)
 
         # should have reconstructed it by this point
-        self.assertEqual(result, MEDIA_EXAMPLE_PATH_REL)
+        self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
 
 
 if __name__ == "__main__":

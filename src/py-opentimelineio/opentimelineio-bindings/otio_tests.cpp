@@ -9,6 +9,8 @@
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/timeline.h"
 #include "otio_utils.h"
+#include "otio_anyDictionary.h"
+#include "otio_anyVector.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -154,6 +156,15 @@ bool test_big_uint() {
     return true;
 }
 
+
+void test_AnyDictionary_destroy(AnyDictionaryProxy* d) {
+    delete d->any_dictionary;
+}
+
+void test_AnyVector_destroy(AnyVectorProxy* v) {
+    delete v->any_vector;
+}
+
 void otio_tests_bindings(py::module m) {
     TypeRegistry& r = TypeRegistry::instance();
     r.register_type<TestObject>();
@@ -171,4 +182,6 @@ void otio_tests_bindings(py::module m) {
     test.def("gil_scoping", &test_gil_scoping);
     test.def("xyzzy", &otio_xyzzy);
     test.def("test_big_uint", &test_big_uint);
+    test.def("test_AnyDictionary_destroy", &test_AnyDictionary_destroy);
+    test.def("test_AnyVector_destroy", &test_AnyVector_destroy);
 }

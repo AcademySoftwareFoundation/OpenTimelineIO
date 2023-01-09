@@ -931,7 +931,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
     adapter = adapters.from_name('fcp_xml').module()
 
     def __init__(self, *args, **kwargs):
-        super(AdaptersFcp7XmlTest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.maxDiff = None
 
     def test_build_empty_file(self):
@@ -1166,12 +1166,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             },
         )
 
-        v0 = schema.Track(kind=schema.track.TrackKind.Video)
-        v1 = schema.Track(kind=schema.track.TrackKind.Video)
+        v0 = schema.Track(kind=schema.TrackKind.Video)
+        v1 = schema.Track(kind=schema.TrackKind.Video)
 
         timeline.tracks.extend([v0, v1])
 
-        a0 = schema.Track(kind=schema.track.TrackKind.Audio)
+        a0 = schema.Track(kind=schema.TrackKind.Audio)
 
         timeline.tracks.append(a0)
 
@@ -1256,11 +1256,33 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             )
         )
 
+        timeline.tracks.markers.append(
+            schema.Marker(
+                name='test_timeline_marker_range',
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(123, RATE),
+                    opentime.RationalTime(11, RATE),
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
+        )
+
         v1[1].markers.append(
             schema.Marker(
                 name='test_clip_marker',
                 marked_range=opentime.TimeRange(
                     opentime.RationalTime(125, RATE)
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
+        )
+
+        v1[1].markers.append(
+            schema.Marker(
+                name='test_clip_marker_range',
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(125, RATE),
+                    opentime.RationalTime(6, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )
@@ -1287,10 +1309,10 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         # Before comparing, scrub ignorable metadata introduced in
         # serialization (things like unique ids minted by the adapter)
         # Since we seeded metadata for the generator, keep that metadata
-        del(new_timeline.metadata["fcp_xml"])
-        for child in new_timeline.tracks.each_child():
+        del new_timeline.metadata["fcp_xml"]
+        for child in new_timeline.tracks.find_children():
             try:
-                del(child.metadata["fcp_xml"])
+                del child.metadata["fcp_xml"]
             except KeyError:
                 pass
 
@@ -1299,7 +1321,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     child.media_reference, schema.GeneratorReference
                 )
                 if not is_generator:
-                    del(child.media_reference.metadata["fcp_xml"])
+                    del child.media_reference.metadata["fcp_xml"]
             except (AttributeError, KeyError):
                 pass
 
@@ -1323,7 +1345,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             def scrub_displayformat(md_dict):
                 for ignore_key in {"link"}:
                     try:
-                        del(md_dict[ignore_key])
+                        del md_dict[ignore_key]
                     except KeyError:
                         pass
 
@@ -1334,7 +1356,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     except AttributeError:
                         pass
 
-            for child in timeline.tracks.each_child():
+            for child in timeline.tracks.find_children():
                 scrub_displayformat(child.metadata)
                 try:
                     scrub_displayformat(child.media_reference.metadata)
@@ -1355,8 +1377,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.
-        with open(FCP7_XML_EXAMPLE_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
+        with open(FCP7_XML_EXAMPLE_PATH) as original_file:
+            with open(tmp_path) as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_hiero_flavored_xml(self):
@@ -1364,7 +1386,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertTrue(len(timeline.tracks), 1)
         self.assertTrue(timeline.tracks[0].name == 'Video 1')
 
-        clips = [c for c in timeline.tracks[0].each_clip()]
+        clips = [c for c in timeline.tracks[0].find_clips()]
         self.assertTrue(len(clips), 2)
 
         self.assertTrue(clips[0].name == 'A160C005_171213_R0MN')
@@ -1411,8 +1433,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         # Similar to the test_roundtrip_disk2mem2disk above
         # the track name element among others will not be present in a new xml.
-        with open(HIERO_XML_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
+        with open(HIERO_XML_PATH) as original_file:
+            with open(tmp_path) as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_xml_with_empty_elements(self):

@@ -12,22 +12,8 @@ import re
 from xml.etree import cElementTree
 from xml.dom import minidom
 
-# urlparse's name changes in Python 3
-try:
-    # Python 2.7
-    import urlparse as urllib_parse
-except ImportError:
-    # Python 3
-    basestring = str
-    import urllib.parse as urllib_parse
-
-# Same with the ABC classes from collections
-try:
-    # Python 3
-    from collections.abc import Mapping
-except ImportError:
-    # Python 2.7
-    from collections import Mapping
+import urllib.parse as urllib_parse
+from collections.abc import Mapping
 
 from .. import (
     core,
@@ -121,7 +107,7 @@ class _Context(Mapping):
         for context_element in self.elements:
             if context_element == element:
                 raise ValueError(
-                    "element {} already in context".format(element)
+                    f"element {element} already in context"
                 )
 
         return _Context(element, self.elements)
@@ -148,10 +134,10 @@ def _element_identification_string(element):
     Gets a string that will hopefully help in identifing an element when there
     is an error.
     """
-    info_string = "tag: {}".format(element.tag)
+    info_string = f"tag: {element.tag}"
     try:
         elem_id = element.attrib["id"]
-        info_string += " id: {}".format(elem_id)
+        info_string += f" id: {elem_id}"
     except KeyError:
         pass
 
@@ -259,7 +245,7 @@ def _track_kind_from_element(media_element):
     elif element_tag == "video":
         return schema.TrackKind.Video
 
-    raise ValueError("Unsupported media kind: {}".format(media_element.tag))
+    raise ValueError(f"Unsupported media kind: {media_element.tag}")
 
 
 def _is_primary_audio_channel(track):
@@ -339,7 +325,7 @@ def _xml_tree_to_dict(node, ignore_tags=None, omit_timing=True):
     # Handle the attributes
     out_dict.update(
         collections.OrderedDict(
-            ("@{}".format(k), v) for k, v in node.attrib.items()
+            (f"@{k}", v) for k, v in node.attrib.items()
         )
     )
 
@@ -422,7 +408,7 @@ def _dict_to_xml_tree(data_dict, tag):
             pass
 
         # test for list-like objects (but not string-derived)
-        if not isinstance(python_value, basestring):
+        if not isinstance(python_value, str):
             try:
                 iter(python_value)
                 return itertools.chain.from_iterable(
@@ -752,7 +738,7 @@ class FCP7XMLParser:
         """
         local_context = context.context_pushing_element(track_element)
         name_element = track_element.find("./name")
-        track_name = (name_element.text if name_element is not None else None)
+        track_name = (name_element.text if name_element is not None else '')
 
         timeline_item_tags = {"clipitem", "generatoritem", "transitionitem"}
 
@@ -990,7 +976,7 @@ class FCP7XMLParser:
         elif item_element.tag == "transitionitem":
             item = self.transition_for_element(item_element, context)
         else:
-            name = "unknown-{}".format(item_element.tag)
+            name = f"unknown-{item_element.tag}"
             item = core.Item(name=name, source_range=item_range)
 
         if metadata_dict:
@@ -1101,7 +1087,7 @@ class FCP7XMLParser:
 
         if effect_element is None:
             raise ValueError(
-                "could not find effect in filter: {}".format(filter_element)
+                f"could not find effect in filter: {filter_element}"
             )
 
         name = _name_from_element(effect_element)
@@ -1172,7 +1158,7 @@ def _backreference_for_item(item, tag, br_map):
     # of hash to id int as values.
 
     def id_string(id_int):
-        return "{}-{}".format(tag, id_int)
+        return f"{tag}-{id_int}"
 
     # Determine how to uniquely identify the referenced item
     if isinstance(item, schema.ExternalReference):
@@ -1363,7 +1349,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
 
     frame_number = int(round(time.value))
     _append_new_sub_element(
-        tc_element, "frame", text="{:.0f}".format(frame_number)
+        tc_element, "frame", text=f"{frame_number:.0f}"
     )
 
     drop_frame = (";" in tc_string)
@@ -1390,8 +1376,8 @@ def _build_item_timings(
     source_end = (item.source_range.end_time_exclusive() - timecode)
     source_end = source_end.rescaled_to(item_rate)
 
-    start = '{:.0f}'.format(timeline_range.start_time.value)
-    end = '{:.0f}'.format(timeline_range.end_time_exclusive().value)
+    start = f'{timeline_range.start_time.value:.0f}'
+    end = f'{timeline_range.end_time_exclusive().value:.0f}'
 
     item_e.append(_build_rate(item_rate))
 
@@ -1404,19 +1390,19 @@ def _build_item_timings(
 
     _append_new_sub_element(
         item_e, 'duration',
-        text='{:.0f}'.format(item.source_range.duration.value)
+        text=f'{item.source_range.duration.value:.0f}'
     )
     _append_new_sub_element(item_e, 'start', text=start)
     _append_new_sub_element(item_e, 'end', text=end)
     _append_new_sub_element(
         item_e,
         'in',
-        text='{:.0f}'.format(source_start.value)
+        text=f'{source_start.value:.0f}'
     )
     _append_new_sub_element(
         item_e,
         'out',
-        text='{:.0f}'.format(source_end.value)
+        text=f'{source_end.value:.0f}'
     )
 
 
@@ -1443,7 +1429,7 @@ def _build_empty_file(media_ref, parent_range, br_map):
         _append_new_sub_element(
             file_e,
             'duration',
-            text='{:.0f}'.format(duration.value),
+            text=f'{duration.value:.0f}',
         )
 
     # timecode
@@ -1496,7 +1482,7 @@ def _build_file(media_reference, br_map):
     file_e.append(_build_rate(available_range.start_time.rate))
     _append_new_sub_element(
         file_e, 'duration',
-        text='{:.0f}'.format(available_range.duration.value)
+        text=f'{available_range.duration.value:.0f}'
     )
 
     # timecode
@@ -1540,12 +1526,12 @@ def _build_transition_item(
     _append_new_sub_element(
         transition_e,
         'start',
-        text='{:.0f}'.format(timeline_range.start_time.value)
+        text=f'{timeline_range.start_time.value:.0f}'
     )
     _append_new_sub_element(
         transition_e,
         'end',
-        text='{:.0f}'.format(timeline_range.end_time_exclusive().value)
+        text=f'{timeline_range.end_time_exclusive().value:.0f}'
     )
 
     # Only add an alignment if it didn't already come in from the metadata dict
@@ -1844,9 +1830,14 @@ def _build_marker(marker):
     _append_new_sub_element(marker_e, 'name', text=marker.name)
     _append_new_sub_element(
         marker_e, 'in',
-        text='{:.0f}'.format(marked_range.start_time.value)
+        text=f'{marked_range.start_time.value:.0f}'
     )
-    _append_new_sub_element(marker_e, 'out', text='-1')
+    _append_new_sub_element(
+        marker_e, 'out',
+        text='{:.0f}'.format(
+            marked_range.start_time.value + marked_range.duration.value
+        )
+    )
 
     return marker_e
 
@@ -1924,7 +1915,7 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     _append_new_sub_element(sequence_e, 'name', text=stack.name)
     _append_new_sub_element(
         sequence_e, 'duration',
-        text='{:.0f}'.format(timeline_range.duration.value)
+        text=f'{timeline_range.duration.value:.0f}'
     )
     sequence_e.append(_build_rate(timeline_range.start_time.rate))
     track_rate = timeline_range.start_time.rate

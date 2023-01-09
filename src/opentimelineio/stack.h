@@ -29,9 +29,11 @@ public:
         std::vector<Marker*> const& markers      = std::vector<Marker*>());
 
     virtual TimeRange range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange trimmed_range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 
@@ -41,10 +43,12 @@ public:
     optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const;
 
-    // Return a vector of clips.
+    // Find child clips.
     //
     // An optional search_range may be provided to limit the search.
-    std::vector<Retainer<Clip>> clip_if(
+    //
+    // The search is recursive unless shallow_search is set to true.
+    std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;

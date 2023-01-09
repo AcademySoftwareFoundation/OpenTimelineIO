@@ -7,7 +7,6 @@ import unittest
 from fractions import Fraction
 from xml.etree import ElementTree
 
-from builtins import int
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.schema import (
@@ -95,7 +94,7 @@ def _make_ges_marker(
     return ges_marker
 
 
-class XgesElement(object):
+class XgesElement:
     """
     Generates an xges string to be converted to an otio timeline.
     """
@@ -142,7 +141,7 @@ class XgesElement(object):
         res_caps = \
             r"video/x-raw\,\ width\=\(int\)300\,\ height\=\(int\)250"
         if framerate:
-            res_caps += r"\,\ framerate\=\(fraction\){}".format(framerate)
+            res_caps += fr"\,\ framerate\=\(fraction\){framerate}"
         track = ElementTree.SubElement(
             self.timeline, "track", {
                 "caps": "video/x-raw(ANY)",
@@ -258,7 +257,7 @@ class XgesElement(object):
         return otio.adapters.read_from_string(string, "xges")
 
 
-class CustomOtioAssertions(object):
+class CustomOtioAssertions:
     """Custom Assertions to perform on otio objects"""
 
     @staticmethod
@@ -266,7 +265,7 @@ class CustomOtioAssertions(object):
         name = otio_obj.name
         if not name:
             name = '""'
-        return "{} {}".format(otio_obj.schema_name(), name)
+        return f"{otio_obj.schema_name()} {name}"
 
     @classmethod
     def _otio_id(cls, otio_obj):
@@ -345,7 +344,7 @@ class CustomOtioAssertions(object):
                 if first:
                     first = False
                     attr_str += " "
-                attr_str += "[{:d}]".format(attr_name)
+                attr_str += f"[{attr_name:d}]"
             else:
                 if not hasattr(val, attr_name):
                     raise AssertionError(
@@ -457,7 +456,7 @@ class CustomOtioAssertions(object):
                     self._val_str(compare)))
 
 
-class OtioTest(object):
+class OtioTest:
     """Tests to be used by OtioTestNode and OtioTestTree."""
 
     @staticmethod
@@ -595,7 +594,7 @@ class OtioTest(object):
             inst, otio_item, marker_details)
 
 
-class OtioTestNode(object):
+class OtioTestNode:
     """
     An OtioTestTree Node that corresponds to some expected otio class.
     This holds information about the children of the node, as well as
@@ -617,7 +616,7 @@ class OtioTestNode(object):
         self.tests = tests
 
 
-class OtioTestTree(object):
+class OtioTestTree:
     """
     Test an otio object has the correct type structure, and perform
     additional tests along the way."""
@@ -664,14 +663,14 @@ class OtioTestTree(object):
             test(self.unittest_inst, otio_obj)
 
 
-class CustomXgesAssertions(object):
+class CustomXgesAssertions:
     """Custom Assertions to perform on a ges xml object"""
 
     @staticmethod
     def _xges_id(xml_el):
-        xges_id = "Element <{}".format(xml_el.tag)
+        xges_id = f"Element <{xml_el.tag}"
         for key, val in xml_el.attrib.items():
-            xges_id += " {}='{}'".format(key, val)
+            xges_id += f" {key}='{val}'"
         xges_id += " /> "
         return xges_id
 
@@ -734,7 +733,7 @@ class CustomXgesAssertions(object):
         for key, val in attrs.items():
             if key in ("start", "duration", "inpoint"):
                 val *= GST_SECOND
-            path += "[@{}='{!s}']".format(key, val)
+            path += f"[@{key}='{val!s}']"
         return self.assertXgesNumElementsAtPath(xml_el, path, compare)
 
     def assertXgesOneElementAtPathWithAttr(
@@ -817,7 +816,7 @@ class CustomXgesAssertions(object):
             xml_el, struct_name, field_name, field_type)
         # TODO: remove once python2 has ended
         if field_type == "string":
-            if type(val) is not str and isinstance(val, type(u"")):
+            if type(val) is not str and isinstance(val, str):
                 val = val.encode("utf8")
         if isinstance(val, otio.core.SerializableObject):
             equal = val.is_equivalent_to(compare)
@@ -1486,7 +1485,7 @@ class AdaptersXGESTest(
     def _subproject_asset_props_and_metas_for_type(self, extract_type):
         xges_el = self._make_nested_project()
         asset = xges_el.ressources.find(
-            "./asset[@extractable-type-name='{}']".format(extract_type))
+            f"./asset[@extractable-type-name='{extract_type}']")
         self.assertIsNotNone(asset)
         asset_id = asset.get("id")
         self.assertIsNotNone(asset_id)
@@ -2539,7 +2538,7 @@ class AdaptersXGESTest(
             SCHEMA.GstStructure.new_from_str("0name, prop=(int)4;")
         with self.assertRaises(otio.exceptions.OTIOError):
             SCHEMA.GstStructure.new_from_str(
-                "{}, prop=(int)4;".format(UTF8_NAME))
+                f"{UTF8_NAME}, prop=(int)4;")
         with self.assertRaises(otio.exceptions.OTIOError):
             SCHEMA.GstStructure("0name", {"prop": ("int", 4)})
         # invalid fieldnames:
@@ -2687,8 +2686,8 @@ class AdaptersXGESTest(
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xges and we drop all the nle specific preferences.
-        with open(XGES_EXAMPLE_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
+        with open(XGES_EXAMPLE_PATH) as original_file:
+            with open(tmp_path) as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
 

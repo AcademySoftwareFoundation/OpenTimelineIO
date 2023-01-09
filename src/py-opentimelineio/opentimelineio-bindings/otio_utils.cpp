@@ -95,7 +95,6 @@ void _build_any_to_py_dispatch_table() {
 }
 
 static py::object _value_to_any = py::none();
-static py::object _value_to_so_vector = py::none();
 
 static void py_to_any(py::object const& o, any* result) {
     if (_value_to_any.is_none()) {
@@ -114,39 +113,11 @@ AnyDictionary py_to_any_dictionary(py::object const& o) {
     any a;
     py_to_any(o, &a);
     if (!compare_typeids(a.type(), typeid(AnyDictionary))) {
-        throw py::type_error(string_printf("expected an AnyDictionary (i.e. metadata); got %s instead",
+        throw py::type_error(string_printf("Expected an AnyDictionary (i.e. metadata); got %s instead",
                                            type_name_for_error_message(a).c_str()));
     }
 
     return safely_cast_any_dictionary_any(a);
-}
-
-std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o) {
-    if (_value_to_so_vector.is_none()) {
-        py::object core = py::module::import("opentimelineio.core");
-        _value_to_so_vector = core.attr("_value_to_so_vector");
-    }
-
-    std::vector<SerializableObject*> result;
-    if (o.is_none()) {
-        return result;
-    }
-
-    /*
-     * We're depending on _value_to_so_vector(), written in Python, to
-     * not screw up, or we're going to crash.  (1) It has to give us
-     * back an AnyVector.  (2) Every element has to be a
-     * SerializableObject::Retainer<>.
-     */
-
-    py::object obj_vector = _value_to_so_vector(o);     // need to retain this here or we'll lose the any...
-    AnyVector const& v = temp_safely_cast_any_vector_any(obj_vector.cast<PyAny*>()->a);
-
-    result.reserve(v.size());
-    for (auto e: v) {
-        result.push_back(safely_cast_retainer_any(e));
-    }
-    return result;
 }
 
 py::object any_to_py(any const& a, bool top_level) {

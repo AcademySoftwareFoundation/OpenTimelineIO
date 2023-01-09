@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version wheel manifest lcov
+	python-version wheel manifest lcov lcov-html lcov-reset
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -32,6 +32,10 @@ CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
 CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
+
+GIT = git
+GITSTATUS := $(shell git diff-index --quiet HEAD . 1>&2 2> /dev/null; echo $$?)
+
 
 ifeq ($(VERBOSE), 1)
 	TEST_ARGS:=-v
@@ -95,16 +99,25 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		C++ coverage will not work, because intermediate build products will \
 		not be found.)
 endif
-	lcov --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+	lcov --rc lcov_branch_coverage=1 --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
-	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
+	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
-	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
+	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	rm ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info
 	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+
+
+lcov-html: lcov
+	@echo -e "$(ccgreen)Generating C++ HTML coverage report...$(ccend)"
+	genhtml --quiet --branch-coverage --output-directory lcov_html_report ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+
+lcov-reset:
+	@echo "$(tput setaf -Txterm 2)Resetting C++ coverage...$(tput sgr0)"
+	lcov -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} --zerocounters
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version
@@ -182,6 +195,14 @@ doc-plugins:
 doc-plugins-update:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_plugin_documentation.py -o docs/tutorials/otio-plugins.md --public-only --sanitized-paths
 
+# build the CORE_VERSION_MAP cpp file
+version-map:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp --dryrun
+
+version-map-update:
+	@echo "updating the CORE_VERSION_MAP..."
+	@python src/py-opentimelineio/opentimelineio/console/autogen_version_map.py -i src/opentimelineio/CORE_VERSION_MAP.last.cpp -o src/opentimelineio/CORE_VERSION_MAP.cpp
+
 # generate documentation in html
 doc-html:
 	@# if you just want to build the docs yourself outside of RTD
@@ -191,3 +212,95 @@ doc-cpp:
 	@cd doxygen ; doxygen config/dox_config ; cd .. 
 	@echo "wrote doxygen output to: doxygen/output/html/index.html"
 	
+# release related targets
+confirm-release-intent:
+ifndef OTIO_DO_RELEASE
+	$(error \
+		"If you are sure you want to perform a release, set OTIO_DO_RELEASE=1")
+endif
+	@echo "Starting release process..."
+
+check-git-status:
+ifneq ($(GITSTATUS), 0)
+	$(error \
+		"Git repository is dirty, cannot create release. Run 'git status' \
+		for more info")
+endif
+	@echo "Git status is clean, ready to proceed with release."
+
+verify-license:
+	@echo "Verifying licenses in files..."
+	@python maintainers/verify_license.py -s .
+
+fix-license:
+	@python maintainers/verify_license.py -s . -f
+
+freeze-ci-versions:
+	@echo "freezing CI versions..."
+	@python maintainers/freeze_ci_versions.py -f
+
+unfreeze-ci-versions:
+	@echo "unfreezing CI versions..."
+	@python maintainers/freeze_ci_versions.py -u
+
+# needs to happen _before_ version-map-update so that version in 
+# CORE_VERSION_MAP does not have the .dev1 suffix at release time
+remove-dev-suffix:
+	@echo "Removing .dev1 suffix"
+	@python maintainers/remove_dev_suffix.py -r
+
+check-github-token:
+ifndef OTIO_RELEASE_GITHUB_TOKEN
+	$(error \
+		OTIO_RELEASE_GITHUB_TOKEN is not set, unable to update contributors)
+endif
+
+update-contributors: check-github-token
+	@echo "Updating CONTRIBUTORS.md..."
+	@python maintainers/fetch_contributors.py \
+		--repo AcademySoftwareFoundation/OpenTimelineIO \
+		--token $(OTIO_RELEASE_GITHUB_TOKEN)
+
+dev-python-install:
+	@python setup.py install
+
+# make target for preparing a release candidate 
+release: \
+	confirm-release-intent \
+	check-git-status \
+	check-github-token \
+	verify-license \
+	freeze-ci-versions \
+	remove-dev-suffix \
+	format \
+	dev-python-install \
+	version-map-update \
+	test-core \
+	update-contributors 
+	@echo "Release is ready.  Commit, push and open a PR!"
+
+# targets for creating a new version (after making a release, to start the next
+# development cycle)
+bump-otio-minor-version:
+	@python maintainers/bump_version_number.py -i minor
+
+shuffle-core-version-map:
+	@cp -f src/opentimelineio/CORE_VERSION_MAP.cpp \
+		src/opentimelineio/CORE_VERSION_MAP.last.cpp
+	@echo "set the current version map as the next one"
+
+add-dev-suffix:
+	@echo "Adding .dev1 suffix"
+	@python maintainers/remove_dev_suffix.py -a
+
+# make target for starting a new version (after a release is completed)
+start-dev-new-minor-version: \
+	check-git-status \
+	unfreeze-ci-versions \
+	bump-otio-minor-version \
+	shuffle-core-version-map \
+	add-dev-suffix \
+	dev-python-install \
+	version-map-update \
+	test-core
+	@echo "New version made.  Commit, push and open a PR!"

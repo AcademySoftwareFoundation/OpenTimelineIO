@@ -59,8 +59,8 @@ Clip::check_for_valid_media_reference_key(
         {
             *error_status = ErrorStatus(
                 ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY,
-                caller +
-                    " failed because the media references contain an empty string key",
+                caller
+                    + " failed because the media references contain an empty string key",
                 this);
         }
         return false;
@@ -73,8 +73,8 @@ Clip::check_for_valid_media_reference_key(
         {
             *error_status = ErrorStatus(
                 ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY,
-                caller +
-                    " failed because the media references do not contain the active key",
+                caller
+                    + " failed because the media references do not contain the active key",
                 this);
         }
         return false;
@@ -114,7 +114,8 @@ Clip::active_media_reference_key() const noexcept
 
 void
 Clip::set_active_media_reference_key(
-    std::string const& new_active_key, ErrorStatus* error_status) noexcept
+    std::string const& new_active_key,
+    ErrorStatus*       error_status) noexcept
 {
     if (!check_for_valid_media_reference_key(
             "set_active_media_reference_key",
@@ -137,10 +138,11 @@ Clip::set_media_reference(MediaReference* media_reference)
 bool
 Clip::read_from(Reader& reader)
 {
-    return reader.read("media_references", &_media_references) &&
-           reader.read(
-               "active_media_reference_key", &_active_media_reference_key) &&
-           Parent::read_from(reader);
+    return reader.read("media_references", &_media_references)
+           && reader.read(
+               "active_media_reference_key",
+               &_active_media_reference_key)
+           && Parent::read_from(reader);
 }
 
 void

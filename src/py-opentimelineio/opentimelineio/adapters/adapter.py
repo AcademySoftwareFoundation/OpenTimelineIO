@@ -19,13 +19,6 @@ from .. import (
 )
 
 
-try:
-    # Python 3.0+
-    getfullargspec = inspect.getfullargspec
-except AttributeError:
-    getfullargspec = inspect.getargspec
-
-
 @core.register_type
 class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.
@@ -52,14 +45,12 @@ class Adapter(plugins.PythonPlugin):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
         suffixes=None
     ):
         plugins.PythonPlugin.__init__(
             self,
             name,
-            execution_scope,
             filepath
         )
 
@@ -114,7 +105,7 @@ class Adapter(plugins.PythonPlugin):
             not self.has_feature("read_from_file") and
             self.has_feature("read_from_string")
         ):
-            with open(filepath, 'r') as fo:
+            with open(filepath) as fo:
                 contents = fo.read()
             result = self._execute_function(
                 "read_from_string",
@@ -291,11 +282,9 @@ class Adapter(plugins.PythonPlugin):
             "Adapter("
             "{}, "
             "{}, "
-            "{}, "
             "{}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath),
                 repr(self.suffixes),
             )
@@ -305,12 +294,10 @@ class Adapter(plugins.PythonPlugin):
         return (
             "otio.adapter.Adapter("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}, "
             "suffixes={}"
             ")".format(
                 repr(self.name),
-                repr(self.execution_scope),
                 repr(self.filepath),
                 repr(self.suffixes),
             )
@@ -319,7 +306,7 @@ class Adapter(plugins.PythonPlugin):
     def plugin_info_map(self):
         """Adds extra adapter-specific information to call to the parent fn."""
 
-        result = super(Adapter, self).plugin_info_map()
+        result = super().plugin_info_map()
 
         features = collections.OrderedDict()
         result["supported features"] = features
@@ -335,7 +322,7 @@ class Adapter(plugins.PythonPlugin):
                 for fn_name in _FEATURE_MAP[feature]:
                     if hasattr(self.module(), fn_name):
                         fn = getattr(self.module(), fn_name)
-                        args = getfullargspec(fn)
+                        args = inspect.getfullargspec(fn)
                         docs = inspect.getdoc(fn)
                         break
 
@@ -359,13 +346,13 @@ def _with_linked_media_references(
     if not read_otio or not media_linker.from_name(media_linker_name):
         return read_otio
 
-    # not every object the adapter reads has an "each_clip" method, so this
+    # not every object the adapter reads has an "find_clips" method, so this
     # skips objects without one.
-    clpfn = getattr(read_otio, "each_clip", None)
+    clpfn = getattr(read_otio, "find_clips", None)
     if clpfn is None:
         return read_otio
 
-    for cl in read_otio.each_clip():
+    for cl in read_otio.find_clips():
         new_mr = media_linker.linked_media_reference(
             cl,
             media_linker_name,

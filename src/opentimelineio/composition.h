@@ -41,10 +41,14 @@ public:
         ErrorStatus*                    error_status = nullptr);
 
     bool insert_child(
-        int index, Composable* child, ErrorStatus* error_status = nullptr);
+        int          index,
+        Composable*  child,
+        ErrorStatus* error_status = nullptr);
 
     bool set_child(
-        int index, Composable* child, ErrorStatus* error_status = nullptr);
+        int          index,
+        Composable*  child,
+        ErrorStatus* error_status = nullptr);
 
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
@@ -57,18 +61,23 @@ public:
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
     handles_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
     virtual TimeRange range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
     virtual TimeRange trimmed_range_of_child_at_index(
-        int index, ErrorStatus* error_status = nullptr) const;
+        int          index,
+        ErrorStatus* error_status = nullptr) const;
 
     // leaving out reference_space argument for now:
     TimeRange range_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
     optional<TimeRange> trimmed_range_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
     optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
@@ -92,13 +101,13 @@ public:
         TimeRange const& search_range,
         ErrorStatus*     error_status = nullptr) const;
 
-    // Return a vector of all objects that match the given template type.
+    // Find child objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into children.
+    // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> children_if(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
@@ -110,9 +119,11 @@ protected:
     virtual void write_to(Writer&) const;
 
     int _index_of_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
     std::vector<Composition*> _path_from_child(
-        Composable const* child, ErrorStatus* error_status = nullptr) const;
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
 
 private:
     // XXX: python implementation is O(n^2) in number of children
@@ -160,7 +171,7 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-Composition::children_if(
+Composition::find_children(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
@@ -197,15 +208,19 @@ Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(
-                        *search_range, composition, error_status);
+                        *search_range,
+                        composition,
+                        error_status);
                     if (is_error(error_status))
                     {
                         return out;
                     }
                 }
 
-                const auto valid_children = composition->children_if<T>(
-                    error_status, search_range, shallow_search);
+                const auto valid_children = composition->find_children<T>(
+                    error_status,
+                    search_range,
+                    shallow_search);
                 if (is_error(error_status))
                 {
                     return out;

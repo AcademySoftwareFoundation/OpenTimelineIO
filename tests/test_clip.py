@@ -36,9 +36,9 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(cl, decoded)
 
-    def test_each_clip(self):
+    def test_find_clips(self):
         cl = otio.schema.Clip(name="test_clip")
-        self.assertEqual(list(cl.each_clip()), [cl])
+        self.assertEqual(list(cl.find_clips()), [cl])
 
     def test_str(self):
         cl = otio.schema.Clip(name="test_clip")
@@ -144,6 +144,11 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(0.0, cl.available_image_bounds.min.y)
         self.assertEqual(16.0, cl.available_image_bounds.max.x)
         self.assertEqual(9.0, cl.available_image_bounds.max.y)
+
+        # test range exceptions
+        cl.media_reference.available_image_bounds = None
+        with self.assertRaises(otio.exceptions.CannotComputeAvailableRangeError):
+            cl.available_range()
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

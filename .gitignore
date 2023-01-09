@@ -10,6 +10,7 @@ htmlcov
 .vscode/
 xcuserdata/
 .venv/
+.cache
 
 # Pycharm metadata
 .idea/
@@ -18,3 +19,7 @@ xcuserdata/
 docs/api
 docs/_build
 .tox
+cpp_cov_html/
+lcov_html_report/
+*.so
+*.pyd

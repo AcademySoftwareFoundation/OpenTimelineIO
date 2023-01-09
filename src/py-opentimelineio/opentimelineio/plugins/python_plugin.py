@@ -56,26 +56,15 @@ class PythonPlugin(core.SerializableObject):
     def __init__(
         self,
         name=None,
-        execution_scope=None,
         filepath=None,
     ):
         core.SerializableObject.__init__(self)
         self.name = name
-        self.execution_scope = execution_scope
         self.filepath = filepath
         self._json_path = None
         self._module = None
 
     name = core.serializable_field("name", doc="Adapter name.")
-    execution_scope = core.serializable_field(
-        "execution_scope",
-        str,
-        doc=(
-            "Describes whether this adapter is executed in the current python"
-            " process or in a subshell.  Options are: "
-            "['in process', 'out of process']."
-        )
-    )
     filepath = core.serializable_field(
         "filepath",
         str,
@@ -126,7 +115,7 @@ class PythonPlugin(core.SerializableObject):
         with file_obj:
             # this will reload the module if it has already been loaded.
             mod = imp.load_module(
-                "opentimelineio.{}.{}".format(namespace, self.name),
+                f"opentimelineio.{namespace}.{self.name}",
                 file_obj,
                 pathname,
                 description
@@ -148,6 +137,6 @@ class PythonPlugin(core.SerializableObject):
         # collects the error handling into a common place.
         if not hasattr(self.module(), func_name):
             raise exceptions.AdapterDoesntSupportFunctionError(
-                "Sorry, {} doesn't support {}.".format(self.name, func_name)
+                f"Sorry, {self.name} doesn't support {func_name}."
             )
         return (getattr(self.module(), func_name)(**kwargs))

@@ -6,8 +6,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
+#include "py-opentimelineio/bindings-common/casters.h"
 #include "opentimelineio/any.h"
-#include "opentimelineio/optional.h"
 #include "opentimelineio/stringUtils.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/vectorIndexing.h"
@@ -17,13 +17,6 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
-namespace pybind11 { namespace detail {
-    template<typename T> struct type_caster<optional<T>>
-        : public optional_caster<optional<T>> {};
-
-    template<> struct type_caster<nullopt_t>
-        : public void_caster<nullopt_t> {};
-}}
 
 template <typename T>
 struct managing_ptr {
@@ -127,7 +120,6 @@ struct MutableSequencePyAPI : public V {
 
         pybind11::class_<This::Iterator>(m, (name + "Iterator").c_str())
             .def("__iter__", &This::Iterator::iter)
-            .def("next", &This::Iterator::next)
             .def("__next__", &This::Iterator::next);
 
         pybind11::class_<This>(m, name.c_str())
@@ -161,27 +153,5 @@ pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
-std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o);
 
 bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
-
-template <typename T>
-std::vector<T> py_to_vector(pybind11::object const& o) {
-    std::vector<SerializableObject*> vso = py_to_so_vector(o);
-    std::vector<T> result;
-    
-    result.reserve(vso.size());
-    
-    for (auto e: vso) {
-        if (T t = dynamic_cast<T>(e)) {
-            result.push_back(t);
-            continue;
-        }
-
-        throw pybind11::type_error(string_printf("list has element of type %s; expected type %s",
-                                                 type_name_for_error_message(typeid(*e)).c_str(),
-                                                 type_name_for_error_message<T>().c_str()));
-    }
-
-    return result;
-}

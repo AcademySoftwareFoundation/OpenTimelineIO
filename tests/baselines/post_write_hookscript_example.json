@@ -1,6 +1,5 @@
 {
     "OTIO_SCHEMA" : "HookScript.1",
     "name" : "post write example hook",
-    "execution_scope" : "in process",
     "filepath" : "post_write_example.py"
 }

@@ -12,18 +12,7 @@ import numbers
 import os
 import sys
 
-try:
-    # Python 2
-    text_type = unicode
-except NameError:
-    # Python 3
-    text_type = str
-
-try:
-    # Python 3.3+
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc
+import collections
 import fractions
 import opentimelineio as otio
 
@@ -66,7 +55,7 @@ class AAFAdapterError(otio.exceptions.OTIOError):
 
 
 def _get_parameter(item, parameter_name):
-    values = dict((value.name, value) for value in item.parameters.value)
+    values = {value.name: value for value in item.parameters.value}
     return values.get(parameter_name)
 
 
@@ -99,9 +88,7 @@ def _get_class_name(item):
 
 
 def _transcribe_property(prop, owner=None):
-    # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
-    # so we have to use type(u"") which works in both Python 2 and 3.
-    if isinstance(prop, (str, type(u""), numbers.Integral, float, dict)):
+    if isinstance(prop, (str, numbers.Integral, float, dict)):
         return prop
     elif isinstance(prop, set):
         return list(prop)
@@ -371,7 +358,7 @@ def _extract_timecode_info(mob):
 def _add_child(parent, child, source):
     if child is None:
         if debug:
-            print("Adding null child? {}".format(source))
+            print(f"Adding null child? {source}")
     elif isinstance(child, otio.schema.Marker):
         parent.markers.append(child)
     else:
@@ -409,7 +396,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     # complex than OTIO.
 
     if isinstance(item, aaf2.content.ContentStorage):
-        msg = "Creating SerializableCollection for {}".format(_encoded_name(item))
+        msg = f"Creating SerializableCollection for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         result = otio.schema.SerializableCollection()
 
@@ -419,7 +406,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             _add_child(result, child, mob)
 
     elif isinstance(item, aaf2.mobs.Mob):
-        _transcribe_log("Creating Timeline for {}".format(_encoded_name(item)), indent)
+        _transcribe_log(f"Creating Timeline for {_encoded_name(item)}", indent)
         result = otio.schema.Timeline()
 
         for slot in item.slots:
@@ -442,7 +429,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 _encoded_name(item), clipUsage
             )
         else:
-            itemMsg = "Creating SourceClip for {}".format(_encoded_name(item))
+            itemMsg = f"Creating SourceClip for {_encoded_name(item)}"
 
         _transcribe_log(itemMsg, indent)
         result = otio.schema.Clip()
@@ -599,7 +586,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         result.out_offset = otio.opentime.RationalTime(out_offset, edit_rate)
 
     elif isinstance(item, aaf2.components.Filler):
-        _transcribe_log("Creating Gap for {}".format(_encoded_name(item)), indent)
+        _transcribe_log(f"Creating Gap for {_encoded_name(item)}", indent)
         result = otio.schema.Gap()
 
         length = item.length
@@ -609,7 +596,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         )
 
     elif isinstance(item, aaf2.components.NestedScope):
-        msg = "Creating Stack for NestedScope for {}".format(_encoded_name(item))
+        msg = f"Creating Stack for NestedScope for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         # TODO: Is this the right class?
         result = otio.schema.Stack()
@@ -619,7 +606,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             _add_child(result, child, slot)
 
     elif isinstance(item, aaf2.components.Sequence):
-        msg = "Creating Track for Sequence for {}".format(_encoded_name(item))
+        msg = f"Creating Track for Sequence for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
@@ -639,13 +626,13 @@ def _transcribe(item, parents, edit_rate, indent=0):
             _add_child(result, child, component)
 
     elif isinstance(item, aaf2.components.OperationGroup):
-        msg = "Creating operationGroup for {}".format(_encoded_name(item))
+        msg = f"Creating operationGroup for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         result = _transcribe_operation_group(item, parents, metadata,
                                              edit_rate, indent + 2)
 
     elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
-        msg = "Creating Track for TimelineMobSlot for {}".format(_encoded_name(item))
+        msg = f"Creating Track for TimelineMobSlot for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
@@ -654,7 +641,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.mobslots.MobSlot):
-        msg = "Creating Track for MobSlot for {}".format(_encoded_name(item))
+        msg = f"Creating Track for MobSlot for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
@@ -671,7 +658,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         pass
 
     elif isinstance(item, aaf2.components.ScopeReference):
-        msg = "Creating Gap for ScopedReference for {}".format(_encoded_name(item))
+        msg = f"Creating Gap for ScopedReference for {_encoded_name(item)}"
         _transcribe_log(msg, indent)
         # TODO: is this like FILLER?
 
@@ -687,7 +674,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         event_mobs = [p for p in parents if isinstance(p, aaf2.mobslots.EventMobSlot)]
         if event_mobs:
             _transcribe_log(
-                "Create marker for '{}'".format(_encoded_name(item)), indent
+                f"Create marker for '{_encoded_name(item)}'", indent
             )
 
             result = otio.schema.Marker()
@@ -731,7 +718,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             )
 
     elif isinstance(item, aaf2.components.Selector):
-        msg = "Transcribe selector for  {}".format(_encoded_name(item))
+        msg = f"Transcribe selector for  {_encoded_name(item)}"
         _transcribe_log(msg, indent)
 
         selected = item.getvalue('Selected')
@@ -766,7 +753,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             # Perform a check here to make sure no potential Gap objects
             # are slipping through the cracks
             if isinstance(result, otio.schema.Gap):
-                err = "AAF Selector parsing error: {}".format(type(item))
+                err = f"AAF Selector parsing error: {type(item)}"
                 raise AAFAdapterError(err)
 
             # A Selector can have a set of alternates to handle multiple options for an
@@ -824,7 +811,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, collections_abc.Iterable):
+    elif isinstance(item, collections.abc.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
         _transcribe_log(msg, indent)
@@ -836,7 +823,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         # For everything else, we just ignore it.
         # To see what is being ignored, turn on the debug flag
         if debug:
-            print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
+            print(f"SKIPPING: {type(item)}: {item} -- {result}")
 
     # Did we get anything? If not, we're done
     if result is None:
@@ -911,7 +898,7 @@ def _find_timecode_track_start(track):
         start = aaf_metadata["Segment"]["Start"]
     except KeyError as e:
         raise AAFAdapterError(
-            "Timecode missing '{}'".format(e)
+            f"Timecode missing '{e}'"
         )
 
     if edit_rate.denominator == 1:
@@ -1221,11 +1208,11 @@ def _attach_markers(collection):
 
     """
     # iterate all timeline objects
-    for timeline in collection.each_child(descended_from_type=otio.schema.Timeline):
+    for timeline in collection.find_children(descended_from_type=otio.schema.Timeline):
         tracks_map = {}
 
         # build track mapping
-        for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        for track in timeline.find_children(descended_from_type=otio.schema.Track):
             metadata = track.metadata.get("AAF", {})
             slot_id = metadata.get("SlotID")
             track_number = metadata.get("PhysicalTrackNumber")
@@ -1235,7 +1222,8 @@ def _attach_markers(collection):
             tracks_map[(int(slot_id), int(track_number))] = track
 
         # iterate all tracks for their markers and attach them to the matching item
-        for current_track in timeline.each_child(descended_from_type=otio.schema.Track):
+        for current_track in timeline.find_children(
+                descended_from_type=otio.schema.Track):
             for marker in list(current_track.markers):
                 metadata = marker.metadata.get("AAF", {})
                 slot_id = metadata.get("AttachedSlotID")

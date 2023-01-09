@@ -20,8 +20,8 @@ Effect::~Effect()
 bool
 Effect::read_from(Reader& reader)
 {
-    return reader.read("effect_name", &_effect_name) &&
-           Parent::read_from(reader);
+    return reader.read("effect_name", &_effect_name)
+           && Parent::read_from(reader);
 }
 
 void

@@ -80,8 +80,8 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
 }
 
 TimeRange
-Stack::trimmed_range_of_child_at_index(
-    int index, ErrorStatus* error_status) const
+Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
+    const
 {
     auto range = range_of_child_at_index(index, error_status);
     if (is_error(error_status) || !source_range())
@@ -91,7 +91,8 @@ Stack::trimmed_range_of_child_at_index(
 
     const TimeRange sr = *source_range();
     return TimeRange(
-        sr.start_time(), std::min(range.duration(), sr.duration()));
+        sr.start_time(),
+        std::min(range.duration(), sr.duration()));
 }
 
 TimeRange
@@ -113,12 +114,12 @@ Stack::available_range(ErrorStatus* error_status) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Stack::clip_if(
+Stack::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return children_if<Clip>(error_status, search_range, shallow_search);
+    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 optional<Imath::Box2d>
@@ -126,7 +127,7 @@ Stack::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<Imath::Box2d> box;
     bool                   found_first_child = false;
-    for (auto clip: children_if<Clip>(error_status))
+    for (auto clip: find_children<Clip>(error_status))
     {
         optional<Imath::Box2d> child_box;
         if (auto clip_box = clip->available_image_bounds(error_status))

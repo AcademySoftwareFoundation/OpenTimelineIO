@@ -12,7 +12,6 @@ exclude .readthedocs.yml
 exclude readthedocs-conda.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
-exclude .travis.yml
 exclude *.pdf
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
@@ -22,7 +21,10 @@ exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude */.DS_Store
 exclude .clang-format
+exclude OTIO_VERSION.json
 global-exclude *.pyc
+global-exclude *.so
+global-exclude *.pyd
 
 prune maintainers
 prune tsc

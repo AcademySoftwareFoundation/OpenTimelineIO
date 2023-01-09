@@ -14,7 +14,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
     static void throw_array_was_deleted() {
-        throw py::value_error("underlying C++ AnyVector object has been destroyed");
+        throw py::value_error("Underlying C++ AnyVector object has been destroyed");
     }
 
     struct Iterator {
@@ -46,7 +46,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
         AnyVector& v = fetch_any_vector();
         index = adjusted_vector_index(index, v);
         if (index < 0 || index >= int(v.size())) {
-            throw py::index_error();
+            throw py::index_error("list index out of range");
         }
         return any_to_py(v[index]);
     }
@@ -55,7 +55,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
         AnyVector& v = fetch_any_vector();
         index = adjusted_vector_index(index, v);
         if (index < 0 || index >= int(v.size())) {
-            throw py::index_error();
+            throw py::index_error("list assignment index out of range");
         }
         std::swap(v[index], pyAny->a);
     }
@@ -75,7 +75,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
     void del_item(int index) {
         AnyVector& v = fetch_any_vector();
         if (v.empty()) {
-            throw py::index_error();
+            throw py::index_error("list index out of range");
         }
 
         index = adjusted_vector_index(index, v);

@@ -75,7 +75,7 @@ def main():
 
         # attach the reference to the clip
         cl = otio.schema.Clip(
-            name="Clip{}".format(i + 1),
+            name=f"Clip{i + 1}",
             media_reference=ref,
 
             # the source range represents the range of the media that is being

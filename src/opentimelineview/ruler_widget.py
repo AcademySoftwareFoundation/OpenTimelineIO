@@ -15,7 +15,7 @@ RULER_SIZE = 10
 class FrameNumber(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, text, position, *args, **kwargs):
-        super(FrameNumber, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.frameNumber = QtWidgets.QGraphicsSimpleTextItem(self)
         self.frameNumber.setText("%s" % text)
         self.setBrush(
@@ -79,7 +79,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         poly.append(QtCore.QPointF(0, RULER_SIZE))
         poly.append(QtCore.QPointF(-0.5 * RULER_SIZE, 0.5 * RULER_SIZE))
         poly.append(QtCore.QPointF(-0.5 * RULER_SIZE, -0.5 * RULER_SIZE))
-        super(Ruler, self).__init__(poly, *args, **kwargs)
+        super().__init__(poly, *args, **kwargs)
 
         # to retrieve tracks and its children
         self.composition = composition
@@ -108,7 +108,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
             menu.addAction(label, __callback)
         menu.exec_(event.screenPos())
 
-        super(Ruler, self).contextMenuEvent(event)
+        super().contextMenuEvent(event)
 
     def set_time_space_callback(self, time_space):
         self._time_space = time_space
@@ -122,19 +122,19 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                                    track_widgets.MARKER_SIZE))
         self.update_frame()
 
-        super(Ruler, self).mouseMoveEvent(mouse_event)
+        super().mouseMoveEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
         self.setSelected(False)
-        super(Ruler, self).mouseReleaseEvent(mouse_event)
+        super().mouseReleaseEvent(mouse_event)
 
     def hoverEnterEvent(self, event):
         self.setSelected(True)
-        super(Ruler, self).hoverEnterEvent(event)
+        super().hoverEnterEvent(event)
 
     def hoverLeaveEvent(self, event):
         self.setSelected(False)
-        super(Ruler, self).hoverLeaveEvent(event)
+        super().hoverLeaveEvent(event)
 
     def init(self):
         for track_item in self.composition.items():
@@ -161,7 +161,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         subclass in order to add the rule to the timeSlider item.
         '''
         timeSlider.add_ruler(self)
-        super(Ruler, self).setParentItem(timeSlider)
+        super().setParentItem(timeSlider)
 
     def map_to_time_space(self, item):
         '''
@@ -182,7 +182,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                      track_widgets.CURRENT_ZOOM_LEVEL *
                      track_widgets.TRACK_NAME_WIDGET_WIDTH) / width
         else:
-            print("Warning: zero width item: {}.".format(item))
+            print(f"Warning: zero width item: {item}.")
 
         # The 'if' condition should be : ratio < 0 or ration >= 1
         # However, we are cheating in order to display the last frame of
@@ -263,7 +263,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
     def paint(self, *args, **kwargs):
         new_args = [args[0],
                     QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(Ruler, self).paint(*new_args, **kwargs)
+        super().paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -271,7 +271,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                 QtGui.QColor(0, 255, 0, 255) if self.isSelected()
                 else QtGui.QColor(0, 0, 0, 255)
             )
-        return super(Ruler, self).itemChange(change, value)
+        return super().itemChange(change, value)
 
     def counteract_zoom(self, zoom_level=1.0):
         self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))

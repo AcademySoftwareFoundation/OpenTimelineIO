@@ -4,72 +4,50 @@
         {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "fcpx_xml",
-            "execution_scope": "in process",
             "filepath": "fcpx_xml.py",
             "suffixes": ["fcpxml"]
         },
         {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "hls_playlist",
-            "execution_scope": "in process",
             "filepath": "hls_playlist.py",
             "suffixes": ["m3u8"]
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "rv_session",
-            "execution_scope" : "in process",
-            "filepath" : "rv.py",
-            "suffixes" : ["rv"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "maya_sequencer",
-            "execution_scope" : "in process",
             "filepath" : "maya_sequencer.py",
             "suffixes" : ["ma","mb"]
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "ale",
-            "execution_scope" : "in process",
             "filepath" : "ale.py",
             "suffixes" : ["ale"]
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "burnins",
-            "execution_scope" : "in process",
             "filepath" : "burnins.py",
             "suffixes" : []
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "AAF",
-            "execution_scope" : "in process",
             "filepath" : "advanced_authoring_format.py",
             "suffixes" : ["aaf"]
         },
         {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "xges",
-            "execution_scope": "in process",
             "filepath": "xges.py",
             "suffixes": ["xges"]
-        },
-        {
-            "OTIO_SCHEMA": "Adapter.1",
-            "name": "kdenlive",
-            "execution_scope": "in process",
-            "filepath": "kdenlive.py",
-            "suffixes": ["kdenlive"]
         }
     ],
     "schemadefs" : [
         {
             "OTIO_SCHEMA" : "SchemaDef.1",
             "name" : "xges",
-            "execution_scope" : "in process",
             "filepath" : "xges.py"
         }
     ]

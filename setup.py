@@ -12,10 +12,10 @@ For more information:
 
 import multiprocessing
 import os
+import shlex
 import sys
 import platform
 import subprocess
-import unittest
 import tempfile
 import shutil
 
@@ -38,12 +38,11 @@ PLAT_TO_CMAKE = {
 
 def _debugInstance(x):
     for a in sorted(dir(x)):
-        print("%s:     %s" % (a, getattr(x, a)))
+        print("{}:     {}".format(a, getattr(x, a)))
 
 
-class CMakeExtension(Extension):
-    def __init__(self, name):
-        Extension.__init__(self, name, sources=[])
+def join_args(args):
+    return ' '.join(map(shlex.quote, args))
 
 
 class OTIO_build_ext(setuptools.command.build_ext.build_ext):
@@ -52,12 +51,24 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         super(setuptools.command.build_ext.build_ext, self).initialize_options()
     """
 
+    built = False
+
     def run(self):
-        # This works around the fact that we build _opentime and _otio
-        # extensions as a one-shot cmake invocation. Usually we'd build each
-        # separately using build_extension.
         self.announce('running OTIO build_ext', level=2)
-        self.build()
+        # Let the original build_ext class do its job.
+        # This is rather important because build_ext.run takes care of a
+        # couple of things, one of which is to copy the built files into
+        # the source tree (in src/py-opentimelineio/opentimelineio)
+        # when building in editable mode.
+        super().run()
+
+    def build_extension(self, _ext: Extension):
+        # This works around the fact that we build _opentime and _otio
+        # extensions as a one-shot cmake invocation. Setuptools calls
+        # build_extension for each Extension registered in the setup function.
+        if not self.built:
+            self.build()
+            self.built = True
 
     def build(self):
         self.build_temp_dir = (
@@ -74,6 +85,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.cmake_preflight_check()
         self.cmake_generate()
         self.cmake_install()
+
+    def is_windows(self):
+        return platform.system() == "Windows"
+
+    def is_mingw(self):
+        return self.plat_name.startswith('mingw')
 
     def generate_cmake_arguments(self):
         # Use the provided build dir so setuptools will be able to locate and
@@ -99,9 +116,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             # Python modules wil be installed by setuptools.
             '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
-
-        if platform.system() == "Windows":
-            cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
+        if self.is_windows():
+            if self.is_mingw():
+                cmake_args += ['-G Unix Makefiles']
+            else:
+                cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
 
         cxx_coverage = bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
         if cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
@@ -150,7 +169,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
     def cmake_generate(self):
         self.announce('running cmake generation', level=2)
+
         cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
+        self.announce(join_args(cmake_args), level=2)
+
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,
@@ -159,19 +181,22 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
     def cmake_install(self):
         self.announce('running cmake build', level=2)
-        if platform.system() == "Windows":
+        if self.is_windows() and not self.is_mingw():
             multi_proc = '/m'
         else:
-            multi_proc = '-j{}'.format(multiprocessing.cpu_count())
+            multi_proc = f'-j{multiprocessing.cpu_count()}'
 
+        cmake_args = [
+            'cmake',
+            '--build', '.',
+            '--target', 'install',
+            '--config', self.build_config,
+            '--', multi_proc,
+        ]
+
+        self.announce(join_args(cmake_args), level=2)
         subprocess.check_call(
-            [
-                'cmake',
-                '--build', '.',
-                '--target', 'install',
-                '--config', self.build_config,
-                '--', multi_proc,
-            ],
+            cmake_args,
             cwd=self.build_temp_dir,
             env=os.environ.copy()
         )
@@ -179,11 +204,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 
 # check the python version first
 if (
-    sys.version_info[0] < 2 or
-    (sys.version_info[0] == 2 and sys.version_info[1] < 7)
+    sys.version_info[0] < 3 or
+    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
 ):
     sys.exit(
-        'OpenTimelineIO requires python2.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.7 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -193,7 +218,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.15.0.dev1",
+    "version": "0.16.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Modified Apache 2.0 License',
@@ -224,7 +249,7 @@ def _append_version_info_to_init_scripts(build_lib):
         )
 
         # get the base data from the original file
-        with open(source_file, 'r') as fi:
+        with open(source_file) as fi:
             src_data = fi.read()
 
         # write that + the suffix to the target file
@@ -237,20 +262,15 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
     """Stamps PROJECT_METADATA into __init__ files."""
 
     def run(self):
-        setuptools.command.build_py.build_py.run(self)
+        super().run()
 
-        if not self.dry_run:
+        if not self.dry_run and not self.editable_mode:
+            # Only run when not in dry-mode (a dry run should not have any side effect)
+            # and in non-editable mode. We don't want to edit files when in editable
+            # mode because that could lead to modifications to the source files.
+            # Note that setuptools will set self.editable_mode to True
+            # when "pip install -e ." is run.
             _append_version_info_to_init_scripts(self.build_lib)
-
-
-def test_otio():
-    """Discovers and runs tests"""
-    try:
-        # Clear the environment of a preset media linker
-        del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
-    except KeyError:
-        pass
-    return unittest.TestLoader().discover('tests')
 
 
 # copied from first paragraph of README.md
@@ -291,13 +311,12 @@ setup(
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: Other/Proprietary License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -322,8 +341,13 @@ setup(
     ),
 
     ext_modules=[
-        CMakeExtension('_opentimelineio'),
-        CMakeExtension('_opentime'),
+        # The full and correct module name is required here because
+        # setuptools needs to resolve the name to find the built file
+        # and copy it into the source tree. (Because yes, editable install
+        # means that the install should point to the source tree, which
+        # means the .sos need to also be there alongside the python files).
+        Extension('opentimelineio._otio', sources=[]),
+        Extension('opentimelineio._opentime', sources=[]),
     ],
 
     package_dir={
@@ -333,23 +357,20 @@ setup(
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
+    python_requires='>=3.7, !=3.9.0',  # noqa: E501
 
     install_requires=[
-        'pyaaf2~=1.4.0',
-        'backports.tempfile; python_version<"3.0"',
-        # Enables the builtins module in the XGES adapter
-        'future; python_version<"3.0"',
-        # Used in the otioz adapter to conform to unix paths
-        'pathlib2; python_version<"3.0"'
+        'pyaaf2>=1.4,<1.7',
+        'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={
         'console_scripts': [
-            'otioview = opentimelineview.console:main',
             'otiocat = opentimelineio.console.otiocat:main',
             'otioconvert = opentimelineio.console.otioconvert:main',
-            'otiostat = opentimelineio.console.otiostat:main',
             'otiopluginfo = opentimelineio.console.otiopluginfo:main',
+            'otiostat = opentimelineio.console.otiostat:main',
+            'otiotool = opentimelineio.console.otiotool:main',
+            'otioview = opentimelineview.console:main',
             (
                 'otioautogen_serialized_schema_docs = '
                 'opentimelineio.console.autogen_serialized_datamodel:main'
@@ -368,12 +389,6 @@ setup(
             'PySide6~=6.2; platform.machine=="aarch64"'
         ]
     },
-
-    test_suite='setup.test_otio',
-
-    tests_require=[
-        'mock;python_version<"3.3"',
-    ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

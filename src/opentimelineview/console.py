@@ -80,7 +80,7 @@ def _parsed_args():
 
 class TimelineWidgetItem(QtWidgets.QListWidgetItem):
     def __init__(self, timeline, *args, **kwargs):
-        super(TimelineWidgetItem, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.timeline = timeline
 
 
@@ -94,7 +94,7 @@ class Main(QtWidgets.QMainWindow):
             *args,
             **kwargs
     ):
-        super(Main, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.adapter_argument_map = adapter_argument_map or {}
         self.media_linker = media_linker
         self.media_linker_argument_map = media_linker_argument_map
@@ -169,14 +169,14 @@ class Main(QtWidgets.QMainWindow):
 
         extensions = otio.adapters.suffixes_with_defined_adapters(read=True)
 
-        extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
+        extensions_string = ' '.join(f'*.{x}' for x in extensions)
 
         path = str(
             QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 'Open OpenTimelineIO',
                 start_folder,
-                'OTIO ({extensions})'.format(extensions=extensions_string)
+                f'OTIO ({extensions_string})'
             )[0]
         )
 
@@ -185,7 +185,7 @@ class Main(QtWidgets.QMainWindow):
 
     def load(self, path):
         self._current_file = path
-        self.setWindowTitle('OpenTimelineIO View: "{}"'.format(path))
+        self.setWindowTitle(f'OpenTimelineIO View: "{path}"')
         self.details_widget.set_item(None)
         self.tracks_widget.clear()
         file_contents = otio.adapters.read_from_file(
@@ -259,7 +259,7 @@ class Main(QtWidgets.QMainWindow):
             self.move(frame_geo.topLeft())
 
     def show(self):
-        super(Main, self).show()
+        super().show()
         self.timeline_widget.frame_all()
 
 

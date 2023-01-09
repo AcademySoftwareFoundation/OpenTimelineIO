@@ -77,7 +77,7 @@ int conform_timeline(
     int count = 0;
     
     otio::ErrorStatus error_status;
-    const auto clips = timeline->clip_if(&error_status);
+    const auto clips = timeline->find_clips(&error_status);
     if (otio::is_error(error_status))
     {
         examples::print_error(error_status);
@@ -130,7 +130,7 @@ int main(int argc, char** argv)
         examples::print_error(error_status);
         exit(1);
     }
-    const auto clips = timeline->clip_if(&error_status);
+    const auto clips = timeline->find_clips(&error_status);
     if (otio::is_error(error_status))
     {
         examples::print_error(error_status);

@@ -13,13 +13,7 @@ from .. import (
     url_utils,
 )
 
-
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
+import urllib.parse as urlparse
 
 
 # versioning
@@ -101,11 +95,11 @@ def _prepped_otio_for_bundle_and_manifest(
     invalid_files = set()
 
     # result_otio is manipulated in place
-    for cl in result_otio.each_clip():
+    for cl in result_otio.find_clips():
         if media_policy == MediaReferencePolicy.AllMissing:
             cl.media_reference = reference_cloned_and_missing(
                 cl.media_reference,
-                "{} specified as the MediaReferencePolicy".format(media_policy)
+                f"{media_policy} specified as the MediaReferencePolicy"
             )
             continue
 

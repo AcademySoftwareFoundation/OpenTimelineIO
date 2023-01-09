@@ -8,14 +8,7 @@ import opentimelineio as otio
 from tests import baseline_reader, utils
 
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
-
+import tempfile
 
 """Unit tests for the adapter plugin system."""
 
@@ -30,7 +23,7 @@ class TestAdapterSuffixes(unittest.TestCase):
         result = otio.adapters.suffixes_with_defined_adapters()
         self.assertIsNotNone(result)
         self.assertNotEqual(result, [])
-        self.assertNotEqual(result, set([]))
+        self.assertNotEqual(result, set())
 
 
 class TestPluginAdapters(unittest.TestCase):
@@ -45,21 +38,18 @@ class TestPluginAdapters(unittest.TestCase):
 
     def test_plugin_adapter(self):
         self.assertEqual(self.adp.name, "example")
-        self.assertEqual(self.adp.execution_scope, "in process")
         self.assertEqual(self.adp.filepath, "example.py")
-        self.assertEqual(self.adp.suffixes[0], u"example")
-        self.assertEqual(list(self.adp.suffixes), [u'example'])
+        self.assertEqual(self.adp.suffixes[0], "example")
+        self.assertEqual(list(self.adp.suffixes), ['example'])
 
         self.assertMultiLineEqual(
             str(self.adp),
             "Adapter("
             "{}, "
             "{}, "
-            "{}, "
             "{}"
             ")".format(
                 repr(self.adp.name),
-                repr(self.adp.execution_scope),
                 repr(self.adp.filepath),
                 repr(self.adp.suffixes),
             )
@@ -68,12 +58,10 @@ class TestPluginAdapters(unittest.TestCase):
             repr(self.adp),
             "otio.adapter.Adapter("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}, "
             "suffixes={}"
             ")".format(
                 repr(self.adp.name),
-                repr(self.adp.execution_scope),
                 repr(self.adp.filepath),
                 repr(self.adp.suffixes),
             )
@@ -222,7 +210,8 @@ class TestPluginManifest(unittest.TestCase):
             if bak_env is not None:
                 os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
             else:
-                del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+                if "OTIO_PLUGIN_MANIFEST_PATH" in os.environ:
+                    del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
     def test_find_manifest_by_environment_variable(self):
         basename = "unittest.plugin_manifest.json"
@@ -300,7 +289,6 @@ class TestPluginManifest(unittest.TestCase):
                     {
                         "OTIO_SCHEMA": "Adapter.1",
                         "name": "local_json",
-                        "execution_scope": "in process",
                         "filepath": "example.py",
                         "suffixes": ["example"]
                     }

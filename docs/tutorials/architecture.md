@@ -109,7 +109,7 @@ A range in time.  Encodes the start time and the duration, meaning that end_time
 
 OpenTimelineIO includes several adapters for reading and writing from other file formats. The `otio.adapters` module has convenience functions that will auto-detect which adapter to use, or you can specify the one you want.
 
-Adapters can be added to the system (outside of the distribution) via JSON files that can be placed on the `OTIO_PLUGIN_MANIFEST_PATH` environment variable to be made available to OTIO.
+Adapters can be added to the system (outside of the distribution) via JSON files that can be placed on the {term}`OTIO_PLUGIN_MANIFEST_PATH` environment variable to be made available to OTIO.
 
 Most common usage only cares about:
 - `timeline = otio.adapters.read_from_file(filepath)`
@@ -127,7 +127,7 @@ For more information, see [How To Write An OpenTimelineIO Adapter](write-an-adap
 
 Media linkers run on the otio file after an adapter calls `.read_from_file()` or `.read_from_string()`.  They are intended to replace media references that exist after the adapter runs (which depending on the adapter are likely to be `MissingReference`) with ones that point to valid files in the local system.  Since media linkers are plugins, they can use proprietary knowledge or context and do not need to be part of OTIO itself.
 
-You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file()` or `.read_from_string()` or via the `OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
+You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file()` or `.read_from_string()` or via the {term}`OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
 
 For more information about writing media linkers, see [How To Write An OpenTimelineIO Media Linker](write-a-media-linker).
 

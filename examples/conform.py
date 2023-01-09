@@ -72,7 +72,7 @@ def _find_matching_media(name, folder):
     # shot = asset_database.find_shot(clip.metadata['mystudio']['shotID'])
     # new_media = shot.latest_render(format='mov')
 
-    matches = glob.glob("{0}/{1}.*".format(folder, name))
+    matches = glob.glob(f"{folder}/{name}.*")
     matches = list(map(os.path.abspath, matches))
 
     if not matches:
@@ -82,7 +82,7 @@ def _find_matching_media(name, folder):
         return matches[0]
     else:
         print(
-            "WARNING: {0} matches found for clip '{1}', using '{2}'".format(
+            "WARNING: {} matches found for clip '{}', using '{}'".format(
                 len(matches),
                 name,
                 matches[0]
@@ -99,7 +99,7 @@ def _conform_timeline(timeline, folder):
 
     count = 0
 
-    for clip in timeline.each_clip():
+    for clip in timeline.find_clips():
         # look for a media file that matches the clip's name
         new_path = _find_matching_media(clip.name, folder)
 
@@ -123,12 +123,12 @@ def main():
 
     timeline = otio.adapters.read_from_file(args.input)
     count = _conform_timeline(timeline, args.folder)
-    print("Relinked {0} clips to new media.".format(count))
+    print(f"Relinked {count} clips to new media.")
     otio.adapters.write_to_file(timeline, args.output)
     print(
         "Saved {} with {} clips.".format(
             args.output,
-            len(list(timeline.each_clip()))
+            len(list(timeline.find_clips()))
         )
     )
 

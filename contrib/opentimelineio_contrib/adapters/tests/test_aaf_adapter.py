@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
@@ -16,12 +15,7 @@ from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
     AAFValidationError
 )
 
-try:
-    # python2
-    import StringIO as io
-except ImportError:
-    # python3
-    import io
+import io
 
 
 TRANSCRIPTION_RESULT = """---
@@ -205,16 +199,6 @@ MARKER_OVER_AUDIO_PATH = os.path.join(
 )
 
 
-def safe_str(maybe_str):
-    """To help with testing between python 2 and 3, this function attempts to
-    decode a string, and if it cannot decode it just returns the string.
-    """
-    try:
-        return maybe_str.decode('utf-8')
-    except AttributeError:
-        return maybe_str
-
-
 try:
     lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
     if lib_path and lib_path not in sys.path:
@@ -258,7 +242,7 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(len(timeline.audio_tracks()), 2)
 
-        clips = list(video_track.each_clip())
+        clips = video_track.find_clips()
 
         self.assertEqual(
             [
@@ -338,7 +322,7 @@ class AAFReaderTests(unittest.TestCase):
             ]
         )
 
-        clips = list(video_track.each_clip())
+        clips = video_track.find_clips()
 
         self.assertEqual(
             [item.name for item in video_track],
@@ -442,7 +426,7 @@ class AAFReaderTests(unittest.TestCase):
         video_track = video_tracks[0]
         self.assertEqual(len(video_track), 12)
 
-        clips = list(video_track.each_clip())
+        clips = video_track.find_clips()
         self.assertEqual(len(clips), 4)
 
         self.assertEqual(
@@ -600,7 +584,7 @@ class AAFReaderTests(unittest.TestCase):
         correctWords = [
             "test1",
             "testing 1 2 3",
-            u"Eyjafjallaj\xf6kull",
+            "Eyjafjallaj\xf6kull",
             "'s' \"d\" `b`",
             None,   # Gap
             None
@@ -647,7 +631,7 @@ class AAFReaderTests(unittest.TestCase):
             t.name = ""
             t.metadata.pop("AAF", None)
 
-            for c in t.each_child():
+            for c in t.find_children():
                 if hasattr(c, "media_reference") and c.media_reference:
                     mr = c.media_reference
                     mr.metadata.get("AAF", {}).pop('LastModified', None)
@@ -658,7 +642,7 @@ class AAFReaderTests(unittest.TestCase):
                 meta.pop('StartTime', None)
 
             # We don't care about Gap start times, only their duration matters
-            for g in t.each_child(descended_from_type=otio.schema.Gap):
+            for g in t.find_children(descended_from_type=otio.schema.Gap):
                 dur = g.source_range.duration
                 rate = g.source_range.start_time.rate
                 g.source_range = otio.opentime.TimeRange(
@@ -882,20 +866,20 @@ class AAFReaderTests(unittest.TestCase):
     def test_utf8_names(self):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
-            (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
-            safe_str(timeline.name)
+            ("Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
+            timeline.name
         )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
         self.assertEqual(
-            safe_str(first_clip.name),
-            (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
+            first_clip.name,
+            ("Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(
             (
                 first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]
             ).encode('utf-8'),
-            (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
+            ("Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode()
         )
 
     def test_multiple_top_level_mobs(self):
@@ -981,7 +965,7 @@ class AAFReaderTests(unittest.TestCase):
         # `Usage_SubClip` value
         subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
         subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
-        for clip in subclip_timeline.each_clip():
+        for clip in subclip_timeline.find_clips():
             self.assertEqual(
                 clip.metadata.get("AAF", {}).get("SourceMobUsage"),
                 subclip_usages[clip.name]
@@ -996,7 +980,7 @@ class AAFReaderTests(unittest.TestCase):
             "t-hawk (loop)-HD.mp4": "",
             "tech.fux (loop)-HD.mp4": ""
         }
-        for clip in simple_timeline.each_clip():
+        for clip in simple_timeline.find_clips():
             self.assertEqual(
                 clip.metadata.get("AAF", {}).get("SourceMobUsage", ""),
                 simple_usages[clip.name]
@@ -1217,9 +1201,9 @@ class AAFReaderTests(unittest.TestCase):
 
         all_markers = {}
         for i, track in enumerate(
-                timeline.each_child(descended_from_type=otio.schema.Track)
+                timeline.find_children(descended_from_type=otio.schema.Track)
         ):
-            for item in track.each_child():
+            for item in track.find_children():
                 markers = [
                     (
                         m.name,
@@ -1236,7 +1220,7 @@ class AAFReaderTests(unittest.TestCase):
     def test_keyframed_properties(self):
         def get_expected_dict(timeline):
             expected = []
-            for clip in timeline.each_child(descended_from_type=otio.schema.Clip):
+            for clip in timeline.find_children(descended_from_type=otio.schema.Clip):
                 for effect in clip.effects:
                     props = {}
                     parameters = effect.metadata.get("AAF", {}).get("Parameters", {})
@@ -1582,7 +1566,7 @@ class AAFWriterTests(unittest.TestCase):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file
             test_dir = os.path.dirname(os.path.abspath(__file__))
-            for clip in timeline.each_clip():
+            for clip in timeline.find_clips():
                 target_url_str = clip.media_reference.target_url
                 clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
 
@@ -1623,7 +1607,7 @@ class AAFWriterTests(unittest.TestCase):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file
             test_dir = os.path.dirname(os.path.abspath(__file__))
-            for clip in timeline.each_clip():
+            for clip in timeline.find_clips():
                 target_url_str = clip.media_reference.target_url
                 clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
 
@@ -1637,8 +1621,8 @@ class AAFWriterTests(unittest.TestCase):
     def _verify_first_clip(self, original_timeline, aaf_path):
         timeline_from_aaf = otio.adapters.read_from_file(aaf_path)
 
-        original_clips = list(original_timeline.each_clip())
-        aaf_clips = list(timeline_from_aaf.each_clip())
+        original_clips = original_timeline.find_clips()
+        aaf_clips = timeline_from_aaf.find_clips()
 
         self.assertTrue(len(original_clips) > 0)
         self.assertEqual(len(aaf_clips), len(original_clips))
@@ -1650,12 +1634,12 @@ class AAFWriterTests(unittest.TestCase):
         for prop in ['source_range']:
             self.assertEqual(getattr(first_clip_in_original_timeline, prop),
                              getattr(first_clip_in_aaf_timeline, prop),
-                             "`{}` did not match".format(prop))
+                             f"`{prop}` did not match")
 
         for method in ['visible_range', 'trimmed_range']:
             self.assertEqual(getattr(first_clip_in_original_timeline, method)(),
                              getattr(first_clip_in_aaf_timeline, method)(),
-                             "`{}` did not match".format(method))
+                             f"`{method}` did not match")
 
     def test_aaf_writer_nesting(self):
         self._verify_aaf(NESTING_EXAMPLE_PATH)
@@ -1733,10 +1717,11 @@ class AAFWriterTests(unittest.TestCase):
                     sequence = opgroup.segments[0]
                 self.assertTrue(isinstance(sequence, Sequence))
 
-                self.assertEqual(len(list(otio_track.each_child(shallow_search=True))),
-                                 len(sequence.components))
+                self.assertEqual(
+                    len(otio_track.find_children(shallow_search=True)),
+                    len(sequence.components))
                 for otio_child, aaf_component in zip(
-                        otio_track.each_child(shallow_search=True),
+                        otio_track.find_children(shallow_search=True),
                         sequence.components):
                     type_mapping = {
                         otio.schema.Clip: aaf2.components.SourceClip,
@@ -1754,7 +1739,7 @@ class AAFWriterTests(unittest.TestCase):
                     if isinstance(aaf_component, aaf2.components.OperationGroup):
                         nested_aaf_segments = aaf_component.segments
                         for nested_otio_child, nested_aaf_segment in zip(
-                                otio_child.each_child(), nested_aaf_segments):
+                                otio_child.find_children(), nested_aaf_segments):
                             self._is_otio_aaf_same(nested_otio_child,
                                                    nested_aaf_segment)
                     else:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
 import opentimelineio as otio
 
 """
@@ -10,7 +12,7 @@ This would be where your plugin implementation would be.
 
 
 def write_to_string(input_otio):
-    return '{}'.format(len(input_otio.tracks))
+    return f'{len(input_otio.tracks)}'
 
 
 def read_from_string(input_str):

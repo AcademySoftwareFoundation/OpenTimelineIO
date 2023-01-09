@@ -25,7 +25,6 @@ changes.  If it needs to be updated and this file regenerated, run:
 ### Adapter.1
 
 parameters:
-- *execution_scope*
 - *filepath*
 - *name*
 - *suffixes*
@@ -77,7 +76,6 @@ parameters:
 ### HookScript.1
 
 parameters:
-- *execution_scope*
 - *filepath*
 - *name*
 
@@ -86,7 +84,6 @@ parameters:
 ### MediaLinker.1
 
 parameters:
-- *execution_scope*
 - *filepath*
 - *name*
 
@@ -121,11 +118,11 @@ parameters:
 - *hooks*
 - *media_linkers*
 - *schemadefs*
+- *version_manifests*
 
 ### SerializableObject.1
 
 parameters:
-- *execution_scope*
 - *filepath*
 - *name*
 
@@ -281,6 +278,5 @@ parameters:
 ### SchemaDef.1
 
 parameters:
-- *execution_scope*
 - *filepath*
 - *name*

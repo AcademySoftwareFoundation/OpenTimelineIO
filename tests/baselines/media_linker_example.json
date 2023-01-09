@@ -1,6 +1,5 @@
 {
     "OTIO_SCHEMA" : "MediaLinker.1",
     "name" : "example",
-    "execution_scope" : "in process",
     "filepath" : "example.py"
 }

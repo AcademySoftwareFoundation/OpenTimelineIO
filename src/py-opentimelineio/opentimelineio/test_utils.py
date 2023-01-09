@@ -12,7 +12,7 @@ from . import (
 )
 
 
-class OTIOAssertions(object):
+class OTIOAssertions:
     def assertJsonEqual(self, known, test_result):
         """Convert to json and compare that (more readable)."""
         self.maxDiff = None

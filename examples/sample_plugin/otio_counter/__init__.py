@@ -1,4 +1,7 @@
-import pkg_resources
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
+import importlib.resources
 
 from opentimelineio.plugins import manifest
 
@@ -25,7 +28,6 @@ as a file in this package).
             {
                 "OTIO_SCHEMA": "Adapter.1",
                 "name": "track_counter",
-                "execution_scope": "in process",
                 "filepath": "adapter.py",
                 "suffixes": ["count"]
             }
@@ -41,7 +43,6 @@ as below.
     {
         "OTIO_SCHEMA" : "MediaLinker.1",
         "name" : "linker_example",
-        "execution_scope" : "in process",
         "filepath" : "linker.py"
     }
 
@@ -62,6 +63,7 @@ def plugin_manifest():
     # XXX: note, this doesn't get called.  For an example of this working,
     #      see the mockplugin unit test.
 
+    filepath = importlib.resources.files(__package__) / "plugin_manifest.json"
     return manifest.manifest_from_string(
-        pkg_resources.resource_string(__name__, 'plugin_manifest.json')
+        filepath.read_text()
     )

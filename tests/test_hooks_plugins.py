@@ -14,13 +14,7 @@ from tests import (
     utils,
 )
 
-# handle python2 vs python3 difference
-try:
-    from tempfile import TemporaryDirectory  # noqa: F401
-    import tempfile
-except ImportError:
-    # XXX: python2.7 only
-    from backports import tempfile
+import tempfile
 
 
 HOOKSCRIPT_PATH = "hookscript_example"
@@ -47,7 +41,6 @@ class HookScriptTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_plugin_hook(self):
         self.assertEqual(self.hook_script.name, "example hook")
-        self.assertEqual(self.hook_script.execution_scope, "in process")
         self.assertEqual(self.hook_script.filepath, "example.py")
 
     def test_plugin_hook_runs(self):
@@ -89,7 +82,6 @@ class TestPluginHookSystem(unittest.TestCase):
 
     def test_plugin_adapter(self):
         self.assertEqual(self.hsf.name, "example hook")
-        self.assertEqual(self.hsf.execution_scope, "in process")
         self.assertEqual(self.hsf.filepath, "example.py")
 
     def test_load_adapter_module(self):
@@ -149,9 +141,8 @@ class TestPluginHookSystem(unittest.TestCase):
 
         self.assertEqual(
             str(self.hsf),
-            "HookScript({}, {}, {})".format(
+            "HookScript({}, {})".format(
                 repr(self.hsf.name),
-                repr(self.hsf.execution_scope),
                 repr(self.hsf.filepath)
             )
         )
@@ -159,11 +150,9 @@ class TestPluginHookSystem(unittest.TestCase):
             repr(self.hsf),
             "otio.hooks.HookScript("
             "name={}, "
-            "execution_scope={}, "
             "filepath={}"
             ")".format(
                 repr(self.hsf.name),
-                repr(self.hsf.execution_scope),
                 repr(self.hsf.filepath)
             )
         )

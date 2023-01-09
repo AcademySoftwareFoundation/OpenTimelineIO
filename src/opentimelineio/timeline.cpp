@@ -27,9 +27,9 @@ Timeline::set_tracks(Stack* stack)
 bool
 Timeline::read_from(Reader& reader)
 {
-    return reader.read("tracks", &_tracks) &&
-           reader.read_if_present("global_start_time", &_global_start_time) &&
-           Parent::read_from(reader);
+    return reader.read("tracks", &_tracks)
+           && reader.read_if_present("global_start_time", &_global_start_time)
+           && Parent::read_from(reader);
 }
 
 void
@@ -75,12 +75,12 @@ Timeline::audio_tracks() const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Timeline::clip_if(
+Timeline::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return _tracks.value->clip_if(error_status, search_range, shallow_search);
+    return _tracks.value->find_clips(error_status, search_range, shallow_search);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

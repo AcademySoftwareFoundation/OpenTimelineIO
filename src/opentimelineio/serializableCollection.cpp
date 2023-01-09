@@ -47,7 +47,9 @@ SerializableCollection::insert_child(int index, SerializableObject* child)
 
 bool
 SerializableCollection::set_child(
-    int index, SerializableObject* child, ErrorStatus* error_status)
+    int                 index,
+    SerializableObject* child,
+    ErrorStatus*        error_status)
 {
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size()))
@@ -103,12 +105,12 @@ SerializableCollection::write_to(Writer& writer) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-SerializableCollection::clip_if(
+SerializableCollection::find_clips(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return children_if<Clip>(error_status, search_range, shallow_search);
+    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

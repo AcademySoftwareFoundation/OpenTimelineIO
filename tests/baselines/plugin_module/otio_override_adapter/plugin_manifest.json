@@ -1,0 +1,11 @@
+{
+    "OTIO_SCHEMA" : "PluginManifest.1",
+    "adapters": [
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "cmx_3600",
+            "filepath" : "adapter.py",
+            "suffixes" : ["edl"]
+        }
+    ]
+}

@@ -30,10 +30,10 @@ Transition::overlapping() const
 bool
 Transition::read_from(Reader& reader)
 {
-    return reader.read("in_offset", &_in_offset) &&
-           reader.read("out_offset", &_out_offset) &&
-           reader.read("transition_type", &_transition_type) &&
-           Parent::read_from(reader);
+    return reader.read("in_offset", &_in_offset)
+           && reader.read("out_offset", &_out_offset)
+           && reader.read("transition_type", &_transition_type)
+           && Parent::read_from(reader);
 }
 
 void

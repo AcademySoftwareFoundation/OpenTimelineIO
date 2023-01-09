@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
-#include "opentimelineio/serializableObject.h"
-#include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
@@ -233,7 +231,9 @@ public:
         _error_status = ErrorStatus(
             ErrorStatus::INTERNAL_ERROR,
             string_printf(
-                "%s (near line %d)", err_msg.c_str(), _line_number_function()));
+                "%s (near line %d)",
+                err_msg.c_str(),
+                _line_number_function()));
     }
 
     void _error(ErrorStatus const& error_status)
@@ -339,7 +339,10 @@ SerializableObject::Reader::_fix_reference_ids(
     if (a.type() == typeid(AnyDictionary))
     {
         _fix_reference_ids(
-            any_cast<AnyDictionary&>(a), error_function, resolver, line_number);
+            any_cast<AnyDictionary&>(a),
+            error_function,
+            resolver,
+            line_number);
     }
     else if (a.type() == typeid(AnyVector))
     {
@@ -347,7 +350,10 @@ SerializableObject::Reader::_fix_reference_ids(
         for (size_t i = 0; i < child_array.size(); i++)
         {
             _fix_reference_ids(
-                child_array[i], error_function, resolver, line_number);
+                child_array[i],
+                error_function,
+                resolver,
+                line_number);
         }
     }
     else if (a.type() == typeid(SerializableObject::ReferenceId))
@@ -370,7 +376,9 @@ SerializableObject::Reader::_fix_reference_ids(
 template <typename T>
 bool
 SerializableObject::Reader::_fetch(
-    std::string const& key, T* dest, bool* had_null)
+    std::string const& key,
+    T*                 dest,
+    bool*              had_null)
 {
     auto e = _dict.find(key);
     if (e == _dict.end())
@@ -480,7 +488,8 @@ SerializableObject::Reader::_fetch(std::string const& key, int64_t* dest)
 
 bool
 SerializableObject::Reader::_fetch(
-    std::string const& key, SerializableObject** dest)
+    std::string const&   key,
+    SerializableObject** dest)
 {
     auto e = _dict.find(key);
     if (e == _dict.end())
@@ -513,7 +522,8 @@ SerializableObject::Reader::_fetch(
 
 bool
 SerializableObject::Reader::_type_check(
-    std::type_info const& wanted, std::type_info const& found)
+    std::type_info const& wanted,
+    std::type_info const& found)
 {
     if (wanted != found)
     {
@@ -572,8 +582,8 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     else if (schema_name_and_version == "TimeRange.1")
     {
         RationalTime start_time, duration;
-        return _fetch("start_time", &start_time) &&
-                       _fetch("duration", &duration)
+        return _fetch("start_time", &start_time)
+                       && _fetch("duration", &duration)
                    ? any(TimeRange(start_time, duration))
                    : any();
     }
@@ -581,8 +591,8 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     {
         RationalTime offset;
         double       rate, scale;
-        return _fetch("offset", &offset) && _fetch("rate", &rate) &&
-                       _fetch("scale", &scale)
+        return _fetch("offset", &offset) && _fetch("rate", &rate)
+                       && _fetch("scale", &scale)
                    ? any(TimeTransform(offset, scale, rate))
                    : any();
     }
@@ -623,7 +633,8 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
             if (e != resolver.object_for_id.end())
             {
                 _error(ErrorStatus(
-                    ErrorStatus::DUPLICATE_OBJECT_REFERENCE, ref_id));
+                    ErrorStatus::DUPLICATE_OBJECT_REFERENCE,
+                    ref_id));
                 return any();
             }
         }
@@ -633,7 +644,9 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
         int           schema_version;
 
         if (!split_schema_string(
-                schema_name_and_version, &schema_name, &schema_version))
+                schema_name_and_version,
+                &schema_name,
+                &schema_version))
         {
             _error(ErrorStatus(
                 ErrorStatus::MALFORMED_SCHEMA,
@@ -744,7 +757,8 @@ SerializableObject::Reader::read(std::string const& key, Imath::Box2d* value)
 template <typename T>
 bool
 SerializableObject::Reader::_read_optional(
-    std::string const& key, optional<T>* value)
+    std::string const& key,
+    optional<T>*       value)
 {
     bool had_null;
     T    result;
@@ -770,35 +784,40 @@ SerializableObject::Reader::read(std::string const& key, optional<int>* value)
 
 bool
 SerializableObject::Reader::read(
-    std::string const& key, optional<double>* value)
+    std::string const& key,
+    optional<double>*  value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const& key, optional<RationalTime>* value)
+    std::string const&      key,
+    optional<RationalTime>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const& key, optional<TimeRange>* value)
+    std::string const&   key,
+    optional<TimeRange>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const& key, optional<TimeTransform>* value)
+    std::string const&       key,
+    optional<TimeTransform>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const& key, optional<Imath::Box2d>* value)
+    std::string const&      key,
+    optional<Imath::Box2d>* value)
 {
     return _read_optional(key, value);
 }
@@ -822,7 +841,9 @@ SerializableObject::Reader::read(std::string const& key, any* value)
 
 bool
 deserialize_json_from_string(
-    std::string const& input, any* destination, ErrorStatus* error_status)
+    std::string const& input,
+    any*               destination,
+    ErrorStatus*       error_status)
 {
     OTIO_rapidjson::Reader                            reader;
     OTIO_rapidjson::StringStream                      ss(input.c_str());
@@ -861,7 +882,9 @@ deserialize_json_from_string(
 
 bool
 deserialize_json_from_file(
-    std::string const& file_name, any* destination, ErrorStatus* error_status)
+    std::string const& file_name,
+    any*               destination,
+    ErrorStatus*       error_status)
 {
 
     FILE* fp = nullptr;
@@ -874,7 +897,7 @@ deserialize_json_from_file(
     {
         fp = nullptr;
     }
-#else // _WINDOWS
+#else  // _WINDOWS
     fp = fopen(file_name.c_str(), "r");
 #endif // _WINDOWS
     if (!fp)

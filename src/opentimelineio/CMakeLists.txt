@@ -9,6 +9,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     composable.h
     composition.h
     deserialization.h
+    editAlgorithm.h
     effect.h
     errorStatus.h
     externalReference.h
@@ -44,6 +45,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     composable.cpp
     composition.cpp
     deserialization.cpp
+    editAlgorithm.cpp
     effect.cpp
     errorStatus.cpp
     externalReference.cpp

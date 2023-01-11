@@ -61,7 +61,7 @@ public:
         return _markers;
     }
 
-    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;

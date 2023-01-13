@@ -11,6 +11,7 @@ import inspect
 import json
 import tempfile
 import sys
+import textwrap
 
 import io
 
@@ -292,11 +293,29 @@ def _write_documentation(model):
         for cl in sorted(modules[module_list], key=lambda cl: str(cl)):
             modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
+
+            if (cl.__doc__ is not None):
+                docstring = cl.__doc__.split("\n")
+                new_docstring = []
+                for line in docstring:
+                    line = textwrap.wrap(line, width=100,
+                                         expand_tabs=False,
+                                         replace_whitespace=False,
+                                         drop_whitespace=False,
+                                         break_long_words=False)
+                    if (line == []):
+                        line = [""]
+                    for wrapped_line in line:
+                        new_docstring.append(wrapped_line)
+                new_docstring = "\n".join(new_docstring)
+            else:
+                new_docstring = cl.__doc__
+
             md_with_helpstrings.write(
                 CLASS_HEADER_WITH_DOCS.format(
                     classname=label,
                     modpath=modname + "." + cl.__name__,
-                    docstring=cl.__doc__
+                    docstring=new_docstring
                 )
             )
             md_only_fields.write(

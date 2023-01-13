@@ -18,7 +18,7 @@ OTIOView has an additional prerequisite to OTIO:
 ## Configure Environment Variables for extra adapters
 
 A default OTIO installation includes only the "Core" adapters, which include CMX EDL, Final Cut Pro 7 XML, and the built in JSON format.
-In order to get access to the "contrib" adapters (which includes the maya sequencer, rv and others), please consult the
+In order to get access to the "contrib" adapters (which includes rv and others), please consult the
 [Adapters documentation page for details](./adapters).
 
 ## Run OTIOView
@@ -132,13 +132,13 @@ GDB will automatically break when it hits the SIGINT line.
 
 ## Mac / Linux
 
-The doxygen docs can be generated with the following commands: 
+The doxygen docs can be generated with the following commands:
 
 ```
 cd doxygen ; doxygen config/dox_config ; cd ..
 ```
 
-Another option is to trigger the make target: 
+Another option is to trigger the make target:
 
 ```
 make doc-cpp

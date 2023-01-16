@@ -19,7 +19,6 @@ comment:
 
 ignore:
   - "contrib/opentimelineio_contrib/adapters/tests/test_rvsession.py"
-  - "contrib/opentimelineio_contrib/adapters/tests/test_maya_sequencer.py"
   - "contrib/opentimelineio_contrib/adapters/tests/test_burnins.py"
   - "contrib/opentimelineio_contrib/adapters/burnins.py"
   - "*aaf2*"

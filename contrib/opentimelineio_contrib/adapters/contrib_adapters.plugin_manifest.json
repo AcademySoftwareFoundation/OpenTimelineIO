@@ -15,12 +15,6 @@
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "maya_sequencer",
-            "filepath" : "maya_sequencer.py",
-            "suffixes" : ["ma","mb"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "ale",
             "filepath" : "ale.py",
             "suffixes" : ["ale"]

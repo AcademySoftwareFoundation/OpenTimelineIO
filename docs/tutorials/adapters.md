@@ -54,12 +54,6 @@ The contrib area hosts adapters which come from the community (_not_ supported
 - set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
 
-## Maya Sequencer
-
-- Status: supported via the `maya_sequencer` adapter.
-- set `${OTIO_MAYA_PYTHON_BIN}` to point the location of `mayapy` within the maya
-    installation.
-
 ## HLS Playlist
 
 - Status: supported via the `hls_playlist` adapter.

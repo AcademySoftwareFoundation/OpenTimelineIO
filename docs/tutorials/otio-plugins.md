@@ -443,27 +443,6 @@ Adapter entry point for writing.
 
 
 
-### maya_sequencer
-
-```
-Maya Sequencer Adapter Harness
-```
-
-*source*: `opentimelineio_contrib/adapters/maya_sequencer.py`
-
-
-*Supported Features (with arguments)*:
-
-- read_from_file:
-  - filepath
-- write_to_file:
-  - input_otio
-  - filepath
-
-
-
-
-
 ### xges
 
 ```

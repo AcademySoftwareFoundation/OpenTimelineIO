@@ -71,9 +71,9 @@ main(int argc, char** argv)
             new otio::Timeline();
         tl->tracks()->append_child(tr);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tl->find_children<otio::Clip>(&err, nullopt, true);
+        auto result = tl->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 0);
-        result = tl->find_children<otio::Clip>(&err, nullopt, false);
+        result = tl->find_children<otio::Clip>(&err, std::nullopt, false);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });

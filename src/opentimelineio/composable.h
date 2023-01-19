@@ -34,7 +34,7 @@ public:
 
     virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
-    virtual optional<Imath::Box2d>
+    virtual std::optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const;
 
 protected:

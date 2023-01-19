@@ -9,7 +9,6 @@
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/anyVector.h"
 #include "opentimelineio/errorStatus.h"
-#include "opentimelineio/optional.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
@@ -17,6 +16,7 @@
 #include "serialization.h"
 
 #include <list>
+#include <optional>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -101,27 +101,27 @@ public:
         bool read(std::string const& key, Imath::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
         bool read(std::string const& key, AnyDictionary* dest);
-        bool read(std::string const& key, any* dest);
+        bool read(std::string const& key, std::any* dest);
 
-        bool read(std::string const& key, optional<bool>* dest);
-        bool read(std::string const& key, optional<int>* dest);
-        bool read(std::string const& key, optional<double>* dest);
-        bool read(std::string const& key, optional<RationalTime>* dest);
-        bool read(std::string const& key, optional<TimeRange>* dest);
-        bool read(std::string const& key, optional<TimeTransform>* dest);
-        bool read(std::string const& key, optional<Imath::Box2d>* value);
+        bool read(std::string const& key, std::optional<bool>* dest);
+        bool read(std::string const& key, std::optional<int>* dest);
+        bool read(std::string const& key, std::optional<double>* dest);
+        bool read(std::string const& key, std::optional<RationalTime>* dest);
+        bool read(std::string const& key, std::optional<TimeRange>* dest);
+        bool read(std::string const& key, std::optional<TimeTransform>* dest);
+        bool read(std::string const& key, std::optional<Imath::Box2d>* value);
 
         // skipping std::string because we translate null into the empty
         // string, so the conversion is somewhat ambiguous
 
         // no other optionals are allowed:
         template <typename T>
-        bool read(std::string const& key, optional<T>* dest) = delete;
+        bool read(std::string const& key, std::optional<T>* dest) = delete;
 
         template <typename T>
         bool read(std::string const& key, T* dest)
         {
-            any a;
+            std::any a;
             return read(key, &a) && _from_any(a, dest);
         }
 
@@ -175,7 +175,7 @@ public:
         // forward functions to keep stringUtils.h private
         static std::string
         fwd_type_name_for_error_message(std::type_info const&);
-        static std::string fwd_type_name_for_error_message(any const& a);
+        static std::string fwd_type_name_for_error_message(std::any const& a);
         static std::string
         fwd_type_name_for_error_message(class SerializableObject*);
 
@@ -201,17 +201,17 @@ public:
             }
         };
 
-        any _decode(_Resolver& resolver);
+        std::any _decode(_Resolver& resolver);
 
         template <typename T>
-        bool _from_any(any const& source, std::vector<T>* dest)
+        bool _from_any(std::any const& source, std::vector<T>* dest)
         {
             if (!_type_check(typeid(AnyVector), source.type()))
             {
                 return false;
             }
 
-            AnyVector const& av = any_cast<AnyVector const&>(source);
+            AnyVector const& av = std::any_cast<AnyVector const&>(source);
             std::vector<T>   result;
             result.reserve(av.size());
 
@@ -231,14 +231,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, std::list<T>* dest)
+        bool _from_any(std::any const& source, std::list<T>* dest)
         {
             if (!_type_check(typeid(AnyVector), source.type()))
             {
                 return false;
             }
 
-            AnyVector const& av = any_cast<AnyVector const&>(source);
+            AnyVector const& av = std::any_cast<AnyVector const&>(source);
             std::list<T>     result;
 
             for (auto e: av)
@@ -257,14 +257,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, std::map<std::string, T>* dest)
+        bool _from_any(std::any const& source, std::map<std::string, T>* dest)
         {
             if (!_type_check(typeid(AnyDictionary), source.type()))
             {
                 return false;
             }
 
-            AnyDictionary const& dict = any_cast<AnyDictionary const&>(source);
+            AnyDictionary const& dict = std::any_cast<AnyDictionary const&>(source);
             std::map<std::string, T> result;
 
             for (auto e: dict)
@@ -283,7 +283,7 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, T** dest)
+        bool _from_any(std::any const& source, T** dest)
         {
             if (source.type() == typeid(void))
             {
@@ -297,7 +297,7 @@ public:
             }
 
             SerializableObject* so =
-                any_cast<SerializableObject::Retainer<>>(source).value;
+                std::any_cast<SerializableObject::Retainer<>>(source).value;
             if (!so)
             {
                 *dest = nullptr;
@@ -315,14 +315,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, Retainer<T>* dest)
+        bool _from_any(std::any const& source, Retainer<T>* dest)
         {
             if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T)))
             {
                 return false;
             }
 
-            Retainer<> const& rso = any_cast<Retainer<> const&>(source);
+            Retainer<> const& rso = std::any_cast<Retainer<> const&>(source);
             if (!rso.value)
             {
                 *dest = Retainer<T>(nullptr);
@@ -339,14 +339,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, T* dest)
+        bool _from_any(std::any const& source, T* dest)
         {
             if (!_type_check(typeid(T), source.type()))
             {
                 return false;
             }
 
-            *dest = any_cast<T>(source);
+            *dest = std::any_cast<T>(source);
             return true;
         }
 
@@ -362,7 +362,7 @@ public:
         bool _fetch(std::string const& key, T* dest, bool* had_null = nullptr);
 
         template <typename T>
-        bool _read_optional(std::string const& key, optional<T>* value);
+        bool _read_optional(std::string const& key, std::optional<T>* value);
 
         bool _fetch(std::string const& key, int64_t* dest);
         bool _fetch(std::string const& key, double* dest);
@@ -380,7 +380,7 @@ public:
             _Resolver&,
             int line_number);
         static void _fix_reference_ids(
-            any&,
+            std::any&,
             error_function_t const& error_function,
             _Resolver&,
             int line_number);
@@ -404,7 +404,7 @@ public:
     {
     public:
         static bool write_root(
-            any const&                value,
+            std::any const&           value,
             class Encoder&            encoder,
             const schema_version_map* downgrade_version_manifest = nullptr,
             ErrorStatus*              error_status               = nullptr);
@@ -417,9 +417,9 @@ public:
         void write(std::string const& key, TimeRange value);
         void write(std::string const& key, Imath::V2d value);
         void write(std::string const& key, Imath::Box2d value);
-        void write(std::string const& key, optional<RationalTime> value);
-        void write(std::string const& key, optional<TimeRange> value);
-        void write(std::string const& key, optional<Imath::Box2d> value);
+        void write(std::string const& key, std::optional<RationalTime> value);
+        void write(std::string const& key, std::optional<TimeRange> value);
+        void write(std::string const& key, std::optional<Imath::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)
@@ -428,7 +428,7 @@ public:
         }
         void write(std::string const& key, AnyDictionary const& value);
         void write(std::string const& key, AnyVector const& value);
-        void write(std::string const& key, any const& value);
+        void write(std::string const& key, std::any const& value);
 
         template <typename T>
         void write(std::string const& key, T const& value)
@@ -448,7 +448,7 @@ public:
           types to a parallel hierarchy holding anys!. */
 
         template <typename T>
-        static any _to_any(std::vector<T> const& value)
+        static std::any _to_any(std::vector<T> const& value)
         {
             AnyVector av;
             av.reserve(value.size());
@@ -458,11 +458,11 @@ public:
                 av.emplace_back(_to_any(e));
             }
 
-            return any(std::move(av));
+            return std::any(std::move(av));
         }
 
         template <typename T>
-        static any _to_any(std::map<std::string, T> const& value)
+        static std::any _to_any(std::map<std::string, T> const& value)
         {
             AnyDictionary am;
             for (const auto& e: value)
@@ -470,11 +470,11 @@ public:
                 am.emplace(e.first, _to_any(e.second));
             }
 
-            return any(std::move(am));
+            return std::any(std::move(am));
         }
 
         template <typename T>
-        static any _to_any(std::list<T> const& value)
+        static std::any _to_any(std::list<T> const& value)
         {
             AnyVector av;
             av.reserve(value.size());
@@ -484,34 +484,34 @@ public:
                 av.emplace_back(_to_any(e));
             }
 
-            return any(std::move(av));
+            return std::any(std::move(av));
         }
 
         template <typename T>
-        static any _to_any(T const* value)
+        static std::any _to_any(T const* value)
         {
             SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(T* value)
+        static std::any _to_any(T* value)
         {
             SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(Retainer<T> const& value)
+        static std::any _to_any(Retainer<T> const& value)
         {
             SerializableObject* so = value.value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(T const& value)
+        static std::any _to_any(T const& value)
         {
-            return any(value);
+            return std::any(value);
         }
         ///@}
 
@@ -531,24 +531,24 @@ public:
         Writer operator=(Writer const&) = delete;
 
         void _build_dispatch_tables();
-        void _write(std::string const& key, any const& value);
+        void _write(std::string const& key, std::any const& value);
         void _encoder_write_key(std::string const& key);
 
-        bool _any_dict_equals(any const& lhs, any const& rhs);
-        bool _any_array_equals(any const& lhs, any const& rhs);
-        bool _any_equals(any const& lhs, any const& rhs);
+        bool _any_dict_equals(std::any const& lhs, std::any const& rhs);
+        bool _any_array_equals(std::any const& lhs, std::any const& rhs);
+        bool _any_equals(std::any const& lhs, std::any const& rhs);
 
         std::string _no_key;
         std::unordered_map<
             std::type_info const*,
-            std::function<void(any const&)>>
+            std::function<void(std::any const&)>>
             _write_dispatch_table;
         std::unordered_map<
             std::type_info const*,
-            std::function<bool(any const&, any const&)>>
+            std::function<bool(std::any const&, std::any const&)>>
             _equality_dispatch_table;
 
-        std::unordered_map<std::string, std::function<void(any const&)>>
+        std::unordered_map<std::string, std::function<void(std::any const&)>>
             _write_dispatch_table_by_name;
         std::unordered_map<SerializableObject const*, std::string>
                                              _id_for_object;

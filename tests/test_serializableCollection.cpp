@@ -81,9 +81,9 @@ main(int argc, char** argv)
             sc = new otio::SerializableCollection();
         sc->insert_child(0, tl);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = sc->find_children<otio::Clip>(&err, nullopt, true);
+        auto result = sc->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 0);
-        result = sc->find_children<otio::Clip>(&err, nullopt, false);
+        result = sc->find_children<otio::Clip>(&err, std::nullopt, false);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });

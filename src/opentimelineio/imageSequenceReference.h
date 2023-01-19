@@ -27,18 +27,17 @@ public:
     using Parent = MediaReference;
 
     ImageSequenceReference(
-        std::string const&       target_url_base    = std::string(),
-        std::string const&       name_prefix        = std::string(),
-        std::string const&       name_suffix        = std::string(),
-        int                      start_frame        = 1,
-        int                      frame_step         = 1,
-        double                   rate               = 1,
-        int                      frame_zero_padding = 0,
-        MissingFramePolicy const missing_frame_policy =
-            MissingFramePolicy::error,
-        optional<TimeRange> const&    available_range        = nullopt,
-        AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<Imath::Box2d> const& available_image_bounds = nullopt);
+        std::string const&                 target_url_base        = std::string(),
+        std::string const&                 name_prefix            = std::string(),
+        std::string const&                 name_suffix            = std::string(),
+        int                                start_frame            = 1,
+        int                                frame_step             = 1,
+        double                             rate                   = 1,
+        int                                frame_zero_padding     = 0,
+        MissingFramePolicy const           missing_frame_policy   = MissingFramePolicy::error,
+        std::optional<TimeRange> const&    available_range        = std::nullopt,
+        AnyDictionary const&               metadata               = AnyDictionary(),
+        std::optional<Imath::Box2d> const& available_image_bounds = std::nullopt);
 
     std::string target_url_base() const noexcept { return _target_url_base; }
 

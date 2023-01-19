@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "opentimelineio/any.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
 

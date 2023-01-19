@@ -23,11 +23,11 @@ public:
     using Parent = Item;
 
     Clip(
-        std::string const&         name               = std::string(),
-        MediaReference*            media_reference    = nullptr,
-        optional<TimeRange> const& source_range       = nullopt,
-        AnyDictionary const&       metadata           = AnyDictionary(),
-        std::string const& active_media_reference_key = default_media_key);
+        std::string const&              name                       = std::string(),
+        MediaReference*                 media_reference            = nullptr,
+        std::optional<TimeRange> const& source_range               = std::nullopt,
+        AnyDictionary const&            metadata                   = AnyDictionary(),
+        std::string const&              active_media_reference_key = default_media_key);
 
     void            set_media_reference(MediaReference* media_reference);
     MediaReference* media_reference() const noexcept;
@@ -48,7 +48,7 @@ public:
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 
-    virtual optional<Imath::Box2d>
+    virtual std::optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const;
 
 protected:

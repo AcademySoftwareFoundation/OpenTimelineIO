@@ -27,40 +27,40 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-any create_safely_typed_any(bool&&);
-any create_safely_typed_any(int&&);
-any create_safely_typed_any(int64_t&&);
-any create_safely_typed_any(uint64_t&&);
-any create_safely_typed_any(double&&);
-any create_safely_typed_any(std::string&&);
-any create_safely_typed_any(RationalTime&&);
-any create_safely_typed_any(TimeRange&&);
-any create_safely_typed_any(TimeTransform&&);
-any create_safely_typed_any(Imath::V2d&&);
-any create_safely_typed_any(Imath::Box2d&&);
-any create_safely_typed_any(AnyVector&&);
-any create_safely_typed_any(AnyDictionary&&);
-any create_safely_typed_any(SerializableObject*);
+std::any create_safely_typed_any(bool&&);
+std::any create_safely_typed_any(int&&);
+std::any create_safely_typed_any(int64_t&&);
+std::any create_safely_typed_any(uint64_t&&);
+std::any create_safely_typed_any(double&&);
+std::any create_safely_typed_any(std::string&&);
+std::any create_safely_typed_any(RationalTime&&);
+std::any create_safely_typed_any(TimeRange&&);
+std::any create_safely_typed_any(TimeTransform&&);
+std::any create_safely_typed_any(Imath::V2d&&);
+std::any create_safely_typed_any(Imath::Box2d&&);
+std::any create_safely_typed_any(AnyVector&&);
+std::any create_safely_typed_any(AnyDictionary&&);
+std::any create_safely_typed_any(SerializableObject*);
 
-bool          safely_cast_bool_any(any const& a);
-int           safely_cast_int_any(any const& a);
-int64_t       safely_cast_int64_any(any const& a);
-uint64_t      safely_cast_uint64_any(any const& a);
-double        safely_cast_double_any(any const& a);
-std::string   safely_cast_string_any(any const& a);
-RationalTime  safely_cast_rational_time_any(any const& a);
-TimeRange     safely_cast_time_range_any(any const& a);
-TimeTransform safely_cast_time_transform_any(any const& a);
-Imath::V2d    safely_cast_point_any(any const& a);
-Imath::Box2d  safely_cast_box_any(any const& a);
+bool          safely_cast_bool_any(std::any const& a);
+int           safely_cast_int_any(std::any const& a);
+int64_t       safely_cast_int64_any(std::any const& a);
+uint64_t      safely_cast_uint64_any(std::any const& a);
+double        safely_cast_double_any(std::any const& a);
+std::string   safely_cast_string_any(std::any const& a);
+RationalTime  safely_cast_rational_time_any(std::any const& a);
+TimeRange     safely_cast_time_range_any(std::any const& a);
+TimeTransform safely_cast_time_transform_any(std::any const& a);
+Imath::V2d    safely_cast_point_any(std::any const& a);
+Imath::Box2d  safely_cast_box_any(std::any const& a);
 
-SerializableObject* safely_cast_retainer_any(any const& a);
+SerializableObject* safely_cast_retainer_any(std::any const& a);
 
-AnyDictionary safely_cast_any_dictionary_any(any const& a);
-AnyVector     safely_cast_any_vector_any(any const& a);
+AnyDictionary safely_cast_any_dictionary_any(std::any const& a);
+AnyVector     safely_cast_any_vector_any(std::any const& a);
 
 // don't use these unless you know what you're doing...
-AnyDictionary& temp_safely_cast_any_dictionary_any(any const& a);
-AnyVector&     temp_safely_cast_any_vector_any(any const& a);
+AnyDictionary& temp_safely_cast_any_dictionary_any(std::any const& a);
+AnyVector&     temp_safely_cast_any_vector_any(std::any const& a);
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "opentime/stringPrintf.h"
-#include "opentimelineio/any.h"
 #include "opentimelineio/version.h"
 using opentime::string_printf;
 
@@ -15,7 +14,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 void fatal_error(std::string const& errMsg);
 
 std::string type_name_for_error_message(std::type_info const&);
-std::string type_name_for_error_message(any const& a);
+std::string type_name_for_error_message(std::any const& a);
 std::string type_name_for_error_message(class SerializableObject*);
 
 template <typename T>

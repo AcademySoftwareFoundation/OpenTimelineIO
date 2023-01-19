@@ -16,7 +16,7 @@ _flatten_next_item(
     Track*                     flat_track,
     std::vector<Track*> const& tracks,
     int                        track_index,
-    optional<TimeRange>        trim_range,
+    std::optional<TimeRange>   trim_range,
     ErrorStatus*               error_status)
 {
     if (track_index < 0)
@@ -160,7 +160,7 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
         flat_track,
         tracks,
         -1,
-        nullopt,
+        std::nullopt,
         error_status);
     return flat_track;
 }
@@ -177,7 +177,7 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
         flat_track,
         tracks,
         -1,
-        nullopt,
+        std::nullopt,
         error_status);
     return flat_track;
 }

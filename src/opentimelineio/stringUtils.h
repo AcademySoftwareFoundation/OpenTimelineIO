@@ -7,6 +7,7 @@
 #include "opentimelineio/version.h"
 using opentime::string_printf;
 
+#include <any>
 #include <string>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {

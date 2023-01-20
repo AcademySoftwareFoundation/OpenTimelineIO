@@ -221,7 +221,7 @@ PYBIND11_MODULE(_otio, m) {
           "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {
-              any result;
+              std::any result;
               deserialize_json_from_string(input, &result, ErrorStatusHandler());
               return any_to_py(result, true /*top_level*/);
           }, "input"_a,
@@ -235,7 +235,7 @@ PYBIND11_MODULE(_otio, m) {
 )docstring")
      .def("deserialize_json_from_file",
           [](std::string filename) {
-              any result;
+              std::any result;
               deserialize_json_from_file(filename, &result, ErrorStatusHandler());
               return any_to_py(result, true /*top_level*/);
           }, 

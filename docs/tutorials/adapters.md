@@ -9,10 +9,6 @@ Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
 - [Reference](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
 
-Final Cut Pro X XML Format:
-- Status: Supported via the `fcpx_xml` adapter
-- [Intro to FCP X XML](https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html)
-
 ## Adobe Premiere Project
 
 - Based on guidance from Adobe, we support interchange with Adobe Premiere via

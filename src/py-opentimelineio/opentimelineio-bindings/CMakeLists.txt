@@ -22,7 +22,6 @@ target_include_directories(_otio
     PRIVATE pybind11/include
     PRIVATE "${PROJECT_SOURCE_DIR}/src"
     PRIVATE "${PROJECT_SOURCE_DIR}/src/deps"
-    PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
 )
 
 target_link_libraries(_otio PUBLIC opentimelineio opentime)

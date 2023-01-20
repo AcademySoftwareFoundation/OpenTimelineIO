@@ -286,44 +286,6 @@ required OTIO function hook
 
 
 
-### fcpx_xml
-
-```
-OpenTimelineIO Final Cut Pro X XML Adapter. 
-```
-
-*source*: `opentimelineio_contrib/adapters/fcpx_xml.py`
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string: 
-```
-Necessary read method for otio adapter
-
-  Args:
-      input_str (str): An FCP X XML string
-
-  Returns:
-      OpenTimeline: An OpenTimeline object
-```
-  - input_str
-- write_to_string: 
-```
-Necessary write method for otio adapter
-
-  Args:
-      input_otio (OpenTimeline): An OpenTimeline object
-
-  Returns:
-      str: The string contents of an FCP X XML
-```
-  - input_otio
-
-
-
-
-
 ### hls_playlist
 
 ```

@@ -44,7 +44,7 @@ Adapter for reading and writing native .otio json files.
 
 *Supported Features (with arguments)*:
 
-- read_from_file: 
+- read_from_file:
 ```
 De-serializes an OpenTimelineIO object from a file
 
@@ -55,7 +55,7 @@ De-serializes an OpenTimelineIO object from a file
       OpenTimeline: An OpenTimeline object
 ```
   - filepath
-- read_from_string: 
+- read_from_string:
 ```
 De-serializes an OpenTimelineIO object from a json string
 
@@ -66,7 +66,7 @@ De-serializes an OpenTimelineIO object from a json string
       OpenTimeline: An OpenTimeline object
 ```
   - input_str
-- write_to_file: 
+- write_to_file:
 ```
 Serializes an OpenTimelineIO object into a file
 
@@ -95,7 +95,7 @@ Serializes an OpenTimelineIO object into a file
   - filepath
   - target_schema_versions
   - indent
-- write_to_string: 
+- write_to_string:
 ```
 Serializes an OpenTimelineIO object into a string
 
@@ -275,50 +275,12 @@ FFMPEG Burnins Adapter
 
 *Supported Features (with arguments)*:
 
-- write_to_file: 
+- write_to_file:
 ```
 required OTIO function hook
 ```
   - input_otio
   - filepath
-
-
-
-
-
-### fcpx_xml
-
-```
-OpenTimelineIO Final Cut Pro X XML Adapter. 
-```
-
-*source*: `opentimelineio_contrib/adapters/fcpx_xml.py`
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string: 
-```
-Necessary read method for otio adapter
-
-  Args:
-      input_str (str): An FCP X XML string
-
-  Returns:
-      OpenTimeline: An OpenTimeline object
-```
-  - input_str
-- write_to_string: 
-```
-Necessary write method for otio adapter
-
-  Args:
-      input_otio (OpenTimeline): An OpenTimeline object
-
-  Returns:
-      str: The string contents of an FCP X XML
-```
-  - input_otio
 
 
 
@@ -428,12 +390,12 @@ draft-pantos-http-live-streaming, respectively.
 
 *Supported Features (with arguments)*:
 
-- read_from_string: 
+- read_from_string:
 ```
 Adapter entry point for reading.
 ```
   - input_str
-- write_to_string: 
+- write_to_string:
 ```
 Adapter entry point for writing.
 ```
@@ -454,7 +416,7 @@ OpenTimelineIO GStreamer Editing Services XML Adapter.
 
 *Supported Features (with arguments)*:
 
-- read_from_string: 
+- read_from_string:
 ```
 Necessary read method for otio adapter
 
@@ -465,7 +427,7 @@ Necessary read method for otio adapter
       OpenTimeline: An OpenTimeline object
 ```
   - input_str
-- write_to_string: 
+- write_to_string:
 ```
 Necessary write method for otio adapter
 
@@ -508,19 +470,19 @@ OpenTimelineIO GStreamer Editing Services XML Adapter.
 
 *Serializable Classes*:
 
-- GESMarker: 
+- GESMarker:
 ```
 An OpenTimelineIO Schema that is a timestamp with metadata,
   essentially mimicking the GstMarker of the GES C libarary.
 ```
-- GESMarkerList: 
+- GESMarkerList:
 ```
 An OpenTimelineIO Schema that is a list of GESMarkers,
   ordered by
   their positions, essentially mimicking the GstMarkerList of the GES
   C libarary.
 ```
-- GstCaps: 
+- GstCaps:
 ```
 An OpenTimelineIO Schema that acts as an ordered collection of
   GstStructures, essentially mimicking the GstCaps of the Gstreamer C
@@ -530,13 +492,13 @@ An OpenTimelineIO Schema that acts as an ordered collection of
   In particular, this schema mimics the gst_caps_to_string and
   gst_caps_from_string C methods.
 ```
-- GstCapsFeatures: 
+- GstCapsFeatures:
 ```
 An OpenTimelineIO Schema that contains a collection of
   features,
   mimicking a GstCapsFeatures of the Gstreamer C libarary.
 ```
-- GstStructure: 
+- GstStructure:
 ```
 An OpenTimelineIO Schema that acts as a named dictionary with
   typed entries, essentially mimicking the GstStructure of the
@@ -578,7 +540,7 @@ An OpenTimelineIO Schema that acts as a named dictionary with
   and the user will be responsible for making sure they are already in
   a serialized form.
 ```
-- XgesTrack: 
+- XgesTrack:
 ```
 An OpenTimelineIO Schema for storing a GESTrack.
 

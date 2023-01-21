@@ -15,7 +15,12 @@ Also see the [GOVERNANCE](GOVERNANCE.md) document for details on the rules and r
 
 The OpenTimelineIO Project Committers (alphabetically by last name) are:
 
+- Daniel Flehner Heen ([apetrynet on github](https://github.com/apetrynet))
+- Jeff Hodges ([jhodges10 on github](https://github.com/jhodges10))
+- Darby Johnston ([darbyjohnston on github](https://github.com/darbyjohnston))
 - Joshua Minor ([jminor on github](https://github.com/jminor))
+- Jean-Christophe Morin ([JeanChristopheMorinPerso on github](https://github.com/JeanChristopheMorinPerso))
+- Roger Nelson ([rogernelson on github](https://github.com/rogernelson))
 - Nick Porcino ([meshula on github](https://github.com/meshula))
 - Eric Reinecke ([reinecke on github](https://github.com/reinecke))
 - Stephan Steinbach ([ssteinbach on github](https://github.com/ssteinbach))

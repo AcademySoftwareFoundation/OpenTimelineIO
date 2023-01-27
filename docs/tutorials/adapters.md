@@ -54,10 +54,6 @@ The contrib area hosts adapters which come from the community (_not_ supported
 
 - Status: supported via the `hls_playlist` adapter.
 
-## Avid Log Exchange (ALE)
-
-- Status: supported via the `ale` adapter.
-
 ## Text Burn-in Adapter
 
 Uses FFmpeg to burn text overlays into video media.

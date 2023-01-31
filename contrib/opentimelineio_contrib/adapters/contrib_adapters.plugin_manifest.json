@@ -3,12 +3,6 @@
     "adapters": [
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "ale",
-            "filepath" : "ale.py",
-            "suffixes" : ["ale"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "burnins",
             "filepath" : "burnins.py",
             "suffixes" : []

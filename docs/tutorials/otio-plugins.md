@@ -240,30 +240,6 @@ Adapter plugins convert to and from OpenTimelineIO.
 [Tutorial on how to write an adapter](write-an-adapter).
 
 
-### ale
-
-```
-OpenTimelineIO Avid Log Exchange (ALE) Adapter
-```
-
-*source*: `opentimelineio_contrib/adapters/ale.py`
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string:
-  - input_str
-  - fps
-- write_to_string:
-  - input_otio
-  - columns
-  - fps
-  - video_format
-
-
-
-
-
 ### burnins
 
 ```

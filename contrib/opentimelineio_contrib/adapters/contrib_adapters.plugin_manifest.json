@@ -2,12 +2,6 @@
     "OTIO_SCHEMA" : "PluginManifest.1",
     "adapters": [
         {
-            "OTIO_SCHEMA": "Adapter.1",
-            "name": "hls_playlist",
-            "filepath": "hls_playlist.py",
-            "suffixes": ["m3u8"]
-        },
-        {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "burnins",
             "filepath" : "burnins.py",

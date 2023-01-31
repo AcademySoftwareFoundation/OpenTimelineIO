@@ -50,10 +50,6 @@ The contrib area hosts adapters which come from the community (_not_ supported
 - set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
 
-## Avid Log Exchange (ALE)
-
-- Status: supported via the `ale` adapter.
-
 ## Text Burn-in Adapter
 
 Uses FFmpeg to burn text overlays into video media.

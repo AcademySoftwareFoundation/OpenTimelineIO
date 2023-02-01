@@ -240,28 +240,6 @@ Adapter plugins convert to and from OpenTimelineIO.
 [Tutorial on how to write an adapter](write-an-adapter).
 
 
-### burnins
-
-```
-FFMPEG Burnins Adapter
-```
-
-*source*: `opentimelineio_contrib/adapters/burnins.py`
-
-
-*Supported Features (with arguments)*:
-
-- write_to_file: 
-```
-required OTIO function hook
-```
-  - input_otio
-  - filepath
-
-
-
-
-
 ### xges
 
 ```

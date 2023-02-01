@@ -2,12 +2,6 @@
     "OTIO_SCHEMA" : "PluginManifest.1",
     "adapters": [
         {
-            "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "burnins",
-            "filepath" : "burnins.py",
-            "suffixes" : []
-        },
-        {
             "OTIO_SCHEMA": "Adapter.1",
             "name": "xges",
             "filepath": "xges.py",

@@ -31,16 +31,17 @@ public:
         return _original_schema_version;
     }
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
-    virtual bool is_unknown_schema() const;
+    bool is_unknown_schema() const override;
+
+protected:
+    ~UnknownSchema() override;
+
+    std::string _schema_name_for_reference() const override;
 
 private:
-    virtual ~UnknownSchema();
-
-    virtual std::string _schema_name_for_reference() const;
-
     std::string _original_schema_name;
     int         _original_schema_version;
 

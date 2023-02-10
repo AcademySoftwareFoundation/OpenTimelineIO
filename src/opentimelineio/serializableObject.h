@@ -628,13 +628,13 @@ protected:
     virtual ~SerializableObject();
     virtual bool _is_deletable();
 
+    virtual std::string _schema_name_for_reference() const;
+
 private:
     SerializableObject(SerializableObject const&)            = delete;
     SerializableObject& operator=(SerializableObject const&) = delete;
     template <typename T>
     friend struct Retainer;
-
-    virtual std::string _schema_name_for_reference() const;
 
     void _managed_retain();
     void _managed_release();

@@ -32,10 +32,10 @@ public:
     }
 
 protected:
-    virtual ~Effect();
+    ~Effect() override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
 private:
     std::string _effect_name;

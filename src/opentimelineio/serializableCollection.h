@@ -74,10 +74,10 @@ public:
         bool                shallow_search = false) const;
 
 protected:
-    virtual ~SerializableCollection();
+    ~SerializableCollection() override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
 private:
     std::vector<Retainer<SerializableObject>> _children;

@@ -43,30 +43,30 @@ public:
 
     void set_kind(std::string const& kind) { _kind = kind; }
 
-    virtual TimeRange range_of_child_at_index(
+    TimeRange range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const;
-    virtual TimeRange trimmed_range_of_child_at_index(
+        ErrorStatus* error_status = nullptr) const override;
+    TimeRange trimmed_range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const;
-    virtual TimeRange
-    available_range(ErrorStatus* error_status = nullptr) const;
+        ErrorStatus* error_status = nullptr) const override;
+    TimeRange
+    available_range(ErrorStatus* error_status = nullptr) const override;
 
-    virtual std::pair<optional<RationalTime>, optional<RationalTime>>
+    std::pair<optional<RationalTime>, optional<RationalTime>>
     handles_of_child(
         Composable const* child,
-        ErrorStatus*      error_status = nullptr) const;
+        ErrorStatus*      error_status = nullptr) const override;
 
     std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
         Composable const* item,
         ErrorStatus*      error_status = nullptr,
         NeighborGapPolicy insert_gap   = NeighborGapPolicy::never) const;
 
-    virtual std::map<Composable*, TimeRange>
-    range_of_all_children(ErrorStatus* error_status = nullptr) const;
+    std::map<Composable*, TimeRange>
+    range_of_all_children(ErrorStatus* error_status = nullptr) const override;
 
     optional<Imath::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const;
+    available_image_bounds(ErrorStatus* error_status) const override;
 
     // Find child clips.
     //
@@ -79,11 +79,11 @@ public:
         bool                       shallow_search = false) const;
 
 protected:
-    virtual ~Track();
-    virtual std::string composition_kind() const;
+    ~Track() override;
+    std::string composition_kind() const override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
 private:
     std::string _kind;

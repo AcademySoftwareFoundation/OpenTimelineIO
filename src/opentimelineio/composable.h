@@ -46,10 +46,10 @@ protected:
         return const_cast<Composable*>(this)->_highest_ancestor();
     }
 
-    virtual ~Composable();
+    ~Composable() override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
 private:
     Composition* _parent;

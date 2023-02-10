@@ -45,17 +45,17 @@ public:
                std::string const& new_active_key,
                ErrorStatus*       error_status = nullptr) noexcept;
 
-    virtual TimeRange
-    available_range(ErrorStatus* error_status = nullptr) const;
+    TimeRange
+    available_range(ErrorStatus* error_status = nullptr) const override;
 
-    virtual optional<Imath::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const;
+    optional<Imath::Box2d>
+    available_image_bounds(ErrorStatus* error_status) const override;
 
 protected:
-    virtual ~Clip();
+    ~Clip() override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 
 private:
     template <typename MediaRefMap>

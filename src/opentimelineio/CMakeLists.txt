@@ -2,7 +2,6 @@
 # opentimelineio/CMakeLists.txt
 
 set(OPENTIMELINEIO_HEADER_FILES
-    any.h
     anyDictionary.h
     anyVector.h
     clip.h
@@ -21,7 +20,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     marker.h
     mediaReference.h
     missingReference.h
-    optional.h
     safely_typed_any.h
     serializableCollection.h
     serializableObject.h

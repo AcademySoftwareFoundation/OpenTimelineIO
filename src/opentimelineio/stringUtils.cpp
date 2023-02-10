@@ -50,7 +50,7 @@ type_name_for_error_message(std::type_info const& t)
 }
 
 std::string
-type_name_for_error_message(any const& a)
+type_name_for_error_message(std::any const& a)
 {
     return type_name_for_error_message(a.type());
 }

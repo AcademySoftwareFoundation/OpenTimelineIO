@@ -56,26 +56,26 @@ public:
         }
     }
 
-    bool Null() { return store(any()); }
-    bool Bool(bool b) { return store(any(b)); }
+    bool Null() { return store(std::any()); }
+    bool Bool(bool b) { return store(std::any(b)); }
 
     // coerce all integer types to int64_t...
-    bool Int(int i) { return store(any(static_cast<int64_t>(i))); }
-    bool Int64(int64_t i) { return store(any(static_cast<int64_t>(i))); }
-    bool Uint(unsigned u) { return store(any(static_cast<int64_t>(u))); }
+    bool Int(int i) { return store(std::any(static_cast<int64_t>(i))); }
+    bool Int64(int64_t i) { return store(std::any(static_cast<int64_t>(i))); }
+    bool Uint(unsigned u) { return store(std::any(static_cast<int64_t>(u))); }
     bool Uint64(uint64_t u)
     {
         /// prevent an overflow
-        return store(any(static_cast<int64_t>(u & 0x7FFFFFFFFFFFFFFF)));
+        return store(std::any(static_cast<int64_t>(u & 0x7FFFFFFFFFFFFFFF)));
     }
 
     // ...and all floating point types to double
-    bool Double(double d) { return store(any(d)); }
+    bool Double(double d) { return store(std::any(d)); }
 
     bool
     String(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */)
     {
-        return store(any(std::string(str, length)));
+        return store(std::any(std::string(str, length)));
     }
 
     bool Key(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */)
@@ -144,7 +144,7 @@ public:
                 AnyVector va;
                 va.swap(top.array);
                 _stack.pop_back();
-                store(any(std::move(va)));
+                store(std::any(std::move(va)));
             }
         }
         return true;
@@ -187,7 +187,7 @@ public:
         return true;
     }
 
-    bool store(any&& a)
+    bool store(std::any&& a)
     {
         if (has_errored())
         {
@@ -219,12 +219,12 @@ public:
         auto e = d.find(key);
         if (e != d.end() && typeid(T) == e->second.type())
         {
-            return &any_cast<const T&>(e->second);
+            return &std::any_cast<const T&>(e->second);
         }
         return nullptr;
     }
 
-    any _root;
+    std::any _root;
 
     void _internal_error(std::string const& err_msg)
     {
@@ -303,7 +303,7 @@ SerializableObject::Reader::_error(ErrorStatus const& error_status)
     auto        e    = _dict.find("name");
     if (e != _dict.end() && e->second.type() == typeid(std::string))
     {
-        name = any_cast<std::string>(e->second);
+        name = std::any_cast<std::string>(e->second);
     }
 
     _error_function(ErrorStatus(
@@ -331,7 +331,7 @@ SerializableObject::Reader::_fix_reference_ids(
 
 void
 SerializableObject::Reader::_fix_reference_ids(
-    any&                    a,
+    std::any&               a,
     error_function_t const& error_function,
     _Resolver&              resolver,
     int                     line_number)
@@ -339,14 +339,14 @@ SerializableObject::Reader::_fix_reference_ids(
     if (a.type() == typeid(AnyDictionary))
     {
         _fix_reference_ids(
-            any_cast<AnyDictionary&>(a),
+            std::any_cast<AnyDictionary&>(a),
             error_function,
             resolver,
             line_number);
     }
     else if (a.type() == typeid(AnyVector))
     {
-        AnyVector& child_array = any_cast<AnyVector&>(a);
+        AnyVector& child_array = std::any_cast<AnyVector&>(a);
         for (size_t i = 0; i < child_array.size(); i++)
         {
             _fix_reference_ids(
@@ -358,7 +358,7 @@ SerializableObject::Reader::_fix_reference_ids(
     }
     else if (a.type() == typeid(SerializableObject::ReferenceId))
     {
-        std::string id = any_cast<SerializableObject::ReferenceId>(a).id;
+        std::string id = std::any_cast<SerializableObject::ReferenceId>(a).id;
         auto        e  = resolver.object_for_id.find(id);
         if (e == resolver.object_for_id.end())
         {
@@ -368,7 +368,7 @@ SerializableObject::Reader::_fix_reference_ids(
         }
         else
         {
-            a = any(Retainer<>(e->second));
+            a = std::any(Retainer<>(e->second));
         }
     }
 }
@@ -409,7 +409,7 @@ SerializableObject::Reader::_fetch(
         *had_null = false;
     }
 
-    std::swap(*dest, any_cast<T&>(e->second));
+    std::swap(*dest, std::any_cast<T&>(e->second));
     _dict.erase(e);
     return true;
 }
@@ -426,19 +426,19 @@ SerializableObject::Reader::_fetch(std::string const& key, double* dest)
 
     if (e->second.type() == typeid(double))
     {
-        *dest = any_cast<double>(e->second);
+        *dest = std::any_cast<double>(e->second);
         _dict.erase(e);
         return true;
     }
     else if (e->second.type() == typeid(int))
     {
-        *dest = static_cast<double>(any_cast<int>(e->second));
+        *dest = static_cast<double>(std::any_cast<int>(e->second));
         _dict.erase(e);
         return true;
     }
     else if (e->second.type() == typeid(int64_t))
     {
-        *dest = static_cast<double>(any_cast<int64_t>(e->second));
+        *dest = static_cast<double>(std::any_cast<int64_t>(e->second));
         _dict.erase(e);
         return true;
     }
@@ -465,13 +465,13 @@ SerializableObject::Reader::_fetch(std::string const& key, int64_t* dest)
 
     if (e->second.type() == typeid(int64_t))
     {
-        *dest = any_cast<int64_t>(e->second);
+        *dest = std::any_cast<int64_t>(e->second);
         _dict.erase(e);
         return true;
     }
     else if (e->second.type() == typeid(int))
     {
-        *dest = any_cast<int>(e->second);
+        *dest = std::any_cast<int>(e->second);
         _dict.erase(e);
         return true;
     }
@@ -515,7 +515,7 @@ SerializableObject::Reader::_fetch(
         return false;
     }
 
-    *dest = any_cast<SerializableObject::Retainer<>>(e->second);
+    *dest = std::any_cast<SerializableObject::Retainer<>>(e->second);
     _dict.erase(e);
     return true;
 }
@@ -557,35 +557,35 @@ SerializableObject::Reader::_type_check_so(
     return true;
 }
 
-any
+std::any
 SerializableObject::Reader::_decode(_Resolver& resolver)
 {
     if (_dict.find("OTIO_SCHEMA") == _dict.end())
     {
-        return any(std::move(_dict));
+        return std::any(std::move(_dict));
     }
 
     std::string schema_name_and_version;
 
     if (!_fetch("OTIO_SCHEMA", &schema_name_and_version))
     {
-        return any();
+        return std::any();
     }
 
     if (schema_name_and_version == "RationalTime.1")
     {
         double rate, value;
         return _fetch("rate", &rate) && _fetch("value", &value)
-                   ? any(RationalTime(value, rate))
-                   : any();
+                   ? std::any(RationalTime(value, rate))
+                   : std::any();
     }
     else if (schema_name_and_version == "TimeRange.1")
     {
         RationalTime start_time, duration;
         return _fetch("start_time", &start_time)
                        && _fetch("duration", &duration)
-                   ? any(TimeRange(start_time, duration))
-                   : any();
+                   ? std::any(TimeRange(start_time, duration))
+                   : std::any();
     }
     else if (schema_name_and_version == "TimeTransform.1")
     {
@@ -593,31 +593,31 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
         double       rate, scale;
         return _fetch("offset", &offset) && _fetch("rate", &rate)
                        && _fetch("scale", &scale)
-                   ? any(TimeTransform(offset, scale, rate))
-                   : any();
+                   ? std::any(TimeTransform(offset, scale, rate))
+                   : std::any();
     }
     else if (schema_name_and_version == "SerializableObjectRef.1")
     {
         std::string ref_id;
         if (!_fetch("id", &ref_id))
         {
-            return any();
+            return std::any();
         }
 
-        return any(SerializableObject::ReferenceId{ ref_id });
+        return std::any(SerializableObject::ReferenceId{ ref_id });
     }
     else if (schema_name_and_version == "V2d.1")
     {
         double x, y;
-        return _fetch("x", &x) && _fetch("y", &y) ? any(Imath::V2d(x, y))
-                                                  : any();
+        return _fetch("x", &x) && _fetch("y", &y) ? std::any(Imath::V2d(x, y))
+                                                  : std::any();
     }
     else if (schema_name_and_version == "Box2d.1")
     {
         Imath::V2d min, max;
         return _fetch("min", &min) && _fetch("max", &max)
-                   ? any(Imath::Box2d(std::move(min), std::move(max)))
-                   : any();
+                   ? std::any(Imath::Box2d(std::move(min), std::move(max)))
+                   : std::any();
     }
     else
     {
@@ -626,7 +626,7 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
         {
             if (!_fetch("OTIO_REF_ID", &ref_id))
             {
-                return any();
+                return std::any();
             }
 
             auto e = resolver.object_for_id.find(ref_id);
@@ -635,7 +635,7 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
                 _error(ErrorStatus(
                     ErrorStatus::DUPLICATE_OBJECT_REFERENCE,
                     ref_id));
-                return any();
+                return std::any();
             }
         }
 
@@ -653,7 +653,7 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
                 string_printf(
                     "badly formed schema version string '%s'",
                     schema_name_and_version.c_str())));
-            return any();
+            return std::any();
         }
 
         ErrorStatus error_status;
@@ -670,11 +670,11 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
             }
             resolver.data_for_object.emplace(so, std::move(_dict));
             resolver.line_number_for_object[so] = _line_number;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         _error(error_status);
-        return any();
+        return std::any();
     }
 }
 
@@ -758,7 +758,7 @@ template <typename T>
 bool
 SerializableObject::Reader::_read_optional(
     std::string const& key,
-    optional<T>*       value)
+    std::optional<T>*  value)
 {
     bool had_null;
     T    result;
@@ -767,63 +767,68 @@ SerializableObject::Reader::_read_optional(
         return false;
     }
 
-    *value = had_null ? optional<T>() : optional<T>(result);
+    *value = had_null ? std::optional<T>() : std::optional<T>(result);
     return true;
-}
-bool
-SerializableObject::Reader::read(std::string const& key, optional<bool>* value)
-{
-    return _read_optional(key, value);
-}
-
-bool
-SerializableObject::Reader::read(std::string const& key, optional<int>* value)
-{
-    return _read_optional(key, value);
-}
-
-bool
-SerializableObject::Reader::read(
-    std::string const& key,
-    optional<double>*  value)
-{
-    return _read_optional(key, value);
-}
-
-bool
-SerializableObject::Reader::read(
-    std::string const&      key,
-    optional<RationalTime>* value)
-{
-    return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
     std::string const&   key,
-    optional<TimeRange>* value)
+    std::optional<bool>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const&       key,
-    optional<TimeTransform>* value)
+    std::string const&  key,
+    std::optional<int>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
 SerializableObject::Reader::read(
-    std::string const&      key,
-    optional<Imath::Box2d>* value)
+    std::string const&     key,
+    std::optional<double>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, any* value)
+SerializableObject::Reader::read(
+    std::string const&           key,
+    std::optional<RationalTime>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
+    std::string const&        key,
+    std::optional<TimeRange>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
+    std::string const&            key,
+    std::optional<TimeTransform>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
+    std::string const&           key,
+    std::optional<Imath::Box2d>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(std::string const& key, std::any* value)
 {
     auto e = _dict.find(key);
     if (e == _dict.end())
@@ -842,7 +847,7 @@ SerializableObject::Reader::read(std::string const& key, any* value)
 bool
 deserialize_json_from_string(
     std::string const& input,
-    any*               destination,
+    std::any*          destination,
     ErrorStatus*       error_status)
 {
     OTIO_rapidjson::Reader                            reader;
@@ -883,7 +888,7 @@ deserialize_json_from_string(
 bool
 deserialize_json_from_file(
     std::string const& file_name,
-    any*               destination,
+    std::any*          destination,
     ErrorStatus*       error_status)
 {
 

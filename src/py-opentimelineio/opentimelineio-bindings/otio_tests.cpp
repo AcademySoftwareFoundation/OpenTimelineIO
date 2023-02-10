@@ -31,9 +31,9 @@ public:
     }
 
     SerializableObject* lookup(std::string key) {
-        any a = metadata()[key];
+        std::any a = metadata()[key];
         if (a.type() == typeid(Retainer<>)) {
-            return any_cast<Retainer<>>(a).value;
+            return std::any_cast<Retainer<>>(a).value;
         }
         return nullptr;
     }
@@ -148,7 +148,7 @@ bool test_big_uint() {
 
     bool result = true;
 
-    if (any_cast<uint64_t>(so->metadata()["giant_number"]) != giant_number) {
+    if (std::any_cast<uint64_t>(so->metadata()["giant_number"]) != giant_number) {
         return false;
     }
 

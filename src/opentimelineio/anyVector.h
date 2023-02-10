@@ -3,8 +3,10 @@
 
 #pragma once
 
-#include "opentimelineio/any.h"
+
 #include "opentimelineio/version.h"
+
+#include <any>
 #include <assert.h>
 #include <vector>
 
@@ -22,7 +24,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
  * and take steps to safe-guard themselves from causing a crash.
  */
 
-class AnyVector : private std::vector<any>
+class AnyVector : private std::vector<std::any>
 {
 public:
     using vector::vector;

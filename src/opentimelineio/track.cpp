@@ -10,10 +10,10 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Track::Track(
-    std::string const&         name,
-    optional<TimeRange> const& source_range,
-    std::string const&         kind,
-    AnyDictionary const&       metadata)
+    std::string const&              name,
+    std::optional<TimeRange> const& source_range,
+    std::string const&              kind,
+    AnyDictionary const&            metadata)
     : Parent(name, source_range, metadata)
     , _kind(kind)
 {}
@@ -140,12 +140,12 @@ Track::available_range(ErrorStatus* error_status) const
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
-std::pair<optional<RationalTime>, optional<RationalTime>>
+std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
 Track::handles_of_child(Composable const* child, ErrorStatus* error_status)
     const
 {
-    optional<RationalTime> head, tail;
-    auto                   neighbors = neighbors_of(child, error_status);
+    std::optional<RationalTime> head, tail;
+    auto                        neighbors = neighbors_of(child, error_status);
     if (auto transition = dynamic_retainer_cast<Transition>(neighbors.first))
     {
         head = transition->in_offset();
@@ -265,18 +265,18 @@ Track::range_of_all_children(ErrorStatus* error_status) const
 
 std::vector<SerializableObject::Retainer<Clip>>
 Track::find_clips(
-    ErrorStatus*               error_status,
-    optional<TimeRange> const& search_range,
-    bool                       shallow_search) const
+    ErrorStatus*                    error_status,
+    std::optional<TimeRange> const& search_range,
+    bool                            shallow_search) const
 {
     return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
-optional<Imath::Box2d>
+std::optional<Imath::Box2d>
 Track::available_image_bounds(ErrorStatus* error_status) const
 {
-    optional<Imath::Box2d> box;
-    bool                   found_first_clip = false;
+    std::optional<Imath::Box2d> box;
+    bool                        found_first_clip = false;
     for (const auto& child: children())
     {
         if (auto clip = dynamic_cast<Clip*>(child.value))
@@ -298,7 +298,7 @@ Track::available_image_bounds(ErrorStatus* error_status) const
             }
             if (is_error(error_status))
             {
-                return optional<Imath::Box2d>();
+                return std::optional<Imath::Box2d>();
             }
         }
     }

@@ -11,12 +11,12 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Item::Item(
-    std::string const&          name,
-    optional<TimeRange> const&  source_range,
-    AnyDictionary const&        metadata,
-    std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers,
-    bool                        enabled)
+    std::string const&              name,
+    std::optional<TimeRange> const& source_range,
+    AnyDictionary const&            metadata,
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers,
+    bool                            enabled)
     : Parent(name, metadata)
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
@@ -82,7 +82,7 @@ Item::visible_range(ErrorStatus* error_status) const
     return result;
 }
 
-optional<TimeRange>
+std::optional<TimeRange>
 Item::trimmed_range_in_parent(ErrorStatus* error_status) const
 {
     if (!parent() && error_status)

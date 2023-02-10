@@ -63,8 +63,8 @@ public:
 
     RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
-    TimeRange
-    virtual available_range(ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange
+    available_range(ErrorStatus* error_status = nullptr) const;
 
     TimeRange trimmed_range(ErrorStatus* error_status = nullptr) const
     {

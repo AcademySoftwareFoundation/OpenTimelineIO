@@ -38,7 +38,10 @@ def main():
     # Often there will be just one, but this tool in general enough
     # to operate on several. This is essential when the --stack or
     # --concatenate arguments are used.
-    timelines = read_inputs(args.input)
+    if args.input:
+        timelines = read_inputs(args.input)
+    else:
+        timelines = []
 
     # Phase 2: Filter (remove stuff)...
 
@@ -133,6 +136,12 @@ def main():
 
     # Final Phase: Output
 
+    if args.list_versions:
+        print("Available versions for --downgrade FAMILY:VERSION")
+        for family, mapping in otio.versioning.full_map().items():
+            for label in mapping.keys():
+                print(f"  {family}:{label}")
+
     if args.downgrade:
         if ":" in args.downgrade:
             label = args.downgrade
@@ -221,7 +230,6 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--input",
         type=str,
         nargs='+',
-        required=True,
         metavar='PATH(s)',
         help="""Input file path(s). All formats supported by adapter plugins
         are supported. Use '-' to read OTIO from standard input."""
@@ -388,6 +396,11 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         `--downgrade 0.14.0`. See the OpenTimelineIO documentation for
         OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL for details."""
     )
+    parser.add_argument(
+        "--list-versions",
+        action='store_true',
+        help="""List available versions for the --downgrade option."""
+    )
 
     parser.add_argument(
         "-o",
@@ -399,6 +412,10 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     args = parser.parse_args()
+
+    # At least one of these must be specified
+    if not any([args.input, args.list_versions]):
+        parser.error("Must specify at least one of --input or --list-versions.")
 
     # Some options cannot be combined.
 

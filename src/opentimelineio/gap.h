@@ -39,8 +39,6 @@ protected:
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
-
-private:
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

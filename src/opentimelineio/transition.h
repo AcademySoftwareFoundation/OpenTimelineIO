@@ -64,7 +64,7 @@ public:
     trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
 protected:
-    ~Transition() override;
+    virtual ~Transition();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

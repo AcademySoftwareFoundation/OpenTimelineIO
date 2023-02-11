@@ -74,7 +74,7 @@ public:
         bool                shallow_search = false) const;
 
 protected:
-    ~SerializableCollection() override;
+    virtual ~SerializableCollection();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

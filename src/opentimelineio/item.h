@@ -89,7 +89,7 @@ public:
         ErrorStatus* error_status = nullptr) const;
 
 protected:
-    ~Item() override;
+    virtual ~Item();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

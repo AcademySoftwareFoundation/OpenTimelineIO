@@ -32,7 +32,7 @@ public:
     AnyDictionary metadata() const noexcept { return _metadata; }
 
 protected:
-    ~SerializableObjectWithMetadata() override;
+    virtual ~SerializableObjectWithMetadata();
     
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

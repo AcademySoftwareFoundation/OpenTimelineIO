@@ -35,7 +35,7 @@ public:
     bool visible() const override;
 
 protected:
-    ~Gap() override;
+    virtual ~Gap();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

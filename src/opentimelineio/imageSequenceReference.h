@@ -109,7 +109,7 @@ public:
         ErrorStatus* error_status = nullptr) const;
 
 protected:
-    ~ImageSequenceReference() override;
+    virtual ~ImageSequenceReference();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

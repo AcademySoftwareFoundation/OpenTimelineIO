@@ -24,7 +24,7 @@ public:
         AnyDictionary const& metadata = AnyDictionary());
 
 protected:
-    ~FreezeFrame() override;
+    virtual ~FreezeFrame();
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

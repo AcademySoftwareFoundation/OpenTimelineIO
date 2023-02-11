@@ -37,7 +37,7 @@ public:
     bool is_unknown_schema() const override;
 
 protected:
-    ~UnknownSchema() override;
+    virtual ~UnknownSchema();
 
     std::string _schema_name_for_reference() const override;
 

@@ -54,7 +54,7 @@ public:
         bool                       shallow_search = false) const;
 
 protected:
-    ~Stack() override;
+    virtual ~Stack();
 
     std::string composition_kind() const override;
 

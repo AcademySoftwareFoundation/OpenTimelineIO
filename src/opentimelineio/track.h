@@ -79,7 +79,8 @@ public:
         bool                       shallow_search = false) const;
 
 protected:
-    ~Track() override;
+    virtual ~Track();
+
     std::string composition_kind() const override;
 
     bool read_from(Reader&) override;

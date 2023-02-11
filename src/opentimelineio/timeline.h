@@ -90,7 +90,7 @@ public:
     }
 
 protected:
-    ~Timeline() override;
+    virtual ~Timeline();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

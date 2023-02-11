@@ -39,7 +39,7 @@ public:
     AnyDictionary parameters() const noexcept { return _parameters; }
 
 protected:
-    ~GeneratorReference() override;
+    virtual ~GeneratorReference();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

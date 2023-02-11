@@ -626,6 +626,7 @@ public:
 
 protected:
     virtual ~SerializableObject();
+
     virtual bool _is_deletable();
 
     virtual std::string _schema_name_for_reference() const;

@@ -25,7 +25,7 @@ public:
         AnyDictionary const& metadata    = AnyDictionary());
 
 protected:
-    ~TimeEffect() override;
+    virtual ~TimeEffect();
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

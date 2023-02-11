@@ -52,7 +52,7 @@ public:
     }
 
 protected:
-    ~Marker() override;
+    virtual ~Marker();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

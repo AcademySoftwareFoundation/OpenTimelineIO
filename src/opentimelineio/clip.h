@@ -52,7 +52,7 @@ public:
     available_image_bounds(ErrorStatus* error_status) const override;
 
 protected:
-    ~Clip() override;
+    virtual ~Clip();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

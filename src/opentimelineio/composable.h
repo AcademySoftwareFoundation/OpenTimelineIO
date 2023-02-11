@@ -46,7 +46,7 @@ protected:
         return const_cast<Composable*>(this)->_highest_ancestor();
     }
 
-    ~Composable() override;
+    virtual ~Composable();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

@@ -28,7 +28,7 @@ public:
     bool is_missing_reference() const override;
 
 protected:
-    ~MissingReference() override;
+    virtual ~MissingReference();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

@@ -113,7 +113,7 @@ public:
         bool                shallow_search = false) const;
 
 protected:
-    ~Composition() override;
+    virtual ~Composition();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

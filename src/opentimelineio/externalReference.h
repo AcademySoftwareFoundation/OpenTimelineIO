@@ -33,7 +33,7 @@ public:
     }
 
 protected:
-    ~ExternalReference() override;
+    virtual ~ExternalReference();
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;

@@ -28,20 +28,20 @@ public:
         std::vector<Effect*> const& effects      = std::vector<Effect*>(),
         std::vector<Marker*> const& markers      = std::vector<Marker*>());
 
-    virtual TimeRange range_of_child_at_index(
+    TimeRange range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const;
-    virtual TimeRange trimmed_range_of_child_at_index(
+        ErrorStatus* error_status = nullptr) const override;
+    TimeRange trimmed_range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const;
-    virtual TimeRange
-    available_range(ErrorStatus* error_status = nullptr) const;
+        ErrorStatus* error_status = nullptr) const override;
+    TimeRange
+    available_range(ErrorStatus* error_status = nullptr) const override;
 
-    virtual std::map<Composable*, TimeRange>
-    range_of_all_children(ErrorStatus* error_status = nullptr) const;
+    std::map<Composable*, TimeRange>
+    range_of_all_children(ErrorStatus* error_status = nullptr) const override;
 
     optional<Imath::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const;
+    available_image_bounds(ErrorStatus* error_status) const override;
 
     // Find child clips.
     //
@@ -56,12 +56,10 @@ public:
 protected:
     virtual ~Stack();
 
-    virtual std::string composition_kind() const;
+    std::string composition_kind() const override;
 
-    virtual bool read_from(Reader&);
-    virtual void write_to(Writer&) const;
-
-private:
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

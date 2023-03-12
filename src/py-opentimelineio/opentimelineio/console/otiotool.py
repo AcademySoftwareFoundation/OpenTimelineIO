@@ -32,6 +32,15 @@ def main():
 
     args = parse_arguments()
 
+    # Special case option, which skips all the other phases
+
+    if args.list_versions:
+        print("Available versions for --downgrade FAMILY:VERSION")
+        for family, mapping in otio.versioning.full_map().items():
+            for label in mapping.keys():
+                print(f"  {family}:{label}")
+        return
+
     # Phase 1: Input...
 
     # Most of this function will operate on this list of timelines.
@@ -135,12 +144,6 @@ def main():
                 timeline)
 
     # Final Phase: Output
-
-    if args.list_versions:
-        print("Available versions for --downgrade FAMILY:VERSION")
-        for family, mapping in otio.versioning.full_map().items():
-            for label in mapping.keys():
-                print(f"  {family}:{label}")
 
     if args.downgrade:
         if ":" in args.downgrade:
@@ -427,6 +430,9 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 
     if args.keep_flattened_tracks and not args.flatten:
         parser.error("Cannot use --keep-flattened-tracks without also using --flatten.")
+
+    if args.input and args.list_versions:
+        parser.error("Cannot combine --input and --list-versions.")
 
     return args
 

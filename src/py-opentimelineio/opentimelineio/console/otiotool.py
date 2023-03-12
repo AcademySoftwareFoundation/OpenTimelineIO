@@ -396,8 +396,9 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         to output an OTIO file. FAMILY:VERSION specifies which schema family
         and version to use. If FAMILY: is omitted, the default OTIO_CORE: is
         used. For example `--downgrade OTIO_CORE:0.14.0` is equivalent to
-        `--downgrade 0.14.0`. See the OpenTimelineIO documentation for
-        OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL for details."""
+        `--downgrade 0.14.0`. See
+        https://opentimelineio.readthedocs.io/en/latest/tutorials/versioning-schemas.html
+        for details."""
     )
     parser.add_argument(
         "--list-versions",

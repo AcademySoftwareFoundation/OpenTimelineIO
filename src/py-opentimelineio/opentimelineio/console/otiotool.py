@@ -32,13 +32,25 @@ def main():
 
     args = parse_arguments()
 
+    # Special case option, which skips all the other phases
+
+    if args.list_versions:
+        print("Available versions for --downgrade FAMILY:VERSION")
+        for family, mapping in otio.versioning.full_map().items():
+            for label in mapping.keys():
+                print(f"  {family}:{label}")
+        return
+
     # Phase 1: Input...
 
     # Most of this function will operate on this list of timelines.
     # Often there will be just one, but this tool in general enough
     # to operate on several. This is essential when the --stack or
     # --concatenate arguments are used.
-    timelines = read_inputs(args.input)
+    if args.input:
+        timelines = read_inputs(args.input)
+    else:
+        timelines = []
 
     # Phase 2: Filter (remove stuff)...
 
@@ -133,6 +145,13 @@ def main():
 
     # Final Phase: Output
 
+    if args.downgrade:
+        if ":" in args.downgrade:
+            label = args.downgrade
+        else:
+            label = "OTIO_CORE:" + args.downgrade
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = label
+
     if args.output:
         # Gather all of the timelines under one OTIO object
         # in preparation for final output
@@ -188,7 +207,8 @@ This tool works in phases, as follows:
     Finally, if the "--output <filename>" option is specified, the resulting
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
-    format supported by the adapter plugins.)
+    format supported by the adapter plugins.) If you need to output an older
+    schema version, see the --downgrade option.
 """.strip(),
         epilog="""Examples:
 
@@ -213,7 +233,6 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--input",
         type=str,
         nargs='+',
-        required=True,
         metavar='PATH(s)',
         help="""Input file path(s). All formats supported by adapter plugins
         are supported. Use '-' to read OTIO from standard input."""
@@ -370,6 +389,24 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 
     # Output...
     parser.add_argument(
+        "--downgrade",
+        type=str,
+        metavar='FAMILY:VERSION',
+        help="""Downgrade OTIO schema. Only relevant when --output is used
+        to output an OTIO file. FAMILY:VERSION specifies which schema family
+        and version to use. If FAMILY: is omitted, the default OTIO_CORE: is
+        used. For example `--downgrade OTIO_CORE:0.14.0` is equivalent to
+        `--downgrade 0.14.0`. See
+        https://opentimelineio.readthedocs.io/en/latest/tutorials/versioning-schemas.html
+        for details."""
+    )
+    parser.add_argument(
+        "--list-versions",
+        action='store_true',
+        help="""List available versions for the --downgrade option."""
+    )
+
+    parser.add_argument(
         "-o",
         "--output",
         type=str,
@@ -379,6 +416,10 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     args = parser.parse_args()
+
+    # At least one of these must be specified
+    if not any([args.input, args.list_versions]):
+        parser.error("Must specify at least one of --input or --list-versions.")
 
     # Some options cannot be combined.
 
@@ -390,6 +431,9 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 
     if args.keep_flattened_tracks and not args.flatten:
         parser.error("Cannot use --keep-flattened-tracks without also using --flatten.")
+
+    if args.input and args.list_versions:
+        parser.error("Cannot combine --input and --list-versions.")
 
     return args
 

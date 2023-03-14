@@ -25,8 +25,6 @@ public:
 
 protected:
     virtual ~FreezeFrame();
-
-private:
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

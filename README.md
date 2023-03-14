@@ -110,7 +110,7 @@ main()
         )
     );
     const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (
-            tl->clip_if()
+            tl->find_clips()
     );
     for (const auto& cl : clips)
     {
@@ -127,7 +127,7 @@ Python:
 import opentimelineio as otio
 
 timeline = otio.adapters.read_from_file("foo.aaf")
-for clip in timeline.clip_if():
+for clip in timeline.find_clips():
   print(clip.name, clip.duration())
 ```
 

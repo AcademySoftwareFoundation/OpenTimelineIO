@@ -63,13 +63,16 @@ class AnyDictionaryTests(unittest.TestCase):
                 del d['b']
 
     def test_construct_with_values(self):
-        d1 = opentimelineio.core._core_utils.AnyDictionary({'key1': 1234, 'key_2': {'asdasdasd': 5.6}})
+        d1 = opentimelineio.core._core_utils.AnyDictionary(
+            {'key1': 1234, 'key_2': {'asdasdasd': 5.6}}
+        )
         v = opentimelineio.core._core_utils.AnyVector()
         v.append(1)
         v.append('inside any vector')
 
         so = opentimelineio._otio.SerializableObject()
-        d2 = opentimelineio.core._core_utils.AnyDictionary({
+        d2 = opentimelineio.core._core_utils.AnyDictionary(
+            {
                 'string': 'myvalue',
                 'int': -999999999999,
                 'list': [1, 2.5, 'asd'],
@@ -89,7 +92,8 @@ class AnyDictionaryTests(unittest.TestCase):
                     scale=999
                 ),
                 'SerializableObject': so
-            })
+            }
+        )
         self.assertEqual(d2['string'], 'myvalue')
         self.assertEqual(d2['SerializableObject'], so)
         self.assertEqual(d2['AnyDictionary'], d1)
@@ -237,7 +241,8 @@ class AnyVectorTests(unittest.TestCase):
         v1 = opentimelineio.core._core_utils.AnyVector([1, 'inside any vector'])
 
         so = opentimelineio._otio.SerializableObject()
-        v2 = opentimelineio.core._core_utils.AnyVector([
+        v2 = opentimelineio.core._core_utils.AnyVector(
+            [
                 'myvalue',
                 -999999999999,
                 [1, 2.5, 'asd'],
@@ -257,7 +262,8 @@ class AnyVectorTests(unittest.TestCase):
                     scale=999
                 ),
                 so
-        ])
+            ]
+        )
         self.assertEqual(v2[0], 'myvalue')
         self.assertEqual(v2[-1], so)
         self.assertEqual(v2[5], d)

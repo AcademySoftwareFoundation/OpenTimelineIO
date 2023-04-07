@@ -152,6 +152,7 @@ struct PyAny {
 pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
+void py_to_any(pybind11::object const& o, any* result);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
 
 bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);

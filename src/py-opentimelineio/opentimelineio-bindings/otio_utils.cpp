@@ -96,7 +96,7 @@ void _build_any_to_py_dispatch_table() {
 
 static py::object _value_to_any = py::none();
 
-static void py_to_any(py::object const& o, any* result) {
+void py_to_any(py::object const& o, any* result) {
     if (_value_to_any.is_none()) {
         py::object core = py::module::import("opentimelineio.core");
         _value_to_any = core.attr("_value_to_any");

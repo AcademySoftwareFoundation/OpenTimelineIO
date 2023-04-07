@@ -2,6 +2,7 @@ import copy
 import unittest
 
 import opentimelineio._otio
+import opentimelineio.opentime
 import opentimelineio.core._core_utils
 
 
@@ -60,6 +61,38 @@ class AnyDictionaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "container mutated during iteration"):
             for key in d:
                 del d['b']
+
+    def test_construct_with_values(self):
+        d1 = opentimelineio.core._core_utils.AnyDictionary({'key1': 1234, 'key_2': {'asdasdasd': 5.6}})
+        v = opentimelineio.core._core_utils.AnyVector()
+        v.append(1)
+        v.append('inside any vector')
+
+        so = opentimelineio._otio.SerializableObject()
+        d2 = opentimelineio.core._core_utils.AnyDictionary({
+                'string': 'myvalue',
+                'int': -999999999999,
+                'list': [1, 2.5, 'asd'],
+                'dict': {'map1': [345]},
+                'AnyVector': v,
+                'AnyDictionary': d1,
+                'RationalTime': opentimelineio.opentime.RationalTime(
+                    value=10.0,
+                    rate=5.0
+                ),
+                'TimeRange': opentimelineio.opentime.TimeRange(
+                    opentimelineio.opentime.RationalTime(value=1.0),
+                    opentimelineio.opentime.RationalTime(value=100.0)
+                ),
+                'TimeTransform': opentimelineio.opentime.TimeTransform(
+                    offset=opentimelineio.opentime.RationalTime(value=55.0),
+                    scale=999
+                ),
+                'SerializableObject': so
+            })
+        self.assertEqual(d2['string'], 'myvalue')
+        self.assertEqual(d2['SerializableObject'], so)
+        self.assertEqual(d2['AnyDictionary'], d1)
 
     def test_raises_if_ref_destroyed(self):
         d1 = opentimelineio.core._core_utils.AnyDictionary()
@@ -195,6 +228,39 @@ class AnyVectorTests(unittest.TestCase):
         # If AnyVector was a pure list, this would fail. But it's not a real list.
         # Appending copies data, completely removing references to it.
         self.assertIsNot(v5[0], tmplist)
+
+    def test_construct_with_values(self):
+        d = opentimelineio.core._core_utils.AnyDictionary()
+        d['key_1'] = 1234
+        d['key_2'] = {'asdasdasd': 5.6}
+
+        v1 = opentimelineio.core._core_utils.AnyVector([1, 'inside any vector'])
+
+        so = opentimelineio._otio.SerializableObject()
+        v2 = opentimelineio.core._core_utils.AnyVector([
+                'myvalue',
+                -999999999999,
+                [1, 2.5, 'asd'],
+                {'map1': [345]},
+                v1,
+                d,
+                opentimelineio.opentime.RationalTime(
+                    value=10.0,
+                    rate=5.0
+                ),
+                opentimelineio.opentime.TimeRange(
+                    opentimelineio.opentime.RationalTime(value=1.0),
+                    opentimelineio.opentime.RationalTime(value=100.0)
+                ),
+                opentimelineio.opentime.TimeTransform(
+                    offset=opentimelineio.opentime.RationalTime(value=55.0),
+                    scale=999
+                ),
+                so
+        ])
+        self.assertEqual(v2[0], 'myvalue')
+        self.assertEqual(v2[-1], so)
+        self.assertEqual(v2[5], d)
 
     def test_raises_if_ref_destroyed(self):
         v1 = opentimelineio.core._core_utils.AnyVector()

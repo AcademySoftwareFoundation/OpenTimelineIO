@@ -2,11 +2,34 @@ import copy
 import unittest
 
 import opentimelineio._otio
+import opentimelineio.opentime
 import opentimelineio.core._core_utils
 
 
 class AnyDictionaryTests(unittest.TestCase):
     def test_main(self):
+        opentimelineio.core._core_utils.AnyDictionary({
+                'string': 'myvalue',
+                'int': -999999999999,
+                'list': [1, 2.5, 'asd'],
+                'dict': {'map1': [345]},
+                'AnyVector': opentimelineio.core._core_utils.AnyVector(),
+                'AnyDictionary': opentimelineio.core._core_utils.AnyDictionary(),
+                'RationalTime': opentimelineio.opentime.RationalTime(
+                    value=10.0,
+                    rate=5.0
+                ),
+                'TimeRange': opentimelineio.opentime.TimeRange(
+                    opentimelineio.opentime.RationalTime(value=1.0),
+                    opentimelineio.opentime.RationalTime(value=100.0)
+                ),
+                'TimeTransform': opentimelineio.opentime.TimeTransform(
+                    offset=opentimelineio.opentime.RationalTime(value=55.0),
+                    scale=999
+                ),
+                'SerializableObjectWithMetadata': opentimelineio._otio.SerializableObjectWithMetadata(),
+            })
+
         d = opentimelineio.core._core_utils.AnyDictionary()
         d['a'] = 1
 

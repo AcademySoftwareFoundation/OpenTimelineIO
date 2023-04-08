@@ -162,6 +162,11 @@ any py_to_any(py::handle const& o) {
         return any(py_to_cpp<TimeTransform>(o));
     }
 
+    if (py::isinstance<SerializableObject>(o)) {
+        SerializableObject::Retainer<> r(py::cast<SerializableObject*>(o));
+        return create_safely_typed_any(r.take_value());
+    }
+
     py::type pytype = py::type::of(o);
     throw py::type_error("Unsupported value type: " + py::cast<std::string>(pytype.attr("__name__")));
 }

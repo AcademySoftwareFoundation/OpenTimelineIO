@@ -1216,7 +1216,7 @@ SerializableObject::clone(ErrorStatus* error_status) const
 
 // to json_string
 std::string
-serialize_json_to_string(
+serialize_json_to_string_pretty(
     const any&                value,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status,
@@ -1249,6 +1249,61 @@ serialize_json_to_string(
     }
 
     return std::string(output_string_buffer.GetString());
+}
+
+// to json_string
+std::string
+serialize_json_to_string_compact(
+    const any&                value,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status,
+    int                       indent)
+{
+    OTIO_rapidjson::StringBuffer output_string_buffer;
+
+    OTIO_rapidjson::Writer<
+        decltype(output_string_buffer),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+        json_writer(output_string_buffer);
+
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+
+    if (!SerializableObject::Writer::write_root(
+            value,
+            json_encoder,
+            schema_version_targets,
+            error_status))
+    {
+        return std::string();
+    }
+
+    return std::string(output_string_buffer.GetString());
+}
+
+// to json_string
+std::string
+serialize_json_to_string(
+    const any&                value,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status,
+    int                       indent)
+{
+    if (indent > 0)
+    {
+        return serialize_json_to_string_pretty(
+            value,
+            schema_version_targets,
+            error_status,
+            indent);
+    }
+    return serialize_json_to_string_compact(
+        value,
+        schema_version_targets,
+        error_status,
+        indent);
 }
 
 bool

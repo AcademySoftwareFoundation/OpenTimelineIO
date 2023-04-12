@@ -1232,10 +1232,7 @@ serialize_json_to_string_pretty(
         OTIO_rapidjson::kWriteNanAndInfFlag>
         json_writer(output_string_buffer);
 
-    if (indent >= 0)
-    {
-        json_writer.SetIndent(' ', indent);
-    }
+    json_writer.SetIndent(' ', indent);
 
     JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
@@ -1256,8 +1253,7 @@ std::string
 serialize_json_to_string_compact(
     const any&                value,
     const schema_version_map* schema_version_targets,
-    ErrorStatus*              error_status,
-    int                       indent)
+    ErrorStatus*              error_status)
 {
     OTIO_rapidjson::StringBuffer output_string_buffer;
 
@@ -1302,8 +1298,7 @@ serialize_json_to_string(
     return serialize_json_to_string_compact(
         value,
         schema_version_targets,
-        error_status,
-        indent);
+        error_status);
 }
 
 bool

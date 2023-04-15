@@ -4,7 +4,7 @@ The contrib area was a place to host adapters and application plugins submitted
 by the OpenTimelineIO community. Those contributions may have involved challenging external 
 dependencies, and may not have the same level of support as the core.
 
-The team is in the process of phasing out this area in favor of using individual
+The adapters previously found in the contrib area have been moved to individual
 repos within the
 [OpenTimelineIO GitHub Organization](https://github.com/OpenTimelineIO/).
 

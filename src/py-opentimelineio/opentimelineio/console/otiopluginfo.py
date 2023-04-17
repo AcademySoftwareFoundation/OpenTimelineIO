@@ -220,7 +220,7 @@ def main():
             print("    (none found)")
 
         for plug in plugins:
-            print(f"  {plug.name}")
+            print(f"  {plug.name} - version: {getattr(plug, 'version') or'unknown'}")
 
             try:
                 info = plug.plugin_info_map()

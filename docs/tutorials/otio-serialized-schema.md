@@ -53,6 +53,7 @@ parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 - *suffixes*: File suffixes associated with this adapter.
+- *version*: Version number of plugin defined in manifest.
 
 ## Module: opentimelineio.core
 
@@ -158,6 +159,7 @@ None
 parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
+- *version*: Version number of plugin defined in manifest.
 
 ## Module: opentimelineio.media_linker
 
@@ -174,6 +176,7 @@ None
 parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
+- *version*: Version number of plugin defined in manifest.
 
 ## Module: opentimelineio.opentime
 
@@ -271,6 +274,7 @@ A class of plugin that is encoded in a python module, exposed via a
 parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
+- *version*: Version number of plugin defined in manifest.
 
 ## Module: opentimelineio.schema
 
@@ -675,3 +679,4 @@ None
 parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
+- *version*: Version number of plugin defined in manifest.

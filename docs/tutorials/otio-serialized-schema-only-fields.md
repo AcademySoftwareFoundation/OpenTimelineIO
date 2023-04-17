@@ -28,6 +28,7 @@ parameters:
 - *filepath*
 - *name*
 - *suffixes*
+- *version*
 
 ## Module: opentimelineio.core
 
@@ -78,6 +79,7 @@ parameters:
 parameters:
 - *filepath*
 - *name*
+- *version*
 
 ## Module: opentimelineio.media_linker
 
@@ -86,6 +88,7 @@ parameters:
 parameters:
 - *filepath*
 - *name*
+- *version*
 
 ## Module: opentimelineio.opentime
 
@@ -125,6 +128,7 @@ parameters:
 parameters:
 - *filepath*
 - *name*
+- *version*
 
 ## Module: opentimelineio.schema
 
@@ -280,3 +284,4 @@ parameters:
 parameters:
 - *filepath*
 - *name*
+- *version*

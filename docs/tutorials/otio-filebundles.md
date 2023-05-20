@@ -27,13 +27,15 @@ The file bundle adapters expect the `target_url` field of the `media_reference` 
 
 File bundles, regardless of how they're encoded, have a consistent structure:
 
-- something.otioz (or .otiod)
-    - content.otio
-    - version.txt
-    - media
-        - media1
-        - media2
-        - media3
+```
+something.otioz
+├── content.otio
+├── version
+└── media
+    ├── media1
+    ├── media2
+    └── media3
+```
 
 
 ### content.otio file

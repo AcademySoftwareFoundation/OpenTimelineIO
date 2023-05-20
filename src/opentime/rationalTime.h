@@ -7,6 +7,7 @@
 #include "opentime/version.h"
 #include <cmath>
 #include <limits>
+#include <cstdint>
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION {

@@ -415,6 +415,5 @@ setup(
     },
 
     # expand the project metadata dictionary to fill in those values
-    **PROJECT_METADATA,
-    license_file='LICENSE.txt'
+    **PROJECT_METADATA
 )

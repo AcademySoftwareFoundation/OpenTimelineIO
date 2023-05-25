@@ -14,10 +14,4 @@ if(OTIO_INSTALL_PYTHON_MODULES)
             DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     endif()
 
-    if(OTIO_INSTALL_CONTRIB)
-        install(DIRECTORY "${PROJECT_SOURCE_DIR}/contrib/opentimelineio_contrib"
-            DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}"
-            PATTERN "tests" EXCLUDE
-            PATTERN "Makefile" EXCLUDE)
-    endif()
 endif()

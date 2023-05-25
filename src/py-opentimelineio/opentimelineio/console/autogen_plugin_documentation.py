@@ -39,8 +39,8 @@ file should be regenerated.
 
 # Manifests
 
-The manifests describe plugins that are visible to OpenTimelineIO.  The core and
-contrib manifests are listed first, then any user-defined local plugins.
+The manifests describe plugins that are visible to OpenTimelineIO.  The core
+manifest is listed first, then any user-defined local plugins.
 
 {manifests}
 
@@ -49,14 +49,6 @@ contrib manifests are listed first, then any user-defined local plugins.
 Manifest path: `{manifest_path}`
 
 {manifest_contents}
-
-# Contrib Plugins
-
-Plugins in Contrib are supported by the community and provided as-is.
-
-Manifest path: `{contrib_manifest_path}`
-
-{contrib_manifest_contents}
 
 {local_manifest_text}
 """
@@ -345,14 +337,6 @@ def generate_and_write_documentation_plugins(
         sanitized_paths
     )
 
-    contrib_manifest_path = manifest_path_list[1]
-    contrib_manifest_path_sanitized = sanitized_paths[1]
-    contrib_manifest_text = _manifest_formatted(
-        plugin_info_map,
-        [contrib_manifest_path],
-        sanitized_paths
-    )
-
     local_manifest_text = ""
     if len(plugin_info_map) > 2 and not public_only:
         local_manifest_paths = manifest_path_list[2:]
@@ -378,8 +362,6 @@ def generate_and_write_documentation_plugins(
             manifests=manifest_list,
             manifest_path=core_manifest_path_sanitized,
             manifest_contents=core_manifest_text,
-            contrib_manifest_path=contrib_manifest_path_sanitized,
-            contrib_manifest_contents=contrib_manifest_text,
             local_manifest_text=local_manifest_text,
         )
     )

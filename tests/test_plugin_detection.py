@@ -80,7 +80,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
     def test_override_adapter(self):
 
-        # Test that entrypoint plugins load before builtin and contrib
+        # Test that entrypoint plugins load before builtin
         man = otio.plugins.manifest.load_manifest()
 
         # The override_adapter creates another otiod adapter

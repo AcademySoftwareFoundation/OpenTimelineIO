@@ -237,7 +237,6 @@ def _append_version_info_to_init_scripts(build_lib):
 
     for module, parentdir in [
             ("opentimelineio", "src/py-opentimelineio"),
-            ("opentimelineio_contrib", "contrib"),
             ("opentimelineview", "src")
     ]:
         target_file = os.path.join(build_lib, module, "__init__.py")
@@ -336,8 +335,7 @@ setup(
 
     packages=(
         find_packages(where="src/py-opentimelineio") +  # opentimelineio
-        find_packages(where="src") +  # opentimelineview
-        find_packages(where="contrib", exclude=["opentimelineio_contrib.adapters.tests"])  # opentimelineio_contrib # noqa
+        find_packages(where="src")  # opentimelineview
     ),
 
     ext_modules=[
@@ -351,7 +349,6 @@ setup(
     ],
 
     package_dir={
-        'opentimelineio_contrib': 'contrib/opentimelineio_contrib',
         'opentimelineio': 'src/py-opentimelineio/opentimelineio',
         'opentimelineview': 'src/opentimelineview',
     },

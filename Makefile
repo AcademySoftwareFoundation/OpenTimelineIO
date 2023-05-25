@@ -46,15 +46,11 @@ OTIO_DEFAULT_MEDIA_LINKER =
 
 
 # run all the unit tests
-test: test-core test-contrib
+test: test-core
 
 test-core: python-version
 	@echo "$(ccgreen)Running Core tests...$(ccend)"
 	@python -m unittest discover -s tests $(TEST_ARGS)
-
-test-contrib: python-version
-	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 # CI
 ###################################
@@ -65,10 +61,10 @@ ci-postbuild: coverage
 python-version:
 	@python --version
 
-coverage: coverage-core coverage-contrib coverage-report
+coverage: coverage-core coverage-report
 
 coverage-report:
-	@${COV_PROG} combine .coverage* contrib/opentimelineio_contrib/adapters/.coverage*
+	@${COV_PROG} combine .coverage*
 	@${COV_PROG} xml
 	@${COV_PROG} report -m
 
@@ -82,10 +78,7 @@ ifndef COV_PROG
 endif
 	@${COV_PROG} run -p -m unittest discover tests
 
-coverage-contrib: python-version
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
-
-lcov: 
+lcov:
 ifndef LCOV_PROG
 	$(error $(newline)$(ccred) lcov is not available please see:$(newline)$(ccend)\
 	$(ccblue)	https://github.com/linux-test-project/lcov/blob/master/README $(ccend))
@@ -127,7 +120,6 @@ clean:
 ifdef COV_PROG
 	@${COV_PROG} erase
 endif
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
 	rm -vf *.whl
 	@cd docs; ${MAKE_PROG} clean
 

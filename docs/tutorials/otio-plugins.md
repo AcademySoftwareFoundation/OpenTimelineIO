@@ -12,11 +12,10 @@ file should be regenerated.
 
 # Manifests
 
-The manifests describe plugins that are visible to OpenTimelineIO.  The core and
-contrib manifests are listed first, then any user-defined local plugins.
+The manifests describe plugins that are visible to OpenTimelineIO.  The core
+manifest is listed first, then any user-defined local plugins.
 
 - `opentimelineio/adapters/builtin_adapters.plugin_manifest.json`
-- `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest.json`
 
 # Core Plugins
 
@@ -187,57 +186,6 @@ read on unix and windows platforms.
   - dryrun
 
 
-
-
-
-## Media Linkers
-
-Media Linkers run after the adapter has read in the file and convert the media
-references into valid references where appropriate.
-
-[Tutorial on how to write a Media Linker](write-a-media-linker).
-
-
-
-## SchemaDefs
-
-SchemaDef plugins define new external schema.
-
-[Tutorial on how to write a schemadef](write-a-schemadef).
-
-
-
-## HookScripts
-
-HookScripts are extra plugins that run on _hooks_.
-
-[Tutorial on how to write a hookscript](write-a-hookscript).
-
-
-
-## Hooks
-
-Hooks are the points at which hookscripts will run.
-
-
-
-
-
-# Contrib Plugins
-
-Plugins in Contrib are supported by the community and provided as-is.
-
-Manifest path: `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest.json`
-
-
-
-## Adapter Plugins
-
-Adapter plugins convert to and from OpenTimelineIO.
-
-[Adapters documentation page for more information](./adapters).
-
-[Tutorial on how to write an adapter](write-an-adapter).
 
 
 

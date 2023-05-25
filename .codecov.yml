@@ -18,7 +18,6 @@ comment:
   require_changes: no
 
 ignore:
-  - "contrib/opentimelineio_contrib/adapters/tests/test_rvsession.py"
   - "*aaf2*"
   - "*pkg_resources*"
   - "*pbr*"

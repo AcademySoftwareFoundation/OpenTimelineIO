@@ -83,7 +83,7 @@ public:
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
 
-    optional<Imath::Box2d>
+    optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const
     {
         return _tracks.value->available_image_bounds(error_status);

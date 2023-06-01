@@ -23,7 +23,7 @@ public:
         std::string const&            name                   = std::string(),
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<Imath::Box2d> const& available_image_bounds = nullopt);
+        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
 
     bool is_missing_reference() const override;
 

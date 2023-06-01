@@ -25,7 +25,7 @@ public:
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          parameters             = AnyDictionary(),
         AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<Imath::Box2d> const& available_image_bounds = nullopt);
+        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
 
     std::string generator_kind() const noexcept { return _generator_kind; }
 

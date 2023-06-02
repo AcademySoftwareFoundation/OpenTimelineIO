@@ -666,6 +666,7 @@ SerializableObject::Writer::_build_dispatch_tables()
 
     auto& wt          = _write_dispatch_table;
     wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
+    wt[&typeid(nullptr)] = [this](any const&) { _encoder.write_null_value(); };
     wt[&typeid(bool)] = [this](any const& value) {
         _encoder.write_value(any_cast<bool>(value));
     };

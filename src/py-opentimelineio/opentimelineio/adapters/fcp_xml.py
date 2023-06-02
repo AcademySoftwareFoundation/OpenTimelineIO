@@ -743,7 +743,7 @@ class FCP7XMLParser:
         timeline_item_tags = {"clipitem", "generatoritem", "transitionitem"}
 
         md_dict = _xml_tree_to_dict(track_element, timeline_item_tags)
-        track_metadata = {META_NAMESPACE: md_dict} if md_dict else None
+        track_metadata = {META_NAMESPACE: md_dict} if md_dict else {}
 
         track = schema.Track(
             name=track_name,

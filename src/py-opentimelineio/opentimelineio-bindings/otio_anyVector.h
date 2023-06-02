@@ -13,6 +13,22 @@ namespace py = pybind11;
 struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
+    AnyVectorProxy() {}
+    AnyVectorProxy(MutationStamp *v) {
+        any_vector = v->any_vector;
+    }
+
+    AnyVectorProxy(const AnyVectorProxy& other) // Copy constructor. Required to convert a py::handle to an AnyVectorProxy.
+    {
+        AnyVector* v = new AnyVector;
+
+        AnyVector::iterator ptr;
+        for (ptr = other.any_vector->begin(); ptr < other.any_vector->end(); ptr++) {
+            v->push_back(*ptr);
+        }
+        any_vector = v;
+    }
+
     static void throw_array_was_deleted() {
         throw py::value_error("Underlying C++ AnyVector object has been destroyed");
     }

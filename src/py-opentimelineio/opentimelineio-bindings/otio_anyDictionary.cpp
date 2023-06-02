@@ -23,6 +23,13 @@ void otio_any_dictionary_bindings(py::module m) {
 
     py::class_<AnyDictionaryProxy>(m, "AnyDictionary")
         .def(py::init<>())
+        .def(py::init([](py::dict item) {
+            AnyDictionary d = py_to_cpp(item);
+            auto proxy = new AnyDictionaryProxy;
+            proxy->fetch_any_dictionary().swap(*d.get_or_create_mutation_stamp()->any_dictionary);
+
+            return proxy;
+        }))
         .def("__getitem__", &AnyDictionaryProxy::get_item, "key"_a)
         .def("__internal_setitem__", &AnyDictionaryProxy::set_item, "key"_a, "item"_a)
         .def("__delitem__", &AnyDictionaryProxy::del_item, "key"_a)

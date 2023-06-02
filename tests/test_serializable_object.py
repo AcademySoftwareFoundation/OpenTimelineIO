@@ -4,7 +4,9 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import opentimelineio as otio
+from opentimelineio._otio import AnyDictionary, AnyVector
 import opentimelineio.test_utils as otio_test_utils
+from opentimelineio.opentime import RationalTime, TimeRange, TimeTransform
 
 import unittest
 import json
@@ -35,6 +37,71 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         so = otio.core.SerializableObjectWithMetadata()
         so.metadata['foo'] = 'bar'
         self.assertEqual(so.metadata['foo'], 'bar')
+
+    def test_cons2(self):
+        v = AnyVector()
+        v.append(1)
+        v.append('inside any vector')
+
+        d = AnyDictionary()
+        d['key_1'] = 1234
+        d['key_2'] = {'asdasdasd': 5.6}
+        so = otio.core.SerializableObjectWithMetadata(
+            metadata={
+                'string': 'myvalue',
+                'int': -999999999999,
+                'list': [1, 2.5, 'asd'],
+                'dict': {'map1': [345]},
+                'AnyVector': v,
+                'AnyDictionary': d,
+                'RationalTime': RationalTime(
+                    value=10.0,
+                    rate=5.0
+                ),
+                'TimeRange': TimeRange(
+                    RationalTime(value=1.0),
+                    RationalTime(value=100.0)
+                ),
+                'TimeTransform': TimeTransform(
+                    offset=RationalTime(value=55.0),
+                    scale=999
+                )
+            }
+        )
+        so.metadata['foo'] = 'bar'
+        self.assertEqual(so.metadata['foo'], 'bar')
+        self.assertEqual(so.metadata['string'], 'myvalue')
+        self.assertEqual(so.metadata['int'], -999999999999)
+        self.assertIsInstance(so.metadata['list'], AnyVector)
+        self.assertEqual(
+            so.metadata['list'],
+            AnyVector([1, 2.5, 'asd'])
+        )
+        self.assertIsInstance(so.metadata['dict'], AnyDictionary)
+        self.assertIsInstance(so.metadata['dict']['map1'], AnyVector)
+        self.assertEqual(so.metadata['dict'], AnyDictionary({'map1': [345]}))
+        self.assertIsInstance(so.metadata['AnyVector'], AnyVector)
+        self.assertEqual(
+            so.metadata['AnyVector'],
+            AnyVector([1, 'inside any vector'])
+        )
+        self.assertIsInstance(so.metadata['AnyDictionary'], AnyDictionary)
+        self.assertEqual(
+            so.metadata['AnyDictionary'],
+            AnyDictionary({'key_1': 1234, 'key_2': {'asdasdasd': 5.6}})
+        )
+        self.assertEqual(
+            so.metadata['RationalTime'],
+            RationalTime(value=10.0, rate=5.0)
+        )
+        self.assertEqual(so.metadata['TimeRange'], TimeRange(
+            RationalTime(value=1.0),
+            RationalTime(value=100.0)
+        ))
+        self.assertEqual(so.metadata['TimeTransform'], TimeTransform(
+            offset=RationalTime(value=55.0),
+            scale=999
+        ))
 
     def test_update(self):
         so = otio.core.SerializableObjectWithMetadata()

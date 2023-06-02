@@ -17,6 +17,7 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
+bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
 
 template <typename T>
 struct managing_ptr {
@@ -152,6 +153,14 @@ struct PyAny {
 pybind11::object any_to_py(any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
-AnyDictionary py_to_any_dictionary(pybind11::object const& o);
+any py_to_any(pybind11::handle const& o);
 
-bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
+bool py_to_cpp(pybind11::bool_ const& o);
+template<typename T>
+T py_to_cpp(pybind11::int_ const& o);
+double py_to_cpp(pybind11::float_ const& o);
+std::string py_to_cpp(pybind11::str const& o);
+AnyDictionary py_to_cpp(pybind11::dict const& o);
+AnyVector py_to_cpp(pybind11::iterable const& o);
+template<typename T>
+T py_to_cpp(pybind11::handle const& o);

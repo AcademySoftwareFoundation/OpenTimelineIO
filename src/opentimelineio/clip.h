@@ -48,7 +48,7 @@ public:
     TimeRange
     available_range(ErrorStatus* error_status = nullptr) const override;
 
-    optional<Imath::Box2d>
+    optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
 protected:

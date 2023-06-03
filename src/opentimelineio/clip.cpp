@@ -184,7 +184,7 @@ Clip::available_range(ErrorStatus* error_status) const
     return active_media->available_range().value();
 }
 
-optional<Imath::Box2d>
+optional<IMATH_NAMESPACE::Box2d>
 Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
@@ -194,7 +194,7 @@ Clip::available_image_bounds(ErrorStatus* error_status) const
             ErrorStatus::CANNOT_COMPUTE_BOUNDS,
             "No image bounds set on clip",
             this);
-        return optional<Imath::Box2d>();
+        return optional<IMATH_NAMESPACE::Box2d>();
     }
 
     if (!active_media->available_image_bounds())
@@ -203,7 +203,7 @@ Clip::available_image_bounds(ErrorStatus* error_status) const
             ErrorStatus::CANNOT_COMPUTE_BOUNDS,
             "No image bounds set on media reference on clip",
             this);
-        return optional<Imath::Box2d>();
+        return optional<IMATH_NAMESPACE::Box2d>();
     }
 
     return active_media->available_image_bounds();

@@ -701,7 +701,7 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string name,
                          optional<TimeRange> available_range,
                          py::object metadata,
-                         optional<Imath::Box2d> const& available_image_bounds) {
+                         optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds) {
                           return new MediaReference(name, available_range, py_to_any_dictionary(metadata), available_image_bounds); }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = nullopt,
@@ -717,7 +717,7 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string name, std::string generator_kind,
                          optional<TimeRange> const& available_range,
                          py::object parameters, py::object metadata,
-                         optional<Imath::Box2d> const& available_image_bounds) {
+                         optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds) {
                           return new GeneratorReference(name, generator_kind,
                                                         available_range,
                                                         py_to_any_dictionary(parameters),
@@ -745,7 +745,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
                         std::string name,
                         optional<TimeRange> available_range,
                         py::object metadata,
-                        optional<Imath::Box2d> const& available_image_bounds) {
+                        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds) {
                     return new MissingReference(
                                   name,
                                   available_range,
@@ -763,7 +763,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
         .def(py::init([](std::string target_url,
                          optional<TimeRange> const& available_range,
                          py::object metadata,
-                         optional<Imath::Box2d> const& available_image_bounds) {
+                         optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds) {
                           return new ExternalReference(target_url,
                                                         available_range,
                                                         py_to_any_dictionary(metadata),
@@ -859,7 +859,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                          ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
                          py::object metadata,
-                         optional<Imath::Box2d> const& available_image_bounds) {
+                         optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds) {
                           return new ImageSequenceReference(target_url_base,
                                                             name_prefix,
                                                             name_suffix,

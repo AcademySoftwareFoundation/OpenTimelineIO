@@ -122,21 +122,21 @@ Stack::find_clips(
     return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
-optional<Imath::Box2d>
+optional<IMATH_NAMESPACE::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {
-    optional<Imath::Box2d> box;
+    optional<IMATH_NAMESPACE::Box2d> box;
     bool                   found_first_child = false;
     for (auto clip: find_children<Clip>(error_status))
     {
-        optional<Imath::Box2d> child_box;
+        optional<IMATH_NAMESPACE::Box2d> child_box;
         if (auto clip_box = clip->available_image_bounds(error_status))
         {
             child_box = clip_box;
         }
         if (is_error(error_status))
         {
-            return optional<Imath::Box2d>();
+            return optional<IMATH_NAMESPACE::Box2d>();
         }
         if (child_box)
         {

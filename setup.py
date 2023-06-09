@@ -221,7 +221,7 @@ PROJECT_METADATA = {
     "version": "0.16.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
-    "license": 'Modified Apache 2.0 License',
+    "license": 'Apache 2.0 License',
 }
 
 METADATA_TEMPLATE = """
@@ -310,7 +310,7 @@ setup(
         'Topic :: Multimedia :: Video :: Display',
         'Topic :: Multimedia :: Video :: Non-Linear Editor',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

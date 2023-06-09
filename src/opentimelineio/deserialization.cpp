@@ -609,14 +609,14 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     else if (schema_name_and_version == "V2d.1")
     {
         double x, y;
-        return _fetch("x", &x) && _fetch("y", &y) ? std::any(Imath::V2d(x, y))
+        return _fetch("x", &x) && _fetch("y", &y) ? std::any(IMATH_NAMESPACE::V2d(x, y))
                                                   : std::any();
     }
     else if (schema_name_and_version == "Box2d.1")
     {
-        Imath::V2d min, max;
+        IMATH_NAMESPACE::V2d min, max;
         return _fetch("min", &min) && _fetch("max", &max)
-                   ? std::any(Imath::Box2d(std::move(min), std::move(max)))
+                   ? std::any(IMATH_NAMESPACE::Box2d(std::move(min), std::move(max)))
                    : std::any();
     }
     else
@@ -743,13 +743,13 @@ SerializableObject::Reader::read(std::string const& key, AnyVector* value)
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, Imath::V2d* value)
+SerializableObject::Reader::read(std::string const& key, IMATH_NAMESPACE::V2d* value)
 {
     return _fetch(key, value);
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, Imath::Box2d* value)
+SerializableObject::Reader::read(std::string const& key, IMATH_NAMESPACE::Box2d* value)
 {
     return _fetch(key, value);
 }
@@ -789,8 +789,8 @@ SerializableObject::Reader::read(
 
 bool
 SerializableObject::Reader::read(
-    std::string const&     key,
-    std::optional<double>* value)
+    std::string const&                     key,
+    std::optional<IMATH_NAMESPACE::Box2d>* value)
 {
     return _read_optional(key, value);
 }
@@ -815,14 +815,6 @@ bool
 SerializableObject::Reader::read(
     std::string const&            key,
     std::optional<TimeTransform>* value)
-{
-    return _read_optional(key, value);
-}
-
-bool
-SerializableObject::Reader::read(
-    std::string const&           key,
-    std::optional<Imath::Box2d>* value)
 {
     return _read_optional(key, value);
 }

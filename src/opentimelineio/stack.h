@@ -40,7 +40,7 @@ public:
     std::map<Composable*, TimeRange>
     range_of_all_children(ErrorStatus* error_status = nullptr) const override;
 
-    std::optional<Imath::Box2d>
+    std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
     // Find child clips.

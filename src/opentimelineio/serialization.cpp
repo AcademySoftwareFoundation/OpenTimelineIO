@@ -76,7 +76,7 @@ public:
     virtual void write_value(class TimeRange const& value)           = 0;
     virtual void write_value(class TimeTransform const& value)       = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
-    virtual void write_value(Imath::Box2d const&)                    = 0;
+    virtual void write_value(IMATH_NAMESPACE::Box2d const&)          = 0;
 
 protected:
     void _error(ErrorStatus const& error_status)
@@ -266,7 +266,7 @@ public:
         _store(std::any(value));
     }
 
-    void write_value(Imath::V2d const& value)
+    void write_value(IMATH_NAMESPACE::V2d const& value)
     {
 
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
@@ -284,7 +284,7 @@ public:
         }
     }
 
-    void write_value(Imath::Box2d const& value) override
+    void write_value(IMATH_NAMESPACE::Box2d const& value) override
     {
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
         {
@@ -588,7 +588,7 @@ public:
         _writer.EndObject();
     }
 
-    void write_value(Imath::V2d const& value)
+    void write_value(IMATH_NAMESPACE::V2d const& value)
     {
         _writer.StartObject();
 
@@ -604,7 +604,7 @@ public:
         _writer.EndObject();
     }
 
-    void write_value(Imath::Box2d const& value)
+    void write_value(IMATH_NAMESPACE::Box2d const& value)
     {
         _writer.StartObject();
 
@@ -689,11 +689,11 @@ SerializableObject::Writer::_build_dispatch_tables()
     wt[&typeid(TimeTransform)] = [this](std::any const& value) {
         _encoder.write_value(std::any_cast<TimeTransform const&>(value));
     };
-    wt[&typeid(Imath::V2d)] = [this](std::any const& value) {
-        _encoder.write_value(std::any_cast<Imath::V2d const&>(value));
+    wt[&typeid(IMATH_NAMESPACE::V2d)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<IMATH_NAMESPACE::V2d const&>(value));
     };
-    wt[&typeid(Imath::Box2d)] = [this](std::any const& value) {
-        _encoder.write_value(std::any_cast<Imath::Box2d const&>(value));
+    wt[&typeid(IMATH_NAMESPACE::Box2d)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<IMATH_NAMESPACE::Box2d const&>(value));
     };
 
     /*
@@ -732,8 +732,8 @@ SerializableObject::Writer::_build_dispatch_tables()
     et[&typeid(TimeTransform)] = &_simple_any_comparison<TimeTransform>;
     et[&typeid(SerializableObject::ReferenceId)] =
         &_simple_any_comparison<SerializableObject::ReferenceId>;
-    et[&typeid(Imath::V2d)]   = &_simple_any_comparison<Imath::V2d>;
-    et[&typeid(Imath::Box2d)] = &_simple_any_comparison<Imath::Box2d>;
+    et[&typeid(IMATH_NAMESPACE::V2d)]   = &_simple_any_comparison<IMATH_NAMESPACE::V2d>;
+    et[&typeid(IMATH_NAMESPACE::Box2d)] = &_simple_any_comparison<IMATH_NAMESPACE::Box2d>;
 
     /*
      * These next recurse back through the Writer itself:
@@ -896,8 +896,8 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const&          key,
-    std::optional<Imath::Box2d> value)
+    std::string const&                    key,
+    std::optional<IMATH_NAMESPACE::Box2d> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -1057,14 +1057,14 @@ SerializableObject::Writer::write(
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, Imath::V2d value)
+SerializableObject::Writer::write(std::string const& key, IMATH_NAMESPACE::V2d value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, Imath::Box2d value)
+SerializableObject::Writer::write(std::string const& key, IMATH_NAMESPACE::Box2d value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
@@ -1215,7 +1215,7 @@ SerializableObject::clone(ErrorStatus* error_status) const
 
 // to json_string
 std::string
-serialize_json_to_string(
+serialize_json_to_string_pretty(
     const std::any&           value,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status,
@@ -1231,10 +1231,7 @@ serialize_json_to_string(
         OTIO_rapidjson::kWriteNanAndInfFlag>
         json_writer(output_string_buffer);
 
-    if (indent >= 0)
-    {
-        json_writer.SetIndent(' ', indent);
-    }
+    json_writer.SetIndent(' ', indent);
 
     JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
@@ -1248,6 +1245,59 @@ serialize_json_to_string(
     }
 
     return std::string(output_string_buffer.GetString());
+}
+
+// to json_string
+std::string
+serialize_json_to_string_compact(
+    const std::any&           value,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status)
+{
+    OTIO_rapidjson::StringBuffer output_string_buffer;
+
+    OTIO_rapidjson::Writer<
+        decltype(output_string_buffer),
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::UTF8<>,
+        OTIO_rapidjson::CrtAllocator,
+        OTIO_rapidjson::kWriteNanAndInfFlag>
+        json_writer(output_string_buffer);
+
+    JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
+
+    if (!SerializableObject::Writer::write_root(
+            value,
+            json_encoder,
+            schema_version_targets,
+            error_status))
+    {
+        return std::string();
+    }
+
+    return std::string(output_string_buffer.GetString());
+}
+
+// to json_string
+std::string
+serialize_json_to_string(
+    const std::any&           value,
+    const schema_version_map* schema_version_targets,
+    ErrorStatus*              error_status,
+    int                       indent)
+{
+    if (indent > 0)
+    {
+        return serialize_json_to_string_pretty(
+            value,
+            schema_version_targets,
+            error_status,
+            indent);
+    }
+    return serialize_json_to_string_compact(
+        value,
+        schema_version_targets,
+        error_status);
 }
 
 bool

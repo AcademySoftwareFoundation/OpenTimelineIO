@@ -62,7 +62,7 @@ public:
         if ((et - _start_time.rescaled_to(_duration))._value > 1)
         {
             return _duration._value != floor(_duration._value)
-                       ? et._floor()
+                       ? et.floor()
                        : et - RationalTime(1, _duration._rate);
         }
         else

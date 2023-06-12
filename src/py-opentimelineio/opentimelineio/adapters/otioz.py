@@ -116,7 +116,6 @@ def write_to_file(
                     url = cl.media_reference.target_url
                 except AttributeError:
                     continue
-            url_utils.filepath_from_url(url)
 
             target = os.path.join(
                 utils.BUNDLE_DIR_NAME,

@@ -80,27 +80,27 @@ public:
     // Return whether the value and rate are equal to another RationalTime.
     // This is different from the operator "==" that rescales the time before
     // comparison.
-    constexpr bool exactly_equal(RationalTime other) const noexcept
+    constexpr bool strictly_equal(RationalTime other) const noexcept
     {
         return _value == other._value && _rate == other._rate;
     }
 
     // Return a RationalTime with the largest integer value not greater than
     // this value.
-    RationalTime floor() const
+    RationalTime floor_value() const
     {
         return RationalTime{ std::floor(_value), _rate };
     }
 
     // Return a RationalTime with the smallest integer value not less than
     // this value.
-    RationalTime ceil() const
+    RationalTime ceil_value() const
     {
         return RationalTime{ std::ceil(_value), _rate };
     }
 
     // Return a RationalTime with the nearest integer value to this value.
-    RationalTime round() const
+    RationalTime round_value() const
     {
         return RationalTime{ std::round(_value), _rate };
     }

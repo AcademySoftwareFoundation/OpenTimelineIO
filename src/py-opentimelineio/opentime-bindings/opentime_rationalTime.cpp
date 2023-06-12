@@ -81,6 +81,10 @@ or if the rate is less than or equal to zero.
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
              "other"_a)
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
+        .def("strictly_equal", &RationalTime::strictly_equal, "other"_a)
+        .def("floor_value", &RationalTime::floor_value)
+        .def("ceil_value", &RationalTime::ceil_value)
+        .def("round_value", &RationalTime::round_value)
         .def("__copy__", [](RationalTime rt) {
                 return rt;
             })

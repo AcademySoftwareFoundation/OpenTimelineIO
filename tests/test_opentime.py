@@ -32,6 +32,8 @@ class TestTime(unittest.TestCase):
         t2 = otio.opentime.RationalTime(30.2)
         self.assertTrue(t1 is not t2)
         self.assertEqual(t1, t2)
+        t3 = otio.opentime.RationalTime(60.4, 2.0)
+        self.assertEqual(t1, t3)
 
     def test_inequality(self):
         t1 = otio.opentime.RationalTime(30.2)
@@ -42,6 +44,24 @@ class TestTime(unittest.TestCase):
         t3 = otio.opentime.RationalTime(30.2)
         self.assertTrue(t1 is not t3)
         self.assertFalse(t1 != t3)
+
+    def test_strict_equality(self):
+        t1 = otio.opentime.RationalTime(30.2)
+        self.assertTrue(t1.strictly_equal(t1))
+        t2 = otio.opentime.RationalTime(30.2)
+        self.assertTrue(t1.strictly_equal(t2))
+        t3 = otio.opentime.RationalTime(60.4, 2.0)
+        self.assertFalse(t1.strictly_equal(t3))
+
+    def test_rounding(self):
+        t1 = otio.opentime.RationalTime(30.2)
+        self.assertEqual(t1.floor_value(), otio.opentime.RationalTime(30.0))
+        self.assertEqual(t1.ceil_value(), otio.opentime.RationalTime(31.0))
+        self.assertEqual(t1.round_value(), otio.opentime.RationalTime(30.0))
+        t2 = otio.opentime.RationalTime(30.8)
+        self.assertEqual(t2.floor_value(), otio.opentime.RationalTime(30.0))
+        self.assertEqual(t2.ceil_value(), otio.opentime.RationalTime(31.0))
+        self.assertEqual(t2.round_value(), otio.opentime.RationalTime(31.0))
 
     def test_comparison(self):
         t1 = otio.opentime.RationalTime(15.2)

@@ -40,24 +40,24 @@ main(int argc, char** argv)
         assertFalse(t1 != t3);
     });
 
-    tests.add_test("test_exact_equality", [] {
+    tests.add_test("test_strict_equality", [] {
         otime::RationalTime t1(30.2);
-        assertTrue(t1.exactly_equal(t1));
+        assertTrue(t1.strictly_equal(t1));
         otime::RationalTime t2(30.2);
-        assertTrue(t1.exactly_equal(t2));
+        assertTrue(t1.strictly_equal(t2));
         otime::RationalTime t3(60.4, 2.0);
-        assertFalse(t1.exactly_equal(t3));
+        assertFalse(t1.strictly_equal(t3));
     });
 
     tests.add_test("test_rounding", [] {
         otime::RationalTime t1(30.2);
-        assertEqual(t1.floor(), otime::RationalTime(30.0));
-        assertEqual(t1.ceil(), otime::RationalTime(31.0));
-        assertEqual(t1.round(), otime::RationalTime(30.0));
+        assertEqual(t1.floor_value(), otime::RationalTime(30.0));
+        assertEqual(t1.ceil_value(), otime::RationalTime(31.0));
+        assertEqual(t1.round_value(), otime::RationalTime(30.0));
         otime::RationalTime t2(30.8);
-        assertEqual(t2.floor(), otime::RationalTime(30.0));
-        assertEqual(t2.ceil(), otime::RationalTime(31.0));
-        assertEqual(t2.round(), otime::RationalTime(31.0));
+        assertEqual(t2.floor_value(), otime::RationalTime(30.0));
+        assertEqual(t2.ceil_value(), otime::RationalTime(31.0));
+        assertEqual(t2.round_value(), otime::RationalTime(31.0));
     });
 
     tests.add_test("test_from_time_string", [] {

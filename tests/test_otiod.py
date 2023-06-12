@@ -64,7 +64,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
 
-        self.assertEqual(manifest, {})
+        self.assertEqual(manifest, [])
         for cl in result_otio.find_clips():
             self.assertIsInstance(
                 cl.media_reference,
@@ -87,9 +87,9 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
 
-        self.assertEqual(len(manifest.keys()), 2)
+        self.assertEqual(len(manifest), 2)
 
-        files_in_manifest = set(manifest.keys())
+        files_in_manifest = set(manifest)
         known_files = {
             MEDIA_EXAMPLE_PATH_ABS: 5,
             os.path.abspath(MEDIA_EXAMPLE_PATH_REL): 4
@@ -97,9 +97,6 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # should only contain absolute paths
         self.assertEqual(files_in_manifest, set(known_files.keys()))
-
-        for fname, count in known_files.items():
-            self.assertEqual(len(manifest[fname]), count)
 
     def test_round_trip(self):
         with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:

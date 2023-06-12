@@ -21,6 +21,7 @@ import zipfile
 
 from .. import (
     exceptions,
+    schema,
     url_utils,
 )
 
@@ -83,14 +84,13 @@ def write_to_file(
     # -------------------------------------------------------------------------
     # - build file manifest (list of paths to files on disk that will be put
     #   into the archive)
-    # - build a mapping of path to file on disk to url to put into the media
-    #   reference in the result
+    # - build a mapping of input paths to output paths
     # - relink the media references to point at the final location inside the
     #   archive
     # - build the resulting structure (zip file, directory)
     # -------------------------------------------------------------------------
 
-    result_otio, path_to_mr_map = utils._prepped_otio_for_bundle_and_manifest(
+    result_otio, paths = utils._prepped_otio_for_bundle_and_manifest(
         input_otio,
         media_policy,
         "OTIOZ"
@@ -98,24 +98,40 @@ def write_to_file(
 
     # dryrun reports the total size of files
     if dryrun:
-        return utils._total_file_size_of(path_to_mr_map.keys())
+        return utils._total_file_size_of(paths)
 
+    # get the output paths
     abspath_to_output_path_map = {}
+    for abspath in paths:
+        target = os.path.join(utils.BUNDLE_DIR_NAME, os.path.basename(abspath))
+        abspath_to_output_path_map[abspath] = target
 
     # relink all the media references to their target paths
-    for abspath, references in path_to_mr_map.items():
-        target = os.path.join(utils.BUNDLE_DIR_NAME, os.path.basename(abspath))
+    for cl in result_otio.find_clips():
+        for mr in cl.media_references().values():
+            if isinstance(mr, schema.ImageSequenceReference):
+                url = cl.media_reference.target_url_base
+            else:
+                try:
+                    url = cl.media_reference.target_url
+                except AttributeError:
+                    continue
+            url_utils.filepath_from_url(url)
 
-        # conform to posix style paths inside the bundle, so that they are
-        # portable between windows and *nix style environments
-        final_path = str(pathlib.Path(target).as_posix())
+            target = os.path.join(
+                utils.BUNDLE_DIR_NAME,
+                os.path.basename(url_utils.filepath_from_url(url)))
 
-        # cache the output path
-        abspath_to_output_path_map[abspath] = final_path
+            # conform to posix style paths inside the bundle, so that they are
+            # portable between windows and *nix style environments
+            final_path = str(pathlib.Path(target).as_posix())
 
-        for mr in references:
-            # author the final_path in url form into the target_url
-            mr.target_url = url_utils.url_from_filepath(final_path)
+            # author the final_path in url form into the media reference
+            url = url_utils.url_from_filepath(final_path)
+            if isinstance(mr, schema.ImageSequenceReference):
+                mr.target_url_base = url if url.endswith('/') else url + '/'
+            else:
+                mr.target_url = url
 
     # write the otioz file to the temp directory
     otio_str = otio_json.write_to_string(result_otio)

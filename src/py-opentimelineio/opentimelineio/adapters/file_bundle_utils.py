@@ -77,10 +77,9 @@ def _prepped_otio_for_bundle_and_manifest(
 ):
     """ Create a new OTIO based on input_otio that has had media references
     replaced according to the media_policy.  Return that new OTIO and a
-    mapping of all the absolute file paths (not URLs) to be used in the bundle,
-    mapped to MediaReferences associated with those files.  Media references in
-    the OTIO will be relinked by the adapters to point to their output
-    locations.
+    list of all the absolute file paths (not URLs) to be used in the bundle.
+    Media references in the OTIO will be relinked by the adapters to point to
+    their output locations.
 
     The otio[dz] adapters use this function to do further relinking and build
     their bundles.
@@ -91,7 +90,7 @@ def _prepped_otio_for_bundle_and_manifest(
     # make sure the incoming OTIO isn't edited
     result_otio = copy.deepcopy(input_otio)
 
-    path_to_reference_map = {}
+    paths = set()
     invalid_files = set()
 
     # result_otio is manipulated in place
@@ -103,68 +102,85 @@ def _prepped_otio_for_bundle_and_manifest(
             )
             continue
 
-        try:
-            target_url = cl.media_reference.target_url
-        except AttributeError:
-            # not an ExternalReference, ignoring it.
-            continue
+        for mr in cl.media_references().values():
+            if isinstance(mr, schema.ImageSequenceReference):
+                url = cl.media_reference.target_url_base
+            else:
+                try:
+                    url = cl.media_reference.target_url
+                except AttributeError:
+                    # not an ImageSequenceReference or object with target_url,
+                    # ignoring it.
+                    continue
 
-        parsed_url = urlparse.urlparse(target_url)
+            parsed_url = urlparse.urlparse(url)
 
-        # ensure that the urlscheme is either file or ""
-        # file means "absolute path"
-        # none is interpreted as a relative path, relative to cwd
-        if parsed_url.scheme not in ("file", ""):
-            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
-                raise NotAFileOnDisk(
-                    "The {} adapter only works with media reference"
-                    " target_url attributes that begin with 'file:'.  Got a "
-                    "target_url of:  '{}'".format(adapter_name, target_url)
-                )
-            if media_policy is MediaReferencePolicy.MissingIfNotFile:
-                cl.media_reference = reference_cloned_and_missing(
-                    cl.media_reference,
-                    "target_url is not a file scheme url (start with url:)"
-                )
-                continue
+            # ensure that the urlscheme is either file or ""
+            # file means "absolute path"
+            # none is interpreted as a relative path, relative to cwd
+            if parsed_url.scheme not in ("file", ""):
+                if media_policy is MediaReferencePolicy.ErrorIfNotFile:
+                    raise NotAFileOnDisk(
+                        "The {} adapter only works with file URLs."
+                        " Got a URL of:  '{}'".format(adapter_name, url)
+                    )
+                if media_policy is MediaReferencePolicy.MissingIfNotFile:
+                    cl.media_reference = reference_cloned_and_missing(
+                        cl.media_reference,
+                        "not a file URL"
+                    )
+                    continue
 
-        # get an absolute path to the target file
-        target_file = os.path.abspath(url_utils.filepath_from_url(target_url))
+            # get absolute paths to the target files
+            target_files = []
+            if isinstance(mr, schema.ImageSequenceReference):
+                for number in range(mr.number_of_images_in_sequence()):
+                    target_files.append(os.path.abspath(
+                        url_utils.filepath_from_url(
+                            mr.target_url_for_image_number(number))))
+            else:
+                target_files.append(os.path.abspath(
+                    url_utils.filepath_from_url(url)))
 
-        # if the file hasn't already been checked
-        if (
-            target_file not in path_to_reference_map
-            and target_file not in invalid_files
-            and (
-                not os.path.exists(target_file)
-                or not os.path.isfile(target_file)
-            )
-        ):
-            invalid_files.add(target_file)
+            # if the file hasn't already been checked
+            for target_file in target_files:
+                if (
+                    target_file not in paths
+                    and target_file not in invalid_files
+                    and (
+                        not os.path.exists(target_file)
+                        or not os.path.isfile(target_file)
+                    )
+                ):
+                    invalid_files.add(target_file)
 
-        if target_file in invalid_files:
-            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
-                raise NotAFileOnDisk(target_file)
-            if media_policy is MediaReferencePolicy.MissingIfNotFile:
-                cl.media_reference = reference_cloned_and_missing(
-                    cl.media_reference,
-                    "target_url target is not a file or does not exist"
-                )
+            invalid = False
+            for target_file in target_files:
+                if target_file in invalid_files:
+                    if media_policy is MediaReferencePolicy.ErrorIfNotFile:
+                        raise NotAFileOnDisk(target_file)
+                    invalid = True
+                    break
+            if invalid:
+                if media_policy is MediaReferencePolicy.MissingIfNotFile:
+                    cl.media_reference = reference_cloned_and_missing(
+                        cl.media_reference,
+                        "not a file URL or does not exist"
+                    )
 
-                # do not need to relink it in the future or add this target to
-                # the manifest, because the path is either not a file or does
-                # not exist.
-                continue
+                    # do not need to relink it in the future or add this target to
+                    # the manifest, because the path is either not a file or does
+                    # not exist.
+                    continue
 
-        # add the media reference to the list of references that point at this
-        # file, they will need to be relinked
-        path_to_reference_map.setdefault(target_file, []).append(
-            cl.media_reference
-        )
+            # add the media reference to the list of references that point at this
+            # file, they will need to be relinked
+            for target_file in target_files:
+                paths.add(target_file)
 
-    _guarantee_unique_basenames(path_to_reference_map.keys(), adapter_name)
+    _guarantee_unique_basenames(paths, adapter_name)
 
-    return result_otio, path_to_reference_map
+    return result_otio, list(paths)
 
 
 def _total_file_size_of(filepaths):

@@ -7,6 +7,7 @@
 
 import unittest
 import os
+import pathlib
 import tempfile
 
 import opentimelineio as otio
@@ -118,14 +119,13 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.find_clips():
             # construct an absolute file path to the result
-            cl.media_reference.target_url = (
-                otio.url_utils.url_from_filepath(
-                    os.path.join(
-                        otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
-                        os.path.basename(cl.media_reference.target_url)
-                    )
-                )
+            url = cl.media_reference.target_url
+            target = os.path.join(
+                otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
+                os.path.basename(url)
             )
+            final_path = str(pathlib.Path(target).as_posix())
+            cl.media_reference.target_url = final_path
 
         self.assertJsonEqual(result, self.tl)
 

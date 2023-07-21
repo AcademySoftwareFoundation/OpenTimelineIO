@@ -207,7 +207,7 @@ otio.adapters.write_to_file(
 
 ```
 
-To fetch the version sets defined by the core from python, use the `"OTIO_CORE"` family of version sets.
+To fetch the version sets defined by the core from python, use the `OTIO_CORE` family of version sets.
 
 See the [versioning module](../api/python/opentimelineio.versioning.rst) for more information on accessing these.
 

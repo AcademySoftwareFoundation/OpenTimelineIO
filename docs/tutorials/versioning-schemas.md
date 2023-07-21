@@ -189,13 +189,25 @@ For example:
 To fetch the version maps and work with this, the python API provides some additional functions:
 
 ```python
+# example using a built in family
+downgrade_manifest = otio.versioning.fetch_map("OTIO_CORE", "0.15.0")
+otio.adapters.write_to_file(
+    sc,
+    "/path/to/file.otio", 
+    target_schema_versions=downgrade_manifest
+)
+
+# using a custom family defined in a plugin manifest json file
 downgrade_manifest = otio.versioning.fetch_map("MYFAMILY", "June2022")
 otio.adapters.write_to_file(
     sc,
     "/path/to/file.otio", 
-    downgrade_manifest
+    target_schema_versions=downgrade_manifest
 )
+
 ```
+
+To fetch the version sets defined by the core from python, use the `"OTIO_CORE"` family of version sets.
 
 See the [versioning module](../api/python/opentimelineio.versioning.rst) for more information on accessing these.
 

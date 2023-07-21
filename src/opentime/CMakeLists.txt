@@ -42,14 +42,31 @@ if(OTIO_CXX_INSTALL)
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime")
 
     install(TARGETS opentime
-            EXPORT OpenTimeConfig
+            EXPORT OpenTimeTargets
             INCLUDES DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include"
             ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
             LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
             RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
-    install(EXPORT OpenTimeConfig
+    install(EXPORT OpenTimeTargets
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime"
             NAMESPACE OTIO:: )
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/OpenTimeConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
+        INSTALL_DESTINATION
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+        NO_SET_AND_CHECK_MACRO
+        NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    )
+
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
+        DESTINATION
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+    )
 endif()
 

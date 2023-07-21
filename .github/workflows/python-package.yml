@@ -39,6 +39,7 @@ jobs:
       OTIO_BUILD_CONFIG: Release
       OTIO_BUILD_DIR: ${{ github.workspace }}/build
       OTIO_INSTALL_DIR: ${{ github.workspace }}/install
+      OTIO_CONSUMER_TEST_BUILD_DIR: ${{ github.workspace }}/consumertest
 
     steps:
     - uses: actions/checkout@v3
@@ -81,6 +82,11 @@ jobs:
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
+    - name: Consumer tests
+      run: |
+        cmake -E make_directory ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+        cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+        cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
   py_build_test:
     runs-on: ${{ matrix.os }}

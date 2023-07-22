@@ -236,8 +236,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 
     # Input...
     parser.add_argument(
-        "-i",
         "--input",
+        "-i",
         type=str,
         nargs='+',
         metavar='PATH(s)',
@@ -247,14 +247,14 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 
     # Filter...
     parser.add_argument(
-        "-v",
         "--video-only",
+        "-v",
         action='store_true',
         help="Output only video tracks"
     )
     parser.add_argument(
-        "-a",
         "--audio-only",
+        "-a",
         action='store_true',
         help="Output only audio tracks"
     )
@@ -285,7 +285,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         type=str,
         nargs='+',
         metavar='REGEX(es)',
-        help="Output only clips with names matching the given regex"
+        help="""Output only clips with names matching the given
+        regular expression pattern (e.g. '[Ii]nterview [0-9]+')"""
     )
     parser.add_argument(
         "--remove-transitions",
@@ -293,21 +294,23 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="Remove all transitions"
     )
     parser.add_argument(
-        "-t",
         "--trim",
+        "-t",
         type=str,
         nargs=2,
         metavar=('START', 'END'),
-        help="Trim from <start> to <end> as HH:MM:SS:FF timecode or seconds"
+        help="""Trim from START to END, each specified as seconds or
+        HH:MM:SS:FF timecode (matching the timeline's rate)"""
     )
 
     # Combine...
     parser.add_argument(
-        "-f",
         "--flatten",
+        "-f",
         choices=['video', 'audio', 'all'],
         metavar='TYPE',
-        help="Flatten multiple tracks into one."
+        help="""Flatten multiple tracks into one.
+        TYPE must be 'video' or 'audio' or 'all'."""
     )
     parser.add_argument(
         "--keep-flattened-tracks",
@@ -316,14 +319,14 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         others instead of replacing them."""
     )
     parser.add_argument(
-        "-s",
         "--stack",
+        "-s",
         action='store_true',
         help="Stack multiple input files into one timeline"
     )
     parser.add_argument(
-        "-c",
         "--concat",
+        "-c",
         action='store_true',
         help="Concatenate multiple input files end-to-end into one timeline"
     )
@@ -398,7 +401,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         type=str,
         nargs='+',
         metavar='NAME(s)',
-        help="Inspect details of clips with names matching the given regex"
+        help="""Inspect details of clips with names matching the given regular
+        expression pattern (e.g. 'SFX.*-TEMP')"""
     )
 
     # Output...
@@ -421,8 +425,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     parser.add_argument(
-        "-o",
         "--output",
+        "-o",
         type=str,
         metavar='PATH',
         help="""Output file. All formats supported by adapter plugins

@@ -112,7 +112,12 @@ def main():
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
 
-    # Phase 6: Redaction
+    # Phase 6: Remove/Redaction
+
+    if args.remove_metadata_key:
+        for timeline in timelines:
+            for key in args.remove_metadata_key:
+                remove_metadata_key(timeline, key)
 
     if args.redact:
         for timeline in timelines:
@@ -194,8 +199,10 @@ This tool works in phases, as follows:
     If specified, the --copy-media-to-folder option, will copy or download
     all linked media, and relink the OTIO to reference the local copies.
 
-5. Redact
-    If specified, the --redact option, will remove all metadata and rename all
+5. Remove/Redact
+    The --remove-metadata-key option allows you to remove a specific piece of
+    metadata from all objects.
+    If specified, the --redact option, will remove ALL metadata and rename all
     objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
 
 6. Inspect
@@ -338,7 +345,14 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         relink all media references to the copies"""
     )
 
-    # Redact
+    # Remove/Redact
+    parser.add_argument(
+        "--remove-metadata-key",
+        type=str,
+        nargs='+',
+        metavar='KEY(s)',
+        help="""Remove one or more metadata keys from all objects."""
+    )
     parser.add_argument(
         "--redact",
         action='store_true',
@@ -620,6 +634,26 @@ def trim_timeline(start, end, timeline):
         otio.algorithms.track_trimmed_to_range(t, trim_range)
         for t in timeline.tracks
     ]
+
+
+def remove_metadata_key(timeline, key):
+    def rem(d):
+        if key in d:
+            del d[key]
+
+    rem(timeline.metadata)
+    for child in [timeline.tracks] + list(timeline.find_children()):
+        rem(child.metadata)
+        if hasattr(child, 'markers'):
+            for marker in child.markers:
+                rem(marker.metadata)
+        if hasattr(child, 'effects'):
+            for effect in child.effects:
+                rem(effect.metadata)
+        if hasattr(child, 'media_reference'):
+            media_reference = child.media_reference
+            if media_reference:
+                rem(media_reference.metadata)
 
 
 # Used only within _counter() to keep track of object indexes

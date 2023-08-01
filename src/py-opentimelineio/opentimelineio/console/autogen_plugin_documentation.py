@@ -270,6 +270,11 @@ def _manifest_formatted(
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
         pt_lines = []
 
+        if pt == "hooks":
+            # hooks get handled differently by plugin_info_map() so we will skip them
+            display_map[pt] = ""
+            continue
+
         sorted_plugins = [
             plugin_info_map[pt][name]
             for name in sorted(plugin_info_map[pt].keys())
@@ -316,21 +321,26 @@ def generate_and_write_documentation_plugins(
     manifest_path_list = plugin_info_map['manifests'][:]
 
     if public_only:
-        manifest_path_list = manifest_path_list[:2]
+        # keep only core manifests
+        manifest_path_list = [
+            p for p in manifest_path_list
+            if p.replace("\\", PATH_SEP).split(PATH_SEP)[-3] == "opentimelineio"
+        ]
 
-    sanitized_paths = manifest_path_list[:]
+    sanitized_path_list = manifest_path_list.copy()
+
     if sanitized_paths:
         # conform all paths to unix-style path separators and leave relative
         # paths (relative to root of OTIO directory)
-        sanitized_paths = [
+        sanitized_path_list = [
             PATH_SEP.join(p.replace("\\", PATH_SEP).split(PATH_SEP)[-3:])
-            for p in manifest_path_list
+            for p in sanitized_path_list
         ]
 
-    manifest_list = "\n".join(f"- `{mp}`" for mp in sanitized_paths)
+    manifest_list = "\n".join(f"- `{mp}`" for mp in sanitized_path_list)
 
     core_manifest_path = manifest_path_list[0]
-    core_manifest_path_sanitized = sanitized_paths[0]
+    core_manifest_path_sanitized = sanitized_path_list[0]
     core_manifest_text = _manifest_formatted(
         plugin_info_map,
         [core_manifest_path],
@@ -340,7 +350,7 @@ def generate_and_write_documentation_plugins(
     local_manifest_text = ""
     if len(plugin_info_map) > 2 and not public_only:
         local_manifest_paths = manifest_path_list[2:]
-        local_manifest_paths_sanitized = sanitized_paths[2:]
+        local_manifest_paths_sanitized = sanitized_path_list[2:]
         local_manifest_list = "\n".join(
             f"- `{mp}`" for mp in local_manifest_paths_sanitized
         )

@@ -301,6 +301,14 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                 if key not in columns:
                     columns.append(key)
 
+        # If otio contains CDL data add ASC_SOP and/or ASC_SAT columns
+        cdl = clip.metadata.get('cdl', None)
+        if cdl is not None:
+            if cdl.get('asc_sop') and 'ASC_SOP' not in columns:
+                columns.append('ASC_SOP')
+            if cdl.get('asc_sat') and 'ASC_SAT' not in columns:
+                columns.append('ASC_SAT')
+
     # Always output these
     for c in ["Duration", "End", "Start", "Name", "Source File"]:
         if c not in columns:
@@ -340,6 +348,30 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             return otio.opentime.to_timecode(
                 clip.source_range.end_time_exclusive(), fps
             )
+        elif column == "ASC_SOP":
+            asc_sop = clip.metadata.get("cdl", {}).get("asc_sop", {})
+            slope = asc_sop.get("slope", None)
+            offset = asc_sop.get("offset", None)
+            power = asc_sop.get("power", None)
+            asc_sop_arr = [slope, offset, power]
+            if None in asc_sop_arr:
+                return clip.metadata.get("ALE", {}).get(column)
+            asc_sop = ""
+            try:
+                for i in range(3):
+                    asc_sop += "("
+                    asc_sop += str(asc_sop_arr[i][0]) + " "
+                    asc_sop += str(asc_sop_arr[i][1]) + " "
+                    asc_sop += str(asc_sop_arr[i][2]) + ")"
+            except IndexError:
+                return clip.metadata.get("ALE", {}).get(column, "")
+            return asc_sop
+        elif column == "ASC_SAT":
+            asc_sat = clip.metadata.get("cdl", {}).get("asc_sat", None)
+            if asc_sat is not None:
+                return asc_sat
+            else:
+                return clip.metadata.get("ALE", {}).get(column)
         else:
             return clip.metadata.get("ALE", {}).get(column)
 

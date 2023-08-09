@@ -15,6 +15,8 @@ namespace pybind11 { namespace detail {
     // becomes std::optional starting in C++17, and Pybind11 already defines
     // casters for std::optional, this becomes a duplicate (and therefore build
     // error).
+    // The casters can be removed when C++ versions less than 17 are no longer
+    // supported by OTIO.
     template<typename T> struct type_caster<optional<T>>
         : public optional_caster<optional<T>> {};
 

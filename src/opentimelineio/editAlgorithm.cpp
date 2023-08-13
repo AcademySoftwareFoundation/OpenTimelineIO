@@ -1,9 +1,31 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
+#include <iostream>
+
 #include "opentimelineio/editAlgorithm.h"
 
 #include "opentimelineio/gap.h"
+
+namespace otime = opentime::OPENTIME_VERSION;
+
+using otime::RationalTime;
+using otime::TimeRange;
+
+std::ostream& operator << (std::ostream& os, const RationalTime& value)
+{
+    os << std::fixed << value.value() << "/" << value.rate();
+    return os;
+}
+
+std::ostream& operator << (std::ostream& os, const TimeRange& value)
+{
+    os << std::fixed << value.start_time().value() << "/" <<
+        value.duration().value() << "/" <<
+        value.duration().rate();
+    return os;
+}
+
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -22,7 +44,7 @@ edit_slice(
     }
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
-
+                        
     // Adjust the source range for the first slice.
     const TimeRange first_source_range(
         item->trimmed_range().start_time(),
@@ -151,6 +173,52 @@ edit_overwrite(
                 TimeRange(trimmed_range.start_time(), range.duration()));
             composition->insert_child(insert_index, item);
         }
+    }
+}
+
+void
+edit_insert(
+    Item*            insert_item,
+    Composition*     composition,
+    RationalTime const& time,
+    ErrorStatus*     error_status)
+{
+    // Find the item to split.
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status, true));
+    if (!item)
+    {
+        composition->append_child(insert_item);
+        return;
+    }
+    
+    const int       index = composition->index_of_child(item);
+    const TimeRange range = composition->trimmed_range_of_child_at_index(index);
+    int insert_index = index;
+
+    // Adjust the source range for the first slice.
+    const TimeRange first_source_range(
+        item->trimmed_range().start_time(),
+        time - range.start_time());
+        
+    auto            third_item = dynamic_cast<Item*>(item->clone());
+    if (item->trimmed_range().start_time() < time)
+    {
+        item->set_source_range(first_source_range);
+        ++insert_index;
+    }
+
+    composition->insert_child(insert_index, insert_item);
+    const TimeRange insert_range = composition->trimmed_range_of_child_at_index(insert_index);
+    
+    // Clone the item for the second slice.
+    if (item->trimmed_range().start_time() < time)
+    {
+        const TimeRange third_source_range(
+            insert_range.start_time() + insert_range.duration(),
+            range.end_time_exclusive() - time);
+        third_item->set_source_range(third_source_range);
+        composition->insert_child(insert_index + 1, third_item);
     }
 }
 

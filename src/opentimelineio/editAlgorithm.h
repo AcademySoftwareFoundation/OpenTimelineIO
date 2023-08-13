@@ -24,7 +24,35 @@ void edit_slice(
 void edit_overwrite(
     Item*            item,
     Composition*     composition,
-    TimeRange const& time,
+    TimeRange const& range,
+    ErrorStatus*     error_status = nullptr);
+
+// Insert an item.
+// |     A     | B | -> | A | C | A | B |
+//       ^   
+//     | C |
+void edit_insert(
+    Item*            item,
+    Composition*     composition,
+    RationalTime const& time,
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_cut(
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_slip(
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_slide(
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_ripple(
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_roll(
+    ErrorStatus*     error_status = nullptr);
+        
+void edit_fill(
     ErrorStatus*     error_status = nullptr);
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -496,7 +496,7 @@ main(int argc, char** argv)
                 otio::RationalTime(12.0, 24.0)));
     });
     
-    // Insert near the end of clip_1 (append at end).
+    // Insert near the end of clip_1.
     tests.add_test("test_edit_insert_5", [] {
         // Create a track with two clips.
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(

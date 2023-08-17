@@ -11,7 +11,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-//#define DEBUG
+#define DEBUG
 
 
 namespace otime = opentime::OPENTIME_VERSION;
@@ -48,21 +48,21 @@ void
 debug_track_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
-    std::cerr << "\t" << title << " TRACK RANGES" << std::endl;
+    std::cout << "\t" << title << " TRACK RANGES" << std::endl;
     for (const auto& child: track->children())
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-            std::cerr << "\t\t" << item->name() << " "
+            std::cout << "\t\t" << item->name() << " "
                       << track->trimmed_range_of_child(child).value()
                       << std::endl;
         auto transition = otio::dynamic_retainer_cast<otio::Transition>(child);
         if (transition)
-            std::cerr << "\t\t" << transition->name() << " "
+            std::cout << "\t\t" << transition->name() << " "
                       << track->trimmed_range_of_child(transition).value()
                       << std::endl;
     }
-    std::cerr << "\t" << title << " TRACK RANGES END" << std::endl;
+    std::cout << "\t" << title << " TRACK RANGES END" << std::endl;
 #endif
 }
 
@@ -70,15 +70,15 @@ void
 debug_clip_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
-    std::cerr << "\t" << title << " CLIP TRIMMED RANGES" << std::endl;
+    std::cout << "\t" << title << " CLIP TRIMMED RANGES" << std::endl;
     for (const auto& child: track->children())
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-            std::cerr << "\t\t" << item->name() << " " << item->trimmed_range()
+            std::cout << "\t\t" << item->name() << " " << item->trimmed_range()
                       << std::endl;
     }
-    std::cerr << "\t" << title << " CLIP TRIMMED RANGES END" << std::endl;
+    std::cout << "\t" << title << " CLIP TRIMMED RANGES END" << std::endl;
 #endif
 }
 
@@ -98,8 +98,8 @@ assert_clip_ranges(
             ++children;
         }
     }
-    assertEqual(children, expected_ranges.size());
     debug_clip_ranges("TEST", track);
+    assertEqual(children, expected_ranges.size());
     assertEqual(expected_ranges, ranges);
 }
 
@@ -120,6 +120,7 @@ assert_track_ranges(
         }
     }
     debug_track_ranges("TEST", track);
+    assertEqual(children, ranges.size());
     assertEqual(expected_ranges, ranges);
 }
 
@@ -137,7 +138,7 @@ test_edit_slice(
 
     debug_track_ranges("START", track);
 #ifdef DEBUG
-    std::cerr << "\t\tslice at " << slice_time << std::endl;
+    std::cout << "\t\tslice at " << slice_time << std::endl;
 #endif
     
     // Slice.
@@ -192,7 +193,7 @@ test_edit_slice_transitions(
 
     debug_track_ranges("START", track);
 #ifdef DEBUG
-    std::cerr << "\t\tslice transitions at " << slice_time << std::endl;
+    std::cout << "\t\tslice transitions at " << slice_time << std::endl;
 #endif
     
     // Slice.
@@ -302,8 +303,8 @@ void test_edit_ripple(
     debug_clip_ranges("START", track);
 
 #ifdef DEBUG
-    std::cerr << "RIPPLE  DELTA_IN=" << delta_in << std::endl;
-    std::cerr << "RIPPLE DELTA_OUT=" << delta_out << std::endl;
+    std::cout << "RIPPLE  DELTA_IN=" << delta_in << std::endl;
+    std::cout << "RIPPLE DELTA_OUT=" << delta_out << std::endl;
 #endif
     otio::ErrorStatus error_status;
     otio::algo::ripple(
@@ -352,8 +353,8 @@ void test_edit_roll(
     debug_clip_ranges("START", track);
 
 #ifdef DEBUG
-    std::cerr << "ROLL  DELTA_IN=" << delta_in << std::endl;
-    std::cerr << "ROLL DELTA_OUT=" << delta_out << std::endl;
+    std::cout << "ROLL  DELTA_IN=" << delta_in << std::endl;
+    std::cout << "ROLL DELTA_OUT=" << delta_out << std::endl;
 #endif
     otio::ErrorStatus error_status;
     otio::algo::roll(
@@ -396,7 +397,7 @@ void test_edit_fill(
             otio::RationalTime(20.0, 24.0)));
     
     otio::SerializableObject::Retainer<otio::Clip> clip_3 = new otio::Clip(
-        "clip_3",
+        "fill_1",
         nullptr,
         clip_range);
 
@@ -405,13 +406,11 @@ void test_edit_fill(
     track->append_child(clip_1);
     track->append_child(clip_2);
 
-    debug_track_ranges("START", track);
-    debug_clip_ranges("START", track);
-
+    auto duration = track->duration();
     
-#ifdef DEBUG
-    std::cerr << "\tclip_3 range=" << clip_3->trimmed_range() << std::endl;
-#endif
+    debug_clip_ranges("START", track);
+    debug_track_ranges("START", track);
+
     otio::ErrorStatus error_status;
     otio::algo::fill(
         clip_3,
@@ -420,10 +419,17 @@ void test_edit_fill(
         reference_point,
         &error_status);
 
+    auto new_duration = track->duration();
+    
     // Asserts.
+    if (reference_point == ReferencePoint::Sequence)
+    {
+        std::cout << "new duration=" << new_duration << " old=" << duration << std::endl;
+        assertEqual(new_duration, duration);
+    }
     assert(!otio::is_error(error_status));
-    assert_track_ranges(track, track_ranges);
     assert_clip_ranges(track, item_ranges);
+    assert_track_ranges(track, track_ranges);
 }
 
 } // namespace
@@ -628,6 +634,7 @@ main(int argc, char** argv)
                             });
     });
 
+    
     // Insert at middle of clip_0
     tests.add_test("test_edit_insert_1", [] {
         // Create a track with two clips.
@@ -740,7 +747,7 @@ main(int argc, char** argv)
                             });
     });
     
-    // Insert at end of clip_1 (insert at 0 index).
+    // Insert at start of clip_1 (insert at 0 index).
     tests.add_test("test_edit_insert_3", [] {
         // Create a track with two clips.
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
@@ -1550,6 +1557,8 @@ main(int argc, char** argv)
             }); 
     });
 
+    // Add longer clip in gap as Fit reference point
+    // (creates linearTimeWarp effect).
     tests.add_test("test_edit_fill_1", [] {
         test_edit_fill(
             TimeRange(
@@ -1564,9 +1573,9 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(20.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(35.0, 24.0)),
                 TimeRange(
-                    RationalTime(50.0, 24.0),
+                    RationalTime(55.0, 24.0),
                     RationalTime(20.0, 24.0))
             },
             // Clip Ranges
@@ -1576,13 +1585,15 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(0.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(35.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
             }); 
     });
 
+    // Add longer clip at gap as Source reference point.
+    // Stretches timeline.
     tests.add_test("test_edit_fill_2", [] {
         test_edit_fill(
             TimeRange(
@@ -1597,7 +1608,10 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(20.0, 24.0),
-                    RationalTime(55.0, 24.0)),
+                    RationalTime(35.0, 24.0)),
+                TimeRange(
+                    RationalTime(55.0, 24.0),
+                    RationalTime(5.0, 24.0)),
             },
             // Clip Ranges
             {
@@ -1606,16 +1620,20 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(0.0, 24.0),
-                    RationalTime(55.0, 24.0)),
+                    RationalTime(35.0, 24.0)),
+                TimeRange(
+                    RationalTime(20.0, 24.0),
+                    RationalTime(5.0, 24.0)),
             }); 
     });
 
 
+    // Add equal clip in gap as Source reference point
     tests.add_test("test_edit_fill_3", [] {
         test_edit_fill(
             TimeRange(
                 RationalTime(0.0, 24.0),
-                RationalTime(10.0, 24.0)),
+                RationalTime(30.0, 24.0)),
             RationalTime(20.0, 24.0),
             ReferencePoint::Source,
             // Clip in Track Ranges
@@ -1644,13 +1662,54 @@ main(int argc, char** argv)
             }); 
     });
 
+    // Add shorter clip in gap as Source reference point
     tests.add_test("test_edit_fill_4", [] {
-
-        // Fit an equal clip to an equal gap
         test_edit_fill(
             TimeRange(
                 RationalTime(0.0, 24.0),
-                RationalTime(10.0, 24.0)),
+                RationalTime(5.0, 24.0)),
+            RationalTime(20.0, 24.0),
+            ReferencePoint::Source,
+            // Clip in Track Ranges
+            {
+                TimeRange(
+                    RationalTime(0.0, 24.0),
+                    RationalTime(20.0, 24.0)),
+                TimeRange(
+                    RationalTime(20.0, 24.0),
+                    RationalTime(5.0, 24.0)),
+                TimeRange(
+                    RationalTime(25.0, 24.0),
+                    RationalTime(25.0, 24.0)),
+                TimeRange(
+                    RationalTime(50.0, 24.0),
+                    RationalTime(20.0, 24.0))
+            },
+            // Clip Ranges
+            {
+                TimeRange(
+                    RationalTime(0.0, 24.0),
+                    RationalTime(20.0, 24.0)),
+                TimeRange(
+                    RationalTime(0.0, 24.0),
+                    RationalTime(5.0, 24.0)),
+                TimeRange(
+                    RationalTime(5.0, 24.0),
+                    RationalTime(25.0, 24.0)),
+                TimeRange(
+                    RationalTime(5.0, 24.0),
+                    RationalTime(20.0, 24.0))
+            }); 
+    });
+
+    // Add an equal clip (after trim) in gap as
+    // Sequence reference point.
+    tests.add_test("test_edit_fill_5", [] {
+
+        test_edit_fill(
+            TimeRange(
+                RationalTime(0.0, 24.0),
+                RationalTime(35.0, 24.0)),
             RationalTime(20.0, 24.0),
             ReferencePoint::Sequence,
             // Clip in Track Ranges
@@ -1679,9 +1738,9 @@ main(int argc, char** argv)
             }); 
     });
     
-    tests.add_test("test_edit_fill_5", [] {
+    // Add a longer clip in gap as Sequence reference point
+    tests.add_test("test_edit_fill_6", [] {
 
-        // Fit a longer clip into a narrower gap
         test_edit_fill(
             TimeRange(
                 RationalTime(-10.0, 24.0),
@@ -1695,7 +1754,10 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(20.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(15.0, 24.0)),
+                TimeRange(
+                    RationalTime(35.0, 24.0),
+                    RationalTime(15.0, 24.0)),
                 TimeRange(
                     RationalTime(50.0, 24.0),
                     RationalTime(20.0, 24.0))
@@ -1707,7 +1769,10 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(15.0, 24.0)),
+                TimeRange(
+                    RationalTime(5.0, 24.0),
+                    RationalTime(15.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
@@ -1715,12 +1780,9 @@ main(int argc, char** argv)
     });
 
 
-    // The spec did not specify what happened with
-    // the clip to fill is narrower than the gap, so this
-    // final test is probably wrong.
-    tests.add_test("test_edit_fill_6", [] {
+    // Add a shorter clip in gap as Sequence reference point
+    tests.add_test("test_edit_fill_7", [] {
 
-        // Fit a narrower clip into a longer gap
         test_edit_fill(
             TimeRange(
                 RationalTime(10.0, 24.0),
@@ -1734,7 +1796,10 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(20.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(5.0, 24.0)),
+                TimeRange(
+                    RationalTime(25.0, 24.0),
+                    RationalTime(25.0, 24.0)),
                 TimeRange(
                     RationalTime(50.0, 24.0),
                     RationalTime(20.0, 24.0))
@@ -1746,7 +1811,10 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0)),
                 TimeRange(
                     RationalTime(10.0, 24.0),
-                    RationalTime(30.0, 24.0)),
+                    RationalTime(5.0, 24.0)),
+                TimeRange(
+                    RationalTime(5.0, 24.0),
+                    RationalTime(25.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))

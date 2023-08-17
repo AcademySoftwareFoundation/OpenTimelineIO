@@ -40,7 +40,8 @@ void overwrite(
 //
 //          item = item to insert (usually a clip)
 //   composition = usually a track item.
-//          time = time to insert at.
+//          time = time to insert at.  If < composition's start time, it will insert at 0 index.
+//                                     If > composition's end_time_exclusive, it will append at end.
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
 void insert(

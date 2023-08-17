@@ -424,7 +424,9 @@ void test_edit_fill(
     // Asserts.
     if (reference_point == ReferencePoint::Sequence)
     {
+#ifdef DEBUG
         std::cout << "new duration=" << new_duration << " old=" << duration << std::endl;
+#endif
         assertEqual(new_duration, duration);
     }
     assert(!otio::is_error(error_status));

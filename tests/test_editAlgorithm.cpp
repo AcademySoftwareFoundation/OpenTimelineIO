@@ -11,7 +11,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-#define DEBUG
+//#define DEBUG
 
 
 namespace otime = opentime::OPENTIME_VERSION;

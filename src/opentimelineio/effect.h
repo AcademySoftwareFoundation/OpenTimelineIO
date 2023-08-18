@@ -34,8 +34,8 @@ public:
 protected:
     virtual ~Effect();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::string _effect_name;

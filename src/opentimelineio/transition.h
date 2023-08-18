@@ -32,7 +32,7 @@ public:
         RationalTime         out_offset      = RationalTime(),
         AnyDictionary const& metadata        = AnyDictionary());
 
-    bool overlapping() const override;
+    virtual bool overlapping() const;
 
     std::string transition_type() const noexcept { return _transition_type; }
 
@@ -55,7 +55,8 @@ public:
         _out_offset = out_offset;
     }
 
-    RationalTime duration(ErrorStatus* error_status = nullptr) const override;
+    // XX is this virtual?
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
     optional<TimeRange>
     range_in_parent(ErrorStatus* error_status = nullptr) const;
@@ -66,8 +67,8 @@ public:
 protected:
     virtual ~Transition();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::string  _transition_type;

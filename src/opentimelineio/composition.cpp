@@ -165,26 +165,6 @@ Composition::remove_child(int index, ErrorStatus* error_status)
     return true;
 }
 
-int
-Composition::index_of_child(Composable const* child, ErrorStatus* error_status)
-    const
-{
-    for (size_t i = 0; i < _children.size(); i++)
-    {
-        if (_children[i] == child)
-        {
-            return int(i);
-        }
-    }
-
-    if (error_status)
-    {
-        *error_status                = ErrorStatus::NOT_A_CHILD_OF;
-        error_status->object_details = this;
-    }
-    return -1;
-}
-
 bool
 Composition::read_from(Reader& reader)
 {
@@ -234,6 +214,26 @@ Composition::handles_of_child(
     ErrorStatus* /* error_status */) const
 {
     return std::make_pair(optional<RationalTime>(), optional<RationalTime>());
+}
+
+int
+Composition::_index_of_child(Composable const* child, ErrorStatus* error_status)
+    const
+{
+    for (size_t i = 0; i < _children.size(); i++)
+    {
+        if (_children[i] == child)
+        {
+            return int(i);
+        }
+    }
+
+    if (error_status)
+    {
+        *error_status                = ErrorStatus::NOT_A_CHILD_OF;
+        error_status->object_details = this;
+    }
+    return -1;
 }
 
 std::vector<Composition*>
@@ -313,7 +313,7 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
     assert(!parents.empty());
     for (auto parent: parents)
     {
-        const int index = parent->index_of_child(current, error_status);
+        auto index = parent->_index_of_child(current, error_status);
         if (is_error(error_status))
         {
             return TimeRange();
@@ -364,7 +364,7 @@ Composition::trimmed_range_of_child(
     assert(!parents.empty());
     for (auto parent: parents)
     {
-        const int index = parent->index_of_child(current, error_status);
+        auto index = parent->_index_of_child(current, error_status);
         if (is_error(error_status))
         {
             return TimeRange();

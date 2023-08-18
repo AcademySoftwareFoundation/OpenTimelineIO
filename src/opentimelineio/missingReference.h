@@ -23,15 +23,15 @@ public:
         std::string const&            name                   = std::string(),
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
-    bool is_missing_reference() const override;
+    virtual bool is_missing_reference() const;
 
 protected:
     virtual ~MissingReference();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

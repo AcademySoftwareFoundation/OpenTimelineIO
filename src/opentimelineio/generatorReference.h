@@ -25,7 +25,7 @@ public:
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          parameters             = AnyDictionary(),
         AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     std::string generator_kind() const noexcept { return _generator_kind; }
 
@@ -41,8 +41,8 @@ public:
 protected:
     virtual ~GeneratorReference();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::string   _generator_kind;

@@ -41,6 +41,30 @@ Track::write_to(Writer& writer) const
     writer.write("kind", _kind);
 }
 
+static RationalTime
+_safe_duration(Composable* c, ErrorStatus* error_status)
+{
+    if (auto item = dynamic_cast<Item*>(c))
+    {
+        return item->duration(error_status);
+    }
+    else if (auto transition = dynamic_cast<Transition*>(c))
+    {
+        return transition->duration(error_status);
+    }
+    else
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::OBJECT_WITHOUT_DURATION,
+                "Cannot determine duration from this kind of object",
+                c);
+        }
+        return RationalTime();
+    }
+}
+
 TimeRange
 Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
 {
@@ -55,7 +79,7 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
     }
 
     Composable*  child          = children()[index];
-    RationalTime child_duration = child->duration(error_status);
+    RationalTime child_duration = _safe_duration(child, error_status);
     if (is_error(error_status))
     {
         return TimeRange();
@@ -68,7 +92,7 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
         Composable* child2 = children()[i];
         if (!child2->overlapping())
         {
-            start_time += children()[i]->duration(error_status);
+            start_time += _safe_duration(children()[i], error_status);
         }
         if (is_error(error_status))
         {
@@ -166,7 +190,7 @@ Track::neighbors_of(
     std::pair<Retainer<Composable>, Retainer<Composable>> result{ nullptr,
                                                                   nullptr };
 
-    const int index = index_of_child(item, error_status);
+    auto index = _index_of_child(item, error_status);
     if (is_error(error_status))
     {
         return result;
@@ -264,18 +288,18 @@ Track::range_of_all_children(ErrorStatus* error_status) const
 }
 
 std::vector<SerializableObject::Retainer<Clip>>
-Track::find_clips(
+Track::clip_if(
     ErrorStatus*               error_status,
     optional<TimeRange> const& search_range,
     bool                       shallow_search) const
 {
-    return find_children<Clip>(error_status, search_range, shallow_search);
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-optional<IMATH_NAMESPACE::Box2d>
+optional<Imath::Box2d>
 Track::available_image_bounds(ErrorStatus* error_status) const
 {
-    optional<IMATH_NAMESPACE::Box2d> box;
+    optional<Imath::Box2d> box;
     bool                   found_first_clip = false;
     for (const auto& child: children())
     {
@@ -298,7 +322,7 @@ Track::available_image_bounds(ErrorStatus* error_status) const
             }
             if (is_error(error_status))
             {
-                return optional<IMATH_NAMESPACE::Box2d>();
+                return optional<Imath::Box2d>();
             }
         }
     }

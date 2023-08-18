@@ -9,7 +9,7 @@ MissingReference::MissingReference(
     std::string const&            name,
     optional<TimeRange> const&    available_range,
     AnyDictionary const&          metadata,
-    optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds)
+    optional<Imath::Box2d> const& available_image_bounds)
     : Parent(name, available_range, metadata, available_image_bounds)
 {}
 

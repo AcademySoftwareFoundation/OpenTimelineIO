@@ -33,8 +33,8 @@ public:
         std::vector<Marker*> const& markers      = std::vector<Marker*>(),
         bool                        enabled      = true);
 
-    bool visible() const override;
-    bool overlapping() const override;
+    virtual bool visible() const;
+    virtual bool overlapping() const;
 
     bool enabled() const { return _enabled; };
 
@@ -61,7 +61,7 @@ public:
         return _markers;
     }
 
-    RationalTime duration(ErrorStatus* error_status = nullptr) const override;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
@@ -91,8 +91,8 @@ public:
 protected:
     virtual ~Item();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     optional<TimeRange>           _source_range;

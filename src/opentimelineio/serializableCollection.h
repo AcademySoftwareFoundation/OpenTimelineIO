@@ -52,23 +52,23 @@ public:
 
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    // Find child clips.
+    // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
     //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    // If shallow_search is false, will recurse into children.
+    std::vector<Retainer<Clip>> clip_if(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Find child objects that match the given template type.
+    // Return a vector of all objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // The search is recursive unless shallow_search is set to true.
+    // If shallow_search is false, will recurse into children.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    std::vector<Retainer<T>> children_if(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
@@ -76,8 +76,8 @@ public:
 protected:
     virtual ~SerializableCollection();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::vector<Retainer<SerializableObject>> _children;
@@ -85,7 +85,7 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-SerializableCollection::find_children(
+SerializableCollection::children_if(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
@@ -107,7 +107,7 @@ SerializableCollection::find_children(
                     dynamic_cast<SerializableCollection*>(child.value))
             {
                 const auto valid_children =
-                    collection->find_children<T>(error_status, search_range);
+                    collection->children_if<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;
@@ -120,7 +120,7 @@ SerializableCollection::find_children(
             else if (auto composition = dynamic_cast<Composition*>(child.value))
             {
                 const auto valid_children =
-                    composition->find_children<T>(error_status, search_range);
+                    composition->children_if<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;
@@ -133,7 +133,7 @@ SerializableCollection::find_children(
             else if (auto timeline = dynamic_cast<Timeline*>(child.value))
             {
                 const auto valid_children =
-                    timeline->find_children<T>(error_status, search_range);
+                    timeline->children_if<T>(error_status, search_range);
                 if (is_error(error_status))
                 {
                     return out;

@@ -32,10 +32,9 @@ public:
     AnyDictionary metadata() const noexcept { return _metadata; }
 
 protected:
-    virtual ~SerializableObjectWithMetadata();
-    
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    ~SerializableObjectWithMetadata();
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::string   _name;

@@ -57,10 +57,6 @@ public:
         return insert_child(int(_children.size()), child, error_status);
     }
 
-    int index_of_child(
-        Composable const* child,
-        ErrorStatus*      error_status = nullptr) const;
-
     bool is_parent_of(Composable const* other) const;
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
@@ -105,13 +101,13 @@ public:
         TimeRange const& search_range,
         ErrorStatus*     error_status = nullptr) const;
 
-    // Find child objects that match the given template type.
+    // Return a vector of all objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // The search is recursive unless shallow_search is set to true.
+    // If shallow_search is false, will recurse into children.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    std::vector<Retainer<T>> children_if(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
@@ -119,9 +115,12 @@ public:
 protected:
     virtual ~Composition();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
+    int _index_of_child(
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
     std::vector<Composition*> _path_from_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
@@ -172,7 +171,7 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-Composition::find_children(
+Composition::children_if(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
@@ -218,7 +217,7 @@ Composition::find_children(
                     }
                 }
 
-                const auto valid_children = composition->find_children<T>(
+                const auto valid_children = composition->children_if<T>(
                     error_status,
                     search_range,
                     shallow_search);

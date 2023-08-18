@@ -32,13 +32,15 @@ public:
         std::vector<Marker*> const& markers  = std::vector<Marker*>(),
         AnyDictionary const&        metadata = AnyDictionary());
 
-    bool visible() const override;
+    virtual bool visible() const;
 
 protected:
     virtual ~Gap();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
+
+private:
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

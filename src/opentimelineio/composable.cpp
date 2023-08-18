@@ -66,19 +66,16 @@ Composable::duration(ErrorStatus* error_status) const
 {
     if (error_status)
     {
-        *error_status = ErrorStatus(
-            ErrorStatus::OBJECT_WITHOUT_DURATION,
-            "Cannot determine duration from this kind of object",
-            this);
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
     }
     return RationalTime();
 }
 
-optional<IMATH_NAMESPACE::Box2d>
+optional<Imath::Box2d>
 Composable::available_image_bounds(ErrorStatus* error_status) const
 {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
-    return optional<IMATH_NAMESPACE::Box2d>();
+    return optional<Imath::Box2d>();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

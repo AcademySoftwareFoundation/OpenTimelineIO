@@ -28,27 +28,25 @@ public:
         std::vector<Effect*> const& effects      = std::vector<Effect*>(),
         std::vector<Marker*> const& markers      = std::vector<Marker*>());
 
-    TimeRange range_of_child_at_index(
+    virtual TimeRange range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const override;
-    TimeRange trimmed_range_of_child_at_index(
+        ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange trimmed_range_of_child_at_index(
         int          index,
-        ErrorStatus* error_status = nullptr) const override;
-    TimeRange
-    available_range(ErrorStatus* error_status = nullptr) const override;
+        ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange
+    available_range(ErrorStatus* error_status = nullptr) const;
 
-    std::map<Composable*, TimeRange>
-    range_of_all_children(ErrorStatus* error_status = nullptr) const override;
+    virtual std::map<Composable*, TimeRange>
+    range_of_all_children(ErrorStatus* error_status = nullptr) const;
 
-    optional<IMATH_NAMESPACE::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const override;
+    optional<Imath::Box2d>
+    available_image_bounds(ErrorStatus* error_status) const;
 
-    // Find child clips.
+    // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    std::vector<Retainer<Clip>> clip_if(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
@@ -56,10 +54,12 @@ public:
 protected:
     virtual ~Stack();
 
-    std::string composition_kind() const override;
+    virtual std::string composition_kind() const;
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
+
+private:
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

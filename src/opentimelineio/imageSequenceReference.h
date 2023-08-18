@@ -38,7 +38,7 @@ public:
             MissingFramePolicy::error,
         optional<TimeRange> const&    available_range        = nullopt,
         AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
+        optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     std::string target_url_base() const noexcept { return _target_url_base; }
 
@@ -111,8 +111,8 @@ public:
 protected:
     virtual ~ImageSequenceReference();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     std::string        _target_url_base;

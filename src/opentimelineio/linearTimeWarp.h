@@ -35,8 +35,8 @@ public:
 protected:
     virtual ~LinearTimeWarp();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     double _time_scalar;

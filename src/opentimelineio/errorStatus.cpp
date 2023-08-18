@@ -64,8 +64,6 @@ ErrorStatus::outcome_to_string(Outcome o)
             return "active key not found in media references";
         case MEDIA_REFERENCES_CONTAIN_EMPTY_KEY:
             return "the media references cannot contain an empty key";
-        case NOT_A_GAP:
-            return "object is not descendent of Gap type";
         default:
             return "unknown/illegal ErrorStatus::Outcome code";
     };

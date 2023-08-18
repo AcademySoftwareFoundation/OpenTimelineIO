@@ -62,28 +62,26 @@ public:
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
 
-    // Find child clips.
+    // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    std::vector<Retainer<Clip>> clip_if(
         ErrorStatus*               error_status   = nullptr,
         optional<TimeRange> const& search_range   = nullopt,
         bool                       shallow_search = false) const;
 
-    // Find child objects that match the given template type.
+    // Return a vector of all objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
     //
-    // The search is recursive unless shallow_search is set to true.
+    // If shallow_search is false, will recurse into children.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    std::vector<Retainer<T>> children_if(
         ErrorStatus*        error_status   = nullptr,
         optional<TimeRange> search_range   = nullopt,
         bool                shallow_search = false) const;
 
-    optional<IMATH_NAMESPACE::Box2d>
+    optional<Imath::Box2d>
     available_image_bounds(ErrorStatus* error_status) const
     {
         return _tracks.value->available_image_bounds(error_status);
@@ -92,8 +90,8 @@ public:
 protected:
     virtual ~Timeline();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    virtual bool read_from(Reader&);
+    virtual void write_to(Writer&) const;
 
 private:
     optional<RationalTime> _global_start_time;
@@ -102,12 +100,12 @@ private:
 
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
-Timeline::find_children(
+Timeline::children_if(
     ErrorStatus*        error_status,
     optional<TimeRange> search_range,
     bool                shallow_search) const
 {
-    return _tracks.value->find_children<T>(
+    return _tracks.value->children_if<T>(
         error_status,
         search_range,
         shallow_search);

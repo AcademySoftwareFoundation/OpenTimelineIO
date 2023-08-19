@@ -60,6 +60,7 @@ overwrite(
     Item*            fill_template,
     ErrorStatus*     error_status)
 {
+    std::cerr << "overwrite at " << range << std::endl;
     const TimeRange composition_range = composition->trimmed_range();
     if (range.start_time() >= composition_range.end_time_exclusive())
     {

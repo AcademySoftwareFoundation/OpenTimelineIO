@@ -18,6 +18,23 @@ using otime::TimeRange;
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
 
 
+#include <iostream>
+
+
+std::ostream& operator << (std::ostream& os, const RationalTime& value)
+{
+    os << std::fixed << value.value() << "/" << value.rate();
+    return os;
+}
+
+std::ostream& operator << (std::ostream& os, const TimeRange& value)
+{
+    os << std::fixed << value.start_time().value() << "/" <<
+        value.duration().value() << "/" <<
+        value.duration().rate();
+    return os;
+}
+
 namespace
 {
 
@@ -93,9 +110,20 @@ overwrite(
             if (second_duration.value() > 0.0)
             {
                 auto second_item  = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range = second_item->trimmed_range();
-                source_range =
-                    TimeRange(trimmed_range.start_time(), second_duration);
+                trimmed_range     = second_item->trimmed_range();
+                std::cout << "\t\t\tsecond_item     = " << trimmed_range
+                          << std::endl
+                          << "\t\t\tfirst_duration  = " << first_duration
+                          << std::endl
+                          << "\t\t\trange.duration  = " << range.duration()
+                          << std::endl
+                          << "\t\t\tsecond_duration = " << second_duration
+                          << std::endl
+                          << std::endl;
+                source_range      = TimeRange(
+                    trimmed_range.start_time() + first_duration +
+                    range.duration(),
+                    second_duration);
                 ++insert_index;
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);

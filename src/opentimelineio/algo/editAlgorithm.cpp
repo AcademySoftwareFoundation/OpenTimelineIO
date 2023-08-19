@@ -103,12 +103,12 @@ overwrite(
             }
             else
             {
-                items.front()->set_source_range(source_range);
+                auto first_item = items.front();
+                if (first_item->name().empty())
+                    first_item->set_name("split_1");
+                first_item->set_source_range(source_range);
                 ++insert_index;
             }
-            std::cout << "\t\t\titem " << item->name() << " = "
-                      << item->trimmed_range() << " address=" << (void*) item
-                      << std::endl;
             composition->insert_child(insert_index, item);
             if (second_duration.value() > 0.0)
             {
@@ -119,6 +119,8 @@ overwrite(
                     range.duration(),
                     second_duration);
                 ++insert_index;
+                if (second_item->name().empty())
+                    second_item->set_name("split_2");
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);
             }

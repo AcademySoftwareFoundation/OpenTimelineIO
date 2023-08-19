@@ -100,12 +100,9 @@ overwrite(
             {
                 --insert_index;
                 composition->remove_child(insert_index);
-                std::cerr << "\t\t\tremove child" << std::endl;
             }
             else
             {
-                std::cout << "\t\t\tfirst item      = " << source_range
-                          << std::endl;
                 items.front()->set_source_range(source_range);
                 ++insert_index;
             }
@@ -122,8 +119,6 @@ overwrite(
                     range.duration(),
                     second_duration);
                 ++insert_index;
-                std::cout << "\t\t\tsecond_item     = " << source_range
-                          << std::endl;
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);
             }

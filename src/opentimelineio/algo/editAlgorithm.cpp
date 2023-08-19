@@ -38,7 +38,7 @@ std::ostream& operator << (std::ostream& os, const TimeRange& value)
 namespace
 {
 
-std::vector<SerializableObject::Retainer<Item> >
+inline std::vector<SerializableObject::Retainer<Item>>
 find_items_in_composition(
     Composition*        composition,
     RationalTime const& time,
@@ -50,13 +50,13 @@ find_items_in_composition(
 }
 
 } // namespace
-            
-            
+
 void
 overwrite(
     Item*            item,
     Composition*     composition,
     TimeRange const& range,
+    bool const       remove_transitions,
     Item*            fill_template,
     ErrorStatus*     error_status)
 {
@@ -81,6 +81,25 @@ overwrite(
     }
     else
     {
+        // Check for transitions to remove first.
+        if (remove_transitions)
+        {
+            auto transitions = composition->find_children<Transition>(
+                error_status,
+                range,
+                true);
+            if (!transitions.empty())
+            {
+                for (const auto transition : transitions)
+                {
+                    int index = composition->index_of_child(transition);
+                    if (index < 0 || index >= composition.children())
+                        continue;
+                    composition->remove_child(transition);
+                }
+            }
+        }
+
         // Find the items to overwrite.
         auto items =
             composition->find_children<Item>(error_status, range, true);
@@ -93,7 +112,7 @@ overwrite(
                 range.start_time() - item_range.start_time();
             const RationalTime second_duration =
                 item_range.duration() - range.duration() - first_duration;
-            int  insert_index = composition->index_of_child(items.front()) + 1;
+            int insert_index = composition->index_of_child(items.front()) + 1;
             TimeRange trimmed_range = items.front()->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
             if (first_duration.value() <= 0.0)
@@ -110,11 +129,11 @@ overwrite(
             composition->insert_child(insert_index, item);
             if (second_duration.value() > 0.0)
             {
-                auto second_item  = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range     = second_item->trimmed_range();
-                source_range      = TimeRange(
-                    trimmed_range.start_time() + first_duration +
-                    range.duration(),
+                auto second_item = dynamic_cast<Item*>(items.front()->clone());
+                trimmed_range    = second_item->trimmed_range();
+                source_range     = TimeRange(
+                    trimmed_range.start_time() + first_duration
+                        + range.duration(),
                     second_duration);
                 ++insert_index;
                 second_item->set_source_range(source_range);
@@ -192,9 +211,30 @@ insert(
     Item*            insert_item,
     Composition*     composition,
     RationalTime const& time,
+    bool const       remove_transitions,
     Item*            fill_template,
     ErrorStatus*     error_status)
 {
+    // Check for transitions to remove first.
+    if (remove_transitions)
+    {
+        TimeRange range(time, RationalTime(1.0, time.rate()));
+        auto transitions = composition->find_children<Transition>(
+            error_status,
+            range,
+            true);
+        if (!transitions.empty())
+        {
+            for (const auto transition : transitions)
+            {
+                int index = composition->index_of_child(transition);
+                if (index < 0 || index >= composition.children())
+                    continue;
+                composition->remove_child(transition);
+            }
+        }
+    }
+
     // Find the item to insert into.
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())

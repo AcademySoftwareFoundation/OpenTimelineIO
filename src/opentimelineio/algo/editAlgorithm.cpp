@@ -93,7 +93,9 @@ overwrite(
                 for (const auto& transition : transitions)
                 {
                     int index = composition->index_of_child(transition);
-                    if (index < 0 || index >= composition->children().size())
+                    if (index < 0
+                        || static_cast<size_t>(index)
+                               >= composition->children().size())
                         continue;
                     composition->remove_child(transition);
                 }
@@ -107,22 +109,25 @@ overwrite(
             composition->trimmed_range_of_child(items.front()).value();
         if (1 == items.size() && item_range.contains(range, 0.0))
         {
+            auto first_item = items.front();
+            std::cout << "OVERWRITE range.start_time()=" << range.start_time()
+                      << " seconds=" << range.start_time().to_seconds()
+                      << std::endl;
             // The item overwrites a portion inside an item.
             const RationalTime first_duration =
                 range.start_time() - item_range.start_time();
             const RationalTime second_duration =
                 item_range.duration() - range.duration() - first_duration;
-            int insert_index = composition->index_of_child(items.front()) + 1;
-            TimeRange trimmed_range = items.front()->trimmed_range();
+            int first_index = composition->index_of_child(first_item);
+            int insert_index = first_index;
+            TimeRange trimmed_range = first_item->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
             if (first_duration.value() <= 0.0)
             {
-                --insert_index;
-                composition->remove_child(insert_index);
+                composition->remove_child(first_index);
             }
             else
             {
-                auto first_item = items.front();
                 first_item->set_source_range(source_range);
                 ++insert_index;
             }
@@ -228,7 +233,9 @@ insert(
             for (const auto& transition : transitions)
             {
                 int index = composition->index_of_child(transition);
-                if (index < 0 || index >= composition->children().size())
+                if (index < 0
+                    || static_cast<size_t>(index)
+                           >= composition->children().size())
                     continue;
                 composition->remove_child(transition);
             }

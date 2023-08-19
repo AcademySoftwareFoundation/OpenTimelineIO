@@ -49,18 +49,27 @@ debug_track_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
     std::cout << "\t" << title << " TRACK RANGES" << std::endl;
+    double rate = 0;
     for (const auto& child: track->children())
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-            std::cout << "\t\t" << item->name() << " "
-                      << track->trimmed_range_of_child(child).value()
+        {
+            auto range = track->trimmed_range_of_child(child).value();
+            std::cout << "\t\t" << item->name() << " " << range
+                      << " start=" << range.start_time().to_seconds()
+                      << " end=" << range.end_time_exclusive().to_seconds()
+                      << " duration=" << range.duration().to_seconds()
                       << std::endl;
+            if (range.duration().rate() > rate) rate = range.duration().rate();
+        }
         auto transition = otio::dynamic_retainer_cast<otio::Transition>(child);
         if (transition)
-            std::cout << "\t\t" << transition->name() << " "
-                      << track->trimmed_range_of_child(transition).value()
+        {
+            auto range = track->trimmed_range_of_child(child).value();
+            std::cout << "\t\t" << transition->name() << " " << range
                       << std::endl;
+        }
     }
     std::cout << "\t" << title << " TRACK RANGES END" << std::endl;
 #endif
@@ -75,8 +84,13 @@ debug_clip_ranges(const std::string& title, otio::Track* track)
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-            std::cout << "\t\t" << item->name() << " " << item->trimmed_range()
+        {
+            auto range = item->trimmed_range();
+            std::cout << "\t\t" << item->name() << " " << range
+                      << " seconds=" << range.start_time().to_seconds()
+                      << " - " << range.duration().to_seconds()
                       << std::endl;
+        }
     }
     std::cout << "\t" << title << " CLIP TRIMMED RANGES END" << std::endl;
 #endif
@@ -813,6 +827,94 @@ main(int argc, char** argv)
                             });
     });
 
+    tests.add_test("test_edit_overwrite_5", [] {
+        // Create a track with three clips of different rates.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 23.98),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
+            "clip_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 23.98),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
+            "clip_2",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(90.0, 30),
+                otio::RationalTime(90.0, 30)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+        track->append_child(clip_1);
+        track->append_child(clip_2);
+
+        // Overwrite one portion of the clip.
+        otio::SerializableObject::Retainer<otio::Clip> over_1 = new otio::Clip(
+            "over_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 30.0),
+                otio::RationalTime(1.0, 30.0)));
+
+        debug_track_ranges("START", track);
+        
+        const RationalTime duration = track->duration();
+        otio::ErrorStatus  error_status;
+        otio::algo::overwrite(
+            over_1,
+            track,
+            TimeRange(RationalTime(137.0, 30.0), RationalTime(1.0, 30.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        assertEqual(duration, new_duration);
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90, 30.0),
+                                    RationalTime(47.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(137.0, 30.0),
+                                    RationalTime(1.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(138.0, 30.0),
+                                    RationalTime(42.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(180.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(47.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(1.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(48.0, 30.0),
+                                    RationalTime(42.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+    });
+
+    
     // Insert at middle of clip_0
     tests.add_test("test_edit_insert_1", [] {
         // Create a track with two clips.

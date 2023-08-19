@@ -100,33 +100,30 @@ overwrite(
             {
                 --insert_index;
                 composition->remove_child(insert_index);
+                std::cerr << "\t\t\tremove child" << std::endl;
             }
             else
             {
+                std::cout << "\t\t\tfirst item      = " << source_range
+                          << std::endl;
                 items.front()->set_source_range(source_range);
                 ++insert_index;
             }
-            std::cout << "\t\t\titem            = " << item->trimmed_range()
+            std::cout << "\t\t\titem " << item->name() << " = "
+                      << item->trimmed_range() << " address=" << (void*) item
                       << std::endl;
             composition->insert_child(insert_index, item);
             if (second_duration.value() > 0.0)
             {
                 auto second_item  = dynamic_cast<Item*>(items.front()->clone());
                 trimmed_range     = second_item->trimmed_range();
-                std::cout << "\t\t\tsecond_item     = " << trimmed_range
-                          << std::endl
-                          << "\t\t\tfirst_duration  = " << first_duration
-                          << std::endl
-                          << "\t\t\trange.duration  = " << range.duration()
-                          << std::endl
-                          << "\t\t\tsecond_duration = " << second_duration
-                          << std::endl
-                          << std::endl;
                 source_range      = TimeRange(
                     trimmed_range.start_time() + first_duration +
                     range.duration(),
                     second_duration);
                 ++insert_index;
+                std::cout << "\t\t\tsecond_item     = " << source_range
+                          << std::endl;
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);
             }

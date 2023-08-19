@@ -119,8 +119,7 @@ overwrite(
                     range.duration(),
                     second_duration);
                 ++insert_index;
-                if (second_item->name().empty())
-                    second_item->set_name("split_2");
+                second_item->set_name("split_2");
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);
             }

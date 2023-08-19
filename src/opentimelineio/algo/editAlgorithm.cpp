@@ -106,6 +106,8 @@ overwrite(
                 items.front()->set_source_range(source_range);
                 ++insert_index;
             }
+            std::cout << "\t\t\titem            = " << item->trimmed_range()
+                      << std::endl
             composition->insert_child(insert_index, item);
             if (second_duration.value() > 0.0)
             {

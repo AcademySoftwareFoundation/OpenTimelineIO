@@ -521,6 +521,7 @@ main(int argc, char** argv)
             clip_1,
             track,
             TimeRange(RationalTime(48.0, 24.0), RationalTime(24.0, 24.0)),
+            true,
             nullptr,
             &error_status);
 
@@ -562,6 +563,7 @@ main(int argc, char** argv)
             clip_1,
             track,
             TimeRange(RationalTime(24.0, 24.0), RationalTime(24.0, 24.0)),
+            true,
             nullptr,
             &error_status);
 
@@ -615,6 +617,7 @@ main(int argc, char** argv)
             clip_2,
             track,
             TimeRange(RationalTime(12.0, 24.0), RationalTime(24.0, 24.0)),
+            true,
             nullptr,
             &error_status);
 
@@ -662,6 +665,7 @@ main(int argc, char** argv)
             over_1,
             track,
             TimeRange(RationalTime(272.0, 24.0), RationalTime(1.0, 24.0)),
+            true,
             nullptr,
             &error_status);
 
@@ -720,6 +724,7 @@ main(int argc, char** argv)
             over_1,
             track,
             TimeRange(RationalTime(272.0, 30.0), RationalTime(1.0, 30.0)),
+            true,
             nullptr,
             &error_status);
         assert(!otio::is_error(error_status));
@@ -762,6 +767,7 @@ main(int argc, char** argv)
             over_2,
             track,
             TimeRange(RationalTime(360.0, 30.0), RationalTime(1.0, 30.0)),
+            true,
             nullptr,
             &error_status);
         
@@ -839,6 +845,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(12.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -896,6 +903,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(0.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -951,6 +959,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(-1.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -1012,6 +1021,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(24.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -1065,6 +1075,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(48.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -1118,6 +1129,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(1.0, 24.0),
+            true,
             nullptr,
             &error_status);
 
@@ -1174,6 +1186,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(47.0, 24.0),
+            true,
             nullptr,
             &error_status);
 

@@ -90,10 +90,10 @@ overwrite(
                 true);
             if (!transitions.empty())
             {
-                for (const auto transition : transitions)
+                for (const auto& transition : transitions)
                 {
                     int index = composition->index_of_child(transition);
-                    if (index < 0 || index >= composition.children())
+                    if (index < 0 || index >= composition->children().size())
                         continue;
                     composition->remove_child(transition);
                 }
@@ -225,10 +225,10 @@ insert(
             true);
         if (!transitions.empty())
         {
-            for (const auto transition : transitions)
+            for (const auto& transition : transitions)
             {
                 int index = composition->index_of_child(transition);
-                if (index < 0 || index >= composition.children())
+                if (index < 0 || index >= composition->children().size())
                     continue;
                 composition->remove_child(transition);
             }
@@ -722,7 +722,13 @@ fill(
             }
             
             const TimeRange time_range(track_time, duration);
-            overwrite(track_item, track, time_range, nullptr, error_status);
+            overwrite(
+                track_item,
+                track,
+                time_range,
+                true,
+                nullptr,
+                error_status);
             return;
         }
 
@@ -738,14 +744,14 @@ fill(
             const TimeRange time_range(
                 track_time,
                 gap_track_range.end_time_exclusive() - track_time);
-            overwrite(item, track, time_range, nullptr, error_status);
+            overwrite(item, track, time_range, true, nullptr, error_status);
             return;
         }
 
         case ReferencePoint::Source:
         default: {
             const TimeRange time_range(track_time, duration);
-            overwrite(item, track, time_range, nullptr, error_status);
+            overwrite(item, track, time_range, true, nullptr, error_status);
             return;
         }
     };

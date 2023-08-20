@@ -8,8 +8,12 @@
 #include <opentimelineio/timeline.h>
 #include <opentimelineio/track.h>
 
-// Uncomment this for debugging output
-// #define DEBUG
+
+namespace otime = opentime::OPENTIME_VERSION;
+namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
+
+using otime::RationalTime;
+using otime::TimeRange;
 
 int
 main(int argc, char** argv)
@@ -34,7 +38,7 @@ main(int argc, char** argv)
 
         timeline->set_tracks(stack);
 
-        RationalTime time(704.0, 30.0);
+        RationalTime time(703.0, 30.0);
         RationalTime one_frame(1.0, 30.0);
         TimeRange range(time, one_frame);
         otio::ErrorStatus errorStatus;
@@ -71,7 +75,7 @@ main(int argc, char** argv)
 
         timeline->set_tracks(stack);
 
-        RationalTime time(704.0, 30.0);
+        RationalTime time(703.0, 30.0);
         RationalTime one_frame(1.0, 30.0);
         TimeRange range(time, one_frame);
         otio::ErrorStatus errorStatus;

@@ -1725,7 +1725,7 @@ main(int argc, char** argv)
             "clip_2",
             nullptr,
             otio::TimeRange(
-                otio::RationalTime(0.0, 30.0),
+                otio::RationalTime(0.0, 23.98),
                 otio::RationalTime(71.94, 23.98)));
         otio::SerializableObject::Retainer<otio::Track> track =
             new otio::Track();
@@ -1754,7 +1754,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        //assertEqual(duration, new_duration);
+        assertEqual(duration, new_duration);
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(

@@ -16,7 +16,6 @@ foreach(test ${tests_opentime})
 endforeach()
 
 list(APPEND tests_opentimelineio test_clip test_editAlgorithm test_serialization test_serializableCollection test_timeline test_track)
-
 foreach(test ${tests_opentimelineio})
     add_executable(${test} utils.h utils.cpp ${test}.cpp)
 

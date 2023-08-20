@@ -45,11 +45,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     composable.cpp
     composition.cpp
     deserialization.cpp
-<<<<<<< HEAD
-    editAlgorithm.cpp
-=======
     algo/editAlgorithm.cpp
->>>>>>> test_edit_commands
     effect.cpp
     errorStatus.cpp
     externalReference.cpp

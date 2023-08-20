@@ -18,47 +18,10 @@ using otime::TimeRange;
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
 
 
-#include <iostream>
-
-
-std::ostream& operator << (std::ostream& os, const RationalTime& value)
-{
-    os << std::fixed << value.value() << "/" << value.rate();
-    return os;
-}
-
-std::ostream& operator << (std::ostream& os, const TimeRange& value)
-{
-    os << std::fixed << value.start_time().value() << "/" <<
-        value.duration().value() << "/" <<
-        value.duration().rate();
-    return os;
-}
-
 namespace
 {
 
-    // @todo: This should be moved to opentime/rationalTime.h
-    
-// We are not testing values outside of one million seconds.
-// At one million second, and double precision, the smallest
-// resolvable number that can be added to one million and return
-// a new value one million + epsilon is 5.82077e-11.
-//
-// This was calculated by searching iteratively for epsilon
-// around 1,000,000, with epsilon starting from 1 and halved
-// at every iteration, until epsilon when added to 1,000,000
-// resulted in 1,000,000.
-constexpr double double_epsilon = 5.82077e-11;
-
-inline bool
-isEqual(double a, double b)
-{
-    return (std::abs(a - b) <= double_epsilon);
-}
-
-
-inline std::vector<SerializableObject::Retainer<Item>>
+std::vector<SerializableObject::Retainer<Item> >
 find_items_in_composition(
     Composition*        composition,
     RationalTime const& time,
@@ -70,13 +33,13 @@ find_items_in_composition(
 }
 
 } // namespace
-
+            
+            
 void
 overwrite(
     Item*            item,
     Composition*     composition,
     TimeRange const& range,
-    bool const       remove_transitions,
     Item*            fill_template,
     ErrorStatus*     error_status)
 {
@@ -101,27 +64,6 @@ overwrite(
     }
     else
     {
-        // Check for transitions to remove first.
-        if (remove_transitions)
-        {
-            auto transitions = composition->find_children<Transition>(
-                error_status,
-                range,
-                true);
-            if (!transitions.empty())
-            {
-                for (const auto& transition : transitions)
-                {
-                    int index = composition->index_of_child(transition);
-                    if (index < 0
-                        || static_cast<size_t>(index)
-                               >= composition->children().size())
-                        continue;
-                    composition->remove_child(transition);
-                }
-            }
-        }
-
         // Find the items to overwrite.
         auto items =
             composition->find_children<Item>(error_status, range, true);
@@ -129,34 +71,31 @@ overwrite(
             composition->trimmed_range_of_child(items.front()).value();
         if (1 == items.size() && item_range.contains(range, 0.0))
         {
-            auto first_item = items.front();
             // The item overwrites a portion inside an item.
             const RationalTime first_duration =
                 range.start_time() - item_range.start_time();
             const RationalTime second_duration =
                 item_range.duration() - range.duration() - first_duration;
-            int first_index = composition->index_of_child(first_item);
-            int insert_index = first_index;
-            TimeRange trimmed_range = first_item->trimmed_range();
+            int  insert_index = composition->index_of_child(items.front()) + 1;
+            TimeRange trimmed_range = items.front()->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
             if (first_duration.value() <= 0.0)
             {
-                composition->remove_child(first_index);
+                --insert_index;
+                composition->remove_child(insert_index);
             }
             else
             {
-                first_item->set_source_range(source_range);
+                items.front()->set_source_range(source_range);
                 ++insert_index;
             }
             composition->insert_child(insert_index, item);
             if (second_duration.value() > 0.0)
             {
-                auto second_item = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range    = second_item->trimmed_range();
-                source_range     = TimeRange(
-                    trimmed_range.start_time() + first_duration
-                        + range.duration(),
-                    second_duration);
+                auto second_item  = dynamic_cast<Item*>(items.front()->clone());
+                trimmed_range = second_item->trimmed_range();
+                source_range =
+                    TimeRange(trimmed_range.start_time(), second_duration);
                 ++insert_index;
                 second_item->set_source_range(source_range);
                 composition->insert_child(insert_index, second_item);
@@ -233,32 +172,9 @@ insert(
     Item*            insert_item,
     Composition*     composition,
     RationalTime const& time,
-    bool const       remove_transitions,
     Item*            fill_template,
     ErrorStatus*     error_status)
 {
-    // Check for transitions to remove first.
-    if (remove_transitions)
-    {
-        TimeRange range(time, RationalTime(1.0, time.rate()));
-        auto transitions = composition->find_children<Transition>(
-            error_status,
-            range,
-            true);
-        if (!transitions.empty())
-        {
-            for (const auto& transition : transitions)
-            {
-                int index = composition->index_of_child(transition);
-                if (index < 0
-                    || static_cast<size_t>(index)
-                           >= composition->children().size())
-                    continue;
-                composition->remove_child(transition);
-            }
-        }
-    }
-
     // Find the item to insert into.
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())
@@ -415,6 +331,8 @@ slice(
     }
     if (items.size() > 1)
     {
+        if (error_status)
+            *error_status = ErrorStatus::INTERNAL_ERROR;
         return;
     }
     auto item = items.front();
@@ -425,7 +343,7 @@ slice(
     
     // Check for slice at start of clip (invalid slice)
     const RationalTime duration = time - range.start_time();
-    if (isEqual(duration.value(), 0.0))
+    if (duration.value() <= 0.0)
         return;
     
     // Accumulate intersecting transitions
@@ -476,7 +394,6 @@ slice(
     const TimeRange first_source_range(
         item->trimmed_range().start_time(),
         duration);
-    
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
@@ -484,11 +401,8 @@ slice(
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());
-    if (!(isEqual(second_source_range.duration().value(), 0.0)))
-    {
-        second_item->set_source_range(second_source_range);
-        composition->insert_child(static_cast<int>(index) + 1, second_item);
-    }
+    second_item->set_source_range(second_source_range);
+    composition->insert_child(static_cast<int>(index) + 1, second_item);
 }
             
 void slip(
@@ -501,7 +415,7 @@ void slip(
 
     // Clamp to available range of media if present
     const TimeRange  available_range = item->available_range();
-    if (!isEqual(available_range.duration().value(), 0.0))
+    if (available_range.duration().value() > 0.0)
     {
         if (start_time < available_range.start_time())
         {
@@ -542,7 +456,7 @@ void slide(
     const TimeRange available_range = previous->available_range();
     RationalTime offset = delta;
 
-    if (delta.value() < 0.0)
+    if (delta.value() < 0)
     {
         // Check we don't move left beyond the previous clip's duration
         if (range.duration() <= -delta)
@@ -554,7 +468,7 @@ void slide(
     {
         // Check we don't move right beyond the previous clip's
         // available duration
-        if (!isEqual(available_range.duration().value(), 0.0) &&
+        if (available_range.duration().value() > 0.0 &&
             range.duration() + delta > available_range.duration())
         {
             offset = available_range.duration() - range.duration();
@@ -597,7 +511,7 @@ void ripple(
 
             // Check we don't move right beyond the clip's
             // available duration
-            if (!(isEqual(available_range.duration().value(), 0.0)) &&
+            if (available_range.duration().value() > 0.0 &&
                 range.duration() + delta_out > available_range.duration())
             {
                 out_offset = available_range.duration() - range.duration();
@@ -651,7 +565,7 @@ roll(
         start_time += in_offset;
 
         // If available range present, clamp to its start_time.
-        if (!(isEqual(available_range.duration().value(), 0.0)))
+        if (available_range.duration().value() > 0.0)
         {
             if (start_time < available_start_time)
                 start_time = available_start_time;
@@ -669,7 +583,7 @@ roll(
             RationalTime out_offset = delta_out;
 
             // If avalable range, clamp to it.
-            if (!(isEqual(available_range.duration().value(), 0.0)))
+            if (available_range.duration().value() > 0.0)
             {
                 RationalTime available_start_time =
                     available_range.start_time();
@@ -748,13 +662,7 @@ fill(
             }
             
             const TimeRange time_range(track_time, duration);
-            overwrite(
-                track_item,
-                track,
-                time_range,
-                true,
-                nullptr,
-                error_status);
+            overwrite(track_item, track, time_range, nullptr, error_status);
             return;
         }
 
@@ -770,14 +678,14 @@ fill(
             const TimeRange time_range(
                 track_time,
                 gap_track_range.end_time_exclusive() - track_time);
-            overwrite(item, track, time_range, true, nullptr, error_status);
+            overwrite(item, track, time_range, nullptr, error_status);
             return;
         }
 
         case ReferencePoint::Source:
         default: {
             const TimeRange time_range(track_time, duration);
-            overwrite(item, track, time_range, true, nullptr, error_status);
+            overwrite(item, track, time_range, nullptr, error_status);
             return;
         }
     };

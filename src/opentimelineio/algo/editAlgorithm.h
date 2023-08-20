@@ -24,36 +24,32 @@ enum class ReferencePoint
 //          item = item to overwrite (usually a clip)
 //   composition = usually a track item.
 //         range = time range to overwrite.
-// remove_transitions = whether to remove transitions within range.
 // fill_template = item to fill in (usually a gap),
 //                 when range > composition's time.
 void overwrite(
     Item*            item,
     Composition*     composition,
     TimeRange const& range,
-    bool             remove_transitions = true,
-    Item*            fill_template      = nullptr,
-    ErrorStatus*     error_status       = nullptr);
+    Item*            fill_template = nullptr,
+    ErrorStatus*     error_status  = nullptr);
 
 // Insert an item.
 // |     A     | B |  ->  | A | C | A | B |
-//       ^
+//       ^   
 //     | C |
 //
 //          item = item to insert (usually a clip)
 //   composition = usually a track item.
 //          time = time to insert at.  If < composition's start time, it will insert at 0 index.
 //                                     If > composition's end_time_exclusive, it will append at end.
-// remove_transitions = whether to remove transitions that intersect time.
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
 void insert(
     Item*               item,
     Composition*        composition,
     RationalTime const& time,
-    bool const          remove_transitions = true,
-    Item*               fill_template      = nullptr,
-    ErrorStatus*        error_status       = nullptr);
+    Item*               fill_template = nullptr,
+    ErrorStatus*        error_status  = nullptr);
 
 //
 // Adjust a single item's start time or duration.

@@ -75,17 +75,6 @@ ceil(const otime::RationalTime& value)
     return otime::RationalTime(std::ceil(value.value()), value.rate());
 }
 
-inline std::vector<SerializableObject::Retainer<Item>>
-find_items_in_composition(
-    Composition*        composition,
-    RationalTime const& time,
-    ErrorStatus*        error_status)
-{
-    // Find the item to slice.
-    TimeRange search_range(time, RationalTime(1.0, time.rate()));
-    return composition->find_children<Item>(error_status, search_range, true);
-}
-
 } // namespace
 
 void
@@ -280,11 +269,11 @@ insert(
     const TimeRange composition_range = composition->trimmed_range();
         
     // Find the item to insert into.
-    auto items = find_items_in_composition(composition, floor(time),
-                                           error_status);
-    if (items.empty())
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status));
+    if (!item)
     {
-        if (floor(time) >= floor(composition_range.end_time_exclusive()))
+        if (time >= composition_range.end_time_exclusive())
         {
             // Append the item and a possible fill (gap).
             const RationalTime fill_duration =
@@ -302,7 +291,7 @@ insert(
             }
             composition->append_child(insert_item);
         }
-        else if (floor(time) < floor(composition_range.start_time()))
+        else if (time < composition_range.start_time())
         {
             composition->insert_child(0, insert_item);
         }
@@ -315,14 +304,7 @@ insert(
         }
         return;
     }
-    if (items.size() > 1)
-    {
-        if (error_status)
-            *error_status = ErrorStatus::INTERNAL_ERROR;
-        return;
-    }
-    auto item = items.front();
-
+    
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
     int insert_index = index;
@@ -439,19 +421,15 @@ slice(
     bool const          remove_transitions,
     ErrorStatus*        error_status)
 {
-    auto items = find_items_in_composition(composition, time, error_status);
-    if (items.empty())
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status));
+    if (!item)
     {
         if (error_status)
             *error_status = ErrorStatus::NOT_AN_ITEM;
         return;
     }
-    if (items.size() > 1)
-    {
-        return;
-    }
-    auto item = items.front();
-        
+    
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
 

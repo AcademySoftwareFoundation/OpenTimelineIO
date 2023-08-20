@@ -282,7 +282,7 @@ insert(
                     fill_template->set_source_range(fill_range);
                 composition->append_child(fill_template);
             }
-            std:: << "append item" << std::endl;
+            std::cerr << "append item" << std::endl;
             composition->append_child(insert_item);
         }
         else if (time < composition_range.start_time())

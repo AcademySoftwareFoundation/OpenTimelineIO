@@ -57,6 +57,11 @@ isEqual(double a, double b)
     return (std::abs(a - b) <= double_epsilon);
 }
 
+inline otime::RationalTime
+floor(const otime::RationalTime& value)
+{
+    return RationalTime(std::floor(value.value()), value.rate());
+}
 
 inline std::vector<SerializableObject::Retainer<Item>>
 find_items_in_composition(
@@ -81,7 +86,8 @@ overwrite(
     ErrorStatus*     error_status)
 {
     const TimeRange composition_range = composition->trimmed_range();
-    if (range.start_time() >= composition_range.end_time_exclusive())
+    if (floor(range.start_time())
+        >= floor(composition_range.end_time_exclusive()))
     {
         // Append the item and a possible fill (gap).
         const RationalTime fill_duration =
@@ -139,7 +145,7 @@ overwrite(
             int insert_index = first_index;
             TimeRange trimmed_range = first_item->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
-            if (first_duration.value() <= 0.0)
+            if (isEqual(first_duration.value(), 0.0))
             {
                 composition->remove_child(first_index);
             }
@@ -260,22 +266,18 @@ insert(
     }
 
     const TimeRange composition_range = composition->trimmed_range();
-    std::cerr << "comp range=" << composition_range << std::endl;
         
     // Find the item to insert into.
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())
     {
-        std::cerr << "--- empty items ---" << std::endl;
-        std::cerr << "time=" << time << std::endl;
-        if (time >= composition_range.end_time_exclusive())
+        if (time == composition_range.end_time_exclusive())
         {
             // Append the item and a possible fill (gap).
             const RationalTime fill_duration =
                 time - composition_range.end_time_exclusive();
             if (!isEqual(fill_duration.value(), 0.0))
             {
-                std::cerr << "append gap" << std::endl;
                 const TimeRange fill_range = TimeRange(
                     RationalTime(0.0, fill_duration.rate()),
                     fill_duration);
@@ -285,12 +287,10 @@ insert(
                     fill_template->set_source_range(fill_range);
                 composition->append_child(fill_template);
             }
-            std::cerr << "append item" << std::endl;
             composition->append_child(insert_item);
         }
         else if (time < composition_range.start_time())
         {
-            std::cerr << "add item at 0" << std::endl;
             composition->insert_child(0, insert_item);
         }
         else
@@ -551,7 +551,7 @@ void slide(
     const int       index = composition->index_of_child(item);
 
     // Exit early if we are at the first clip or if the delta is 0.
-    if (index <= 0 || delta.value() == 0.0F)
+    if (index <= 0 || delta.value() == 0.0)
     {
         return;
     }

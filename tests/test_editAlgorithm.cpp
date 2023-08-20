@@ -1708,7 +1708,9 @@ main(int argc, char** argv)
     
     // Insert at the end of clip_1.
     tests.add_test("test_edit_insert_7", [] {
-        // Create a track with two clips.
+        otio::ErrorStatus  error_status;
+        
+        // Create a track with three clips.
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
             "PSR63_2012-06-02",
             nullptr,
@@ -1716,17 +1718,17 @@ main(int argc, char** argv)
                 otio::RationalTime(0.0, 23.98),
                 otio::RationalTime(71.94, 23.98)));
         otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
-            "BART_2021-02-07",
-            nullptr,
-            otio::TimeRange(
-                otio::RationalTime(90.0, 30.0),
-                otio::RationalTime(90.0, 30.0)));
-        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
             "Dinky_2015-06-11",
             nullptr,
             otio::TimeRange(
                 otio::RationalTime(0.0, 23.98),
                 otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
+            "BART_2021-02-07",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(90.0, 30.0),
+                otio::RationalTime(90.0, 30.0)));
         otio::SerializableObject::Retainer<otio::Track> track =
             new otio::Track();
         track->append_child(clip_0);
@@ -1736,7 +1738,9 @@ main(int argc, char** argv)
 
         debug_clip_ranges("START", track);
         
-        track->remove_child(2);
+        track->remove_child(1);
+        
+        debug_clip_ranges("REMOVED 1 - TWO CLIPS", track);
         
         const RationalTime new_duration = track->duration();
         assertNotEqual(duration, new_duration);
@@ -1751,15 +1755,13 @@ main(int argc, char** argv)
                                     otio::RationalTime(90.0, 30.0)),
                             });
 
-        debug_clip_ranges("REMOVED", track);
         
         
         // Insert at end of clip 2.
-        otio::ErrorStatus  error_status;
         otio::algo::insert(
-            clip_2,
+            clip_1,
             track,
-            RationalTime(90.0, 30.0),
+            RationalTime(180.0, 30.0),
             true,
             nullptr,
             &error_status);
@@ -1774,12 +1776,54 @@ main(int argc, char** argv)
                                     otio::RationalTime(0.0, 23.98),
                                     otio::RationalTime(71.94, 23.98)),
                                 otio::TimeRange(
+                                    otio::RationalTime(90.0, 30.0),
+                                    otio::RationalTime(90.0, 30.0)),
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                            });
+
+        track->remove_child(2);
+
+        debug_clip_ranges("REMOVED 2 - TWO CLIPS", track);
+        
+        const RationalTime new_duration3 = track->duration();
+        assertNotEqual(duration, new_duration3);
+
+        assert_clip_ranges(track,
+                            {
+                                otio::TimeRange(
                                     otio::RationalTime(0.0, 23.98),
                                     otio::RationalTime(71.94, 23.98)),
                                 otio::TimeRange(
                                     otio::RationalTime(90.0, 30.0),
                                     otio::RationalTime(90.0, 30.0)),
                             });
+        
+        // Insert at end of clip 1.
+        otio::algo::insert(
+            clip_1,
+            track,
+            RationalTime(90.0, 30.0),
+            true,
+            nullptr,
+            &error_status);
+        
+        const RationalTime new_duration4 = track->duration();
+        assertEqual(duration, new_duration4);
+        assert_clip_ranges(track,
+                            {
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                                otio::TimeRange(
+                                    otio::RationalTime(90.0, 30.0),
+                                    otio::RationalTime(90.0, 30.0)),
+                            });
+        
     });
     
     tests.add_test("test_edit_slip", [] {

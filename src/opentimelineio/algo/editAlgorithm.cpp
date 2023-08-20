@@ -265,6 +265,8 @@ insert(
     {
         std::cerr << "empty items" << std::endl;
         const TimeRange composition_range = composition->trimmed_range();
+        std::cerr << "time=" << time << std::endl;
+        std::cerr << "comp range=" << composition_range << std::endl;
         if (time >= composition_range.end_time_exclusive())
         {
             // Append the item and a possible fill (gap).

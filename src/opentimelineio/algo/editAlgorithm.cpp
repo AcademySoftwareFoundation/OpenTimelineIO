@@ -230,12 +230,12 @@ overwrite(
 
 void
 insert(
-    Item*            insert_item,
-    Composition*     composition,
+    Item* const         insert_item,
+    Composition*        composition,
     RationalTime const& time,
-    bool const       remove_transitions,
-    Item*            fill_template,
-    ErrorStatus*     error_status)
+    bool const          remove_transitions,
+    Item*               fill_template,
+    ErrorStatus*        error_status)
 {
     // Check for transitions to remove first.
     if (remove_transitions)
@@ -259,14 +259,15 @@ insert(
         }
     }
 
+    const TimeRange composition_range = composition->trimmed_range();
+    std::cerr << "comp range=" << composition_range << std::endl;
+        
     // Find the item to insert into.
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())
     {
         std::cerr << "--- empty items ---" << std::endl;
-        const TimeRange composition_range = composition->trimmed_range();
         std::cerr << "time=" << time << std::endl;
-        std::cerr << "comp range=" << composition_range << std::endl;
         if (time >= composition_range.end_time_exclusive())
         {
             // Append the item and a possible fill (gap).

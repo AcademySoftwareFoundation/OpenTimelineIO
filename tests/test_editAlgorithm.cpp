@@ -1738,6 +1738,9 @@ main(int argc, char** argv)
         
         track->remove_child(2);
         
+        const RationalTime new_duration = track->duration();
+        assertNotEqual(duration, new_duration);
+        
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(
@@ -1763,8 +1766,8 @@ main(int argc, char** argv)
 
         // Asserts.
         assert(!otio::is_error(error_status));
-        const RationalTime new_duration = track->duration();
-        assertEqual(duration, new_duration);
+        const RationalTime new_duration2 = track->duration();
+        assertEqual(duration, new_duration2);
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(

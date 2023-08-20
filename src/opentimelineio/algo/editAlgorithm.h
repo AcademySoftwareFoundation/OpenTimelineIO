@@ -48,7 +48,7 @@ void overwrite(
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
 void insert(
-    Item*               item,
+    Item* const         item,
     Composition*        composition,
     RationalTime const& time,
     bool const          remove_transitions = true,

@@ -13,7 +13,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-//#define DEBUG
+#define DEBUG
 
 
 namespace otime = opentime::OPENTIME_VERSION;
@@ -1710,19 +1710,19 @@ main(int argc, char** argv)
     tests.add_test("test_edit_insert_7", [] {
         // Create a track with two clips.
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
-            "clip_0",
+            "PSR63_2012-06-02",
             nullptr,
             otio::TimeRange(
                 otio::RationalTime(0.0, 23.98),
                 otio::RationalTime(71.94, 23.98)));
         otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
-            "clip_1",
+            "BART_2021-02-07",
             nullptr,
             otio::TimeRange(
                 otio::RationalTime(90.0, 30.0),
                 otio::RationalTime(90.0, 30.0)));
         otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
-            "clip_2",
+            "Dinky_2015-06-11",
             nullptr,
             otio::TimeRange(
                 otio::RationalTime(0.0, 23.98),
@@ -1737,6 +1737,16 @@ main(int argc, char** argv)
         debug_clip_ranges("START", track);
         
         track->remove_child(2);
+        
+        assert_clip_ranges(track,
+                            {
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                                otio::TimeRange(
+                                    otio::RationalTime(90.0, 30.0),
+                                    otio::RationalTime(90.0, 30.0)),
+                            });
 
         debug_clip_ranges("REMOVED", track);
         

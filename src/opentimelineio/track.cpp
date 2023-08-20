@@ -166,7 +166,7 @@ Track::neighbors_of(
     std::pair<Retainer<Composable>, Retainer<Composable>> result{ nullptr,
                                                                   nullptr };
 
-    auto index = _index_of_child(item, error_status);
+    const int index = index_of_child(item, error_status);
     if (is_error(error_status))
     {
         return result;

@@ -86,7 +86,7 @@ overwrite(
         // Append the item and a possible fill (gap).
         const RationalTime fill_duration =
             range.start_time() - composition_range.end_time_exclusive();
-        if (fill_duration.value() > 0.0)
+        if (!isEqual(fill_duration.value(), 0.0))
         {
             const TimeRange fill_range = TimeRange(
                 RationalTime(0.0, fill_duration.rate()),
@@ -149,7 +149,7 @@ overwrite(
                 ++insert_index;
             }
             composition->insert_child(insert_index, item);
-            if (second_duration.value() > 0.0)
+            if (!isEqual(second_duration.value(), 0.0))
             {
                 auto second_item = dynamic_cast<Item*>(items.front()->clone());
                 trimmed_range    = second_item->trimmed_range();
@@ -272,9 +272,8 @@ insert(
             // Append the item and a possible fill (gap).
             const RationalTime fill_duration =
                 time - composition_range.end_time_exclusive();
-            if (fill_duration.value() > 0.0)
+            if (!isEqual(fill_duration.value(), 0.0))
             {
-                std::cerr << "append gap" << std::endl;
                 const TimeRange fill_range = TimeRange(
                     RationalTime(0.0, fill_duration.rate()),
                     fill_duration);
@@ -284,7 +283,6 @@ insert(
                     fill_template->set_source_range(fill_range);
                 composition->append_child(fill_template);
             }
-            std::cerr << "append item" << std::endl;
             composition->append_child(insert_item);
         }
         else if (time < composition_range.start_time())
@@ -304,12 +302,13 @@ insert(
     int insert_index = index;
 
     // Item is partially split
-    const bool split = range.start_time() < time;
-    if (split)
+    bool split = false;
+    const TimeRange first_source_range(
+        item->trimmed_range().start_time(),
+        time - range.start_time());
+    if (!isEqual(first_source_range.duration().value(), 0.0))
     {
-        const TimeRange first_source_range(
-            item->trimmed_range().start_time(),
-            time - range.start_time());
+        split = true;
         item->set_source_range(first_source_range);
         ++insert_index;
     }
@@ -325,9 +324,12 @@ insert(
             insert_range.start_time() + insert_range.duration(),
             range.end_time_exclusive() - time);
         // Clone the item for the second partially overwritten item.
-        auto            second_item = dynamic_cast<Item*>(item->clone());
-        second_item->set_source_range(second_source_range);
-        composition->insert_child(insert_index + 1, second_item);
+        if (!isEqual(second_source_range.duration().value(), 0.0))
+        {
+            auto            second_item = dynamic_cast<Item*>(item->clone());
+            second_item->set_source_range(second_source_range);
+            composition->insert_child(insert_index + 1, second_item);
+        }
     }
 }
 

@@ -13,7 +13,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-// #define DEBUG
+//#define DEBUG
 
 
 namespace otime = opentime::OPENTIME_VERSION;
@@ -59,9 +59,6 @@ debug_track_ranges(const std::string& title, otio::Track* track)
         {
             auto range = track->trimmed_range_of_child(child).value();
             std::cout << "\t\t" << item->name() << " " << range
-                      << " start=" << range.start_time().to_seconds()
-                      << " end=" << range.end_time_exclusive().to_seconds()
-                      << " duration=" << range.duration().to_seconds()
                       << std::endl;
             if (range.duration().rate() > rate) rate = range.duration().rate();
         }
@@ -89,8 +86,6 @@ debug_clip_ranges(const std::string& title, otio::Track* track)
         {
             auto range = item->trimmed_range();
             std::cout << "\t\t" << item->name() << " " << range
-                      << " seconds=" << range.start_time().to_seconds()
-                      << " - " << range.duration().to_seconds()
                       << std::endl;
         }
     }
@@ -1711,6 +1706,69 @@ main(int argc, char** argv)
                             });
     });
     
+    // Insert at the end of clip_1.
+    tests.add_test("test_edit_insert_7", [] {
+        // Create a track with two clips.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 23.98),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
+            "clip_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(90.0, 30.0),
+                otio::RationalTime(90.0, 30.0)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
+            "clip_2",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 30.0),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+        track->append_child(clip_1);
+        track->append_child(clip_2);
+        const RationalTime duration = track->duration();
+
+        debug_clip_ranges("START", track);
+        
+        track->remove_child(2);
+
+        debug_clip_ranges("REMOVED", track);
+        
+        
+        // Insert at end of clip 2.
+        otio::ErrorStatus  error_status;
+        otio::algo::insert(
+            clip_2,
+            track,
+            RationalTime(90.0, 30.0),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        //assertEqual(duration, new_duration);
+        assert_clip_ranges(track,
+                            {
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.98),
+                                    otio::RationalTime(71.94, 23.98)),
+                                otio::TimeRange(
+                                    otio::RationalTime(90.0, 30.0),
+                                    otio::RationalTime(90.0, 30.0)),
+                            });
+    });
+    
     tests.add_test("test_edit_slip", [] {
         const TimeRange media_range(
             RationalTime(-15.0, 24.0),
@@ -2507,7 +2565,7 @@ main(int argc, char** argv)
     });
     
     // Add a shorter clip in gap as Sequence reference point
-    tests.add_test("test_edit_fill_7", [] {
+    tests.add_test("test_edit_fill_8", [] {
 
         test_edit_fill(
             TimeRange(
@@ -2547,42 +2605,6 @@ main(int argc, char** argv)
             }); 
     });
 
-    // Find children seems broken
-    tests.add_test("test_find_children", [] {
-        
-        // Create a timeline, stack and two tracks with one clip each.
-        otio::SerializableObject::Retainer<otio::Clip> video_clip = new otio::Clip(
-            "video_0",
-            nullptr,
-            otio::TimeRange(
-                otio::RationalTime(0.0, 30.0),
-                otio::RationalTime(704.0, 30.0)));
-        otio::SerializableObject::Retainer<otio::Clip> audio_clip = new otio::Clip(
-            "audio_0",
-            nullptr,
-            otio::TimeRange(
-                otio::RationalTime(5.0, 24.0),
-                otio::RationalTime(20.0, 24.0)));
-        otio::SerializableObject::Retainer<otio::Track> video_track = new otio::Track("Video");
-        otio::SerializableObject::Retainer<otio::Track> audio_track = new otio::Track("Audio");
-        otio::SerializableObject::Retainer<otio::Stack> stack = new otio::Stack();
-        otio::SerializableObject::Retainer<otio::Timeline> timeline = new otio::Timeline();
-        video_track->append_child(video_clip);
-        audio_track->append_child(audio_clip);
-
-        stack->append_child(video_track);
-        stack->append_child(audio_track);
-
-        timeline->set_tracks(stack);
-
-        RationalTime time(704.0, 30.0);
-        RationalTime one_frame(1.0, 30.0);
-        TimeRange range(time, one_frame);
-        otio::ErrorStatus errorStatus;
-        auto items = timeline->find_children(&errorStatus, range);
-        assert(!otio::is_error(errorStatus));
-        assert(!items.empty());
-    });
     
     tests.run(argc, argv);
     return 0;

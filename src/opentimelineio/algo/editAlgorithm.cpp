@@ -38,6 +38,26 @@ std::ostream& operator << (std::ostream& os, const TimeRange& value)
 namespace
 {
 
+    // @todo: This should be moved to opentime/rationalTime.h
+    
+// We are not testing values outside of one million seconds.
+// At one million second, and double precision, the smallest
+// resolvable number that can be added to one million and return
+// a new value one million + epsilon is 5.82077e-11.
+//
+// This was calculated by searching iteratively for epsilon
+// around 1,000,000, with epsilon starting from 1 and halved
+// at every iteration, until epsilon when added to 1,000,000
+// resulted in 1,000,000.
+constexpr double double_epsilon = 5.82077e-11;
+
+inline bool
+isEqual(double a, double b)
+{
+    return (std::abs(a - b) <= double_epsilon);
+}
+
+
 inline std::vector<SerializableObject::Retainer<Item>>
 find_items_in_composition(
     Composition*        composition,
@@ -110,9 +130,6 @@ overwrite(
         if (1 == items.size() && item_range.contains(range, 0.0))
         {
             auto first_item = items.front();
-            std::cout << "OVERWRITE range.start_time()=" << range.start_time()
-                      << " seconds=" << range.start_time().to_seconds()
-                      << std::endl;
             // The item overwrites a portion inside an item.
             const RationalTime first_duration =
                 range.start_time() - item_range.start_time();
@@ -398,8 +415,6 @@ slice(
     }
     if (items.size() > 1)
     {
-        if (error_status)
-            *error_status = ErrorStatus::INTERNAL_ERROR;
         return;
     }
     auto item = items.front();
@@ -410,7 +425,7 @@ slice(
     
     // Check for slice at start of clip (invalid slice)
     const RationalTime duration = time - range.start_time();
-    if (duration.value() <= 0.0)
+    if (isEqual(duration.value(), 0.0))
         return;
     
     // Accumulate intersecting transitions
@@ -461,6 +476,7 @@ slice(
     const TimeRange first_source_range(
         item->trimmed_range().start_time(),
         duration);
+    
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
@@ -468,8 +484,11 @@ slice(
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());
-    second_item->set_source_range(second_source_range);
-    composition->insert_child(static_cast<int>(index) + 1, second_item);
+    if (!(isEqual(second_source_range.duration().value(), 0.0)))
+    {
+        second_item->set_source_range(second_source_range);
+        composition->insert_child(static_cast<int>(index) + 1, second_item);
+    }
 }
             
 void slip(
@@ -482,7 +501,7 @@ void slip(
 
     // Clamp to available range of media if present
     const TimeRange  available_range = item->available_range();
-    if (available_range.duration().value() > 0.0)
+    if (!isEqual(available_range.duration().value(), 0.0))
     {
         if (start_time < available_range.start_time())
         {
@@ -523,7 +542,7 @@ void slide(
     const TimeRange available_range = previous->available_range();
     RationalTime offset = delta;
 
-    if (delta.value() < 0)
+    if (delta.value() < 0.0)
     {
         // Check we don't move left beyond the previous clip's duration
         if (range.duration() <= -delta)
@@ -535,7 +554,7 @@ void slide(
     {
         // Check we don't move right beyond the previous clip's
         // available duration
-        if (available_range.duration().value() > 0.0 &&
+        if (!isEqual(available_range.duration().value(), 0.0) &&
             range.duration() + delta > available_range.duration())
         {
             offset = available_range.duration() - range.duration();
@@ -578,7 +597,7 @@ void ripple(
 
             // Check we don't move right beyond the clip's
             // available duration
-            if (available_range.duration().value() > 0.0 &&
+            if (!(isEqual(available_range.duration().value(), 0.0)) &&
                 range.duration() + delta_out > available_range.duration())
             {
                 out_offset = available_range.duration() - range.duration();
@@ -632,7 +651,7 @@ roll(
         start_time += in_offset;
 
         // If available range present, clamp to its start_time.
-        if (available_range.duration().value() > 0.0)
+        if (!(isEqual(available_range.duration().value(), 0.0)))
         {
             if (start_time < available_start_time)
                 start_time = available_start_time;
@@ -650,7 +669,7 @@ roll(
             RationalTime out_offset = delta_out;
 
             // If avalable range, clamp to it.
-            if (available_range.duration().value() > 0.0)
+            if (!(isEqual(available_range.duration().value(), 0.0)))
             {
                 RationalTime available_start_time =
                     available_range.start_time();

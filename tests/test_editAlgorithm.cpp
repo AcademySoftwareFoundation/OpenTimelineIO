@@ -11,11 +11,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-<<<<<<< HEAD
 //#define DEBUG
-=======
-// #define DEBUG
->>>>>>> test_edit_commands
 
 
 namespace otime = opentime::OPENTIME_VERSION;
@@ -53,24 +49,10 @@ debug_track_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
     std::cout << "\t" << title << " TRACK RANGES" << std::endl;
-<<<<<<< HEAD
-=======
-    double rate = 0;
->>>>>>> test_edit_commands
     for (const auto& child: track->children())
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-<<<<<<< HEAD
-            std::cout << "\t\t" << item->name() << " "
-                      << track->trimmed_range_of_child(child).value()
-                      << std::endl;
-        auto transition = otio::dynamic_retainer_cast<otio::Transition>(child);
-        if (transition)
-            std::cout << "\t\t" << transition->name() << " "
-                      << track->trimmed_range_of_child(transition).value()
-                      << std::endl;
-=======
         {
             auto range = track->trimmed_range_of_child(child).value();
             std::cout << "\t\t" << item->name() << " " << range
@@ -87,7 +69,6 @@ debug_track_ranges(const std::string& title, otio::Track* track)
             std::cout << "\t\t" << transition->name() << " " << range
                       << std::endl;
         }
->>>>>>> test_edit_commands
     }
     std::cout << "\t" << title << " TRACK RANGES END" << std::endl;
 #endif
@@ -102,10 +83,6 @@ debug_clip_ranges(const std::string& title, otio::Track* track)
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
         if (item)
-<<<<<<< HEAD
-            std::cout << "\t\t" << item->name() << " " << item->trimmed_range()
-                      << std::endl;
-=======
         {
             auto range = item->trimmed_range();
             std::cout << "\t\t" << item->name() << " " << range
@@ -113,7 +90,6 @@ debug_clip_ranges(const std::string& title, otio::Track* track)
                       << " - " << range.duration().to_seconds()
                       << std::endl;
         }
->>>>>>> test_edit_commands
     }
     std::cout << "\t" << title << " CLIP TRIMMED RANGES END" << std::endl;
 #endif
@@ -205,11 +181,7 @@ test_edit_slice_transitions(
         nullptr,
         TimeRange(RationalTime(0.0, 24.0), RationalTime(30.0, 24.0)));
     otio::SerializableObject::Retainer<otio::Clip> clip_3 = new otio::Clip(
-<<<<<<< HEAD
-        "clip_2",
-=======
         "clip_3",
->>>>>>> test_edit_commands
         nullptr,
         TimeRange(RationalTime(0.0, 24.0), RationalTime(25.0, 24.0)));
     otio::SerializableObject::Retainer<otio::Transition> transition_0 =
@@ -471,13 +443,8 @@ void test_edit_fill(
         assertEqual(new_duration, duration);
     }
     assert(!otio::is_error(error_status));
-<<<<<<< HEAD
     assert_clip_ranges(track, item_ranges);
     assert_track_ranges(track, track_ranges);
-=======
-    assert_track_ranges(track, track_ranges);
-    assert_clip_ranges(track, item_ranges);
->>>>>>> test_edit_commands
 }
 
 } // namespace
@@ -487,11 +454,7 @@ main(int argc, char** argv)
 {
     Tests tests;
     
-<<<<<<< HEAD
-    tests.add_test("test_edit_slice", [] {
-=======
     tests.add_test("test_edit_slice_1", [] {
->>>>>>> test_edit_commands
         // Slice in the middle.
         test_edit_slice(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
@@ -527,8 +490,6 @@ main(int argc, char** argv)
         
     });
 
-<<<<<<< HEAD
-=======
     tests.add_test("test_edit_slice_2", [] {
         // Create a track with three clips of different rates
         // Slice the clips several times at different points.
@@ -814,7 +775,6 @@ main(int argc, char** argv)
     });
 
     
->>>>>>> test_edit_commands
     tests.add_test("test_edit_slice_transitions_1", [] {
         
         // Four clips with two transitions.
@@ -859,10 +819,7 @@ main(int argc, char** argv)
             clip_1,
             track,
             TimeRange(RationalTime(48.0, 24.0), RationalTime(24.0, 24.0)),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -887,20 +844,12 @@ main(int argc, char** argv)
             nullptr,
             otio::TimeRange(
                 otio::RationalTime(0.0, 24.0),
-<<<<<<< HEAD
-                otio::RationalTime(72.0, 24.0)));
-=======
                 otio::RationalTime(24.0, 24.0)));
->>>>>>> test_edit_commands
         otio::SerializableObject::Retainer<otio::Track> track =
             new otio::Track();
         track->append_child(clip_0);
 
-<<<<<<< HEAD
-        // Overwrite a portion inside the clip.
-=======
         // Overwrite past the clip.
->>>>>>> test_edit_commands
         otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
             "clip_1",
             nullptr,
@@ -911,9 +860,6 @@ main(int argc, char** argv)
         otio::algo::overwrite(
             clip_1,
             track,
-<<<<<<< HEAD
-            TimeRange(RationalTime(24.0, 24.0), RationalTime(24.0, 24.0)),
-=======
             TimeRange(RationalTime(48.0, 24.0), RationalTime(24.0, 24.0)),
             true,
             nullptr,
@@ -958,16 +904,12 @@ main(int argc, char** argv)
             track,
             TimeRange(RationalTime(42.0, 24.0), RationalTime(1.0, 24.0)),
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime duration = track->duration();
-<<<<<<< HEAD
-        assert(duration == otio::RationalTime(72.0, 24.0));
-=======
         assert(duration == otio::RationalTime(100.0, 24.0));
         assert_clip_ranges(track,
                             {
@@ -981,25 +923,10 @@ main(int argc, char** argv)
                                     RationalTime(44.0, 24.0),
                                     RationalTime(57.0, 24.0))
                             });
->>>>>>> test_edit_commands
         assert_track_ranges(track,
                             {
                                 TimeRange(
                                     RationalTime(0.0, 24.0),
-<<<<<<< HEAD
-                                    RationalTime(24.0, 24.0)),
-                                TimeRange(
-                                    RationalTime(24.0, 24.0),
-                                    RationalTime(24.0, 24.0)),
-                                TimeRange(
-                                    RationalTime(48.0, 24.0),
-                                    RationalTime(24.0, 24.0))
-                            });
-    });
-
-    tests.add_test("test_edit_overwrite_2", [] {
-        // Create a track with two clips.
-=======
                                     RationalTime(42.0, 24.0)),
                                 TimeRange(
                                     RationalTime(42.0, 24.0),
@@ -1012,7 +939,6 @@ main(int argc, char** argv)
 
     tests.add_test("test_edit_overwrite_3", [] {
         // Create a track with two clips and overwrite a portion of both.
->>>>>>> test_edit_commands
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
             "clip_0",
             nullptr,
@@ -1043,10 +969,7 @@ main(int argc, char** argv)
             clip_2,
             track,
             TimeRange(RationalTime(12.0, 24.0), RationalTime(24.0, 24.0)),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1069,8 +992,6 @@ main(int argc, char** argv)
     });
 
     
-<<<<<<< HEAD
-=======
     tests.add_test("test_edit_overwrite_4", [] {
         // Create a track with one long clip.
         otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
@@ -1389,7 +1310,6 @@ main(int argc, char** argv)
     });
 
     
->>>>>>> test_edit_commands
     // Insert at middle of clip_0
     tests.add_test("test_edit_insert_1", [] {
         // Create a track with two clips.
@@ -1422,10 +1342,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(12.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1483,10 +1400,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(0.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1542,10 +1456,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(-1.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1607,10 +1518,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(24.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1664,10 +1572,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(48.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1721,10 +1626,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(1.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -1781,10 +1683,7 @@ main(int argc, char** argv)
             insert_1,
             track,
             RationalTime(47.0, 24.0),
-<<<<<<< HEAD
-=======
             true,
->>>>>>> test_edit_commands
             nullptr,
             &error_status);
 
@@ -2013,19 +1912,6 @@ main(int argc, char** argv)
                                   RationalTime(10.0, 24.0))
                           });
         assert_clip_ranges(track,
-<<<<<<< HEAD
-                            {
-                                TimeRange(
-                                    RationalTime(0.0, 24.0),
-                                    RationalTime(20.0, 24.0)),
-                                TimeRange(
-                                    RationalTime(5.0, 24.0),
-                                    RationalTime(50.0, 24.0)),
-                                TimeRange(
-                                    RationalTime(0.0, 24.0),
-                                    RationalTime(10.0, 24.0))
-                            });
-=======
                            {
                                TimeRange(
                                    RationalTime(0.0, 24.0),
@@ -2037,7 +1923,6 @@ main(int argc, char** argv)
                                    RationalTime(0.0, 24.0),
                                    RationalTime(10.0, 24.0))
                            });
->>>>>>> test_edit_commands
     });
         
     // Test trim delta_out left (create a gap)
@@ -2491,11 +2376,7 @@ main(int argc, char** argv)
                     RationalTime(0.0, 24.0),
                     RationalTime(5.0, 24.0)),
                 TimeRange(
-<<<<<<< HEAD
-                    RationalTime(5.0, 24.0),
-=======
                     RationalTime(10.0, 24.0),
->>>>>>> test_edit_commands
                     RationalTime(25.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
@@ -2572,11 +2453,7 @@ main(int argc, char** argv)
                     RationalTime(5.0, 24.0),
                     RationalTime(15.0, 24.0)),
                 TimeRange(
-<<<<<<< HEAD
-                    RationalTime(5.0, 24.0),
-=======
                     RationalTime(20.0, 24.0),
->>>>>>> test_edit_commands
                     RationalTime(15.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),
@@ -2618,11 +2495,7 @@ main(int argc, char** argv)
                     RationalTime(10.0, 24.0),
                     RationalTime(5.0, 24.0)),
                 TimeRange(
-<<<<<<< HEAD
-                    RationalTime(5.0, 24.0),
-=======
                     RationalTime(10.0, 24.0),
->>>>>>> test_edit_commands
                     RationalTime(25.0, 24.0)),
                 TimeRange(
                     RationalTime(5.0, 24.0),

@@ -57,16 +57,22 @@ isEqual(double a, double b)
     return (std::abs(a - b) <= double_epsilon);
 }
 
-
-inline std::vector<SerializableObject::Retainer<Item>>
-find_items_in_composition(
-    Composition*        composition,
-    RationalTime const& time,
-    ErrorStatus*        error_status)
+inline otime::RationalTime
+round(const otime::RationalTime& value)
 {
-    // Find the item to slice.
-    TimeRange search_range(time, RationalTime(1.0, time.rate()));
-    return composition->find_children<Item>(error_status, search_range, true);
+    return otime::RationalTime(std::round(value.value()), value.rate());
+}
+
+inline otime::RationalTime
+floor(const otime::RationalTime& value)
+{
+    return otime::RationalTime(std::floor(value.value()), value.rate());
+}
+
+inline otime::RationalTime
+ceil(const otime::RationalTime& value)
+{
+    return otime::RationalTime(std::ceil(value.value()), value.rate());
 }
 
 } // namespace
@@ -81,12 +87,13 @@ overwrite(
     ErrorStatus*     error_status)
 {
     const TimeRange composition_range = composition->trimmed_range();
-    if (range.start_time() >= composition_range.end_time_exclusive())
+    const RationalTime start_time = range.start_time();
+    if (floor(start_time) >= floor(composition_range.end_time_exclusive()))
     {
         // Append the item and a possible fill (gap).
         const RationalTime fill_duration =
             range.start_time() - composition_range.end_time_exclusive();
-        if (fill_duration.value() > 0.0)
+        if (!isEqual(fill_duration.value(), 0.0))
         {
             const TimeRange fill_range = TimeRange(
                 RationalTime(0.0, fill_duration.rate()),
@@ -139,7 +146,7 @@ overwrite(
             int insert_index = first_index;
             TimeRange trimmed_range = first_item->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
-            if (first_duration.value() <= 0.0)
+            if (isEqual(first_duration.value(), 0.0))
             {
                 composition->remove_child(first_index);
             }
@@ -149,7 +156,7 @@ overwrite(
                 ++insert_index;
             }
             composition->insert_child(insert_index, item);
-            if (second_duration.value() > 0.0)
+            if (!isEqual(second_duration.value(), 0.0))
             {
                 auto second_item = dynamic_cast<Item*>(items.front()->clone());
                 trimmed_range    = second_item->trimmed_range();
@@ -230,12 +237,12 @@ overwrite(
 
 void
 insert(
-    Item*            insert_item,
-    Composition*     composition,
+    Item* const         insert_item,
+    Composition*        composition,
     RationalTime const& time,
-    bool const       remove_transitions,
-    Item*            fill_template,
-    ErrorStatus*     error_status)
+    bool const          remove_transitions,
+    Item*               fill_template,
+    ErrorStatus*        error_status)
 {
     // Check for transitions to remove first.
     if (remove_transitions)
@@ -259,17 +266,19 @@ insert(
         }
     }
 
+    const TimeRange composition_range = composition->trimmed_range();
+        
     // Find the item to insert into.
-    auto items = find_items_in_composition(composition, time, error_status);
-    if (items.empty())
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status));
+    if (!item)
     {
-        const TimeRange composition_range = composition->trimmed_range();
         if (time >= composition_range.end_time_exclusive())
         {
             // Append the item and a possible fill (gap).
             const RationalTime fill_duration =
                 time - composition_range.end_time_exclusive();
-            if (fill_duration.value() > 0.0)
+            if (!isEqual(fill_duration.value(), 0.0))
             {
                 const TimeRange fill_range = TimeRange(
                     RationalTime(0.0, fill_duration.rate()),
@@ -283,28 +292,31 @@ insert(
             composition->append_child(insert_item);
         }
         else if (time < composition_range.start_time())
+        {
             composition->insert_child(0, insert_item);
+        }
+        else
+        {
+            std::cerr << "*************** PRECISION ERROR **************"
+                      << std::endl;
+            if (error_status)
+                *error_status = ErrorStatus::INTERNAL_ERROR;
+        }
         return;
     }
-    if (items.size() > 1)
-    {
-        if (error_status)
-            *error_status = ErrorStatus::INTERNAL_ERROR;
-        return;
-    }
-    auto item = items.front();
-
+    
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
     int insert_index = index;
 
     // Item is partially split
-    const bool split = range.start_time() < time;
-    if (split)
+    bool split = false;
+    const TimeRange first_source_range(
+        item->trimmed_range().start_time(),
+        time - range.start_time());
+    if (!isEqual(first_source_range.duration().value(), 0.0))
     {
-        const TimeRange first_source_range(
-            item->trimmed_range().start_time(),
-            time - range.start_time());
+        split = true;
         item->set_source_range(first_source_range);
         ++insert_index;
     }
@@ -320,9 +332,12 @@ insert(
             insert_range.start_time() + insert_range.duration(),
             range.end_time_exclusive() - time);
         // Clone the item for the second partially overwritten item.
-        auto            second_item = dynamic_cast<Item*>(item->clone());
-        second_item->set_source_range(second_source_range);
-        composition->insert_child(insert_index + 1, second_item);
+        if (!isEqual(second_source_range.duration().value(), 0.0))
+        {
+            auto            second_item = dynamic_cast<Item*>(item->clone());
+            second_item->set_source_range(second_source_range);
+            composition->insert_child(insert_index + 1, second_item);
+        }
     }
 }
 
@@ -406,19 +421,15 @@ slice(
     bool const          remove_transitions,
     ErrorStatus*        error_status)
 {
-    auto items = find_items_in_composition(composition, time, error_status);
-    if (items.empty())
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status));
+    if (!item)
     {
         if (error_status)
             *error_status = ErrorStatus::NOT_AN_ITEM;
         return;
     }
-    if (items.size() > 1)
-    {
-        return;
-    }
-    auto item = items.front();
-        
+    
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
 
@@ -531,7 +542,7 @@ void slide(
     const int       index = composition->index_of_child(item);
 
     // Exit early if we are at the first clip or if the delta is 0.
-    if (index <= 0 || delta.value() == 0.0F)
+    if (index <= 0 || delta.value() == 0.0)
     {
         return;
     }

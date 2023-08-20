@@ -263,6 +263,7 @@ insert(
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())
     {
+        std::cerr << "empty items" << std::endl;
         const TimeRange composition_range = composition->trimmed_range();
         if (time >= composition_range.end_time_exclusive())
         {
@@ -271,6 +272,7 @@ insert(
                 time - composition_range.end_time_exclusive();
             if (fill_duration.value() > 0.0)
             {
+                std::cerr << "append gap" << std::endl;
                 const TimeRange fill_range = TimeRange(
                     RationalTime(0.0, fill_duration.rate()),
                     fill_duration);
@@ -280,6 +282,7 @@ insert(
                     fill_template->set_source_range(fill_range);
                 composition->append_child(fill_template);
             }
+            std:: << "append item" << std::endl;
             composition->append_child(insert_item);
         }
         else if (time < composition_range.start_time())

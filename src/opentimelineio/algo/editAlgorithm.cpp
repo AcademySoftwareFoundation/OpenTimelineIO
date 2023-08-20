@@ -58,9 +58,21 @@ isEqual(double a, double b)
 }
 
 inline otime::RationalTime
+round(const otime::RationalTime& value)
+{
+    return otime::RationalTime(std::round(value.value()), value.rate());
+}
+
+inline otime::RationalTime
 floor(const otime::RationalTime& value)
 {
-    return RationalTime(std::floor(value.value()), value.rate());
+    return otime::RationalTime(std::floor(value.value()), value.rate());
+}
+
+inline otime::RationalTime
+ceil(const otime::RationalTime& value)
+{
+    return otime::RationalTime(std::ceil(value.value()), value.rate());
 }
 
 inline std::vector<SerializableObject::Retainer<Item>>
@@ -86,8 +98,8 @@ overwrite(
     ErrorStatus*     error_status)
 {
     const TimeRange composition_range = composition->trimmed_range();
-    if (floor(range.start_time())
-        >= floor(composition_range.end_time_exclusive()))
+    const RationalTime start_time = range.start_time();
+    if (floor(start_time) >= floor(composition_range.end_time_exclusive()))
     {
         // Append the item and a possible fill (gap).
         const RationalTime fill_duration =
@@ -271,7 +283,7 @@ insert(
     auto items = find_items_in_composition(composition, time, error_status);
     if (items.empty())
     {
-        if (time == composition_range.end_time_exclusive())
+        if (floor(time) >= floor(composition_range.end_time_exclusive()))
         {
             // Append the item and a possible fill (gap).
             const RationalTime fill_duration =
@@ -289,7 +301,7 @@ insert(
             }
             composition->append_child(insert_item);
         }
-        else if (time < composition_range.start_time())
+        else if (floor(time) < floor(composition_range.start_time()))
         {
             composition->insert_child(0, insert_item);
         }

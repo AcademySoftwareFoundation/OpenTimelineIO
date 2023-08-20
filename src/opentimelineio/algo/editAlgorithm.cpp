@@ -139,7 +139,7 @@ overwrite(
             int insert_index = first_index;
             TimeRange trimmed_range = first_item->trimmed_range();
             TimeRange source_range(trimmed_range.start_time(), first_duration);
-            if (isEqual(first_duration.value(), 0.0))
+            if (first_duration.value() <= 0.0)
             {
                 composition->remove_child(first_index);
             }

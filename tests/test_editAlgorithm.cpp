@@ -11,7 +11,7 @@
 #include <opentimelineio/transition.h>
 
 // Uncomment this for debugging output
-//#define DEBUG
+// #define DEBUG
 
 
 namespace otime = opentime::OPENTIME_VERSION;
@@ -49,6 +49,7 @@ debug_track_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
     std::cout << "\t" << title << " TRACK RANGES" << std::endl;
+    double rate = 0;
     for (const auto& child: track->children())
     {
         auto item = otio::dynamic_retainer_cast<otio::Item>(child);
@@ -443,8 +444,8 @@ void test_edit_fill(
         assertEqual(new_duration, duration);
     }
     assert(!otio::is_error(error_status));
-    assert_clip_ranges(track, item_ranges);
     assert_track_ranges(track, track_ranges);
+    assert_clip_ranges(track, item_ranges);
 }
 
 } // namespace

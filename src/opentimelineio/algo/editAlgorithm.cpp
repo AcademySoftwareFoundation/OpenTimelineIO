@@ -295,6 +295,8 @@ insert(
         }
         else
         {
+            std::cerr << "*************** PRECISION ERROR **************"
+                      << std::endl;
             if (error_status)
                 *error_status = ErrorStatus::INTERNAL_ERROR;
         }

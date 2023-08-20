@@ -280,7 +280,8 @@ insert(
     const TimeRange composition_range = composition->trimmed_range();
         
     // Find the item to insert into.
-    auto items = find_items_in_composition(composition, time, error_status);
+    auto items = find_items_in_composition(composition, floor(time),
+                                           error_status);
     if (items.empty())
     {
         if (floor(time) >= floor(composition_range.end_time_exclusive()))

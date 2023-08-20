@@ -182,7 +182,7 @@ test_edit_slice_transitions(
         nullptr,
         TimeRange(RationalTime(0.0, 24.0), RationalTime(30.0, 24.0)));
     otio::SerializableObject::Retainer<otio::Clip> clip_3 = new otio::Clip(
-        "clip_2",
+        "clip_3",
         nullptr,
         TimeRange(RationalTime(0.0, 24.0), RationalTime(25.0, 24.0)));
     otio::SerializableObject::Retainer<otio::Transition> transition_0 =
@@ -455,7 +455,7 @@ main(int argc, char** argv)
 {
     Tests tests;
     
-    tests.add_test("test_edit_slice", [] {
+    tests.add_test("test_edit_slice_1", [] {
         // Slice in the middle.
         test_edit_slice(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
@@ -491,6 +491,293 @@ main(int argc, char** argv)
         
     });
 
+    tests.add_test("test_edit_slice_2", [] {
+        // Create a track with three clips of different rates
+        // Slice the clips several times at different points.
+        // Delete an item and slice again at same point.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 23.98),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
+            "clip_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 23.98),
+                otio::RationalTime(71.94, 23.98)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
+            "clip_2",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(90.0, 30.0),
+                otio::RationalTime(90.0, 30.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+        track->append_child(clip_1);
+        track->append_child(clip_2);
+        
+        // Slice.
+        otio::ErrorStatus error_status;
+        otio::algo::slice(
+            track,
+            RationalTime(121.0, 30.0),
+            true,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(31.0, 30.0),
+                                    RationalTime(59, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(59, 30.0)),
+                                TimeRange(
+                                    RationalTime(180.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+
+        otio::algo::slice(
+            track,
+            RationalTime(122.0, 30.0),
+            true,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(31.0, 30.0),
+                                    RationalTime(1, 30.0)),
+                                TimeRange(
+                                    RationalTime(32.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(1.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(122.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(180.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+
+        track->remove_child(2); // Delete the 1 frame item
+        
+        // Asserts.
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(32.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(179.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+
+        // Slice again at the same points (this slice does nothing at it is at
+        // start point).
+        std::cerr << __LINE__ << std::endl;
+        otio::algo::slice(
+            track,
+            RationalTime(121.0, 30.0),
+            true,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(32.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(58, 30.0)),
+                                TimeRange(
+                                    RationalTime(179.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+
+        // Slice again for one frame
+        std::cerr << __LINE__ << std::endl;
+        otio::algo::slice(
+            track,
+            RationalTime(122.0, 30.0),
+            true,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(32.0, 30.0),
+                                    RationalTime(1, 30.0)),
+                                TimeRange(
+                                    RationalTime(33.0, 30.0),
+                                    RationalTime(57, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(1.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(122.0, 30.0),
+                                    RationalTime(57, 30.0)),
+                                TimeRange(
+                                    RationalTime(179.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        
+        // Slice again for one frame
+        otio::algo::slice(
+            track,
+            RationalTime(179.0, 30.0),
+            true,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(0.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(32.0, 30.0),
+                                    RationalTime(1, 30.0)),
+                                TimeRange(
+                                    RationalTime(33.0, 30.0),
+                                    RationalTime(57, 30.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 23.98),
+                                    RationalTime(71.94, 23.98)),
+                                TimeRange(
+                                    RationalTime(90.0, 30.0),
+                                    RationalTime(31.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(121.0, 30.0),
+                                    RationalTime(1.0, 30.0)),
+                                TimeRange(
+                                    RationalTime(122.0, 30.0),
+                                    RationalTime(57, 30.0)),
+                                TimeRange(
+                                    RationalTime(179.0, 30.0),
+                                    RationalTime(90.0, 30.0))
+                            });
+    });
+
+    
     tests.add_test("test_edit_slice_transitions_1", [] {
         
         // Four clips with two transitions.

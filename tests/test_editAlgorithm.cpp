@@ -47,27 +47,44 @@ std::ostream& operator << (std::ostream& os, const TimeRange& value)
 namespace {
 
 void
+assert_duration(const RationalTime& new_duration, const RationalTime& duration)
+{
+#ifdef DEBUG
+    std::cout << "\tnew duration=" << new_duration << " old duration=" << duration
+              << std::endl;
+#endif
+    assertEqual(new_duration, duration);
+}
+
+void
 debug_track_ranges(const std::string& title, otio::Track* track)
 {
 #ifdef DEBUG
     std::cout << "\t" << title << " TRACK RANGES" << std::endl;
-    double rate = 0;
     for (const auto& child: track->children())
     {
-        auto item = otio::dynamic_retainer_cast<otio::Item>(child);
-        if (item)
+        auto clip = otio::dynamic_retainer_cast<otio::Clip>(child);
+        if (clip)
         {
             auto range = track->trimmed_range_of_child(child).value();
-            std::cout << "\t\t" << item->name() << " " << range
+            std::cout << "\t\t" << clip->name() << " " << range
                       << std::endl;
-            if (range.duration().rate() > rate) rate = range.duration().rate();
+        }
+        auto gap = otio::dynamic_retainer_cast<otio::Gap>(child);
+        if (gap)
+        {
+            auto range = track->trimmed_range_of_child(child).value();
+            std::string name = gap->name();
+            if (name.empty()) name = "gap";
+            std::cout << "\t\t" << name << " " << range << std::endl;
         }
         auto transition = otio::dynamic_retainer_cast<otio::Transition>(child);
         if (transition)
         {
             auto range = track->trimmed_range_of_child(child).value();
-            std::cout << "\t\t" << transition->name() << " " << range
-                      << std::endl;
+            std::string name = transition->name();
+            if (name.empty()) name = "transition";
+            std::cout << "\t\t" << name << " " << range << std::endl;
         }
     }
     std::cout << "\t" << title << " TRACK RANGES END" << std::endl;
@@ -81,12 +98,19 @@ debug_clip_ranges(const std::string& title, otio::Track* track)
     std::cout << "\t" << title << " CLIP TRIMMED RANGES" << std::endl;
     for (const auto& child: track->children())
     {
-        auto item = otio::dynamic_retainer_cast<otio::Item>(child);
-        if (item)
+        auto clip = otio::dynamic_retainer_cast<otio::Clip>(child);
+        if (clip)
         {
-            auto range = item->trimmed_range();
-            std::cout << "\t\t" << item->name() << " " << range
-                      << std::endl;
+            auto range = clip->trimmed_range();
+            std::cout << "\t\t" << clip->name() << " " << range << std::endl;
+        }
+        auto gap = otio::dynamic_retainer_cast<otio::Gap>(child);
+        if (gap)
+        {
+            auto range = gap->trimmed_range();
+            std::string name = gap->name();
+            if (name.empty()) name = "gap";
+            std::cout << "\t\t" << name << " " << range << std::endl;
         }
     }
     std::cout << "\t" << title << " CLIP TRIMMED RANGES END" << std::endl;
@@ -148,9 +172,6 @@ test_edit_slice(
     track->append_child(clip_0); 
 
     debug_track_ranges("START", track);
-#ifdef DEBUG
-    std::cout << "\t\tslice at " << slice_time << std::endl;
-#endif
     
     // Slice.
     otio::algo::slice(track, slice_time);
@@ -203,9 +224,6 @@ test_edit_slice_transitions(
     track->append_child(transition_1);
 
     debug_track_ranges("START", track);
-#ifdef DEBUG
-    std::cout << "\t\tslice transitions at " << slice_time << std::endl;
-#endif
     
     // Slice.
     otio::algo::slice(track, slice_time);
@@ -310,13 +328,6 @@ void test_edit_ripple(
     track->append_child(clip_1);
     track->append_child(clip_2);
 
-    debug_track_ranges("START", track);
-    debug_clip_ranges("START", track);
-
-#ifdef DEBUG
-    std::cout << "RIPPLE  DELTA_IN=" << delta_in << std::endl;
-    std::cout << "RIPPLE DELTA_OUT=" << delta_out << std::endl;
-#endif
     otio::ErrorStatus error_status;
     otio::algo::ripple(
         clip_1,
@@ -360,13 +371,6 @@ void test_edit_roll(
     track->append_child(clip_1);
     track->append_child(clip_2);
 
-    debug_track_ranges("START", track);
-    debug_clip_ranges("START", track);
-
-#ifdef DEBUG
-    std::cout << "ROLL  DELTA_IN=" << delta_in << std::endl;
-    std::cout << "ROLL DELTA_OUT=" << delta_out << std::endl;
-#endif
     otio::ErrorStatus error_status;
     otio::algo::roll(
         clip_1,
@@ -408,7 +412,7 @@ void test_edit_fill(
             otio::RationalTime(20.0, 24.0)));
     
     otio::SerializableObject::Retainer<otio::Clip> clip_3 = new otio::Clip(
-        "fill_1",
+        "fill_0",
         nullptr,
         clip_range);
 
@@ -418,9 +422,6 @@ void test_edit_fill(
     track->append_child(clip_2);
 
     auto duration = track->duration();
-    
-    debug_clip_ranges("START", track);
-    debug_track_ranges("START", track);
 
     otio::ErrorStatus error_status;
     otio::algo::fill(
@@ -435,10 +436,7 @@ void test_edit_fill(
     // Asserts.
     if (reference_point == ReferencePoint::Sequence)
     {
-#ifdef DEBUG
-        std::cout << "new duration=" << new_duration << " old=" << duration << std::endl;
-#endif
-        assertEqual(new_duration, duration);
+        assert_duration(new_duration, duration);
     }
     assert(!otio::is_error(error_status));
     assert_track_ranges(track, track_ranges);
@@ -974,7 +972,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(duration, new_duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1022,7 +1020,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(duration, new_duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1078,8 +1076,10 @@ main(int argc, char** argv)
             nullptr,
             &error_status);
         assert(!otio::is_error(error_status));
-        const RationalTime new_duration = track->duration();
-        assertEqual(duration, new_duration);
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1123,8 +1123,10 @@ main(int argc, char** argv)
         
         // Asserts.
         assert(!otio::is_error(error_status));
-        const RationalTime new_duration3 = track->duration();
-        assertEqual(duration, new_duration3);
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1180,8 +1182,10 @@ main(int argc, char** argv)
         
         // Asserts.
         assert(!otio::is_error(error_status));
-        const RationalTime new_duration2 = track->duration();
-        assertEqual(duration, new_duration2);
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1253,8 +1257,6 @@ main(int argc, char** argv)
             otio::TimeRange(
                 otio::RationalTime(0.0, 30.0),
                 otio::RationalTime(1.0, 30.0)));
-
-        debug_track_ranges("START", track);
         
         const RationalTime duration = track->duration();
         otio::ErrorStatus  error_status;
@@ -1268,7 +1270,7 @@ main(int argc, char** argv)
 
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(duration, new_duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1304,6 +1306,240 @@ main(int argc, char** argv)
                                 TimeRange(
                                     RationalTime(90.0, 30.0),
                                     RationalTime(90.0, 30.0))
+                            });
+    });
+
+    
+    tests.add_test("test_edit_overwrite_7", [] {
+        // Create a track with one long clip.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(704.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+
+        // Overwrite past the clip, creating a gap.
+        otio::SerializableObject::Retainer<otio::Clip> over_1 = new otio::Clip(
+            "over_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(1.0, 24.0)));
+        const RationalTime duration = track->duration();
+        otio::ErrorStatus  error_status;
+        otio::algo::overwrite(
+            over_1,
+            track,
+            TimeRange(RationalTime(800.0, 24.0), RationalTime(1.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        assert_duration(new_duration, RationalTime(801.0, 24.0));
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(704.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(704.0, 24.0),
+                                    RationalTime(96.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(800.0, 24.0),
+                                    RationalTime(1.0, 24.0))
+                            });
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(704.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(96.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(1.0, 24.0))
+                            });
+    });
+
+    
+    tests.add_test("test_edit_overwrite_8", [] {
+        // Create a track with one long clip.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(704.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+
+        // Overwrite before the clip, creating a gap.
+        otio::SerializableObject::Retainer<otio::Clip> over_1 = new otio::Clip(
+            "over_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(1.0, 24.0)));
+        const RationalTime duration = track->duration();
+        otio::ErrorStatus  error_status;
+        otio::algo::overwrite(
+            over_1,
+            track,
+            TimeRange(RationalTime(-30.0, 24.0), RationalTime(1.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        assert_duration(new_duration, RationalTime(734.0, 24.0));
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(1.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(1.0, 24.0),
+                                    RationalTime(29.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(30.0, 24.0),
+                                    RationalTime(704.0, 24.0))
+                            });
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(1.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(29.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(704.0, 24.0))
+                            });
+    });
+
+    
+    
+    tests.add_test("test_edit_overwrite_9", [] {
+        // Create a track with one long clip.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(704.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+
+        // Overwrite before the clip, creating a gap.
+        otio::SerializableObject::Retainer<otio::Clip> over_1 = new otio::Clip(
+            "over_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(100.0, 24.0)));
+        const RationalTime duration = track->duration();
+        otio::ErrorStatus  error_status;
+        otio::algo::overwrite(
+            over_1,
+            track,
+            TimeRange(RationalTime(-30.0, 24.0), RationalTime(70.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        assert_duration(new_duration, duration);
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(70.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(70.0, 24.0),
+                                    RationalTime(634.0, 24.0))
+                            });
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(70.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(70.0, 24.0),
+                                    RationalTime(634.0, 24.0))
+                            });
+    });
+ 
+    tests.add_test("test_edit_overwrite_10", [] {
+        // Create a track with one long clip.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(704.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+
+        // Overwrite before the clip, creating a gap.
+        otio::SerializableObject::Retainer<otio::Clip> over_1 = new otio::Clip(
+            "over_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(100.0, 24.0)));
+        const RationalTime duration = track->duration();
+        otio::ErrorStatus  error_status;
+        otio::algo::overwrite(
+            over_1,
+            track,
+            TimeRange(RationalTime(20.0, 24.0), RationalTime(70.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        const RationalTime new_duration = track->duration();
+        //assert_duration(new_duration, duration);
+        assert_track_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(20.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(20.0, 24.0),
+                                    RationalTime(70.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 24.0),
+                                    RationalTime(614.0, 24.0))
+                            });
+        assert_clip_ranges(track,
+                            {
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(20.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(0.0, 24.0),
+                                    RationalTime(70.0, 24.0)),
+                                TimeRange(
+                                    RationalTime(90.0, 24.0),
+                                    RationalTime(614.0, 24.0))
                             });
     });
 
@@ -1348,7 +1584,7 @@ main(int argc, char** argv)
         assert(!otio::is_error(error_status));
         assertEqual(track->children().size(), 4);
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1407,7 +1643,7 @@ main(int argc, char** argv)
         assertEqual(track->children().size(), 3);
         
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1523,7 +1759,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1577,7 +1813,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1631,7 +1867,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -1688,7 +1924,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime duration = track->duration();
-        assertEqual(duration, otime::RationalTime(60.0,24.0));
+        assert_duration(duration, otime::RationalTime(60.0,24.0));
         assert_track_ranges(track,
                             {
                                 otio::TimeRange(
@@ -1735,15 +1971,11 @@ main(int argc, char** argv)
         track->append_child(clip_1);
         track->append_child(clip_2);
         const RationalTime duration = track->duration();
-
-        debug_clip_ranges("START", track);
         
         track->remove_child(1);
         
-        debug_clip_ranges("REMOVED 1 - TWO CLIPS", track);
-        
         const RationalTime new_duration = track->duration();
-        assertNotEqual(duration, new_duration);
+        assert_duration(new_duration, RationalTime(180.0, 30.0));
         
         assert_clip_ranges(track,
                             {
@@ -1768,8 +2000,10 @@ main(int argc, char** argv)
 
         // Asserts.
         assert(!otio::is_error(error_status));
-        const RationalTime new_duration2 = track->duration();
-        assertEqual(duration, new_duration2);
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(
@@ -1785,11 +2019,11 @@ main(int argc, char** argv)
 
         track->remove_child(2);
 
-        debug_clip_ranges("REMOVED 2 - TWO CLIPS", track);
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, RationalTime(180.0, 30.0));
+        }
         
-        const RationalTime new_duration3 = track->duration();
-        assertNotEqual(duration, new_duration3);
-
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(
@@ -1808,9 +2042,11 @@ main(int argc, char** argv)
             true,
             nullptr,
             &error_status);
-        
-        const RationalTime new_duration4 = track->duration();
-        assertEqual(duration, new_duration4);
+
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
         assert_clip_ranges(track,
                             {
                                 otio::TimeRange(
@@ -1962,7 +2198,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(new_duration, duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -2016,7 +2252,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(new_duration, duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                           {
                               TimeRange(
@@ -2082,7 +2318,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!otio::is_error(error_status));
         const RationalTime new_duration = track->duration();
-        assertEqual(new_duration, duration);
+        assert_duration(new_duration, duration);
         assert_track_ranges(track,
                           {
                               TimeRange(
@@ -2662,6 +2898,123 @@ main(int argc, char** argv)
             }); 
     });
 
+    
+    // Test remove middle clip
+    tests.add_test("test_edit_remove_0", [] {
+        // Create a track with three clips.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "clip_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(50.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
+            "clip_1",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(5.0, 24.0),
+                otio::RationalTime(50.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_2 = new otio::Clip(
+            "clip_2",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(10.0, 24.0)));
+        
+        otio::SerializableObject::Retainer<otio::Clip> fill_0 = new otio::Clip(
+            "fill_0",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(0.0, 24.0),
+                otio::RationalTime(10.0, 24.0)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+        track->append_child(clip_1);
+        track->append_child(clip_2);
+        
+        const RationalTime duration = track->duration();
+
+        otio::ErrorStatus  error_status;
+
+        // Remove second clip (creates a gap)
+        otio::algo::remove(
+            RationalTime(55.0, 24.0),
+            track,
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, duration);
+        }
+        assert_track_ranges(track,
+                          {
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(50.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(100.0, 24.0),
+                                  RationalTime(10.0, 24.0))
+                          });
+        assert_clip_ranges(track,
+                          {
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(5.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(10.0, 24.0))
+                          });
+        
+        // Remove second clip (which is now a gap, replacing it with fill_0)
+        otio::algo::remove(
+            RationalTime(55.0, 24.0),
+            track,
+            true,
+            fill_0,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        {
+            const RationalTime new_duration = track->duration();
+            assert_duration(new_duration, RationalTime(70.0, 24.0));
+        }
+        assert_track_ranges(track,
+                          {
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(50.0, 24.0),
+                                  RationalTime(10.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(60.0, 24.0),
+                                  RationalTime(10.0, 24.0))
+                          });
+        assert_clip_ranges(track,
+                          {
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(50.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(10.0, 24.0)),
+                              TimeRange(
+                                  RationalTime(0.0, 24.0),
+                                  RationalTime(10.0, 24.0))
+                          });
+    });
     
     tests.run(argc, argv);
     return 0;

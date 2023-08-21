@@ -5,6 +5,7 @@
 
 #include "opentimelineio/algo/editAlgorithm.h"
 
+#include "opentimelineio/effect.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/track.h"
@@ -20,14 +21,15 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
 
 #include <iostream>
 
-
-std::ostream& operator << (std::ostream& os, const RationalTime& value)
+inline std::ostream&
+operator<<(std::ostream& os, const RationalTime& value)
 {
     os << std::fixed << value.value() << "/" << value.rate();
     return os;
 }
 
-std::ostream& operator << (std::ostream& os, const TimeRange& value)
+inline std::ostream&
+operator<<(std::ostream& os, const TimeRange& value)
 {
     os << std::fixed << value.start_time().value() << "/" <<
         value.duration().value() << "/" <<
@@ -38,8 +40,6 @@ std::ostream& operator << (std::ostream& os, const TimeRange& value)
 namespace
 {
 
-    // @todo: This should be moved to opentime/rationalTime.h
-    
 // We are not testing values outside of one million seconds.
 // At one million second, and double precision, the smallest
 // resolvable number that can be added to one million and return
@@ -56,25 +56,7 @@ isEqual(double a, double b)
 {
     return (std::abs(a - b) <= double_epsilon);
 }
-
-inline otime::RationalTime
-round(const otime::RationalTime& value)
-{
-    return otime::RationalTime(std::round(value.value()), value.rate());
-}
-
-inline otime::RationalTime
-floor(const otime::RationalTime& value)
-{
-    return otime::RationalTime(std::floor(value.value()), value.rate());
-}
-
-inline otime::RationalTime
-ceil(const otime::RationalTime& value)
-{
-    return otime::RationalTime(std::ceil(value.value()), value.rate());
-}
-
+    
 } // namespace
 
 void
@@ -88,7 +70,7 @@ overwrite(
 {
     const TimeRange composition_range = composition->trimmed_range();
     const RationalTime start_time = range.start_time();
-    if (floor(start_time) >= floor(composition_range.end_time_exclusive()))
+    if (start_time >= composition_range.end_time_exclusive())
     {
         // Append the item and a possible fill (gap).
         const RationalTime fill_duration =
@@ -100,11 +82,25 @@ overwrite(
                 fill_duration);
             if (!fill_template)
                 fill_template = new Gap(fill_range);
-            else
-                fill_template->set_source_range(fill_range);
             composition->append_child(fill_template);
         }
         composition->append_child(item);
+    }
+    else if (start_time < composition_range.start_time() &&
+             range.end_time_exclusive() < composition_range.start_time())
+    {
+        const RationalTime fill_duration =
+            composition_range.start_time() - start_time - range.duration();
+        if (!isEqual(fill_duration.value(), 0.0))
+        {
+            const TimeRange fill_range = TimeRange(
+                RationalTime(0.0, fill_duration.rate()),
+                fill_duration);
+            if (!fill_template)
+                fill_template = new Gap(fill_range);
+            composition->insert_child(0, fill_template);
+        }
+        composition->insert_child(0, item);
     }
     else
     {
@@ -137,6 +133,24 @@ overwrite(
         if (1 == items.size() && item_range.contains(range, 0.0))
         {
             auto first_item = items.front();
+            
+            bool is_fill_fit = false;
+
+            // We check if we are replacing a gap with a clip with timewarp,
+            // which is the special case of fill() ReferencePoint::Fit.
+            if (dynamic_retainer_cast<Gap>(first_item))
+            {
+                auto effects = item->effects();
+                for (auto& effect : effects)
+                {
+                    if (dynamic_retainer_cast<LinearTimeWarp>(effect))
+                    {
+                        is_fill_fit = true;
+                        break;
+                    }
+                }
+            }
+            
             // The item overwrites a portion inside an item.
             const RationalTime first_duration =
                 range.start_time() - item_range.start_time();
@@ -155,6 +169,10 @@ overwrite(
                 first_item->set_source_range(source_range);
                 ++insert_index;
             }
+            const TimeRange item_range = item->trimmed_range();
+            if (range.duration() < item_range.duration() && !is_fill_fit)
+                item->set_source_range(
+                    TimeRange(trimmed_range.start_time(), range.duration()));
             composition->insert_child(insert_index, item);
             if (!isEqual(second_duration.value(), 0.0))
             {
@@ -162,7 +180,7 @@ overwrite(
                 trimmed_range    = second_item->trimmed_range();
                 source_range     = TimeRange(
                     trimmed_range.start_time() + first_duration
-                        + range.duration(),
+                    + range.duration(),
                     second_duration);
                 ++insert_index;
                 second_item->set_source_range(source_range);
@@ -188,7 +206,7 @@ overwrite(
             // Determine if the last item is partially overwritten.
             bool      last_partial = false;
             TimeRange last_source_range;
-            if (items.size() > 1)
+            if (items.size() >= 1)
             {
                 item_range =
                     composition->trimmed_range_of_child(items.back()).value();
@@ -198,12 +216,21 @@ overwrite(
                     last_partial = true;
                     const TimeRange trimmed_range =
                         items.back()->trimmed_range();
-                    const RationalTime duration =
-                        item_range.end_time_inclusive()
-                        - range.end_time_inclusive();
-                    last_source_range = TimeRange(
-                        trimmed_range.start_time() + duration,
-                        trimmed_range.duration() - duration);
+                    RationalTime duration = item_range.end_time_inclusive()
+                                            - range.end_time_inclusive();
+                    if (items.size() == 1)
+                    {
+                        duration += range.start_time();
+                        last_source_range = TimeRange(
+                            trimmed_range.start_time() + range.duration(),
+                            duration);
+                    }
+                    else
+                    {
+                        last_source_range = TimeRange(
+                            trimmed_range.start_time() + duration,
+                            trimmed_range.duration() - duration);
+                    }
                 }
             }
 
@@ -285,8 +312,6 @@ insert(
                     fill_duration);
                 if (!fill_template)
                     fill_template = new Gap(fill_range);
-                else
-                    fill_template->set_source_range(fill_range);
                 composition->append_child(fill_template);
             }
             composition->append_child(insert_item);
@@ -297,8 +322,6 @@ insert(
         }
         else
         {
-            std::cerr << "*************** PRECISION ERROR **************"
-                      << std::endl;
             if (error_status)
                 *error_status = ErrorStatus::INTERNAL_ERROR;
         }
@@ -401,8 +424,6 @@ void trim(
                             fill_duration);
                         if (!fill_template)
                             fill_template = new Gap(fill_range);
-                        else
-                            fill_template->set_source_range(fill_range);
                         composition->insert_child(next_index, fill_template);
                     }
                 }
@@ -775,9 +796,12 @@ fill(
             const std::string& name = item->name();
             LinearTimeWarp* timeWarp =
                 new LinearTimeWarp(name, name + "_timeWarp", pct);
-            std::vector<Effect*> effects;
-            effects.push_back(timeWarp);
-            item = new Item(name, clip_range, AnyDictionary(), effects);
+            auto& effects = item->effects();
+            std::vector<Effect*> effectList;
+            for (auto& effect : effects)
+                effectList.push_back(effect);
+            effectList.push_back(timeWarp);
+            item = new Item(name, clip_range, AnyDictionary(), effectList);
             const TimeRange time_range(
                 track_time,
                 gap_track_range.end_time_exclusive() - track_time);
@@ -791,7 +815,34 @@ fill(
             overwrite(item, track, time_range, true, nullptr, error_status);
             return;
         }
-    };
+    }
 }
 
+void remove(
+    RationalTime const& time,
+    Composition*        composition,
+    bool         const  fill,
+    Item*               fill_template,
+    ErrorStatus*        error_status)
+{
+    auto item = dynamic_retainer_cast<Item>(
+        composition->child_at_time(time, error_status));
+    if (!item)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::NOT_AN_ITEM;
+        return;
+    }
+
+    const int       index      = composition->index_of_child(item);
+    const TimeRange item_range = item->trimmed_range();
+    composition->remove_child(index);
+    if (fill)
+    {
+        if (!fill_template)
+            fill_template = new Gap(item_range);
+        composition->insert_child(index, fill_template);
+    }
+}
+            
 }}} // namespace opentimelineio::OPENTIMELINEIO_VERSION::algo

@@ -144,7 +144,7 @@ void roll(
 
 // Create a 3/4 Point Edit or Fill.
 //
-// | A |GAP| B |  ->  |A| C |B|
+// | A |GAP| B |  ->  | A | C | B |
 //     ^   ^
 //  C--| C |--C
 //
@@ -160,5 +160,24 @@ void fill(
     RationalTime const&  track_time,
     ReferencePoint const reference_point = ReferencePoint::Source,
     ErrorStatus*         error_status = nullptr);
+
+//
+// Remove item(s) at a time and fill them, optionally with a gap.
+//            
+// | A | C | B |  ->  | A |GAP| B |
+//       ^
+//       |
+//
+//           track = track to remove item from.
+//            time = RationalTime
+//            fill = whether to fill the hole with fill_template.
+//   fill_template = if nullptr, use a gap to fill the hole.
+//
+void remove(
+    RationalTime const& time,
+    Composition*        composition,
+    bool         const  fill = true,
+    Item*               fill_template = nullptr,
+    ErrorStatus*        error_status = nullptr);
 
 }}} // namespace opentimelineio::OPENTIMELINEIO_VERSION::algo

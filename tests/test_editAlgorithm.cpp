@@ -2939,8 +2939,8 @@ main(int argc, char** argv)
 
         // Remove second clip (creates a gap)
         otio::algo::remove(
-            RationalTime(55.0, 24.0),
             track,
+            RationalTime(55.0, 24.0),
             true,
             nullptr,
             &error_status);
@@ -2978,8 +2978,8 @@ main(int argc, char** argv)
         
         // Remove second clip (which is now a gap, replacing it with fill_0)
         otio::algo::remove(
-            RationalTime(55.0, 24.0),
             track,
+            RationalTime(55.0, 24.0),
             true,
             fill_0,
             &error_status);

@@ -819,8 +819,8 @@ fill(
 }
 
 void remove(
-    RationalTime const& time,
     Composition*        composition,
+    RationalTime const& time,
     bool         const  fill,
     Item*               fill_template,
     ErrorStatus*        error_status)

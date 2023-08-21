@@ -174,8 +174,8 @@ void fill(
 //   fill_template = if nullptr, use a gap to fill the hole.
 //
 void remove(
-    RationalTime const& time,
     Composition*        composition,
+    RationalTime const& time,
     bool         const  fill = true,
     Item*               fill_template = nullptr,
     ErrorStatus*        error_status = nullptr);

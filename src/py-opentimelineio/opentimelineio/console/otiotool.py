@@ -354,7 +354,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         type=str,
         nargs='+',
         metavar='KEY(s)',
-        help="""Remove one or more metadata keys from all objects."""
+        help="""Remove one or more metadata dictionary top-level keys from all
+        objects."""
     )
     parser.add_argument(
         "--redact",

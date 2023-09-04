@@ -21,12 +21,23 @@ enum class ReferencePoint
 //   ^   ^
 //   | C |
 //
-//          item = item to overwrite (usually a clip)
+//          item = item to overwrite (usually a clip) -- C in the diagram.
 //   composition = usually a track item.
 //         range = time range to overwrite.
 // remove_transitions = whether to remove transitions within range.
-// fill_template = item to fill in (usually a gap),
-//                 when range > composition's time.
+// fill_template = item to fill in (usually a gap).
+//
+// If overwrite range starts after B's end, a gap hole is filled with
+// fill_template and then then C is appended.
+//
+// If overwrite range starts before B's end and extends after, B is partitioned
+// and C is appended at the end.
+//
+// If overwrite range starts before A and partially overlaps it, C is
+// added at the beginning and A is partitioned.
+//            
+// If overwrite range starts and ends before A, a gap hole is filled with
+// fill_template.
 void overwrite(
     Item*            item,
     Composition*     composition,
@@ -47,6 +58,10 @@ void overwrite(
 // remove_transitions = whether to remove transitions that intersect time.
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
+//
+// If A and B's length is L1 and C's length is L2, the end result is L1 + L2.
+// A is split.
+//
 void insert(
     Item* const         item,
     Composition*        composition,
@@ -68,6 +83,11 @@ void insert(
 //                 source_range().end_time_exclusive() will be adjusted by
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
+//            
+// Do not affect other clips.
+// Fill now-"empty" time with gap or template
+// Unless item is meeting a Gap, then, existing Gap's duration will be augmented
+//    
 void trim(
     Item*               item,
     RationalTime const& delta_in,
@@ -95,10 +115,14 @@ void slice(
 //
 //          item = item to slip (usually a clip)
 //         delta = +/- rational time to slip the item by.
+//            
+// Do not affect item duration.
+// Do not affect surrounding items.
+// Clamp to available_range of media (if available)
 void slip(Item* item, RationalTime const& delta);
 
 //
-// Slide an item start_time by + or -, moving the previous item's duration.
+// Slide an item start_time by + or -, adjusting the previous item's duration.
 // Clamps previous item's duration to available_range if available.
 //
 // | A | B | C |  ->  | A     | B | C |
@@ -106,6 +130,9 @@ void slip(Item* item, RationalTime const& delta);
 //
 //          item = item to slip (usually a clip)
 //         delta = +/- rational time to slide the item by.
+//
+// If item is the first clip, it does nothing.
+//
 void slide(Item* item, RationalTime const& delta);
 
 //
@@ -177,6 +204,8 @@ void fill(
 //            time = RationalTime
 //            fill = whether to fill the hole with fill_template.
 //   fill_template = if nullptr, use a gap to fill the hole.
+//
+// if fill is not set, A and B become concatenated, with no fill.
 //
 void remove(
     Composition*        composition,

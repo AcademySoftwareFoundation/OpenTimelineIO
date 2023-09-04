@@ -126,12 +126,17 @@ void ripple(
     ErrorStatus*        error_status = nullptr);
 
 //
-// Adjust a source_range without affecting any other items.
+// Any trim-like action results in adjacent items source_range being adjusted
+// to fit.
+// No new items are ever created.
+// Clamped to available media (if available)
+// Start time in parent of Item before input item will never change
+// End time in parent of Item after input item will never change
 //
 // |   A   |   B   |  ->  | A |  B      |
 //      <--*
 //            
-//      item = Item to apply ripple to (usually a clip)
+//      item = Item to apply roll to (usually a clip)
 //  delta_in = RationalTime that the item's source_range().start_time()
 //             will be adjusted by
 // delta_out = RationalTime that the item's

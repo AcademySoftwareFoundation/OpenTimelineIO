@@ -128,6 +128,12 @@ overwrite(
         // Find the items to overwrite.
         auto items =
             composition->find_children<Item>(error_status, range, true);
+        if (items.empty())
+        {
+            if (error_status)
+                *error_status = ErrorStatus::NOT_AN_ITEM;
+            return;
+        }
         TimeRange item_range =
             composition->trimmed_range_of_child(items.front()).value();
         if (1 == items.size() && item_range.contains(range, 0.0))
@@ -169,7 +175,7 @@ overwrite(
                 first_item->set_source_range(source_range);
                 ++insert_index;
             }
-            const TimeRange item_range = item->trimmed_range();
+            item_range = item->trimmed_range();
             if (range.duration() < item_range.duration() && !is_fill_fit)
                 item->set_source_range(
                     TimeRange(trimmed_range.start_time(), range.duration()));
@@ -372,8 +378,20 @@ void trim(
     ErrorStatus*     error_status)
 {
     Composition* composition = item->parent();
+    if (!composition)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::NOT_A_CHILD_OF;
+        return;
+    }
     auto children = composition->children();
     const int       index = composition->index_of_child(item);
+    if (index < 0)
+    {   
+        if (error_status)
+            *error_status = ErrorStatus::NOT_AN_ITEM;
+        return;
+    }
     
     const TimeRange range = item->trimmed_range();
     RationalTime start_time = range.start_time();
@@ -392,7 +410,7 @@ void trim(
     }
     if (delta_out.value() != 0.0)
     {
-        const size_t next_index = index + 1;
+        const int next_index = index + 1;
         if (next_index < children.size())
         {
             auto next = dynamic_retainer_cast<Item>(children[next_index]);
@@ -492,8 +510,8 @@ slice(
         {
             for (auto transition : transitions)
             {
-                const int index = composition->index_of_child(transition);
-                composition->remove_child(index);
+                const int child_index = composition->index_of_child(transition);
+                composition->remove_child(child_index);
             }
         }
         else
@@ -560,6 +578,11 @@ void slide(
     RationalTime const& delta)
 {
     Composition* composition = item->parent();
+    if (!composition)
+    {
+        return;
+    }
+    
     const int       index = composition->index_of_child(item);
 
     // Exit early if we are at the first clip or if the delta is 0.
@@ -604,6 +627,8 @@ void ripple(
     RationalTime const& delta_out,
     ErrorStatus*     error_status)
 {
+    if (error_status) *error_status = ErrorStatus::OK;
+    
     const TimeRange range = item->trimmed_range();
     RationalTime start_time = range.start_time();
     RationalTime end_time_exclusive = range.end_time_exclusive();
@@ -651,8 +676,20 @@ roll(
     ErrorStatus*        error_status)
 {
     Composition* composition = item->parent();
+    if (!composition)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::NOT_A_CHILD_OF;
+        return;
+    }
     auto children = composition->children();
     const int       index = composition->index_of_child(item);
+    if (index < 0)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::NOT_AN_ITEM;
+        return;
+    }
     
     const TimeRange range = item->trimmed_range();
     const TimeRange available_range = item->available_range();
@@ -696,7 +733,7 @@ roll(
         {
             auto next = dynamic_retainer_cast<Item>(children[next_index]);
             TimeRange next_range = next->trimmed_range();
-            const TimeRange available_range = next->available_range();
+            const TimeRange next_available_range = next->available_range();
             RationalTime next_start_time = next_range.start_time();
             RationalTime out_offset = delta_out;
 
@@ -704,7 +741,7 @@ roll(
             if (!(isEqual(available_range.duration().value(), 0.0)))
             {
                 RationalTime available_start_time =
-                    available_range.start_time();
+                    next_available_range.start_time();
                 if (-out_offset > available_start_time)
                     out_offset = -available_start_time;
             }

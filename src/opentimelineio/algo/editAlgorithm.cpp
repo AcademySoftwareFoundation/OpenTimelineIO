@@ -411,7 +411,7 @@ void trim(
     if (delta_out.value() != 0.0)
     {
         const int next_index = index + 1;
-        if (next_index < children.size())
+        if (static_cast<size_t>(next_index) < children.size())
         {
             auto next = dynamic_retainer_cast<Item>(children[next_index]);
             auto gap_next = dynamic_retainer_cast<Gap>(children[next_index]);

@@ -358,6 +358,7 @@ insert(
     if (split)
     {
         const TimeRange second_source_range(
+            first_source_range.start_time() +
             insert_range.start_time() + insert_range.duration(),
             range.end_time_exclusive() - time);
         // Clone the item for the second partially overwritten item.

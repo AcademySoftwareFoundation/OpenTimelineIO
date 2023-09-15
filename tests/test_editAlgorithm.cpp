@@ -2062,6 +2062,73 @@ main(int argc, char** argv)
         
     });
     
+    // Insert at the middle of clip 0
+    tests.add_test("test_edit_insert_8", [] {
+        otio::ErrorStatus  error_status;
+        
+        // Create a track with three clips.
+        otio::SerializableObject::Retainer<otio::Clip> clip_0 = new otio::Clip(
+            "spiderman",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(1575360, 23.976024),
+                otio::RationalTime(3809.0, 23.976024)));
+        otio::SerializableObject::Retainer<otio::Clip> clip_1 = new otio::Clip(
+            "spider insert",
+            nullptr,
+            otio::TimeRange(
+                otio::RationalTime(1575360, 23.976024),
+                otio::RationalTime(1.0, 23.976024)));
+        otio::SerializableObject::Retainer<otio::Track> track =
+            new otio::Track();
+        track->append_child(clip_0);
+        
+        debug_track_ranges("START", track);
+    
+        // Insert at end of clip 2.
+        otio::algo::insert(
+            clip_1,
+            track,
+            RationalTime(141.0, 23.976024),
+            true,
+            nullptr,
+            &error_status);
+
+        // Asserts.
+        assert(!otio::is_error(error_status));
+        // {
+        //     const RationalTime new_duration = track->duration();
+        //     assert_duration(new_duration, duration);
+        // }
+        assert_clip_ranges(track,
+                            {
+                                otio::TimeRange(
+                                    otio::RationalTime(1575360.0, 23.976024),
+                                    otio::RationalTime(141.0, 23.976024)),
+                                otio::TimeRange(
+                                    otio::RationalTime(1575360, 23.976024),
+                                    otio::RationalTime(1.0, 23.976024)),
+                                otio::TimeRange(
+                                    otio::RationalTime(1575502.0, 23.976024),
+                                    otio::RationalTime(3668.0, 23.976024)),
+                            });
+        
+        assert_track_ranges(track,
+                            {
+                                otio::TimeRange(
+                                    otio::RationalTime(0.0, 23.976024),
+                                    otio::RationalTime(141.0, 23.976024)),
+                                otio::TimeRange(
+                                    otio::RationalTime(141.0, 23.976024),
+                                    otio::RationalTime(1, 23.976024)),
+                                otio::TimeRange(
+                                    otio::RationalTime(142.0, 23.976024),
+                                    otio::RationalTime(3668.0, 23.976024)),
+                            });
+        
+    });
+
+    
     tests.add_test("test_edit_slip", [] {
         const TimeRange media_range(
             RationalTime(-15.0, 24.0),

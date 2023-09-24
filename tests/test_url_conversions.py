@@ -10,6 +10,7 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+PREMIERE_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(
         os.path.dirname(__file__),
@@ -50,6 +51,17 @@ class TestConversions(unittest.TestCase):
 
         # should have reconstructed it by this point
         self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
+
+    def test_premiere_xml_urls(self):
+        timeline = otio.adapters.read_from_file(PREMIERE_XML_EXAMPLE_PATH)
+        for clip in timeline.find_clips():
+            media_ref = clip.media_reference
+
+            if hasattr(media_ref, 'target_url') and media_ref.target_url is not None:
+                url = media_ref.target_url
+                self.assertTrue(url.startswith("file://"))
+                processed_url = otio.url_utils.filepath_from_url(url)
+                self.assertNotEquals(url, processed_url)
 
 
 if __name__ == "__main__":

@@ -40,4 +40,17 @@ def filepath_from_url(urlstr):
     """ Take a url and return a filepath """
 
     parsed_result = urlparse.urlparse(urlstr)
-    return request.url2pathname(parsed_result.path)
+
+    # Check if original urlstr is URL encoded
+    if urlparse.unquote(urlstr) != urlstr:
+        filepath = request.url2pathname(parsed_result.path)
+
+    # Otherwise, combine the netloc and path
+    else:
+        filepath = parsed_result.netloc + parsed_result.path
+
+    # If on Windows, remove the first leading slash left by urlparse
+    if os.name == 'nt' and filepath.startswith('/'):
+        filepath = filepath[1:]
+
+    return filepath

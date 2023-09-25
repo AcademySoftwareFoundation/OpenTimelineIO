@@ -62,8 +62,9 @@ def filepath_from_url(urlstr):
 
     filepath = filepath.replace("\\", "/")
 
-    # If on Windows, remove the first leading slash left by urlparse
-    if filepath.startswith('/') and re.match(r"/[a-zA-Z]:/.*", filepath):
+    # If on Windows and using a drive letter,
+    # remove the first leading slash left by urlparse
+    if re.match(r"/[a-zA-Z]:/.*", filepath):
         filepath = filepath[1:]
 
     return filepath

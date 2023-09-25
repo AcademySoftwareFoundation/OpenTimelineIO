@@ -4,6 +4,7 @@
 """Utilities for conversion between urls and file paths"""
 
 import os
+import re
 
 from urllib import (
     parse as urlparse,
@@ -52,7 +53,7 @@ def filepath_from_url(urlstr):
     filepath = filepath.replace("\\", "/")
 
     # If on Windows, remove the first leading slash left by urlparse
-    if os.name == 'nt' and filepath.startswith('/'):
+    if filepath.startswith('/') and re.match(r"/[a-zA-Z]:/.*", filepath):
         filepath = filepath[1:]
 
     return filepath

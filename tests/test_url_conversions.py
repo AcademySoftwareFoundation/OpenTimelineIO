@@ -60,7 +60,7 @@ class TestConversions(unittest.TestCase):
             print(f"Original URL: {url}")
             self.assertTrue(url.startswith("file://"))
             processed_url = otio.url_utils.filepath_from_url(url)
-            print(f"Processed URL Path: {url}")
+            print(f"Processed URL Path: {processed_url}")
             self.assertEqual(processed_url, CORRECTED_WINDOWS_PATH)
 
 

@@ -10,7 +10,6 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-PREMIERE_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(
         os.path.dirname(__file__),
@@ -33,6 +32,10 @@ MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
+ENCODED_WINDOWS_URL = "file://localhost/S%3a/path/file.ext"
+WINDOWS_URL = "file://S:/path/file.ext"
+CORRECTED_WINDOWS_PATH = "S:/path/file.ext"
+
 
 class TestConversions(unittest.TestCase):
     def test_roundtrip_abs(self):
@@ -52,16 +55,13 @@ class TestConversions(unittest.TestCase):
         # should have reconstructed it by this point
         self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
 
-    def test_premiere_xml_urls(self):
-        timeline = otio.adapters.read_from_file(PREMIERE_XML_EXAMPLE_PATH)
-        for clip in timeline.find_clips():
-            media_ref = clip.media_reference
-
-            if hasattr(media_ref, 'target_url') and media_ref.target_url is not None:
-                url = media_ref.target_url
-                self.assertTrue(url.startswith("file://"))
-                processed_url = otio.url_utils.filepath_from_url(url)
-                self.assertNotEquals(url, processed_url)
+    def test_windows_urls(self):
+        for url in (ENCODED_WINDOWS_URL, WINDOWS_URL):
+            print(f"Original URL: {url}")
+            self.assertTrue(url.startswith("file://"))
+            processed_url = otio.url_utils.filepath_from_url(url)
+            print(f"Processed URL Path: {url}")
+            self.assertEqual(processed_url, CORRECTED_WINDOWS_PATH)
 
 
 if __name__ == "__main__":

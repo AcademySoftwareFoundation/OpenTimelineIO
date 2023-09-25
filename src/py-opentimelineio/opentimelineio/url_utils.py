@@ -49,6 +49,8 @@ def filepath_from_url(urlstr):
     else:
         filepath = parsed_result.netloc + parsed_result.path
 
+    filepath = filepath.replace("\\", "/")
+
     # If on Windows, remove the first leading slash left by urlparse
     if os.name == 'nt' and filepath.startswith('/'):
         filepath = filepath[1:]

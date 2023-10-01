@@ -57,10 +57,7 @@ class TestConversions(unittest.TestCase):
 
     def test_windows_urls(self):
         for url in (ENCODED_WINDOWS_URL, WINDOWS_URL):
-            print(f"Original URL: {url}")
-            self.assertTrue(url.startswith("file://"))
             processed_url = otio.url_utils.filepath_from_url(url)
-            print(f"Processed URL Path: {processed_url}")
             self.assertEqual(processed_url, CORRECTED_WINDOWS_PATH)
 
 

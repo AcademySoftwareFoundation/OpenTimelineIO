@@ -4,7 +4,6 @@
 """Utilities for conversion between urls and file paths"""
 
 import os
-import re
 
 from urllib import (
     parse as urlparse,

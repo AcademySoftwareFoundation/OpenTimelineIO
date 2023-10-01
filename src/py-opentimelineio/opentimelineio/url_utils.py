@@ -9,8 +9,10 @@ from urllib import (
     parse as urlparse,
     request
 )
-import pathlib
-from pathlib import Path, PureWindowsPath
+from pathlib import (
+    Path,
+    PureWindowsPath
+)
 
 
 def url_from_filepath(fpath):
@@ -19,7 +21,7 @@ def url_from_filepath(fpath):
     try:
         # appears to handle absolute windows paths better, which are absolute
         # and start with a drive letter.
-        return urlparse.unquote(pathlib.Path(fpath).as_uri())
+        return urlparse.unquote(Path(fpath).as_uri())
     except ValueError:
         # scheme is "file" for absolute paths, else ""
         scheme = "file" if os.path.isabs(fpath) else ""

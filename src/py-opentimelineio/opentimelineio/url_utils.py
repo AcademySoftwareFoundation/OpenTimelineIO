@@ -11,6 +11,7 @@ from urllib import (
     request
 )
 import pathlib
+from pathlib import Path, PureWindowsPath
 
 
 def url_from_filepath(fpath):
@@ -50,21 +51,20 @@ def filepath_from_url(urlstr):
     .. _ongoing discussions: https://discuss.python.org/t/file-uris-in-python/15600
     """
 
+    # Parse provided URL
     parsed_result = urlparse.urlparse(urlstr)
 
-    # Check if original urlstr is URL encoded
-    if urlparse.unquote(urlstr) != urlstr:
-        filepath = request.url2pathname(parsed_result.path)
+    # Convert the parsed URL to a path
+    filepath = Path(request.url2pathname(parsed_result.path))
 
-    # Otherwise, combine the netloc and path
-    else:
-        filepath = parsed_result.netloc + parsed_result.path
+    # If the network location is a window drive, reassemble the path
+    if PureWindowsPath(parsed_result.netloc).drive:
+        filepath = Path(parsed_result.netloc + parsed_result.path)
 
-    filepath = filepath.replace("\\", "/")
+    # Otherwise check if the specified index is a windows drive, then offset the path
+    elif PureWindowsPath(filepath.parts[1]).drive:
+        # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
+        filepath = filepath.relative_to(filepath.root)
 
-    # If on Windows and using a drive letter,
-    # remove the first leading slash left by urlparse
-    if re.match(r"/[a-zA-Z]:/.*", filepath):
-        filepath = filepath[1:]
-
-    return filepath
+    # Convert "\" to "/" if needed
+    return filepath.as_posix()

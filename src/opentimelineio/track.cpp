@@ -276,7 +276,7 @@ optional<IMATH_NAMESPACE::Box2d>
 Track::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<IMATH_NAMESPACE::Box2d> box;
-    bool                   found_first_clip = false;
+    bool                             found_first_clip = false;
     for (const auto& child: children())
     {
         if (auto clip = dynamic_cast<Clip*>(child.value))

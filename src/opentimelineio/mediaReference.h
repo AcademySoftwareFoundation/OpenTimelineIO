@@ -24,10 +24,11 @@ public:
     using Parent = SerializableObjectWithMetadata;
 
     MediaReference(
-        std::string const&            name                   = std::string(),
-        optional<TimeRange> const&    available_range        = nullopt,
-        AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
+        std::string const&                      name            = std::string(),
+        optional<TimeRange> const&              available_range = nullopt,
+        AnyDictionary const&                    metadata = AnyDictionary(),
+        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
+            nullopt);
 
     optional<TimeRange> available_range() const noexcept
     {
@@ -59,7 +60,7 @@ protected:
     void write_to(Writer&) const override;
 
 private:
-    optional<TimeRange>    _available_range;
+    optional<TimeRange>              _available_range;
     optional<IMATH_NAMESPACE::Box2d> _available_image_bounds;
 };
 

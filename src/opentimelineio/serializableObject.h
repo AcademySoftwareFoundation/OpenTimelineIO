@@ -109,7 +109,8 @@ public:
         bool read(std::string const& key, optional<RationalTime>* dest);
         bool read(std::string const& key, optional<TimeRange>* dest);
         bool read(std::string const& key, optional<TimeTransform>* dest);
-        bool read(std::string const& key, optional<IMATH_NAMESPACE::Box2d>* value);
+        bool
+        read(std::string const& key, optional<IMATH_NAMESPACE::Box2d>* value);
 
         // skipping std::string because we translate null into the empty
         // string, so the conversion is somewhat ambiguous
@@ -419,7 +420,8 @@ public:
         void write(std::string const& key, IMATH_NAMESPACE::Box2d value);
         void write(std::string const& key, optional<RationalTime> value);
         void write(std::string const& key, optional<TimeRange> value);
-        void write(std::string const& key, optional<IMATH_NAMESPACE::Box2d> value);
+        void
+        write(std::string const& key, optional<IMATH_NAMESPACE::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)

@@ -126,7 +126,7 @@ optional<IMATH_NAMESPACE::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {
     optional<IMATH_NAMESPACE::Box2d> box;
-    bool                   found_first_child = false;
+    bool                             found_first_child = false;
     for (auto clip: find_children<Clip>(error_status))
     {
         optional<IMATH_NAMESPACE::Box2d> child_box;

@@ -20,10 +20,11 @@ public:
     using Parent = MediaReference;
 
     MissingReference(
-        std::string const&            name                   = std::string(),
-        optional<TimeRange> const&    available_range        = nullopt,
-        AnyDictionary const&          metadata               = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = nullopt);
+        std::string const&                      name            = std::string(),
+        optional<TimeRange> const&              available_range = nullopt,
+        AnyDictionary const&                    metadata = AnyDictionary(),
+        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
+            nullopt);
 
     bool is_missing_reference() const override;
 

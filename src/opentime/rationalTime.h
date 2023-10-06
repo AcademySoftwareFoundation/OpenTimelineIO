@@ -6,8 +6,8 @@
 #include "opentime/errorStatus.h"
 #include "opentime/version.h"
 #include <cmath>
-#include <limits>
 #include <cstdint>
+#include <limits>
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION {

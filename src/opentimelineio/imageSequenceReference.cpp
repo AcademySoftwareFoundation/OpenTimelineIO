@@ -6,16 +6,16 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 ImageSequenceReference::ImageSequenceReference(
-    std::string const&            target_url_base,
-    std::string const&            name_prefix,
-    std::string const&            name_suffix,
-    int                           start_frame,
-    int                           frame_step,
-    double                        rate,
-    int                           frame_zero_padding,
-    MissingFramePolicy const      missing_frame_policy,
-    optional<TimeRange> const&    available_range,
-    AnyDictionary const&          metadata,
+    std::string const&                      target_url_base,
+    std::string const&                      name_prefix,
+    std::string const&                      name_suffix,
+    int                                     start_frame,
+    int                                     frame_step,
+    double                                  rate,
+    int                                     frame_zero_padding,
+    MissingFramePolicy const                missing_frame_policy,
+    optional<TimeRange> const&              available_range,
+    AnyDictionary const&                    metadata,
     optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds)
     : Parent(std::string(), available_range, metadata, available_image_bounds)
     , _target_url_base(target_url_base)

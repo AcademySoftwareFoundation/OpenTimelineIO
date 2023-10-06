@@ -609,8 +609,9 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     else if (schema_name_and_version == "V2d.1")
     {
         double x, y;
-        return _fetch("x", &x) && _fetch("y", &y) ? any(IMATH_NAMESPACE::V2d(x, y))
-                                                  : any();
+        return _fetch("x", &x) && _fetch("y", &y)
+                   ? any(IMATH_NAMESPACE::V2d(x, y))
+                   : any();
     }
     else if (schema_name_and_version == "Box2d.1")
     {
@@ -743,13 +744,17 @@ SerializableObject::Reader::read(std::string const& key, AnyVector* value)
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, IMATH_NAMESPACE::V2d* value)
+SerializableObject::Reader::read(
+    std::string const&    key,
+    IMATH_NAMESPACE::V2d* value)
 {
     return _fetch(key, value);
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, IMATH_NAMESPACE::Box2d* value)
+SerializableObject::Reader::read(
+    std::string const&      key,
+    IMATH_NAMESPACE::Box2d* value)
 {
     return _fetch(key, value);
 }
@@ -816,7 +821,7 @@ SerializableObject::Reader::read(
 
 bool
 SerializableObject::Reader::read(
-    std::string const&      key,
+    std::string const&                key,
     optional<IMATH_NAMESPACE::Box2d>* value)
 {
     return _read_optional(key, value);

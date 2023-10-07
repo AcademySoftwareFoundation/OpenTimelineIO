@@ -6,7 +6,7 @@ name: OpenTimelineIO
 # for configuring which build will be a C++ coverage build / coverage report
 env:
   GH_COV_PY: 3.7
-  GH_COV_OS: ubuntu-latest
+  GH_COV_OS: ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest
   GH_DEPENDABOT: dependabot
 
 on:
@@ -24,13 +24,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest, windows-latest`, and `macos-latest`, and `macos-latest, macos-latest]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
-        - os: ubuntu-latest
+        - os: ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest
           OTIO_TEST_TARGET: test
-        - os: windows-latest
+        - os: windows-latest`, and `macos-latest`, and `macos-latest
           OTIO_TEST_TARGET: RUN_TESTS
         - os: macos-latest
           OTIO_TEST_TARGET: test
@@ -92,13 +92,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest, windows-latest`, and `macos-latest`, and `macos-latest, macos-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
-          - { os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest, shell: bash }
           - { os: macos-latest, shell: bash }
-          - { os: windows-latest, shell: pwsh }
-          - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
+          - { os: windows-latest`, and `macos-latest`, and `macos-latest, shell: pwsh }
+          - { os: windows-latest`, and `macos-latest`, and `macos-latest, shell: msys2, python-version: 'mingw64' }
 
     defaults:
       run:
@@ -162,7 +162,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest, windows-latest`, and `macos-latest`, and `macos-latest, macos-latest]
         python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*']
     steps:
       - uses: actions/checkout@v3
@@ -184,7 +184,7 @@ jobs:
 
   package_sdist:
     needs: py_build_test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, `windows-latest`, and `macos-latest`, and `macos-latest`, and `macos-latest
     steps:
     - uses: actions/checkout@v3
       with:

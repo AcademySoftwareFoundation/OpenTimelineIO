@@ -33,7 +33,7 @@ public:
 
 protected:
     virtual ~SerializableObjectWithMetadata();
-    
+
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 

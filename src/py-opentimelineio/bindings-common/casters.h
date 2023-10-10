@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "nonstd/optional.hpp"

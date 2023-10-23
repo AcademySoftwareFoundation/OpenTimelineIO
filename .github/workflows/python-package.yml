@@ -6,7 +6,7 @@ name: OpenTimelineIO
 # for configuring which build will be a C++ coverage build / coverage report
 env:
   GH_COV_PY: 3.7
-  GH_COV_OS: ubuntu-latest
+  GH_COV_OS: ubuntu-22.04
   GH_DEPENDABOT: dependabot
 
 on:
@@ -24,15 +24,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-2022, macos-12]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
-        - os: ubuntu-latest
+        - os: ubuntu-22.04
           OTIO_TEST_TARGET: test
-        - os: windows-latest
+        - os: windows-2022
           OTIO_TEST_TARGET: RUN_TESTS
-        - os: macos-latest
+        - os: macos-12
           OTIO_TEST_TARGET: test
 
     env:
@@ -92,13 +92,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-2022, macos-12]
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         include:
-          - { os: ubuntu-latest, shell: bash }
-          - { os: macos-latest, shell: bash }
-          - { os: windows-latest, shell: pwsh }
-          - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
+          - { os: ubuntu-22.04, shell: bash }
+          - { os: macos-12, shell: bash }
+          - { os: windows-2022, shell: pwsh }
+          - { os: windows-2022, shell: msys2, python-version: 'mingw64' }
 
     defaults:
       run:
@@ -162,7 +162,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-2022, macos-12]
         python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*']
     steps:
       - uses: actions/checkout@v3
@@ -184,7 +184,7 @@ jobs:
 
   package_sdist:
     needs: py_build_test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
       with:

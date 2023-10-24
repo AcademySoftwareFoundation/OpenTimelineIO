@@ -176,7 +176,7 @@ jobs:
           CIBW_SKIP: '*musllinux*'
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_I686_IMAGE: manylinux2014
-          CIBW_ARCHS_MACOS: universal2 arm64
+          CIBW_ARCHS_MACOS: x86_64 arm64
 
       - uses: actions/upload-artifact@v3
         with:

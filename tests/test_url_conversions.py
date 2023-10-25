@@ -44,6 +44,7 @@ ENCODED_POSIX_URL = "file:///path/sub%20dir/file.ext"
 POSIX_URL = "file:///path/sub dir/file.ext"
 CORRECTED_POSIX_PATH = "/path/sub dir/file.ext"
 
+
 class TestConversions(unittest.TestCase):
     def test_roundtrip_abs(self):
         self.assertTrue(MEDIA_EXAMPLE_PATH_URL_ABS.startswith("file://"))

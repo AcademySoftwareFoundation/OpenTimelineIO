@@ -4,6 +4,7 @@
 """Utilities for conversion between urls and file paths"""
 
 import os
+import sys
 
 from urllib import (
     parse as urlparse,
@@ -45,16 +46,20 @@ def filepath_from_url(urlstr):
     Take an url and return a filepath.
 
     URLs can either be encoded according to the `RFC 3986`_ standard or not.
-    Additionally, Windows mapped paths need to be accounted for when processing a
-    URL; however, there are `ongoing discussions`_ about how to best handle this within
-    Python. This function is meant to cover all of these scenarios in the interim.
+    Additionally, Windows mapped drive letter and UNC paths need to be accounted for
+    when processing URL(s); however, there are `ongoing discussions`_ about how to best
+    handle this within Python developer community. This function is meant to cover
+    these scenarios in the interim.
 
     .. _RFC 3986: https://tools.ietf.org/html/rfc3986#section-2.1
     .. _ongoing discussions: https://discuss.python.org/t/file-uris-in-python/15600
     """
 
+    # De-encode the URL
+    decoded_url_str = urlparse.unquote(urlstr)
+
     # Parse provided URL
-    parsed_result = urlparse.urlparse(urlstr)
+    parsed_result = urlparse.urlparse(decoded_url_str)
 
     # Convert the parsed URL to a path
     filepath = PurePath(request.url2pathname(parsed_result.path))
@@ -63,10 +68,18 @@ def filepath_from_url(urlstr):
     if PureWindowsPath(parsed_result.netloc).drive:
         filepath = PurePath(parsed_result.netloc + parsed_result.path)
 
-    # Otherwise check if the specified index is a windows drive, then offset the path
+    # Check if the specified index is a windows drive, if it is then do nothing
+    elif PureWindowsPath(filepath.parts[0]).drive:
+        filepath = filepath
+
+    # Check if the specified index is a windows drive, then offset the path
     elif PureWindowsPath(filepath.parts[1]).drive:
         # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
         filepath = PurePosixPath(*filepath.parts[1:])
+
+    # Last resort, if using a "file" schema, then strip the "file:" prefix
+    elif parsed_result.scheme == 'file':
+        filepath = Path(decoded_url_str.strip('file:'))
 
     # Convert "\" to "/" if needed
     return filepath.as_posix()

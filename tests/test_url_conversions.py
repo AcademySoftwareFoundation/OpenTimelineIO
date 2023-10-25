@@ -33,9 +33,16 @@ MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
 )
 
 ENCODED_WINDOWS_URL = "file://localhost/S%3a/path/file.ext"
-WINDOWS_URL = "file://S:/path/file.ext"
-CORRECTED_WINDOWS_PATH = "S:/path/file.ext"
+WINDOWS_DRIVE_URL = "file://S:/path/file.ext"
+CORRECTED_WINDOWS_DRIVE_PATH = "S:/path/file.ext"
 
+ENCODED_WINDOWS_UNC_URL = "file://unc/path/sub%20dir/file.ext"
+WINDOWS_UNC_URL = "file://unc/path/sub dir/file.ext"
+CORRECTED_WINDOWS_UNC_PATH = "//unc/path/sub dir/file.ext"
+
+ENCODED_POSIX_URL = "file:///path/sub%20dir/file.ext"
+POSIX_URL = "file:///path/sub dir/file.ext"
+CORRECTED_POSIX_PATH = "/path/sub dir/file.ext"
 
 class TestConversions(unittest.TestCase):
     def test_roundtrip_abs(self):
@@ -56,9 +63,19 @@ class TestConversions(unittest.TestCase):
         self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
 
     def test_windows_urls(self):
-        for url in (ENCODED_WINDOWS_URL, WINDOWS_URL):
+        for url in (ENCODED_WINDOWS_URL, WINDOWS_DRIVE_URL):
             processed_url = otio.url_utils.filepath_from_url(url)
-            self.assertEqual(processed_url, CORRECTED_WINDOWS_PATH)
+            self.assertEqual(processed_url, CORRECTED_WINDOWS_DRIVE_PATH)
+
+    def test_windows_unc_urls(self):
+        for url in (ENCODED_WINDOWS_UNC_URL, WINDOWS_UNC_URL):
+            processed_url = otio.url_utils.filepath_from_url(url)
+            self.assertEqual(processed_url, CORRECTED_WINDOWS_UNC_PATH)
+
+    def test_posix_urls(self):
+        for url in (ENCODED_POSIX_URL, POSIX_URL):
+            processed_url = otio.url_utils.filepath_from_url(url)
+            self.assertEqual(processed_url, CORRECTED_POSIX_PATH)
 
 
 if __name__ == "__main__":

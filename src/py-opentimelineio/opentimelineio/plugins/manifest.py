@@ -8,6 +8,7 @@ import inspect
 import logging
 import os
 from pathlib import Path
+from typing import Union
 
 try:
     from importlib import metadata
@@ -30,6 +31,22 @@ OTIO_PLUGIN_TYPES = [
     'hooks',
     'version_manifests',
 ]
+
+
+def plugin_entry_points(
+) -> Union[metadata.EntryPoints, metadata.SelectableGroups]:
+    """Returns the list of entry points for all available OpenTimelineIO
+    plugins.
+    """
+    try:
+        entry_points = metadata.entry_points(group='opentimelineio.plugins')
+    except TypeError:
+        # For python <= 3.9
+        entry_points = metadata.entry_points().get(
+            'opentimelineio.plugins', []
+        )
+
+    return entry_points
 
 
 def manifest_from_file(filepath):
@@ -247,11 +264,7 @@ def load_manifest():
             result.extend(manifest_from_file(json_path))
 
     if not os.environ.get("OTIO_DISABLE_ENTRYPOINTS_PLUGINS"):
-        try:
-            entry_points = metadata.entry_points(group='opentimelineio.plugins')
-        except TypeError:
-            # For python <= 3.9
-            entry_points = metadata.entry_points().get('opentimelineio.plugins', [])
+        entry_points = plugin_entry_points()
 
         for plugin in entry_points:
             plugin_name = plugin.name

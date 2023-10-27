@@ -8,6 +8,13 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+enum TrimPolicy
+{
+    IgnoreTimeEffects = 0,
+    HonorTimeEffectsExactly,
+    HonorTimeEffectsWithSnapping
+};
+
 class Clip;
 
 class Track : public Composition

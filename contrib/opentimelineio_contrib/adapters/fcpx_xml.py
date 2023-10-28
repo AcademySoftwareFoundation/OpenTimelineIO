@@ -535,7 +535,7 @@ class FcpxOtio:
         format_element = self._find_or_create_format_from(clip)
         asset = self._create_asset_element(clip, format_element)
 
-        if not compound_only and not self._asset_clip_by_name(clip.name):
+        if not compound_only and self._asset_clip_by_name(clip.name) is None:
             self._create_asset_clip_element(
                 clip,
                 format_element,
@@ -919,7 +919,7 @@ class FcpxXml:
             return True
         if element.tag == "asset-clip":
             asset = self._asset_by_id(element.get("ref", None))
-            if asset and asset.get("hasVideo", "0") == "0":
+            if asset is not None and asset.get("hasVideo", "0") == "0":
                 return True
         if element.tag == "ref-clip":
             if element.get("srcEnable", "video") == "audio":
@@ -1018,7 +1018,7 @@ class FcpxXml:
         )
         asset_clip = self._assetclip_by_ref(asset_id)
         metadata = {}
-        if asset_clip:
+        if asset_clip is not None:
             metadata = self._create_metadta(asset_clip)
         return otio.schema.ExternalReference(
             target_url=asset.get("src"),

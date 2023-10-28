@@ -200,6 +200,7 @@ def _generate_model_for_module(mod, classes, modules):
             if (
                 inspect.ismodule(thing)
                 and thing not in modules
+                and "opentimelineio" in thing.__name__
                 and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
             )
         ),

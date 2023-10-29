@@ -33,8 +33,7 @@ OTIO_PLUGIN_TYPES = [
 ]
 
 
-def plugin_entry_points(
-) -> Union[metadata.EntryPoints, metadata.SelectableGroups]:
+def plugin_entry_points():
     """Returns the list of entry points for all available OpenTimelineIO
     plugins.
     """

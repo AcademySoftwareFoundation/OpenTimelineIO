@@ -8,7 +8,6 @@ import inspect
 import logging
 import os
 from pathlib import Path
-from typing import Union
 
 try:
     from importlib import metadata

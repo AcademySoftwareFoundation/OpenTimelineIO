@@ -5,6 +5,26 @@ clips, gaps, and transitions. This document is meant to clarify how these
 objects nest within each other, and how they work together to represent an
 audio/video timeline.
 
+## Rendering
+
+Rendering of the image tracks in a timeline is done in painter order. The layers
+in a stack are iterated from the bottom (the first entry in the stack) towards
+the top (the final entry in the stack). Images in a stack overlay lower images
+with no blending.
+
+Within a track, clips may overlap via a transition. In that case, the 
+contribution of track is the linear blend of the elements joined by the
+transition.
+
+If there are effects on a clip, OpenTimelineIO does not say anything about the
+impact of the effect and deviation from the base behavior is application
+specific.
+
+Rendering of the audio tracks is additive. It is strongly advised, but not
+required, that the summed audio is summed as floating point, and that it is 
+processed through a compression filter in order to prevent clipping and 
+distortion. 
+
 ## Simple Cut List
 
 Let’s start with a simple cut list of a few clips. This is stored as a 

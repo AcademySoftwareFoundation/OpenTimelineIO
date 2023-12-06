@@ -42,17 +42,17 @@ std::any create_safely_typed_any(AnyVector&&);
 std::any create_safely_typed_any(AnyDictionary&&);
 std::any create_safely_typed_any(SerializableObject*);
 
-bool          safely_cast_bool_any(std::any const& a);
-int           safely_cast_int_any(std::any const& a);
-int64_t       safely_cast_int64_any(std::any const& a);
-uint64_t      safely_cast_uint64_any(std::any const& a);
-double        safely_cast_double_any(std::any const& a);
-std::string   safely_cast_string_any(std::any const& a);
-RationalTime  safely_cast_rational_time_any(std::any const& a);
-TimeRange     safely_cast_time_range_any(std::any const& a);
-TimeTransform safely_cast_time_transform_any(std::any const& a);
-IMATH_NAMESPACE::V2d    safely_cast_point_any(std::any const& a);
-IMATH_NAMESPACE::Box2d  safely_cast_box_any(std::any const& a);
+bool                   safely_cast_bool_any(std::any const& a);
+int                    safely_cast_int_any(std::any const& a);
+int64_t                safely_cast_int64_any(std::any const& a);
+uint64_t               safely_cast_uint64_any(std::any const& a);
+double                 safely_cast_double_any(std::any const& a);
+std::string            safely_cast_string_any(std::any const& a);
+RationalTime           safely_cast_rational_time_any(std::any const& a);
+TimeRange              safely_cast_time_range_any(std::any const& a);
+TimeTransform          safely_cast_time_transform_any(std::any const& a);
+IMATH_NAMESPACE::V2d   safely_cast_point_any(std::any const& a);
+IMATH_NAMESPACE::Box2d safely_cast_box_any(std::any const& a);
 
 SerializableObject* safely_cast_retainer_any(std::any const& a);
 

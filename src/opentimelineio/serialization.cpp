@@ -732,8 +732,10 @@ SerializableObject::Writer::_build_dispatch_tables()
     et[&typeid(TimeTransform)] = &_simple_any_comparison<TimeTransform>;
     et[&typeid(SerializableObject::ReferenceId)] =
         &_simple_any_comparison<SerializableObject::ReferenceId>;
-    et[&typeid(IMATH_NAMESPACE::V2d)]   = &_simple_any_comparison<IMATH_NAMESPACE::V2d>;
-    et[&typeid(IMATH_NAMESPACE::Box2d)] = &_simple_any_comparison<IMATH_NAMESPACE::Box2d>;
+    et[&typeid(IMATH_NAMESPACE::V2d)] =
+        &_simple_any_comparison<IMATH_NAMESPACE::V2d>;
+    et[&typeid(IMATH_NAMESPACE::Box2d)] =
+        &_simple_any_comparison<IMATH_NAMESPACE::Box2d>;
 
     /*
      * These next recurse back through the Writer itself:
@@ -1057,14 +1059,18 @@ SerializableObject::Writer::write(
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, IMATH_NAMESPACE::V2d value)
+SerializableObject::Writer::write(
+    std::string const&   key,
+    IMATH_NAMESPACE::V2d value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, IMATH_NAMESPACE::Box2d value)
+SerializableObject::Writer::write(
+    std::string const&     key,
+    IMATH_NAMESPACE::Box2d value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);

@@ -57,6 +57,10 @@ public:
         return insert_child(int(_children.size()), child, error_status);
     }
 
+    int index_of_child(
+        Composable const* child,
+        ErrorStatus*      error_status = nullptr) const;
+
     bool is_parent_of(Composable const* other) const;
 
     virtual std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
@@ -118,9 +122,6 @@ protected:
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 
-    int _index_of_child(
-        Composable const* child,
-        ErrorStatus*      error_status = nullptr) const;
     std::vector<Composition*> _path_from_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;

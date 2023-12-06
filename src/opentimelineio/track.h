@@ -52,8 +52,7 @@ public:
     TimeRange
     available_range(ErrorStatus* error_status = nullptr) const override;
 
-    std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
-    handles_of_child(
+    std::pair<std::optional<RationalTime>, std::optional<RationalTime>> handles_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const override;
 

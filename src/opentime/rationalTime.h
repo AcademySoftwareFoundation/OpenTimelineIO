@@ -87,20 +87,20 @@ public:
 
     // Return a RationalTime with the largest integer value not greater than
     // this value.
-    RationalTime floor_value() const
+    RationalTime floor() const
     {
         return RationalTime{ std::floor(_value), _rate };
     }
 
     // Return a RationalTime with the smallest integer value not less than
     // this value.
-    RationalTime ceil_value() const
+    RationalTime ceil() const
     {
         return RationalTime{ std::ceil(_value), _rate };
     }
 
     // Return a RationalTime with the nearest integer value to this value.
-    RationalTime round_value() const
+    RationalTime round() const
     {
         return RationalTime{ std::round(_value), _rate };
     }

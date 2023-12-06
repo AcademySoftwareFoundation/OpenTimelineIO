@@ -55,13 +55,13 @@ class TestTime(unittest.TestCase):
 
     def test_rounding(self):
         t1 = otio.opentime.RationalTime(30.2)
-        self.assertEqual(t1.floor_value(), otio.opentime.RationalTime(30.0))
-        self.assertEqual(t1.ceil_value(), otio.opentime.RationalTime(31.0))
-        self.assertEqual(t1.round_value(), otio.opentime.RationalTime(30.0))
+        self.assertEqual(t1.floor(), otio.opentime.RationalTime(30.0))
+        self.assertEqual(t1.ceil(), otio.opentime.RationalTime(31.0))
+        self.assertEqual(t1.round(), otio.opentime.RationalTime(30.0))
         t2 = otio.opentime.RationalTime(30.8)
-        self.assertEqual(t2.floor_value(), otio.opentime.RationalTime(30.0))
-        self.assertEqual(t2.ceil_value(), otio.opentime.RationalTime(31.0))
-        self.assertEqual(t2.round_value(), otio.opentime.RationalTime(31.0))
+        self.assertEqual(t2.floor(), otio.opentime.RationalTime(30.0))
+        self.assertEqual(t2.ceil(), otio.opentime.RationalTime(31.0))
+        self.assertEqual(t2.round(), otio.opentime.RationalTime(31.0))
 
     def test_comparison(self):
         t1 = otio.opentime.RationalTime(15.2)

@@ -36,6 +36,7 @@ SKIP_DIRS = [
     os.path.join("src", "deps"),
     "build",
     ".git",
+    ".venv",
 ]
 
 

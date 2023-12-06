@@ -8,6 +8,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     composable.h
     composition.h
     deserialization.h
+    algo/editAlgorithm.h
     effect.h
     errorStatus.h
     externalReference.h
@@ -42,6 +43,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     composable.cpp
     composition.cpp
     deserialization.cpp
+    algo/editAlgorithm.cpp
     effect.cpp
     errorStatus.cpp
     externalReference.cpp
@@ -116,13 +118,30 @@ if(OTIO_CXX_INSTALL)
     endif()
 
     install(TARGETS opentimelineio
-           EXPORT OpenTimelineIOConfig
+           EXPORT OpenTimelineIOTargets
            INCLUDES DESTINATION "${OPENTIMELINEIO_INCLUDES}"
            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
-    install(EXPORT OpenTimelineIOConfig
+    install(EXPORT OpenTimelineIOTargets
            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio"
            NAMESPACE OTIO:: )
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/OpenTimelineIOConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake
+        INSTALL_DESTINATION
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
+        NO_SET_AND_CHECK_MACRO
+        NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    )
+
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake
+        DESTINATION
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
+    )
 endif()

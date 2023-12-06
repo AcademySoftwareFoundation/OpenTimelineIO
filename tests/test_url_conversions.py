@@ -32,6 +32,10 @@ MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
+ENCODED_WINDOWS_URL = "file://localhost/S%3a/path/file.ext"
+WINDOWS_URL = "file://S:/path/file.ext"
+CORRECTED_WINDOWS_PATH = "S:/path/file.ext"
+
 
 class TestConversions(unittest.TestCase):
     def test_roundtrip_abs(self):
@@ -50,6 +54,11 @@ class TestConversions(unittest.TestCase):
 
         # should have reconstructed it by this point
         self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
+
+    def test_windows_urls(self):
+        for url in (ENCODED_WINDOWS_URL, WINDOWS_URL):
+            processed_url = otio.url_utils.filepath_from_url(url)
+            self.assertEqual(processed_url, CORRECTED_WINDOWS_PATH)
 
 
 if __name__ == "__main__":

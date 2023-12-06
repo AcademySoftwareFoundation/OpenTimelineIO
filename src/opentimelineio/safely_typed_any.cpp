@@ -60,13 +60,13 @@ create_safely_typed_any(TimeTransform&& value)
 }
 
 std::any
-create_safely_typed_any(Imath::V2d&& value)
+create_safely_typed_any(IMATH_NAMESPACE::V2d&& value)
 {
     return std::any(value);
 }
 
 std::any
-create_safely_typed_any(Imath::Box2d&& value)
+create_safely_typed_any(IMATH_NAMESPACE::Box2d&& value)
 {
     return std::any(value);
 }
@@ -143,16 +143,16 @@ safely_cast_time_transform_any(std::any const& a)
     return std::any_cast<TimeTransform>(a);
 }
 
-Imath::V2d
+IMATH_NAMESPACE::V2d
 safely_cast_point_any(std::any const& a)
 {
-    return std::any_cast<Imath::V2d>(a);
+    return std::any_cast<IMATH_NAMESPACE::V2d>(a);
 }
 
-Imath::Box2d
+IMATH_NAMESPACE::Box2d
 safely_cast_box_any(std::any const& a)
 {
-    return std::any_cast<Imath::Box2d>(a);
+    return std::any_cast<IMATH_NAMESPACE::Box2d>(a);
 }
 
 AnyDictionary

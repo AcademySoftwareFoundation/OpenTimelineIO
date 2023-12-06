@@ -6,6 +6,7 @@
 #include "opentime/errorStatus.h"
 #include "opentime/version.h"
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <string>
 

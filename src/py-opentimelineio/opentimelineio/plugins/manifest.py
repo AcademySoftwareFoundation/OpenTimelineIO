@@ -32,6 +32,21 @@ OTIO_PLUGIN_TYPES = [
 ]
 
 
+def plugin_entry_points():
+    """Returns the list of entry points for all available OpenTimelineIO
+    plugins.
+    """
+    try:
+        entry_points = metadata.entry_points(group='opentimelineio.plugins')
+    except TypeError:
+        # For python <= 3.9
+        entry_points = metadata.entry_points().get(
+            'opentimelineio.plugins', []
+        )
+
+    return entry_points
+
+
 def manifest_from_file(filepath):
     """Read the .json file at filepath into a :py:class:`Manifest` object."""
 
@@ -247,11 +262,7 @@ def load_manifest():
             result.extend(manifest_from_file(json_path))
 
     if not os.environ.get("OTIO_DISABLE_ENTRYPOINTS_PLUGINS"):
-        try:
-            entry_points = metadata.entry_points(group='opentimelineio.plugins')
-        except TypeError:
-            # For python <= 3.9
-            entry_points = metadata.entry_points().get('opentimelineio.plugins', [])
+        entry_points = plugin_entry_points()
 
         for plugin in entry_points:
             plugin_name = plugin.name

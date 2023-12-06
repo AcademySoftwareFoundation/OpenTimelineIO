@@ -177,7 +177,10 @@ def _add_mutable_mapping_methods(mapClass):
 
                 # Hide the method frm Sphinx doc.
                 # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
-                getattr(mapClass, name).__doc__ += '\n\n:meta private:'
+                # __doc__ will be None on a Windows embeddable package where the built-in modules are provided  # noqa
+                # as pyc files which do not include the docstrings.
+                if getattr(mapClass, name).__doc__ is not None:
+                    getattr(mapClass, name).__doc__ += "\n\n:meta private:"
 
     mapClass.setdefault = setdefault
     mapClass.pop = pop
@@ -329,7 +332,10 @@ def _add_mutable_sequence_methods(
 
                     # Hide the method frm Sphinx doc.
                     # See https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists  # noqa
-                    getattr(sequenceClass, name).__doc__ += '\n\n:meta private:'
+                    # __doc__ will be None on a Windows embeddable package where the built-in modules are provided  # noqa
+                    # as pyc files which do not include the docstrings.
+                    if getattr(sequenceClass, name).__doc__ is not None:
+                        getattr(sequenceClass, name).__doc__ += "\n\n:meta private:"
 
     if not issubclass(sequenceClass, SerializableObject):
         def __copy__(self):

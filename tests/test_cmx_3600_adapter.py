@@ -720,7 +720,6 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             self.assertTrue(timeline is not None)
             self.assertEqual(len(timeline.tracks), 1)
             self.assertEqual(len(timeline.tracks[0]), 2)
-            print(edl_path)
 
             # If cannot assertEqual fails with clip name
             # Attempt to assertEqual with
@@ -738,7 +737,6 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
                 timeline.tracks[0][0].source_range.duration,
                 otio.opentime.from_timecode("00:00:01:07", fps)
             )
-            print(timeline.tracks[0][0].media_reference)
 
             try:
                 self.assertIsOTIOEquivalentTo(

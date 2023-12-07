@@ -107,10 +107,10 @@ project at ASWF TAC meetings.
 (alphabetical by last name)
 
 * Jeff Hodges - Adobe
-* Joshua Minor (chair) - Pixar
+* Joshua Minor - Pixar
 * Roger Nelson - Autodesk
 * Nick Porcino - Pixar
-* Eric Reinecke - Netflix
+* Eric Reinecke (chair) - Netflix
 * Stephan Steinbach - Pixar
 
 ### TSC Meetings

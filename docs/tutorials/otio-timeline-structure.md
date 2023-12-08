@@ -11,7 +11,7 @@ Rendering of the image tracks in a timeline is done in painter order. The layers
 in a stack are iterated from the bottom (the first entry in the stack) towards
 the top (the final entry in the stack). Images in a stack overlay lower images
 using an alpha composite operation respecting any alpha in the source materials.
-
+All compositing is assumed to occur over a background of zero values in color components, and 100% values for alpha components.
 Within a track, clips may overlap via a transition. In that case, the 
 contribution of track is the linear blend of the elements joined by the
 transition.

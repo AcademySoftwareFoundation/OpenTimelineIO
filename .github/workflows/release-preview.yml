@@ -33,7 +33,7 @@ jobs:
       - name: Create Branch
         shell: bash
         run: |
-          sh scripts/release-branch/rb.sh
+          sh ./github/scripts/release-branch.sh
 
       - name: Get New Branch Name
         id: get-branch-name
@@ -57,7 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Convert markdown to slack markdown for issue
+      - name: Convert Github markdown to Slack markdown syntax
         # https://github.com/LoveToKnow/slackify-markdown-action
         uses: LoveToKnow/slackify-markdown-action@v1.0.0
         if: ${{ github.event.inputs.notify == 'true' }}

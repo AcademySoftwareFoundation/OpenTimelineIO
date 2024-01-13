@@ -3,19 +3,25 @@
 release-candidate:
 - 'CHANGELOG.md'
 
+submodules:
+- any: ['src/deps/**']
+
 dependencies:
-- any: ['pyproject.toml', 'src/deps/**']
+- any: ['pyproject.toml']
 
 ci:
 - '.github/**'
 
-docs:
+documentation:
 - any: ['docs/**']
 
 opentime:
 - any: ['src/opentime/**']
 
-opentimelineview:
+'time calculations':
+- any: ['src/opentime/**']
+
+otioview:
 - any: ['src/opentimelineview/**']
 
 python-bindings:

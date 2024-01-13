@@ -15,7 +15,7 @@ docs:
 opentime:
 - any: ['src/opentime/**']
 
-opentime:
+opentimelineview:
 - any: ['src/opentimelineview/**']
 
 python-bindings:

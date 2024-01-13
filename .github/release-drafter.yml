@@ -1,0 +1,133 @@
+# https://github.com/release-drafter/release-drafter#configuration-options
+
+# The template for the body of the draft release
+template: |
+  $CHANGES
+
+# The template to use for each merged pull request
+change-template: '* $TITLE @$AUTHOR (#$NUMBER)'
+# Characters to escape in $TITLE when inserting into change-template so that they are not interpreted as Markdown format characters
+change-title-escapes: '\<*_&' # You can add #
+
+# The template for the name of the draft release
+name-template: 'v$RESOLVED_VERSION 🌈'
+# The template for the tag of the draft release
+tag-template: 'v$RESOLVED_VERSION'
+
+# # Template used calculating the next version number for the release
+# version-template: '$MAJOR.$MINOR'
+# # Adjust the $RESOLVED_VERSION variable using labels.
+# version-resolver:
+#   # every release is a whole version by default
+#   default: minor
+#   major:
+#     labels:
+#       - 'feature'
+#       - 'feat'
+#       - 'perf'
+#   minor:
+#     labels:
+#       - 'bug'
+#       - 'bugfix'
+#       - 'fix'
+#       - 'build'
+#       - 'refactor'
+#       - 'revert'
+#       - 'test'
+#   patch:
+#     labels:
+#       - 'chore'
+#       - 'ci'
+#       - 'docs'
+#       - 'style'
+
+# automatically a label into a pull request
+# https://github.com/release-drafter/release-drafter#autolabeler
+autolabeler:
+  - label: 'feat'
+    title:
+      - '/^feat.+/'
+    branch:
+      - '/feature\/.+/'
+      - '/feat\/.+/'
+  - label: 'fix'
+    title:
+      - '/^fix.+/'
+    branch:
+      - '/bugfix\/.+/'
+      - '/hotfix\/.+/'
+      - '/fix\/.+/'
+  - label: 'build'
+    title:
+      - '/^build.+/'
+    branch:
+      - '/build\/.+/'
+  - label: 'chore'
+    title:
+      - '/^chore.+/'
+    branch:
+      - '/chore\/.+/'
+  - label: 'ci'
+    title:
+      - '/^ci.+/'
+    branch:
+      - '/ci\/.+/'
+  - label: 'docs'
+    title:
+      - '/^docs.+/'
+    branch:
+      - '/docs\/.+/'
+  - label: 'perf'
+    title:
+      - '/^perf.+/'
+    branch:
+      - '/perf\/.+/'
+  - label: 'refactor'
+    title:
+      - '/^refactor.+/'
+    branch:
+      - '/refactor\/.+/'
+  - label: 'revert'
+    title:
+      - '/^revert.+/'
+    branch:
+      - '/revert\/.+/'
+  - label: 'style'
+    title:
+      - '/^style.+/'
+    branch:
+      - '/style\/.+/'
+  - label: 'test'
+    title:
+      - '/^test.+/'
+    branch:
+      - '/test\/.+/'
+  - label: 'feature-flag'
+    body:
+      - '/\[x\] is this behind a feature flag/'
+
+# Categorize pull requests using labels
+# https://github.com/release-drafter/release-drafter#categorize-pull-requests
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feat'
+      - 'feature'
+      - 'perf'
+  - title: '📖 Docs'
+    labels:
+      - 'docs'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'bug'
+      - 'bugfix'
+      - 'fix'
+  - title: '🧰 Maintenance'
+    labels:
+      - 'build'
+      - 'chore'
+      - 'ci'
+      - 'refactor'
+      - 'revert'
+      - 'style'
+      - 'test'

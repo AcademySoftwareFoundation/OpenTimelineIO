@@ -1,0 +1,22 @@
+# https://github.com/actions/labeler#common-examples
+
+release-candidate:
+- 'CHANGELOG.md'
+
+dependencies:
+- any: ['pyproject.toml', 'src/deps/**']
+
+ci:
+- '.github/**'
+
+docs:
+- any: ['docs/**']
+
+opentime:
+- any: ['src/opentime/**']
+
+opentime:
+- any: ['src/opentimelineview/**']
+
+python-bindings:
+- any: ['src/py-opentimelineio/**']

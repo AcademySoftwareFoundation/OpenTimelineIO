@@ -1,0 +1,51 @@
+name: Release Published
+# This workflow is called when a new release is published in GitHub.
+
+
+# Cancel other related workflows in-progress
+concurrency:
+  group: release-publish-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v3
+      
+  announce-production:
+    runs-on: ubuntu-latest
+    name: Announce successful deployment
+    needs: [pypi-publish]
+    steps:
+      - name: Convert markdown to slack markdown
+        # https://github.com/LoveToKnow/slackify-markdown-action
+        uses: LoveToKnow/slackify-markdown-action@v1.0.0
+        id: slack-markdown
+        with:
+          text: |
+            ${{ github.ref_name }} New version of OTIO released!.
+            [Release Notes](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/releases/tag/${{ github.ref_name }})
+
+      - name: 'Slack Notification to #opentimelineio'
+        # https://github.com/rtCamp/action-slack-notify
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.RELEASES_SLACK_WEBHOOK }}
+          SLACK_ICON: https://avatars.githubusercontent.com/u/40807682?s=512&v=4
+          SLACK_LINK_NAMES: true
+          SLACK_USERNAME: 'OTIO Release Bot'
+          SLACK_CHANNEL: 'opentimelineio'
+          SLACK_COLOR: '#5b53ff'
+          SLACK_TITLE: 'New OTIO version released!'
+          SLACK_MESSAGE: |
+            ${{ steps.slack-markdown.outputs.text }}
+          SLACK_FOOTER: |
+            Release Published: ${{ github.ref_name }}
+          MSG_MINIMAL: true

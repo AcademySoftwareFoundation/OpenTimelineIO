@@ -1,4 +1,4 @@
-name: Release Published
+name: Publish Release
 # This workflow is called when a new release is published in GitHub.
 
 
@@ -12,17 +12,17 @@ on:
     types: [published]
 
 jobs:
-  deploy-production:
-    name: Deploy to Production
+  load-repo:
+    name: Download GitHub repo
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v3
       
-  announce-production:
+  announce-release:
     runs-on: ubuntu-latest
-    name: Announce successful deployment
-    needs: [pypi-publish]
+    name: Announce successful release
+    needs: [load-repo]
     steps:
       - name: Convert markdown to slack markdown
         # https://github.com/LoveToKnow/slackify-markdown-action

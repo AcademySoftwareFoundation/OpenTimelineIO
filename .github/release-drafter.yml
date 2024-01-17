@@ -72,7 +72,7 @@ autolabeler:
       - '/^ci.+/'
     branch:
       - '/ci\/.+/'
-  - label: 'docs'
+  - label: 'documentation'
     title:
       - '/^docs.+/'
     branch:
@@ -102,9 +102,6 @@ autolabeler:
       - '/^test.+/'
     branch:
       - '/test\/.+/'
-  - label: 'feature-flag'
-    body:
-      - '/\[x\] is this behind a feature flag/'
 
 # Categorize pull requests using labels
 # https://github.com/release-drafter/release-drafter#categorize-pull-requests
@@ -114,9 +111,9 @@ categories:
       - 'feat'
       - 'feature'
       - 'perf'
-  - title: '📖 Docs'
+  - title: '📖 Documentation'
     labels:
-      - 'docs'
+      - 'documentation'
   - title: '🐛 Bug Fixes'
     labels:
       - 'bug'

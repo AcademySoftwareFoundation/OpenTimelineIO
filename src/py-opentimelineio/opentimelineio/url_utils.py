@@ -10,8 +10,9 @@ from urllib import (
     request
 )
 from pathlib import (
-    Path,
-    PureWindowsPath
+    PurePath,
+    PureWindowsPath,
+    PurePosixPath
 )
 
 
@@ -21,7 +22,7 @@ def url_from_filepath(fpath):
     try:
         # appears to handle absolute windows paths better, which are absolute
         # and start with a drive letter.
-        return urlparse.unquote(Path(fpath).as_uri())
+        return urlparse.unquote(PurePath(fpath).as_uri())
     except ValueError:
         # scheme is "file" for absolute paths, else ""
         scheme = "file" if os.path.isabs(fpath) else ""
@@ -56,16 +57,16 @@ def filepath_from_url(urlstr):
     parsed_result = urlparse.urlparse(urlstr)
 
     # Convert the parsed URL to a path
-    filepath = Path(request.url2pathname(parsed_result.path))
+    filepath = PurePath(request.url2pathname(parsed_result.path))
 
     # If the network location is a window drive, reassemble the path
     if PureWindowsPath(parsed_result.netloc).drive:
-        filepath = Path(parsed_result.netloc + parsed_result.path)
+        filepath = PurePath(parsed_result.netloc + parsed_result.path)
 
     # Otherwise check if the specified index is a windows drive, then offset the path
     elif PureWindowsPath(filepath.parts[1]).drive:
         # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
-        filepath = filepath.relative_to(filepath.root)
+        filepath = PurePosixPath(*filepath.parts[1:])
 
     # Convert "\" to "/" if needed
     return filepath.as_posix()

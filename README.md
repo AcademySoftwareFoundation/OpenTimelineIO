@@ -127,7 +127,7 @@ Python:
 import opentimelineio as otio
 
 timeline = otio.adapters.read_from_file("foo.aaf")
-for clip in timeline.find_clips():
+for clip in timeline.each_clip():
   print(clip.name, clip.duration())
 ```
 

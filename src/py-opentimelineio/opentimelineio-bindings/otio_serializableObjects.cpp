@@ -214,19 +214,23 @@ The marked range may have a zero duration. The marked range is in the owning ite
                         std::string name,
                         TimeRange marked_range,
                         std::string const& color,
-                        py::object metadata) {
+                        py::object metadata,
+                        std::string const& comment) {
                           return new Marker(
                                   name,
                                   marked_range,
                                   color,
-                                  py_to_any_dictionary(metadata));
+                                  py_to_any_dictionary(metadata),
+                                  comment);
                       }),
              py::arg_v("name"_a = std::string()),
              "marked_range"_a = TimeRange(),
              "color"_a = std::string(Marker::Color::red),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::none()),
+             "comment"_a = std::string())
         .def_property("color", &Marker::color, &Marker::set_color, "Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.")
-        .def_property("marked_range", &Marker::marked_range, &Marker::set_marked_range, "Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).");
+        .def_property("marked_range", &Marker::marked_range, &Marker::set_marked_range, "Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).")
+        .def_property("comment", &Marker::comment, &Marker::set_comment, "Optional comment for this marker.");
 
     py::class_<Marker::Color>(marker_class, "Color")
         .def_property_readonly_static("PINK", [](py::object /* self */) { return Marker::Color::pink; })

@@ -197,7 +197,10 @@ MARKER_OVER_AUDIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "marker-over-audio.aaf"
 )
-
+BAD_TRACK_NUMBER_ON_MARKER_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "bad_marker_track_from_avid.aaf"
+)
 
 try:
     lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -1151,6 +1154,30 @@ class AAFReaderTests(unittest.TestCase):
             self.assertEqual(color, expected_marker.get('color'))
             self.assertEqual(label, expected_marker.get('label'))
             self.assertEqual(start_time, expected_marker.get('start_time'))
+
+    def test_aaf_marker_with_bad_track(self):
+        """
+        If you export from Avid with "Use Selected Tracks" selected, Avid
+        will rewrite the track numbers after omitted unselected tracks.
+        The markers, however, may not be updated by avid to reflect the
+        new track numbers!
+        This test confirms that we don't crash when reading such a file.
+        """
+
+        timeline = None
+
+        try:
+            timeline = otio.adapters.read_from_file(
+                BAD_TRACK_NUMBER_ON_MARKER_PATH
+            )
+
+        except Exception as e:
+            print('[ERROR] Transcribing test sample data `{}` caused an exception: {}'.format(  # noqa
+                os.path.basename(BAD_TRACK_NUMBER_ON_MARKER_PATH),
+                e)
+            )
+
+        self.assertIsNotNone(timeline)
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

@@ -526,6 +526,7 @@ system.
 
 parameters:
 - *color*: Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.
+- *comment*: Optional comment for this marker.
 - *marked_range*: Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
 - *metadata*: 
 - *name*: 

@@ -79,6 +79,4 @@ def filepath_from_url(urlstr):
         filepath = PurePath('//', parsed_result.netloc + decoded_parsed_path)
 
     # Convert "\" to "/" if needed
-    path = filepath.as_posix()
-
-    return path
+    return filepath.as_posix()

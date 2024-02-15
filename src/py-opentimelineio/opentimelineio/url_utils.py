@@ -11,8 +11,7 @@ from urllib import (
 from pathlib import (
     PurePath,
     PureWindowsPath,
-    PurePosixPath,
-    Path
+    PurePosixPath
 )
 
 

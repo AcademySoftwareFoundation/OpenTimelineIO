@@ -40,6 +40,7 @@ ENCODED_WINDOWS_UNC_URL = "file://unc/path/sub%20dir/file.ext"
 WINDOWS_UNC_URL = "file://unc/path/sub dir/file.ext"
 CORRECTED_WINDOWS_UNC_PATH = "//unc/path/sub dir/file.ext"
 
+POSIX_LOCALHOST_URL = "file://localhost/path/sub dir/file.ext"
 ENCODED_POSIX_URL = "file:///path/sub%20dir/file.ext"
 POSIX_URL = "file:///path/sub dir/file.ext"
 CORRECTED_POSIX_PATH = "/path/sub dir/file.ext"
@@ -74,7 +75,7 @@ class TestConversions(unittest.TestCase):
             self.assertEqual(processed_url, CORRECTED_WINDOWS_UNC_PATH)
 
     def test_posix_urls(self):
-        for url in (ENCODED_POSIX_URL, POSIX_URL):
+        for url in (ENCODED_POSIX_URL, POSIX_URL, POSIX_LOCALHOST_URL):
             processed_url = otio.url_utils.filepath_from_url(url)
             self.assertEqual(processed_url, CORRECTED_POSIX_PATH)
 

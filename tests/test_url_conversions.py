@@ -67,17 +67,17 @@ class TestConversions(unittest.TestCase):
     def test_windows_urls(self):
         for url in (WINDOWS_ENCODED_URL, WINDOWS_DRIVE_URL):
             processed_url = otio.url_utils.filepath_from_url(url)
-            self.assertEqual(processed_url, WINDOWS_DRIVE_PATH)
+            self.assertEqual(WINDOWS_DRIVE_PATH, processed_url)
 
     def test_windows_unc_urls(self):
         for url in (WINDOWS_ENCODED_UNC_URL, WINDOWS_UNC_URL):
             processed_url = otio.url_utils.filepath_from_url(url)
-            self.assertEqual(processed_url, WINDOWS_UNC_PATH)
+            self.assertEqual(WINDOWS_UNC_PATH, processed_url)
 
     def test_posix_urls(self):
         for url in (POSIX_ENCODED_URL, POSIX_URL, POSIX_LOCALHOST_URL):
             processed_url = otio.url_utils.filepath_from_url(url)
-            self.assertEqual(processed_url, POSIX_PATH)
+            self.assertEqual(POSIX_PATH, processed_url)
 
 
 if __name__ == "__main__":

@@ -76,7 +76,7 @@ def filepath_from_url(urlstr):
     # as parsing "file:///some/path/to/file.ext" doesn't provide a netloc
     elif parsed_result.netloc and parsed_result.netloc != 'localhost':
         # Paths of type: "file://host/share/path/to/file.ext" provide "host" as netloc
-        filepath = Path('//', parsed_result.netloc + decoded_parsed_path)
+        filepath = PurePath('//', parsed_result.netloc + decoded_parsed_path)
 
     # Convert "\" to "/" if needed
     path = filepath.as_posix()

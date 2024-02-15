@@ -13,54 +13,33 @@ namespace opentime { namespace OPENTIME_VERSION {
 
 RationalTime RationalTime::_invalid_time{ 0, RationalTime::_invalid_rate };
 
-static constexpr std::array<double, 4> dropframe_timecode_rates{ {
-    // 23.976,
-    // 23.98,
-    // 23.97,
-    // 24000.0/1001.0,
-    29.97,
+static constexpr std::array<double, 2> dropframe_timecode_rates{ {
     30000.0 / 1001.0,
-    59.94,
     60000.0 / 1001.0,
 } };
 
+// See the official source of these numbers here:
+// ST 12-1:2014 - SMPTE Standard - Time and Control Code
+// https://ieeexplore.ieee.org/document/7291029
+//
 static constexpr std::array<double, 11> smpte_timecode_rates{
-    { 1.0,
-      12.0,
-      24000.0 / 1001.0,
+    { 24000.0 / 1001.0,
       24.0,
       25.0,
       30000.0 / 1001.0,
       30.0,
+      48000.0 / 1001.0,
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0 }
-};
-
-static constexpr std::array<double, 16> valid_timecode_rates{
-    { 1.0,
-      12.0,
-      23.97,
-      23.976,
-      23.98,
-      24000.0 / 1001.0,
-      24.0,
-      25.0,
-      29.97,
-      30000.0 / 1001.0,
-      30.0,
-      48.0,
-      50.0,
-      59.94,
-      60000.0 / 1001.0,
-      60.0 }
+      60.0
+    }
 };
 
 bool
 RationalTime::is_valid_timecode_rate(double fps)
 {
-    auto b = valid_timecode_rates.begin(), e = valid_timecode_rates.end();
+    auto b = smpte_timecode_rates.begin(), e = smpte_timecode_rates.end();
     return std::find(b, e, fps) != e;
 }
 
@@ -460,7 +439,8 @@ RationalTime::to_timecode(
         return std::string();
     }
 
-    if (!is_valid_timecode_rate(rate))
+    double nearest_valid_rate = nearest_valid_timecode_rate(rate);
+    if (abs(nearest_valid_rate - rate) > 0.1)
     {
         if (error_status)
         {
@@ -468,6 +448,9 @@ RationalTime::to_timecode(
         }
         return std::string();
     }
+
+    // Let's assume this is the rate instead of the given rate.
+    rate = nearest_valid_rate;
 
     bool rate_is_dropframe = is_dropframe_rate(rate);
     if (drop_frame == IsDropFrameRate::ForceYes and not rate_is_dropframe)
@@ -504,11 +487,11 @@ RationalTime::to_timecode(
     }
     else
     {
-        if ((rate == 29.97) or (rate == 30000 / 1001.0))
+        if (rate == 30000 / 1001.0)
         {
             dropframes = 2;
         }
-        else if (rate == 59.94)
+        else if (rate == 60000 / 1001.0)
         {
             dropframes = 4;
         }

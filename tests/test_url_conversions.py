@@ -32,7 +32,7 @@ MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
-ENCODED_WINDOWS_URL = "file://localhost/S%3a/path/file.ext"
+ENCODED_WINDOWS_URL = "file://host/S%3a/path/file.ext"
 WINDOWS_DRIVE_URL = "file://S:/path/file.ext"
 CORRECTED_WINDOWS_DRIVE_PATH = "S:/path/file.ext"
 

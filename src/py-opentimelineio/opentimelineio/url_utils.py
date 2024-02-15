@@ -4,6 +4,7 @@
 """Utilities for conversion between urls and file paths"""
 
 import os
+import sys
 from urllib import (
     parse as urlparse,
     request
@@ -11,7 +12,8 @@ from urllib import (
 from pathlib import (
     PurePath,
     PureWindowsPath,
-    PurePosixPath
+    PurePosixPath,
+    Path
 )
 
 
@@ -53,18 +55,18 @@ def filepath_from_url(urlstr):
     .. _ongoing discussions: https://discuss.python.org/t/file-uris-in-python/15600
     """
 
-    # De-encode the URL
-    decoded_url_str = urlparse.unquote(urlstr)
-
     # Parse provided URL
-    parsed_result = urlparse.urlparse(decoded_url_str)
+    parsed_result = urlparse.urlparse(urlstr)
+
+    # De-encode the parsed path
+    decoded_parsed_path = urlparse.unquote(parsed_result.path)
 
     # Convert the parsed URL to a path
-    filepath = PurePath(request.url2pathname(parsed_result.path))
+    filepath = PurePath(request.url2pathname(decoded_parsed_path))
 
     # If the network location is a window drive, reassemble the path
     if PureWindowsPath(parsed_result.netloc).drive:
-        filepath = PurePath(parsed_result.netloc + parsed_result.path)
+        filepath = PurePath(parsed_result.netloc + decoded_parsed_path)
 
     # Check if the specified index has a specified `drive`, if so then do nothing
     elif filepath.drive:
@@ -75,9 +77,18 @@ def filepath_from_url(urlstr):
         # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
         filepath = PurePosixPath(*filepath.parts[1:])
 
-    # Last resort, strip the "file:" prefix
-    else:
-        filepath = Path(decoded_url_str.strip('file:'))
+    # Should catch UNC paths,
+    # as parsing "file:///some/path/to/file.ext" doesn't provide a netloc
+    elif parsed_result.netloc and parsed_result.netloc != 'localhost':
+        # Paths of type: "file://host/share/path/to/file.ext" provide "host" as netloc
+        filepath = Path('//', parsed_result.netloc + decoded_parsed_path)
 
     # Convert "\" to "/" if needed
-    return filepath.as_posix()
+    path = filepath.as_posix()
+
+    # Since the previous code handles Windows drive letter, we can assume that any path
+    # starting with a "/" is a UNC path if executed is run on Windows.
+    if path.startswith('/') and sys.platform == 'win32':
+        path = '/' + path
+
+    return path

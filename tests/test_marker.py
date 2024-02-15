@@ -88,6 +88,47 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(repr(m), expected)
 
+    def test_comment(self):
+        src = """
+        {
+            "OTIO_SCHEMA" : "Marker.1",
+            "metadata" : {},
+            "name" : null,
+            "comment": "foo bar",
+            "range" : {
+                "OTIO_SCHEMA" : "TimeRange.1",
+                "start_time" : {
+                    "OTIO_SCHEMA" : "RationalTime.1",
+                    "rate" : 5,
+                    "value" : 0
+                },
+                "duration" : {
+                    "OTIO_SCHEMA" : "RationalTime.1",
+                    "rate" : 5,
+                    "value" : 0
+                }
+            }
+
+        }
+        """
+        marker = otio.adapters.read_from_string(src, "otio_json")
+        self.assertEqual(marker.comment, "foo bar")
+
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(5, 24),
+            otio.opentime.RationalTime(10, 24)
+        )
+        m = otio.schema.Marker(
+            name="marker_1",
+            marked_range=tr,
+            metadata={'foo': 'bar'},
+            comment="foo bar2")
+        self.assertEqual(m.comment, "foo bar2")
+
+        encoded = otio.adapters.otio_json.write_to_string(m)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertEqual(decoded.comment, "foo bar2")
+
     def test_str(self):
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(5, 24),

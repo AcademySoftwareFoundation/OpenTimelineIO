@@ -212,6 +212,7 @@ parameters:
 
 parameters:
 - *color*
+- *comment*
 - *marked_range*
 - *metadata*
 - *name*

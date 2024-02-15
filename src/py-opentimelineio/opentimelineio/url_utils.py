@@ -68,10 +68,6 @@ def filepath_from_url(urlstr):
     if PureWindowsPath(parsed_result.netloc).drive:
         filepath = PurePath(parsed_result.netloc + decoded_parsed_path)
 
-    # Check if the specified index has a specified `drive`, if so then do nothing
-    elif filepath.drive:
-        filepath = filepath
-
     # Check if the specified index is a windows drive, then offset the path
     elif PureWindowsPath(filepath.parts[1]).drive:
         # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
@@ -85,10 +81,5 @@ def filepath_from_url(urlstr):
 
     # Convert "\" to "/" if needed
     path = filepath.as_posix()
-
-    # Since the previous code handles Windows drive letter, we can assume that any path
-    # starting with a "/" is a UNC path if executed is run on Windows.
-    if path.startswith('/') and sys.platform == 'win32':
-        path = '/' + path
 
     return path

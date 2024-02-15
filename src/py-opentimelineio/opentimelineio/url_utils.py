@@ -82,8 +82,9 @@ def filepath_from_url(urlstr):
         # Paths of type: "file://host/share/path/to/file.ext" provide "host" as netloc
         filepath = PurePath('//', parsed_result.netloc + decoded_parsed_path)
 
-        # When running `as_posix` the resulting path will have only 1 leading `/`,
-        # so we insert another `/` at the front of the string path and return it.
+        # Executing `as_posix` on Windows seems to generate a path with only
+        # 1 leading `/`, so we insert another `/` at the front of the string path
+        # to match Linux and Windows UNC conventions and return it.
         conformed_filepath = filepath.as_posix()
         if not conformed_filepath.startswith('//'):
             conformed_filepath = '/' + conformed_filepath

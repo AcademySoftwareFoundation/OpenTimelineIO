@@ -40,7 +40,7 @@ def url_from_filepath(fpath):
         )
 
 
-def filepath_from_url(urlstr, as_posix=True):
+def filepath_from_url(urlstr):
     """
     Take an url and return a filepath.
 

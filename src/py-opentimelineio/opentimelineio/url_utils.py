@@ -40,7 +40,7 @@ def url_from_filepath(fpath):
         )
 
 
-def filepath_from_url(urlstr):
+def filepath_from_url(urlstr, as_posix=True):
     """
     Take an url and return a filepath.
 
@@ -81,6 +81,13 @@ def filepath_from_url(urlstr):
     elif parsed_result.netloc and parsed_result.netloc != 'localhost':
         # Paths of type: "file://host/share/path/to/file.ext" provide "host" as netloc
         filepath = PurePath('//', parsed_result.netloc + decoded_parsed_path)
+
+        # When running `as_posix` the resulting path will have only 1 leading `/`,
+        # so we insert another `/` at the front of the string path and return it.
+        conformed_filepath = filepath.as_posix()
+        if conformed_filepath.startswith('/'):
+            conformed_filepath = '/' + conformed_filepath
+        return conformed_filepath
 
     # Convert "\" to "/" if needed
     return filepath.as_posix()

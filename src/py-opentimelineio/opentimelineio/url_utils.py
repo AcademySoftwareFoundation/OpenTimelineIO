@@ -85,7 +85,7 @@ def filepath_from_url(urlstr):
         # When running `as_posix` the resulting path will have only 1 leading `/`,
         # so we insert another `/` at the front of the string path and return it.
         conformed_filepath = filepath.as_posix()
-        if conformed_filepath.startswith('/'):
+        if not conformed_filepath.startswith('//'):
             conformed_filepath = '/' + conformed_filepath
         return conformed_filepath
 

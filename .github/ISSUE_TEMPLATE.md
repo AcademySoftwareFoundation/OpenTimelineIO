@@ -1,7 +1,7 @@
 # Required:
 ------------
-[ ] I believe this isn't a duplicate topic
-[ ] This report is not related to an adapter
+[ ] I believe this isn't a duplicate topic  
+[ ] This report is not related to an adapter  
 
 For adapter related issues, please go to the appropriate repository - likely in
 the [OpenTimelineIO github organization](https://github.com/OpenTimelineIO/).

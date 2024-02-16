@@ -16,6 +16,8 @@ For general questions and help please use the
 [ ] New feature or functionality
 
 ## Description
+<!-- Please make the description as precise as possible so we can best understand your suggestion or issue. -->
+
 
 # Optional
 -----------

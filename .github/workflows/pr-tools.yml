@@ -1,0 +1,35 @@
+name: Pull Request Tools
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [
+        opened, # pr is created
+        reopened, # pr is reopened after being closed
+        synchronize, # pr is updated with new commits
+      ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # label PRs based on the files that were changed
+  pr-labeler:
+    name: Label Pull Requests
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3 # https://github.com/actions/checkout/tree/main#usage
+
+      # https://github.com/actions/labeler#usage
+      - uses: actions/labeler@v4
+        with:
+          # https://github.com/actions/labeler#inputs
+          configuration-path: .github/labeler.yml
+          sync-labels: true # remove labels when matching files are reverted or no longer changed by the PR
+          dot: true # auto-include paths starting with dot (e.g.; ~/.github)

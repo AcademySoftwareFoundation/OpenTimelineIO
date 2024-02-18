@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest a new feature for OpenTimelineio
 title: ''
-labels: ''
+labels: 'feature'
 assignees: ''
 
 ---

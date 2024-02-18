@@ -1,0 +1,87 @@
+name: Release Preview
+
+# Cancel other related workflows in-progress
+concurrency:
+  group: release-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      create-new-branch:
+        description: 'Create branch'
+        type: boolean
+        required: true
+        default: true
+      notify:
+        description: 'Announce release'
+        type: boolean
+        required: true
+        default: true
+
+jobs:
+  release-branch:
+    # run if toggled on and not off an existing release branch
+    if: ${{github.event.inputs.create-new-branch && github.event.inputs.create-new-branch == 'true' && !startsWith(github.ref,'refs/heads/release/')}}
+    name: Release Branch
+    runs-on: ubuntu-latest
+    outputs:
+      branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Create Branch
+        shell: bash
+        run: |
+          sh ./github/scripts/release-branch.sh
+
+      - name: Get New Branch Name
+        id: get-branch-name
+        shell: bash
+        run: |
+          echo ::set-output name=branch-name::$(git rev-parse --abbrev-ref HEAD)
+
+  release-preview:
+    needs: [release-branch]
+    if: ${{ always() }}
+    name: Release Preview
+    runs-on: ubuntu-latest
+    steps:
+      - name: Draft or Update a Release
+        # https://github.com/release-drafter/release-drafter
+        uses: release-drafter/release-drafter@v5
+        id: draft-release
+        with:
+          publish: false
+          commitish: ${{needs.release-branch.outputs.branch-name || github.ref_name}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Convert Github markdown to Slack markdown syntax
+        # https://github.com/LoveToKnow/slackify-markdown-action
+        uses: LoveToKnow/slackify-markdown-action@v1.0.0
+        if: ${{ github.event.inputs.notify == 'true' }}
+        id: slack-markdown
+        with:
+          text: |
+            [Release Notes](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/releases/tag/${{ steps.draft-release.outputs.tag_name }})
+
+            ${{ steps.draft-release.outputs.body }}
+
+      - name: 'Slack Notification to ##opentimelineio'
+        # https://github.com/rtCamp/action-slack-notify
+        uses: rtCamp/action-slack-notify@v2
+        if: ${{ github.event.inputs.notify == 'true' }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES_URL }}
+          SLACK_ICON: https://avatars.githubusercontent.com/u/40807682?s=512&v=4
+          SLACK_LINK_NAMES: true
+          SLACK_USERNAME: 'OTIO Release Preview'
+          SLACK_CHANNEL: 'opentimelineio'
+          SLACK_COLOR: '#5b53ff'
+          SLACK_TITLE: 'Release Preview for ${{ github.repository }}'
+          SLACK_MESSAGE: |
+            ${{ steps.slack-markdown.outputs.text }}
+          SLACK_FOOTER: |
+            Release Preview of ${{ steps.draft-release.outputs.name }}
+          MSG_MINIMAL: commit

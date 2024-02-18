@@ -11,9 +11,9 @@ For general questions and help please use the
 
 ## Select One:
 
-[ ] Build problem
-[ ] Incorrect Functionality or bug
-[ ] New feature or functionality
+[ ] Build problem  
+[ ] Incorrect Functionality or bug  
+[ ] New feature or functionality  
 
 ## Description
 <!-- Please make the description as precise as possible so we can best understand your suggestion or issue. -->

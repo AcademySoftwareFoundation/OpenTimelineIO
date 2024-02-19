@@ -24,8 +24,8 @@ For general questions and help please use the
 
 ## Environment
 
-Operating System:
-Python version if appropriate:
+Operating System:  
+Python version if appropriate:  
 
 ## Reproduction Steps
 

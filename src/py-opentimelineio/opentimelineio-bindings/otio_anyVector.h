@@ -13,6 +13,13 @@ namespace py = pybind11;
 struct AnyVectorProxy : public AnyVector::MutationStamp {
     using MutationStamp = AnyVector::MutationStamp;
 
+    AnyVectorProxy() {}
+
+    // TODO: Should we instead just pass an AnyVector?
+    AnyVectorProxy(MutationStamp *v) {
+        any_vector = v->any_vector;
+    }
+
     static void throw_array_was_deleted() {
         throw py::value_error("Underlying C++ AnyVector object has been destroyed");
     }

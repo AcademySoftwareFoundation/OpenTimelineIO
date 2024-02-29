@@ -13,6 +13,7 @@ from opentimelineio.adapters import (
     otio_json,
 )
 
+import pathlib
 import tempfile
 
 
@@ -89,6 +90,14 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         test_str = otio.adapters.write_to_string(tl)
         self.assertJsonEqual(tl, otio.adapters.read_from_string(test_str))
+
+    def test_otio_pathlib_filepath(self):
+        """Tests reading / writing with a filepath that's a Path object."""
+        tl = otio.adapters.read_from_file(pathlib.Path(SCREENING_EXAMPLE_PATH))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tmp_path = pathlib.Path(temp_dir) / "tmp_pathlib.otio"
+            otio.adapters.write_to_file(input_otio=tl, filepath=tmp_path)
+            self.assertJsonEqual(tl, otio.adapters.read_from_file(filepath=tmp_path))
 
 
 if __name__ == '__main__':

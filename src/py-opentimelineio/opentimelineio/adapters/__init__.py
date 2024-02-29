@@ -15,6 +15,7 @@ modules.
 
 import os
 import itertools
+import pathlib
 
 from .. import (
     exceptions,
@@ -132,10 +133,15 @@ def read_from_file(
         timeline = read_from_file("file_with_no_extension", "cmx_3600")
     """
 
-    adapter = _from_filepath_or_name(filepath, adapter_name)
+    # convert pathlib Path objects to simple string
+    string_filepath = filepath
+    if isinstance(string_filepath, pathlib.PurePath):
+        string_filepath = os.fspath(filepath)
+
+    adapter = _from_filepath_or_name(string_filepath, adapter_name)
 
     return adapter.read_from_file(
-        filepath=filepath,
+        filepath=string_filepath,
         media_linker_name=media_linker_name,
         media_linker_argument_map=media_linker_argument_map,
         **adapter_argument_map
@@ -189,9 +195,14 @@ def write_to_file(
 
     adapter = _from_filepath_or_name(filepath, adapter_name)
 
+    # convert pathlib Path objects to simple string
+    string_filepath = filepath
+    if isinstance(string_filepath, pathlib.PurePath):
+        string_filepath = os.fspath(filepath)
+
     return adapter.write_to_file(
         input_otio=input_otio,
-        filepath=filepath,
+        filepath=string_filepath,
         **adapter_argument_map
     )
 

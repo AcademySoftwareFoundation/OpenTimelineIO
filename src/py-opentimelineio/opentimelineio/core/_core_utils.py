@@ -4,6 +4,7 @@
 import types
 import collections.abc
 import copy
+import json
 
 from .. import (
     _otio,
@@ -13,6 +14,11 @@ from .. _otio import (
     AnyDictionary,
     AnyVector,
     PyAny
+)
+from .. _opentime import (
+    RationalTime,
+    TimeRange,
+    TimeTransform
 )
 
 
@@ -388,3 +394,57 @@ def __deepcopy__(self, *args, **kwargs):
 @add_method(SerializableObject)
 def __copy__(self, *args, **kwargs):
     raise ValueError("SerializableObjects may not be shallow copied.")
+
+
+@add_method(AnyDictionary)
+def to_dict(self):
+    """
+    Convert to a built-in dict. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
+
+
+@add_method(AnyVector)
+def to_list(self):
+    """
+    Convert to a built-in list. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
+
+
+@add_method(SerializableObject)
+def to_dict(self):
+    """
+    Convert to a built-in dict. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
+
+
+@add_method(RationalTime)
+def to_dict(self):
+    """
+    Convert to a built-in dict. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
+
+
+@add_method(TimeRange)
+def to_dict(self):
+    """
+    Convert to a built-in dict. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
+
+
+@add_method(TimeTransform)
+def to_dict(self):
+    """
+    Convert to a built-in dict. It will recursively convert all values
+    to their corresponding python built-in types.
+    """
+    return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))

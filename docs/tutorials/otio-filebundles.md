@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document describes OpenTimelineIO's file bundle formats, `otiod` and `otioz`, as well as how to use the internal adapters to generate file bundles.  The OTIOZ/D File Bundle format packages OpenTimelineIO data and associated media into a single file.  This can be useful for sending, archiving and interchange.
+This document describes OpenTimelineIO's file bundle formats, `otiod` and `otioz`, as well as how to use the internal adapters to generate file bundles.  
+
+The OTIOZ/D File Bundle format packages OpenTimelineIO data and associated media into a single file.  This can be useful for sending, archiving and interchange.
 
 ## OTIOZ/D File Bundle Format Details
 

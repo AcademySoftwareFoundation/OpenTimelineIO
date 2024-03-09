@@ -252,45 +252,45 @@ class ConvertToPython(unittest.TestCase):
         so = opentimelineio.core.SerializableObjectWithMetadata(name="asd")
         so.metadata["key1"] = opentimelineio.core.Composition()
 
-        d = so.to_dict()
-        self.assertTrue(isinstance(d, dict))
-        json.dumps(d)
+        converted = so.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
 
     def test_AnyDictionary(self):
         ad = opentimelineio._otio.AnyDictionary()
         ad["my key"] = opentimelineio.core.Composable()
 
-        d = ad.to_dict()
-        self.assertTrue(isinstance(d, dict))
-        json.dumps(d)
+        converted = ad.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
 
     def test_AnyVector(self):
         av = opentimelineio._otio.AnyVector()
         av.append(1)
         av.append(opentimelineio._otio.AnyDictionary())
 
-        l = av.to_list()
-        self.assertTrue(isinstance(l, list))
-        self.assertEqual(l, [1, {}])
-        json.dumps(l)
+        converted = av.to_list()
+        self.assertTrue(isinstance(converted, list))
+        self.assertEqual(converted, [1, {}])
+        json.dumps(converted)
 
     def test_RationalTime(self):
         rt = opentimelineio.opentime.RationalTime()
 
-        d = rt.to_dict()
-        self.assertTrue(isinstance(d, dict))
-        json.dumps(d)
+        converted = rt.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
 
     def test_TimeRange(self):
         tr = opentimelineio.opentime.TimeRange()
 
-        d = tr.to_dict()
-        self.assertTrue(isinstance(d, dict))
-        json.dumps(d)
+        converted = tr.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
 
     def test_TimeTransform(self):
         tt = opentimelineio.opentime.TimeTransform()
 
-        d = tt.to_dict()
-        self.assertTrue(isinstance(d, dict))
-        json.dumps(d)
+        converted = tt.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)

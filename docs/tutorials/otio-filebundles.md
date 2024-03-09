@@ -29,12 +29,13 @@ OTIOZ (adds the version.txt file and is encoded in a zipfile):
 
 ```
 something.otioz (zipfile)
-├── content.otio (file)
-├── version.txt (file)
+├── content.otio (compressed file)
+├── version.txt (compressed file)
 └── media (directory)
-    ├── media1 (file)
-    ├── media2 (file)
-    └── media3 (file)
+    ├── media1 (uncompressed file)
+    ├── media2 (uncompressed file)
+    ├── media3 (uncompressed file)
+    └── ...    (uncompressed files)
 ```
 
 ### content.otio file

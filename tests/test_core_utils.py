@@ -2,10 +2,13 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import copy
+import json
 import unittest
 
 import opentimelineio._otio
 import opentimelineio.core._core_utils
+import opentimelineio.core
+import opentimelineio.opentime
 
 
 class AnyDictionaryTests(unittest.TestCase):
@@ -242,3 +245,52 @@ class AnyVectorTests(unittest.TestCase):
         deepcopied = copy.deepcopy(v)
         self.assertIsNot(v, deepcopied)
         self.assertIsNot(v[2], deepcopied[2])
+
+
+class ConvertToPython(unittest.TestCase):
+    def test_SerializableObject(self):
+        so = opentimelineio.core.SerializableObjectWithMetadata(name="asd")
+        so.metadata["key1"] = opentimelineio.core.Composition()
+
+        d = so.to_dict()
+        self.assertTrue(isinstance(d, dict))
+        json.dumps(d)
+
+    def test_AnyDictionary(self):
+        ad = opentimelineio._otio.AnyDictionary()
+        ad["my key"] = opentimelineio.core.Composable()
+
+        d = ad.to_dict()
+        self.assertTrue(isinstance(d, dict))
+        json.dumps(d)
+
+    def test_AnyVector(self):
+        av = opentimelineio._otio.AnyVector()
+        av.append(1)
+        av.append(opentimelineio._otio.AnyDictionary())
+
+        l = av.to_list()
+        self.assertTrue(isinstance(l, list))
+        self.assertEqual(l, [1, {}])
+        json.dumps(l)
+
+    def test_RationalTime(self):
+        rt = opentimelineio.opentime.RationalTime()
+
+        d = rt.to_dict()
+        self.assertTrue(isinstance(d, dict))
+        json.dumps(d)
+
+    def test_TimeRange(self):
+        tr = opentimelineio.opentime.TimeRange()
+
+        d = tr.to_dict()
+        self.assertTrue(isinstance(d, dict))
+        json.dumps(d)
+
+    def test_TimeTransform(self):
+        tt = opentimelineio.opentime.TimeTransform()
+
+        d = tt.to_dict()
+        self.assertTrue(isinstance(d, dict))
+        json.dumps(d)

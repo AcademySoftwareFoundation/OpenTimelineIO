@@ -397,8 +397,8 @@ def __copy__(self, *args, **kwargs):
     raise ValueError("SerializableObjects may not be shallow copied.")
 
 
-@add_method(AnyDictionary)
-def to_dict(self):
+@add_method(AnyDictionary)  # noqa: F811
+def to_dict(self):  # noqa: F811
     """
     Convert to a built-in dict. It will recursively convert all values
     to their corresponding python built-in types.
@@ -406,8 +406,8 @@ def to_dict(self):
     return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
 
 
-@add_method(AnyVector)
-def to_list(self):
+@add_method(AnyVector)  # noqa: F811
+def to_list(self):  # noqa: F811
     """
     Convert to a built-in list. It will recursively convert all values
     to their corresponding python built-in types.
@@ -415,8 +415,8 @@ def to_list(self):
     return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
 
 
-@add_method(SerializableObject)
-def to_dict(self):
+@add_method(SerializableObject)  # noqa: F811
+def to_dict(self):  # noqa: F811
     """
     Convert to a built-in dict. It will recursively convert all values
     to their corresponding python built-in types.
@@ -424,8 +424,8 @@ def to_dict(self):
     return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
 
 
-@add_method(RationalTime)
-def to_dict(self):
+@add_method(RationalTime)  # noqa: F811
+def to_dict(self):  # noqa: F811
     """
     Convert to a built-in dict. It will recursively convert all values
     to their corresponding python built-in types.
@@ -433,8 +433,8 @@ def to_dict(self):
     return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
 
 
-@add_method(TimeRange)
-def to_dict(self):
+@add_method(TimeRange)  # noqa: F811
+def to_dict(self):  # noqa: F811
     """
     Convert to a built-in dict. It will recursively convert all values
     to their corresponding python built-in types.
@@ -442,8 +442,8 @@ def to_dict(self):
     return json.loads(_otio._serialize_json_to_string(_value_to_any(self), {}, 0))
 
 
-@add_method(TimeTransform)
-def to_dict(self):
+@add_method(TimeTransform)  # noqa: F811
+def to_dict(self):  # noqa: F811
     """
     Convert to a built-in dict. It will recursively convert all values
     to their corresponding python built-in types.

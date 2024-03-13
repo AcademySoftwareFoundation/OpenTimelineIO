@@ -10,6 +10,7 @@ https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html 
 import inspect
 import collections
 import copy
+from typing import List
 
 from .. import (
     core,
@@ -99,6 +100,21 @@ class Adapter(plugins.PythonPlugin):
             media_linker_argument_map or {}
         )
 
+        hook_function_argument_map = copy.deepcopy(
+            hook_function_argument_map or {}
+        )
+        hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
+            adapter_argument_map
+        )
+        hook_function_argument_map['media_linker_argument_map'] = (
+            media_linker_argument_map
+        )
+
+        if self.has_feature("hooks"):
+            adapter_argument_map[
+                "hook_function_argument_map"
+            ] = hook_function_argument_map
+
         result = None
 
         if (
@@ -119,15 +135,6 @@ class Adapter(plugins.PythonPlugin):
                 **adapter_argument_map
             )
 
-        hook_function_argument_map = copy.deepcopy(
-            hook_function_argument_map or {}
-        )
-        hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
-            adapter_argument_map
-        )
-        hook_function_argument_map['media_linker_argument_map'] = (
-            media_linker_argument_map
-        )
         result = hooks.run(
             "post_adapter_read",
             result,
@@ -174,6 +181,11 @@ class Adapter(plugins.PythonPlugin):
         # Store file path for use in hooks
         hook_function_argument_map['_filepath'] = filepath
 
+        if self.has_feature("hooks"):
+            adapter_argument_map[
+                "hook_function_argument_map"
+            ] = hook_function_argument_map
+
         input_otio = hooks.run("pre_adapter_write", input_otio,
                                extra_args=hook_function_argument_map)
         if (
@@ -210,13 +222,6 @@ class Adapter(plugins.PythonPlugin):
         **adapter_argument_map
     ):
         """Call the read_from_string function on this adapter."""
-
-        result = self._execute_function(
-            "read_from_string",
-            input_str=input_str,
-            **adapter_argument_map
-        )
-
         hook_function_argument_map = copy.deepcopy(
             hook_function_argument_map or {}
         )
@@ -225,6 +230,17 @@ class Adapter(plugins.PythonPlugin):
         )
         hook_function_argument_map['media_linker_argument_map'] = copy.deepcopy(
             media_linker_argument_map
+        )
+
+        if self.has_feature("hooks"):
+            adapter_argument_map[
+                "hook_function_argument_map"
+            ] = hook_function_argument_map
+
+        result = self._execute_function(
+            "read_from_string",
+            input_str=input_str,
+            **adapter_argument_map
         )
 
         result = hooks.run(
@@ -276,6 +292,16 @@ class Adapter(plugins.PythonPlugin):
             input_otio=input_otio,
             **adapter_argument_map
         )
+
+    def adapter_hook_names(self) -> List[str]:
+        """Returns a list of hooks claimed by the adapter.
+
+        In addition to the hook being declared in the manifest, it should also be
+        returned here, so it can be attributed to the adapter.
+        """
+        if not self.has_feature("hooks"):
+            return []
+        return self._execute_function("adapter_hook_names")
 
     def __str__(self):
         return (
@@ -372,5 +398,6 @@ _FEATURE_MAP = {
     'read': ['read_from_file', 'read_from_string'],
     'write_to_file': ['write_to_file'],
     'write_to_string': ['write_to_string'],
-    'write': ['write_to_file', 'write_to_string']
+    'write': ['write_to_file', 'write_to_string'],
+    'hooks': ['adapter_hook_names']
 }

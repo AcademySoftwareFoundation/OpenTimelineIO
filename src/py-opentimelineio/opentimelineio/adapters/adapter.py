@@ -105,7 +105,7 @@ class Adapter(plugins.PythonPlugin):
             not self.has_feature("read_from_file") and
             self.has_feature("read_from_string")
         ):
-            with open(filepath) as fo:
+            with open(filepath, encoding="utf-8") as fo:
                 contents = fo.read()
             result = self._execute_function(
                 "read_from_string",
@@ -181,7 +181,7 @@ class Adapter(plugins.PythonPlugin):
             self.has_feature("write_to_string")
         ):
             result = self.write_to_string(input_otio, **adapter_argument_map)
-            with open(filepath, 'w') as fo:
+            with open(filepath, 'w', encoding="utf-8") as fo:
                 fo.write(result)
             result = filepath
 

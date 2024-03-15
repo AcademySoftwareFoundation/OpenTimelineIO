@@ -125,7 +125,9 @@ _flatten_next_item(
     }
 }
 
-// make all tracks the same length by adding a gap to the end if they are shorter
+// add a gap to end of a track if it is shorter then the longest track.
+// shorter tracks are clones and get added to the tracks_retainer.
+// a new track will replace the original pointer in the track vector.
 static void
 _normalize_tracks_lengths(std::vector<Track*>& tracks,
                           TrackRetainerVector& tracks_retainer,
@@ -143,22 +145,23 @@ _normalize_tracks_lengths(std::vector<Track*>& tracks,
 
     for(int i = 0; i < tracks.size(); i++)
     {
-        Track *track = tracks[i];
-        RationalTime track_duration = track->duration(error_status);
+        Track *old_track = tracks[i];
+        RationalTime track_duration = old_track->duration(error_status);
         if (track_duration < duration)
         {
-            track = static_cast<Track*>(track->clone(error_status));
+            Track *new_track = static_cast<Track*>(old_track->clone(error_status));
             if (is_error(error_status))
             {
                 return;
             }
-            tracks_retainer.push_back(SerializableObject::Retainer<Track>(track));
-            track->append_child(new Gap(duration - track_duration), error_status);
+            // add track to retainer so it can be freed later
+            tracks_retainer.push_back(SerializableObject::Retainer<Track>(new_track));
+            new_track->append_child(new Gap(duration - track_duration), error_status);
             if (is_error(error_status))
             {
                 return;
             }
-            tracks[i] = track;
+            tracks[i] = new_track;
         }
     }
 }
@@ -167,6 +170,9 @@ Track*
 flatten_stack(Stack* in_stack, ErrorStatus* error_status)
 {
     std::vector<Track*> tracks;
+    // tracks are cloned if they need to be normalized
+    // they get added to this retainer so they can be
+    // freed when the algorithm is complete
     TrackRetainerVector tracks_retainer;
     tracks.reserve(in_stack->children().size());
 
@@ -216,6 +222,9 @@ Track*
 flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
 {
     std::vector<Track*> flat_tracks;
+    // tracks are cloned if they need to be normalized
+    // they get added to this retainer so they can be
+    // freed when the algorithm is complete
     TrackRetainerVector tracks_retainer;
     flat_tracks.reserve(tracks.size());
     for (auto track : tracks)

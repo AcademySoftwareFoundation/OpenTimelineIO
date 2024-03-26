@@ -61,6 +61,7 @@ class PythonPlugin(core.SerializableObject):
         core.SerializableObject.__init__(self)
         self.name = name
         self.filepath = filepath
+        self.version = None
         self._json_path = None
         self._module = None
 
@@ -71,6 +72,13 @@ class PythonPlugin(core.SerializableObject):
         doc=(
             "Absolute path or relative path to adapter module from location of"
             " json."
+        )
+    )
+    version = core.serializable_field(
+        "version",
+        str,
+        doc=(
+            "Version number of plugin defined in manifest."
         )
     )
 

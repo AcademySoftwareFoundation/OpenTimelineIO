@@ -702,6 +702,7 @@ def redact_timeline(timeline):
                 has_target_url = hasattr(media_reference, 'target_url')
                 if has_target_url and media_reference.target_url:
                     media_reference.target_url = f"URL #{counter}"
+                media_reference.name = f"{media_reference.schema_name()} #{counter}"
                 media_reference.metadata.clear()
 
 

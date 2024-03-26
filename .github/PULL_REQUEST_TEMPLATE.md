@@ -1,6 +1,6 @@
 **Link the Issue(s) this Pull Request is related to.**
 
-Each PR should link at least one issue, in the form:
+If there is an associated issue, link it in the form:
 
 ```Fixes #123```
 

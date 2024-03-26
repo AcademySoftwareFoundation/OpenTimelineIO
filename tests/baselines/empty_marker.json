@@ -3,6 +3,7 @@
     "metadata" : {},
     "name" : "",
     "color" : "RED",
+    "comment" : "",
     "marked_range" : {
         "FROM_TEST_FILE" : "empty_timerange.json"
     }

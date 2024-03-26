@@ -77,6 +77,34 @@ public:
         return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
+    // Return whether the value and rate are equal to another RationalTime.
+    // This is different from the operator "==" that rescales the time before
+    // comparison.
+    constexpr bool strictly_equal(RationalTime other) const noexcept
+    {
+        return _value == other._value && _rate == other._rate;
+    }
+
+    // Return a RationalTime with the largest integer value not greater than
+    // this value.
+    RationalTime floor() const
+    {
+        return RationalTime{ std::floor(_value), _rate };
+    }
+
+    // Return a RationalTime with the smallest integer value not less than
+    // this value.
+    RationalTime ceil() const
+    {
+        return RationalTime{ std::ceil(_value), _rate };
+    }
+
+    // Return a RationalTime with the nearest integer value to this value.
+    RationalTime round() const
+    {
+        return RationalTime{ std::round(_value), _rate };
+    }
+
     static RationalTime constexpr duration_from_start_end_time(
         RationalTime start_time,
         RationalTime end_time_exclusive) noexcept
@@ -262,11 +290,6 @@ public:
 private:
     static RationalTime     _invalid_time;
     static constexpr double _invalid_rate = -1;
-
-    RationalTime _floor() const noexcept
-    {
-        return RationalTime{ floor(_value), _rate };
-    }
 
     friend class TimeTransform;
     friend class TimeRange;

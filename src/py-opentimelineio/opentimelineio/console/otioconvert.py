@@ -157,16 +157,11 @@ def _parsed_args():
     if result.version:
         print(f"OpenTimelineIO version: {otio.__version__}")
 
-        if pkg_resources:
-            pkg_resource_plugins = list(
-                pkg_resources.iter_entry_points("opentimelineio.plugins")
-            )
-            if pkg_resource_plugins:
-                print("Plugins from pkg_resources:")
-                for plugin in pkg_resource_plugins:
-                    print(f"   {plugin.dist}")
-            else:
-                print("No pkg_resource plugins installed.")
+        entry_points = otio.plugins.manifest.plugin_entry_points()
+        if entry_points:
+            print("Plugins from installed packages:")
+            for plugin in entry_points:
+                print(f"   {plugin.dist.name} {plugin.dist.version}")
         parser.exit()
 
     if not result.input:

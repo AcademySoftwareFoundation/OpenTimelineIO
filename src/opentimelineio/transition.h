@@ -57,10 +57,10 @@ public:
 
     RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
-    optional<TimeRange>
+    std::optional<TimeRange>
     range_in_parent(ErrorStatus* error_status = nullptr) const;
 
-    optional<TimeRange>
+    std::optional<TimeRange>
     trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
 protected:

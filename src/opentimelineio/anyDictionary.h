@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "opentimelineio/any.h"
 #include "opentimelineio/version.h"
 
+#include <any>
 #include <assert.h>
 #include <map>
 #include <string>
@@ -14,7 +14,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /**
  * An AnyDictionary has exactly the same API as
- *    std::map<std::string, any>
+ *    std::map<std::string, std::any>
  *
  * except that it records a "time-stamp" that bumps monotonically every time an
  * operation that would invalidate iterators is performed.
@@ -26,7 +26,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
  * and take steps to safe-guard themselves from causing a crash.  (Yes,
  * I'm talking to you, Python...)
  */
-class AnyDictionary : private std::map<std::string, any>
+class AnyDictionary : private std::map<std::string, std::any>
 {
 public:
     using map::map;
@@ -125,7 +125,7 @@ public:
     /// @TODO: remove all of these @{
 
     // if key is in this, and the type of key matches the type of result, then
-    // set result to the value of any_cast<type>(this[key]) and return true,
+    // set result to the value of std::any_cast<type>(this[key]) and return true,
     // otherwise return false
     template <typename containedType>
     bool get_if_set(const std::string& key, containedType* result) const
@@ -141,7 +141,7 @@ public:
             && (it->second.type().hash_code()
                 == typeid(containedType).hash_code()))
         {
-            *result = any_cast<containedType>(it->second);
+            *result = std::any_cast<containedType>(it->second);
             return true;
         }
         else
@@ -171,7 +171,7 @@ public:
             && (d_it->second.type().hash_code()
                 == typeid(containedType).hash_code()))
         {
-            *result = any_cast<containedType>(d_it->second);
+            *result = std::any_cast<containedType>(d_it->second);
             return true;
         }
         else

@@ -2,7 +2,6 @@
 # opentimelineio/CMakeLists.txt
 
 set(OPENTIMELINEIO_HEADER_FILES
-    any.h
     anyDictionary.h
     anyVector.h
     clip.h
@@ -22,7 +21,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     marker.h
     mediaReference.h
     missingReference.h
-    optional.h
     safely_typed_any.h
     serializableCollection.h
     serializableObject.h
@@ -83,7 +81,6 @@ target_include_directories(opentimelineio
     PRIVATE       "${IMATH_INCLUDES}"
                   "${PROJECT_SOURCE_DIR}/src"
                   "${PROJECT_SOURCE_DIR}/src/deps"
-                  "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
                   "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
                   "${IMATH_INCLUDES}")
 

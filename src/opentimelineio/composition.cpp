@@ -11,11 +11,11 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Composition::Composition(
-    std::string const&          name,
-    optional<TimeRange> const&  source_range,
-    AnyDictionary const&        metadata,
-    std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers)
+    std::string const&              name,
+    std::optional<TimeRange> const& source_range,
+    AnyDictionary const&            metadata,
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers)
     : Parent(name, source_range, metadata, effects, markers)
 {}
 
@@ -228,12 +228,14 @@ Composition::is_parent_of(Composable const* other) const
     return false;
 }
 
-std::pair<optional<RationalTime>, optional<RationalTime>>
+std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
 Composition::handles_of_child(
     Composable const* /* child */,
     ErrorStatus* /* error_status */) const
 {
-    return std::make_pair(optional<RationalTime>(), optional<RationalTime>());
+    return std::make_pair(
+        std::optional<RationalTime>(),
+        std::optional<RationalTime>());
 }
 
 std::vector<Composition*>
@@ -306,9 +308,9 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
         return TimeRange();
     }
 
-    Composition const*  reference_space = this; // XXX
-    optional<TimeRange> result_range;
-    auto                current = child;
+    Composition const*       reference_space = this; // XXX
+    std::optional<TimeRange> result_range;
+    auto                     current = child;
 
     assert(!parents.empty());
     for (auto parent: parents)
@@ -347,7 +349,7 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
 }
 
 // XXX should have reference_space argument or something
-optional<TimeRange>
+std::optional<TimeRange>
 Composition::trimmed_range_of_child(
     Composable const* child,
     ErrorStatus*      error_status) const
@@ -358,8 +360,8 @@ Composition::trimmed_range_of_child(
         return TimeRange();
     }
 
-    optional<TimeRange> result_range;
-    auto                current = child;
+    std::optional<TimeRange> result_range;
+    auto                     current = child;
 
     assert(!parents.empty());
     for (auto parent: parents)
@@ -398,7 +400,7 @@ Composition::trimmed_range_of_child(
         std::max(source_range()->start_time(), result_range->start_time());
     if (new_start_time > result_range->end_time_exclusive())
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     auto new_duration = std::min(
@@ -407,7 +409,7 @@ Composition::trimmed_range_of_child(
                         - new_start_time;
     if (new_duration.value() < 0)
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     return TimeRange(new_start_time, new_duration);
@@ -430,7 +432,7 @@ Composition::_children_at_time(RationalTime t, ErrorStatus* error_status) const
     return result;
 }
 
-optional<TimeRange>
+std::optional<TimeRange>
 Composition::trim_child_range(TimeRange child_range) const
 {
     if (!source_range())
@@ -445,7 +447,7 @@ Composition::trim_child_range(TimeRange child_range) const
 
     if (past_end_time || before_start_time)
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     if (child_range.start_time() < sr.start_time())
@@ -610,8 +612,8 @@ Composition::_bisect_right(
     RationalTime const&                             tgt,
     std::function<RationalTime(Composable*)> const& key_func,
     ErrorStatus*                                    error_status,
-    optional<int64_t>                               lower_search_bound,
-    optional<int64_t>                               upper_search_bound) const
+    std::optional<int64_t>                          lower_search_bound,
+    std::optional<int64_t>                          upper_search_bound) const
 {
     if (*lower_search_bound < 0)
     {
@@ -625,7 +627,7 @@ Composition::_bisect_right(
     }
     if (!upper_search_bound)
     {
-        upper_search_bound = optional<int64_t>(_children.size());
+        upper_search_bound = std::optional<int64_t>(_children.size());
     }
     int64_t midpoint_index = 0;
     while (*lower_search_bound < *upper_search_bound)
@@ -651,8 +653,8 @@ Composition::_bisect_left(
     RationalTime const&                             tgt,
     std::function<RationalTime(Composable*)> const& key_func,
     ErrorStatus*                                    error_status,
-    optional<int64_t>                               lower_search_bound,
-    optional<int64_t>                               upper_search_bound) const
+    std::optional<int64_t>                          lower_search_bound,
+    std::optional<int64_t>                          upper_search_bound) const
 {
     if (*lower_search_bound < 0)
     {
@@ -666,7 +668,7 @@ Composition::_bisect_left(
     }
     if (!upper_search_bound)
     {
-        upper_search_bound = optional<int64_t>(_children.size());
+        upper_search_bound = std::optional<int64_t>(_children.size());
     }
     int64_t midpoint_index = 0;
     while (*lower_search_bound < *upper_search_bound)

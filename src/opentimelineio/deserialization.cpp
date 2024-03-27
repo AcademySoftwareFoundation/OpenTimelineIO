@@ -219,7 +219,7 @@ public:
         auto e = d.find(key);
         if (e != d.end() && typeid(T) == e->second.type())
         {
-            return &any_cast<const T&>(e->second);
+            return &std::any_cast<const T&>(e->second);
         }
         return nullptr;
     }

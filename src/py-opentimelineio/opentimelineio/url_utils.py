@@ -45,9 +45,10 @@ def filepath_from_url(urlstr):
     Take an url and return a filepath.
 
     URLs can either be encoded according to the `RFC 3986`_ standard or not.
-    Additionally, Windows mapped paths need to be accounted for when processing a
-    URL; however, there are `ongoing discussions`_ about how to best handle this within
-    Python. This function is meant to cover all of these scenarios in the interim.
+    Additionally, Windows mapped drive letter and UNC paths need to be accounted for
+    when processing URL(s); however, there are `ongoing discussions`_ about how to best
+    handle this within Python developer community. This function is meant to cover
+    these scenarios in the interim.
 
     .. _RFC 3986: https://tools.ietf.org/html/rfc3986#section-2.1
     .. _ongoing discussions: https://discuss.python.org/t/file-uris-in-python/15600
@@ -56,17 +57,38 @@ def filepath_from_url(urlstr):
     # Parse provided URL
     parsed_result = urlparse.urlparse(urlstr)
 
+    # De-encode the parsed path
+    decoded_parsed_path = urlparse.unquote(parsed_result.path)
+
     # Convert the parsed URL to a path
-    filepath = PurePath(request.url2pathname(parsed_result.path))
+    filepath = PurePath(request.url2pathname(decoded_parsed_path))
 
     # If the network location is a window drive, reassemble the path
     if PureWindowsPath(parsed_result.netloc).drive:
-        filepath = PurePath(parsed_result.netloc + parsed_result.path)
+        filepath = PurePath(parsed_result.netloc + decoded_parsed_path)
 
-    # Otherwise check if the specified index is a windows drive, then offset the path
+    # If the specified index is a windows drive, then append it to the other parts
+    elif PureWindowsPath(filepath.parts[0]).drive:
+        filepath = PurePosixPath(filepath.drive, *filepath.parts[1:])
+
+    # If the specified index is a windows drive, then offset the path
     elif PureWindowsPath(filepath.parts[1]).drive:
         # Remove leading "/" if/when `request.url2pathname` yields "/S:/path/file.ext"
         filepath = PurePosixPath(*filepath.parts[1:])
+
+    # Should catch UNC paths,
+    # as parsing "file:///some/path/to/file.ext" doesn't provide a netloc
+    elif parsed_result.netloc and parsed_result.netloc != 'localhost':
+        # Paths of type: "file://host/share/path/to/file.ext" provide "host" as netloc
+        filepath = PurePath('//', parsed_result.netloc + decoded_parsed_path)
+
+        # Executing `as_posix` on Windows seems to generate a path with only
+        # 1 leading `/`, so we insert another `/` at the front of the string path
+        # to match Linux and Windows UNC conventions and return it.
+        conformed_filepath = filepath.as_posix()
+        if not conformed_filepath.startswith('//'):
+            conformed_filepath = '/' + conformed_filepath
+        return conformed_filepath
 
     # Convert "\" to "/" if needed
     return filepath.as_posix()

@@ -157,7 +157,11 @@ main(int argc, char** argv)
             new otio::ExternalReference());
 
         SerializableObject::Retainer<Clip> clip(new Clip(
-            "unit_clip", media, nullopt, AnyDictionary(), high_quality));
+            "unit_clip",
+            media,
+            std::nullopt,
+            AnyDictionary(),
+            high_quality));
 
         assertEqual(clip->active_media_reference_key().c_str(), high_quality);
         assertEqual(clip->media_reference(), media.value);

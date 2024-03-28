@@ -7,9 +7,9 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Timeline::Timeline(
-    std::string const&     name,
-    optional<RationalTime> global_start_time,
-    AnyDictionary const&   metadata)
+    std::string const&          name,
+    std::optional<RationalTime> global_start_time,
+    AnyDictionary const&        metadata)
     : SerializableObjectWithMetadata(name, metadata)
     , _global_start_time(global_start_time)
     , _tracks(new Stack("tracks"))
@@ -76,9 +76,9 @@ Timeline::audio_tracks() const
 
 std::vector<SerializableObject::Retainer<Clip>>
 Timeline::find_clips(
-    ErrorStatus*               error_status,
-    optional<TimeRange> const& search_range,
-    bool                       shallow_search) const
+    ErrorStatus*                    error_status,
+    std::optional<TimeRange> const& search_range,
+    bool                            shallow_search) const
 {
     return _tracks.value->find_clips(
         error_status,

@@ -6,8 +6,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
-#include "py-opentimelineio/bindings-common/casters.h"
-#include "opentimelineio/any.h"
 #include "opentimelineio/stringUtils.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/vectorIndexing.h"
@@ -146,10 +144,10 @@ struct PyAny {
         : a(create_safely_typed_any(value)) {
     }
 
-    any a;
+    std::any a;
 };
 
-pybind11::object any_to_py(any const& a, bool top_level = false);
+pybind11::object any_to_py(std::any const& a, bool top_level = false);
 pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);

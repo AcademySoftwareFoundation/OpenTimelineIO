@@ -58,9 +58,9 @@ public:
     //
     // The search is recursive unless shallow_search is set to true.
     std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*               error_status   = nullptr,
-        optional<TimeRange> const& search_range   = nullopt,
-        bool                       shallow_search = false) const;
+        ErrorStatus*                    error_status   = nullptr,
+        std::optional<TimeRange> const& search_range   = std::nullopt,
+        bool                            shallow_search = false) const;
 
     // Find child objects that match the given template type.
     //
@@ -69,9 +69,9 @@ public:
     // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
     std::vector<Retainer<T>> find_children(
-        ErrorStatus*        error_status   = nullptr,
-        optional<TimeRange> search_range   = nullopt,
-        bool                shallow_search = false) const;
+        ErrorStatus*             error_status   = nullptr,
+        std::optional<TimeRange> search_range   = std::nullopt,
+        bool                     shallow_search = false) const;
 
 protected:
     virtual ~SerializableCollection();
@@ -86,9 +86,9 @@ private:
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
 SerializableCollection::find_children(
-    ErrorStatus*        error_status,
-    optional<TimeRange> search_range,
-    bool                shallow_search) const
+    ErrorStatus*             error_status,
+    std::optional<TimeRange> search_range,
+    bool                     shallow_search) const
 {
     std::vector<Retainer<T>> out;
     for (const auto& child: _children)

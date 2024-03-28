@@ -26,7 +26,7 @@ SerializableObject::Reader::fwd_type_name_for_error_message(
     return type_name_for_error_message(t);
 }
 std::string
-SerializableObject::Reader::fwd_type_name_for_error_message(any const& a)
+SerializableObject::Reader::fwd_type_name_for_error_message(std::any const& a)
 {
     return type_name_for_error_message(a);
 }
@@ -119,7 +119,7 @@ SerializableObject::to_json_string(
     int                       indent) const
 {
     return serialize_json_to_string(
-        any(Retainer<>(this)),
+        std::any(Retainer<>(this)),
         schema_version_targets,
         error_status,
         indent);
@@ -133,7 +133,7 @@ SerializableObject::to_json_file(
     int                       indent) const
 {
     return serialize_json_to_file(
-        any(Retainer<>(this)),
+        std::any(Retainer<>(this)),
         file_name,
         schema_version_targets,
         error_status,
@@ -145,7 +145,7 @@ SerializableObject::from_json_string(
     std::string const& input,
     ErrorStatus*       error_status)
 {
-    any dest;
+    std::any dest;
 
     if (!deserialize_json_from_string(input, &dest, error_status))
     {
@@ -165,7 +165,7 @@ SerializableObject::from_json_string(
         return nullptr;
     }
 
-    return any_cast<Retainer<>&>(dest).take_value();
+    return std::any_cast<Retainer<>&>(dest).take_value();
 }
 
 SerializableObject*
@@ -173,7 +173,7 @@ SerializableObject::from_json_file(
     std::string const& file_name,
     ErrorStatus*       error_status)
 {
-    any dest;
+    std::any dest;
 
     if (!deserialize_json_from_file(file_name, &dest, error_status))
     {
@@ -193,7 +193,7 @@ SerializableObject::from_json_file(
         return nullptr;
     }
 
-    return any_cast<Retainer<>&>(dest).take_value();
+    return std::any_cast<Retainer<>&>(dest).take_value();
 }
 
 std::string

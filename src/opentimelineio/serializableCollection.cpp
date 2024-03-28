@@ -106,9 +106,9 @@ SerializableCollection::write_to(Writer& writer) const
 
 std::vector<SerializableObject::Retainer<Clip>>
 SerializableCollection::find_clips(
-    ErrorStatus*               error_status,
-    optional<TimeRange> const& search_range,
-    bool                       shallow_search) const
+    ErrorStatus*                    error_status,
+    std::optional<TimeRange> const& search_range,
+    bool                            shallow_search) const
 {
     return find_children<Clip>(error_status, search_range, shallow_search);
 }

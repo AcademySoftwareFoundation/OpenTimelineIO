@@ -34,10 +34,10 @@ public:
     using Parent = Composition;
 
     Track(
-        std::string const&         name         = std::string(),
-        optional<TimeRange> const& source_range = nullopt,
-        std::string const&                      = Kind::video,
-        AnyDictionary const& metadata           = AnyDictionary());
+        std::string const&              name         = std::string(),
+        std::optional<TimeRange> const& source_range = std::nullopt,
+        std::string const&              kind         = Kind::video,
+        AnyDictionary const&            metadata     = AnyDictionary());
 
     std::string kind() const noexcept { return _kind; }
 
@@ -52,7 +52,8 @@ public:
     TimeRange
     available_range(ErrorStatus* error_status = nullptr) const override;
 
-    std::pair<optional<RationalTime>, optional<RationalTime>> handles_of_child(
+    std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
+    handles_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const override;
 
@@ -64,7 +65,7 @@ public:
     std::map<Composable*, TimeRange>
     range_of_all_children(ErrorStatus* error_status = nullptr) const override;
 
-    optional<IMATH_NAMESPACE::Box2d>
+    std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
     // Find child clips.
@@ -73,9 +74,9 @@ public:
     //
     // The search is recursive unless shallow_search is set to true.
     std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*               error_status   = nullptr,
-        optional<TimeRange> const& search_range   = nullopt,
-        bool                       shallow_search = false) const;
+        ErrorStatus*                    error_status   = nullptr,
+        std::optional<TimeRange> const& search_range   = std::nullopt,
+        bool                            shallow_search = false) const;
 
 protected:
     virtual ~Track();

@@ -51,7 +51,7 @@ Transition::duration(ErrorStatus* /* error_status */) const
     return _in_offset + _out_offset;
 }
 
-optional<TimeRange>
+std::optional<TimeRange>
 Transition::range_in_parent(ErrorStatus* error_status) const
 {
     if (!parent())
@@ -68,7 +68,7 @@ Transition::range_in_parent(ErrorStatus* error_status) const
     return parent()->range_of_child(this, error_status);
 }
 
-optional<TimeRange>
+std::optional<TimeRange>
 Transition::trimmed_range_in_parent(ErrorStatus* error_status) const
 {
     if (!parent())

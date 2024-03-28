@@ -21,11 +21,11 @@ public:
     using Parent = Item;
 
     Composition(
-        std::string const&          name         = std::string(),
-        optional<TimeRange> const&  source_range = nullopt,
-        AnyDictionary const&        metadata     = AnyDictionary(),
-        std::vector<Effect*> const& effects      = std::vector<Effect*>(),
-        std::vector<Marker*> const& markers      = std::vector<Marker*>());
+        std::string const&              name         = std::string(),
+        std::optional<TimeRange> const& source_range = std::nullopt,
+        AnyDictionary const&            metadata     = AnyDictionary(),
+        std::vector<Effect*> const&     effects      = std::vector<Effect*>(),
+        std::vector<Marker*> const&     markers      = std::vector<Marker*>());
 
     virtual std::string composition_kind() const;
 
@@ -63,7 +63,7 @@ public:
 
     bool is_parent_of(Composable const* other) const;
 
-    virtual std::pair<optional<RationalTime>, optional<RationalTime>>
+    virtual std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
     handles_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
@@ -79,11 +79,11 @@ public:
     TimeRange range_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
-    optional<TimeRange> trimmed_range_of_child(
+    std::optional<TimeRange> trimmed_range_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
 
-    optional<TimeRange> trim_child_range(TimeRange child_range) const;
+    std::optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
     bool has_child(Composable* child) const;
 
@@ -112,9 +112,9 @@ public:
     // The search is recursive unless shallow_search is set to true.
     template <typename T = Composable>
     std::vector<Retainer<T>> find_children(
-        ErrorStatus*        error_status   = nullptr,
-        optional<TimeRange> search_range   = nullopt,
-        bool                shallow_search = false) const;
+        ErrorStatus*             error_status   = nullptr,
+        std::optional<TimeRange> search_range   = std::nullopt,
+        bool                     shallow_search = false) const;
 
 protected:
     virtual ~Composition();
@@ -143,9 +143,9 @@ private:
     int64_t _bisect_right(
         RationalTime const&                             tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus*                                    error_status = nullptr,
-        optional<int64_t> lower_search_bound = optional<int64_t>(0),
-        optional<int64_t> upper_search_bound = nullopt) const;
+        ErrorStatus*                                    error_status       = nullptr,
+        std::optional<int64_t>                          lower_search_bound = std::optional<int64_t>(0),
+        std::optional<int64_t>                          upper_search_bound = std::nullopt) const;
 
     // Return the index of the last item in seq such that all e in seq[:index]
     // have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
@@ -159,9 +159,9 @@ private:
     int64_t _bisect_left(
         RationalTime const&                             tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus*                                    error_status = nullptr,
-        optional<int64_t> lower_search_bound = optional<int64_t>(0),
-        optional<int64_t> upper_search_bound = nullopt) const;
+        ErrorStatus*                                    error_status       = nullptr,
+        std::optional<int64_t>                          lower_search_bound = std::optional<int64_t>(0),
+        std::optional<int64_t>                          upper_search_bound = std::nullopt) const;
 
     std::vector<Retainer<Composable>> _children;
 
@@ -173,9 +173,9 @@ private:
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
 Composition::find_children(
-    ErrorStatus*        error_status,
-    optional<TimeRange> search_range,
-    bool                shallow_search) const
+    ErrorStatus*             error_status,
+    std::optional<TimeRange> search_range,
+    bool                     shallow_search) const
 {
     std::vector<Retainer<T>>          out;
     std::vector<Retainer<Composable>> children;

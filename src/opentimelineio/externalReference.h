@@ -20,11 +20,10 @@ public:
     using Parent = MediaReference;
 
     ExternalReference(
-        std::string const&                      target_url      = std::string(),
-        optional<TimeRange> const&              available_range = nullopt,
-        AnyDictionary const&                    metadata = AnyDictionary(),
-        optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
-            nullopt);
+        std::string const&                           target_url             = std::string(),
+        std::optional<TimeRange> const&              available_range        = std::nullopt,
+        AnyDictionary const&                         metadata               = AnyDictionary(),
+        std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = std::nullopt);
 
     std::string target_url() const noexcept { return _target_url; }
 

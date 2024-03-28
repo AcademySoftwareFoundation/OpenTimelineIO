@@ -3,7 +3,6 @@
 
 #include "opentimelineio/serialization.h"
 #include "errorStatus.h"
-#include "nonstd/optional.hpp"
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/unknownSchema.h"
@@ -148,7 +147,7 @@ public:
 
         if (_stack.size() == 1)
         {
-            any newstack(std::move(a));
+            std::any newstack(std::move(a));
             _root.swap(newstack);
         }
         else
@@ -161,13 +160,13 @@ public:
             }
             else
             {
-                any newstack(std::move(a));
+                std::any newstack(std::move(a));
                 top.array.emplace_back(newstack);
             }
         }
     }
 
-    void _store(any&& a)
+    void _store(std::any&& a)
     {
         if (has_errored())
         {
@@ -192,13 +191,13 @@ public:
         }
     }
 
-    void write_null_value() override { _store(any()); }
-    void write_value(bool value) override { _store(any(value)); }
-    void write_value(int value) override { _store(any(value)); }
-    void write_value(int64_t value) override { _store(any(value)); }
-    void write_value(uint64_t value) override { _store(any(value)); }
-    void write_value(std::string const& value) override { _store(any(value)); }
-    void write_value(double value) override { _store(any(value)); }
+    void write_null_value() override { _store(std::any()); }
+    void write_value(bool value) override { _store(std::any(value)); }
+    void write_value(int value) override { _store(std::any(value)); }
+    void write_value(int64_t value) override { _store(std::any(value)); }
+    void write_value(uint64_t value) override { _store(std::any(value)); }
+    void write_value(std::string const& value) override { _store(std::any(value)); }
+    void write_value(double value) override { _store(std::any(value)); }
 
     void write_value(RationalTime const& value) override
     {
@@ -209,11 +208,11 @@ public:
                 { "value", value.value() },
                 { "rate", value.rate() },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
     }
     void write_value(TimeRange const& value) override
@@ -226,11 +225,11 @@ public:
                 { "duration", value.duration() },
                 { "start_time", value.start_time() },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
     }
     void write_value(TimeTransform const& value) override
@@ -243,11 +242,11 @@ public:
                 { "rate", value.rate() },
                 { "scale", value.scale() },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
     }
     void write_value(SerializableObject::ReferenceId value) override
@@ -258,13 +257,13 @@ public:
                 { "OTIO_SCHEMA", "SerializableObjectRef.1" },
                 { "id", value.id.c_str() },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
-        _store(any(value));
+        _store(std::any(value));
     }
 
     void write_value(IMATH_NAMESPACE::V2d const& value)
@@ -277,11 +276,11 @@ public:
                 { "x", value.x },
                 { "y", value.y },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
     }
 
@@ -294,11 +293,11 @@ public:
                 { "min", value.min },
                 { "max", value.max },
             };
-            _store(any(std::move(result)));
+            _store(std::any(std::move(result)));
         }
         else
         {
-            _store(any(value));
+            _store(std::any(value));
         }
     }
     // @}
@@ -349,7 +348,7 @@ public:
                 AnyVector va;
                 va.swap(top.array);
                 _stack.pop_back();
-                _store(any(std::move(va)));
+                _store(std::any(std::move(va)));
             }
         }
     }
@@ -407,7 +406,7 @@ public:
     }
 
 private:
-    any                                     _root;
+    std::any                                _root;
     SerializableObject::Reader::_Resolver   _resolver;
     std::function<void(ErrorStatus const&)> _error_function;
 
@@ -635,26 +634,28 @@ private:
 
 template <typename T>
 bool
-_simple_any_comparison(any const& lhs, any const& rhs)
+_simple_any_comparison(std::any const& lhs, std::any const& rhs)
 {
     return lhs.type() == typeid(T) && rhs.type() == typeid(T)
-           && any_cast<T const&>(lhs) == any_cast<T const&>(rhs);
+           && std::any_cast<T const&>(lhs) == std::any_cast<T const&>(rhs);
 }
 
 template <>
 bool
-_simple_any_comparison<void>(any const& lhs, any const& rhs)
+_simple_any_comparison<void>(std::any const& lhs, std::any const& rhs)
 {
     return lhs.type() == typeid(void) && rhs.type() == typeid(void);
 }
 
 template <>
 bool
-_simple_any_comparison<char const*>(any const& lhs, any const& rhs)
+_simple_any_comparison<char const*>(std::any const& lhs, std::any const& rhs)
 {
     return lhs.type() == typeid(char const*)
            && rhs.type() == typeid(char const*)
-           && !strcmp(any_cast<char const*>(lhs), any_cast<char const*>(rhs));
+           && !strcmp(
+               std::any_cast<char const*>(lhs),
+               std::any_cast<char const*>(rhs));
 }
 
 void
@@ -665,51 +666,53 @@ SerializableObject::Writer::_build_dispatch_tables()
      */
 
     auto& wt          = _write_dispatch_table;
-    wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
-    wt[&typeid(bool)] = [this](any const& value) {
-        _encoder.write_value(any_cast<bool>(value));
+    wt[&typeid(void)] = [this](std::any const&) {
+        _encoder.write_null_value();
     };
-    wt[&typeid(int64_t)] = [this](any const& value) {
-        _encoder.write_value(any_cast<int64_t>(value));
+    wt[&typeid(bool)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<bool>(value));
     };
-    wt[&typeid(double)] = [this](any const& value) {
-        _encoder.write_value(any_cast<double>(value));
+    wt[&typeid(int64_t)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<int64_t>(value));
     };
-    wt[&typeid(std::string)] = [this](any const& value) {
-        _encoder.write_value(any_cast<std::string const&>(value));
+    wt[&typeid(double)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<double>(value));
     };
-    wt[&typeid(char const*)] = [this](any const& value) {
-        _encoder.write_value(std::string(any_cast<char const*>(value)));
+    wt[&typeid(std::string)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<std::string const&>(value));
     };
-    wt[&typeid(RationalTime)] = [this](any const& value) {
-        _encoder.write_value(any_cast<RationalTime const&>(value));
+    wt[&typeid(char const*)] = [this](std::any const& value) {
+        _encoder.write_value(std::string(std::any_cast<char const*>(value)));
     };
-    wt[&typeid(TimeRange)] = [this](any const& value) {
-        _encoder.write_value(any_cast<TimeRange const&>(value));
+    wt[&typeid(RationalTime)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<RationalTime const&>(value));
     };
-    wt[&typeid(TimeTransform)] = [this](any const& value) {
-        _encoder.write_value(any_cast<TimeTransform const&>(value));
+    wt[&typeid(TimeRange)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<TimeRange const&>(value));
     };
-    wt[&typeid(IMATH_NAMESPACE::V2d)] = [this](any const& value) {
-        _encoder.write_value(any_cast<IMATH_NAMESPACE::V2d const&>(value));
+    wt[&typeid(TimeTransform)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<TimeTransform const&>(value));
     };
-    wt[&typeid(IMATH_NAMESPACE::Box2d)] = [this](any const& value) {
-        _encoder.write_value(any_cast<IMATH_NAMESPACE::Box2d const&>(value));
+    wt[&typeid(IMATH_NAMESPACE::V2d)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<IMATH_NAMESPACE::V2d const&>(value));
+    };
+    wt[&typeid(IMATH_NAMESPACE::Box2d)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<IMATH_NAMESPACE::Box2d const&>(value));
     };
 
     /*
      * These next recurse back through the Writer itself:
      */
-    wt[&typeid(SerializableObject::Retainer<>)] = [this](any const& value) {
-        this->write(_no_key, any_cast<SerializableObject::Retainer<>>(value));
+    wt[&typeid(SerializableObject::Retainer<>)] = [this](std::any const& value) {
+        this->write(_no_key, std::any_cast<SerializableObject::Retainer<>>(value));
     };
 
-    wt[&typeid(AnyDictionary)] = [this](any const& value) {
-        this->write(_no_key, any_cast<AnyDictionary const&>(value));
+    wt[&typeid(AnyDictionary)] = [this](std::any const& value) {
+        this->write(_no_key, std::any_cast<AnyDictionary const&>(value));
     };
 
-    wt[&typeid(AnyVector)] = [this](any const& value) {
-        this->write(_no_key, any_cast<AnyVector const&>(value));
+    wt[&typeid(AnyVector)] = [this](std::any const& value) {
+        this->write(_no_key, std::any_cast<AnyVector const&>(value));
     };
 
     /*
@@ -741,16 +744,18 @@ SerializableObject::Writer::_build_dispatch_tables()
     /*
      * These next recurse back through the Writer itself:
      */
-    et[&typeid(AnyDictionary)] = [this](any const& lhs, any const& rhs) {
+    et[&typeid(AnyDictionary)] = [this](std::any const& lhs, std::any const& rhs) {
         return _any_dict_equals(lhs, rhs);
     };
-    et[&typeid(AnyVector)] = [this](any const& lhs, any const& rhs) {
+    et[&typeid(AnyVector)] = [this](std::any const& lhs, std::any const& rhs) {
         return _any_array_equals(lhs, rhs);
     };
 }
 
 bool
-SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
+SerializableObject::Writer::_any_dict_equals(
+    std::any const& lhs,
+    std::any const& rhs)
 {
     if (lhs.type() != typeid(AnyDictionary)
         || rhs.type() != typeid(AnyDictionary))
@@ -758,8 +763,8 @@ SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
         return false;
     }
 
-    AnyDictionary const& ld = any_cast<AnyDictionary const&>(lhs);
-    AnyDictionary const& rd = any_cast<AnyDictionary const&>(rhs);
+    AnyDictionary const& ld = std::any_cast<AnyDictionary const&>(lhs);
+    AnyDictionary const& rd = std::any_cast<AnyDictionary const&>(rhs);
 
     auto r_it = rd.begin();
 
@@ -781,15 +786,17 @@ SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs)
 }
 
 bool
-SerializableObject::Writer::_any_array_equals(any const& lhs, any const& rhs)
+SerializableObject::Writer::_any_array_equals(
+    std::any const& lhs,
+    std::any const& rhs)
 {
     if (lhs.type() != typeid(AnyVector) || rhs.type() != typeid(AnyVector))
     {
         return false;
     }
 
-    AnyVector const& lv = any_cast<AnyVector const&>(lhs);
-    AnyVector const& rv = any_cast<AnyVector const&>(rhs);
+    AnyVector const& lv = std::any_cast<AnyVector const&>(lhs);
+    AnyVector const& rv = std::any_cast<AnyVector const&>(rhs);
 
     if (lv.size() != rv.size())
     {
@@ -808,7 +815,9 @@ SerializableObject::Writer::_any_array_equals(any const& lhs, any const& rhs)
 }
 
 bool
-SerializableObject::Writer::_any_equals(any const& lhs, any const& rhs)
+SerializableObject::Writer::_any_equals(
+    std::any const& lhs,
+    std::any const& rhs)
 {
     auto e = _equality_dispatch_table.find(&lhs.type());
     return (e != _equality_dispatch_table.end()) && e->second(lhs, rhs);
@@ -816,7 +825,7 @@ SerializableObject::Writer::_any_equals(any const& lhs, any const& rhs)
 
 bool
 SerializableObject::Writer::write_root(
-    any const&                value,
+    std::any const&           value,
     Encoder&                  encoder,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status)
@@ -881,8 +890,8 @@ SerializableObject::Writer::write(std::string const& key, TimeRange value)
 
 void
 SerializableObject::Writer::write(
-    std::string const&     key,
-    optional<RationalTime> value)
+    std::string const&          key,
+    std::optional<RationalTime> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -890,8 +899,8 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const&  key,
-    optional<TimeRange> value)
+    std::string const&       key,
+    std::optional<TimeRange> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -899,8 +908,8 @@ SerializableObject::Writer::write(
 
 void
 SerializableObject::Writer::write(
-    std::string const&               key,
-    optional<IMATH_NAMESPACE::Box2d> value)
+    std::string const&                    key,
+    std::optional<IMATH_NAMESPACE::Box2d> value)
 {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
@@ -963,7 +972,7 @@ SerializableObject::Writer::write(
     const std::string& schema_name    = value->schema_name();
     int                schema_version = value->schema_version();
 
-    any downgraded = {};
+    std::any downgraded = {};
 
     // if there is a manifest & the encoder is not converting to AnyDictionary
     if ((_downgrade_version_manifest != nullptr)
@@ -1034,9 +1043,9 @@ SerializableObject::Writer::write(
 
     // write the contents of the object to the encoder, either the downgraded
     // anydictionary or the SerializableObject
-    if (!(downgraded.empty()))
+    if (downgraded.has_value())
     {
-        for (const auto& kv: any_cast<AnyDictionary>(downgraded))
+        for (const auto& kv: std::any_cast<AnyDictionary>(downgraded))
         {
             this->write(kv.first, kv.second);
         }
@@ -1112,7 +1121,7 @@ SerializableObject::Writer::write(
 }
 
 void
-SerializableObject::Writer::write(std::string const& key, any const& value)
+SerializableObject::Writer::write(std::string const& key, std::any const& value)
 {
     std::type_info const& type = value.type();
 
@@ -1147,7 +1156,7 @@ SerializableObject::Writer::write(std::string const& key, any const& value)
         std::string s;
         std::string bad_type_name =
             (type == typeid(UnknownType)) ? type_name_for_error_message(
-                any_cast<UnknownType>(value).type_name)
+                std::any_cast<UnknownType>(value).type_name)
                                           : type_name_for_error_message(type);
 
         if (&key != &_no_key)
@@ -1184,8 +1193,8 @@ SerializableObject::is_equivalent_to(SerializableObject const& other) const
     SerializableObject::Writer w1(e1, {});
     SerializableObject::Writer w2(e2, {});
 
-    w1.write(w1._no_key, any(Retainer<>(this)));
-    w2.write(w2._no_key, any(Retainer<>(&other)));
+    w1.write(w1._no_key, std::any(Retainer<>(this)));
+    w2.write(w2._no_key, std::any(Retainer<>(&other)));
 
     return (
         !e1.has_errored() && !e2.has_errored()
@@ -1199,7 +1208,7 @@ SerializableObject::clone(ErrorStatus* error_status) const
         CloningEncoder::ResultObjectPolicy::CloneBackToSerializableObject);
     SerializableObject::Writer w(e, {});
 
-    w.write(w._no_key, any(Retainer<>(this)));
+    w.write(w._no_key, std::any(Retainer<>(this)));
     if (e.has_errored(error_status))
     {
         return nullptr;
@@ -1216,14 +1225,14 @@ SerializableObject::clone(ErrorStatus* error_status) const
     e._resolver.finalize(error_function);
 
     return e._root.type() == typeid(SerializableObject::Retainer<>)
-               ? any_cast<SerializableObject::Retainer<>&>(e._root).take_value()
+               ? std::any_cast<SerializableObject::Retainer<>&>(e._root).take_value()
                : nullptr;
 }
 
 // to json_string
 std::string
 serialize_json_to_string_pretty(
-    const any&                value,
+    const std::any&           value,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status,
     int                       indent)
@@ -1257,7 +1266,7 @@ serialize_json_to_string_pretty(
 // to json_string
 std::string
 serialize_json_to_string_compact(
-    const any&                value,
+    const std::any&           value,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status)
 {
@@ -1288,7 +1297,7 @@ serialize_json_to_string_compact(
 // to json_string
 std::string
 serialize_json_to_string(
-    const any&                value,
+    const std::any&           value,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status,
     int                       indent)
@@ -1309,7 +1318,7 @@ serialize_json_to_string(
 
 bool
 serialize_json_to_file(
-    any const&                value,
+    std::any const&           value,
     std::string const&        file_name,
     const schema_version_map* schema_version_targets,
     ErrorStatus*              error_status,

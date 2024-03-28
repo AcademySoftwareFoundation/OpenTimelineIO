@@ -99,10 +99,10 @@ main(int argc, char** argv)
         tr->append_child(cl0);
         tr->append_child(st);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tr->find_children<otio::Clip>(&err, nullopt, true);
+        auto result = tr->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->find_children<otio::Clip>(&err, nullopt, false);
+        result = tr->find_children<otio::Clip>(&err, std::nullopt, false);
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);

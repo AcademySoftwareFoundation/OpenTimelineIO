@@ -342,9 +342,9 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
     }
 
     return (reference_space != this) ? transformed_time_range(
-               *result_range,
-               reference_space,
-               error_status)
+                                           *result_range,
+                                           reference_space,
+                                           error_status)
                                      : *result_range;
 }
 

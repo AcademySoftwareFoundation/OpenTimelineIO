@@ -617,7 +617,8 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     {
         IMATH_NAMESPACE::V2d min, max;
         return _fetch("min", &min) && _fetch("max", &max)
-                   ? std::any(IMATH_NAMESPACE::Box2d(std::move(min), std::move(max)))
+                   ? std::any(
+                         IMATH_NAMESPACE::Box2d(std::move(min), std::move(max)))
                    : std::any();
     }
     else
@@ -776,13 +777,17 @@ SerializableObject::Reader::_read_optional(
     return true;
 }
 bool
-SerializableObject::Reader::read(std::string const& key, std::optional<bool>* value)
+SerializableObject::Reader::read(
+    std::string const&   key,
+    std::optional<bool>* value)
 {
     return _read_optional(key, value);
 }
 
 bool
-SerializableObject::Reader::read(std::string const& key, std::optional<int>* value)
+SerializableObject::Reader::read(
+    std::string const&  key,
+    std::optional<int>* value)
 {
     return _read_optional(key, value);
 }

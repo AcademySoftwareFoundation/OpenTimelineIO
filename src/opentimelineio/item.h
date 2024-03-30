@@ -39,7 +39,10 @@ public:
 
     void set_enabled(bool enabled) { _enabled = enabled; }
 
-    std::optional<TimeRange> source_range() const noexcept { return _source_range; }
+    std::optional<TimeRange> source_range() const noexcept
+    {
+        return _source_range;
+    }
 
     void set_source_range(std::optional<TimeRange> const& source_range)
     {

@@ -2,15 +2,15 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include "opentimelineio/stackAlgorithm.h"
+#include "opentimelineio/gap.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
-#include "opentimelineio/gap.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
-typedef std::vector<SerializableObject::Retainer<Track>> TrackRetainerVector;
+typedef std::vector<SerializableObject::Retainer<Track>>   TrackRetainerVector;
 
 static void
 _flatten_next_item(
@@ -129,9 +129,10 @@ _flatten_next_item(
 // shorter tracks are clones and get added to the tracks_retainer.
 // a new track will replace the original pointer in the track vector.
 static void
-_normalize_tracks_lengths(std::vector<Track*>& tracks,
-                          TrackRetainerVector& tracks_retainer,
-                          ErrorStatus*         error_status)
+_normalize_tracks_lengths(
+    std::vector<Track*>& tracks,
+    TrackRetainerVector& tracks_retainer,
+    ErrorStatus*         error_status)
 {
     RationalTime duration;
     for (auto track: tracks)
@@ -143,20 +144,24 @@ _normalize_tracks_lengths(std::vector<Track*>& tracks,
         }
     }
 
-    for(int i = 0; i < tracks.size(); i++)
+    for (int i = 0; i < tracks.size(); i++)
     {
-        Track *old_track = tracks[i];
+        Track*       old_track      = tracks[i];
         RationalTime track_duration = old_track->duration(error_status);
         if (track_duration < duration)
         {
-            Track *new_track = static_cast<Track*>(old_track->clone(error_status));
+            Track* new_track =
+                static_cast<Track*>(old_track->clone(error_status));
             if (is_error(error_status))
             {
                 return;
             }
             // add track to retainer so it can be freed later
-            tracks_retainer.push_back(SerializableObject::Retainer<Track>(new_track));
-            new_track->append_child(new Gap(duration - track_duration), error_status);
+            tracks_retainer.push_back(
+                SerializableObject::Retainer<Track>(new_track));
+            new_track->append_child(
+                new Gap(duration - track_duration),
+                error_status);
             if (is_error(error_status))
             {
                 return;
@@ -227,7 +232,7 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
     // freed when the algorithm is complete
     TrackRetainerVector tracks_retainer;
     flat_tracks.reserve(tracks.size());
-    for (auto track : tracks)
+    for (auto track: tracks)
     {
         flat_tracks.push_back(track);
     }

@@ -264,7 +264,13 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
     def run(self):
         super().run()
 
-        if not self.dry_run and not self.editable_mode:
+        # editable_mode isn't always present
+        try:
+            editable_mode = self.editable_mode
+        except AttributeError:
+            editable_mode = False
+
+        if not self.dry_run and not editable_mode:
             # Only run when not in dry-mode (a dry run should not have any side effect)
             # and in non-editable mode. We don't want to edit files when in editable
             # mode because that could lead to modifications to the source files.

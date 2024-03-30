@@ -218,7 +218,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.16.0.dev1",
+    "version": "0.16.0",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Apache 2.0 License',
@@ -264,7 +264,13 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
     def run(self):
         super().run()
 
-        if not self.dry_run and not self.editable_mode:
+        # editable_mode isn't always present
+        try:
+            editable_mode = self.editable_mode
+        except AttributeError:
+            editable_mode = False
+
+        if not self.dry_run and not editable_mode:
             # Only run when not in dry-mode (a dry run should not have any side effect)
             # and in non-editable mode. We don't want to edit files when in editable
             # mode because that could lead to modifications to the source files.

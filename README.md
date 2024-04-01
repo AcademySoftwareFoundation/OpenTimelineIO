@@ -67,6 +67,12 @@ To provide interoperability with other file formats or applications lacking a
 native integration, the opentimelineio community has built a number of python
 adapter plugins. This includes Final Cut Pro XML, AAF, CMX 3600 EDL, and more.
 
+**Note: v0.16 will be the last release of the
+[OpenTimelineIO PyPI package](https://pypi.org/project/OpenTimelineIO/)
+to include the full set of adapter plugins. If you rely on these please use the
+[OpenTimelineIO-Plugins PyPI Package](https://pypi.org/project/OpenTimelineIO-Plugins/)
+to continue to receive them. Each OpenTimelineIO release will have a matching OpenTimelineIO-Plugins release.**
+
 For more information about this, including supported formats, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
 Other Plugins

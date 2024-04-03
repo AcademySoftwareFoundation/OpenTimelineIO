@@ -196,7 +196,10 @@ public:
     void write_value(int value) override { _store(std::any(value)); }
     void write_value(int64_t value) override { _store(std::any(value)); }
     void write_value(uint64_t value) override { _store(std::any(value)); }
-    void write_value(std::string const& value) override { _store(std::any(value)); }
+    void write_value(std::string const& value) override
+    {
+        _store(std::any(value));
+    }
     void write_value(double value) override { _store(std::any(value)); }
 
     void write_value(RationalTime const& value) override
@@ -697,15 +700,19 @@ SerializableObject::Writer::_build_dispatch_tables()
         _encoder.write_value(std::any_cast<IMATH_NAMESPACE::V2d const&>(value));
     };
     wt[&typeid(IMATH_NAMESPACE::Box2d)] = [this](std::any const& value) {
-        _encoder.write_value(std::any_cast<IMATH_NAMESPACE::Box2d const&>(value));
+        _encoder.write_value(
+            std::any_cast<IMATH_NAMESPACE::Box2d const&>(value));
     };
 
     /*
      * These next recurse back through the Writer itself:
      */
-    wt[&typeid(SerializableObject::Retainer<>)] = [this](std::any const& value) {
-        this->write(_no_key, std::any_cast<SerializableObject::Retainer<>>(value));
-    };
+    wt[&typeid(SerializableObject::Retainer<>)] =
+        [this](std::any const& value) {
+            this->write(
+                _no_key,
+                std::any_cast<SerializableObject::Retainer<>>(value));
+        };
 
     wt[&typeid(AnyDictionary)] = [this](std::any const& value) {
         this->write(_no_key, std::any_cast<AnyDictionary const&>(value));
@@ -744,9 +751,10 @@ SerializableObject::Writer::_build_dispatch_tables()
     /*
      * These next recurse back through the Writer itself:
      */
-    et[&typeid(AnyDictionary)] = [this](std::any const& lhs, std::any const& rhs) {
-        return _any_dict_equals(lhs, rhs);
-    };
+    et[&typeid(AnyDictionary)] =
+        [this](std::any const& lhs, std::any const& rhs) {
+            return _any_dict_equals(lhs, rhs);
+        };
     et[&typeid(AnyVector)] = [this](std::any const& lhs, std::any const& rhs) {
         return _any_array_equals(lhs, rhs);
     };
@@ -1155,9 +1163,10 @@ SerializableObject::Writer::write(std::string const& key, std::any const& value)
     {
         std::string s;
         std::string bad_type_name =
-            (type == typeid(UnknownType)) ? type_name_for_error_message(
-                std::any_cast<UnknownType>(value).type_name)
-                                          : type_name_for_error_message(type);
+            (type == typeid(UnknownType))
+                ? type_name_for_error_message(
+                      std::any_cast<UnknownType>(value).type_name)
+                : type_name_for_error_message(type);
 
         if (&key != &_no_key)
         {
@@ -1225,7 +1234,8 @@ SerializableObject::clone(ErrorStatus* error_status) const
     e._resolver.finalize(error_function);
 
     return e._root.type() == typeid(SerializableObject::Retainer<>)
-               ? std::any_cast<SerializableObject::Retainer<>&>(e._root).take_value()
+               ? std::any_cast<SerializableObject::Retainer<>&>(e._root)
+                     .take_value()
                : nullptr;
 }
 

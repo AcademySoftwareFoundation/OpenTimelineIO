@@ -24,10 +24,11 @@ public:
     using Parent = SerializableObjectWithMetadata;
 
     MediaReference(
-        std::string const&                           name                   = std::string(),
-        std::optional<TimeRange> const&              available_range        = std::nullopt,
-        AnyDictionary const&                         metadata               = AnyDictionary(),
-        std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = std::nullopt);
+        std::string const&              name            = std::string(),
+        std::optional<TimeRange> const& available_range = std::nullopt,
+        AnyDictionary const&            metadata        = AnyDictionary(),
+        std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
+            std::nullopt);
 
     std::optional<TimeRange> available_range() const noexcept
     {

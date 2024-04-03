@@ -20,12 +20,13 @@ public:
     using Parent = MediaReference;
 
     GeneratorReference(
-        std::string const&                           name                   = std::string(),
-        std::string const&                           generator_kind         = std::string(),
-        std::optional<TimeRange> const&              available_range        = std::nullopt,
-        AnyDictionary const&                         parameters             = AnyDictionary(),
-        AnyDictionary const&                         metadata               = AnyDictionary(),
-        std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds = std::nullopt);
+        std::string const&              name            = std::string(),
+        std::string const&              generator_kind  = std::string(),
+        std::optional<TimeRange> const& available_range = std::nullopt,
+        AnyDictionary const&            parameters      = AnyDictionary(),
+        AnyDictionary const&            metadata        = AnyDictionary(),
+        std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
+            std::nullopt);
 
     std::string generator_kind() const noexcept { return _generator_kind; }
 

@@ -49,7 +49,7 @@ public:
 
     constexpr TimeRange(TimeRange const&) noexcept = default;
 
-    TimeRange& operator=(TimeRange const&) noexcept = default;
+    constexpr TimeRange& operator=(TimeRange const&) noexcept = default;
 
     constexpr RationalTime start_time() const noexcept { return _start_time; }
 
@@ -96,7 +96,7 @@ public:
                               new_end_time) };
     }
 
-    RationalTime clamped(RationalTime other) const noexcept
+    constexpr RationalTime clamped(RationalTime other) const noexcept
     {
         return std::min(std::max(other, _start_time), end_time_inclusive());
     }
@@ -388,13 +388,13 @@ private:
     RationalTime _start_time, _duration;
     friend class TimeTransform;
 
-    inline constexpr bool
+    constexpr bool
     greater_than(double lhs, double rhs, double epsilon) const noexcept
     {
         return lhs - rhs >= epsilon;
     }
 
-    inline constexpr bool
+    constexpr bool
     lesser_than(double lhs, double rhs, double epsilon) const noexcept
     {
         return rhs - lhs >= epsilon;

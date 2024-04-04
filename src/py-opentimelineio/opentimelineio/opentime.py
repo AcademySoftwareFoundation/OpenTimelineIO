@@ -55,7 +55,7 @@ def to_nearest_timecode(rt, rate=None, drop_frame=None):
         if rate is None and drop_frame is None
         else rt.to_nearest_timecode(rate, drop_frame)
     )
-    
+
 
 def to_frames(rt, rate=None):
     """Turn a :class:`~RationalTime` into a frame number."""

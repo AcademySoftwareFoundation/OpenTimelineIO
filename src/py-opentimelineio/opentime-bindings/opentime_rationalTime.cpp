@@ -131,6 +131,26 @@ For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Resul
                         IsDropFrameRate::InferFromRate,
                         ErrorStatusConverter());
                 })
+        .def("to_nearest_timecode", [](RationalTime rt, double rate, std::optional<bool> drop_frame) {
+                return rt.to_nearest_timecode(
+                        rate,
+                        df_enum_converter(drop_frame),
+                        ErrorStatusConverter()
+                );
+        }, "rate"_a, "drop_frame"_a, "Convert to nearest timecode (``HH:MM:SS;FRAME``)")
+        .def("to_nearest_timecode", [](RationalTime rt, double rate) {
+                return rt.to_nearest_timecode(
+                        rate,
+                        IsDropFrameRate::InferFromRate,
+                        ErrorStatusConverter()
+                );
+        }, "rate"_a)
+        .def("to_nearest_timecode", [](RationalTime rt) {
+                return rt.to_nearest_timecode(
+                        rt.rate(),
+                        IsDropFrameRate::InferFromRate,
+                        ErrorStatusConverter());
+                })
         .def("to_time_string", &RationalTime::to_time_string)
         .def_static("from_timecode", [](std::string s, double rate) {
                 return RationalTime::from_timecode(s, rate, ErrorStatusConverter());

@@ -571,6 +571,26 @@ RationalTime::to_timecode(
 }
 
 std::string
+RationalTime::to_nearest_timecode(
+    double          rate,
+    IsDropFrameRate drop_frame,
+    ErrorStatus*    error_status) const
+{
+    std::string result = to_timecode(rate, drop_frame, error_status);
+
+    if (error_status)
+    {
+        *error_status = ErrorStatus();
+
+        double nearest_rate = nearest_valid_timecode_rate(rate);
+
+        return to_timecode(nearest_rate, drop_frame, error_status);
+    }
+
+    return result;
+}
+
+std::string
 RationalTime::to_time_string() const
 {
     double total_seconds = to_seconds();

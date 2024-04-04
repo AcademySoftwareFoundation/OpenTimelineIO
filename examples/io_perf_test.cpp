@@ -5,7 +5,6 @@
 
 #include "opentimelineio/clip.h"
 #include "opentimelineio/typeRegistry.h"
-#include "opentimelineio/any.h"
 #include "opentimelineio/serialization.h"
 #include "opentimelineio/deserialization.h"
 #include "opentimelineio/timeline.h"
@@ -133,7 +132,7 @@ main(
         print_elapsed_time("downgrade clip", begin, end);
     }
 
-    otio::any tl;
+    std::any tl;
     std::string fname = std::string(argv[1]);
 
     // read file

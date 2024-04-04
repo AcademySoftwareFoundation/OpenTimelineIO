@@ -96,7 +96,7 @@ int conform_timeline(
         // relink to the found path
         clip->set_media_reference(new otio::ExternalReference(
             "file://" + new_path,
-            otio::nullopt // the available range is unknown without opening the file
+            std::nullopt // the available range is unknown without opening the file
         ));
         count += 1;
     }

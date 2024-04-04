@@ -96,7 +96,7 @@ public:
                               new_end_time) };
     }
 
-    constexpr RationalTime clamped(RationalTime other) const noexcept
+    RationalTime clamped(RationalTime other) const noexcept
     {
         return std::min(std::max(other, _start_time), end_time_inclusive());
     }

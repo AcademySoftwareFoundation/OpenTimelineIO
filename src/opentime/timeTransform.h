@@ -28,8 +28,8 @@ public:
 
     constexpr double rate() const noexcept { return _rate; }
 
-    constexpr TimeTransform(TimeTransform const&) noexcept  = default;
-    constexpr TimeTransform& operator=(TimeTransform const&) noexcept = default;
+    TimeTransform(TimeTransform const&) noexcept = default;
+    TimeTransform& operator=(TimeTransform const&) noexcept = default;
 
     constexpr TimeRange applied_to(TimeRange other) const noexcept
     {

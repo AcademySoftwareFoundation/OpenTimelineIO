@@ -47,9 +47,9 @@ public:
         , _duration{ duration }
     {}
 
-    constexpr TimeRange(TimeRange const&) noexcept = default;
+    TimeRange(TimeRange const&) noexcept = default;
 
-    constexpr TimeRange& operator=(TimeRange const&) noexcept = default;
+    TimeRange& operator=(TimeRange const&) noexcept = default;
 
     constexpr RationalTime start_time() const noexcept { return _start_time; }
 

@@ -39,7 +39,7 @@ public:
         , _rate{ rate }
     {}
 
-    constexpr RationalTime(RationalTime const&) noexcept  = default;
+    RationalTime(RationalTime const&) noexcept = default;
     RationalTime& operator=(RationalTime const&) noexcept = default;
 
     bool is_invalid_time() const noexcept

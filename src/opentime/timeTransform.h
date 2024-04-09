@@ -28,9 +28,6 @@ public:
 
     constexpr double rate() const noexcept { return _rate; }
 
-    TimeTransform(TimeTransform const&) noexcept = default;
-    TimeTransform& operator=(TimeTransform const&) noexcept = default;
-
     constexpr TimeRange applied_to(TimeRange other) const noexcept
     {
         return TimeRange::range_from_start_end_time(

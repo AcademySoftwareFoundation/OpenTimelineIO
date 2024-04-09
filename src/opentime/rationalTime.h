@@ -39,9 +39,6 @@ public:
         , _rate{ rate }
     {}
 
-    RationalTime(RationalTime const&) noexcept = default;
-    RationalTime& operator=(RationalTime const&) noexcept = default;
-
     bool is_invalid_time() const noexcept
     {
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);

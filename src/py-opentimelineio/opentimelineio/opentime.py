@@ -16,6 +16,7 @@ __all__ = [
     'from_time_string',
     'from_seconds',
     'to_timecode',
+    'to_nearest_timecode',
     'to_frames',
     'to_seconds',
     'to_time_string',
@@ -44,6 +45,15 @@ def to_timecode(rt, rate=None, drop_frame=None):
         rt.to_timecode()
         if rate is None and drop_frame is None
         else rt.to_timecode(rate, drop_frame)
+    )
+
+
+def to_nearest_timecode(rt, rate=None, drop_frame=None):
+    """Convert a :class:`~RationalTime` into a timecode string."""
+    return (
+        rt.to_nearest_timecode()
+        if rate is None and drop_frame is None
+        else rt.to_nearest_timecode(rate, drop_frame)
     )
 
 

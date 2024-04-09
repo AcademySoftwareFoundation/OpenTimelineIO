@@ -190,6 +190,17 @@ public:
         return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
 
+    std::string to_nearest_timecode(
+        double          rate,
+        IsDropFrameRate drop_frame,
+        ErrorStatus*    error_status = nullptr) const;
+
+    std::string to_nearest_timecode(ErrorStatus* error_status = nullptr) const
+    {
+        return to_nearest_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
+    }
+
+
     // produce a string in the form
     // hours:minutes:seconds
     // which may have a leading negative sign. seconds may have up to

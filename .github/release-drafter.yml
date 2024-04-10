@@ -123,6 +123,7 @@ categories:
     labels:
       - 'build'
       - 'chore'
+      - 'dependencies'
       - 'ci'
       - 'refactor'
       - 'revert'

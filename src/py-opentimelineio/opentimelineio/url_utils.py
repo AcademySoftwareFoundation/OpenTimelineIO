@@ -5,6 +5,7 @@
 
 import os
 import urllib
+from urllib import request
 import pathlib
 
 
@@ -23,7 +24,7 @@ def url_from_filepath(fpath):
     try:
         # appears to handle absolute windows paths better, which are absolute
         # and start with a drive letter.
-        return urllib.urlparse.unquote(pathlib.PurePath(fpath).as_uri())
+        return urllib.parse.unquote(pathlib.PurePath(fpath).as_uri())
     except ValueError:
         # scheme is "file" for absolute paths, else ""
         scheme = "file" if os.path.isabs(fpath) else ""
@@ -63,7 +64,7 @@ def filepath_from_url(urlstr):
 
     # Convert the parsed URL to a path
     filepath = pathlib.PurePath(
-        urllib.request.url2pathname(decoded_parsed_path)
+        request.url2pathname(decoded_parsed_path)
     )
 
     # If the network location is a window drive, reassemble the path

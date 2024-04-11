@@ -99,7 +99,7 @@ Because the basename of both files is `academy_leader.mov`, this will be an erro
 The file bundle adapters expect the `target_url` field of any `media_reference`s in the source timeline to be in one of two forms (as produced by python's urlparse library):
 
 - absolute path:  "file:///path/to/some/file" (encodes "/path/to/some/file")
-- relative path: "path/to/some/file" (assumes the path is relative to the current working directory when invoking the adapter on the source timeline).
+- relative path: "path/to/some/file" (the path is relative to the current working directory of the command running the adapter on the source timeline).
 
 ### MediaReferencePolicy Option
 

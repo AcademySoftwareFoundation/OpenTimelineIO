@@ -13,7 +13,7 @@ from .. import (
     url_utils,
 )
 
-import urllib.parse as urlparse
+import urllib
 
 
 # versioning
@@ -109,7 +109,7 @@ def _prepped_otio_for_bundle_and_manifest(
             # not an ExternalReference, ignoring it.
             continue
 
-        parsed_url = urlparse.urlparse(target_url)
+        parsed_url = urllib.parse.urlparse(target_url)
 
         # ensure that the urlscheme is either "file" or ""
         # file means "absolute path"

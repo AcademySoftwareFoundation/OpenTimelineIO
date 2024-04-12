@@ -153,6 +153,7 @@ jobs:
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       uses: codecov/codecov-action@v3.1.4
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         flags: py-unittests
         name: py-opentimelineio-codecov
         fail_ci_if_error: true

@@ -251,7 +251,7 @@ update-contributors: check-github-token
 	@echo "Updating CONTRIBUTORS.md..."
 	@python maintainers/fetch_contributors.py \
 		--repo AcademySoftwareFoundation/OpenTimelineIO \
-		--token $(OTIO_RELEASE_GITHUB_TOKEN)
+		--token "${OTIO_RELEASE_GITHUB_TOKEN}"
 
 dev-python-install:
 	@python setup.py install

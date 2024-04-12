@@ -49,24 +49,69 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def main():
-    args = _parsed_args()
-
+def fetch_plat_map():
+    # HACK: pull the image version corresponding to -latest out of the
+    #       README.md for the github repo where they are stored
     request = urllib.request.Request(GITHUB_README_URL)
     response = urllib.request.urlopen(request).read().decode('utf-8')
 
-    # HACK: pull the image version corresponding to -latest out of the
-    #       README.md for the github repo where they are stored
+    def md_row_fields(md_row):
+        # Split on |, discard the empty entries from leading and trailing |
+        return [
+            col.strip() for col in md_row.split("|")[1:-1]
+        ]
+
+    # First, just strip the readme down the platform image table
     lines = response.split("\n")
-    plat_map = {}
-    for plat in PLATFORMS:
-        plat_latest = plat + "-latest"
-        for ln in lines:
-            if plat_latest not in ln:
-                continue
-            plat_map[plat] = (
-                re.match(".*(" + plat + "-.*)`.*", ln).groups(0)[0]
+    table_lines = []
+    in_images_section = False
+    for line in lines:
+        if not in_images_section and line.startswith("## Available Images"):
+            in_images_section = True
+            continue
+        elif in_images_section and line.startswith("#"):
+            break
+        elif not in_images_section:
+            continue
+
+        if line.startswith("|"):
+            table_lines.append(line.strip())
+
+    # Extract the table column labels
+    plat_col_labels = md_row_fields(table_lines[0])
+
+    platform_name_re = re.compile(r"`([^`]*)`")
+    entries = {}
+    for line in table_lines[2:]:
+        col_data = md_row_fields(line)
+        plat_entry = dict(zip(plat_col_labels, col_data))
+        raw_labels = plat_entry["YAML Label"]
+        available_labels = platform_name_re.findall(raw_labels)
+        try:
+            next(
+                label for label in available_labels
+                if label.split("-")[-1] == "latest"
             )
+        except StopIteration:
+            # not a latest label
+            continue
+
+        label = next(
+            label for label in available_labels
+            if label.split("-")[-1] not in {"xl", "latest"}
+        )
+        platform = label.split("-")[0]
+        if platform not in PLATFORMS:
+            continue
+        entries[platform] = label
+
+    return entries
+
+
+def main():
+    args = _parsed_args()
+
+    plat_map = fetch_plat_map()
 
     if args.freeze:
         freeze_ci(plat_map, args.dryrun)

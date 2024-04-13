@@ -163,6 +163,7 @@ jobs:
         flags: py-unittests
         name: py-opentimelineio-codecov
         fail_ci_if_error: true
+        # based on: https://github.com/codecov/codecov-action?tab=readme-ov-file#usage
         token: ${{ secrets.CODECOV_TOKEN }}
 
   package_wheels:

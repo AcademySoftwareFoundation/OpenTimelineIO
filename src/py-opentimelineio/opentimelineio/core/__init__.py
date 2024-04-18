@@ -240,7 +240,7 @@ def downgrade_function_from(cls, version_to_downgrade_from):
     return decorator_func
 
 
-def serializable_field(name, required_type=None, doc=None):
+def serializable_field(name, required_type=None, doc=None, default_value=None):
     """
     Convenience function for adding attributes to child classes of
     :class:`~SerializableObject` in such a way that they will be serialized/deserialized
@@ -274,13 +274,14 @@ def serializable_field(name, required_type=None, doc=None):
     :param str name: name of the field to add
     :param type required_type: type required for the field
     :param str doc: field documentation
+    :param Any default_value: default value to return if no field value is set yet
 
     :return: property object
     :rtype: :py:class:`property`
     """
 
     def getter(self):
-        return self._dynamic_fields[name]
+        return self._dynamic_fields.get(name, default_value)
 
     def setter(self, val):
         # always allow None values regardless of value of required_type

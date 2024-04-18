@@ -1498,7 +1498,7 @@ def _build_file(media_reference, br_map):
     # will not get recognized
     # TODO: We should use a better method for this. Perhaps pre-walk the
     #       timeline and find all the track kinds this media is present in?
-    if not file_e.find("media"):
+    if file_e.find("media") is None:
         file_media_e = _get_or_create_subelement(file_e, "media")
 
         audio_exts = {'.wav', '.aac', '.mp3', '.aif', '.aiff', '.m4a'}

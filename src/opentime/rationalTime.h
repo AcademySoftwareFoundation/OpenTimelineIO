@@ -39,9 +39,6 @@ public:
         , _rate{ rate }
     {}
 
-    constexpr RationalTime(RationalTime const&) noexcept  = default;
-    RationalTime& operator=(RationalTime const&) noexcept = default;
-
     bool is_invalid_time() const noexcept
     {
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
@@ -105,7 +102,7 @@ public:
         return RationalTime{ std::round(_value), _rate };
     }
 
-    static RationalTime constexpr duration_from_start_end_time(
+    static constexpr RationalTime duration_from_start_end_time(
         RationalTime start_time,
         RationalTime end_time_exclusive) noexcept
     {
@@ -119,7 +116,7 @@ public:
                                    start_time._rate };
     }
 
-    static RationalTime constexpr duration_from_start_end_time_inclusive(
+    static constexpr RationalTime duration_from_start_end_time_inclusive(
         RationalTime start_time,
         RationalTime end_time_inclusive) noexcept
     {
@@ -207,7 +204,7 @@ public:
     // microsecond precision.
     std::string to_time_string() const;
 
-    RationalTime const& operator+=(RationalTime other) noexcept
+    constexpr RationalTime const& operator+=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {
@@ -221,7 +218,7 @@ public:
         return *this;
     }
 
-    RationalTime const& operator-=(RationalTime other) noexcept
+    constexpr RationalTime const& operator-=(RationalTime other) noexcept
     {
         if (_rate < other._rate)
         {

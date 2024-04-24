@@ -354,12 +354,16 @@ class TestTime(unittest.TestCase):
             )
 
     def test_timecode_infer_drop_frame(self):
+        # These rates are all non-integer SMPTE rates.
+        # When `to_timecode` is called without specifying
+        # a value for `drop_frame`, it will infer that these
+        # should be displayed as drop-frame timecode.
         frames = 1084319
         rates = [
             (29.97, '10:03:00;05'),
             (30000.0 / 1001.0, '10:03:00;05'),
             (59.94, '05:01:30;03'),
-            (60000.0 / 1001.0, '05:01:11;59')
+            (60000.0 / 1001.0, '05:01:30;03')
         ]
         for rate, timecode in rates:
             t = otio.opentime.RationalTime(frames, rate)

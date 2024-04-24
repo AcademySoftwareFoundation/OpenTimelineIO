@@ -36,15 +36,29 @@ static constexpr std::array<double, 11> smpte_timecode_rates{
     }
 };
 
+// deprecated in favor of `is_smpte_timecode_rate`
 bool
 RationalTime::is_valid_timecode_rate(double fps)
+{
+    return is_smpte_timecode_rate(fps);
+}
+
+bool
+RationalTime::is_smpte_timecode_rate(double fps)
 {
     auto b = smpte_timecode_rates.begin(), e = smpte_timecode_rates.end();
     return std::find(b, e, fps) != e;
 }
 
+// deprecated in favor of `is_smpte_timecode_rate`
 double
 RationalTime::nearest_valid_timecode_rate(double rate)
+{
+    return nearest_smpte_timecode_rate(rate);
+}
+
+double
+RationalTime::nearest_smpte_timecode_rate(double rate)
 {
     double nearest_rate = 0;
     double min_diff     = std::numeric_limits<double>::max();
@@ -179,7 +193,7 @@ RationalTime::from_timecode(
     double             rate,
     ErrorStatus*       error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate))
+    if (!RationalTime::is_smpte_timecode_rate(rate))
     {
         if (error_status)
         {
@@ -310,7 +324,7 @@ RationalTime::from_time_string(
     double             rate,
     ErrorStatus*       error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate))
+    if (!RationalTime::is_smpte_timecode_rate(rate))
     {
         set_error(
             time_string,
@@ -439,7 +453,7 @@ RationalTime::to_timecode(
         return std::string();
     }
 
-    double nearest_valid_rate = nearest_valid_timecode_rate(rate);
+    double nearest_valid_rate = nearest_smpte_timecode_rate(rate);
     if (abs(nearest_valid_rate - rate) > 0.1)
     {
         if (error_status)
@@ -565,7 +579,7 @@ RationalTime::to_nearest_timecode(
     {
         *error_status = ErrorStatus();
 
-        double nearest_rate = nearest_valid_timecode_rate(rate);
+        double nearest_rate = nearest_smpte_timecode_rate(rate);
 
         return to_timecode(nearest_rate, drop_frame, error_status);
     }

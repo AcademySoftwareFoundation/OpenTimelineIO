@@ -171,12 +171,15 @@ public:
                                    start_time._rate };
     }
 
-    /// @brief Returns true if the rate is valid for use with timecode.
+    [[deprecated("Use is_smpte_timecode_rate() instead")]]
     static bool is_valid_timecode_rate(double rate);
 
-    /// @brief Returns the first valid timecode rate that has the least
-    /// difference from rate.
+    static bool is_smpte_timecode_rate(double rate);
+
+    [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
     static double nearest_valid_timecode_rate(double rate);
+
+    static double nearest_smpte_timecode_rate(double rate);
 
     /// @brief Convert a frame number and rate into a time.
     static constexpr RationalTime

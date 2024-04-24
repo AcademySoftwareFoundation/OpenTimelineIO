@@ -347,10 +347,10 @@ class TestTime(unittest.TestCase):
         tc_auto = otio.opentime.to_timecode(t, rate_float)
         self.assertEqual(tc_auto, '10:03:00;05')
 
-        insmpte_df_rate = otio.opentime.RationalTime(30, (24000 / 1001.0))
+        invalid_df_rate = otio.opentime.RationalTime(30, (24000 / 1001.0))
         with self.assertRaises(ValueError):
             otio.opentime.to_timecode(
-                insmpte_df_rate, (24000 / 1001.0), drop_frame=True
+                invalid_df_rate, (24000 / 1001.0), drop_frame=True
             )
 
     def test_timecode_infer_drop_frame(self):
@@ -418,7 +418,7 @@ class TestTime(unittest.TestCase):
         with self.assertRaises(ValueError):
             otio.opentime.from_timecode('01:00:13;23', 24)
 
-    def test_insmpte_rate_to_timecode_functions(self):
+    def test_invalid_rate_to_timecode_functions(self):
         t = otio.opentime.RationalTime(100, 29.7)
 
         with self.assertRaises(ValueError):

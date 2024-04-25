@@ -422,7 +422,7 @@ class TestTime(unittest.TestCase):
         t = otio.opentime.RationalTime(100, 29.7)
 
         # temp debugging experiment. what exception is thrown here?
-        otio.opentime.to_timecode(t, 29.7)
+        otio.opentime.to_timecode(t, 29.0)
 
         with self.assertRaises(ValueError):
             otio.opentime.to_timecode(t, 29.7)

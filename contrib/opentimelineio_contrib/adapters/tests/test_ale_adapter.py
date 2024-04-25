@@ -177,8 +177,8 @@ class ALEAdapterTest(unittest.TestCase):
             cl = otio.schema.Clip(
                 metadata={'ALE': {'Image Size': size}},
                 source_range=otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(0, 24000/1001),
-                    duration=otio.opentime.RationalTime(48, 24000/1001)
+                    start_time=otio.opentime.RationalTime(0, 24000 / 1001),
+                    duration=otio.opentime.RationalTime(48, 24000 / 1001)
                 )
             )
             timeline.tracks[0].extend([cl])

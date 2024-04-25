@@ -419,10 +419,8 @@ class TestTime(unittest.TestCase):
             otio.opentime.from_timecode('01:00:13;23', 24)
 
     def test_invalid_rate_to_timecode_functions(self):
+        # Use a bogus rate, expecting `to_timecode` to complain
         t = otio.opentime.RationalTime(100, 29.7)
-
-        # temp debugging experiment. what exception is thrown here?
-        otio.opentime.to_timecode(t, 29.0)
 
         with self.assertRaises(ValueError):
             otio.opentime.to_timecode(t, 29.7)

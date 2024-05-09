@@ -98,7 +98,7 @@ def fetch_plat_map():
 
         label = next(
             label for label in available_labels
-            if label.split("-")[-1] not in {"xl", "latest"}
+            if label.split("-")[-1] not in {"xl", "xlarge", "latest"}
         )
         platform = label.split("-")[0]
         if platform not in PLATFORMS:

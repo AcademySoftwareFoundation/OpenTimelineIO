@@ -4,6 +4,8 @@
 #pragma once
 
 /**
+ * \file safely_typed_any.h
+ *
  * This file/interface exists only so that we can package/unpackage
  * types with code compiled in one specific library to avoid the
  * type-aliasing problem that any's are subject to.

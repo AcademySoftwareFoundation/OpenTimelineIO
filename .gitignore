@@ -11,6 +11,7 @@ htmlcov
 xcuserdata/
 .venv/
 .cache
+doxygen/output
 
 # Pycharm metadata
 .idea/

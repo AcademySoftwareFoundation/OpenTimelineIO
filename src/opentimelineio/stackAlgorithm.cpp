@@ -7,6 +7,8 @@
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
 
+#include <cstddef>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
@@ -144,7 +146,7 @@ _normalize_tracks_lengths(
         }
     }
 
-    for (int i = 0; i < tracks.size(); i++)
+    for (std::size_t i = 0; i < tracks.size(); i++)
     {
         Track*       old_track      = tracks[i];
         RationalTime track_duration = old_track->duration(error_status);

@@ -144,7 +144,7 @@ _normalize_tracks_lengths(
         }
     }
 
-    for (int i = 0; i < tracks.size(); i++)
+    for (size_t i = 0; i < tracks.size(); i++)
     {
         Track*       old_track      = tracks[i];
         RationalTime track_duration = old_track->duration(error_status);

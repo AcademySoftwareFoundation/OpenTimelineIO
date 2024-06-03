@@ -127,11 +127,11 @@ main(int argc, char** argv)
         stack->append_child(video_track);
         stack->append_child(audio_track);
 
-        RationalTime time(703.0, 30.0);
-        RationalTime one_frame(1.0, 30.0);
-        TimeRange    range(time, one_frame);
-        ErrorStatus  err;
-        auto         items = stack->find_children(&err, range);
+        RationalTime      time(703.0, 30.0);
+        RationalTime      one_frame(1.0, 30.0);
+        TimeRange         range(time, one_frame);
+        otio::ErrorStatus err;
+        auto              items = stack->find_children(&err, range);
         assert(!is_error(err));
         assert(items.size() == 2);
     });

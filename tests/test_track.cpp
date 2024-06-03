@@ -109,7 +109,7 @@ main(int argc, char** argv)
     });
 
     tests.add_test(
-        "test_find_children_two_tracks", [] {
+        "test_find_children_stack", [] {
         using namespace otio;
         SerializableObject::Retainer<Clip> video_clip = new Clip(
             "video_0",

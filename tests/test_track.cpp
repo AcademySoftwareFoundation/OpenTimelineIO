@@ -109,7 +109,7 @@ main(int argc, char** argv)
     });
 
     tests.add_test(
-        "test_find_children_two_tracks", [] {
+        "test_find_children_stack", [] {
         using namespace otio;
         SerializableObject::Retainer<Clip> video_clip = new Clip(
             "video_0",
@@ -127,11 +127,11 @@ main(int argc, char** argv)
         stack->append_child(video_track);
         stack->append_child(audio_track);
 
-        RationalTime time(703.0, 30.0);
-        RationalTime one_frame(1.0, 30.0);
-        TimeRange    range(time, one_frame);
-        ErrorStatus  err;
-        auto         items = stack->find_children(&err, range);
+        RationalTime      time(703.0, 30.0);
+        RationalTime      one_frame(1.0, 30.0);
+        TimeRange         range(time, one_frame);
+        otio::ErrorStatus err;
+        auto              items = stack->find_children(&err, range);
         assert(!is_error(err));
         assert(items.size() == 2);
     });

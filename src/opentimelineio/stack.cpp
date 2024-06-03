@@ -79,6 +79,26 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
     return result;
 }
 
+std::vector<SerializableObject::Retainer<Composable>>
+Stack::children_in_range(
+    TimeRange const& search_range,
+    ErrorStatus* error_status) const
+{
+    std::vector<SerializableObject::Retainer<Composable>> children;
+    for (auto child : this->children())
+    {
+        if (auto item = dynamic_retainer_cast<Item>(child))
+        {
+            TimeRange range = item->trimmed_range(error_status);
+            if (range.intersects(search_range))
+            {
+                children.push_back(child);
+            }
+        }
+    }
+    return children;
+}
+
 TimeRange
 Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
     const

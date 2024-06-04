@@ -53,11 +53,11 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(result[1], cl1)
 
     def test_find_children_stack(self):
-        video_clip = otio.schema.Clip();
+        video_clip = otio.schema.Clip()
         video_clip.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 30.0),
             otio.opentime.RationalTime(700.0, 30.0))
-        audio_clip = otio.schema.Clip();
+        audio_clip = otio.schema.Clip()
         audio_clip.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 30.0),
             otio.opentime.RationalTime(704.0, 30.0))
@@ -76,6 +76,7 @@ class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(items), 2)
         self.assertTrue(audio_clip in items)
         self.assertTrue(audio_track in items)
+
 
 if __name__ == '__main__':
     unittest.main()

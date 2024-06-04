@@ -114,11 +114,11 @@ main(int argc, char** argv)
         SerializableObject::Retainer<Clip> video_clip = new Clip(
             "video_0",
             nullptr,
-            TimeRange(RationalTime(0.0, 30.0), RationalTime(704.0, 30.0)));
+            TimeRange(RationalTime(0.0, 30.0), RationalTime(700.0, 30.0)));
         SerializableObject::Retainer<Clip> audio_clip = new Clip(
             "audio_0",
             nullptr,
-            TimeRange(RationalTime(0.0, 30.0), RationalTime(700.0, 30.0)));
+            TimeRange(RationalTime(0.0, 30.0), RationalTime(704.0, 30.0)));
         SerializableObject::Retainer<Track> video_track = new Track("Video");
         SerializableObject::Retainer<Track> audio_track = new Track("Audio");
         SerializableObject::Retainer<Stack> stack = new Stack();
@@ -132,8 +132,14 @@ main(int argc, char** argv)
         TimeRange         range(time, one_frame);
         otio::ErrorStatus err;
         auto              items = stack->find_children(&err, range);
-        assert(!is_error(err));
-        assert(items.size() == 2);
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 2);
+        assertTrue(
+            std::find(items.begin(), items.end(), audio_clip.value) !=
+            items.end());
+        assertTrue(
+            std::find(items.begin(), items.end(), audio_track.value) !=
+            items.end());
     });
 
     tests.run(argc, argv);

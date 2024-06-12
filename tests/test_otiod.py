@@ -14,7 +14,7 @@ from opentimelineio import test_utils as otio_test_utils
 from opentimelineio.adapters import file_bundle_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(

@@ -1,83 +1,39 @@
 # Adapters
 
-OpenTimelineIO supports, or plans to support, conversion adapters for many
-existing file formats.
+While OpenTimelineIO favors the `.otio` JSON format, Python OpenTimelineIO supports many file formats via adapter plugins.
 
-## Final Cut Pro XML
+## Built-In Adapters
 
-Final Cut 7 XML Format
-- Status: Supported via the `fcp_xml` adapter
-- [Reference](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101)
+The OpenTimelineIO native file format adapters that are present in the `opentimelineio` python package are:
 
-Final Cut Pro X XML Format:
-- Status: Supported via the `fcpx_xml` adapter
-- [Intro to FCP X XML](https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html)
+- [otio_json](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/src/py-opentimelineio/opentimelineio/adapters/otio_json.py) - OpenTimelineIO's native file format.
+- [otiod](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/src/py-opentimelineio/opentimelineio/adapters/otiod.py) - a directory bundle of a `.otio` file along with referenced media.
+- [otioz](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/blob/main/src/py-opentimelineio/opentimelineio/adapters/otioz.py) - a zip file bundle of a `.otio` file along with referenced media.
 
-## Adobe Premiere Project
+## Batteries-Included Adapters
 
-- Based on guidance from Adobe, we support interchange with Adobe Premiere via
-    the FCP 7 XML format (see above).
+To also install a curated list of additional useful adapters, use the [OpenTimelineIO-Plugins ](https://pypi.org/project/OpenTimelineIO-Plugins/) python package. In addition to the OpenTimelineIO native adapters, you'll get aditional useful adapters including:
 
-## CMX3600 EDL
+- [AAF](https://github.com/OpenTimelineIO/otio-aaf-adapter)
+- [ale](https://github.com/OpenTimelineIO/otio-ale-adapter)
+- [burnins](https://github.com/OpenTimelineIO/otio-burnins-adapter)
+- [cmx_3600](https://github.com/OpenTimelineIO/otio-cmx3600-adapter)
+- [fcp_xml](https://github.com/OpenTimelineIO/otio-fcp-adapter)
+- [fcpx_xml](https://github.com/OpenTimelineIO/otio-fcpx-xml-adapter)
+- [hls_playlist](https://github.com/OpenTimelineIO/otio-hls-playlist-adapter)
+- [maya_sequencer](https://github.com/OpenTimelineIO/otio-maya-sequencer-adapter)
+- [svg](https://github.com/OpenTimelineIO/otio-svg-adapter)
+- [xges](https://github.com/OpenTimelineIO/otio-xges-adapter)
 
-- Status: Supported via the `cmx_3600` adapter
-- Includes support for ASC_CDL color correction metadata
-- Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
-- http://xmil.biz/EDL-X/CMX3600.pdf
-- [Reference](https://prohelp.apple.com/finalcutpro_help-r01/English/en/finalcutpro/usermanual/chapter_96_section_0.html)
+These adapters are supported by the broader OpenTimelineIO community. While the OTIO core team consults and sometimes contribute to their development, they may be maintained and supported at varying levels.
 
-## Avid AAF
+## Additional Adapters
 
-- Status: Reads and writes AAF compositions
-  - includes clip, gaps, transitions but not markers or effects
-  - This adapter is still in progress, see the ongoing work here: [AAF Project](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/projects/1)
-- [Spec](https://static.amwa.tv/ms-01-aaf-object-spec.pdf)
-- [Protocol](https://static.amwa.tv/as-01-aaf-edit-protocol-spec.pdf)
+Below are some other adapters that may be useful to some users:
 
-- Depends on the [PyAAF2](https://github.com/markreidvfx/pyaaf2) module, so either:
-    - `pip install pyaaf2`
-    - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
+- [kdenlive](https://invent.kde.org/multimedia/kdenlive-opentimelineio)
 
-# Contrib Adapters
+## Custom Adapters
 
-The contrib area hosts adapters which come from the community (_not_ supported
-    by the core-otio team) and may require extra dependencies.
+Adapters are implemented as plugins for OpenTimelineIO and can either be registered via an [environment variable](./otio-env-variables) or by packaging in a Python module with a particular entrypoint defined. For more detail, see the [Writing an OTIO Adapter](./write-an-adapter) tutorial.
 
-## RV Session File
-
-- Status: write-only adapter supported via the `rv_session` adapter.
-- need to set environment variables to locate `py-interp` and `rvSession.py`
-    from within the RV distribution
-- set `${OTIO_RV_PYTHON_BIN}` to point at `py-interp` from within rv, for
-    example:
-    `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
-- set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
-    `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
-
-## Maya Sequencer
-
-- Status: supported via the `maya_sequencer` adapter.
-- set `${OTIO_MAYA_PYTHON_BIN}` to point the location of `mayapy` within the maya
-    installation.
-
-## HLS Playlist
-
-- Status: supported via the `hls_playlist` adapter.
-
-## Avid Log Exchange (ALE)
-
-- Status: supported via the `ale` adapter.
-
-## Text Burn-in Adapter
-
-Uses FFmpeg to burn text overlays into video media.
-
-- Status: supported via the `burnins` adapter.
-
-## GStreamer Editing Services Adapter
-
-- Status: supported via the `xges` adapter.
-
-## Kdenlive Adapter
-
-- Status: supported via the kdenlive adapter

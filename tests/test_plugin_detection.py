@@ -80,14 +80,14 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
     def test_override_adapter(self):
 
-        # Test that entrypoint plugins load before builtin and contrib
+        # Test that entrypoint plugins load before builtin
         man = otio.plugins.manifest.load_manifest()
 
-        # The override_adapter creates another cmx_3600 adapter
+        # The override_adapter creates another otiod adapter
         adapters = [adapter for adapter in man.adapters
-                    if adapter.name == "cmx_3600"]
+                    if adapter.name == "otiod"]
 
-        # More then one cmx_3600 adapter should exist.
+        # More then one otiod adapter should exist.
         self.assertTrue(len(adapters) > 1)
 
         # Override adapter should be the first adapter found

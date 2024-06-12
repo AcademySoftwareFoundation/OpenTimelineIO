@@ -1,7 +1,0 @@
-TITLE:   Avid_Example.01
-001  ZZ100_50 V     C        01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18
-* FROM CLIP NAME:  take_1
-* FROM CLIP: S:\path\to\ZZ100_501.take_1.0001.exr
-002  ZZ100_50 V     C        01:00:06:13 01:00:08:15 00:59:54:18 00:59:56:20
-* FROM CLIP NAME:  take_2
-* FROM CLIP: S:\path\to\ZZ100_502A.take_2.0101.exr

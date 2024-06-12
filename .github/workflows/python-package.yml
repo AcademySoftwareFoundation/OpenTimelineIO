@@ -118,13 +118,15 @@ jobs:
       with:
         msystem: mingw64
         install: >-
-          mingw-w64-x86_64-openssl
           mingw-w64-x86_64-python
           mingw-w64-x86_64-python-pip
           mingw-w64-x86_64-gcc
           mingw-w64-x86_64-cmake
           make
           git
+    - name: Ensure MSYS2 pip is updated
+      if: matrix.python-version == 'mingw64'
+      run: curl -sS https://bootstrap.pypa.io/get-pip.py | sudo python
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
       uses: actions/setup-python@v4.3.0

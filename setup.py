@@ -334,9 +334,6 @@ setup(
         'opentimelineio': [
             'adapters/builtin_adapters.plugin_manifest.json',
         ],
-        'opentimelineio_contrib': [
-            'adapters/contrib_adapters.plugin_manifest.json',
-        ],
     },
 
     packages=(

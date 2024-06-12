@@ -73,12 +73,7 @@ For more information: https://github.com/AcademySoftwareFoundation/OpenTimelineI
 
 For more information about this, including supported formats, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
-The **AAF Adapter** has been **relocated** to a separate repository and is located here:
-https://github.com/OpenTimelineIO/otio-aaf-adapter
-
-Other Plugins
--------------
-
+All adapters except the native `.otio`, `.otioz` and `.otiod` have been relocated to separate repositories under the OpenTimelineIO organization located here: https://github.com/OpenTimelineIO
 The OTIO python bindings also support several other kinds of plugins, for more information see:
 
 * [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.

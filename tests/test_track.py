@@ -10,6 +10,10 @@ import opentimelineio.test_utils as otio_test_utils
 
 class TrackTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
+    def test_append_none(self):
+        tr = otio.schema.Track()
+        self.assertRaises(TypeError, lambda x: tr.append(None))
+
     def test_find_children(self):
         cl = otio.schema.Clip()
         tr = otio.schema.Track()

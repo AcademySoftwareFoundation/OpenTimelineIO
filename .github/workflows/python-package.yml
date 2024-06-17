@@ -156,6 +156,12 @@ jobs:
         pip install .[dev] -v
     - name: Run tests w/ python coverage
       run: make ci-postbuild
+
+    # if tests fail, run tmate for remote debugging session
+    - name: Setup tmate session
+      if: ${{ failure() }}
+      uses: mxschmitt/action-tmate@v3
+
     # (only on ubuntu/pyhton3.7)
     - name: Generate C++ coverage report
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT

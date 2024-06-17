@@ -130,9 +130,15 @@ public:
                                    start_time._rate };
     }
 
+    [[deprecated("Use is_smpte_timecode_rate() instead")]]
     static bool is_valid_timecode_rate(double rate);
 
+    static bool is_smpte_timecode_rate(double rate);
+
+    [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
     static double nearest_valid_timecode_rate(double rate);
+
+    static double nearest_smpte_timecode_rate(double rate);
 
     static constexpr RationalTime
     from_frames(double frame, double rate) noexcept

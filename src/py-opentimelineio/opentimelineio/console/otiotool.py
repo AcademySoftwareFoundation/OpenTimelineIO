@@ -137,7 +137,8 @@ def main():
                         args.list_media or
                         args.verify_media or
                         args.list_tracks or
-                        args.list_markers)
+                        args.list_markers or
+                        args.verify_ranges)
     if should_summarize:
         for timeline in timelines:
             summarize_timeline(
@@ -146,6 +147,7 @@ def main():
                 args.list_media,
                 args.verify_media,
                 args.list_markers,
+                args.verify_ranges,
                 timeline)
 
     # Final Phase: Output
@@ -207,7 +209,7 @@ This tool works in phases, as follows:
 
 6. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
-    --verify-media, --list-markers, and --inspect will examine the OTIO and
+    --verify-media, --list-markers, --verify-ranges, and --inspect will examine the OTIO and
     print information to standard output.
 
 7. Output
@@ -396,6 +398,12 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--list-markers",
         action='store_true',
         help="List summary of all markers"
+    )
+    parser.add_argument(
+        "--verify-ranges",
+        action='store_true',
+        help="""Verify that each clip in a timeline has a source range 
+        within the available range of media"""
     )
     parser.add_argument(
         "--inspect",
@@ -852,7 +860,7 @@ def inspect_timelines(name_regex, timeline):
 
 
 def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
-                       list_markers, timeline):
+                       list_markers, verify_ranges, timeline):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -861,8 +869,22 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
             if list_tracks:
                 print(f"TRACK: {child.name} ({child.kind})")
         if isinstance(child, otio.schema.Clip):
-            if list_clips:
-                print("  CLIP:", child.name)
+            if list_clips or verify_ranges:
+                range_msg = ""
+                if verify_ranges:
+                    try:
+                        source = child.source_range
+                        available = child.available_range()
+
+                        starts_early = source.start_time.value < available.start_time.value
+                        ends_late = (source.duration.value - source.start_time.value) > (available.duration.value - available.start_time.value)
+                        if starts_early or ends_late:
+                            range_msg = "SOURCE MEDIA OUT OF BOUNDS"
+                        else:
+                            range_msg = "IN BOUNDS"
+                    except Exception as e: # available range is, well, unavailable
+                        pass
+                print("  CLIP:", child.name, range_msg)
             if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url

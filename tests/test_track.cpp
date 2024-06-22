@@ -111,35 +111,59 @@ main(int argc, char** argv)
     tests.add_test(
         "test_find_children_stack", [] {
         using namespace otio;
-        SerializableObject::Retainer<Clip> video_clip = new Clip(
-            "video_0",
-            nullptr,
-            TimeRange(RationalTime(0.0, 30.0), RationalTime(700.0, 30.0)));
-        SerializableObject::Retainer<Clip> audio_clip = new Clip(
-            "audio_0",
-            nullptr,
-            TimeRange(RationalTime(0.0, 30.0), RationalTime(704.0, 30.0)));
-        SerializableObject::Retainer<Track> video_track = new Track("Video");
-        SerializableObject::Retainer<Track> audio_track = new Track("Audio");
-        SerializableObject::Retainer<Stack> stack = new Stack();
-        video_track->append_child(video_clip);
-        audio_track->append_child(audio_clip);
-        stack->append_child(video_track);
-        stack->append_child(audio_track);
 
-        RationalTime      time(703.0, 30.0);
-        RationalTime      one_frame(1.0, 30.0);
-        TimeRange         range(time, one_frame);
+        SerializableObject::Retainer<Stack> stack = new Stack();
+        SerializableObject::Retainer<Track> track = new Track;
+        SerializableObject::Retainer<Clip>  clip  = new Clip;
+        stack->append_child(track);
+        track->append_child(clip);
+
+        // Simple find.
+        clip->set_source_range(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(3.0, 24.0)));
         otio::ErrorStatus err;
-        auto              items = stack->find_children(&err, range);
+        auto items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(1.0, 24.0)));
         assertFalse(is_error(err));
         assertEqual(items.size(), 2);
         assertTrue(
-            std::find(items.begin(), items.end(), audio_clip.value) !=
-            items.end());
+            std::find(items.begin(), items.end(), track.value) != items.end());
         assertTrue(
-            std::find(items.begin(), items.end(), audio_track.value) !=
-            items.end());
+            std::find(items.begin(), items.end(), clip.value) != items.end());
+
+        // Set a short source range on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(2.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(2.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 0);
+
+        // Set a source range with a positive offset on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(3.0, 24.0), RationalTime(3.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(2.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 1);
+        assertTrue(
+            std::find(items.begin(), items.end(), track.value) != items.end());
+
+        // Set a source range with a negative offset on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(-1.0, 24.0), RationalTime(3.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(1.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 2);
+        assertTrue(
+            std::find(items.begin(), items.end(), track.value) != items.end());
+        assertTrue(
+            std::find(items.begin(), items.end(), clip.value) != items.end());
     });
 
     tests.run(argc, argv);

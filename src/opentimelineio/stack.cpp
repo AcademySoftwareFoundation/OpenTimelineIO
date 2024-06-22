@@ -85,12 +85,12 @@ Stack::children_in_range(
     ErrorStatus* error_status) const
 {
     std::vector<SerializableObject::Retainer<Composable>> children;
-    for (auto child : this->children())
+    for (const auto& child : this->children())
     {
-        if (auto item = dynamic_retainer_cast<Item>(child))
+        if (const auto& item = dynamic_retainer_cast<Item>(child))
         {
-            TimeRange range = item->trimmed_range(error_status);
-            if (range.intersects(search_range))
+            const auto range = item->trimmed_range_in_parent(error_status);
+            if (range.has_value() && range.value().intersects(search_range))
             {
                 children.push_back(child);
             }

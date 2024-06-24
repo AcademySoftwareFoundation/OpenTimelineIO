@@ -266,7 +266,10 @@ public:
     /// @brief Convert to the nearest timecode (e.g., "HH:MM:SS;FRAME").
     std::string to_nearest_timecode(ErrorStatus* error_status = nullptr) const
     {
-        return to_nearest_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
+        return to_nearest_timecode(
+            _rate,
+            IsDropFrameRate::InferFromRate,
+            error_status);
     }
 
     /// @brief Return a string in the form "hours:minutes:seconds".

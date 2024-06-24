@@ -91,3 +91,19 @@ git push origin mybugfix
 Now your remote branch will have your `mybugfix` branch, which you can now pull request (to OpenTimelineIO's `main` branch) using the github UI.
 
 Please make sure that your pull requests are clean. In other words, address only the issue at hand. Split minor corrections, formatting clean ups, and the like into other PRs. Ensure that new work has coverage in a test. Ensure that any resultant behavioral changes in other parts of the library are called out. Use the rebase and squash git facilities as needed to ensure that the pull request does not contain non-informative remnants of old or superseded work.
+
+## OpenTimelineIO-Plugins Versioning Strategy
+
+OpenTimelineIO provides two PyPI packages:
+
+- `opentimelineio` - the core library and builtin file format support
+- `opentimelineio-plugins` - additional "batteries included" adapters
+
+In short, the rules are:
+
+- `OpenTimelineIO-Plugins` pins to the same `OpenTimelineIO` PyPI version using the `==` constraint - in other words the `OpenTimelineIO-Plugins` version is in lock-step with `OpenTimelineIO`.
+- Each adapter specifies a version constraint against the `OpenTimelineIO` version based on that adapter's requirements.
+- The `OpenTimelineIO-Plugins` project depends on a set of adapters in a floating way, which lets the adapter repos individually deal with their dependency on the core.
+- `OpenTimelineIO-Plugins` is versioned only when plugins are added, removed, or the pinned version of `OpenTimelineIO` is updated.
+
+Keeping `OpenTimelineIO-Plugins` versioning lock-step with `OpenTimelineIO` ensures that version constraints on `OpenTimelineIO-Plugins` will yield the same result as version constraints on `OpenTimelineIO`. For example, installing `OpenTimelineIO-plugins==0.17.0` will guarantee that `OpenTimelineIO` 0.17.0 is installed. Individual adapter version can then be pinned by end-users and adapter developers can specify what version of their adapters work best with a given version of `OpenTimelineIO`.

@@ -52,6 +52,7 @@ jobs:
         uses: release-drafter/release-drafter@v5
         id: draft-release
         with:
+          version: $TAG
           publish: false
           commitish: ${{needs.release-branch.outputs.branch-name || github.ref_name}}
         env:

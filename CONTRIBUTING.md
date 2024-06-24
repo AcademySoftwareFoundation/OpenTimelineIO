@@ -106,4 +106,6 @@ In short, the rules are:
 - The `OpenTimelineIO-Plugins` project depends on a set of adapters in a floating way, which lets the adapter repos individually deal with their dependency on the core.
 - `OpenTimelineIO-Plugins` is versioned only when plugins are added, removed, or the pinned version of `OpenTimelineIO` is updated.
 
-Keeping `OpenTimelineIO-Plugins` versioning lock-step with `OpenTimelineIO` ensures that version constraints on `OpenTimelineIO-Plugins` will yield the same result as version constraints on `OpenTimelineIO`. For example, installing `OpenTimelineIO-plugins==0.17.0` will guarantee that `OpenTimelineIO` 0.17.0 is installed. Individual adapter version can then be pinned by end-users and adapter developers can specify what version of their adapters work best with a given version of `OpenTimelineIO`.
+Keeping `OpenTimelineIO-Plugins` versioning lock-step with `OpenTimelineIO` ensures that version constraints on `OpenTimelineIO-Plugins` will yield the same result as version constraints on `OpenTimelineIO`. For example, installing `OpenTimelineIO-plugins==0.17.0` will guarantee that `OpenTimelineIO` 0.17.0 is installed. Individual adapter version can then be pinned by end-users.
+
+Adapter developers should specify a loose version constraint on `OpenTimelineIO` (e.g. `>=0.17.0`) so that the package manager can discover the adapter version that works best with the desired `OpenTimelineIO` version.

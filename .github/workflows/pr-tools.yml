@@ -2,7 +2,7 @@ name: Pull Request Tools
 
 on:
   workflow_dispatch:
-  pull_request:
+  pull_request_target:
     types: [
         opened, # pr is created
         reopened, # pr is reopened after being closed
@@ -24,7 +24,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3 # https://github.com/actions/checkout/tree/main#usage
+        uses: actions/checkout@v4 # https://github.com/actions/checkout/tree/main#usage
 
       # https://github.com/actions/labeler#usage
       - uses: actions/labeler@v4

@@ -28,12 +28,12 @@ jobs:
     outputs:
       branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Create Branch
         shell: bash
         run: |
-          sh ./github/scripts/release-branch.sh
+          sh .github/scripts/release-branch.sh
 
       - name: Get New Branch Name
         id: get-branch-name

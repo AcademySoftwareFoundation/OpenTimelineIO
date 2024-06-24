@@ -41,7 +41,7 @@ tag-template: 'v$RESOLVED_VERSION'
 #       - 'docs'
 #       - 'style'
 
-# automatically a label into a pull request
+# automatically label pull requests
 # https://github.com/release-drafter/release-drafter#autolabeler
 autolabeler:
   - label: 'feat'

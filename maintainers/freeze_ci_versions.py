@@ -49,7 +49,7 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def fetch_plat_map():
+def _fetch_plat_map():
     # HACK: pull the image version corresponding to -latest out of the
     #       README.md for the github repo where they are stored
     request = urllib.request.Request(GITHUB_README_URL)
@@ -111,7 +111,7 @@ def fetch_plat_map():
 def main():
     args = _parsed_args()
 
-    plat_map = fetch_plat_map()
+    plat_map = _fetch_plat_map()
 
     if args.freeze:
         freeze_ci(plat_map, args.dryrun)

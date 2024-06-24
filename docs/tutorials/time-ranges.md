@@ -112,7 +112,27 @@ The `trimmed_range_in_parent()` is specified in the parent time frame.
 
 ## Tracks
 
-TODO.
+#### `Track.available_range()`
+
+Total duration of the track, totalling all items inside it.
+For example, if there is a clip and a gap in the track,
+and each is 5 seconds long, the `available_range()`
+would return 10 seconds.
+
+#### `Track.range_of_child_at_index(index)`
+
+Returns range of nth item (specified by `index`) in the track.
+Same as item's `duration`, including transition time.
+
+#### `Track.trimmed_range_of_child_at_index(index)`
+
+Same as `range_of_child_at_index()`,
+but trimmed relative to the track's source range.
+
+#### `Track.range_of_all_children()`
+
+Returns a list of every item,
+mapped to their trimmed range in the track.
 
 ## Markers
 
@@ -133,16 +153,49 @@ time.
 
 ## Transitions
 
-TODO.
+#### `Transition.range_in_parent()`
+
+Range of transition for whatever holds the transition.
+Calls its parent's `range_in_child()`.
+
+#### `Transition.trimmed_range_in_parent()`
+
+The same as `range_in_parent()`,
+but trimmed relative to the parent.
+Calls its parent's `trimmed_range_in_child()`.
 
 ## Gaps
 
-TODO.
+#### `Gap.source_range`
+
+Time range of the gap, in between other items like Clips.
 
 ## Stacks
 
-TODO.
+#### `Stack.source_range`
+
+Defined range for the set of tracks.
+
+#### `Stack.available_range()`
+
+Returns a range representing its tracks' longest duration
+(based on the underlying clip `duration()`s).
+
+#### `Stack.range_of_child_at_index(int index)`
+
+Returns the total duration of the track at position `index`.
+
+#### `Stack.trimmed_range_of_child_at_index(int index)`
+
+Same as `range_of_child_at_index()`, but trimmed relative
+to the duration of the `source_range` of the stack.
+
+#### `Stack.range_of_all_children()`
+
+Returns set of Tracks mapped to their individual time ranges.
 
 ## Timelines
 
-TODO.
+#### `Timeline.range_of_child(child)`
+
+Get trimmed time range of direct as well as indirect children (like clips and gaps).

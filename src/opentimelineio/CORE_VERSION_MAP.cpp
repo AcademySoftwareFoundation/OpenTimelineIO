@@ -110,7 +110,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "Transition", 1 },
           { "UnknownSchema", 1 },
       } },
-    { "0.17.0.dev2",
+    { "0.17.0",
       {
           { "Adapter", 1 },
           { "Clip", 2 },

@@ -870,8 +870,8 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                 print(f"TRACK: {child.name} ({child.kind})")
         if isinstance(child, otio.schema.Clip):
             if list_clips or verify_ranges:
-                range_msg = ""
                 if verify_ranges:
+                    range_msg = ""
                     try:
                         source = child.source_range
                         available = child.available_range()
@@ -889,7 +889,9 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                             range_msg = "IN BOUNDS"
                     except Exception:  # available range is, well, unavailable
                         pass
-                print("  CLIP:", child.name, range_msg)
+                    print("  CLIP:", child.name, range_msg)
+                else:
+                    print("  CLIP:", child.name)
             if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url

@@ -209,8 +209,8 @@ This tool works in phases, as follows:
 
 6. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
-    --verify-media, --list-markers, --verify-ranges, and --inspect will examine the OTIO and
-    print information to standard output.
+    --verify-media, --list-markers, --verify-ranges, and --inspect
+    will examine the OTIO and print information to standard output.
 
 7. Output
     Finally, if the "--output <filename>" option is specified, the resulting
@@ -402,7 +402,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     parser.add_argument(
         "--verify-ranges",
         action='store_true',
-        help="""Verify that each clip in a timeline has a source range 
+        help="""Verify that each clip in a timeline has a source range
         within the available range of media"""
     )
     parser.add_argument(
@@ -876,13 +876,18 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                         source = child.source_range
                         available = child.available_range()
 
-                        starts_early = source.start_time.value < available.start_time.value
-                        ends_late = (source.duration.value - source.start_time.value) > (available.duration.value - available.start_time.value)
+                        src_start = source.start_time.value
+                        src_dur = source.duration.value
+                        avail_start = available.start_time.value
+                        avail_dur = available.duration.value
+
+                        starts_early = src_start < avail_start
+                        ends_late = (src_dur - src_start) > (avail_dur - avail_start)
                         if starts_early or ends_late:
                             range_msg = "SOURCE MEDIA OUT OF BOUNDS"
                         else:
                             range_msg = "IN BOUNDS"
-                    except Exception as e: # available range is, well, unavailable
+                    except Exception:  # available range is, well, unavailable
                         pass
                 print("  CLIP:", child.name, range_msg)
             if list_media or verify_media:

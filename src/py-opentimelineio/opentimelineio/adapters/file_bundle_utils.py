@@ -110,7 +110,8 @@ def _prepped_otio_for_bundle_and_manifest(
 
         # ensure that the urlscheme is either "file" or ""
         # file means "absolute path"
-        # "" is interpreted as a relative path, relative to cwd
+        # "" is interpreted as a relative path, relative to cwd of the python
+        # process
         if parsed_url.scheme not in ("file", ""):
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(

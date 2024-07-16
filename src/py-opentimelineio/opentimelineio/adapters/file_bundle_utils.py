@@ -6,7 +6,6 @@
 import os
 import copy
 
-
 from .. import (
     exceptions,
     schema,
@@ -58,21 +57,17 @@ def _guarantee_unique_basenames(path_list, adapter_name):
         new_basename = os.path.basename(fn)
         if new_basename in basename_to_source_fn:
             raise exceptions.OTIOError(
-                "Error: the {} adapter requires that the media files have "
-                "unique basenames.  File '{}' and '{}' have matching basenames"
-                " of: '{}'".format(
-                    adapter_name,
-                    fn,
-                    basename_to_source_fn[new_basename],
-                    new_basename
-                )
+                f"Error: the {adapter_name} adapter requires that the media"
+                f" files have unique basenames.  File '{fn}' and"
+                f" '{basename_to_source_fn[new_basename]}' have matching"
+                f" basenames of: '{new_basename}'"
             )
         basename_to_source_fn[new_basename] = fn
 
 
 def _prepped_otio_for_bundle_and_manifest(
     input_otio,    # otio to process
-    media_policy,  # what to do with media references
+    media_policy,  # how to handle media references (see: MediaReferencePolicy)
     adapter_name,  # just for error messages
 ):
     """ Create a new OTIO based on input_otio that has had media references
@@ -86,6 +81,8 @@ def _prepped_otio_for_bundle_and_manifest(
     their bundles.
 
     This is considered an internal API.
+
+    media_policy is expected to be of type MediaReferencePolicy.
     """
 
     # make sure the incoming OTIO isn't edited
@@ -117,9 +114,9 @@ def _prepped_otio_for_bundle_and_manifest(
         if parsed_url.scheme not in ("file", ""):
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(
-                    "The {} adapter only works with media reference"
-                    " target_url attributes that begin with 'file:'.  Got a "
-                    "target_url of:  '{}'".format(adapter_name, target_url)
+                    f"The {adapter_name} adapter only works with media"
+                    " reference target_url attributes that begin with 'file:'."
+                    f"  Got a target_url of:  '{target_url}'"
                 )
             if media_policy is MediaReferencePolicy.MissingIfNotFile:
                 cl.media_reference = reference_cloned_and_missing(

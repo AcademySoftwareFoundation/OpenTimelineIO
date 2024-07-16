@@ -26,7 +26,11 @@ import pathlib
 import urllib.parse as urlparse
 
 
-def read_from_file(filepath, absolute_media_reference_paths=False):
+def read_from_file(
+    filepath,
+    # convert the media_reference paths to absolute paths
+    absolute_media_reference_paths=False
+):
     result = otio_json.read_from_file(
         os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
     )
@@ -53,6 +57,8 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
 def write_to_file(
     input_otio,
     filepath,
+    # see documentation in file_bundle_utils for more information on the
+    # media_policy
     media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
@@ -64,18 +70,14 @@ def write_to_file(
 
     if not os.path.exists(os.path.dirname(filepath)):
         raise exceptions.OTIOError(
-            "Directory '{}' does not exist, cannot create '{}'.".format(
-                os.path.dirname(filepath),
-                filepath
-            )
+            f"Directory '{os.path.dirname(filepath)}' does not exist, cannot"
+            f" create '{filepath}'."
         )
 
     if not os.path.isdir(os.path.dirname(filepath)):
         raise exceptions.OTIOError(
-            "'{}' is not a directory, cannot create '{}'.".format(
-                os.path.dirname(filepath),
-                filepath
-            )
+            f"'{os.path.dirname(filepath)}' is not a directory, cannot create"
+            f" '{filepath}'."
         )
 
     # general algorithm for the file bundle adapters:
@@ -125,7 +127,6 @@ def write_to_file(
 
     os.mkdir(filepath)
 
-    # write the otioz file to the temp directory
     otio_json.write_to_file(
         result_otio,
         os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)

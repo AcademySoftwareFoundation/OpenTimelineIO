@@ -403,7 +403,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--verify-ranges",
         action='store_true',
         help="""Verify that each clip in a timeline has a source range
-        within the available range of media"""
+        within the available range of media
+        (acceptable in some use cases, not in others)"""
     )
     parser.add_argument(
         "--inspect",

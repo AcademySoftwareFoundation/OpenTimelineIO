@@ -2,13 +2,13 @@
 
 ## Overview
 
-This document describes OpenTimelineIO's file bundle formats, `otiod` and `otioz`, as well as how to use the internal adapters to generate file bundles.  
+This document describes OpenTimelineIO's file bundle formats, `otiod` and `otioz`, as well as how to use the internal adapters that read and write them.
 
-The OTIOZ/D File Bundle format packages OpenTimelineIO data and associated media into a single file.  This can be useful for sending, archiving and interchange.
+The OTIOZ/D File Bundle formats package OpenTimelineIO data and associated media into a single file.  This can be useful for sending, archiving and interchange of a single unit that collects cut information and media together.
 
 ## OTIOZ/D File Bundle Format Details
 
-File bundles have two separate encodings, OTIOZ and OTIOD.  OTIOD is an encoding that uses a directory hierarchy of files, and OTIOZ is the identical structure packed into a single zipfile, currently using the python `zipfile` library.  In either case they will contain a content.otio which is the cut information.
+There are two encodings for OTIO file bundles, OTIOZ and OTIOD.  OTIOD is an encoding in the file system that uses a directory hierarchy of files.  OTIOZ is the identical structure packed into a single .zip file, currently using the python `zipfile` library.  Both contain a content.otio entry at the top level which contains the cut information for the bundle.
 
 ### Structure
 
@@ -58,23 +58,23 @@ The `media` directory contains all the media files that the `ExternalReference`s
 
 ## Read Adapter Behavior
 
-When a bundle is read from disk using the OpenTimelineIO API (using `read_from_file`, for example), only the `content.otio` file is extracted from the bundle and returned.  
+When a bundle is read from disk using the OpenTimelineIO Python API (using the adapters.read_from_* functions), only the `content.otio` file is read and parsed.
 
 For example, to view the timeline (not the media) of an otioz file in `otioview`, you can run:
 
 `otioview sommething.otioz`
 
-This will _only_ read the `content.otio` from the bundle, so is usually a fast operation to run, and does not decode or unzip any of the media in the media directory.
+Because this will _only_ read the `content.otio` from the bundle, it is usually a fast operation to run. None of the media is decoded or unzipped during this process.
 
-### extract_to_directory Optional Argument:
+### extract_to_directory Optional Argument
 
-extract_to_directory: if a value other than `None` is passed in, will extract the contents of the bundle into the directory at the path passed into the `extract_to_directory` argument.
+extract_to_directory: if a value other than `None` is passed in, will extract the contents of the bundle into the directory at the path passed into the `extract_to_directory` argument.  For the OTIOZ adapter, this will unzip the associated media.
 
 ### Read Adapter Example
 
 Extract the contents of the bundle and convert to an rv playlist:
 
-`otioconvert -i /var/tmp/somefile.otioz -a extract_to_directory=/var/tmp/somefile -o /var/tmp/somefile/somefile.rv`
+`otioconvert -i /var/tmp/some_file.otioz -a extract_to_directory=/var/tmp/example_directory -o /var/tmp/example_directory/some_file.rv`
 
 ## Write Adapter
 
@@ -84,7 +84,9 @@ For creating otio bundles using the provided python adapter, an OTIO file is use
 
 #### Unique Basenames
 
-Because file bundles have a flat namespace for media, and media will be copied into the bundle, the `ExternalReference` media references in the source OTIO must have a target_url fields pointing at media files with unique basenames.  For example, if there are media references that point at:
+Because file bundles have a flat namespace for media, and media will be copied into the bundle, the `ExternalReference` media references in the source OTIO must have a target_url fields pointing at media files with unique basenames.
+
+For example, if there are media references that point at:
 
 `/project_a/academy_leader.mov`
 
@@ -96,7 +98,7 @@ Because the basename of both files is `academy_leader.mov`, this will be an erro
 
 #### Expected Source Timeline External Reference URL Format
 
-The file bundle adapters expect the `target_url` field of any `media_reference`s in the source timeline to be in one of two forms (as produced by python's urlparse library):
+The file bundle adapters expect the `target_url` field of any `media_reference`s in the source timeline to be in one of two forms (as produced by python's [urlparse](https://docs.python.org/3/library/urllib.parse.html) library):
 
 - absolute path:  "file:///path/to/some/file" (encodes "/path/to/some/file")
 - relative path: "path/to/some/file" (the path is relative to the current working directory of the command running the adapter on the source timeline).
@@ -114,11 +116,11 @@ When running in `AllMissing` mode, no media will be put into the bundle.
 To use this argument with `otioconvert` from the commandline,  you can use the `-A` flag with the argument name `media_policy`:
 
 ```
-otioconvert -i <somefile> -o path/to/outputfile.otioz -A media_policy="AllMissing"
+otioconvert -i <some_file> -o path/to/output_file.otioz -A media_policy="AllMissing"
 ```
 
 ### Write Adapter Example
 
 Convert an otio into a zip bundle:
 
-`otioconvert -i somefile.otio -o /var/tmp/somefile.otioz`
+`otioconvert -i some_file.otio -o /var/tmp/some_file.otioz`

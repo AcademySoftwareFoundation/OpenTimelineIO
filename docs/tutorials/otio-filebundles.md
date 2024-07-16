@@ -70,6 +70,10 @@ Because this will _only_ read the `content.otio` from the bundle, it is usually 
 
 extract_to_directory: if a value other than `None` is passed in, will extract the contents of the bundle into the directory at the path passed into the `extract_to_directory` argument.  For the OTIOZ adapter, this will unzip the associated media.
 
+### absolute_media_reference_paths Optional Argument
+
+The OTIOD adapter additionally has an argument `absolute_media_reference_paths` which will convert all the media references in the bundle to be absolute paths if `True` is passed.  Default is `False`.
+
 ### Read Adapter Example
 
 Extract the contents of the bundle and convert to an rv playlist:

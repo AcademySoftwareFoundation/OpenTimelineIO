@@ -526,9 +526,9 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
                 index = adjusted_vector_index(index, c->children());
                 c->remove_child(index, ErrorStatusHandler());
             }, "index"_a)
-        .def("__internal_insert", [](Composition* c, int index, Composable* composable) {
+        .def("__internal_insert", [](Composition* c, int index, Composable &composable) {
                 index = adjusted_vector_index(index, c->children());
-                c->insert_child(index, composable, ErrorStatusHandler());
+                c->insert_child(index, &composable, ErrorStatusHandler());
             }, "index"_a, "item"_a)
         .def("__contains__", &Composition::has_child, "composable"_a)
         .def("__len__", [](Composition* c) {

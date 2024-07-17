@@ -23,6 +23,41 @@ from .. import (
     opentime,
 )
 
+#############################################################################################
+# Customization to help with writing timecodes while keeping dropframe vs nondropframe in mind
+# See https://en.wikipedia.org/wiki/SMPTE_timecode#Drop-frame_timecode
+#############################################################################################
+
+class ITimeCodeWriter:
+    def write_timecode(self, rationalTime: opentime.RationalTime):
+        pass
+
+class ForceDropFrameTimeCodeWriter(ITimeCodeWriter):
+    def __init__(self, rate):
+        self.rate = rate
+
+    def write_timecode(self, rationalTime: opentime.RationalTime):
+        print(f"ForceDropFrameTimeCodeWriter: writing {rationalTime} into timecode given rate {self.rate}")
+        return opentime.to_timecode(rationalTime, self.rate, drop_frame=0)
+
+class InferredDropFrameTimeCodeWriter(ITimeCodeWriter):
+    def __init__(self, rate):
+        self.rate = rate
+
+    def write_timecode(self, rationalTime: opentime.RationalTime):
+        print(f"InferredDropFrameTimeCodeWriter: writing {rationalTime} into timecode given rate {self.rate}")
+        return opentime.to_timecode(rationalTime, self.rate)
+
+class TimeCodeWriterFactory:
+    def __init__(self, rate):
+        self.rate = rate
+
+    def create_timecode_provider(self, force_disable_dropframe: bool = False) -> ITimeCodeWriter:
+        if force_disable_dropframe:
+            return ForceDropFrameTimeCodeWriter(self.rate)
+        return InferredDropFrameTimeCodeWriter(self.rate)
+
+#############################################################################################
 
 class EDLParseError(exceptions.OTIOError):
     pass
@@ -626,6 +661,7 @@ class ClipHandler:
             'record_tc_out'
         ]:
             if ':' not in getattr(self, prop):
+                old_attr = getattr(self, prop)
                 setattr(
                     self,
                     prop,
@@ -637,6 +673,7 @@ class ClipHandler:
                         self.edl_rate
                     )
                 )
+                print(f"Converted non TC prop {old_attr} to {getattr(self, prop)} based on rate {self.edl_rate}")
 
     def make_transition(self, comment_data):
         # Do some sanity check
@@ -798,11 +835,17 @@ def write_to_string(
     rate=None,
     style='avid',
     reelname_len=8,
-    force_disable_sources_dropframe=False
+    force_disable_sources_dropframe=False,
+    force_disable_target_dropframe=False,
 ):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    print(f"Invoked cmx_3600 write_to_string with arguments: {input_otio}, {rate}, {style}, {reelname_len}, {force_disable_sources_dropframe}")
+    print(
+        "Invoked cmx_3600 write_to_string with arguments: " +
+        f"{input_otio}, {rate}, {style}, {reelname_len}, " +
+        f"{force_disable_sources_dropframe}, " +
+        f"{force_disable_target_dropframe}"
+    )
 
     video_tracks = [t for t in input_otio.tracks
                     if t.kind == schema.TrackKind.Video and t.enabled]
@@ -834,19 +877,25 @@ def write_to_string(
         rate=rate or input_otio.tracks[0].duration().rate,
         style=style,
         reelname_len=reelname_len,
-        force_disable_sources_dropframe=force_disable_sources_dropframe
+        force_disable_sources_dropframe=force_disable_sources_dropframe,
+        force_disable_target_dropframe=force_disable_target_dropframe,
     )
 
     return writer.get_content_for_track_at_index(0, title=input_otio.name)
 
 
 class EDLWriter:
-    def __init__(self, tracks, rate, style, reelname_len=8, force_disable_sources_dropframe=False):
+    def __init__(self,
+        tracks, rate, style, reelname_len=8,
+        force_disable_sources_dropframe=False,
+        force_disable_target_dropframe=False,
+    ):
         self._tracks = tracks
         self._rate = rate
         self._style = style
         self._reelname_len = reelname_len
         self._force_disable_sources_dropframe = force_disable_sources_dropframe
+        self._force_disable_target_dropframe = force_disable_target_dropframe
 
         if style not in VALID_EDL_STYLES:
             raise exceptions.NotSupportedError(
@@ -919,6 +968,7 @@ class EDLWriter:
                         self._style,
                         self._reelname_len,
                         self._force_disable_sources_dropframe,
+                        self._force_disable_target_dropframe,
                     )
                 )
             elif isinstance(child, schema.Clip):
@@ -932,6 +982,7 @@ class EDLWriter:
                             self._style,
                             self._reelname_len,
                             self._force_disable_sources_dropframe,
+                            self._force_disable_target_dropframe,
                         )
                     )
                 else:
@@ -989,8 +1040,14 @@ class Event:
         rate,
         style,
         reelname_len,
-        force_disable_sources_dropframe
+        force_disable_sources_dropframe,
+        force_disable_target_dropframe,
     ):
+        print(
+            "Creating Event with arguments: " +
+            f"{clip}, {tracks}, {kind}, {rate}, {style}, {reelname_len}, " +
+            f"{force_disable_sources_dropframe}, {force_disable_target_dropframe}"
+        )
 
         # Premiere style uses AX for the reel name
         if style == 'premiere':
@@ -998,7 +1055,12 @@ class Event:
         else:
             reel = _reel_from_clip(clip, reelname_len)
 
-        line = EventLine(kind, rate, reel=reel, force_disable_sources_dropframe=force_disable_sources_dropframe)
+        line = EventLine(
+            kind, rate, reel=reel,
+            force_disable_sources_dropframe=force_disable_sources_dropframe,
+            force_disable_target_dropframe=force_disable_target_dropframe,
+        )
+
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
@@ -1069,11 +1131,16 @@ class DissolveEvent:
         style,
         reelname_len,
         force_disable_sources_dropframe,
+        force_disable_target_dropframe,
     ):
         # Note: We don't make the A-Side event line here as it is represented
         # by its own event (edit number).
 
-        cut_line = EventLine(kind, rate, force_disable_sources_dropframe=force_disable_sources_dropframe)
+        cut_line = EventLine(
+            kind, rate,
+            force_disable_sources_dropframe=force_disable_sources_dropframe,
+            force_disable_target_dropframe=force_disable_target_dropframe,
+        )
 
         if a_side_event:
             cut_line.reel = a_side_event.reel
@@ -1103,6 +1170,7 @@ class DissolveEvent:
             rate,
             reel=_reel_from_clip(b_side_clip, reelname_len),
             force_disable_sources_dropframe=force_disable_sources_dropframe,
+            force_disable_target_dropframe=force_disable_target_dropframe,
         )
         dslve_line.source_in = b_side_clip.source_range.start_time
         dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
@@ -1176,9 +1244,19 @@ class DissolveEvent:
 
         return "\n".join(lines)
 
-
 class EventLine:
-    def __init__(self, kind, rate, reel='AX', force_disable_sources_dropframe=False):
+    def __init__(self,
+        kind, rate, reel='AX',
+        force_disable_sources_dropframe=False,
+        force_disable_target_dropframe=False,
+    ):
+        print(
+            "Creating OTIO Event line using parameters: " +
+            f"{kind}, {rate}, {reel}, " +
+            f"{force_disable_sources_dropframe}, " +
+            f"{force_disable_target_dropframe}"
+        )
+
         self.reel = reel
         self._kind = 'V' if kind == schema.TrackKind.Video else 'A'
         self._rate = rate
@@ -1190,17 +1268,19 @@ class EventLine:
 
         self.dissolve_length = opentime.RationalTime(0.0, rate)
 
-        self.force_disable_sources_dropframe = force_disable_sources_dropframe
+        timecode_writer_factory = TimeCodeWriterFactory(rate)
+        self.source_timecode_provider = timecode_writer_factory.create_timecode_provider(force_disable_sources_dropframe)
+        self.target_timecode_provider = timecode_writer_factory.create_timecode_provider(force_disable_target_dropframe)
 
     def to_edl_format(self, edit_number):
         ser = {
             'edit': edit_number,
             'reel': self.reel,
             'kind': self._kind,
-            'src_in': self._to_timecode_handle_dropframe(self.source_in),
-            'src_out': self._to_timecode_handle_dropframe(self.source_out),
-            'rec_in': opentime.to_timecode(self.record_in, self._rate),
-            'rec_out': opentime.to_timecode(self.record_out, self._rate),
+            'src_in': self.source_timecode_provider.write_timecode(self.source_in),
+            'src_out': self.source_timecode_provider.write_timecode(self.source_out),
+            'rec_in': self.target_timecode_provider.write_timecode(self.record_in),
+            'rec_out': self.target_timecode_provider.write_timecode(self.record_out),
             'diss': int(
                 opentime.to_frames(self.dissolve_length, self._rate)
             ),
@@ -1215,12 +1295,6 @@ class EventLine:
 
     def is_dissolve(self):
         return self.dissolve_length.value > 0
-
-    def _to_timecode_handle_dropframe(self, rt):
-        if self.force_disable_sources_dropframe:
-            return opentime.to_timecode(rt, self._rate, drop_frame=0)
-        return opentime.to_timecode(rt, self._rate)
-
 
 def _generate_comment_lines(
     clip,
@@ -1262,14 +1336,17 @@ def _generate_comment_lines(
         )
 
     if timing_effect and isinstance(timing_effect, schema.LinearTimeWarp):
+        line_tc_result = opentime.to_timecode(
+            clip.trimmed_range().start_time,
+            edl_rate
+        )
+
+        print(f"Created timecode {line_tc_result} using {clip.trimmed_range().start_time} and {edl_rate}")
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
                 timing_effect.time_scalar * edl_rate,
-                opentime.to_timecode(
-                    clip.trimmed_range().start_time,
-                    edl_rate
-                )
+                line_tc_result,
             )
         )
 
@@ -1338,6 +1415,7 @@ def _generate_comment_lines(
             marker.marked_range.start_time,
             edl_rate
         )
+        print(f"Created marker timecode {timecode} using {marker.marked_range.start_time} and {edl_rate}")
 
         color = marker.color
         meta = marker.metadata.get("cmx_3600")

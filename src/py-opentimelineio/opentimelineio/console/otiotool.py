@@ -877,14 +877,15 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                         source = child.source_range
                         available = child.available_range()
 
-                        src_start = source.start_time.value
-                        src_dur = source.duration.value
-                        avail_start = available.start_time.value
-                        avail_dur = available.duration.value
-
-                        starts_early = src_start < avail_start
-                        ends_late = (src_dur - src_start) > (avail_dur - avail_start)
-                        if starts_early or ends_late:
+                        # contains() uses end_time_exclusive(),
+                        # does not handle case when
+                        # the end of the source range
+                        # meets available range exactly
+                        available_start = available.start_time
+                        available_end = available.end_time_inclusive()
+                        src_start = source.start_time
+                        src_end = source.end_time_inclusive()
+                        if src_start < available_start or available_end < src_end:
                             range_msg = "SOURCE MEDIA OUT OF BOUNDS"
                         else:
                             range_msg = "IN BOUNDS"

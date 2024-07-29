@@ -4,14 +4,20 @@
 #include "opentimelineio/serializableObject.h"
 #if defined(__GNUC__) || defined(__clang__)
 #    include <cstdlib>
-#    include <cxxabi.h>
+#    if __has_include(<cxxabi.h>)
+#       define OTIO_HAVE_DEMANGLER 1
+#       include <cxxabi.h>
+#    else // !__has_include(<cxxabi.h>)
+#       define OTIO_HAVE_DEMANGLER 0
+#    endif // __has_include(<cxxabi.h>)
 #    include <memory>
 #else
+#    define OTIO_HAVE_DEMANGLER 0
 #    include <typeinfo>
 #endif
 
 namespace {
-#if defined(__GNUC__) || defined(__clang__)
+#if OTIO_HAVE_DEMANGLER
 std::string
 cxxabi_type_name_for_error_mesage(const char* name)
 {
@@ -41,10 +47,10 @@ type_name_for_error_message(std::type_info const& t)
         return "None";
     }
 
-#if defined(__GNUC__) || defined(__clang__)
+#if OTIO_HAVE_DEMANGLER
     return ::cxxabi_type_name_for_error_mesage(t.name());
 #else
-    // On Windows std::type_info.name() returns a human readable string.
+    // On Windows, or without cxxabi.h, std::type_info.name() returns a human readable string.
     return t.name();
 #endif
 }

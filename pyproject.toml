@@ -5,3 +5,9 @@ requires = [
     "cmake>=3.12",
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
+
+[tool.cibuildwheel.windows]
+archs = ["AMD64"]

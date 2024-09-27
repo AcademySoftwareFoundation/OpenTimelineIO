@@ -39,6 +39,11 @@ public:
         return _original_schema_version;
     }
 
+    AnyDictionary data() const noexcept
+    {
+        return _data;
+    }
+
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 

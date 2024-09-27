@@ -657,12 +657,15 @@ static void define_effects(py::module m) {
     py::class_<Effect, SOWithMetadata, managing_ptr<Effect>>(m, "Effect", py::dynamic_attr())
         .def(py::init([](std::string name,
                          std::string effect_name,
-                         py::object metadata) {
-                          return new Effect(name, effect_name, py_to_any_dictionary(metadata)); }),
+                         py::object metadata,
+                         py::bool_ enabled) {
+                          return new Effect(name, effect_name, py_to_any_dictionary(metadata), enabled); }),
              py::arg_v("name"_a = std::string()),
              "effect_name"_a = std::string(),
-             py::arg_v("metadata"_a = py::none()))
-        .def_property("effect_name", &Effect::effect_name, &Effect::set_effect_name);
+             py::arg_v("metadata"_a = py::none()),
+             "enabled"_a = true)
+        .def_property("effect_name", &Effect::effect_name, &Effect::set_effect_name)
+        .def_property("enabled", &Effect::enabled, &Effect::set_enabled, "If true, the Effect is applied. If false, the Effect is omitted.");
 
     py::class_<TimeEffect, Effect, managing_ptr<TimeEffect>>(m, "TimeEffect", py::dynamic_attr(), "Base class for all effects that alter the timing of an item.")
         .def(py::init([](std::string name,

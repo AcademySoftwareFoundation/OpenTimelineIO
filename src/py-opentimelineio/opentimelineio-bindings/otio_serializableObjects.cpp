@@ -301,6 +301,9 @@ define_bases1(py::module m)
     py::class_<UnknownSchema, SerializableObject, managing_ptr<UnknownSchema>>(
         m,
         "UnknownSchema")
+        .def_property_readonly("data", [](UnknownSchema* schema) {
+                auto ptr = schema->data().get_or_create_mutation_stamp();
+            return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
         .def_property_readonly(
             "original_schema_name",
             &UnknownSchema::original_schema_name)

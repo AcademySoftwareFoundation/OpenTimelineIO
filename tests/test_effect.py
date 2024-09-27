@@ -82,6 +82,7 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(ef.effect_name, "flop")
         self.assertEqual(ef.enabled, True)
 
+
 class TestLinearTimeWarp(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
         ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
@@ -90,7 +91,6 @@ class TestLinearTimeWarp(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(ef.time_scalar, 2.5)
         self.assertEqual(ef.metadata, {"foo": "bar"})
         self.assertEqual(ef.enabled, True)
-
 
     def test_serialize(self):
         ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})

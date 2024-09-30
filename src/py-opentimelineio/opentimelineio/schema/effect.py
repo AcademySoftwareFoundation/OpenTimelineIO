@@ -11,11 +11,13 @@ def __str__(self):
         "Effect("
         "{}, "
         "{}, "
+        "{}, "
         "{}"
         ")".format(
             str(self.name),
             str(self.effect_name),
             str(self.metadata),
+            str(self.enabled)
         )
     )
 
@@ -26,10 +28,12 @@ def __repr__(self):
         "otio.schema.Effect("
         "name={}, "
         "effect_name={}, "
-        "metadata={}"
+        "metadata={}, "
+        "enabled={}"
         ")".format(
             repr(self.name),
             repr(self.effect_name),
             repr(self.metadata),
+            repr(self.enabled)
         )
     )

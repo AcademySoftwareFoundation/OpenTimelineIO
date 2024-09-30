@@ -310,6 +310,7 @@ None
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 
@@ -342,6 +343,7 @@ Hold the first frame of the clip for the duration of the clip.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -500,6 +502,7 @@ A time warp that applies a linear speed up or slow down across the entire clip.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -607,6 +610,7 @@ Base class for all effects that alter the timing of an item.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 

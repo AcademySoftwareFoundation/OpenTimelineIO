@@ -193,11 +193,8 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-build }}
           CIBW_SKIP: '*musllinux*'
-          # configure cibuildwheel to build native archs ('auto'), and some
-          # emulated ones
-          CIBW_ARCHS_LINUX: auto aarch64
+          CIBW_ARCHS_LINUX: x86_64 aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_I686_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
 
       - uses: actions/upload-artifact@v3

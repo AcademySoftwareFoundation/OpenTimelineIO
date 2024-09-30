@@ -14,7 +14,7 @@ public:
     struct Schema
     {
         static auto constexpr name   = "Effect";
-        static int constexpr version = 2;
+        static int constexpr version = 1;
     };
 
     using Parent = SerializableObjectWithMetadata;

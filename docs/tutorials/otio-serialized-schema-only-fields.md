@@ -140,7 +140,7 @@ parameters:
 - *name*
 - *source_range*
 
-### Effect.2
+### Effect.1
 
 parameters:
 - *effect_name*

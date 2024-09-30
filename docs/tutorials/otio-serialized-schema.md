@@ -298,7 +298,7 @@ parameters:
 - *name*: 
 - *source_range*: 
 
-### Effect.2
+### Effect.1
 
 *full module path*: `opentimelineio.schema.Effect`
 

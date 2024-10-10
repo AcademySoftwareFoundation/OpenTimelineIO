@@ -40,6 +40,10 @@ public:
     std::map<Composable*, TimeRange>
     range_of_all_children(ErrorStatus* error_status = nullptr) const override;
 
+    std::vector<Retainer<Composable>> children_in_range(
+        TimeRange const& search_range,
+        ErrorStatus*     error_status = nullptr) const override;
+
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 

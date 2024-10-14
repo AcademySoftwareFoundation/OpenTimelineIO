@@ -182,6 +182,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@v2.16.5
         with:
@@ -189,8 +193,9 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-build }}
           CIBW_SKIP: '*musllinux*'
+          CIBW_ARCHS_LINUX: x86_64 aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_I686_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
 
       - uses: actions/upload-artifact@v3
         with:

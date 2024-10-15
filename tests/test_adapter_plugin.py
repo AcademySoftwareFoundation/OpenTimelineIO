@@ -89,6 +89,7 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertTrue(self.adp.has_feature("read"))
         self.assertTrue(self.adp.has_feature("read_from_file"))
         self.assertFalse(self.adp.has_feature("write"))
+        self.assertTrue(self.adp.has_feature("hooks"))
 
     def test_pass_arguments_to_adapter(self):
         self.assertEqual(self.adp.read_from_file("foo", suffix=3).name, "foo3")

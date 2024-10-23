@@ -39,10 +39,17 @@ security vulnerabilities.
   
 ### Software Dependencies
 
-OpenTimelineIO depends on:
+#### OpenTimelineIO C++
 
 - [Imath](https://github.com/AcademySoftwareFoundation/Imath) - Provides Vector, Matrix, and Bounding Box primitives. 
+- [rapidjson](https://github.com/Tencent/rapidjson/) - Used in serialization/deserialization of the `.otio` JSON file format.
+
+#### OpenTimelineIO Python
 
 - [pybind11](https://github.com/pybind/pybind11) (only if built with Python bindings) - Used to create Python bindings for the C++ library.
+- [importlib_metadata](https://pypi.org/project/importlib-metadata/) - Provides backward compatability for Python 3.7.
 
-- [rapidjson](https://github.com/Tencent/rapidjson/) - Used in serialization/deserialization of the `.otio` JSON file format.
+Optionally, OTIOView requires:
+
+- [PySide2](https://pypi.org/project/PySide2/) - on x86_64.
+- [PySide6](https://pypi.org/project/PySide6/) - on AArch64.

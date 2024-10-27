@@ -12,6 +12,17 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
 typedef std::vector<SerializableObject::Retainer<Track>>   TrackRetainerVector;
 
+static bool
+_is_not_visible(
+    SerializableObject::Retainer<Composable> thing)
+{
+    auto item = dynamic_retainer_cast<Item>(thing);
+    if (!item)
+        return false;
+
+    return !item->visible();
+}
+
 static void
 _flatten_next_item(
     RangeTrackMap&             range_track_map,
@@ -61,46 +72,50 @@ _flatten_next_item(
         }
         track_map = &result.first->second;
     }
-    for (auto child: track->children())
-    {
-        auto item = dynamic_retainer_cast<Item>(child);
-        if (!item)
-        {
-            if (!dynamic_retainer_cast<Transition>(child))
-            {
-                if (error_status)
-                {
-                    *error_status = ErrorStatus(
-                        ErrorStatus::TYPE_MISMATCH,
-                        "expected item of type Item* || Transition*",
-                        child);
-                }
-                return;
-            }
-        }
 
-        if (!item || item->visible() || track_index == 0)
+    auto children = track->children();
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        std::optional<TimeRange> trim = std::nullopt;
+        SerializableObject::Retainer<Composable> child = children[i];
+
+        // combine all non visible children into one continuous range
+        while(track_index > 0 && _is_not_visible(child))
         {
-            flat_track->insert_child(
-                static_cast<int>(flat_track->children().size()),
-                static_cast<Composable*>(child->clone(error_status)),
-                error_status);
-            if (is_error(error_status))
-            {
-                return;
-            }
-        }
-        else
-        {
-            TimeRange trim = (*track_map)[item];
+            TimeRange child_trim = (*track_map)[child];
+
+            // offset ranges so they are in track range before being trimmed
             if (trim_range)
             {
                 trim = TimeRange(
-                    trim.start_time() + trim_range->start_time(),
-                    trim.duration());
-                (*track_map)[item] = trim;
+                    child_trim.start_time() + trim_range->start_time(),
+                    child_trim.duration());
+                (*track_map)[child] = child_trim;
             }
 
+            if (trim.has_value())
+            {
+                trim = trim->duration_extended_by(child_trim.duration());
+            }
+            else
+            {
+                trim = child_trim;
+            }
+
+            if (i+1 < children.size())
+            {
+                child = children[i++];
+            }
+            else
+            {
+                // last item is not visible
+                child = nullptr;
+                break;
+            }
+        }
+
+        if (trim.has_value())
+        {
             _flatten_next_item(
                 range_track_map,
                 flat_track,
@@ -108,7 +123,37 @@ _flatten_next_item(
                 track_index - 1,
                 trim,
                 error_status);
-            if (track == nullptr || is_error(error_status))
+
+            if (is_error(error_status))
+            {
+                return;
+            }
+        }
+
+        if (child)
+        {
+            auto item = dynamic_retainer_cast<Item>(child);
+            if (!item)
+            {
+                if (!dynamic_retainer_cast<Transition>(child))
+                {
+                    if (error_status)
+                    {
+                        *error_status = ErrorStatus(
+                            ErrorStatus::TYPE_MISMATCH,
+                            "expected item of type Item* || Transition*",
+                            child);
+                    }
+                    return;
+                }
+            }
+
+            flat_track->insert_child(
+                static_cast<int>(flat_track->children().size()),
+                static_cast<Composable*>(child->clone(error_status)),
+                error_status);
+
+            if (is_error(error_status))
             {
                 return;
             }

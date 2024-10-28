@@ -131,13 +131,11 @@ class PythonPlugin(core.SerializableObject):
         if not self._module:
             self._module = self._imported_module("adapters")
 
-        print(f"Retrieved plugin module: {self._module}")
         return self._module
 
     def _execute_function(self, func_name, **kwargs):
         """Execute func_name on this adapter with error checking."""
 
-        print(f"Invoking plugin function: {func_name} with args: {kwargs}")
         # collects the error handling into a common place.
         if not hasattr(self.module(), func_name):
             raise exceptions.AdapterDoesntSupportFunctionError(

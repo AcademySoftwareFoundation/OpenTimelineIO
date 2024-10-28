@@ -258,7 +258,6 @@ class Adapter(plugins.PythonPlugin):
         **adapter_argument_map
     ):
         """Call the write_to_string function on this adapter."""
-        print(f"Called write_to_string with args: {input_otio}, {hook_function_argument_map}, {adapter_argument_map}")
 
         hook_function_argument_map = copy.deepcopy(
             hook_function_argument_map or {}

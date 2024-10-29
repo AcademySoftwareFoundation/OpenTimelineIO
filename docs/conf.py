@@ -45,7 +45,12 @@ pygments_style = 'sphinx'
 
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-
+html_theme_options = {
+    'show_related': False,  # Turn off related (nested) links
+    'collapse_navigation': False,  # Collapse the sidebar navigation
+    'sticky_navigation': True,  # Keep sidebar fixed during scrolling
+    'includehidden': False,  # Prevent hidden toctree items from being included in the main body
+}
 htmlhelp_basename = f'{project.lower()}doc'
 
 

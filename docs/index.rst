@@ -4,15 +4,24 @@ Welcome to OpenTimelineIO's documentation!
 Overview
 --------
 
-OpenTimelineIO (OTIO) is an API and interchange format for editorial cut information. You can think
-of it as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and
-manipulating editorial data. It also includes a plugin system for translating to/from existing
-editorial formats as well as a plugin system for linking to proprietary media storage schemas.
+The OpenTimelineIO (OTIO) project aims to solve modern VFX and Post Production workflow challenges like conform, project migration, and interchange across software and platforms in a reliable, open source and reproducible manner. 
 
-OTIO supports clips, timing, tracks, transitions, markers, metadata, etc. but not embedded video or
-audio. Video and audio media are referenced externally. We encourage 3rd party vendors, animation
-studios and visual effects studios to work together as a community to provide adaptors for each
-video editing tool and pipeline.
+OpenTimelineIO is:
+
+* :doc:`an interchange file format for editorial cut information. <tutorials/otio-file-format-specification>`
+* :doc:`an ecosystem of tools and integrations. <intros/integrations>`
+* :doc:`an cross platform API for timeline data. <cxx/bridges>`
+
+You can think of OTIO as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and
+manipulating editorial data. 
+
+OpenTimelineIO’s API's and language bindings allows application developers to integrate OpenTimelineIO support into their products, 
+and allows studios and developers to build an ecosystem of compatible pipeline tools. 
+
+See our OTIO fundamentals guide, and intros for [Creatives](intros/creatives.md), Pipeline Architects, Integrators and Developers, and our FAQs. 
+
+OpenimelineIO is a [Academy Software Foundation](https://www.aswf.io) incubation project.
+
 
 Links
 ---------
@@ -20,33 +29,64 @@ Links
 
 `OpenTimelineIO Discussion Group <https://lists.aswf.io/g/otio-discussion>`_
 
-Quick Start
+Intro
 ------------
 .. toctree::
-   :maxdepth: 2
-   :caption: Quick Start
+   :maxdepth: 0
+   :caption: Intro
 
-   tutorials/quickstart
-   tutorials/otio-env-variables
+   intros/intro.md
+   intros/integrations.md
+   intros/creatives.md
+   intros/pipeline.md
+   intros/integrators.md
 
-Tutorials
-------------
+
+User Tutorials
+--------------
+.. toctree::
+   :maxdepth: 0
+   :caption: User Tutorials
+
+   user_tutorials/sample_media.md
+   user_tutorials/roundtripping.md
+
+
+Python API
+----------------
+.. toctree::
+   :maxdepth: 1
+   :caption: Python API
+
+   fundamentals/feature-matrix
+   fundamentals/otio-timeline-structure
+   fundamentals/time-ranges
+   fundamentals/spatial-coordinates
+
+
+File Format Specifications
+--------------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: File Format Specifications
+
+   tutorials/otio-filebundles
+   tutorials/otio-file-format-specification
+
+
+Dev Tutorials
+-------------
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials
+   :caption: Dev Tutorials
 
    tutorials/adapters
    tutorials/architecture
    tutorials/contributing
-   tutorials/feature-matrix
-   tutorials/otio-timeline-structure
-   tutorials/time-ranges
-   tutorials/otio-filebundles
    tutorials/write-an-adapter
    tutorials/write-a-media-linker
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
-   tutorials/spatial-coordinates
    tutorials/developing-a-new-schema
    tutorials/versioning-schemas
 
@@ -62,7 +102,6 @@ Use Cases
 
 API References
 --------------
-
 
 .. toctree::
    :maxdepth: 3

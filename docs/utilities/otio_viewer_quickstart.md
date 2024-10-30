@@ -1,4 +1,4 @@
-# Quickstart
+# OTIO Viewer
 
 This is for users who wish to get started using the "OTIOView" application to inspect the contents of editorial timelines.
 

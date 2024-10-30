@@ -1,4 +1,4 @@
-# Integrations
+# Available Integrations
 
 OpenTimelineIO is used in a variety of software and projects. If you know of any, feel free to add them to this list (in alphabetical order).
 

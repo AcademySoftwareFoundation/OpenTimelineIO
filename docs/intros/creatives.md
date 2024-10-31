@@ -1,6 +1,6 @@
 # For Creatives
 
-OpenTimelineIO can help solve a variety of conform and project interchange and archive workflow challenges and be integrated into pipelines and asset management tools. 
+OpenTimelineIO can help solve a variety of conform, project interchange, studio pipelines, archival and other workflows.
 
 The best place to start is our [Workflow tutorials and Example files](/user_tutorials/sample_media.md) which contain media as well as .otio files. 
 

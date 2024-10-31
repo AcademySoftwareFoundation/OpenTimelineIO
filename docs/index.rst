@@ -9,7 +9,7 @@ The OpenTimelineIO (OTIO) project aims to solve modern VFX and Post Production w
 OpenTimelineIO is:
 
 * :doc:`an ecosystem of video tools and integrations. <intros/integrations>`
-* :doc:`an interchange file format for editorial cut information. <tutorials/otio-file-format-specification>`
+* :doc:`an interchange file format for editorial cut information. <schema/otio-file-format-specification>`
 * :doc:`an cross platform API for timeline data. <cxx/bridges>`
 
 You can think of OTIO as a modern Edit Decision List (EDL) that also includes an API for reading, writing, and
@@ -62,25 +62,38 @@ API Fundamentals
 .. toctree::
    :maxdepth: 1
    :caption: API Fundamentals
-
+   
+   fundamentals/introduction
    fundamentals/otio-timeline-structure
    fundamentals/time-ranges
    fundamentals/spatial-coordinates
 
 
-Dev Tutorials
--------------
+Python Fundamentals
+-------------------
 .. toctree::
    :maxdepth: 1
-   :caption: Dev Tutorials
+   :caption: Python Fundamentals
 
-   fundamentals/feature-matrix
-   tutorials/write-an-adapter
-   tutorials/write-a-media-linker
-   tutorials/write-a-hookscript
-   tutorials/write-a-schemadef
-   tutorials/developing-a-new-schema
-   tutorials/versioning-schemas
+   python/architecture
+   python/feature-matrix
+   python/adapters.md
+   python/otio-plugins.md 
+   python/otio-env-variables.md 
+
+
+Python Tutorials
+-------------------
+.. toctree::
+   :maxdepth: 1
+   :caption: Python Tutorials
+
+   python-tutorials/write-an-adapter
+   python-tutorials/write-a-media-linker
+   python-tutorials/write-a-hookscript
+   python-tutorials/write-a-schemadef
+   python-tutorials/developing-a-new-schema
+   python-tutorials/versioning-schemas
 
 API References
 --------------
@@ -102,19 +115,11 @@ Schema References
    :maxdepth: 2
    :caption: Schema References
 
-   tutorials/otio-filebundles
-   tutorials/otio-file-format-specification
-   tutorials/otio-serialized-schema
-   tutorials/otio-serialized-schema-only-fields
+   schema/otio-filebundles
+   schema/otio-file-format-specification
+   schema/otio-serialized-schema
+   schema/otio-serialized-schema-only-fields
 
-Plugin References
------------------
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Plugins References
-
-   tutorials/otio-plugins.md
 
 Utilities
 ---------

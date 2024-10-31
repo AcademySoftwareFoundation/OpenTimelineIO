@@ -29,7 +29,7 @@ Adapter plugins convert to and from OpenTimelineIO.
 
 [Adapters documentation page for more information](./adapters).
 
-[Tutorial on how to write an adapter](write-an-adapter).
+[Tutorial on how to write an adapter](/python-tutorials/write-an-adapter).
 
 
 ### otio_json
@@ -194,7 +194,7 @@ read on unix and windows platforms.
 Media Linkers run after the adapter has read in the file and convert the media
 references into valid references where appropriate.
 
-[Tutorial on how to write a Media Linker](write-a-media-linker).
+[Tutorial on how to write a Media Linker](/python-tutorials/write-a-media-linker).
 
 
 
@@ -202,7 +202,7 @@ references into valid references where appropriate.
 
 SchemaDef plugins define new external schema.
 
-[Tutorial on how to write a schemadef](write-a-schemadef).
+[Tutorial on how to write a schemadef](/python-tutorials/write-a-schemadef).
 
 
 
@@ -210,7 +210,7 @@ SchemaDef plugins define new external schema.
 
 HookScripts are extra plugins that run on _hooks_.
 
-[Tutorial on how to write a hookscript](write-a-hookscript).
+[Tutorial on how to write a hookscript](/python-tutorials/write-a-hookscript).
 
 
 

@@ -35,5 +35,5 @@ Below are some other adapters that may be useful to some users:
 
 ## Custom Adapters
 
-Adapters are implemented as plugins for OpenTimelineIO and can either be registered via an [environment variable](./otio-env-variables) or by packaging in a Python module with a particular entrypoint defined. For more detail, see the [Writing an OTIO Adapter](./write-an-adapter) tutorial.
+Adapters are implemented as plugins for OpenTimelineIO and can either be registered via an [environment variable](./otio-env-variables) or by packaging in a Python module with a particular entrypoint defined. For more detail, see the [Writing an OTIO Adapter](/python-tutorials/write-an-adapter) tutorial.
 

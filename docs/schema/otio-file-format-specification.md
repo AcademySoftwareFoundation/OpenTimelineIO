@@ -83,7 +83,7 @@ the core OTIO schema.
 Due to the fact that many different workflows can and will use metadata, it is important to group
 metadata inside namespaces so that independent workflows can coexist without encountering name collisions. In the example below, there is metadata on the Timeline and on several Clips for both a hypothetical `my_playback_tool` and `my_production_tracking_system` that could coexist with anything else added under a different namespace.
 
-Metadata can also be useful when prototyping new OTIO schemas. An existing object can be extended with metadata which can later be migrated into a new schema version, or a custom schema defined in a [SchemaDef plugin](write-a-schemadef).
+Metadata can also be useful when prototyping new OTIO schemas. An existing object can be extended with metadata which can later be migrated into a new schema version, or a custom schema defined in a [SchemaDef plugin](/python-tutorials/write-a-schemadef).
 
 ## Example:
 

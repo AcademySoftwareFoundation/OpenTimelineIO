@@ -21,7 +21,7 @@ A default OTIO installation includes only the "Core" adapters, which include the
 
 A curated list of adapters for popular file formats like EDL, AAF, ALE, and FCP XML can be installed using the [OpenTimelineIO Plugins package in PyPI](https://pypi.org/project/OpenTimelineIO-Plugins/). These plugins can also be individually installed from their PyPI packages.
 
-For mor information, see the [Adapters](./adapters) section.
+For mor information, see the [Adapters](/python/adapters) section.
 
 
 ## Run OTIOView

@@ -12,7 +12,7 @@ These variables must be set _before_ the OpenTimelineIO python library is import
 OTIO_PLUGIN_MANIFEST_PATH
     A colon (`:`) on POSIX system (or a semicolon (`;`) on Windows) separated string with paths
     to `.manifest.json` files that contain OTIO plugin manifests.
-    See the [tutorial on how to write an adapter plugin](write-an-adapter.md) for additional details.
+    See the [tutorial on how to write an adapter plugin](/python-tutorials/write-an-adapter.md) for additional details.
 
 OTIO_DEFAULT_MEDIA_LINKER
    The name of the default media linker to use after reading a file, if `""` then no

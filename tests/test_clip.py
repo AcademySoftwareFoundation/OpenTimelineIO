@@ -21,16 +21,34 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             target_url="/var/tmp/test.mov"
         )
 
+        ltw = otio.schema.LinearTimeWarp(
+            name="linear_time_warp",
+            time_scalar=1.5);
+        effects = []
+        effects.append(ltw)
+
+        red = otio.schema.MarkerColor.RED
+        m = otio.schema.Marker(
+            name="red_marker", color=red)
+        markers = []
+        markers.append(m)
+
         cl = otio.schema.Clip(
             name=name,
             media_reference=mr,
             source_range=tr,
+            effects=effects,
+            markers=markers,
             # transition_in
             # transition_out
         )
         self.assertEqual(cl.name, name)
         self.assertEqual(cl.source_range, tr)
         self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
+
+        self.assertTrue(isinstance(cl.effects[0], otio.schema.LinearTimeWarp)
+
+        self.assertEqual(cl.markers[0].color, red)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

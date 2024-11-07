@@ -7,11 +7,13 @@ from .. import _otio
 
 @add_method(_otio.Clip)
 def __str__(self):
-    return 'Clip("{}", {}, {}, {})'.format(
+    return 'Clip("{}", {}, {}, {} {} {})'.format(
         self.name,
         self.media_reference,
         self.source_range,
-        self.metadata
+        self.metadata,
+        self.effects,
+        self.markers
     )
 
 
@@ -23,11 +25,15 @@ def __repr__(self):
         'media_reference={}, '
         'source_range={}, '
         'metadata={}'
+        'effects={}'
+        'markers={}'
         ')'.format(
             repr(self.name),
             repr(self.media_reference),
             repr(self.source_range),
             repr(self.metadata),
+            repr(self.effects),
+            repr(self.markers)
         )
     )
 

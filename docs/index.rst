@@ -41,8 +41,8 @@ Getting Started
    intros/pipeline.md
    intros/integrators.md
    intros/integrations.md
+   intros/community.md
    intros/roadmap.md
-   intros/contributing.md
 
 User Tutorials
 --------------
@@ -67,6 +67,7 @@ API Fundamentals
    fundamentals/otio-timeline-structure
    fundamentals/time-ranges
    fundamentals/spatial-coordinates
+   fundamentals/contributing.md
 
 
 Python Fundamentals

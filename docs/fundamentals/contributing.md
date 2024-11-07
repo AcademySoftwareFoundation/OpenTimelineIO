@@ -3,9 +3,6 @@
 
 We're excited to collaborate with the community and look forward to the many improvements you can make to OpenTimelineIO!
 
-Feel free to join our Slack, and join the TSC Zoom meetings. 
-
-You can find an archicv
 
 ## Contributor License Agreement
 

@@ -46,7 +46,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(cl.source_range, tr)
         self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
 
-        self.assertTrue(isinstance(cl.effects[0], otio.schema.LinearTimeWarp)
+        self.assertTrue(isinstance(cl.effects[0], otio.schema.LinearTimeWarp))
 
         self.assertEqual(cl.markers[0].color, red)
 

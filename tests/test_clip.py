@@ -23,7 +23,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         ltw = otio.schema.LinearTimeWarp(
             name="linear_time_warp",
-            time_scalar=1.5);
+            time_scalar=1.5)
         effects = []
         effects.append(ltw)
 

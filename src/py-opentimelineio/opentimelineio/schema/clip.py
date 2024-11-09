@@ -7,7 +7,7 @@ from .. import _otio
 
 @add_method(_otio.Clip)
 def __str__(self):
-    return 'Clip("{}", {}, {}, {} {} {})'.format(
+    return 'Clip("{}", {}, {}, {}, {}, {})'.format(
         self.name,
         self.media_reference,
         self.source_range,
@@ -24,8 +24,8 @@ def __repr__(self):
         'name={}, '
         'media_reference={}, '
         'source_range={}, '
-        'metadata={}'
-        'effects={}'
+        'metadata={}, '
+        'effects={}, '
         'markers={}'
         ')'.format(
             repr(self.name),

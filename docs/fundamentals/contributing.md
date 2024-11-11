@@ -3,6 +3,7 @@
 
 We're excited to collaborate with the community and look forward to the many improvements you can make to OpenTimelineIO!
 
+
 ## Contributor License Agreement
 
 Before contributing code to OpenTimelineIO, we ask that you sign a Contributor License Agreement (CLA).

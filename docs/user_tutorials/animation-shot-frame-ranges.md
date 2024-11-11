@@ -5,7 +5,7 @@
 ## Summary
 
 This case is very similar to the
-[](/use-cases/shots-added-removed-from-cut).
+[](/user_tutorials/shots-added-removed-from-cut).
 The editorial and animation departments are working with a sequence of shots simultaneously over the course of a few
 weeks. The initial delivery of rendered video clips from animation to editorial provides enough footage for the
 editor(s) to work with, at least as a starting point. As the cut evolves, the editor(s) may need more frames at the
@@ -26,7 +26,7 @@ runs a Python script which compares the frame range of each shot used in the cut
 take of each shot being animated. Any shot that is too short must be extended and any shot that is more than 12 frames
 too long can be trimmed down. The revised shots are animated, re-rendered and re-delivered to editorial. Upon receiving
 these new deliveries, editorial will cut them into the sequence (see also
-[](/use-cases/conform-new-renders-into-cut)).
+[](/user_tutorials/conform-new-renders-into-cut)).
 For shots that used timing effects to temporarily extend them, those effects can be removed, since the new version of
 those shots is now longer.
 

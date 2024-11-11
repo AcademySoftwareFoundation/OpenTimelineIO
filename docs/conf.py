@@ -45,6 +45,12 @@ pygments_style = 'sphinx'
 
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme_options = {
+    'navigation_depth': 1,  # Set the depth to 1 to hide nested headers
+    'collapse_navigation': False,  # Prevents collapsing of nested navigation
+    'sticky_navigation': True,  # Keeps the sidebar navigation in view while scrolling
+}
+
 
 htmlhelp_basename = f'{project.lower()}doc'
 

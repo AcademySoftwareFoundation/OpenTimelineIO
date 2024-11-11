@@ -121,7 +121,7 @@ The native format serialization (`.otio` files) is handled via the "otio_json" a
 
 In most cases you don't need to worry about adapter names, just use `otio.adapters.read_from_file()` and `otio.adapters.write_to_file` and it will figure out which one to use based on the filename extension.
 
-For more information, see [How To Write An OpenTimelineIO Adapter](write-an-adapter).
+For more information, see [How To Write An OpenTimelineIO Adapter](/python-tutorials/write-an-adapter).
 
 ## otio.media_linkers
 
@@ -129,7 +129,7 @@ Media linkers run on the otio file after an adapter calls `.read_from_file()` or
 
 You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file()` or `.read_from_string()` or via the {term}`OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
 
-For more information about writing media linkers, see [How To Write An OpenTimelineIO Media Linker](write-a-media-linker).
+For more information about writing media linkers, see [How To Write An OpenTimelineIO Media Linker](/python-tutorials/write-a-media-linker).
 
 Example Scripts
 ----------------

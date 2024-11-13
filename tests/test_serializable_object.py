@@ -142,7 +142,7 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         so = otio.core.SerializableObjectWithMetadata()
         so.metadata["box"] = b
         self.assertEqual(so.metadata["box"], b)
-        v = [ b.min, b.max ]
+        v = [b.min, b.max]
         so.metadata["vectors"] = v
         self.assertEqual(so.metadata["vectors"], v)
 

@@ -144,7 +144,8 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(so.metadata["box"], b)
         v = [b.min, b.max]
         so.metadata["vectors"] = v
-        self.assertEqual(so.metadata["vectors"], v)
+        self.assertEqual(so.metadata["vectors"],
+            [otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)])
 
 
 class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):

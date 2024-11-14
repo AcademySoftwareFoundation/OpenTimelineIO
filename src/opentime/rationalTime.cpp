@@ -453,6 +453,10 @@ RationalTime::to_timecode(
         return std::string();
     }
 
+    // It is common practice to use truncated or rounded values
+    // like 29.97 instead of exact SMPTE rates like 30000/1001
+    // so as a convenience we will snap the rate to the nearest
+    // SMPTE rate if it is close enough.
     double nearest_smpte_rate = nearest_smpte_timecode_rate(rate);
     if (abs(nearest_smpte_rate - rate) > 0.1)
     {

@@ -102,14 +102,22 @@ Compute the duration of samples from first to last (including last). This is not
 
 For example, the duration of a clip from frame 10 to frame 15 is 6 frames. Result will be in the rate of start_time.
 )docstring")
-        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a, "Returns true if the rate is valid for use with timecode.")
+        .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a,
+            "Deprecated. Please use `is_smpte_timecode_rate` instead. This function will be removed in a future release.")
+        .def_static("is_smpte_timecode_rate", &RationalTime::is_smpte_timecode_rate, "rate"_a,
+            "Returns true if the rate is valid for use with SMPTE timecode.")
         .def_static("nearest_valid_timecode_rate", &RationalTime::nearest_valid_timecode_rate, "rate"_a,
-            "Returns the first valid timecode rate that has the least difference from the given value.")
-        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a, "Turn a frame number and rate into a :class:`~RationalTime` object.")
+            "Deprecated. Please use `nearest_smpte_timecode_rate` instead. This function will be removed in a future release.")
+        .def_static("nearest_smpte_timecode_rate", &RationalTime::nearest_smpte_timecode_rate, "rate"_a,
+            "Returns the first SMPTE timecode rate that has the least difference from the given value.")
+        .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a,
+            "Turn a frame number and rate into a :class:`~RationalTime` object.")
         .def_static("from_seconds", static_cast<RationalTime (*)(double, double)> (&RationalTime::from_seconds), "seconds"_a, "rate"_a)
         .def_static("from_seconds", static_cast<RationalTime (*)(double)> (&RationalTime::from_seconds), "seconds"_a)
-        .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames, "Returns the frame number based on the current rate.")
-        .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a, "Returns the frame number based on the given rate.")
+        .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames,
+            "Returns the frame number based on the current rate.")
+        .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a,
+            "Returns the frame number based on the given rate.")
         .def("to_seconds", &RationalTime::to_seconds)
         .def("to_timecode", [](RationalTime rt, double rate, std::optional<bool> drop_frame) {
                 return rt.to_timecode(

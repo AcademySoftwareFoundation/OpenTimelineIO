@@ -171,14 +171,18 @@ public:
                                    start_time._rate };
     }
 
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
     [[deprecated("Use is_smpte_timecode_rate() instead")]]
     static bool is_valid_timecode_rate(double rate);
 
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
     static bool is_smpte_timecode_rate(double rate);
 
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
     [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
     static double nearest_valid_timecode_rate(double rate);
 
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
     static double nearest_smpte_timecode_rate(double rate);
 
     /// @brief Convert a frame number and rate into a time.

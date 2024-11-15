@@ -187,7 +187,7 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.19.2
         with:
           output-dir: wheelhouse
         env:

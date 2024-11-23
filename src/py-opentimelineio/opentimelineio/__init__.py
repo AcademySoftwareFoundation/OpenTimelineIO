@@ -10,6 +10,8 @@ see: http://opentimeline.io
 
 # flake8: noqa
 
+__version__ = "${version}"
+
 # in dependency hierarchy
 from . import (
     opentime,

@@ -11,7 +11,7 @@ env:
 
 on:
   push:
-    branches: [ main, "switch_to_scikit_build_core" ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 

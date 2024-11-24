@@ -76,8 +76,6 @@ sdist.include = ["src/opentimelineio/adapters/builtin_adapters.plugin_manifest.j
 wheel.packages = ["src/py-opentimelineio/opentimelineio", "src/opentimelineview"]
 wheel.install-dir = "opentimelineio"
 
-build-dir = "build"
-
 [[tool.scikit-build.generate]]
 path = "opentimelineio/__init__.py"
 template-path = "src/py-opentimelineio/opentimelineio/__init__.py"

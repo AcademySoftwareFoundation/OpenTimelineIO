@@ -71,30 +71,25 @@ with OpenTimelineIO due to spaces in the path.
 
 The Python package is a mix of pure python and C++ code. Therefore, it is
 recommended to use the python tooling (`python -m pip`) to develop both
-the C++ binding and the pure python code. We use `setuptools` as our
-python build backend, which means `pip` will call the `setup.py` in the root
-of the directory to build both the pure python and the C++ bindings.
-`setuptools` will take care of all the complexity of building a C++ Python
-extension for you.
+the C++ binding and the pure python code. We use [scikit-build-core](https://scikit-build-core.readthedocs.io/)
+as our python build backend, which means `pip` or [build](https://pypi.org/project/build/)
+must be used to build the python package. `scikit-build-core` will take care
+of automatically installing the required dependencies (cmake, ninja, etc).
 
-The first time `setup.py` is run, cmake scripts will be created, and the headers
-and libraries will be installed where you specify. If the C++ or Python  sources
-are subsequently modified, running this command again will build and update everything
-appropriately.
+By default, `scikit-build-core` will build the project in a temporary directory and will
+not use caching. This can be changed by setting [`build-dir` in `pyproject.toml`](https://scikit-build-core.readthedocs.io/en/stable/configuration.html#other-options). Alternatively, you can also set `build-dir` via a command line
+argument: `pip install --config-settings=build-dir=<path> .` or
+`python -m build --config-settings=build-dir=<path> --wheel .`.
 
-**Note** Any CMake arguments can be passed through `pip` by using the `CMAKE_ARGS`
+**Note** Any CMake arguments can be passed to `cmake` by using the `CMAKE_ARGS`
 environment variable when building from source. *nix Example:
 
 ```bash
 env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" python -m pip install .
 ```
 
-`python -m pip install .` adds some overhead that might be annoying or unwanted when
-developing the python bindings. For that reason (and only that reason), if you want a faster
-iteration process, you can use `setuptools` commands. For example you can use
-`python setup.py build_ext` to only run the compilation step. Be aware that calling `setup.py`
-directly is highly discouraged and should only be used when no of the other options
-are viable. See https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html.
+Additionally, `scikit-build-core` supports [editable installs](https://scikit-build-core.readthedocs.io/en/stable/configuration.html#editable-installs).
+You can use this to speed up your development.
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
 

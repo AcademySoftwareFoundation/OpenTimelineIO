@@ -1,10 +1,95 @@
 [build-system]
-requires = [
-    "setuptools",
-    "wheel",
-    "cmake>=3.12",
+requires = ["scikit-build-core>=0.10.7"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "OpenTimelineIO"
+version = "0.18.0.dev1"
+description = "Editorial interchange format and API"
+authors = [
+    {name = "Contributors to the OpenTimelineIO project", email = "otio-discussion@lists.aswf.io"}
 ]
-build-backend = "setuptools.build_meta"
+license = {file = "LICENSE.txt"}
+keywords = ["film", "tv", "editing", "editorial", "edit", "non-linear", "edl", "time"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Display",
+    "Topic :: Multimedia :: Video :: Non-Linear Editor",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+]
+
+# Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
+requires-python = ">=3.7, !=3.9.0"
+
+dependencies = [
+    'importlib_metadata>=1.4; python_version < "3.8"'
+]
+
+[project.urls]
+Documentation = "https://opentimelineio.readthedocs.io"
+Homepage = "https://opentimeline.io"
+Issues = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues"
+Source = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO"
+
+[project.scripts]
+otiocat = "opentimelineio.console.otiocat:main"
+otioconvert = "opentimelineio.console.otioconvert:main"
+otiopluginfo = "opentimelineio.console.otiopluginfo:main"
+otiostat = "opentimelineio.console.otiostat:main"
+otiotool = "opentimelineio.console.otiotool:main"
+otioview = "opentimelineview.console:main"
+otioautogen_serialized_schema_docs = "opentimelineio.console.autogen_serialized_datamodel:main"
+
+[project.optional-dependencies]
+dev = [
+    "check-manifest",
+    "flake8>=3.5",
+    "coverage>=4.5",
+    "urllib3>=1.24.3",
+]
+view = [
+    'PySide2~=5.11; platform.machine=="x86_64"',
+    'PySide6~=6.2; platform.machine=="aarch64"',
+]
+
+[tool.scikit-build]
+cmake.version = "CMakeLists.txt"
+
+cmake.build-type = "Release"
+
+logging.level = "DEBUG"
+build.verbose = true
+
+sdist.include = ["src/opentimelineio/adapters/builtin_adapters.plugin_manifest.json"]
+
+wheel.packages = ["src/py-opentimelineio/opentimelineio", "src/opentimelineview"]
+wheel.install-dir = "opentimelineio"
+
+[[tool.scikit-build.generate]]
+path = "opentimelineio/__init__.py"
+template-path = "src/py-opentimelineio/opentimelineio/__init__.py"
+
+[[tool.scikit-build.generate]]
+path = "opentimelineview/__init__.py"
+template-path = "src/opentimelineview/__init__.py"
+
+[tool.scikit-build.cmake.define]
+OTIO_PYTHON_INSTALL = "ON"
+OTIO_CXX_INSTALL = "OFF"
+OTIO_SHARED_LIBS = "OFF"
+BUILD_TESTING = "OFF"
+OTIO_INSTALL_PYTHON_MODULES = "OFF"
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]

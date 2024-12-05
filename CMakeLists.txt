@@ -72,6 +72,10 @@ if(OTIO_PYTHON_INSTALL)
     # can find them, rather as part of the C++ SDK package; so the variable
     # OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR indicates where that is.
     #
+    if (SKBUILD)
+        set(OTIO_PYTHON_INSTALL_DIR ${SKBUILD_PLATLIB_DIR})
+    endif()
+
     if(OTIO_PYTHON_INSTALL_DIR STREQUAL "" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         # neither install directory supplied from the command line
         set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${Python_SITEARCH}")

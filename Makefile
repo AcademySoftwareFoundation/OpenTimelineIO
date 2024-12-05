@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version wheel manifest lcov lcov-html lcov-reset
+	python-version wheel lcov lcov-html lcov-reset
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -28,7 +28,6 @@ LCOV_PROG := $(shell command -v lcov 2> /dev/null)
 PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
-CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
 CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
@@ -54,7 +53,7 @@ test-core: python-version
 
 # CI
 ###################################
-ci-prebuild: manifest lint
+ci-prebuild: lint
 ci-postbuild: coverage
 ###################################
 
@@ -164,15 +163,6 @@ endif
 	$(eval DIRS += src/py-opentimelineio/opentimelineio-opentime-bindings)
 	$(eval FILES_TO_FORMAT = $(wildcard $(addsuffix /*.h, $(DIRS)) $(addsuffix /*.cpp, $(DIRS))))
 	$(shell clang-format -i -style=file $(FILES_TO_FORMAT))
-
-manifest:
-ifndef CHECK_MANIFEST_PROG
-	$(error $(newline)$(ccred)check-manifest is not available on $$PATH please see:$(newline)$(ccend)\
-	$(ccblue)	https://github.com/mgedmin/check-manifest#quick-start$(newline)$(ccend)\
-	$(dev_deps_message))
-endif
-	@check-manifest
-	@echo "check-manifest succeeded"
 	
 
 doc-model:

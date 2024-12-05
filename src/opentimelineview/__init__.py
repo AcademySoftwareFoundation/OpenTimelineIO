@@ -3,6 +3,8 @@
 
 # flake8: noqa
 
+__version__ = "{version}"
+
 from . import (
     details_widget,
     timeline_widget,

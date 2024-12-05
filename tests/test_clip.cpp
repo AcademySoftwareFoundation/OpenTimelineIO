@@ -9,6 +9,9 @@
 #include <opentimelineio/missingReference.h>
 #include <opentimelineio/serializableCollection.h>
 #include <opentimelineio/timeline.h>
+#include <opentimelineio/freezeFrame.h>
+#include <opentimelineio/linearTimeWarp.h>
+#include <opentimelineio/marker.h>
 
 #include <iostream>
 
@@ -150,6 +153,22 @@ main(int argc, char** argv)
     tests.add_test("test_clip_media_representation", [] {
         using namespace otio;
 
+        static constexpr auto time_scalar = 1.5;
+
+        SerializableObject::Retainer<LinearTimeWarp> ltw(new LinearTimeWarp(
+            LinearTimeWarp::Schema::name,
+            LinearTimeWarp::Schema::name,
+            time_scalar));
+        std::vector<Effect*> effects = { ltw };
+
+        static constexpr auto red = Marker::Color::red;
+
+        SerializableObject::Retainer<Marker> m(new Marker(
+            LinearTimeWarp::Schema::name,
+            TimeRange(),
+            red));
+        std::vector<Marker*> markers = { m };
+
         static constexpr auto high_quality  = "high_quality";
         static constexpr auto proxy_quality = "proxy_quality";
 
@@ -161,6 +180,8 @@ main(int argc, char** argv)
             media,
             std::nullopt,
             AnyDictionary(),
+            effects,
+            markers,
             high_quality));
 
         assertEqual(clip->active_media_reference_key().c_str(), high_quality);
@@ -225,6 +246,18 @@ main(int argc, char** argv)
         // should work
         clip->set_media_references({ { "cloud", ref4 } }, "cloud");
         assertEqual(clip->media_reference(), ref4.value);
+
+        // basic test for an effect
+        assertEqual(clip->effects().size(), effects.size());
+        auto effect = dynamic_cast<OTIO_NS::LinearTimeWarp*>(
+            clip->effects().front().value);
+        assertEqual(effect->time_scalar(), time_scalar);
+
+        // basic test for a marker
+        assertEqual(clip->markers().size(), markers.size());
+        auto marker = dynamic_cast<OTIO_NS::Marker*>(
+            clip->markers().front().value);
+        assertEqual(marker->color().c_str(), red);
     });
 
     tests.run(argc, argv);

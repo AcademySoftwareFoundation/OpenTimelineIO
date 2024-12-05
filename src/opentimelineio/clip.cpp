@@ -13,8 +13,10 @@ Clip::Clip(
     MediaReference*                 media_reference,
     std::optional<TimeRange> const& source_range,
     AnyDictionary const&            metadata,
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers,
     std::string const&              active_media_reference_key)
-    : Parent{ name, source_range, metadata }
+    : Parent{ name, source_range, metadata, effects, markers }
     , _active_media_reference_key(active_media_reference_key)
 {
     set_media_reference(media_reference);

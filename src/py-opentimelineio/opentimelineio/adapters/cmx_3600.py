@@ -1018,6 +1018,7 @@ class Event:
 
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
+        line.source_rate = clip.source_range.start_time.rate
 
         timing_effect = _relevant_timing_effect(clip)
 
@@ -1220,6 +1221,7 @@ class EventLine:
         self.reel = reel
         self._kind = 'V' if kind == schema.TrackKind.Video else 'A'
         self._rate = rate
+        self.source_rate = rate
 
         self.source_in = opentime.RationalTime(0.0, rate=rate)
         self.source_out = opentime.RationalTime(0.0, rate=rate)
@@ -1228,15 +1230,18 @@ class EventLine:
 
         self.dissolve_length = opentime.RationalTime(0.0, rate)
 
-        timecode_writer_factory = TimeCodeWriterFactory(rate)
-        self.source_timecode_provider = timecode_writer_factory.create_timecode_provider(
-            force_disable_sources_dropframe
-        )
-        self.target_timecode_provider = timecode_writer_factory.create_timecode_provider(
-            force_disable_target_dropframe
-        )
+        self._force_disable_sources_dropframe = force_disable_sources_dropframe
+        self._force_disable_target_dropframe = force_disable_target_dropframe
 
     def to_edl_format(self, edit_number):
+        source_timecode_writer_factory = TimeCodeWriterFactory(self.source_rate)
+        self.source_timecode_provider = source_timecode_writer_factory.create_timecode_provider(
+            self._force_disable_sources_dropframe
+        )
+        target_timecode_writer_factory = TimeCodeWriterFactory(self._rate)
+        self.target_timecode_provider = target_timecode_writer_factory.create_timecode_provider(
+            self._force_disable_target_dropframe
+        )
         ser = {
             'edit': edit_number,
             'reel': self.reel,

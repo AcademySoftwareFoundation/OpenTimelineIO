@@ -1038,6 +1038,8 @@ class Event:
             clip.trimmed_range(),
             tracks
         )
+        range_in_timeline.start_time.rate = rate
+        range_in_timeline.duration.rate = rate
         line.record_in = range_in_timeline.start_time
         line.record_out = range_in_timeline.end_time_exclusive()
         self.line = line

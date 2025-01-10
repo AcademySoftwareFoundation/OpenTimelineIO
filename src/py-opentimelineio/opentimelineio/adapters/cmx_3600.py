@@ -1035,13 +1035,14 @@ class Event:
                     line.source_in + opentime.RationalTime(value, rate))
         # use provided edl frame rate for record timecode conversions
         trimmed_range = clip.trimmed_range()
-        converted_range = opentime.TimeRange(opentime.RationalTime(trimmed_range.start_time.value, rate), opentime.RationalTime(trimmed_range.duration.value, rate))
+        converted_range = opentime.TimeRange(
+            trimmed_range.start_time, # start times can be calculated normally, but duration shouldn't be scaled
+            opentime.RationalTime(trimmed_range.duration.value, rate)
+            )
         range_in_timeline = clip.transformed_time_range(
             converted_range,
             tracks
         )
-#       range_in_timeline.start_time = opentime.RationalTime(range_in_timeline.start_time.value, rate)
-#       range_in_timeline.duration.rate = opentime.RationalTime(range_in_timeline.duration.value, rate)
         line.record_in = range_in_timeline.start_time
         line.record_out = range_in_timeline.end_time_exclusive()
         self.line = line

@@ -12,7 +12,7 @@ The OpenTimelineIO native file format adapters that are present in the `opentime
 
 ## Batteries-Included Adapters
 
-To also install a curated list of additional useful adapters, use the [OpenTimelineIO-Plugins ](https://pypi.org/project/OpenTimelineIO-Plugins/) python package. In addition to the OpenTimelineIO native adapters, you'll get aditional useful adapters including:
+To also install a curated list of additional useful adapters, use the [OpenTimelineIO-Plugins ](https://pypi.org/project/OpenTimelineIO-Plugins/) python package. In addition to the OpenTimelineIO native adapters, you'll get additional useful adapters including:
 
 - [AAF](https://github.com/OpenTimelineIO/otio-aaf-adapter)
 - [ale](https://github.com/OpenTimelineIO/otio-ale-adapter)

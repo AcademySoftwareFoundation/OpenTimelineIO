@@ -113,7 +113,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
             # turn off the C++ tests during a Python build
             '-DBUILD_TESTING:BOOL=OFF',
-            # Python modules wil be installed by setuptools.
+            # Python modules will be installed by setuptools.
             '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
         if self.is_windows():

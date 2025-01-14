@@ -15,7 +15,7 @@ The entry point defined below can be read as:
     ``opentimelineio.plugins``.
     2. Declaring that for the ``opentimelineio.plugins`` group, this module
     provides a plugin named ``track_counter`` and the module that should be
-    loaded for tha plugin is the ``otio_counter`` module.
+    loaded for that plugin is the ``otio_counter`` module.
 
 For more information about python plugins, see the python packaging guide:
     https://packaging.python.org/guides/creating-and-discovering-plugins/#using-package-metadata

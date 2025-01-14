@@ -133,7 +133,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for (name, value) in supported_doubles:
             md[name] = value
 
-            # float('nan') != float('nan'), so need ot test isnan(value) instead
+            # float('nan') != float('nan'), so need to test isnan(value) instead
             if not math.isnan(value):
                 self.assertEqual(
                     md[name],
@@ -171,7 +171,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 )
             except Exception as e:
                 self.fail(
-                    "A problem occured when attempting to serialize {} "
+                    "A problem occurred when attempting to serialize {} "
                     "with value: {}.  Error message was: {}".format(
                         name,
                         value,
@@ -186,7 +186,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 )
             except Exception as e:
                 self.fail(
-                    "A problem occured when attempting to serialize {} "
+                    "A problem occurred when attempting to serialize {} "
                     "with value: {}.  Error message was: {}".format(
                         name,
                         value,

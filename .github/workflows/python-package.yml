@@ -98,6 +98,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
         include:
           - { os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-22.04, shell: bash, python-version: 3.7 }
           - { os: macos-latest, shell: bash }
           - { os: macos-13, shell: bash }
           - { os: windows-latest, shell: pwsh }
@@ -106,6 +107,7 @@ jobs:
           - { os: macos-latest, python-version: 3.7 }
           - { os: macos-latest, python-version: 3.8 }
           - { os: macos-latest, python-version: 3.9 }
+          - { os: ubuntu-latest, python-version: 3.7 }
 
     defaults:
       run:

@@ -60,7 +60,7 @@ public:
             CLASS::Schema::name,
             CLASS::Schema::version,
             &typeid(CLASS),
-            []() -> SerializableObject* { return new CLASS; }, // LCOV_EXCL_EXCEPTION_BR_LINE
+            []() -> SerializableObject* { return new CLASS; },
             CLASS::Schema::name);
     }
 

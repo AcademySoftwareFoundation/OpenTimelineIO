@@ -93,7 +93,8 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		not be found.)
 endif
 	lcov --rc lcov_branch_coverage=1 --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
-		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q \
+		--ignore-errors mismatch
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
 	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \

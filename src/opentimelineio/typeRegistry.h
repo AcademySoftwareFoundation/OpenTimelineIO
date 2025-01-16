@@ -61,7 +61,7 @@ public:
             CLASS::Schema::version,
             &typeid(CLASS),
             []() -> SerializableObject* { return new CLASS; },
-            CLASS::Schema::name);
+            CLASS::Schema::name); // LCOV_EXCL_EXCEPTION_BR_LINE
     }
 
     /// Register a new schema.

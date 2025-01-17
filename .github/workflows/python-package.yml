@@ -131,9 +131,6 @@ jobs:
           mingw-w64-x86_64-cmake
           make
           git
-    - name: Ensure MSYS2 pip is updated
-      if: matrix.python-version == 'mingw64'
-      run: curl -sS https://bootstrap.pypa.io/get-pip.py | python
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
       uses: actions/setup-python@v4.3.0

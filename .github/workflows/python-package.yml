@@ -65,7 +65,7 @@ jobs:
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
-        lcov --capture -b . --directory . --output-file=coverage.info -q
+        lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --capture -b . --directory . --output-file=coverage.info -q
         cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
         lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info

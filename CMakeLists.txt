@@ -153,7 +153,7 @@ if(OTIO_CXX_COVERAGE AND NOT MSVC)
     # Note that we exclude some OTIO files from code coverage since they are
     # causing errors like this:
     # geninfo: ERROR: "typeRegistry.h":63: mismatched exception tag for id 3, 3: '0' -> '1'
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-update=atomic -fprofile-exclude-files='/usr/*;src/deps/*;src/opentimelineio/typeRegistry.h;src/opentimelineio/serialization.cpp;src/py-opentimelineio/opentime-bindings/opentime_bindings.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_tests.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_bindings.cpp'")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-update=atomic -fprofile-exclude-files='/usr/*;src/deps/*'")
     # this causes cmake to produce file.gcno instead of file.cpp.gcno
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
     message(STATUS "Building C++ with Coverage: ON")

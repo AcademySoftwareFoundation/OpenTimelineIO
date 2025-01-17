@@ -149,7 +149,7 @@ jobs:
     - name: Build and Install
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
-        pip install .[dev] -v
+        pip install .[dev] -v --break-system-packages
     - name: Run tests w/ python coverage
       run: make ci-postbuild
     # (only on ubuntu/pyhton3.7)

@@ -150,7 +150,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(OTIO_CXX_COVERAGE AND NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-exclude-files='/usr/*;src/deps/*;src/opentimelineio/typeRegistry.h;src/opentimelineio/serialization.cpp;src/py-opentimelineio/opentime-bindings/opentime_bindings.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_tests.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_bindings.cpp'")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-update=atomic -fprofile-exclude-files='/usr/*;src/deps/*;src/opentimelineio/typeRegistry.h;src/opentimelineio/serialization.cpp;src/py-opentimelineio/opentime-bindings/opentime_bindings.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_tests.cpp;src/py-opentimelineio/opentimelineio-bindings/otio_bindings.cpp'")
     # this causes cmake to produce file.gcno instead of file.cpp.gcno
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
     message(STATUS "Building C++ with Coverage: ON")

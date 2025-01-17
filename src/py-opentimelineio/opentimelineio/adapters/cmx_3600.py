@@ -881,8 +881,6 @@ class EDLWriter:
     def get_content_for_track_at_index(self, idx, title):
         track = self._tracks[idx]
 
-        timeline_offset = track[0].source_range.duration if isinstance(track[0], schema.Gap) else opentime.RationalTime(0, self._rate)
-
         # Add a gap if the last child is a transition.
         if isinstance(track[-1], schema.Transition):
             gap = schema.Gap(
@@ -945,7 +943,6 @@ class EDLWriter:
                         self._reelname_len,
                         self._force_disable_sources_dropframe,
                         self._force_disable_target_dropframe,
-                        timeline_offset,
                     )
                 )
             elif isinstance(child, schema.Clip):
@@ -960,7 +957,6 @@ class EDLWriter:
                             self._reelname_len,
                             self._force_disable_sources_dropframe,
                             self._force_disable_target_dropframe,
-                            timeline_offset,
                         )
                     )
                 else:
@@ -1009,7 +1005,6 @@ class Event:
         reelname_len,
         force_disable_sources_dropframe,
         force_disable_target_dropframe,
-        timeline_offset,
     ):
 
         # Premiere style uses AX for the reel name
@@ -1050,11 +1045,8 @@ class Event:
             tracks
         )
 
-        # clip_offset = timeline_offset.rescaled_to(clip.source_range.start_time.rate)
-        # offset_adjustment = clip_offset.rescaled_to(29.97).value - clip_offset.value
-
-        line.record_in = range_in_timeline.start_time#opentime.RationalTime(range_in_timeline.start_time.value + offset_adjustment, rate)
-        line.record_out = range_in_timeline.end_time_exclusive()#opentime.RationalTime(range_in_timeline.end_time_exclusive().value + offset_adjustment, rate)
+        line.record_in = range_in_timeline.start_time
+        line.record_out = range_in_timeline.end_time_exclusive()
         self.line = line
 
         self.comments = _generate_comment_lines(
@@ -1104,7 +1096,6 @@ class DissolveEvent:
         reelname_len,
         force_disable_sources_dropframe,
         force_disable_target_dropframe,
-        offset_adjustment,
     ):
         # Note: We don't make the A-Side event line here as it is represented
         # by its own event (edit number).

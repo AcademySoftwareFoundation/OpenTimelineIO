@@ -67,8 +67,6 @@ jobs:
         cd ${{ env.OTIO_BUILD_DIR }}
         lcov --capture -b . --directory . --output-file=coverage.info -q
         cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
-        lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
-        lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
         lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info
 # \todo Should the Codecov web pages show the results of the C++ or Python tests?

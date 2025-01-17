@@ -1039,17 +1039,22 @@ class Event:
                 line.source_out = (
                     line.source_in + opentime.RationalTime(value, rate))
 
+        # overwrite frame rates to prevent incorrect rescaling
+        clip.source_range = opentime.TimeRange(
+                start_time=opentime.RationalTime(clip.source_range.start_time.value, rate=rate),
+                duration=opentime.RationalTime(clip.source_range.duration.value, rate=rate))
+
         trimmed_range = clip.trimmed_range()
         range_in_timeline = clip.transformed_time_range(
             trimmed_range,
             tracks
         )
 
-        clip_offset = timeline_offset.rescaled_to(clip.source_range.start_time.rate)
-        offset_adjustment = clip_offset.rescaled_to(29.97).value - clip_offset.value
+        # clip_offset = timeline_offset.rescaled_to(clip.source_range.start_time.rate)
+        # offset_adjustment = clip_offset.rescaled_to(29.97).value - clip_offset.value
 
-        line.record_in = opentime.RationalTime(range_in_timeline.start_time.value + offset_adjustment, rate)
-        line.record_out = opentime.RationalTime(range_in_timeline.end_time_exclusive().value + offset_adjustment, rate)
+        line.record_in = range_in_timeline.start_time#opentime.RationalTime(range_in_timeline.start_time.value + offset_adjustment, rate)
+        line.record_out = range_in_timeline.end_time_exclusive()#opentime.RationalTime(range_in_timeline.end_time_exclusive().value + offset_adjustment, rate)
         self.line = line
 
         self.comments = _generate_comment_lines(

@@ -881,6 +881,9 @@ class EDLWriter:
     def get_content_for_track_at_index(self, idx, title):
         track = self._tracks[idx]
 
+        timeline_offset = track[0].source_range.duration if isinstance(track[0], schema.Gap) else opentime.RationalTime(0, self._rate)
+        offset_adjustment = timeline_offset.rescaled_to(self._rate).value - timeline_offset.value
+
         # Add a gap if the last child is a transition.
         if isinstance(track[-1], schema.Transition):
             gap = schema.Gap(
@@ -943,6 +946,7 @@ class EDLWriter:
                         self._reelname_len,
                         self._force_disable_sources_dropframe,
                         self._force_disable_target_dropframe,
+                        offset_adjustment,
                     )
                 )
             elif isinstance(child, schema.Clip):
@@ -957,6 +961,7 @@ class EDLWriter:
                             self._reelname_len,
                             self._force_disable_sources_dropframe,
                             self._force_disable_target_dropframe,
+                            offset_adjustment,
                         )
                     )
                 else:
@@ -1005,6 +1010,7 @@ class Event:
         reelname_len,
         force_disable_sources_dropframe,
         force_disable_target_dropframe,
+        offset_adjustment,
     ):
 
         # Premiere style uses AX for the reel name
@@ -1033,18 +1039,14 @@ class Event:
                 value = clip.trimmed_range().duration.value / timing_effect.time_scalar
                 line.source_out = (
                     line.source_in + opentime.RationalTime(value, rate))
-        # use provided edl frame rate for record timecode conversions
+
         trimmed_range = clip.trimmed_range()
-        converted_range = opentime.TimeRange(
-            trimmed_range.start_time, # start times can be calculated normally, but duration shouldn't be scaled
-            opentime.RationalTime(trimmed_range.duration.value, rate)
-            )
         range_in_timeline = clip.transformed_time_range(
-            converted_range,
+            trimmed_range,
             tracks
         )
-        line.record_in = range_in_timeline.start_time
-        line.record_out = range_in_timeline.end_time_exclusive()
+        line.record_in = opentime.RationalTime(range_in_timeline.start_time.value + offset_adjustment, rate)
+        line.record_out = opentime.RationalTime(range_in_timeline.end_time_exclusive().value + offset_adjustment, rate)
         self.line = line
 
         self.comments = _generate_comment_lines(
@@ -1094,6 +1096,7 @@ class DissolveEvent:
         reelname_len,
         force_disable_sources_dropframe,
         force_disable_target_dropframe,
+        offset_adjustment,
     ):
         # Note: We don't make the A-Side event line here as it is represented
         # by its own event (edit number).

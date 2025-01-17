@@ -92,7 +92,7 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		C++ coverage will not work, because intermediate build products will \
 		not be found.)
 endif
-	lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+	lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g" \
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info

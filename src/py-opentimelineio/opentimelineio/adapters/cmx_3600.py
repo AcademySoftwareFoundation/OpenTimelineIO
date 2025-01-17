@@ -1035,11 +1035,9 @@ class Event:
                     line.source_in + opentime.RationalTime(value, rate))
 
         # overwrite frame rates to prevent incorrect rescaling
-        clip.source_range = opentime.TimeRange(
-                start_time=opentime.RationalTime(clip.source_range.start_time.value, rate=rate),
-                duration=opentime.RationalTime(clip.source_range.duration.value, rate=rate))
-
-        trimmed_range = clip.trimmed_range()
+        trimmed_range = opentime.TimeRange(
+                start_time=opentime.RationalTime(clip.trimmed_range().start_time.value, rate=rate),
+                duration=opentime.RationalTime(clip.trimmed_range().duration.value, rate=rate))
         range_in_timeline = clip.transformed_time_range(
             trimmed_range,
             tracks

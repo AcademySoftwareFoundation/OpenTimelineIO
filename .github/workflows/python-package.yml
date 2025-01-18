@@ -148,7 +148,6 @@ jobs:
       run: make ci-prebuild
     - name: Build and Install
       run: |
-        # compile and install into virtualenv/virtual machine (verbosely)
         pip install .[dev] -v --break-system-packages
     - name: Run tests w/ python coverage
       run: make ci-postbuild

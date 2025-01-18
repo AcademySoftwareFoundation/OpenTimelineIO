@@ -150,9 +150,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(OTIO_CXX_COVERAGE AND NOT MSVC)
-    # Note that we exclude some OTIO files from code coverage since they are
-    # causing errors like this:
-    # geninfo: ERROR: mismatched end line for PyInit__opentime at opentime_bindings.cpp:
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-update=atomic -fprofile-exclude-files='/usr/*;src/deps/*'")
     # this causes cmake to produce file.gcno instead of file.cpp.gcno
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)

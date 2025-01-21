@@ -65,10 +65,8 @@ jobs:
       if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}
-        lcov --capture -b . --directory . --output-file=coverage.info -q
+        lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory . --output-file=coverage.info -q
         cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
-        lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
-        lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
         lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info
 # \todo Should the Codecov web pages show the results of the C++ or Python tests?
@@ -98,6 +96,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
         include:
           - { os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-22.04, shell: bash, python-version: 3.7 }
           - { os: macos-latest, shell: bash }
           - { os: macos-13, shell: bash }
           - { os: windows-latest, shell: pwsh }
@@ -106,6 +105,7 @@ jobs:
           - { os: macos-latest, python-version: 3.7 }
           - { os: macos-latest, python-version: 3.8 }
           - { os: macos-latest, python-version: 3.9 }
+          - { os: ubuntu-latest, python-version: 3.7 }
 
     defaults:
       run:
@@ -131,9 +131,6 @@ jobs:
           mingw-w64-x86_64-cmake
           make
           git
-    - name: Ensure MSYS2 pip is updated
-      if: matrix.python-version == 'mingw64'
-      run: curl -sS https://bootstrap.pypa.io/get-pip.py | python
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
       uses: actions/setup-python@v4.3.0
@@ -151,8 +148,7 @@ jobs:
       run: make ci-prebuild
     - name: Build and Install
       run: |
-        # compile and install into virtualenv/virtual machine (verbosely)
-        pip install .[dev] -v
+        pip install .[dev] -v --break-system-packages
     - name: Run tests w/ python coverage
       run: make ci-postbuild
     # (only on ubuntu/pyhton3.7)

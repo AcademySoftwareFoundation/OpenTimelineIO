@@ -738,7 +738,7 @@ roll(
             RationalTime next_start_time = next_range.start_time();
             RationalTime out_offset = delta_out;
 
-            // If avalable range, clamp to it.
+            // If available range, clamp to it.
             if (!(isEqual(available_range.duration().value(), 0.0)))
             {
                 RationalTime available_start_time =

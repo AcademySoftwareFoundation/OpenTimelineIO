@@ -7,8 +7,8 @@
 // version-map-update` and this file should be regenerated.
 //
 // This maps a "Label" to a map of Schema name to Schema version. The intent is
-// that these sets of schemas can be used for compatability with future
-// versions of OTIO, so that a newer version of OTIO can target a compatability
+// that these sets of schemas can be used for compatibility with future
+// versions of OTIO, so that a newer version of OTIO can target a compatibility
 // version of an older library.
 #include "opentimelineio/typeRegistry.h"
 

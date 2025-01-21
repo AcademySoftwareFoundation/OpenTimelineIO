@@ -235,7 +235,7 @@ class TestTime(unittest.TestCase):
         """Test drop frame in action. Focused on minute roll overs
 
         We nominal_fps 30 for frame calculation
-        For this frame rate we drop 2 frames per minute execpt every 10th.
+        For this frame rate we drop 2 frames per minute except every 10th.
 
         Compensation is calculated like this when below 10 minutes:
           (fps * seconds + frames - dropframes * (minutes - 1))
@@ -343,7 +343,7 @@ class TestTime(unittest.TestCase):
         tc = otio.opentime.to_timecode(t, rate_float, drop_frame=False)
         self.assertEqual(tc, '10:02:23:29')
 
-        # Detect DFTC from rate for backward compatability with old versions
+        # Detect DFTC from rate for backward compatibility with old versions
         tc_auto = otio.opentime.to_timecode(t, rate_float)
         self.assertEqual(tc_auto, '10:03:00;05')
 
@@ -387,7 +387,7 @@ class TestTime(unittest.TestCase):
             to_tc = otio.opentime.to_timecode(t, rate=ntsc_2997, drop_frame=False)
             to_auto_tc = otio.opentime.to_timecode(t, rate=ntsc_2997)
 
-            # 29.97 should auto-detect dftc for backward compatability
+            # 29.97 should auto-detect dftc for backward compatibility
             self.assertEqual(to_dftc, to_auto_tc)
 
             # check calculated against reference

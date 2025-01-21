@@ -70,8 +70,8 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 ```
 
 parameters:
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ### Composition.1
 
@@ -88,12 +88,12 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 ```
 
 parameters:
-- *effects*:
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### Item.1
 
@@ -106,12 +106,12 @@ None
 ```
 
 parameters:
-- *effects*:
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### MediaReference.1
 
@@ -124,10 +124,10 @@ None
 ```
 
 parameters:
-- *available_image_bounds*:
-- *available_range*:
-- *metadata*:
-- *name*:
+- *available_image_bounds*: 
+- *available_range*: 
+- *metadata*: 
+- *name*: 
 
 ### SerializableObjectWithMetadata.1
 
@@ -140,8 +140,8 @@ None
 ```
 
 parameters:
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ## Module: opentimelineio.hooks
 
@@ -191,8 +191,8 @@ It can be rescaled into another :class:`~RationalTime`'s rate.
 ```
 
 parameters:
-- *rate*:
-- *value*:
+- *rate*: 
+- *value*: 
 
 ### TimeRange.1
 
@@ -209,8 +209,8 @@ meaning that :meth:`end_time_inclusive` (last portion of a sample in the time ra
 ```
 
 parameters:
-- *duration*:
-- *start_time*:
+- *duration*: 
+- *start_time*: 
 
 ### TimeTransform.1
 
@@ -223,9 +223,9 @@ parameters:
 ```
 
 parameters:
-- *offset*:
-- *rate*:
-- *scale*:
+- *offset*: 
+- *rate*: 
+- *scale*: 
 
 ## Module: opentimelineio.plugins
 
@@ -289,14 +289,14 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 ```
 
 parameters:
-- *active_media_reference_key*:
-- *effects*:
+- *active_media_reference_key*: 
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*:
-- *media_references*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *markers*: 
+- *media_references*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### Effect.1
 
@@ -309,10 +309,10 @@ None
 ```
 
 parameters:
-- *effect_name*:
+- *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ### ExternalReference.1
 
@@ -325,11 +325,11 @@ None
 ```
 
 parameters:
-- *available_image_bounds*:
-- *available_range*:
-- *metadata*:
-- *name*:
-- *target_url*:
+- *available_image_bounds*: 
+- *available_range*: 
+- *metadata*: 
+- *name*: 
+- *target_url*: 
 
 ### FreezeFrame.1
 
@@ -342,10 +342,10 @@ Hold the first frame of the clip for the duration of the clip.
 ```
 
 parameters:
-- *effect_name*:
+- *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
 0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
@@ -363,12 +363,12 @@ None
 ```
 
 parameters:
-- *effects*:
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### GeneratorReference.1
 
@@ -381,12 +381,12 @@ None
 ```
 
 parameters:
-- *available_image_bounds*:
-- *available_range*:
-- *generator_kind*:
-- *metadata*:
-- *name*:
-- *parameters*:
+- *available_image_bounds*: 
+- *available_range*: 
+- *generator_kind*: 
+- *metadata*: 
+- *name*: 
+- *parameters*: 
 
 ### ImageSequenceReference.1
 
@@ -475,13 +475,13 @@ yield the first three target urls as:
 ```
 
 parameters:
-- *available_image_bounds*:
-- *available_range*:
+- *available_image_bounds*: 
+- *available_range*: 
 - *frame_step*: Step between frame numbers in file names.
 - *frame_zero_padding*: Number of digits to pad zeros out to in frame numbers.
-- *metadata*:
+- *metadata*: 
 - *missing_frame_policy*: Directive for how frames in sequence not found during playback or rendering should be handled.
-- *name*:
+- *name*: 
 - *name_prefix*: Everything in the file name leading up to the frame number.
 - *name_suffix*: Everything after the frame number in the file name.
 - *rate*: Frame rate if every frame in the sequence were played back.
@@ -501,10 +501,10 @@ A time warp that applies a linear speed up or slow down across the entire clip.
 ```
 
 parameters:
-- *effect_name*:
+- *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
 0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
@@ -531,8 +531,8 @@ parameters:
 - *color*: Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.
 - *comment*: Optional comment for this marker.
 - *marked_range*: Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ### MissingReference.1
 
@@ -550,10 +550,10 @@ is not known.
 ```
 
 parameters:
-- *available_image_bounds*:
-- *available_range*:
-- *metadata*:
-- *name*:
+- *available_image_bounds*: 
+- *available_range*: 
+- *metadata*: 
+- *name*: 
 
 ### SerializableCollection.1
 
@@ -577,8 +577,8 @@ references to a single file.
 ```
 
 parameters:
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ### Stack.1
 
@@ -591,12 +591,12 @@ None
 ```
 
 parameters:
-- *effects*:
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### TimeEffect.1
 
@@ -609,10 +609,10 @@ Base class for all effects that alter the timing of an item.
 ```
 
 parameters:
-- *effect_name*:
+- *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 
 ### Timeline.1
 
@@ -625,10 +625,10 @@ None
 ```
 
 parameters:
-- *global_start_time*:
-- *metadata*:
-- *name*:
-- *tracks*:
+- *global_start_time*: 
+- *metadata*: 
+- *name*: 
+- *tracks*: 
 
 ### Track.1
 
@@ -641,13 +641,13 @@ None
 ```
 
 parameters:
-- *effects*:
+- *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *kind*:
-- *markers*:
-- *metadata*:
-- *name*:
-- *source_range*:
+- *kind*: 
+- *markers*: 
+- *metadata*: 
+- *name*: 
+- *source_range*: 
 
 ### Transition.1
 
@@ -662,8 +662,8 @@ dissolve or wipe.
 
 parameters:
 - *in_offset*: Amount of the previous clip this transition overlaps, exclusive.
-- *metadata*:
-- *name*:
+- *metadata*: 
+- *name*: 
 - *out_offset*: Amount of the next clip this transition overlaps, exclusive.
 - *transition_type*: Kind of transition, as defined by the :class:`Type` enum.
 

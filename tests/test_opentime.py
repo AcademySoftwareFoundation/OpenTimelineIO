@@ -26,6 +26,14 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t.value, 0)
         self.assertEqual(t.rate, 1.0)
 
+    def test_valid(self):
+        t1 = otio.opentime.RationalTime(0, 0)
+        self.assertTrue(t1.is_invalid_time())
+        self.assertFalse(t1.is_valid_time())
+        t2 = otio.opentime.RationalTime(24)
+        self.assertTrue(t2.is_valid_time())
+        self.assertFalse(t2.is_invalid_time())
+
     def test_equality(self):
         t1 = otio.opentime.RationalTime(30.2)
         self.assertEqual(t1, t1)
@@ -869,6 +877,18 @@ class TestTimeRange(unittest.TestCase):
             duration=otio.opentime.RationalTime(10, 48)
         )
         self.assertEqual(tr2.start_time.rate, tr2.duration.rate)
+
+        tr3 = otio.opentime.TimeRange(0, 48, 24)
+        self.assertEqual(tr3.start_time, otio.opentime.RationalTime(0, 24))
+        self.assertEqual(tr3.duration, otio.opentime.RationalTime(48, 24))
+
+    def test_valid(self):
+        tr = otio.opentime.TimeRange(0, 0, 0)
+        self.assertTrue(tr.is_invalid_range())
+        self.assertFalse(tr.is_valid_range())
+        tr2 = otio.opentime.TimeRange(0, 48, 24)
+        self.assertTrue(tr2.is_valid_range())
+        self.assertFalse(tr2.is_invalid_range())
 
     def test_duration_validation(self):
         tr = otio.opentime.TimeRange()

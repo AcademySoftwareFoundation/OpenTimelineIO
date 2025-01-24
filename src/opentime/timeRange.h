@@ -30,7 +30,7 @@ constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 class TimeRange
 {
 public:
-    explicit constexpr TimeRange() noexcept
+    constexpr TimeRange() noexcept
         : _start_time{}
         , _duration{}
     {}
@@ -40,12 +40,38 @@ public:
         , _duration{ RationalTime{ 0, start_time.rate() } }
     {}
 
-    explicit constexpr TimeRange(
+    constexpr TimeRange(
         RationalTime start_time,
         RationalTime duration) noexcept
         : _start_time{ start_time }
         , _duration{ duration }
     {}
+
+    constexpr TimeRange(
+        double start_time,
+        double duration,
+        double rate) noexcept
+        : _start_time{ start_time, rate }
+        , _duration{ duration, rate }
+    {}
+
+    /// @brief Returns true if the time range is invalid.
+    ///
+    /// The time range is considered invalid if either the start time or
+    /// duration is invalid.
+    bool is_invalid_range() const noexcept
+    {
+        return _start_time.is_invalid_time() || _duration.is_invalid_time();
+    }
+
+    /// @brief Returns true if the time range is valid.
+    ///
+    /// The time range is considered valid if both the start time and
+    /// duration are valid.
+    bool is_valid_range() const noexcept
+    {
+        return _start_time.is_valid_time() && _duration.is_valid_time();
+    }
 
     constexpr RationalTime start_time() const noexcept { return _start_time; }
 

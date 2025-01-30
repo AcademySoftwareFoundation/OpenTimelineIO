@@ -22,7 +22,8 @@ jobs:
         workflow: python-package.yml
         workflow_conclusion: success
         commit: ${{ github.sha }}
-        name: wheels
+        name_is_regexp: true
+        name: wheel-.*
         path: dist
 
     - name: Download sdist from commit ${{ github.sha }}

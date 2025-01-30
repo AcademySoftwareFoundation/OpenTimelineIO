@@ -172,9 +172,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*', 'cp312*']
+        python-build: ['cp37', 'cp38', 'cp39', 'cp310', 'cp311', 'cp312']
         exclude:
-          - { os: macos-latest, python-build: 'cp37*' }
+          - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 
@@ -187,7 +187,7 @@ jobs:
         with:
           output-dir: wheelhouse
         env:
-          CIBW_BUILD: ${{ matrix.python-build }}
+          CIBW_BUILD: ${{ matrix.python-build }}*
           CIBW_SKIP: '*musllinux*'
           CIBW_ARCHS_LINUX: x86_64 aarch64
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014

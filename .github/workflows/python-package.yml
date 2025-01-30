@@ -195,8 +195,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: wheels
-          path: ./wheelhouse/*-${{ matrix.python-build }}.whl
+          name: wheel-{{ matrix.os }}-${{ matrix.python-build }}
+          path: ./wheelhouse/*.whl
 
   package_sdist:
     needs: py_build_test

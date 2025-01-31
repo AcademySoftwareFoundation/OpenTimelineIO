@@ -133,7 +133,7 @@ jobs:
           git
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
-      uses: actions/setup-python@v4.3.0
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install coverage dependency
@@ -206,7 +206,7 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@v4.3.0
+    - uses: actions/setup-python@v5.4.0
 
     - name: Install pypa/build
       run: python -m pip install build --user

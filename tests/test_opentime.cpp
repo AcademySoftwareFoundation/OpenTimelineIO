@@ -162,6 +162,9 @@ main(int argc, char** argv)
         otime::TimeRange r2(0.0, 24.0, 24.0);
         assertTrue(r2.is_valid_range());
         assertFalse(r2.is_invalid_range());
+        otime::TimeRange r3(0.0, -24.0, 24.0);
+        assertFalse(r3.is_valid_range());
+        assertTrue(r3.is_invalid_range());
     });
 
     tests.run(argc, argv);

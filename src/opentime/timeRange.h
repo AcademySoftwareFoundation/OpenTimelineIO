@@ -61,7 +61,7 @@ public:
     /// duration is invalid.
     bool is_invalid_range() const noexcept
     {
-        return _start_time.is_invalid_time() || _duration.is_invalid_time();
+        return _start_time.is_invalid_time() || _duration.is_invalid_time() || _duration.value() < 0.0;
     }
 
     /// @brief Returns true if the time range is valid.
@@ -70,7 +70,7 @@ public:
     /// duration are valid.
     bool is_valid_range() const noexcept
     {
-        return _start_time.is_valid_time() && _duration.is_valid_time();
+        return _start_time.is_valid_time() && _duration.is_valid_time() && _duration.value() >= 0.0;
     }
 
     constexpr RationalTime start_time() const noexcept { return _start_time; }

@@ -889,6 +889,9 @@ class TestTimeRange(unittest.TestCase):
         tr2 = otio.opentime.TimeRange(0, 48, 24)
         self.assertTrue(tr2.is_valid_range())
         self.assertFalse(tr2.is_invalid_range())
+        tr3 = otio.opentime.TimeRange(0, -48, 24)
+        self.assertFalse(tr3.is_valid_range())
+        self.assertTrue(tr3.is_invalid_range())
 
     def test_duration_validation(self):
         tr = otio.opentime.TimeRange()

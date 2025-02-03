@@ -173,6 +173,11 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
         python-build: ['cp37', 'cp38', 'cp39', 'cp310', 'cp311', 'cp312']
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+          - os: ubuntu-24.04-arm
+            arch: aarch64
         exclude:
           - { os: macos-latest, python-build: 'cp37' }
     steps:
@@ -185,7 +190,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-build }}*
           CIBW_SKIP: '*musllinux*'
-          CIBW_ARCHS_LINUX: auto
+          CIBW_ARCHS_LINUX: ${{ matrix.arch }}
           MACOSX_DEPLOYMENT_TARGET: 10.14
 
       - uses: actions/upload-artifact@v4

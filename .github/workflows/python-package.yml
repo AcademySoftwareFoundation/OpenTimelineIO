@@ -185,8 +185,6 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-build }}*
           CIBW_SKIP: '*musllinux*'
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
           MACOSX_DEPLOYMENT_TARGET: 10.14
 
       - uses: actions/upload-artifact@v4

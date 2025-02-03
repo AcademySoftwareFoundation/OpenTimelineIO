@@ -58,7 +58,7 @@ public:
     /// @brief Returns true if the time range is invalid.
     ///
     /// The time range is considered invalid if either the start time or
-    /// duration is invalid.
+    /// duration is invalid, or if the duration is less than zero.
     bool is_invalid_range() const noexcept
     {
         return _start_time.is_invalid_time() || _duration.is_invalid_time() || _duration.value() < 0.0;
@@ -67,7 +67,8 @@ public:
     /// @brief Returns true if the time range is valid.
     ///
     /// The time range is considered valid if both the start time and
-    /// duration are valid.
+    /// duration are valid, and the duration is greater than or equal to
+    /// zero.
     bool is_valid_range() const noexcept
     {
         return _start_time.is_valid_time() && _duration.is_valid_time() && _duration.value() >= 0.0;

@@ -23,7 +23,7 @@ jobs:
         workflow_conclusion: success
         commit: ${{ github.sha }}
         name_is_regexp: true
-        name: wheel-.*
+        name: `wheel-.*`
         path: dist
 
     - name: Download sdist from commit ${{ github.sha }}

@@ -69,6 +69,10 @@ It can be rescaled into another :class:`~RationalTime`'s rate.
 Returns true if the time is invalid. The time is considered invalid if the value or the rate are a NaN value
 or if the rate is less than or equal to zero.
 )docstring")
+        .def("is_valid_time", &RationalTime::is_valid_time, R"docstring(
+Returns true if the time is valid. The time is considered valid if the value and rate are not NaN values
+and the rate is greater than zero.
+)docstring")
         .def_property_readonly("value", &RationalTime::value)
         .def_property_readonly("rate", &RationalTime::rate)
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,

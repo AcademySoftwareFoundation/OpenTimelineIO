@@ -133,7 +133,7 @@ jobs:
           git
     - name: Set up Python ${{ matrix.python-version }}
       if: matrix.python-version != 'mingw64'
-      uses: actions/setup-python@v4.3.0
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install coverage dependency
@@ -171,31 +171,28 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*', 'cp312*']
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
+        python-build: ['cp37', 'cp38', 'cp39', 'cp310', 'cp311', 'cp312']
         exclude:
-          - { os: macos-latest, python-build: 'cp37*' }
+          - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v3
-
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.22.0
         with:
           output-dir: wheelhouse
         env:
-          CIBW_BUILD: ${{ matrix.python-build }}
+          CIBW_BUILD: ${{ matrix.python-build }}*
           CIBW_SKIP: '*musllinux*'
-          CIBW_ARCHS_LINUX: x86_64 aarch64
+          CIBW_ARCHS_LINUX: native
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          MACOSX_DEPLOYMENT_TARGET: 10.14
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheel-${{ matrix.os }}-${{ matrix.python-build }}
           path: ./wheelhouse/*.whl
 
   package_sdist:
@@ -206,7 +203,7 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@v4.3.0
+    - uses: actions/setup-python@v5.4.0
 
     - name: Install pypa/build
       run: python -m pip install build --user
@@ -214,7 +211,7 @@ jobs:
     - name: Generate sdist
       run: python -m build -s .
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: sdist
         path: dist

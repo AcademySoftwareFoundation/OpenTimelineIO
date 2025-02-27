@@ -54,6 +54,15 @@ public:
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
     }
 
+    /// @brief Returns true if the time is valid.
+    ///
+    /// The time is considered valid if the value and rate are not NaN values,
+    /// and the rate is greater than zero.
+    bool is_valid_time() const noexcept
+    {
+        return !std::isnan(_rate) && !std::isnan(_value) && (_rate > 0);
+    }
+
     /// @brief Returns the time value.
     constexpr double value() const noexcept { return _value; }
 

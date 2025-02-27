@@ -22,7 +22,7 @@ static constexpr std::array<double, 2> dropframe_timecode_rates{ {
 // ST 12-1:2014 - SMPTE Standard - Time and Control Code
 // https://ieeexplore.ieee.org/document/7291029
 //
-static constexpr std::array<double, 11> smpte_timecode_rates{
+static constexpr std::array<double, 22> smpte_timecode_rates{
     { 24000.0 / 1001.0,
       24.0,
       25.0,
@@ -32,19 +32,19 @@ static constexpr std::array<double, 11> smpte_timecode_rates{
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0
-      72.0
+      60.0,
       72000.0 / 1001.0,
-      96.0
+      72.0,
       96000.0 / 1001.0,
-      120.0
+      96.0,
       120000.0 / 1001.0,
-      144.0
+      120.0,
       144000.0 / 1001.0,
-      192.0
+      144.0,
       192000.0 / 1001.0,
-      240.0
+      192.0,
       240000.0 / 1001.0,
+      240.0
     }
 };
 
@@ -470,7 +470,7 @@ RationalTime::to_timecode(
     // so as a convenience we will snap the rate to the nearest
     // SMPTE rate if it is close enough.
     double nearest_smpte_rate = nearest_smpte_timecode_rate(rate);
-    double error_margin = nearest_smpte_rate * 0.002
+    double error_margin = nearest_smpte_rate * 0.002;
     if (abs(nearest_smpte_rate - rate) > error_margin)
     {
         if (error_status)
@@ -575,8 +575,11 @@ RationalTime::to_timecode(
     int hours =
         static_cast<int>(std::floor(std::floor(seconds_total / 60) / 60));
 
+    std::string frames_digits = (nominal_fps < 100) ? "2" : "3";
+    std::string timecode_format_string = "%02d:%02d:%02d%c%0"+frames_digits+"d";
+
     return string_printf(
-        "%02d:%02d:%02d%c%02d",
+        timecode_format_string.c_str(),
         hours,
         minutes,
         seconds,

@@ -1,4 +1,4 @@
-include README.md README_contrib.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
+include README.md README_contrib.md CHANGELOG.md LICENSE.txt NOTICE.txt SECURITY.md CMakeLists.txt
 recursive-include examples *
 recursive-include src *
 recursive-include tests *

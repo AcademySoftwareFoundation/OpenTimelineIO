@@ -15,6 +15,7 @@ Links
 
 * Main web site: http://opentimeline.io/
 * Documentation: https://opentimelineio.readthedocs.io/
+* Wiki (more documentation): https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki
 * GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
 * [Discussion group](https://lists.aswf.io/g/otio-discussion)
 * [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)

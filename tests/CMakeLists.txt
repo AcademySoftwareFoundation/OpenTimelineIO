@@ -3,6 +3,10 @@ include_directories(${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include
 	${PROJECT_SOURCE_DIR}/src/tests)
 
+if(USE_DEPS_IMATH)
+    include_directories(${PROJECT_SOURCE_DIR}/src/deps/Imath/src)
+endif()
+
 list(APPEND tests_opentime test_opentime)
 foreach(test ${tests_opentime})
 	add_executable(${test} utils.h utils.cpp ${test}.cpp)

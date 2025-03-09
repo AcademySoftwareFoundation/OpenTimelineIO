@@ -25,6 +25,10 @@ target_include_directories(_otio
     PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
 )
 
+if(USE_DEPS_IMATH)
+    target_include_directories(_otio PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
 target_link_libraries(_otio PUBLIC opentimelineio opentime)
 
 # The version of pybind11 we are currently using generates an overwhelming number of

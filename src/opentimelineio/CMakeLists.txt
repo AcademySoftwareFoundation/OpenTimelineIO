@@ -78,14 +78,12 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
 target_include_directories(opentimelineio
-    PRIVATE       "${IMATH_INCLUDES}"
-                  "${PROJECT_SOURCE_DIR}/src"
+    PRIVATE       "${PROJECT_SOURCE_DIR}/src"
                   "${PROJECT_SOURCE_DIR}/src/deps"
-                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
-                  "${IMATH_INCLUDES}")
+                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
 target_link_libraries(opentimelineio 
-    PUBLIC opentime ${OTIO_IMATH_TARGETS})
+    PUBLIC opentime Imath::Imath)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"

@@ -426,6 +426,23 @@ class TestTime(unittest.TestCase):
         t = otio.opentime.RationalTime(value=120, rate=120)
         self.assertEqual(timecode, otio.opentime.to_timecode(t, rate=120))
 
+    def test_from_timecode_120(self):
+        timecode = "00:00:00:000"
+        t = otio.opentime.RationalTime(value=0, rate=120)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=120))
+
+        timecode = "00:00:00:010"
+        t = otio.opentime.RationalTime(value=10, rate=120)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=120))
+
+        timecode = "00:00:00:119"
+        t = otio.opentime.RationalTime(value=119, rate=120)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=120))
+
+        timecode = "00:00:01:000"
+        t = otio.opentime.RationalTime(value=120, rate=120)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=120))
+
     def test_faulty_formatted_timecode_24(self):
         """
         01:00:13;23 is drop-frame timecode, which only applies for

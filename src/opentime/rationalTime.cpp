@@ -246,12 +246,14 @@ RationalTime::from_timecode(
     {
         // split the fields
         unsigned int last_pos = 0;
-        for (unsigned int i = 0; i < 4; i++)
+        for (unsigned int i = 0; i < 3; i++)
         {
             fields[i] = timecode.substr(last_pos, 2);
             last_pos  = last_pos + 3;
         }
 
+        fields[3] = timecode.substr(last_pos, timecode.length() - last_pos);
+      
         hours   = std::stoi(fields[0]);
         minutes = std::stoi(fields[1]);
         seconds = std::stoi(fields[2]);

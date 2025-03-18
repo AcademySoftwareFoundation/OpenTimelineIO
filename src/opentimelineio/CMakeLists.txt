@@ -82,9 +82,6 @@ target_include_directories(opentimelineio
                   "${PROJECT_SOURCE_DIR}/src/deps"
                   "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
-if(USE_DEPS_IMATH)
-    target_include_directories(opentimelineio PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
-endif()
 
 target_link_libraries(opentimelineio 
     PUBLIC opentime Imath::Imath)

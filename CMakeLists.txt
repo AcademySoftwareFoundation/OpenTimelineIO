@@ -236,6 +236,10 @@ else()
     set(USE_DEPS_IMATH ON)
 endif()
 
+if(USE_DEPS_IMATH)
+    include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
 # set up the internally hosted dependencies
 add_subdirectory(src/deps)
 

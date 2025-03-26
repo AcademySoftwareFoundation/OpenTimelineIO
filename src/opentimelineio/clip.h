@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/color.h"
 #include "opentimelineio/item.h"
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
@@ -46,7 +47,8 @@ public:
         AnyDictionary const&            metadata        = AnyDictionary(),
         std::vector<Effect*> const& effects             = std::vector<Effect*>(),
         std::vector<Marker*> const& markers             = std::vector<Marker*>(),
-        std::string const& active_media_reference_key   = default_media_key);
+        std::string const& active_media_reference_key   = default_media_key,
+        Color* color                                    = nullptr);
 
     /// @name Media References
     ///@{
@@ -86,6 +88,9 @@ public:
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
+    Color* color() const noexcept;
+    void set_color(Color* color);
+
 protected:
     virtual ~Clip();
 
@@ -103,6 +108,7 @@ private:
 private:
     std::map<std::string, Retainer<MediaReference>> _media_references;
     std::string                                     _active_media_reference_key;
+    Retainer<Color>                                 _color;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

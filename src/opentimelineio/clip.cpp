@@ -15,9 +15,11 @@ Clip::Clip(
     AnyDictionary const&            metadata,
     std::vector<Effect*> const&     effects,
     std::vector<Marker*> const&     markers,
-    std::string const&              active_media_reference_key)
+    std::string const&              active_media_reference_key,
+    Color*                          color)
     : Parent{ name, source_range, metadata, effects, markers }
     , _active_media_reference_key(active_media_reference_key)
+    , _color(color)
 {
     set_media_reference(media_reference);
 }
@@ -144,6 +146,7 @@ Clip::read_from(Reader& reader)
            && reader.read(
                "active_media_reference_key",
                &_active_media_reference_key)
+           && reader.read_if_present("color", &_color)
            && Parent::read_from(reader);
 }
 
@@ -153,6 +156,7 @@ Clip::write_to(Writer& writer) const
     Parent::write_to(writer);
     writer.write("media_references", _media_references);
     writer.write("active_media_reference_key", _active_media_reference_key);
+    writer.write("color", _color);
 }
 
 TimeRange
@@ -209,6 +213,18 @@ Clip::available_image_bounds(ErrorStatus* error_status) const
     }
 
     return active_media->available_image_bounds();
+}
+
+Color*
+Clip::color() const noexcept
+{
+    return _color;
+}
+
+void
+Clip::set_color(Color* color)
+{
+    _color = color ? color : new Color();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

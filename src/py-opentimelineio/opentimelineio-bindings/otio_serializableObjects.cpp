@@ -7,6 +7,7 @@
 #include "otio_errorStatusHandler.h"
 
 #include "opentimelineio/clip.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/effect.h"
@@ -203,6 +204,38 @@ static void define_bases1(py::module m) {
 static void define_bases2(py::module m) {
     MarkerVectorProxy::define_py_class(m, "MarkerVector");
     EffectVectorProxy::define_py_class(m, "EffectVector");
+
+    py::class_<Color, SOWithMetadata, managing_ptr<Color>>(m, "Color", py::dynamic_attr(), R"docstring(:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing conversion between different formats. To be considered interoperable, the sRGB transfer function encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the intended value. Round-trip conversions may not be guaranteed outside that.)docstring")
+        .def(py::init([](double r, double g, double b, double a) {
+            return new Color(r, g, b, a);
+        }), "r"_a = 1.0, "g"_a = 1.0, "b"_a = 1.0, "a"_a = 1.0)
+        .def_property("r", &Color::r, &Color::set_r)
+        .def_property("g", &Color::g, &Color::set_g)
+        .def_property("b", &Color::b, &Color::set_b)
+        .def_property("a", &Color::a, &Color::set_a)
+
+        .def("to_hex", &Color::to_hex)
+        .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8)
+        .def("to_agbr_integer", &Color::to_agbr_integer)
+        .def("to_rgba_float_list", &Color::to_rgba_float_list)
+        
+        .def_static("from_hex",  Color::from_hex)
+        .def_static("from_float_list", &Color::from_float_list)
+        .def_static("from_int_list", &Color::from_int_list)
+        .def_static("from_agbr_int", &Color::from_agbr_int)
+
+        .def_property_readonly_static("PINK", [](py::object) { return new Color(Color::pink); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("RED", [](py::object) { return new Color(Color::red); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("ORANGE", [](py::object) { return new Color(Color::orange); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("YELLOW", [](py::object) { return new Color(Color::yellow); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("GREEN", [](py::object) { return new Color(Color::green); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("CYAN", [](py::object) { return new Color(Color::cyan); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("BLUE", [](py::object) { return new Color(Color::blue); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("PURPLE", [](py::object) { return new Color(Color::purple); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("MAGENTA", [](py::object) { return new Color(Color::magenta); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("BLACK", [](py::object) { return new Color(Color::black); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("WHITE", [](py::object) { return new Color(Color::white); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("TRANSPARENT", [](py::object) { return new Color(Color::transparent); }, py::return_value_policy::take_ownership);
 
     auto marker_class =
         py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), R"docstring(
@@ -427,11 +460,13 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
                          std::optional<TimeRange> source_range, py::object metadata,
                          std::optional<std::vector<Effect*>> effects,
                          std::optional<std::vector<Marker*>> markers,
-                         const std::string&  active_media_reference) {
+                         const std::string&  active_media_reference,
+                         Color* color) {
                           return new Clip(name, media_reference, source_range, py_to_any_dictionary(metadata),
                                           vector_or_default<Effect>(effects),
                                           vector_or_default<Marker>(markers),
-                                          active_media_reference);
+                                          active_media_reference,
+                                          color);
                       }),
              py::arg_v("name"_a = std::string()),
              "media_reference"_a = nullptr,
@@ -439,7 +474,8 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
              py::arg_v("metadata"_a = py::none()),
              "effects"_a = py::none(),
              "markers"_a = py::none(),
-             "active_media_reference"_a = std::string(Clip::default_media_key))
+             "active_media_reference"_a = std::string(Clip::default_media_key),
+             "color"_a = nullptr)
         .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
             return Clip::default_media_key; 
            })
@@ -447,6 +483,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
         .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) { 
             clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler()); 
             })
+        .def_property("color", &Clip::color, &Clip::set_color)
         .def("media_references", &Clip::media_references) 
         .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
             clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
@@ -565,13 +602,15 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
     track_class
         .def(py::init([](std::string name, std::optional<std::vector<Composable*>> children,
                          std::optional<TimeRange> const& source_range,
-                         std::string const& kind, py::object metadata) {
+                         std::string const& kind, py::object metadata,
+                         Color* color) {
                           auto composable_children = vector_or_default<Composable>(children);
                           Track* t = new Track(
                                   name,
                                   source_range,
                                   kind,
-                                  py_to_any_dictionary(metadata)
+                                  py_to_any_dictionary(metadata),
+                                  color
                           );
                           if (!composable_children.empty())
                               t->set_children(composable_children, ErrorStatusHandler());
@@ -581,8 +620,10 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "children"_a = py::none(),
              "source_range"_a = std::nullopt,
              "kind"_a = std::string(Track::Kind::video),
-             py::arg_v("metadata"_a = py::none()))
+             py::arg_v("metadata"_a = py::none()),
+             "color"_a = nullptr)
         .def_property("kind", &Track::kind, &Track::set_kind)
+        .def_property("color", &Track::color, &Track::set_color)
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));

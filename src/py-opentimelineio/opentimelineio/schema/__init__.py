@@ -7,6 +7,7 @@
 
 from .. _otio import (
     Box2d,
+    Color,
     Clip,
     Effect,
     TimeEffect,
@@ -37,6 +38,7 @@ from . schemadef import (
 
 from . import (
     box2d,
+    color,
     clip,
     effect,
     external_reference,
@@ -57,6 +59,7 @@ def timeline_from_clips(clips):
 
 __all__ = [
     'Box2d',
+    'Color',
     'Clip',
     'Effect',
     'TimeEffect',

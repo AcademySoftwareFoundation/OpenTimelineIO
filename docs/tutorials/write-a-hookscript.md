@@ -126,3 +126,92 @@ def hook_function(in_timeline, argument_map=None):
 ```
 
 Please note that if a "post adapter write hook" changes `in_timeline` in any way, the api will not automatically update the already serialized file.  The changes will only exist in the in-memory object, because the hook runs _after_ the file is serialized to disk.
+
+## Implementing Adapter-specific hooks
+
+While OTIO ships with a set of pre-defined hooks (e.g. `pre_adapter_write`), you can also define your own hooks in your adapter.
+These can be useful to give the user more fine-grained control over the execution of your adapter and make it work for their specific workflow.
+A good example is media embedding within Avids AAF files: Depending on the workflow, media references might have to be transcoded to be compatible with the AAF format.
+To achieve this, the AAF adapter could define a hook which users can leverage to transcode the files before embedding is attempted.
+
+To define a custom hook in your adapter, you need to implement the `adapter_hook_names` function in your adapter module.
+You can define as many hooks as you like, but try to use the native hooks where possible to keep the API consistent. 
+
+```python
+# my_aaf_adapter.py
+
+def read_from_file(self, filepath, **kwargs):
+    ...
+
+def write_to_file(self, timeline, filepath, **kwargs):
+    ...
+
+def adapter_hook_names() -> List[str]:
+    """Returns names of custom hooks implemented by this adapter."""
+    return [
+        "my_custom_adapter_hook"
+    ]
+```
+
+The new hooks also need to be added to the adapter plugin manifest.
+
+```json
+{
+    "OTIO_SCHEMA" : "PluginManifest.1",
+    "adapters" : [
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "My AAF Adapter",
+            "execution_scope" : "in process",
+            "filepath" : "adapters/my_aaf_adapter.py",
+            "suffixes" : ["aaf"]
+        }
+    ],
+    "hook_scripts" : [
+        {
+            "OTIO_SCHEMA" : "HookScript.1",
+            "name" : "script_attached_to_custom_adapter_hook",
+            "filepath" : "my_custom_adapter_hook_script.py"
+        }
+    ],
+    "hooks" : {
+        "pre_adapter_write" : [],
+        "post_adapter_read" : [],
+        "post_adapter_write" : [],
+        "post_media_linker" : [],
+        "my_custom_adapter_hook" : ["script_attached_to_custom_adapter_hook"]
+    }
+}
+```
+
+A custom hook script might look like this:
+
+```python
+# my_custom_adapter_hook_script.py
+
+def hook_function(timeline, custom_argument, argument_map=None):
+    # Do something with the timeline
+    print(
+        f"Running custom adapter hook with custom argument value '{custom_argument}'"
+        f"and argument map: {argument_map}"
+    )
+    return timeline
+```
+
+Attached hook scripts can then be run anywhere using the `otio.hooks.run` function:
+
+```python
+# my_aaf_adapter.py
+
+def write_to_file(self, timeline, filepath, **kwargs):
+    # Do something
+    ...
+    # Run custom hook script with it's custom arguments and pass hook_argument_map along
+    otio.hooks.run(
+        "my_custom_adapter_hook", timeline, 
+        custom_argument="some_value", 
+        argument_map=kwargs.get("hook_argument_map", {})
+    )
+    ...
+    # Do something more
+```

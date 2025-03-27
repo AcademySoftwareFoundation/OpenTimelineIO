@@ -338,8 +338,9 @@ class Adapter(plugins.PythonPlugin):
         result["supported features"] = features
 
         for feature in sorted(_FEATURE_MAP.keys()):
-            if feature in ["read", "write"]:
+            if feature in ["read", "write", "hooks"]:
                 continue
+
             if self.has_feature(feature):
                 features[feature] = collections.OrderedDict()
 
@@ -355,6 +356,14 @@ class Adapter(plugins.PythonPlugin):
                 if args:
                     features[feature]["args"] = args.args
                     features[feature]["doc"] = docs
+
+        # check if there are any adapter specific-hooks and get their names
+        if self.has_feature("hooks"):
+            adapter_hooks_names_fn = getattr(
+                self.module(), _FEATURE_MAP["hooks"][0], None
+            )
+            if adapter_hooks_names_fn:
+                features["hooks"] = adapter_hooks_names_fn()
 
         return result
 

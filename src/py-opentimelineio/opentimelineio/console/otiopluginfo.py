@@ -75,7 +75,16 @@ def _supported_features_formatted(feature_map, _):
     if feature_map:
         print("    explicit supported features:")
     for thing, args in feature_map.items():
+        # skip hooks, they are treated separately, see below
+        if thing == "hooks":
+            continue
         print("      {} args: {}".format(thing, args['args']))
+
+    # check if there are any adapter specific-hooks implemented
+    adapter_hook_names = feature_map.get("hooks", [])
+    if adapter_hook_names:
+        print("      adapter hooks: {}".format(adapter_hook_names))
+
     extra_features = []
     for kind in ["read", "write"]:
         if (

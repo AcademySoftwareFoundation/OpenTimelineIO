@@ -11,7 +11,7 @@
 #include "opentimelineio/safely_typed_any.h"
 #include "opentimelineio/stringUtils.h"
 
-#include <ImathBox.h>
+#include <Imath/ImathBox.h>
 
 #include <map>
 #include <cstring>

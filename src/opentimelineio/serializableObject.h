@@ -12,7 +12,7 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
-#include "ImathBox.h"
+#include "Imath/ImathBox.h"
 #include "serialization.h"
 
 #include <list>

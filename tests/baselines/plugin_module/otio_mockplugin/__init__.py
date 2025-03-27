@@ -13,7 +13,7 @@ attempt to call the plugin_manifest() function from the __init__.py directory.
 
 This would allow you to programmatically generate a manifest rather than have
 it be static on disk, allowing you to switch features on or off or do some
-template substition or any other kind of procedural processing.
+template substitution or any other kind of procedural processing.
 
 This unit test uses a very simple example that just reads the manifest from
 a non-standard json file path.

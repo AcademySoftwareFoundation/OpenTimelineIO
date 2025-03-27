@@ -86,14 +86,14 @@ del hook_list[1]
 
 ### Replacing part of a path for drive mapping
 
-An example use-case would be to create a pre-write adapter hook that checks the argument map for a style being identified as nucoda and then preforms a path replacement on the reference url:
+An example use-case would be to create a pre-write adapter hook that checks the argument map for a style being identified as nucoda and then performs a path replacement on the reference url:
 
 ```python
 def hook_function(in_timeline,argument_map=None):
     adapter_args = argument_map.get('adapter_arguments')
     if adapter_args and adapter_args.get('style') == 'nucoda':
         for in_clip in in_timeline.each_clip():
-            ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensative ) '''
+            ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensitive ) '''
             if in_clip.media_reference:
                 in_clip.media_reference.target_url = in_clip.media_reference.target_url.replace(r'/linux/media/path','S:')
 ```

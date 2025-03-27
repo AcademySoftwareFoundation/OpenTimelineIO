@@ -54,6 +54,15 @@ public:
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
     }
 
+    /// @brief Returns true if the time is valid.
+    ///
+    /// The time is considered valid if the value and rate are not NaN values,
+    /// and the rate is greater than zero.
+    bool is_valid_time() const noexcept
+    {
+        return !std::isnan(_rate) && !std::isnan(_value) && (_rate > 0);
+    }
+
     /// @brief Returns the time value.
     constexpr double value() const noexcept { return _value; }
 
@@ -171,12 +180,19 @@ public:
                                    start_time._rate };
     }
 
-    /// @brief Returns true if the rate is valid for use with timecode.
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
+    [[deprecated("Use is_smpte_timecode_rate() instead")]]
     static bool is_valid_timecode_rate(double rate);
 
-    /// @brief Returns the first valid timecode rate that has the least
-    /// difference from rate.
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
+    static bool is_smpte_timecode_rate(double rate);
+
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
+    [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
     static double nearest_valid_timecode_rate(double rate);
+
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
+    static double nearest_smpte_timecode_rate(double rate);
 
     /// @brief Convert a frame number and rate into a time.
     static constexpr RationalTime

@@ -26,7 +26,7 @@ import opentimelineio as otio
 
 def main():
     """otiotool main program.
-    This function is resposible for executing the steps specified
+    This function is responsible for executing the steps specified
     by all of the command line arguments in the right order.
     """
 

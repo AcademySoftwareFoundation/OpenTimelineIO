@@ -12,7 +12,7 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
-#include "ImathBox.h"
+#include "Imath/ImathBox.h"
 #include "serialization.h"
 
 #include <list>
@@ -449,7 +449,7 @@ public:
 
     private:
         ///@{
-        /** Convience routines for converting various STL structures of specific
+        /** Convenience routines for converting various STL structures of specific
           types to a parallel hierarchy holding std::anys!. */
 
         template <typename T>

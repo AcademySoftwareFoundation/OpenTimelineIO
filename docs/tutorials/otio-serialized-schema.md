@@ -244,7 +244,7 @@ Defines an OTIO plugin Manifest.
     or other features (in the case of adapters, what file suffixes they
     advertise support for).
 
-    For more information, consult the documenation.
+    For more information, consult the documentation.
     
 ```
 

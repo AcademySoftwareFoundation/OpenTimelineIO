@@ -15,6 +15,7 @@ Links
 
 * Main web site: http://opentimeline.io/
 * Documentation: https://opentimelineio.readthedocs.io/
+* Wiki (more documentation): https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki
 * GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
 * [Discussion group](https://lists.aswf.io/g/otio-discussion)
 * [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)
@@ -174,7 +175,7 @@ commandline by using the `CMAKE_ARGS` environment variable.
 
 `env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
 
-Additionaly, to reproduce CI failures regarding the file manifest, run:
+Additionally, to reproduce CI failures regarding the file manifest, run:
 `make manifest` locally to run the python `check-manifest` program.
 
 ## C++ Coverage Builds

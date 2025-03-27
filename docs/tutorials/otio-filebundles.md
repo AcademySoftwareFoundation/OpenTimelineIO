@@ -62,7 +62,7 @@ When a bundle is read from disk using the OpenTimelineIO Python API (using the a
 
 For example, to view the timeline (not the media) of an otioz file in `otioview`, you can run:
 
-`otioview sommething.otioz`
+`otioview something.otioz`
 
 Because this will _only_ read the `content.otio` from the bundle, it is usually a fast operation to run. None of the media is decoded or unzipped during this process.
 

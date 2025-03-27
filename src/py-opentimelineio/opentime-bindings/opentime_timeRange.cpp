@@ -42,6 +42,15 @@ meaning that :meth:`end_time_inclusive` (last portion of a sample in the time ra
                         return TimeRange(*start_time, *duration);
                     }
         }), "start_time"_a=nullptr, "duration"_a=nullptr)
+        .def(py::init<double, double, double>(), "start_time"_a, "duration"_a, "rate"_a)
+        .def("is_invalid_range", &TimeRange::is_invalid_range, R"docstring(
+Returns true if the time range is invalid. The time range is considered invalid if either the start time or
+duration is invalid, or if the duration is less than zero.
+)docstring")
+        .def("is_valid_range", &TimeRange::is_valid_range, R"docstring(
+Returns true if the time range is valid. The time range is considered valid if both the start time and
+duration are valid, and the duration is greater than or equal to zero.
+)docstring")
         .def_property_readonly("start_time", &TimeRange::start_time)
         .def_property_readonly("duration", &TimeRange::duration)
         .def("end_time_inclusive", &TimeRange::end_time_inclusive, R"docstring(

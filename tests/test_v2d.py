@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import unittest
+import json
 import sys
+import unittest
+
+import opentimelineio.test_utils as otio_test_utils
 
 import opentimelineio as otio
-import opentimelineio.test_utils as otio_test_utils
 
 
 class V2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -21,15 +23,9 @@ class V2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_str(self):
         v = otio.schema.V2d(1.0, 2.0)
 
-        self.assertMultiLineEqual(
-            str(v),
-            'V2d(1.0, 2.0)'
-        )
+        self.assertMultiLineEqual(str(v), "V2d(1.0, 2.0)")
 
-        self.assertMultiLineEqual(
-            repr(v),
-            'otio.schema.V2d(x=1.0, y=2.0)'
-        )
+        self.assertMultiLineEqual(repr(v), "otio.schema.V2d(x=1.0, y=2.0)")
 
     def test_equality(self):
         v1 = otio.schema.V2d(1.0, 2.0)
@@ -104,6 +100,17 @@ class V2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(otio.schema.V2d.baseTypeSmallest(), sys.float_info.min)
         self.assertEqual(otio.schema.V2d.baseTypeEpsilon(), sys.float_info.epsilon)
 
+    def test_json_serialization(self):
+        serialized = otio.adapters.otio_json.write_to_string(otio.schema.V2d())
+        json_v2d = json.loads(serialized)
+        self.assertEqual(json_v2d["OTIO_SCHEMA"], "V2d.1")
 
-if __name__ == '__main__':
+    def test_serialization_round_trip(self):
+        v2d = otio.schema.V2d()
+        serialized = otio.adapters.otio_json.write_to_string(v2d)
+        deserialized = otio.adapters.otio_json.read_from_string(serialized)
+        self.assertEqual(v2d, deserialized)
+
+
+if __name__ == "__main__":
     unittest.main()

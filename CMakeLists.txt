@@ -11,6 +11,15 @@ set(OTIO_VERSION_MINOR "18")
 set(OTIO_VERSION_PATCH "0")
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
+# Set the SOVERSION. This version should be incremented anytime the ABI
+# changes. OTIO is currently using the minor version number for breaking
+# changes, e.g. v0.15, v0.16.0, v0.17.0, so the SOVERSION should be incremented
+# to match. If the next OTIO version is 0.19.0 and has ABI changes, the
+# SOVERSION should be incremented to 0.19. When OTIO reaches 1.x.x the
+# SOVERSION can be changed to match the major version which is a more
+# common convention.
+set(OTIO_SOVERSION 0.18)
+
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")

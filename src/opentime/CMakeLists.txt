@@ -24,6 +24,12 @@ set_target_properties(opentime PROPERTIES
     POSITION_INDEPENDENT_CODE TRUE
     WINDOWS_EXPORT_ALL_SYMBOLS true)
 
+if(BUILD_SHARED_LIBS)
+    set_target_properties(opentime PROPERTIES
+        SOVERSION ${OTIO_SOVERSION}
+        VERSION ${OTIO_VERSION})
+endif()
+
 if(APPLE)
     set_target_properties(opentime PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"

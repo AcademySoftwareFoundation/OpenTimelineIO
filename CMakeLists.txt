@@ -118,6 +118,13 @@ else()
     endif()
 endif()
 
+# Set the SOVERSION. This version should be incremented anytime the ABI
+# changes. OTIO is currently using the minor version number for breaking
+# changes, e.g. v0.15, v0.16.0, v0.17.0, so SOVERSION is set as a combination
+# of OTIO_VERSION_MAJOR and OTIO_VERSION_MINOR. When OTIO reaches version 1.x.x
+# then SOVERSION could be changed to track just OTIO_VERSION_MAJOR.
+set(OTIO_SOVERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR})
+
 set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
 if(OTIO_CXX_INSTALL)

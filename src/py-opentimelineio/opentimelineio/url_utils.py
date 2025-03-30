@@ -76,7 +76,6 @@ def filepath_from_url(urlstr):
     elif pathlib.PureWindowsPath(filepath.parts[0]).drive:
         filepath = pathlib.PurePosixPath(filepath.drive, *filepath.parts[1:])
 
-
     # If the specified index is a windows drive, then offset the path
     elif (
         # relative paths may not have a parts[1]

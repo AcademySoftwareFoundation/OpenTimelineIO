@@ -118,11 +118,27 @@ else()
     endif()
 endif()
 
-# Set the SOVERSION. This version should be incremented anytime the ABI
-# changes. OTIO is currently using the minor version number for breaking
-# changes, e.g. v0.15, v0.16.0, v0.17.0, so SOVERSION is set as a combination
-# of OTIO_VERSION_MAJOR and OTIO_VERSION_MINOR. When OTIO reaches version 1.x.x
-# then SOVERSION could be changed to track just OTIO_VERSION_MAJOR.
+# Set the SO version. The SO version must be incremented every time a change
+# occurs to the ABI that causes a backward incompatibility. Such changes
+# include, exhaustively:
+#
+# * a change to struct or class layout
+# * enum changes that would cause a renumbering of previously published enums
+# * a removal of a struct, class, enumeration, or function
+# * a change in parameters to a free standing function
+# * a removal of a global variable
+#
+# OTIO currently designates the minor version number for breaking changes,
+# e.g. v0.15, v0.16.0, v0.17.0, accordingly the SO version will be incremented
+# to match. So for example, the following OTIO versions would map to these
+# ABI versions:
+#
+# * v0.18.0 - 0.18
+# * v0.19.0 - 0.19
+# * v0.19.1 - 0.19 # No ABI changes with minor version changes
+# * v1.0.0 - 1.0
+# * v1.1.0 - 1.1
+#
 set(OTIO_SOVERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR})
 
 set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")

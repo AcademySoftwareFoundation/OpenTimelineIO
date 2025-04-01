@@ -88,6 +88,63 @@ jobs:
         cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
         cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
+  cpp_build_external_deps:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        # Unfortunately the CMake test target is OS dependent so we set it as
+        # a variable here.
+        include:
+        - os: ubuntu-latest
+          OTIO_TEST_TARGET: test
+
+    env:
+      OTIO_BUILD_CONFIG: Release
+      OTIO_BUILD_DIR: ${{ github.workspace }}/build
+      OTIO_INSTALL_DIR: ${{ github.workspace }}/install
+      OTIO_CONSUMER_TEST_BUILD_DIR: ${{ github.workspace }}/consumertest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Install coverage dependency
+      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      run: |
+        sudo apt-get install lcov
+    - name: Install external dependencies (Imath and rapidJSON)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get install libimath-dev rapidjson-dev
+    - name: Build
+      run: |
+        cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON -DOTIO_FIND_IMATH=ON -DOTIO_FIND_RAPIDJSON=ON
+        cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
+    - name: Run tests
+      run: |
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
+    - name: Collect code coverage
+      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      run: |
+        cd ${{ env.OTIO_BUILD_DIR }}
+        lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory . --output-file=coverage.info -q
+        cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
+        lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
+        lcov --list coverage.filtered.info
+    - name: Install
+      run: |
+        cd ${{ env.OTIO_BUILD_DIR }}
+        cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
+    - name: Consumer tests
+      run: |
+        cmake -E make_directory ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+        cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+        cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
+
   py_build_test:
     runs-on: ${{ matrix.os }}
     strategy:

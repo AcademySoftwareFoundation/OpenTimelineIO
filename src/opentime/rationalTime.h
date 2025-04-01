@@ -93,7 +93,7 @@ public:
         return value_rescaled_to(rt._rate);
     }
 
-    /// @brief Returns whether time is almost equal to another time.
+    /// @brief Returns whether this time is almost equal to another time.
     ///
     /// @param other The other time for comparison.
     /// @param delta The tolerance used for the comparison.
@@ -103,10 +103,10 @@ public:
         return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
-    /// @brief Returns whether the value and rate are equal to another time.
+    /// @brief Returns whether this value and rate are exactly equal to another time.
     ///
-    /// This is different from the operator "==" that rescales the time before
-    /// comparison.
+    /// Note that this is different from the equality operator that rescales the time
+    /// before comparison.
     constexpr bool strictly_equal(RationalTime other) const noexcept
     {
         return _value == other._value && _rate == other._rate;

@@ -78,9 +78,15 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
 target_include_directories(opentimelineio
-    PRIVATE       "${PROJECT_SOURCE_DIR}/src"
-                  "${PROJECT_SOURCE_DIR}/src/deps"
-                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+    PRIVATE "${PROJECT_SOURCE_DIR}/src")
+
+if(OTIO_FIND_RAPIDJSON)
+    target_include_directories(opentimelineio
+        PRIVATE "${RapidJSON_INCLUDE_DIRS}")
+else()
+    target_include_directories(opentimelineio
+        PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+endif()
 
 
 target_link_libraries(opentimelineio 

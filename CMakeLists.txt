@@ -130,14 +130,16 @@ endif()
 #
 # OTIO currently designates the minor version number for breaking changes,
 # e.g. v0.15, v0.16.0, v0.17.0, accordingly the SO version will be incremented
-# to match. So for example, the following OTIO versions would map to these
-# ABI versions:
+# to match. SO version must be monotically increasing, so the ABI version
+# should be computed as: major * 100 + revision. The third digit will never
+# implicate an ABI version change. So for example, the following OTIO versions
+# would map to these ABI versions:
 #
-# * v0.18.0 - 0.18
-# * v0.19.0 - 0.19
-# * v0.19.1 - 0.19 # No ABI changes with minor version changes
-# * v1.0.0 - 1.0
-# * v1.1.0 - 1.1
+# * v0.18.0 - 18
+# * v0.19.0 - 19
+# * v0.19.1 - 19 # No ABI changes with minor version changes
+# * v1.0.0 - 100
+# * v1.1.0 - 101
 #
 math(EXPR OTIO_SOVERSION "${OTIO_VERSION_MAJOR} * 100 + ${OTIO_VERSION_MINOR}")
 

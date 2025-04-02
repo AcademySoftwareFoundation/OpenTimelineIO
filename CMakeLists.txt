@@ -34,6 +34,7 @@ option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
 set(OTIO_IMATH_LIBS "" CACHE STRING   "Imath library overrides to use instead of src/deps or find_package")
 option(OTIO_FIND_IMATH                "Find Imath using find_package, ignored if OTIO_IMATH_LIBS is set" OFF)
+option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -223,13 +224,10 @@ if (NOT "${OTIO_IMATH_LIBS}" STREQUAL "")
     set(OTIO_RESOLVED_IMATH_LIBRARIES "${OTIO_IMATH_LIBS}")
     set(USE_DEPS_IMATH OFF)
 elseif(OTIO_FIND_IMATH)
-    find_package(Imath QUIET)
+    set(USE_DEPS_IMATH OFF)
+    find_package(Imath REQUIRED)
     if (Imath_FOUND)
         message(STATUS "Found Imath 3 at ${Imath_CONFIG}")
-        set(USE_DEPS_IMATH OFF)
-    else()
-        message(STATUS "Imath 3 was not found, using src/deps/Imath")
-        set(USE_DEPS_IMATH ON)
     endif()
 else()
     message(STATUS "Using src/deps/Imath by default")
@@ -238,6 +236,17 @@ endif()
 
 if(USE_DEPS_IMATH)
     include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
+#----- RapidJSON
+
+if(OTIO_FIND_RAPIDJSON)
+    find_package(RapidJSON CONFIG REQUIRED)
+    if (RapidJSON_FOUND)
+        message(STATUS "Found RapidJSON at ${RapidJSON_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/rapidjson by default")
 endif()
 
 # set up the internally hosted dependencies

@@ -12,9 +12,11 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Composition;
 
+/// @brief An object that can be composed within a Composition (such as a Track or Stack).
 class Composable : public SerializableObjectWithMetadata
 {
 public:
+    /// @brief This struct provides the Composable schema.
     struct Schema
     {
         static auto constexpr name   = "Composable";
@@ -23,17 +25,27 @@ public:
 
     using Parent = SerializableObjectWithMetadata;
 
+    /// @brief Create a new composable.
+    ///
+    /// @param name The name of the composable.
+    /// @param metadata The metadata for the clip.
     Composable(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
+    /// @brief Return whether the composable is visible.
     virtual bool visible() const;
+
+    /// @brief Return whether the composable is overlapping another item.
     virtual bool overlapping() const;
 
+    /// @brief Return the parent composition.
     Composition* parent() const { return _parent; }
 
+    /// @brief Return the duration of the composable.
     virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
+    /// @brief Return the available image bounds.
     virtual std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const;
 

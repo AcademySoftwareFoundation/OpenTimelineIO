@@ -8,9 +8,14 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Represents media for which a concrete reference is missing.
+///
+/// Note that a missing reference may have useful metadata, even if the
+/// location of the media is not known.
 class MissingReference final : public MediaReference
 {
 public:
+    /// @brief This struct provides the MissingReference schema.
     struct Schema
     {
         static auto constexpr name   = "MissingReference";
@@ -19,6 +24,12 @@ public:
 
     using Parent = MediaReference;
 
+    /// @brief Create a new missing reference.
+    ///
+    /// @param name The name of the missing reference.
+    /// @param available_range The available range of the missing reference.
+    /// @param metadata The metadata for the missing reference.
+    /// @param available_image_bounds The spatial bounds for the missing reference.
     MissingReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,

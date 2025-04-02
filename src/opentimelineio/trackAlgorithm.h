@@ -8,6 +8,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Trim the track to the given range.
 Track* track_trimmed_to_range(
     Track*       in_track,
     TimeRange    trim_range,

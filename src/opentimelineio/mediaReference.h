@@ -12,9 +12,11 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 using namespace opentime;
 
+/// @brief A reference to a piece of media, for example a movie on a clip.
 class MediaReference : public SerializableObjectWithMetadata
 {
 public:
+    /// @brief This struct provides the MediaReference schema.
     struct Schema
     {
         static auto constexpr name   = "MediaReference";
@@ -23,6 +25,12 @@ public:
 
     using Parent = SerializableObjectWithMetadata;
 
+    /// @brief Create a new media reference.
+    ///
+    /// @param name The name of the media reference.
+    /// @param available_range The available range of the media reference.
+    /// @param metadata The metadata for the media reference.
+    /// @param available_image_bounds The spatial bounds of the media reference.
     MediaReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
@@ -30,23 +38,28 @@ public:
         std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
             std::nullopt);
 
+    /// @brief Return the available range of the media reference.
     std::optional<TimeRange> available_range() const noexcept
     {
         return _available_range;
     }
 
+    /// @brief Set the available range of the media reference.
     void set_available_range(std::optional<TimeRange> const& available_range)
     {
         _available_range = available_range;
     }
 
+    /// @brief Return whether the reference is missing.
     virtual bool is_missing_reference() const;
 
+    /// @brief Return the spatial bounds of the media reference.
     std::optional<IMATH_NAMESPACE::Box2d> available_image_bounds() const
     {
         return _available_image_bounds;
     }
 
+    /// @brief Set the spatial bounds of the media reference.
     void set_available_image_bounds(
         std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds)
     {

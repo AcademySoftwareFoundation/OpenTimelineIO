@@ -10,21 +10,25 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
+/// @brief A track is a composition of a certain kind, like video or audio.
 class Track : public Composition
 {
 public:
+    /// @brief This struct provides the base set of kinds of tracks.
     struct Kind
     {
         static auto constexpr video = "Video";
         static auto constexpr audio = "Audio";
     };
 
+    /// @brief This enumeration provides the neighbor gap policy.
     enum NeighborGapPolicy
     {
         never              = 0,
         around_transitions = 1
     };
 
+    /// @brief This struct provides the Track schema.
     struct Schema
     {
         static auto constexpr name   = "Track";
@@ -33,14 +37,22 @@ public:
 
     using Parent = Composition;
 
+    /// @brief Create a new track.
+    ///
+    /// @param name The track name.
+    /// @param source_range The source range of the track.
+    /// @param kind The kind of track.
+    /// @param metadata The metadata for the track.
     Track(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
         AnyDictionary const&            metadata     = AnyDictionary());
 
+    /// @brief Return this kind of track.
     std::string kind() const noexcept { return _kind; }
 
+    /// @brief Set this kind of track.
     void set_kind(std::string const& kind) { _kind = kind; }
 
     TimeRange range_of_child_at_index(
@@ -57,6 +69,7 @@ public:
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const override;
 
+    /// @brief Return the neighbors of the given item.
     std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
         Composable const* item,
         ErrorStatus*      error_status = nullptr,
@@ -68,11 +81,12 @@ public:
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
+    /// @brief Find child clips.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
     std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,

@@ -12,6 +12,9 @@ using opentime::string_printf;
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @name String Utilities
+///@{
+
 void fatal_error(std::string const& errMsg);
 
 std::string type_name_for_error_message(std::type_info const&);
@@ -29,5 +32,7 @@ bool split_schema_string(
     std::string const& schema_and_version,
     std::string*       schema_name,
     int*               schema_version);
+
+///@}
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

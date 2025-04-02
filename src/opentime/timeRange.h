@@ -12,9 +12,10 @@ namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief This default epsilon_s value is used in comparison between floating numbers.
 ///
-/// It is computed to be twice 192khz, the fastest commonly used audio rate. It
-/// can be changed in the future if necessary due to higher sampling rates or
-/// some other kind of numeric tolerance detected in the library.
+/// It is computed to be twice 192kHz, the fastest commonly used audio rate. That gives
+/// a resolution of half a frame at 192kHz. The value can be changed in the future if
+/// necessary, due to higher sampling rates or some other kind of numeric tolerance
+/// detected in the library.
 constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 /// @brief This class represents a time range defined by a start time and duration.

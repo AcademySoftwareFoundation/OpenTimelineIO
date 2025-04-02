@@ -7,6 +7,7 @@
 #include <opentimelineio/clip.h>
 #include <opentimelineio/stack.h>
 #include <opentimelineio/track.h>
+#include <opentimelineio/gap.h>
 #include <opentimelineio/stackAlgorithm.h>
 
 #include <iostream>
@@ -211,6 +212,109 @@ main(int argc, char** argv)
         assertEqual(result->children()[0]->name(), std::string("track1_A"));
         assertEqual(result->children().size(), 2);
         assertEqual(result->duration().value(), 300);
+    });
+
+    tests.add_test(
+        "test_flatten_stack_04", [] {
+        using namespace otio;
+
+        otio::RationalTime rt_0_24{0, 24};
+        otio::RationalTime rt_150_24{150, 24};
+        otio::TimeRange tr_AB_150_24{rt_0_24, rt_150_24};
+
+        otio::TimeRange tr_C_150_24{rt_0_24, otio::RationalTime(300, 24)};
+
+        // A and B are Gaps placed over clip C
+        // C should remain uncut
+        // 0         150          300
+        // [    A     |     B     ]
+        // [    C                 ]
+        //
+        // should flatten to:
+        // [    C                 ]
+
+        otio::SerializableObject::Retainer<otio::Gap> cl_A =
+            new otio::Gap(tr_AB_150_24, "track1_A");
+        otio::SerializableObject::Retainer<otio::Gap> cl_B =
+            new otio::Gap(tr_AB_150_24, "track1_B");
+        otio::SerializableObject::Retainer<otio::Clip> cl_C =
+            new otio::Clip("track2_C", nullptr, tr_C_150_24);
+
+        otio::SerializableObject::Retainer<otio::Track> tr_over =
+            new otio::Track();
+        tr_over->append_child(cl_A);
+        tr_over->append_child(cl_B);
+
+        otio::SerializableObject::Retainer<otio::Track> tr_under =
+            new otio::Track();
+        tr_under->append_child(cl_C);
+
+        otio::SerializableObject::Retainer<otio::Stack> st =
+            new otio::Stack();
+        st->append_child(tr_under);
+        st->append_child(tr_over);
+
+        auto result = flatten_stack(st);
+
+        assertEqual(result->children().size(), 1);
+        assertEqual(result->children()[0]->name(), std::string("track2_C"));
+        assertEqual(result->duration().value(), 300);
+        assertEqual(st->children().size(), 2);
+        assertEqual(dynamic_cast<otio::Track*>(st->children()[0].value)->children().size(), 1);
+        assertEqual(dynamic_cast<otio::Track*>(st->children()[1].value)->children().size(), 2);
+    });
+
+    tests.add_test(
+        "test_flatten_stack_05", [] {
+        using namespace otio;
+
+        otio::RationalTime rt_0_24{0, 24};
+        otio::RationalTime rt_150_24{150, 24};
+        otio::TimeRange tr_150_24{rt_0_24, rt_150_24};
+
+        // A and B are Gaps placed over clips C and D
+        // with a cut at the same location
+        // 0         150          300
+        // [    A     |     B     ]
+        // [    C     |     D     ]
+        //
+        // should flatten to:
+        // [    C     |     D     ]
+
+        otio::SerializableObject::Retainer<otio::Gap> cl_A =
+            new otio::Gap(tr_150_24, "track1_A");
+        otio::SerializableObject::Retainer<otio::Gap> cl_B =
+            new otio::Gap(tr_150_24, "track1_B");
+        otio::SerializableObject::Retainer<otio::Clip> cl_C =
+            new otio::Clip("track2_C", nullptr, tr_150_24);
+        otio::SerializableObject::Retainer<otio::Clip> cl_D =
+            new otio::Clip("track2_D", nullptr, tr_150_24);
+
+
+        otio::SerializableObject::Retainer<otio::Track> tr_over =
+            new otio::Track();
+        tr_over->append_child(cl_A);
+        tr_over->append_child(cl_B);
+
+        otio::SerializableObject::Retainer<otio::Track> tr_under =
+            new otio::Track();
+        tr_under->append_child(cl_C);
+        tr_under->append_child(cl_D);
+
+        otio::SerializableObject::Retainer<otio::Stack> st =
+            new otio::Stack();
+        st->append_child(tr_under);
+        st->append_child(tr_over);
+
+        auto result = flatten_stack(st);
+
+        assertEqual(result->children().size(), 2);
+        assertEqual(result->children()[0]->name(), std::string("track2_C"));
+        assertEqual(result->children()[1]->name(), std::string("track2_D"));
+        assertEqual(result->duration().value(), 300);
+        assertEqual(st->children().size(), 2);
+        assertEqual(dynamic_cast<otio::Track*>(st->children()[0].value)->children().size(), 2);
+        assertEqual(dynamic_cast<otio::Track*>(st->children()[1].value)->children().size(), 2);
     });
 
     tests.run(argc, argv);

@@ -4,7 +4,12 @@
 #----- Other dependencies
 
 # detect if the submodules haven't been updated
-set(DEPS_SUBMODULES pybind11 rapidjson)
+set(DEPS_SUBMODULES pybind11)
+
+if(NOT OTIO_FIND_RAPIDJSON)
+    set(DEPS_SUBMODULES ${DEPS_SUBMODULES} rapidjson)
+endif()
+
 foreach(submodule IN LISTS DEPS_SUBMODULES)
     file(GLOB SUBMOD_CONTENTS ${submodule})
     list(LENGTH SUBMOD_CONTENTS SUBMOD_CONTENT_LEN)

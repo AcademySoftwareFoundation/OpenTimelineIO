@@ -77,6 +77,7 @@ public:
     virtual void write_value(class TimeTransform const& value)       = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
     virtual void write_value(IMATH_NAMESPACE::Box2d const&)          = 0;
+    virtual void write_value(IMATH_NAMESPACE::V2d const&)            = 0;
 
 protected:
     void _error(ErrorStatus const& error_status)
@@ -269,7 +270,7 @@ public:
         _store(std::any(value));
     }
 
-    void write_value(IMATH_NAMESPACE::V2d const& value)
+    void write_value(IMATH_NAMESPACE::V2d const& value) override
     {
 
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)

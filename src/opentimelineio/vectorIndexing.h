@@ -7,6 +7,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Return the adjusted vector index.
 template <typename V>
 constexpr int
 adjusted_vector_index(int index, V const& vec) noexcept

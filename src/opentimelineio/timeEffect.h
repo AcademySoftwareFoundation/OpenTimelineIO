@@ -8,9 +8,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Base class for all effects that alter the timing of an item.
 class TimeEffect : public Effect
 {
 public:
+    /// @brief This struct provides the TimeEffect schema.
     struct Schema
     {
         static auto constexpr name   = "TimeEffect";
@@ -19,6 +21,11 @@ public:
 
     using Parent = Effect;
 
+    /// @brief Create a new time effect.
+    ///
+    /// @param name The name of the object.
+    /// @param effect_name The time effect name.
+    /// @param metadata The metadata for the time effect.
     TimeEffect(
         std::string const&   name        = std::string(),
         std::string const&   effect_name = std::string(),

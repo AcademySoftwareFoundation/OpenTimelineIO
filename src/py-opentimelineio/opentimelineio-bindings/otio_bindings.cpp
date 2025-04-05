@@ -14,7 +14,7 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/stackAlgorithm.h"
 
-#include <ImathBox.h>
+#include <Imath/ImathBox.h>
 
 namespace py = pybind11;
 using namespace pybind11::literals;

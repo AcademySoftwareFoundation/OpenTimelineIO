@@ -32,7 +32,7 @@
 #include "otio_utils.h"
 #include "otio_anyDictionary.h"
 
-#include "ImathBox.h"
+#include "Imath/ImathBox.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;

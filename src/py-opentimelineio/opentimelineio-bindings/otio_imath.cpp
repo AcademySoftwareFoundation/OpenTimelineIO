@@ -6,8 +6,8 @@
 
 #include "otio_utils.h"
 
-#include "ImathBox.h"
-#include "ImathVec.h"
+#include "Imath/ImathBox.h"
+#include "Imath/ImathVec.h"
 
 namespace py = pybind11;
 

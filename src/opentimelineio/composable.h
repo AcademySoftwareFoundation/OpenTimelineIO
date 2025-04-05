@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
 
-#include <ImathBox.h>
+#include <Imath/ImathBox.h>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 

@@ -106,16 +106,12 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 void
 main()
 {
-    otio::ErrorStatus err;
     otio::SerializableObject::Retainer<otio::Timeline> tl(
             dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file("taco.otio", &err)
+                otio::Timeline::from_json_file("taco.otio")
         )
     );
-    const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (
-            tl->find_clips()
-    );
-    for (const auto& cl : clips)
+    for (const auto& cl : tl->find_clips())
     {
         otio::RationalTime dur = cl->duration();
         std::cout << "Name: " << cl->name() << " [";

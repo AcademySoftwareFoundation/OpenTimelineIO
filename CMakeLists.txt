@@ -34,6 +34,7 @@ option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
 set(OTIO_IMATH_LIBS "" CACHE STRING   "Imath library overrides to use instead of src/deps or find_package")
 option(OTIO_FIND_IMATH                "Find Imath using find_package, ignored if OTIO_IMATH_LIBS is set" OFF)
+option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -117,6 +118,31 @@ else()
         set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
     endif()
 endif()
+
+# Set the SO version. The SO version must be incremented every time a change
+# occurs to the ABI that causes a backward incompatibility. Such changes
+# include, exhaustively:
+#
+# * a change to struct or class layout
+# * enum changes that would cause a renumbering of previously published enums
+# * a removal of a struct, class, enumeration, or function
+# * a change in parameters to a free standing function
+# * a removal of a global variable
+#
+# OTIO currently designates the minor version number for breaking changes,
+# e.g. v0.15, v0.16.0, v0.17.0, accordingly the SO version will be incremented
+# to match. SO version must be monotically increasing, so the ABI version
+# should be computed as: major * 100 + revision. The third digit will never
+# implicate an ABI version change. So for example, the following OTIO versions
+# would map to these ABI versions:
+#
+# * v0.18.0 - 18
+# * v0.19.0 - 19
+# * v0.19.1 - 19 # No ABI changes with minor version changes
+# * v1.0.0 - 100
+# * v1.1.0 - 101
+#
+math(EXPR OTIO_SOVERSION "${OTIO_VERSION_MAJOR} * 100 + ${OTIO_VERSION_MINOR}")
 
 set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
@@ -223,40 +249,33 @@ if (NOT "${OTIO_IMATH_LIBS}" STREQUAL "")
     set(OTIO_RESOLVED_IMATH_LIBRARIES "${OTIO_IMATH_LIBS}")
     set(USE_DEPS_IMATH OFF)
 elseif(OTIO_FIND_IMATH)
-    find_package(Imath QUIET)
+    set(USE_DEPS_IMATH OFF)
+    find_package(Imath REQUIRED)
     if (Imath_FOUND)
         message(STATUS "Found Imath 3 at ${Imath_CONFIG}")
-        set(USE_DEPS_IMATH OFF)
-    else()
-        find_package(IlmBase QUIET)
-        if (IlmBase_FOUND)
-            message(STATUS "Imath 3 not found, found Imath 2 at ${IlmBase_CONFIG}")
-            message(STATUS "You may need to point to the Imath headers by setting IMATH_INCLUDES")
-            set(USE_DEPS_IMATH_OFF)
-            set(OTIO_RESOLVED_IMATH_LIBRARIES "${IlmBase_LIBRARIES")
-        else()
-            message(STATUS "Imath 3 and 2 were not found, using src/deps/Imath")
-            set(USE_DEPS_IMATH ON)
-        endif()
     endif()
 else()
     message(STATUS "Using src/deps/Imath by default")
     set(USE_DEPS_IMATH ON)
 endif()
 
+if(USE_DEPS_IMATH)
+    include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
+#----- RapidJSON
+
+if(OTIO_FIND_RAPIDJSON)
+    find_package(RapidJSON CONFIG REQUIRED)
+    if (RapidJSON_FOUND)
+        message(STATUS "Found RapidJSON at ${RapidJSON_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/rapidjson by default")
+endif()
+
 # set up the internally hosted dependencies
 add_subdirectory(src/deps)
-
-set (OTIO_IMATH_TARGETS
-    # For OpenEXR/Imath 3.x:
-    $<TARGET_NAME_IF_EXISTS:Imath::Imath>
-    $<TARGET_NAME_IF_EXISTS:Imath::Half>
-    # For OpenEXR >= 2.4/2.5 with reliable exported targets
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Imath>
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Half>
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
-    # For OpenEXR <= 2.3:
-    ${ILMBASE_LIBRARIES})
 
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
@@ -272,4 +291,3 @@ endif()
 if(OTIO_CXX_EXAMPLES)
     add_subdirectory(examples)
 endif()
-

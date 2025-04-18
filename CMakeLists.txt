@@ -32,8 +32,7 @@ option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (I
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
-set(OTIO_IMATH_LIBS "" CACHE STRING   "Imath library overrides to use instead of src/deps or find_package")
-option(OTIO_FIND_IMATH                "Find Imath using find_package, ignored if OTIO_IMATH_LIBS is set" OFF)
+option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
@@ -243,23 +242,13 @@ set(CTEST_OUTPUT_ON_FAILURE ON)
 # Build the dependencies and components
 
 #----- Imath
-set(OTIO_RESOLVED_IMATH_LIBRARIES "")
-if (NOT "${OTIO_IMATH_LIBS}" STREQUAL "")
-    message(STATUS "Using Imath from OTIO_MATH_LIBS: ${OTIO_IMATH_LIBS}")
-    set(OTIO_RESOLVED_IMATH_LIBRARIES "${OTIO_IMATH_LIBS}")
-    set(USE_DEPS_IMATH OFF)
-elseif(OTIO_FIND_IMATH)
-    set(USE_DEPS_IMATH OFF)
+if(OTIO_FIND_IMATH)
     find_package(Imath REQUIRED)
     if (Imath_FOUND)
         message(STATUS "Found Imath 3 at ${Imath_CONFIG}")
     endif()
 else()
     message(STATUS "Using src/deps/Imath by default")
-    set(USE_DEPS_IMATH ON)
-endif()
-
-if(USE_DEPS_IMATH)
     include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
 endif()
 

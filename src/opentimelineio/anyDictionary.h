@@ -132,10 +132,6 @@ public:
         map::swap(other);
     }
 
-    /// @todo Remove all of these.
-    ///
-    ///@{
-
     /// @brief Return whether the given key has been set.
     ///
     /// If key is in this, and the type of key matches the type of result, then
@@ -197,8 +193,6 @@ public:
             return false;
         }
     }
-
-    ///@}
 
     using map::empty;
     using map::max_size;

@@ -16,13 +16,17 @@
         },
         {
             "FROM_TEST_FILE" : "post_write_hookscript_example.json"
+        },
+        {
+            "FROM_TEST_FILE" : "custom_adapter_hookscript_example.json"
         }
     ],
     "hooks" : {
         "pre_adapter_write" : ["example hook", "example hook"],
         "post_adapter_read" : [],
         "post_adapter_write" : ["post write example hook"],
-        "post_media_linker" : ["example hook"]
+        "post_media_linker" : ["example hook"],
+        "custom_adapter_hook": ["custom adapter hook"]
     },
     "version_manifests" : {
         "TEST_FAMILY_NAME": {

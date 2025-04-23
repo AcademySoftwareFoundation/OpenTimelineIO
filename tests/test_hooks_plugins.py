@@ -19,6 +19,7 @@ import tempfile
 
 HOOKSCRIPT_PATH = "hookscript_example"
 POST_WRITE_HOOKSCRIPT_PATH = "post_write_hookscript_example"
+CUSTOM_ADAPTER_HOOKSCRIPT_PATH = "custom_adapter_hookscript_example"
 
 POST_RUN_NAME = "hook ran and did stuff"
 TEST_METADATA = {'extra_data': True}
@@ -71,8 +72,17 @@ class TestPluginHookSystem(unittest.TestCase):
             "baselines",
             POST_WRITE_HOOKSCRIPT_PATH
         )
-        self.man.hook_scripts = [self.hsf, self.post_hsf]
-
+        self.adapter_hook_jsn = baseline_reader.json_baseline_as_string(
+            CUSTOM_ADAPTER_HOOKSCRIPT_PATH
+        )
+        self.adapter_hookscript = otio.adapters.otio_json.read_from_string(
+            self.adapter_hook_jsn)
+        self.adapter_hookscript._json_path = os.path.join(
+            baseline_reader.MODPATH,
+            "baselines",
+            HOOKSCRIPT_PATH
+        )
+        self.man.hook_scripts = [self.hsf, self.post_hsf, self.adapter_hookscript]
         self.orig_manifest = otio.plugins.manifest._MANIFEST
         otio.plugins.manifest._MANIFEST = self.man
 
@@ -83,6 +93,8 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_plugin_adapter(self):
         self.assertEqual(self.hsf.name, "example hook")
         self.assertEqual(self.hsf.filepath, "example.py")
+        self.assertEqual(otio.adapters.from_name("example").adapter_hook_names(),
+                         ["custom_adapter_hook"])
 
     def test_load_adapter_module(self):
         target = os.path.join(
@@ -101,15 +113,25 @@ class TestPluginHookSystem(unittest.TestCase):
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata.get("extra_data"), True)
 
+    def test_run_custom_hook_function(self):
+        tl = otio.schema.Timeline()
+        result = otio.hooks.run(hook="custom_adapter_hook", tl=tl,
+                                extra_args=TEST_METADATA)
+        self.assertEqual(result.metadata["custom_hook"], TEST_METADATA)
+
     def test_run_hook_through_adapters(self):
+        hook_map = dict(TEST_METADATA)
+        hook_map["run_custom_hook"] = True
+
         result = otio.adapters.read_from_string(
             'foo', adapter_name='example',
             media_linker_name='example',
-            hook_function_argument_map=TEST_METADATA
+            hook_function_argument_map=hook_map
         )
 
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata.get("extra_data"), True)
+        self.assertEqual(result.metadata["custom_hook"]["extra_data"], True)
 
     def test_post_write_hook(self):
         self.man.adapters.extend(self.orig_manifest.adapters)
@@ -161,11 +183,11 @@ class TestPluginHookSystem(unittest.TestCase):
         # for not just assert that it returns a non-empty list
         self.assertEqual(
             list(otio.hooks.available_hookscripts()),
-            [self.hsf, self.post_hsf]
+            [self.hsf, self.post_hsf, self.adapter_hookscript]
         )
         self.assertEqual(
             otio.hooks.available_hookscript_names(),
-            [self.hsf.name, self.post_hsf.name]
+            [self.hsf.name, self.post_hsf.name, self.adapter_hookscript.name]
         )
 
     def test_manifest_hooks(self):
@@ -173,7 +195,8 @@ class TestPluginHookSystem(unittest.TestCase):
             sorted(list(otio.hooks.names())),
             sorted(
                 ["post_adapter_read", "post_media_linker",
-                 "pre_adapter_write", "post_adapter_write"]
+                 "pre_adapter_write", "post_adapter_write",
+                 "custom_adapter_hook"]
             )
         )
 
@@ -201,6 +224,13 @@ class TestPluginHookSystem(unittest.TestCase):
             list(otio.hooks.scripts_attached_to("post_adapter_write")),
             [
                 self.post_hsf.name
+            ]
+        )
+
+        self.assertEqual(
+            list(otio.hooks.scripts_attached_to("custom_adapter_hook")),
+            [
+                self.adapter_hookscript.name
             ]
         )
 

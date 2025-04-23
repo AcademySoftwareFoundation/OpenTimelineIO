@@ -14,7 +14,7 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@v4.3.0
+    - uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.10'
 
@@ -58,11 +58,11 @@ jobs:
   check-warnings:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@v4.3.0
+    - uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.10'
 

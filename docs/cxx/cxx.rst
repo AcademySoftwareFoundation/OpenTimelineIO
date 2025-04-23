@@ -38,7 +38,7 @@ straightforward and uncontroversial.
 
 Reminder: these
 `sample header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/opentime>`_
-exist only to show the API; namespacing and other niceties are ommitted.
+exist only to show the API; namespacing and other niceties are omitted.
 
 Starting Examples
 +++++++++++++++++
@@ -82,7 +82,7 @@ already defines properties ``name`` and ``metadata``: ::
 	std::color _color;
     };
 
-The contructor takes four properties, two of which (``marked_range`` and
+The constructor takes four properties, two of which (``marked_range`` and
 ``color``) are stored directly in ``Marker``, with the remaining two (``name``
 and ``metadata``) handled by the base class ``SerializableObjectWithMetadata``.
 
@@ -146,7 +146,7 @@ details above as appropriate for your case.
    Properties are written to the JSON file in the order they are written
    to from within ``write_to()``.  But the reading code need not be in the same order,
    and changes in the ordering of either the reading or writing code will not
-   break compatability with previously written JSON files.
+   break compatibility with previously written JSON files.
 
    However, it is vital to invoke ``Parent::read_from()`` *after* reading all
    of the derived class properties, while for writing ``Parent::write_to()``
@@ -155,7 +155,7 @@ details above as appropriate for your case.
 .. Note::
    Also note that the order of properties within a JSON file for data
    that is essentially a ``std::map<>`` (see ``AnyDictionary`` below)
-   is always alphebetical by key.  This ensures deterministic JSON file
+   is always alphabetical by key.  This ensures deterministic JSON file
    writing which is important for comparison and testing.
 
 Using Schemas
@@ -193,7 +193,7 @@ to JSON is transported as a C++ ``any``.  What can that ``any`` hold?
 First, the ``any`` can be empty, which corresponds with a ``null`` JSON value.
 The ``any`` could also hold any of the following "atomic" types: ``bool``,
 ``int``, ``double``, ``std::string``, ``RationalTime``, ``TimeRange`` and
-``TimeTransform``.  All but the last three are immediately expressable in JSON,
+``TimeTransform``.  All but the last three are immediately expressible in JSON,
 while the three Opentime types are read/written as compound structures with the
 same format that the current Python implementation delivers.  The final
 "atomic" type that an ``any`` can hold is a ``SerializableObject*``, which
@@ -323,7 +323,7 @@ Memory Management
 +++++++++++++++++
 
 The final topic we must deal with is memory management. Languages like Python
-and Swift natually make use of reference counted class instances. We considered
+and Swift naturally make use of reference counted class instances. We considered
 such a route in C++, by requiring that manipulations be done not in terms of
 ``SerializableObject*`` pointers, but rather using
 ``std::shared_ptr<SerializableObject>`` (and the corresponding
@@ -679,7 +679,7 @@ What makes this complicated is the following set of rules/constraints:
     virtue of a Python wrapper instance P being constructed from Python.  Until that C++ object X
     is passed to C++ in some way, then X will exist only as long as P does.
 
-How can we satisfy all these contraints, while ensuring we don't create retain
+How can we satisfy all these constraints, while ensuring we don't create retain
 cycles (which might be fixable with Python garbage collection, but also
 might not)?  Here is the solution we came up with; if you have an alternate
 suggestion, we would be happy to hear it.

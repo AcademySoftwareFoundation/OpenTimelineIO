@@ -15,6 +15,7 @@ Links
 
 * Main web site: http://opentimeline.io/
 * Documentation: https://opentimelineio.readthedocs.io/
+* Wiki (more documentation): https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki
 * GitHub: https://github.com/AcademySoftwareFoundation/OpenTimelineIO
 * [Discussion group](https://lists.aswf.io/g/otio-discussion)
 * [Slack channel](https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC)
@@ -105,16 +106,12 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 void
 main()
 {
-    otio::ErrorStatus err;
     otio::SerializableObject::Retainer<otio::Timeline> tl(
             dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file("taco.otio", &err)
+                otio::Timeline::from_json_file("taco.otio")
         )
     );
-    const std::vector<otio::SerializableObject::Retainer<otio::Clip>> clips = (
-            tl->find_clips()
-    );
-    for (const auto& cl : clips)
+    for (const auto& cl : tl->find_clips())
     {
         otio::RationalTime dur = cl->duration();
         std::cout << "Name: " << cl->name() << " [";
@@ -174,7 +171,7 @@ commandline by using the `CMAKE_ARGS` environment variable.
 
 `env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
 
-Additionaly, to reproduce CI failures regarding the file manifest, run:
+Additionally, to reproduce CI failures regarding the file manifest, run:
 `make manifest` locally to run the python `check-manifest` program.
 
 ## C++ Coverage Builds

@@ -79,6 +79,14 @@ class TestConversions(unittest.TestCase):
             processed_url = otio.url_utils.filepath_from_url(url)
             self.assertEqual(processed_url, POSIX_PATH)
 
+    def test_relative_url(self):
+        # see github issue #1817 - when a relative URL has only one name after
+        # the "." (ie ./blah but not ./blah/blah)
+        self.assertEqual(
+            otio.url_utils.filepath_from_url(os.path.join(".", "docs")),
+            "docs",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

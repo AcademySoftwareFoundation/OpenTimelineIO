@@ -100,6 +100,9 @@ linkcheck_exclude_documents = [
     r'cxx/cxx'
 ]
 
+# For some reason this URL gives 403 Forbidden when running in github actions
+linkcheck_ignore = [r'https://opensource.org/licenses/MIT']
+
 # -- Options for MySt-Parser -----------------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/sphinx/reference.html
 

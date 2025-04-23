@@ -10,6 +10,7 @@
 
 namespace opentime { namespace OPENTIME_VERSION {
 
+/// @brief This provides printf style functionality for std::string.
 template <typename... Args>
 std::string
 string_printf(char const* format, Args... args)

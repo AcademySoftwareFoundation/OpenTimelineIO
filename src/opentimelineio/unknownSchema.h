@@ -8,24 +8,32 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief An unknown schema.
 class UnknownSchema : public SerializableObject
 {
 public:
+    /// @brief This struct provides the UnknownSchema schema.
     struct Schema
     {
         static auto constexpr name   = "UnknownSchema";
         static int constexpr version = 1;
     };
 
+    /// @brief Create a new unknown schema.
+    ///
+    /// @param original_schema_name The original schema name.
+    /// @param original_schema_version The original schema version.
     UnknownSchema(
         std::string const& original_schema_name,
         int                original_schema_version);
 
+    /// @brief Return the original schema name.
     std::string original_schema_name() const noexcept
     {
         return _original_schema_name;
     }
 
+    /// @brief Return the original schema version.
     int original_schema_version() const noexcept
     {
         return _original_schema_version;

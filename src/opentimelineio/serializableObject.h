@@ -23,62 +23,90 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class CloningEncoder;
 
+/// @brief A serializable object.
 class SerializableObject
 {
 public:
+    /// @brief This struct provides the SerializableObject schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableObject";
         static int constexpr version = 1;
     };
 
+    /// @brief Create a new serializable object.
     SerializableObject();
 
-    /**
-     * You cannot directly delete a SerializableObject* (or, hopefully, anything
-     * derived from it, as all derivations are required to protect the destructor).
-     *
-     * Instead, call the member function possibly_delete(), which deletes the object
-     * (and, recursively, the objects owned by this object), provided the objects
-     * are not under external management (e.g. prevented from being deleted because an
-     * external scripting system is holding a reference to them).
-     */
+    /// @brief Delete a serializable object.
+    ///
+    /// You cannot directly delete a SerializableObject* (or, hopefully, anything
+    /// derived from it, as all derivations are required to protect the destructor).
+    ///
+    /// Instead, call the member function possibly_delete(), which deletes the object
+    /// (and, recursively, the objects owned by this object), provided the objects
+    /// are not under external management (e.g. prevented from being deleted because an
+    /// external scripting system is holding a reference to them).
     bool possibly_delete();
 
+    /// @brief Serialize this object to a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
     bool to_json_file(
         std::string const&        file_name,
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
+    /// @brief Serialize this object to a JSON string.
+    ///
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
     std::string to_json_string(
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
     static SerializableObject* from_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr);
+
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param input The input string.
+    /// @param error_status The return status.
     static SerializableObject* from_json_string(
         std::string const& input,
         ErrorStatus*       error_status = nullptr);
 
+    /// @brief Return whether this object is equivalent to another.
     bool is_equivalent_to(SerializableObject const& other) const;
 
-    // Makes a (deep) clone of this instance.
-    //
-    // Descendent SerializableObjects are cloned as well.
-    // If the operation fails, nullptr is returned and error_status
-    // is set appropriately.
+    /// @brief Makes a (deep) clone of this instance.
+    ///
+    /// Descendent objects are cloned as well.
+    ///
+    /// If the operation fails, nullptr is returned and error_status
+    /// is set appropriately.
     SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
 
-    // Allow external system (e.g. Python, Swift) to add serializable fields
-    // on the fly.  C++ implementations should have no need for this functionality.
+    /// @brief Allow external system (e.g. Python, Swift) to add serializable
+    /// fields on the fly.
+    ///
+    /// C++ implementations should have no need for this functionality.
     AnyDictionary& dynamic_fields() { return _dynamic_fields; }
 
     template <typename T = SerializableObject>
     struct Retainer;
 
+    /// @brief This class provides reading functionality.
     class Reader
     {
     public:
@@ -403,6 +431,7 @@ public:
         friend class TypeRegistry;
     };
 
+    /// @brief This class provides writing functionality.
     class Writer
     {
     public:
@@ -448,9 +477,9 @@ public:
         }
 
     private:
+        /// Convenience routines for converting various STL structures of specific
+        /// types to a parallel hierarchy holding std::any.
         ///@{
-        /** Convenience routines for converting various STL structures of specific
-          types to a parallel hierarchy holding std::anys!. */
 
         template <typename T>
         static std::any _to_any(std::vector<T> const& value)
@@ -518,6 +547,7 @@ public:
         {
             return std::any(value);
         }
+
         ///@}
 
         Writer(
@@ -567,15 +597,22 @@ public:
         friend class SerializableObject;
     };
 
+    /// @brief Deserialize from the given reader.
     virtual bool read_from(Reader&);
+
+    /// @brief Serialize to the given writer.
     virtual void write_to(Writer&) const;
 
+    /// @brief Return whether this schema is unknown.
     virtual bool is_unknown_schema() const;
 
+    /// @brief Return the schema name.
     std::string schema_name() const { return _type_record()->schema_name; }
 
+    /// @brief Return the schema version.
     int schema_version() const { return _type_record()->schema_version; }
 
+    /// @brief This struct provides similar functionality to a smart pointer.
     template <typename T>
     struct Retainer
     {
@@ -646,6 +683,7 @@ private:
     void _managed_release();
 
 public:
+    /// @brief This struct provides a reference ID.
     struct ReferenceId
     {
         std::string id;
@@ -655,12 +693,15 @@ public:
         }
     };
 
+    /// @todo Add comment.
     void install_external_keepalive_monitor(
         std::function<void()> monitor,
         bool                  apply_now);
 
+    /// @brief Return the current reference count.
     int current_ref_count() const;
 
+    /// @brief This struct provides an unknown type.
     struct UnknownType
     {
         std::string type_name;

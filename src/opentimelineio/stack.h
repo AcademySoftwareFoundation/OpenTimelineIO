@@ -10,9 +10,11 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
+/// @brief A stack of items in a timeline, for example a stack of tracks in a timelime.
 class Stack : public Composition
 {
 public:
+    /// @brief This struct provides the Stack schema.
     struct Schema
     {
         static auto constexpr name   = "Stack";
@@ -21,6 +23,15 @@ public:
 
     using Parent = Composition;
 
+    /// @brief Create a new stack.
+    ///
+    /// @param name The name of the stack.
+    /// @param source_range The source range of the stack.
+    /// @param metadata The metadata for the stack.
+    /// @param effects The list of effects for the stack. Note that the
+    /// the stack keeps a retainer to each effect.
+    /// @param markers The list of markers for the stack. Note that the
+    /// the stack keeps a retainer to each marker.
     Stack(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
@@ -47,11 +58,12 @@ public:
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
+    /// @brief Find child clips.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
     std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,

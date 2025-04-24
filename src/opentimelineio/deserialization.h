@@ -11,11 +11,13 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Deserialize JSON data from a string.
 bool deserialize_json_from_string(
     std::string const& input,
     std::any*          destination,
     ErrorStatus*       error_status = nullptr);
 
+/// @brief Deserialize JSON data from a file.
 bool deserialize_json_from_file(
     std::string const& file_name,
     std::any*          destination,

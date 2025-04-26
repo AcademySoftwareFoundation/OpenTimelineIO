@@ -6,6 +6,65 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "OpenTimelineIO"
+version = "0.18.0.dev1"
+description = "Editorial interchange format and API"
+readme = "README.md"
+requires-python = ">=3.7, !=3.9.0"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Contributors to the OpenTimelineIO project", email = "otio-discussion@lists.aswf.io" }
+]
+keywords = ["film", "tv", "editing", "editorial", "edit", "non-linear", "edl", "time"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Display",
+    "Topic :: Multimedia :: Video :: Non-Linear Editor",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+]
+
+dependencies = [
+    'importlib_metadata>=1.4; python_version < "3.8"',
+]
+
+[project.urls]
+Homepage = "http://opentimeline.io"
+Source = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO"
+Documentation = "https://opentimelineio.readthedocs.io/"
+Issues = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues"
+
+[project.scripts]
+otiocat = "opentimelineio.console.otiocat:main"
+otioconvert = "opentimelineio.console.otioconvert:main"
+otiopluginfo = "opentimelineio.console.otiopluginfo:main"
+otiostat = "opentimelineio.console.otiostat:main"
+otiotool = "opentimelineio.console.otiotool:main"
+otioview = "opentimelineview.console:main"
+otioautogen_serialized_schema_docs = "opentimelineio.console.autogen_serialized_datamodel:main"
+
+[project.optional-dependencies]
+dev = [
+    "check-manifest",
+    "flake8>=3.5",
+    "coverage>=4.5",
+    "urllib3>=1.24.3",
+]
+view = [
+    'PySide2~=5.11; platform_machine=="x86_64"',
+    'PySide6~=6.2; platform_machine=="aarch64"',
+]
+
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]
 

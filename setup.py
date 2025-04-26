@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""Setup.py for installing OpenTimelineIO
+"""Setup.py for installing OpenTimelineIO using setuptools.
 
-For more information:
-- see README.md
-- http://opentimeline.io
+This file is retained for compatibility and to handle the custom C++ build
+process via CMake. Project metadata, dependencies, and entry points are
+defined in pyproject.toml following PEP 621.
 """
 
 import multiprocessing
@@ -217,6 +217,7 @@ if (
 
 
 # Metadata that gets stamped into the __init__ files during the build phase.
+# This might be removable in the future if version stamping is handled differently.
 PROJECT_METADATA = {
     "version": "0.18.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
@@ -294,41 +295,11 @@ Each adapter allows for import/export between that proprietary tool and the
 OpenTimelineIO format."""
 
 setup(
-    name='OpenTimelineIO',
-    description='Editorial interchange format and API',
-    long_description=LONG_DESCRIPTION,
-    long_description_content_type='text/markdown',
-    url='http://opentimeline.io',
-    project_urls={
-        'Source':
-            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO',
-        'Documentation':
-            'https://opentimelineio.readthedocs.io/',
-        'Issues':
-            'https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues',
-    },
-
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Topic :: Multimedia :: Graphics',
-        'Topic :: Multimedia :: Video',
-        'Topic :: Multimedia :: Video :: Display',
-        'Topic :: Multimedia :: Video :: Non-Linear Editor',
-        'Topic :: Software Development :: Libraries :: Python Modules',
-        'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Operating System :: OS Independent',
-        'Natural Language :: English',
-    ],
-
-    keywords='film tv editing editorial edit non-linear edl time',
-
-    platforms='any',
+    # name, version, description, author, license, etc. are in pyproject.toml
+    # url, project_urls are in pyproject.toml
+    # classifiers are in pyproject.toml
+    # keywords are in pyproject.toml
+    # platforms='any', # Handled by build system/wheels
 
     package_data={
         'opentimelineio': [
@@ -356,38 +327,10 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>=3.7, !=3.9.0',  # noqa: E501
-
-    install_requires=[
-        'importlib_metadata>=1.4; python_version < "3.8"',
-    ],
-    entry_points={
-        'console_scripts': [
-            'otiocat = opentimelineio.console.otiocat:main',
-            'otioconvert = opentimelineio.console.otioconvert:main',
-            'otiopluginfo = opentimelineio.console.otiopluginfo:main',
-            'otiostat = opentimelineio.console.otiostat:main',
-            'otiotool = opentimelineio.console.otiotool:main',
-            'otioview = opentimelineview.console:main',
-            (
-                'otioautogen_serialized_schema_docs = '
-                'opentimelineio.console.autogen_serialized_datamodel:main'
-            ),
-        ],
-    },
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'flake8>=3.5',
-            'coverage>=4.5',
-            'urllib3>=1.24.3'
-        ],
-        'view': [
-            'PySide2~=5.11; platform.machine=="x86_64"',
-            'PySide6~=6.2; platform.machine=="aarch64"'
-        ]
-    },
+    # python_requires is in pyproject.toml
+    # install_requires is in pyproject.toml
+    # entry_points are in pyproject.toml
+    # extras_require is in pyproject.toml
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

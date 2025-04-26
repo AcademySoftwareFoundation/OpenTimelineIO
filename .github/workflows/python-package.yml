@@ -69,15 +69,15 @@ jobs:
         cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
         lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
         lcov --list coverage.filtered.info
-# \todo Should the Codecov web pages show the results of the C++ or Python tests?
-#    - name: Upload coverage to Codecov
-#      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-#      uses: codecov/codecov-action@v3.1.4
-#      with:
-#        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
-#        flags: unittests
-#        name: opentimelineio-codecov
-#        fail_ci_if_error: true
+    # TODO: Should the Codecov web pages show the results of the C++ or Python tests?
+    - name: Upload coverage to Codecov
+      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      uses: codecov/codecov-action@v3.1.4
+      with:
+        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
+        flags: unittests
+        name: opentimelineio-codecov
+        fail_ci_if_error: true
     - name: Install
       run: |
         cd ${{ env.OTIO_BUILD_DIR }}

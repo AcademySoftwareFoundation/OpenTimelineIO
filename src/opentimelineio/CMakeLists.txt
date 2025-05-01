@@ -123,9 +123,6 @@ if(OTIO_CXX_INSTALL)
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
-    if(OTIO_DEPENDENCIES_INSTALL)
-        list(APPEND OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps)
-    endif()
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOTargets

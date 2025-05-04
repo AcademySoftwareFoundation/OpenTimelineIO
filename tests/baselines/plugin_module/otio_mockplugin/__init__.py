@@ -21,7 +21,7 @@ a non-standard json file path.
 
 def plugin_manifest():
     filepath = (
-        resources.files(__package__) 
+        resources.files(__package__)
         / "unusually_named_plugin_manifest.json"
     )
 

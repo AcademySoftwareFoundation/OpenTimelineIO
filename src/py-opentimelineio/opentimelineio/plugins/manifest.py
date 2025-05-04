@@ -7,13 +7,8 @@ from importlib import resources
 import inspect
 import logging
 import os
-from pathlib import Path
 
-try:
-    from importlib import metadata
-except ImportError:
-    # For python 3.7
-    import importlib_metadata as metadata
+from importlib import metadata
 
 from .. import (
     core,
@@ -287,12 +282,7 @@ def load_manifest():
                 except AttributeError:
                     name = plugin_entry_point.__name__
 
-                    try:
-                        filepath = resources.files(name) / "plugin_manifest.json"
-                    except AttributeError:
-                        # For python <= 3.7
-                        with resources.path(name, "plugin_manifest.json") as p:
-                            filepath = Path(p)
+                    filepath = resources.files(name) / "plugin_manifest.json"
 
                     if filepath.as_posix() in result.source_files:
                         continue
@@ -317,18 +307,10 @@ def load_manifest():
         )
 
     # the builtin plugin manifest
-    try:
-        builtin_manifest_path = (
-            resources.files("opentimelineio.adapters")
-            / "builtin_adapters.plugin_manifest.json"
-        ).as_posix()
-    except AttributeError:
-        # For python <= 3.7
-        with resources.path(
-            "opentimelineio.adapters",
-            "builtin_adapters.plugin_manifest.json"
-        ) as p:
-            builtin_manifest_path = p.as_posix()
+    builtin_manifest_path = (
+        resources.files("opentimelineio.adapters")
+        / "builtin_adapters.plugin_manifest.json"
+    ).as_posix()
 
     if os.path.abspath(builtin_manifest_path) not in result.source_files:
         plugin_manifest = manifest_from_file(builtin_manifest_path)

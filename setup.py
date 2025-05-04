@@ -205,10 +205,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 # check the python version first
 if (
     sys.version_info[0] < 3 or
-    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
+    (sys.version_info[0] == 3 and sys.version_info[1] < 9)
 ):
     sys.exit(
-        'OpenTimelineIO requires python3.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.9 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -317,8 +317,6 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
@@ -357,10 +355,9 @@ setup(
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>=3.7, !=3.9.0',  # noqa: E501
+    python_requires='>=3.9, !=3.9.0',  # noqa: E501
 
     install_requires=[
-        'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={
         'console_scripts': [

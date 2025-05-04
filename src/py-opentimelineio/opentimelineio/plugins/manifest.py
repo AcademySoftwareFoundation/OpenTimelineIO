@@ -8,6 +8,7 @@ import inspect
 import logging
 import os
 
+# for python <= 3.9
 from importlib import metadata
 
 from .. import (

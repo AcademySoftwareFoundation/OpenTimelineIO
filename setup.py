@@ -355,7 +355,7 @@ setup(
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>=3.9, !=3.9.0',  # noqa: E501
+    python_requires='>3.9.0',  # noqa: E501
 
     install_requires=[
     ],

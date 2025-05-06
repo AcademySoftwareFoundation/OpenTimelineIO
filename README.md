@@ -4,7 +4,7 @@ OpenTimelineIO
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2022--2025-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11-blue)
+![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11-%2C%203.12-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -56,7 +56,7 @@ Supported VFX Platforms
 -----------------
 The current release supports:
 - VFX platform 2025, 2024, 2023, 2022
-- Python 3.9 - 3.11
+- Python 3.9 - 3.12
 
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)
@@ -154,7 +154,7 @@ You can also install the PySide2 dependency with `python -m pip install .[view]`
 
 You may need to escape the `[` depending on your shell, `\[view\]` .
 
-Currently the code base is written against python 3.9, 3.10 and 3.11,
+Currently the code base is written against python 3.9-3.12,
 in keeping with the pep8 style.  We ask that before developers submit pull
 request, they:
 

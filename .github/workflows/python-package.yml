@@ -93,19 +93,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         include:
           - { os: ubuntu-latest, shell: bash }
-          - { os: ubuntu-22.04, shell: bash, python-version: 3.7 }
           - { os: macos-latest, shell: bash }
           - { os: macos-13, shell: bash }
           - { os: windows-latest, shell: pwsh }
           - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
         exclude:
-          - { os: macos-latest, python-version: 3.7 }
-          - { os: macos-latest, python-version: 3.8 }
           - { os: macos-latest, python-version: 3.9 }
-          - { os: ubuntu-latest, python-version: 3.7 }
 
     defaults:
       run:
@@ -151,7 +147,7 @@ jobs:
         pip install .[dev] -v --break-system-packages
     - name: Run tests w/ python coverage
       run: make ci-postbuild
-    # (only on ubuntu/pyhton3.7)
+    # (only on GH_COV_OS and GH_COV_PY)
     - name: Generate C++ coverage report
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
       run: make lcov
@@ -172,9 +168,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
-        python-build: ['cp37', 'cp38', 'cp39', 'cp310', 'cp311', 'cp312']
+        python-build: ['cp39', 'cp310', 'cp311', 'cp312']
         exclude:
-          - { os: macos-latest, python-build: 'cp37' }
+          # none currently
+          # - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 

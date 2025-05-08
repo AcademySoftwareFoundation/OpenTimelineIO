@@ -4,7 +4,7 @@ OpenTimelineIO
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2022--2025-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11-%2C%203.12-blue)
+![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11%2C%203.12-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)

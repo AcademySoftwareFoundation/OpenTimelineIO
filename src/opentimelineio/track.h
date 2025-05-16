@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/color.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/version.h"
 
@@ -47,7 +48,8 @@ public:
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
-        AnyDictionary const&            metadata     = AnyDictionary());
+        AnyDictionary const&            metadata     = AnyDictionary(),
+        Color*                          color        = nullptr);
 
     /// @brief Return this kind of track.
     std::string kind() const noexcept { return _kind; }
@@ -92,6 +94,9 @@ public:
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
 
+    Color* color() const noexcept;
+    void set_color(Color* color);
+
 protected:
     virtual ~Track();
 
@@ -101,7 +106,8 @@ protected:
     void write_to(Writer&) const override;
 
 private:
-    std::string _kind;
+    std::string      _kind;
+    Retainer<Color>  _color;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

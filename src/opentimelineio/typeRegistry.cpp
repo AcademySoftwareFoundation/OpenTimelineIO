@@ -5,6 +5,7 @@
 
 #include "anyDictionary.h"
 #include "opentimelineio/clip.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/effect.h"
@@ -55,6 +56,7 @@ TypeRegistry::TypeRegistry()
         "UnknownSchema");
 
     register_type<Clip>();
+    register_type<Color>();
     register_type<Composable>();
     register_type<Composition>();
     register_type<Effect>();

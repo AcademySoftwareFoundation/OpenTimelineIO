@@ -13,9 +13,11 @@ Track::Track(
     std::string const&              name,
     std::optional<TimeRange> const& source_range,
     std::string const&              kind,
-    AnyDictionary const&            metadata)
+    AnyDictionary const&            metadata,
+    Color*                          color)
     : Parent(name, source_range, metadata)
     , _kind(kind)
+    , _color(color)
 {}
 
 Track::~Track()
@@ -31,7 +33,9 @@ Track::composition_kind() const
 bool
 Track::read_from(Reader& reader)
 {
-    return reader.read("kind", &_kind) && Parent::read_from(reader);
+    return reader.read("kind", &_kind)
+           && reader.read_if_present("color", &_color)
+           && Parent::read_from(reader);
 }
 
 void
@@ -303,6 +307,18 @@ Track::available_image_bounds(ErrorStatus* error_status) const
         }
     }
     return box;
+}
+
+Color*
+Track::color() const noexcept
+{
+    return _color;
+}
+
+void
+Track::set_color(Color* color)
+{
+    _color = color ? color : new Color();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

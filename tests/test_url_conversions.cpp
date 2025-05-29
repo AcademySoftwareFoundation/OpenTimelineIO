@@ -8,21 +8,27 @@
 #include <filesystem>
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otime  = opentime::OPENTIME_VERSION;
+namespace otio   = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace bundle = opentimelineio::OPENTIMELINEIO_VERSION::bundle;
 
 int
 main(int argc, char** argv)
 {
     Tests tests;
 
-    std::filesystem::path const sample_data_dir = std::filesystem::current_path() / "sample_data";
-    std::string const screening_example_path = (sample_data_dir / "screening_example.otio").u8string();
+    std::filesystem::path const sample_data_dir =
+        std::filesystem::current_path() / "sample_data";
+    std::string const screening_example_path = bundle::to_unix_separators(
+        (sample_data_dir / "screening_example.otio").u8string());
 
     std::string const media_example_path_rel = "OpenTimelineIO@3xDark.png";
-    std::string const media_example_path_url_rel = otio::url_from_filepath(media_example_path_rel);
-    std::string const media_example_path_abs = (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string();
-    std::string const media_example_path_url_abs = otio::url_from_filepath(media_example_path_abs);
+    std::string const media_example_path_url_rel = bundle::to_unix_separators(
+        bundle::url_from_filepath(media_example_path_rel));
+    std::string const media_example_path_abs = bundle::to_unix_separators(
+        (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string());
+    std::string const media_example_path_url_abs = bundle::to_unix_separators(
+        bundle::url_from_filepath(media_example_path_abs));
 
     std::string const windows_encoded_url = "file://host/S%3a/path/file.ext";
     std::string const windows_drive_url = "file://S:/path/file.ext";
@@ -41,7 +47,8 @@ main(int argc, char** argv)
         "test_roundtrip_abs",
         [media_example_path_abs, media_example_path_url_abs] {
             assertEqual(media_example_path_url_abs.substr(0, 7), std::string("file://"));
-            std::string const filepath = otio::filepath_from_url(media_example_path_url_abs);
+            std::string const filepath =
+                bundle::filepath_from_url(media_example_path_url_abs);
             assertEqual(filepath, media_example_path_abs);
         });
 
@@ -49,7 +56,8 @@ main(int argc, char** argv)
         "test_roundtrip_rel",
         [media_example_path_rel, media_example_path_url_rel] {
             assertNotEqual(media_example_path_url_rel.substr(0, 7), std::string("file://"));
-            std::string const filepath = otio::filepath_from_url(media_example_path_url_rel);
+            std::string const filepath =
+                bundle::filepath_from_url(media_example_path_url_rel);
             assertEqual(filepath, media_example_path_rel);
         });
 
@@ -57,7 +65,7 @@ main(int argc, char** argv)
         "test_windows_urls",
         [windows_encoded_url, windows_drive_url, windows_drive_path] {
             for (auto const url : { windows_encoded_url, windows_drive_url }) {
-                std::string const filepath = otio::filepath_from_url(url);
+                std::string const filepath = bundle::filepath_from_url(url);
                 assertEqual(filepath, windows_drive_path);
             }
         });
@@ -66,7 +74,7 @@ main(int argc, char** argv)
         "test_windows_unc_urls",
         [windows_encoded_unc_url, windows_unc_url, windows_unc_path] {
             for (auto const url : { windows_encoded_unc_url, windows_unc_url }) {
-                std::string const filepath = otio::filepath_from_url(url);
+                std::string const filepath = bundle::filepath_from_url(url);
                 assertEqual(filepath, windows_unc_path);
             }
         });
@@ -75,7 +83,7 @@ main(int argc, char** argv)
         "test_posix_urls",
         [posix_encoded_url, posix_url, posix_localhost_url, posix_path] {
             for (auto const url : { posix_encoded_url, posix_url }) {
-                std::string const filepath = otio::filepath_from_url(url);
+                std::string const filepath = bundle::filepath_from_url(url);
                 assertEqual(filepath, posix_path);
             }
         });
@@ -85,8 +93,8 @@ main(int argc, char** argv)
         [] {
             // See github issue #1817 - when a relative URL has only one name after
             // the "." (ie ./blah but not ./blah/blah)
-            std::string const filepath = otio::filepath_from_url(
-                std::filesystem::path(".") / std::filesystem::path("docs"));
+            std::string const filepath = bundle::filepath_from_url(
+                (std::filesystem::path(".") / std::filesystem::path("docs")).u8string());
             assertEqual(filepath, std::string("docs"));
         });
 

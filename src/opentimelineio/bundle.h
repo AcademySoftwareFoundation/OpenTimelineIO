@@ -9,6 +9,8 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Timeline;
 
+namespace bundle {
+
 /// @brief This constant provides the current otioz version.
 static std::string const otiozVersion = "1.0.0";
 
@@ -22,6 +24,9 @@ enum class BundleMediaReferencePolicy
     MissingIfNotFile,
     AllMissing
 };
+
+/// @brief Convert Windows path separators to UNIX path separators.
+std::string to_unix_separators(const std::string&);
 
 /// @brief Convert a filesystem path to a file URL.
 ///
@@ -56,9 +61,11 @@ std::string filepath_from_url(std::string const&);
 bool to_otiod_bundle(
     Timeline const*            timeline,
     std::string const&         file_name,
-    BundleMediaReferencePolicy media_reference_policy   = BundleMediaReferencePolicy::ErrorIfNotFile,
-    ErrorStatus*               error_status             = nullptr,
-    const schema_version_map*  target_family_label_spec = nullptr,
-    int                        indent                   = 4);
+    BundleMediaReferencePolicy media_reference_policy =
+        BundleMediaReferencePolicy::ErrorIfNotFile,
+    ErrorStatus*              error_status             = nullptr,
+    const schema_version_map* target_family_label_spec = nullptr,
+    int                       indent                   = 4);
 
+} // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

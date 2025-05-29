@@ -5,6 +5,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
     bundle.h
+    bundleUtils.h
     clip.h
     composable.h
     composition.h
@@ -41,6 +42,7 @@ set(OPENTIMELINEIO_HEADER_FILES
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
     bundle.cpp
+    bundleUtils.cpp
     clip.cpp
     composable.cpp
     composition.cpp

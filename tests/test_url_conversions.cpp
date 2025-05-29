@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-#include <opentimelineio/bundle.h>
+#include <opentimelineio/bundleUtils.h>
 
 #include <filesystem>
 #include <iostream>

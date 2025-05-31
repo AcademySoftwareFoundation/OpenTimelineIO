@@ -28,6 +28,12 @@ std::string to_unix_separators(std::string const&);
 /// @brief Get the scheme from a URL.
 std::string scheme_from_url(std::string const&);
 
+/// @brief Encode a URL (i.e., replace " " characters with "%20").
+std::string url_encode(std::string const& url);
+
+/// @brief Decode a URL (i.e., replace "%20" strings with " ").
+std::string url_decode(std::string const& url);
+
 /// @brief Convert a filesystem path to a file URL.
 ///
 /// For example:

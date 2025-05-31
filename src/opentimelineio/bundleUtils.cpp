@@ -47,8 +47,6 @@ scheme_from_url(std::string const& url)
     return rxi != std::sregex_iterator() ? rxi->str() : std::string();
 }
 
-namespace {
-
 std::string
 url_encode(std::string const& url)
 {
@@ -112,8 +110,6 @@ url_decode(std::string const& url)
 
     return result;
 }
-
-} // namespace
 
 std::string
 url_from_filepath(std::string const& filepath)

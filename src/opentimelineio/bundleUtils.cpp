@@ -32,7 +32,7 @@ to_string(MediaReferencePolicy media_referenece_policy)
 }
 
 std::string
-to_unix_separators(const std::string& path)
+to_unix_separators(std::string const& path)
 {
     std::string result = path;
     std::replace(result.begin(), result.end(), '\\', '/');
@@ -51,7 +51,7 @@ std::string
 url_encode(std::string const& url)
 {
     // Don't encode these characters.
-    const std::vector<char> chars = { '-', '.', '_', '~', ':', '/', '?',  '#',
+    std::vector<char> const chars = { '-', '.', '_', '~', ':', '/', '?',  '#',
                                       '[', ']', '@', '!', '$', '&', '\'', '(',
                                       ')', '*', '+', ',', ';', '=', '\\' };
 
@@ -61,7 +61,7 @@ url_encode(std::string const& url)
     ss << std::hex;
     for (auto i = url.begin(), end = url.end(); i != end; ++i)
     {
-        const auto j = std::find(chars.begin(), chars.end(), *i);
+        auto const j = std::find(chars.begin(), chars.end(), *i);
         if (std::isalnum(*i) || j != chars.end())
         {
             ss << *i;
@@ -81,7 +81,7 @@ url_decode(std::string const& url)
 
     // Find all percent encodings.
     size_t           url_pos = 0;
-    const std::regex rx("(%[0-9A-Fa-f][0-9A-Fa-f])");
+    std::regex const rx("(%[0-9A-Fa-f][0-9A-Fa-f])");
     for (auto i = std::sregex_iterator(url.begin(), url.end(), rx);
          i != std::sregex_iterator();
          ++i)
@@ -114,10 +114,10 @@ url_decode(std::string const& url)
 std::string
 url_from_filepath(std::string const& filepath)
 {
-    const std::string encoded = url_encode(to_unix_separators(filepath));
-    const std::string url     = std::filesystem::u8path(filepath).is_relative()
-                                    ? encoded
-                                    : ("file://" + encoded);
+    std::string const encoded = url_encode(to_unix_separators(filepath));
+    std::string const url = std::filesystem::u8path(filepath).is_relative()
+                                ? encoded
+                                : ("file://" + encoded);
     return url;
 }
 
@@ -142,7 +142,7 @@ filepath_from_url(std::string const& url)
     {
         size = std::min(i, j) + 1;
     }
-    const std::string path = url.substr(pos, size);
+    std::string const path = url.substr(pos, size);
 
     // Decode the path.
     std::string decoded = url_decode(path);
@@ -223,10 +223,10 @@ guarantee_unique_basenames(
         if (i != basename_to_source_fn.end())
         {
             std::stringstream ss;
-            ss << "bundles require that the media files have unique "
-               << "basenames; file '" << fn << "' and '"
+            ss << "Bundles require that the media files have unique "
+               << "basenames. File '" << fn << "' and '"
                << i->second << "' have matching basenames of: '"
-               << new_basename << "'";
+               << new_basename << "'.";
             error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
             return false;
@@ -279,9 +279,9 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
                 {
                     std::stringstream ss;
-                    ss << "bundles only work with media reference target URLs "
-                       << "that begin with 'file://' or ''; got a target URL of: "
-                       << mr->target_url();
+                    ss << "Bundles only work with media reference target URLs "
+                       << "that begin with 'file://' or ''. Got a target URL of: "
+                       << "'" << mr->target_url() << "'.";
                     error_status =
                         ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
                     return result_timeline;
@@ -321,7 +321,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
                 {
                     std::stringstream ss;
-                    ss << target_file << " is not a file or does not exist";
+                    ss << "'" << target_file << "' is not a file or does not exist.";
                     error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED,
                         ss.str());

@@ -5,7 +5,6 @@
 
 #include "opentimelineio/bundle.h"
 #include "opentimelineio/externalReference.h"
-#include "opentimelineio/timeline.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 namespace bundle {

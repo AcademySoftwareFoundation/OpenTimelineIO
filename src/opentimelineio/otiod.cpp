@@ -20,17 +20,17 @@ to_otiod(
     std::string const&        file_name,
     MediaReferencePolicy      media_reference_policy,
     ErrorStatus*              error_status,
-    const schema_version_map* target_family_label_spec,
+    schema_version_map const* target_family_label_spec,
     int                       indent)
 {
     // Check that the path does not exist.
-    const std::filesystem::path path = std::filesystem::u8path(file_name);
+    std::filesystem::path const path = std::filesystem::u8path(file_name);
     if (std::filesystem::exists(path))
     {
         if (error_status)
         {
             std::stringstream ss;
-            ss << "'" << path.u8string() << "' exists, will not overwrite";
+            ss << "'" << path.u8string() << "' exists, will not overwrite.";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
         }
@@ -38,14 +38,14 @@ to_otiod(
     }
 
     // Check that the parent path exists.
-    const std::filesystem::path parent_path = path.parent_path();
+    std::filesystem::path const parent_path = path.parent_path();
     if (!std::filesystem::exists(parent_path))
     {
         if (error_status)
         {
             std::stringstream ss;
-            ss << "directory '" << parent_path.u8string()
-               << "' does not exist, cannot create '" << path.u8string() << "'";
+            ss << "Directory '" << parent_path.u8string()
+               << "' does not exist, cannot create '" << path.u8string() << "'.";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
         }
@@ -60,7 +60,7 @@ to_otiod(
             std::stringstream ss;
             ss << "'" << parent_path.u8string()
                << "' is not a directory, cannot create '" << path.u8string()
-               << "'";
+               << "'.";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
         }
@@ -155,6 +155,20 @@ to_otiod(
     }
 
     return true;
+}
+
+std::pair<SerializableObject::Retainer<Timeline>, std::string>
+from_otiod(
+    std::string const& file_name,
+    ErrorStatus* error_status)
+{
+    std::string const timeline_file_name = (std::filesystem::u8path(file_name)
+                                      / std::filesystem::u8path(otio_file))
+                                         .u8string();
+    return std::make_pair(
+        dynamic_cast<Timeline*>(
+            Timeline::from_json_file(timeline_file_name, error_status)),
+        timeline_file_name);
 }
 
 } // namespace bundle

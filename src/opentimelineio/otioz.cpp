@@ -45,7 +45,7 @@ ZipWriter::ZipWriter(std::string const& zip_file_name)
     if (!_zip)
     {
         std::stringstream ss;
-        ss << "cannot create ZIP writer: '" << zip_file_name << "'";
+        ss << "Cannot create ZIP writer: '" << zip_file_name << "'.";
         throw std::runtime_error(ss.str());
     }
 
@@ -53,7 +53,7 @@ ZipWriter::ZipWriter(std::string const& zip_file_name)
     if (err != MZ_OK)
     {
         std::stringstream ss;
-        ss << "cannot open ZIP file: '" << zip_file_name << "'";
+        ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
         throw std::runtime_error(ss.str());
     }
 }
@@ -88,7 +88,7 @@ ZipWriter::add_compressed(
     if (err != MZ_OK)
     {
         std::stringstream ss;
-        ss << "cannot add file to ZIP: '" << file_name_in_zip << "'";
+        ss << "Cannot add file '" << file_name_in_zip << "' to ZIP.";
         throw std::runtime_error(ss.str());
     }
 }
@@ -106,7 +106,7 @@ ZipWriter::add_uncompressed(
     if (err != MZ_OK)
     {
         std::stringstream ss;
-        ss << "cannot add file to ZIP: '" << path.u8string() << "'";
+        ss << "Cannot add file '" << path.u8string() << "' to ZIP.";
         throw std::runtime_error(ss.str());
     }
 }
@@ -120,17 +120,17 @@ to_otioz(
     std::string const&        file_name,
     MediaReferencePolicy      media_reference_policy,
     ErrorStatus*              error_status,
-    const schema_version_map* target_family_label_spec,
+    schema_version_map const* target_family_label_spec,
     int                       indent)
 {
     // Check that the path does not exist.
-    const std::filesystem::path path = std::filesystem::u8path(file_name);
+    std::filesystem::path const path = std::filesystem::u8path(file_name);
     if (std::filesystem::exists(path))
     {
         if (error_status)
         {
             std::stringstream ss;
-            ss << "'" << path.u8string() << "' exists, will not overwrite";
+            ss << "'" << path.u8string() << "' exists, will not overwrite.";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
         }
@@ -217,7 +217,7 @@ to_otioz(
             zip.add_uncompressed(i.first, i.second);
         }
     }
-    catch (const std::exception& e)
+    catch (std::exception const& e)
     {
         if (error_status)
         {
@@ -228,6 +228,108 @@ to_otioz(
     }
 
     return true;
+}
+
+namespace {
+
+class ZipReader
+{
+public:
+    ZipReader(
+        std::string const& zip_file_name,
+        std::string const& output_dir);
+    ~ZipReader();
+
+private:
+    void* _zip = nullptr;
+};
+
+ZipReader::ZipReader(
+    std::string const& zip_file_name,
+    std::string const& output_dir)
+{
+    _zip = mz_zip_reader_create();
+    if (!_zip)
+    {
+        std::stringstream ss;
+        ss << "Cannot create ZIP reader: '" << zip_file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    int32_t err = mz_zip_reader_open_file(_zip, zip_file_name.c_str());
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    err = mz_zip_reader_save_all(_zip, output_dir.c_str());
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot extract ZIP file: '" << zip_file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+}
+
+ZipReader::~ZipReader()
+{
+    if (_zip)
+    {
+        mz_zip_reader_close(_zip);
+        mz_zip_reader_delete(&_zip);
+    }
+}
+
+} // namespace
+
+std::pair<SerializableObject::Retainer<Timeline>, std::string>
+from_otioz(
+    std::string const& file_name,
+    std::string const& output_dir,
+    ErrorStatus*       error_status)
+{
+    std::pair<SerializableObject::Retainer<Timeline>, std::string> out;
+
+    // Check that the output directory does not exist.
+    std::filesystem::path const path = std::filesystem::u8path(output_dir);
+    if (std::filesystem::exists(path))
+    {
+        if (error_status)
+        {
+            std::stringstream ss;
+            ss << "'" << path.u8string() << "' exists, will not overwrite.";
+            *error_status =
+                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
+        }
+        return out;
+    }
+
+    // Read the archive.
+    try
+    {
+        ZipReader(file_name, output_dir);
+
+        std::string const timeline_file_name =
+            (std::filesystem::u8path(output_dir)
+             / std::filesystem::u8path(otio_file))
+                .u8string();
+        out = std::make_pair(
+            dynamic_cast<Timeline*>(
+                Timeline::from_json_file(timeline_file_name, error_status)),
+            timeline_file_name);
+    }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+        {
+            *error_status =
+                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
+        }
+    }
+
+    return out;
 }
 
 } // namespace bundle

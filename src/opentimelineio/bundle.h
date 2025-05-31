@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "opentimelineio/typeRegistry.h"
+#include "opentimelineio/timeline.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -14,6 +14,11 @@ class Timeline;
 /// @todo Document that paths are relative to the timeline.
 /// @todo Should bundle support be optional?
 /// @todo Add exception handling for std::filesystem use.
+/// @todo Add support for file sequences.
+/// @todo Add C++ bundle tests.
+/// @todo Python wrappings.
+/// @todo Convert Python adapters to use C++ functions.
+/// @todo Update documentation.
 namespace bundle {
 
 /// @brief This constant provides the current otioz version.
@@ -47,8 +52,19 @@ bool to_otioz(
     MediaReferencePolicy media_reference_policy =
         MediaReferencePolicy::ErrorIfNotFile,
     ErrorStatus*              error_status             = nullptr,
-    const schema_version_map* target_family_label_spec = nullptr,
+    schema_version_map const* target_family_label_spec = nullptr,
     int                       indent                   = 4);
+
+/// @brief Read a timeline from an .otioz bundle. The timeline and timeline
+/// file name are returned.
+///
+/// @param file_name The bundle file name.
+/// @param output_dir The directory where the bundle will be extracted.
+/// @param error_status The error status.
+std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otioz(
+    std::string const& file_name,
+    std::string const& output_dir,
+    ErrorStatus*       error_status = nullptr);
 
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
@@ -67,8 +83,17 @@ bool to_otiod(
     MediaReferencePolicy media_reference_policy =
         MediaReferencePolicy::ErrorIfNotFile,
     ErrorStatus*              error_status             = nullptr,
-    const schema_version_map* target_family_label_spec = nullptr,
+    schema_version_map const* target_family_label_spec = nullptr,
     int                       indent                   = 4);
+
+/// @brief Read a timeline from an .otiod bundle. The timeline and timeline
+/// file name are returned.
+///
+/// @param file_name The bundle file name.
+/// @param timeline_file_name Returns the timeline file name.
+/// @param error_status The error status.
+std::pair<SerializableObject::Retainer<Timeline>, std::string>
+from_otiod(std::string const& file_name, ErrorStatus* error_status = nullptr);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

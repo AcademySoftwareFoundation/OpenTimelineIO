@@ -97,12 +97,11 @@ url_decode(std::string const& url)
 
         // Convert the encoding and append it.
         std::stringstream ss;
-        std::string const s = i->str().substr(1);
-        ss << std::hex << s;
+        ss << std::hex << i->str().substr(1);
         unsigned int j = 0;
         ss >> j;
         result.push_back(char(j));
-        url_pos += 1 + s.size();
+        url_pos += i->str().size();
     }
 
     // Copy the remainder without any encodings.
@@ -228,10 +227,10 @@ guarantee_unique_basenames(
         if (i != basename_to_source_fn.end())
         {
             std::stringstream ss;
-            ss << "Bundles require that the media files have unique "
-               << "basenames. File '" << fn << "' and '"
+            ss << "bundles require that the media files have unique "
+               << "basenames; file '" << fn << "' and '"
                << i->second << "' have matching basenames of: '"
-               << new_basename << "'.";
+               << new_basename << "'";
             error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
             return false;
@@ -284,8 +283,8 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
                 {
                     std::stringstream ss;
-                    ss << "Bundles only work with media reference target URLs "
-                       << "that begin with 'file://' or ''. Got a target URL of: "
+                    ss << "bundles only work with media reference target URLs "
+                       << "that begin with 'file://' or ''; got a target URL of: "
                        << mr->target_url();
                     error_status =
                         ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
@@ -326,7 +325,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
                 {
                     std::stringstream ss;
-                    ss << target_file << " is not a file or does not exist.";
+                    ss << target_file << " is not a file or does not exist";
                     error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED,
                         ss.str());

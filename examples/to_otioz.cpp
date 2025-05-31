@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cout << "usage: to_otiod (input.otio) (output.otiod)" << std::endl;
+        std::cout << "usage: to_otioz (input.otio) (output.otioz)" << std::endl;
         return 1;
     }
     const std::string input = examples::normalize_path(argv[1]);
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    if (!bundle::to_otiod(
+    if (!bundle::to_otioz(
         timeline,
         std::filesystem::path(input).parent_path().u8string(),
         output,

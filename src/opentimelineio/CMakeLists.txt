@@ -41,7 +41,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
-    bundle.cpp
     bundleUtils.cpp
     clip.cpp
     composable.cpp
@@ -60,6 +59,8 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     marker.cpp
     mediaReference.cpp
     missingReference.cpp
+    otiod.cpp
+    otioz.cpp
     safely_typed_any.cpp
     serializableCollection.cpp
     serializableObject.cpp

@@ -8,6 +8,7 @@
 #include "opentimelineio/timeline.h"
 
 #include <filesystem>
+#include <fstream>
 #include <sstream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
@@ -29,7 +30,7 @@ to_otiod(
         if (error_status)
         {
             std::stringstream ss;
-            ss << "'" << path.u8string() << "' exists, will not overwrite.";
+            ss << "'" << path.u8string() << "' exists, will not overwrite";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
         }
@@ -43,7 +44,7 @@ to_otiod(
         if (error_status)
         {
             std::stringstream ss;
-            ss << "Directory '" << parent_path.u8string()
+            ss << "directory '" << parent_path.u8string()
                << "' does not exist, cannot create '" << path.u8string() << "'";
             *error_status =
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
@@ -115,8 +116,7 @@ to_otiod(
 
         for (auto const& mr : i.second)
         {
-            // Author the relative path from the root of the bundle in URL
-            // form into the target_url.
+            // Convert the relative path to a URL and set the media reference.
             std::string const url = url_from_filepath(
                 std::filesystem::relative(final_path, path).u8string());
             mr->set_target_url(url);
@@ -125,6 +125,13 @@ to_otiod(
 
     // Create the output directory.
     std::filesystem::create_directory(path);
+
+    // Write the version file.
+    {
+        std::ofstream of;
+        of.open(path / std::filesystem::u8path(version_file));
+        of << otiod_version << '\n';
+    }
 
     // Write the .otio file.
     std::string const result_otio_file =

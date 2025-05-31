@@ -13,13 +13,14 @@ class Timeline;
 /// @todo Add support for dry runs?
 /// @todo Document that paths are relative to the timeline.
 /// @todo Should bundle support be optional?
+/// @todo Add exception handling for std::filesystem use.
 namespace bundle {
 
 /// @brief This constant provides the current otioz version.
-static std::string const otiozVersion = "1.0.0";
+static std::string const otioz_version = "1.0.0";
 
 /// @brief This constant provides the current otiod version.
-static std::string const otiodVersion = "1.0.0";
+static std::string const otiod_version = "1.0.0";
 
 /// @brief This enumeration provides the bundle media reference policy.
 enum class MediaReferencePolicy
@@ -29,6 +30,26 @@ enum class MediaReferencePolicy
     AllMissing
 };
 
+/// @brief Write a timeline and it's referenced media to an .otioz bundle.
+///
+/// @param timeline The timeline to write.
+/// @param timeline_dir The timeline's parent directory. This is used to locate
+///        media with relative file paths.
+/// @param file_name The bundle file name.
+/// @param media_reference_policy The media reference policy.
+/// @param error_status The error status.
+/// @param target_family_label_spec @todo Add comment.
+/// @param indent The number of spaces to use for indentation.
+bool to_otioz(
+    Timeline const*      timeline,
+    std::string const&   timeline_dir,
+    std::string const&   file_name,
+    MediaReferencePolicy media_reference_policy =
+        MediaReferencePolicy::ErrorIfNotFile,
+    ErrorStatus*              error_status             = nullptr,
+    const schema_version_map* target_family_label_spec = nullptr,
+    int                       indent                   = 4);
+
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
 /// @param timeline The timeline to write.
@@ -36,7 +57,7 @@ enum class MediaReferencePolicy
 ///        media with relative file paths.
 /// @param file_name The bundle file name.
 /// @param media_reference_policy The media reference policy.
-/// @param error_status The return status.
+/// @param error_status The error status.
 /// @param target_family_label_spec @todo Add comment.
 /// @param indent The number of spaces to use for indentation.
 bool to_otiod(

@@ -88,20 +88,21 @@ url_decode(std::string const& url)
          i != std::sregex_iterator();
          ++i)
     {
-
         // Copy parts without any encodings.
         if (url_pos != static_cast<size_t>(i->position()))
         {
             result.append(url.substr(url_pos, i->position() - url_pos));
-            url_pos = i->position() + i->str().size();
+            url_pos = i->position();
         }
 
         // Convert the encoding and append it.
         std::stringstream ss;
-        ss << std::hex << i->str().substr(1);
+        std::string const s = i->str().substr(1);
+        ss << std::hex << s;
         unsigned int j = 0;
         ss >> j;
         result.push_back(char(j));
+        url_pos += 1 + s.size();
     }
 
     // Copy the remainder without any encodings.

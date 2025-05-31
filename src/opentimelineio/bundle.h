@@ -11,7 +11,8 @@ class Timeline;
 
 /// @todo Should the file versions be bumped?
 /// @todo Add support for dry runs?
-/// @todo Document that relative paths are relative to the timeline.
+/// @todo Document that paths are relative to the timeline.
+/// @todo Should bundle support be optional?
 namespace bundle {
 
 /// @brief This constant provides the current otioz version.
@@ -31,7 +32,8 @@ enum class MediaReferencePolicy
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
 /// @param timeline The timeline to write.
-/// @param timeline_dir The timeline's parent directory.
+/// @param timeline_dir The timeline's parent directory. This is used to locate
+///        media with relative file paths.
 /// @param file_name The bundle file name.
 /// @param media_reference_policy The media reference policy.
 /// @param error_status The return status.

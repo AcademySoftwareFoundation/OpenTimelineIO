@@ -207,10 +207,8 @@ reference_cloned_and_missing(
     return result;
 }
 
-bool
-guarantee_unique_basenames(
-    std::vector<std::string> const& path_list,
-    ErrorStatus& error_status)
+void
+guarantee_unique_basenames(std::vector<std::string> const& path_list)
 {
     // Walking across all unique file references, guarantee that all the
     // basenames are unique.
@@ -227,16 +225,13 @@ guarantee_unique_basenames(
                << "basenames. File '" << fn << "' and '"
                << i->second << "' have matching basenames of: '"
                << new_basename << "'.";
-            error_status =
-                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
-            return false;
+            throw std::runtime_error(ss.str());
         }
         basename_to_source_fn[new_basename] = fn;
     }
-    return true;
 }
 
-}
+} // namspace
 
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const& timeline,
@@ -245,8 +240,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     std::map<
         std::string,
         std::vector<SerializableObject::Retainer<ExternalReference>>>&
-                 path_to_reference_map,
-    ErrorStatus& error_status)
+                 path_to_reference_map)
 {
     // Make an editable copy of the timeline.
     SerializableObject::Retainer<Timeline> result_timeline(
@@ -264,7 +258,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             {
                 std::stringstream ss;
                 ss << to_string(media_reference_policy)
-                   << " specified as the MediaReferencePolicy ";
+                   << " specified as the MediaReferencePolicy";
                 cl->set_media_reference(
                     reference_cloned_and_missing(mr, ss.str()));
                 continue;
@@ -282,9 +276,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                     ss << "Bundles only work with media reference target URLs "
                        << "that begin with 'file://' or ''. Got a target URL of: "
                        << "'" << mr->target_url() << "'.";
-                    error_status =
-                        ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, ss.str());
-                    return result_timeline;
+                    throw std::runtime_error(ss.str());
                 }
                 if (MediaReferencePolicy::MissingIfNotFile == media_reference_policy)
                 {
@@ -322,10 +314,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 {
                     std::stringstream ss;
                     ss << "'" << target_file << "' is not a file or does not exist.";
-                    error_status = ErrorStatus(
-                        ErrorStatus::FILE_WRITE_FAILED,
-                        ss.str());
-                    return result_timeline;
+                    throw std::runtime_error(ss.str());
                 }
                 if (MediaReferencePolicy::MissingIfNotFile == media_reference_policy)
                 {
@@ -350,7 +339,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     {
         path_list.push_back(i.first);
     }
-    guarantee_unique_basenames(path_list, error_status);
+    guarantee_unique_basenames(path_list);
 
     return result_timeline;
 }

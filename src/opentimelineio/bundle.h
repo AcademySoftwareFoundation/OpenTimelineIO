@@ -10,10 +10,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Timeline;
 
 /// @todo Should the file versions be bumped?
+/// @todo Shoudle we use a library for URL conversions?
 /// @todo Add support for dry runs?
 /// @todo Document that paths are relative to the timeline.
 /// @todo Should bundle support be optional?
-/// @todo Add exception handling for std::filesystem use.
 /// @todo Add support for file sequences.
 /// @todo Add C++ bundle tests.
 /// @todo Python wrappings.

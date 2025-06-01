@@ -25,7 +25,7 @@ ends_with(std::string const& s, std::string const& find)
 
 int
 main(int argc, char** argv)
-    {
+{
     if (argc != 3)
     {
         std::cout << "Usage:\n";

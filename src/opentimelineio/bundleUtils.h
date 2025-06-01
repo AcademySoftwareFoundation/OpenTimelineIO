@@ -66,12 +66,13 @@ std::string filepath_from_url(std::string const&);
 /// to their output locations.
 ///
 /// This is considered an internal API.
+/// 
+/// Will throw std::exception on errors.
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const&,
     std::string const&   timeline_dir,
     MediaReferencePolicy media_reference_policy,
-    std::map<std::string, std::vector<SerializableObject::Retainer<ExternalReference>>>&,
-    ErrorStatus& error_status);
+    std::map<std::string, std::vector<SerializableObject::Retainer<ExternalReference>>>&);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

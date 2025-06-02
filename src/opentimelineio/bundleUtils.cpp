@@ -9,7 +9,6 @@
 #include "opentimelineio/imageSequenceReference.h"
 
 #include <algorithm>
-#include <filesystem>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -239,9 +238,9 @@ reference_cloned_and_missing(
 
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const& timeline,
-    std::string const&                            timeline_dir,
+    std::filesystem::path const&                  timeline_dir,
     MediaReferencePolicy                          media_reference_policy,
-    std::map<std::string, std::string>&           manifest)
+    std::map<std::filesystem::path, std::filesystem::path>& manifest)
 {
     manifest.clear();
     std::map<std::filesystem::path, std::filesystem::path>
@@ -317,16 +316,17 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 }
             }
 
-            // Get the absolute paths to the target files.
+            // Get absolute paths to the target files.
             std::vector<std::filesystem::path> target_paths;
             std::filesystem::path              target_path;
             bool                               target_error = false;
             for (const auto& target_file: target_files)
             {
-                target_path =
-                    scheme.empty() ? (std::filesystem::u8path(timeline_dir)
-                                      / std::filesystem::u8path(target_file))
-                                   : std::filesystem::u8path(target_file);
+                target_path = std::filesystem::u8path(target_file);
+                if (scheme.empty())
+                {
+                    target_path = timeline_dir / target_path;
+                }
                 target_path = std::filesystem::absolute(target_path);
                 if (!std::filesystem::exists(target_path)
                     || !std::filesystem::is_regular_file(target_path))
@@ -360,13 +360,12 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             std::filesystem::path bundle_path;
             for (auto const& path: target_paths)
             {
-                bundle_path =
-                    std::filesystem::u8path(media_dir) / path.filename();
-                const auto i = manifest.find(path.u8string());
+                bundle_path = media_dir / path.filename();
+                const auto i = manifest.find(path);
                 if (i == manifest.end())
                 {
-                    const auto i = bundle_paths_to_abs_paths.find(bundle_path);
-                    if (i != bundle_paths_to_abs_paths.end())
+                    const auto j = bundle_paths_to_abs_paths.find(bundle_path);
+                    if (j != bundle_paths_to_abs_paths.end())
                     {
                         std::stringstream ss;
                         ss << "Bundles require that the media files have unique "
@@ -377,7 +376,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                         throw std::runtime_error(ss.str());
                     }
                     bundle_paths_to_abs_paths[bundle_path] = path;
-                    manifest[path.u8string()] = bundle_path.u8string();
+                    manifest[path] = bundle_path;
                 }
             }
 

@@ -135,10 +135,10 @@ to_otioz(
         }
 
         // Create the new timeline and file manifest.
-        std::map<std::string, std::string> manifest;
+        std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            timeline_dir,
+            std::filesystem::u8path(timeline_dir),
             media_reference_policy,
             manifest);
 
@@ -146,7 +146,7 @@ to_otioz(
         ZipWriter zip(file_name);
 
         // Write the version file.
-        zip.add_compressed(otioz_version, version_file);
+        zip.add_compressed(otioz_version, version_file.u8string());
 
         // Write the .otio file.
         std::string const result_otio = result_timeline->to_json_string(
@@ -157,12 +157,12 @@ to_otioz(
         {
             throw std::runtime_error(error_status->details);
         }
-        zip.add_compressed(result_otio, otio_file);
+        zip.add_compressed(result_otio, otio_file.u8string());
 
         // Write the files from the manifest.
         for (auto const& i: manifest)
         {
-            zip.add_uncompressed(i.first, i.second);
+            zip.add_uncompressed(i.first, i.second.u8string());
         }
     }
     catch (std::exception const& e)
@@ -253,14 +253,12 @@ from_otioz(
         ZipReader(file_name, output_dir);
 
         // Read the timeline.
-        std::filesystem::path const timeline_path =
-            std::filesystem::u8path(output_dir)
-            / std::filesystem::u8path(otio_file);
-        SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(Timeline::from_json_file(
-                timeline_path.u8string(),
-                error_status)));
+        std::string const timeline_file =
+            (std::filesystem::u8path(output_dir) / otio_file).u8string();
+        SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(
+            Timeline::from_json_file(timeline_file, error_status)));
 
-        out = std::make_pair(timeline, timeline_path.u8string());
+        out = std::make_pair(timeline, timeline_file);
     }
     catch (std::exception const& e)
     {

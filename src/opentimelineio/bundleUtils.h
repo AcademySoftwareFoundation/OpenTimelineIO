@@ -5,17 +5,19 @@
 
 #include "opentimelineio/bundle.h"
 
+#include <filesystem>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 namespace bundle {
 
 /// @brief Version file name.
-std::string const version_file = "version.txt";
+std::filesystem::path const version_file = "version.txt";
 
 /// @brief OTIO file name.
-std::string const otio_file = "content.otio";
+std::filesystem::path const otio_file = "content.otio";
 
 /// @brief Media directory name.
-std::string const media_dir = "media";
+std::filesystem::path const media_dir = "media";
 
 /// @brief Convert a media reference policy to a string.
 std::string to_string(MediaReferencePolicy);
@@ -67,9 +69,9 @@ std::string filepath_from_url(std::string const&);
 /// Throws std::exception on errors.
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const&,
-    std::string const&   timeline_dir,
+    std::filesystem::path const& timeline_dir,
     MediaReferencePolicy media_reference_policy,
-    std::map<std::string, std::string>&);
+    std::map<std::filesystem::path, std::filesystem::path>&);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

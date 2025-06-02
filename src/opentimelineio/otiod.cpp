@@ -56,10 +56,10 @@ to_otiod(
         }
 
         // Create the new timeline and file manifest.
-        std::map<std::string, std::string> manifest;
+        std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            timeline_dir,
+            std::filesystem::u8path(timeline_dir),
             media_reference_policy,
             manifest);
 
@@ -68,21 +68,18 @@ to_otiod(
 
         // Write the version file.
         {
-            std::ofstream               of;
-            std::filesystem::path const version_path =
-                path / std::filesystem::u8path(version_file);
-            of.open(version_path);
+            std::ofstream of;
+            of.open(path / version_file);
             of << otiod_version << '\n';
         }
 
         // Write the .otio file.
-        std::string const result_otio_file =
-            (path / std::filesystem::u8path(otio_file)).u8string();
+        std::string const result_otio_file = (path / otio_file).u8string();
         if (!result_timeline->to_json_file(
-                result_otio_file,
-                error_status,
-                target_family_label_spec,
-                indent))
+            result_otio_file,
+            error_status,
+            target_family_label_spec,
+            indent))
         {
             std::stringstream ss;
             if (error_status)
@@ -99,12 +96,10 @@ to_otiod(
         // Create the media directory and copy the files from the manifest.
         //
         // @todo Can we use std::async to speed up file copies?
-        std::filesystem::path const media_path =
-            path / std::filesystem::u8path(media_dir);
-        std::filesystem::create_directory(media_path);
+        std::filesystem::create_directory(path / media_dir);
         for (auto const& i: manifest)
         {
-            std::filesystem::copy_file(i.first, path / std::filesystem::u8path(i.second));
+            std::filesystem::copy_file(i.first, path / i.second);
         }
     }
     catch (const std::exception& e)
@@ -126,7 +121,7 @@ from_otiod(
 {
     // Read the timeline.
     std::filesystem::path const timeline_path =
-        std::filesystem::u8path(file_name) / std::filesystem::u8path(otio_file);
+        std::filesystem::u8path(file_name) / otio_file;
     SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(
         Timeline::from_json_file(timeline_path.u8string(), error_status)));
 

@@ -5,7 +5,6 @@
 
 #include <opentimelineio/bundleUtils.h>
 
-#include <filesystem>
 #include <iostream>
 
 namespace otime  = opentime::OPENTIME_VERSION;

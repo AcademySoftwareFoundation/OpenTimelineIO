@@ -4,7 +4,9 @@
 #include "opentimelineio/bundleUtils.h"
 
 #include "opentimelineio/clip.h"
+#include "opentimelineio/externalReference.h"
 #include "opentimelineio/missingReference.h"
+#include "opentimelineio/imageSequenceReference.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -190,45 +192,47 @@ filepath_from_url(std::string const& url)
 
 namespace {
 
-// Replace the original media reference with a missing reference with the same
-// metadata.
+// Replace the original media reference with a missing reference with the
+// same metadata.
+// 
+// Aditional metadata:
+// * missing_reference_because
+// 
+// For external references:
+// * original_target_url
 //
-// Also adds original_target_url and missing_reference_because fields.
+// For image sequence references:
+// * original_target_url_base
+// * original_name_prefix
+// * original_name_suffix
+// * original_start_frame
+// * original_frame_step
+// * original_rate
+// * original_frame_zero_padding
 SerializableObject::Retainer<MediaReference>
 reference_cloned_and_missing(
-    SerializableObject::Retainer<ExternalReference> const& orig_mr,
-    std::string const&                                     reason_missing)
+    SerializableObject::Retainer<MediaReference> const& orig_mr,
+    std::string const&                                  reason_missing)
 {
-    SerializableObject::Retainer<MediaReference> result(
-        new MissingReference);
-    auto metadata = orig_mr->metadata();
-    metadata["missing_reference_because"] = reason_missing;
-    metadata["original_target_url"]       = orig_mr->target_url();
-    return result;
-}
-
-void
-guarantee_unique_basenames(std::vector<std::string> const& path_list)
-{
-    // Walking across all unique file references, guarantee that all the
-    // basenames are unique.
-    std::map<std::string, std::string> basename_to_source_fn;
-    for (auto const& fn : path_list)
+    SerializableObject::Retainer<MediaReference> result(new MissingReference);
+    auto                                         metadata = orig_mr->metadata();
+    metadata["missing_reference_because"]                 = reason_missing;
+    if (auto orig_er = dynamic_retainer_cast<ExternalReference>(orig_mr))
     {
-        std::string const new_basename =
-            std::filesystem::u8path(fn).filename().u8string();
-        auto i = basename_to_source_fn.find(new_basename);
-        if (i != basename_to_source_fn.end())
-        {
-            std::stringstream ss;
-            ss << "Bundles require that the media files have unique "
-               << "basenames. File '" << fn << "' and '"
-               << i->second << "' have matching basenames of: '"
-               << new_basename << "'.";
-            throw std::runtime_error(ss.str());
-        }
-        basename_to_source_fn[new_basename] = fn;
+        metadata["original_target_url"] = orig_er->target_url();
     }
+    else if (auto orig_isr = dynamic_retainer_cast<ImageSequenceReference>(orig_mr))
+    {
+        metadata["original_target_url_base"] = orig_isr->target_url_base();
+        metadata["original_name_prefix"]     = orig_isr->name_prefix();
+        metadata["original_name_suffix"]     = orig_isr->name_suffix();
+        metadata["original_start_frame"]     = orig_isr->start_frame();
+        metadata["original_frame_step"]      = orig_isr->frame_step();
+        metadata["original_rate"]            = orig_isr->rate();
+        metadata["original_frame_zero_padding"] =
+            orig_isr->frame_zero_padding();
+    }
+    return result;
 }
 
 } // namspace
@@ -237,22 +241,23 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const& timeline,
     std::string const&                            timeline_dir,
     MediaReferencePolicy                          media_reference_policy,
-    std::map<
-        std::string,
-        std::vector<SerializableObject::Retainer<ExternalReference>>>&
-                 path_to_reference_map)
+    std::map<std::string, std::string>&           manifest)
 {
+    manifest.clear();
+    std::map<std::filesystem::path, std::filesystem::path>
+        bundle_paths_to_abs_paths;
+
     // Make an editable copy of the timeline.
     SerializableObject::Retainer<Timeline> result_timeline(
         dynamic_cast<Timeline*>(timeline->clone()));
 
-    path_to_reference_map.clear();
-    std::set<std::filesystem::path> invalid_files;
-
     // The result timeline is manipulated in place.
     for (auto& cl : result_timeline->find_clips())
     {
-        if (auto mr = dynamic_cast<ExternalReference*>(cl->media_reference()))
+        auto mr  = cl->media_reference();
+        auto er  = dynamic_cast<ExternalReference*>(cl->media_reference());
+        auto isr = dynamic_cast<ImageSequenceReference*>(cl->media_reference());
+        if (er || isr)
         {
             if (MediaReferencePolicy::AllMissing == media_reference_policy)
             {
@@ -267,7 +272,9 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             // Ensure that the URL scheme is either "file://" or "".
             // File means "absolute path", "" is interpreted as a relative path,
             // relative to the source .otio file.
-            std::string const scheme = scheme_from_url(mr->target_url());
+            std::string const url    = er ? er->target_url()
+                                          : isr->target_url_base();
+            std::string const scheme = scheme_from_url(url);
             if (!(scheme == "file://" || scheme.empty()))
             {
                 if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
@@ -275,7 +282,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                     std::stringstream ss;
                     ss << "Bundles only work with media reference target URLs "
                        << "that begin with 'file://' or ''. Got a target URL of: "
-                       << "'" << mr->target_url() << "'.";
+                       << "'" << url << "'.";
                     throw std::runtime_error(ss.str());
                 }
                 if (MediaReferencePolicy::MissingIfNotFile == media_reference_policy)
@@ -287,59 +294,106 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 }
             }
 
-            // Get an absolute path to the target file.
-            std::filesystem::path target_file =
-                std::filesystem::u8path(filepath_from_url(mr->target_url()));
-            if (scheme.empty())
+            // Get the list of target files.
+            std::vector<std::string> target_files;
+            if (er)
             {
-                target_file = std::filesystem::u8path(timeline_dir) / target_file;
+                target_files.push_back(filepath_from_url(er->target_url()));
             }
-            target_file = std::filesystem::absolute(target_file);
-
-            // If the file hasn't already been checked.
-            auto i = path_to_reference_map.find(target_file.u8string());
-            auto j = invalid_files.find(target_file);
-            if (i == path_to_reference_map.end() &&
-                j == invalid_files.end() &&
-                (!std::filesystem::exists(target_file) ||
-                    !std::filesystem::is_regular_file(target_file)))
+            else if (isr)
             {
-                invalid_files.insert(target_file);
-            }
-
-            j = invalid_files.find(target_file);
-            if (j != invalid_files.end())
-            {
-                if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
+                TimeRange const range = cl->available_range();
+                for (int frame = range.start_time().to_frames();
+                     frame <= range.duration().to_frames();
+                     ++frame)
                 {
                     std::stringstream ss;
-                    ss << "'" << target_file << "' is not a file or does not exist.";
+                    ss << isr->name_prefix();
+                    ss << std::setfill('0')
+                       << std::setw(isr->frame_zero_padding()) << frame;
+                    ss << isr->name_suffix();
+                    target_files.push_back(filepath_from_url(
+                        isr->target_url_base() + "/" + ss.str()));
+                }
+            }
+
+            // Get the absolute paths to the target files.
+            std::vector<std::filesystem::path> target_paths;
+            std::filesystem::path              target_path;
+            bool                               target_error = false;
+            for (const auto& target_file: target_files)
+            {
+                target_path =
+                    scheme.empty() ? (std::filesystem::u8path(timeline_dir)
+                                      / std::filesystem::u8path(target_file))
+                                   : std::filesystem::u8path(target_file);
+                target_path = std::filesystem::absolute(target_path);
+                if (!std::filesystem::exists(target_path)
+                    || !std::filesystem::is_regular_file(target_path))
+                {
+                    target_error = true;
+                    break;
+                }
+                target_paths.push_back(target_path);
+            }
+            if (target_error)
+            {
+                if (MediaReferencePolicy::ErrorIfNotFile
+                    == media_reference_policy)
+                {
+                    std::stringstream ss;
+                    ss << "'" << target_path.u8string()
+                       << "' is not a file or does not exist.";
                     throw std::runtime_error(ss.str());
                 }
-                if (MediaReferencePolicy::MissingIfNotFile == media_reference_policy)
+                if (MediaReferencePolicy::MissingIfNotFile
+                    == media_reference_policy)
                 {
                     cl->set_media_reference(reference_cloned_and_missing(
                         mr,
                         "target_url target is not a file or does not exist"));
-                    // Do not need to relink it in the future or add this target to
-                    // the manifest, because the path is either not a file or does
-                    // not exist.
                     continue;
                 }
             }
 
-            // Add the media reference to the list of references that point at
-            // this file, they will need to be relinked.
-            path_to_reference_map[target_file.u8string()].push_back(mr);
+            // Add files to the manifest.
+            std::filesystem::path bundle_path;
+            for (auto const& path: target_paths)
+            {
+                bundle_path =
+                    std::filesystem::u8path(media_dir) / path.filename();
+                const auto i = manifest.find(path.u8string());
+                if (i == manifest.end())
+                {
+                    const auto i = bundle_paths_to_abs_paths.find(bundle_path);
+                    if (i != bundle_paths_to_abs_paths.end())
+                    {
+                        std::stringstream ss;
+                        ss << "Bundles require that the media files have unique "
+                           << "basenames. File '" << path.u8string()
+                           << "' and '" << i->second
+                           << "' have matching basenames of: '"
+                           << path.filename().u8string() << "'.";
+                        throw std::runtime_error(ss.str());
+                    }
+                    bundle_paths_to_abs_paths[bundle_path] = path;
+                    manifest[path.u8string()] = bundle_path.u8string();
+                }
+            }
+
+            // Relink the media reference.
+            if (er)
+            {
+                er->set_target_url(url_from_filepath(bundle_path.u8string()));
+            }
+            else if (isr)
+            {
+                isr->set_target_url_base(
+                    url_from_filepath(bundle_path.parent_path().u8string())
+                    + "/");
+            }
         }
     }
-
-    std::vector<std::string> path_list;
-    for (auto const& i : path_to_reference_map)
-    {
-        path_list.push_back(i.first);
-    }
-    guarantee_unique_basenames(path_list);
 
     return result_timeline;
 }

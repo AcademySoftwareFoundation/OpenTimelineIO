@@ -125,7 +125,7 @@ to_otioz(
 {
     try
     {
-        // Check that the path does not exist.
+        // Check the path does not already exist.
         std::filesystem::path const path = std::filesystem::u8path(file_name);
         if (std::filesystem::exists(path))
         {
@@ -134,50 +134,21 @@ to_otioz(
             throw std::runtime_error(ss.str());
         }
 
-        // General algorithm for the file bundles:
-        //
-        // * Build the file manifest (list of paths to files on disk that will be
-        //   put into the archive).
-        // * Build a mapping of path to file on disk to url to put into the media
-        //   reference in the result.
-        // * Relink the media references to point at the final location inside the
-        //   archive.
-        // * Build the resulting structure (zip file, directory).
-        std::map<
-            std::string,
-            std::vector<SerializableObject::Retainer<ExternalReference>>>
-             path_to_mr_map;
+        // Create the new timeline and file manifest.
+        std::map<std::string, std::string> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             timeline_dir,
             media_reference_policy,
-            path_to_mr_map);
+            manifest);
 
-        // Relink all the media references to their target paths.
-        std::map<std::filesystem::path, std::string> abspath_to_output_path_map;
-        for (auto const& i: path_to_mr_map)
-        {
-            std::filesystem::path const target =
-                std::filesystem::u8path(media_dir)
-                / std::filesystem::u8path(i.first).filename();
+        // Write the archive.
+        ZipWriter zip(file_name);
 
-            // Conform to POSIX style paths inside the bundle, so that they are
-            // portable between windows and UNIX style environments.
-            std::string const final_path =
-                to_unix_separators(target.u8string());
+        // Write the version file.
+        zip.add_compressed(otioz_version, version_file);
 
-            // Cache the output path.
-            abspath_to_output_path_map[i.first] = final_path;
-
-            for (auto const& mr: i.second)
-            {
-                // Convert the path to a URL and set the media reference.
-                std::string const url = url_from_filepath(final_path);
-                mr->set_target_url(url);
-            }
-        }
-
-        // Create the .otio.
+        // Write the .otio file.
         std::string const result_otio = result_timeline->to_json_string(
             error_status,
             target_family_label_spec,
@@ -186,18 +157,10 @@ to_otioz(
         {
             throw std::runtime_error(error_status->details);
         }
-
-        // Write the archive.
-        ZipWriter zip(file_name);
-
-        // Write the .otio file.
         zip.add_compressed(result_otio, otio_file);
 
-        // Write the version file.
-        zip.add_compressed(otioz_version, version_file);
-
-        // Write the media files.
-        for (auto const& i: abspath_to_output_path_map)
+        // Write the files from the manifest.
+        for (auto const& i: manifest)
         {
             zip.add_uncompressed(i.first, i.second);
         }
@@ -277,7 +240,7 @@ from_otioz(
     std::pair<SerializableObject::Retainer<Timeline>, std::string> out;
     try
     {
-        // Check that the output directory does not exist.
+        // Check the output directory does not already exist.
         std::filesystem::path const path = std::filesystem::u8path(output_dir);
         if (std::filesystem::exists(path))
         {
@@ -290,14 +253,14 @@ from_otioz(
         ZipReader(file_name, output_dir);
 
         // Read the timeline.
-        std::string const timeline_file_name =
-            (std::filesystem::u8path(output_dir)
-             / std::filesystem::u8path(otio_file))
-                .u8string();
-        out = std::make_pair(
-            dynamic_cast<Timeline*>(
-                Timeline::from_json_file(timeline_file_name, error_status)),
-            timeline_file_name);
+        std::filesystem::path const timeline_path =
+            std::filesystem::u8path(output_dir)
+            / std::filesystem::u8path(otio_file);
+        SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(Timeline::from_json_file(
+                timeline_path.u8string(),
+                error_status)));
+
+        out = std::make_pair(timeline, timeline_path.u8string());
     }
     catch (std::exception const& e)
     {

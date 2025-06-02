@@ -4,7 +4,6 @@
 #pragma once
 
 #include "opentimelineio/bundle.h"
-#include "opentimelineio/externalReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 namespace bundle {
@@ -58,21 +57,19 @@ std::string filepath_from_url(std::string const&);
 /// @brief Create a new timeline based on input_otio that has had media
 /// references replaced according to the media_policy.
 /// 
-/// Return that new timeline and a mapping of all the absolute file
-/// paths (not URLs) to be used in the bundle, mapped to MediaReferences
-/// associated with those files.
+/// The media references are relinked to relative files paths in media_dir.
 /// 
-/// Media references in the timeline will be relinked by the adapters to point
-/// to their output locations.
+/// The new timeline and a set of all absolute file paths (not URLs) to be
+/// used in the bundle.
 ///
 /// This is considered an internal API.
 /// 
-/// Will throw std::exception on errors.
+/// Throws std::exception on errors.
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const&,
     std::string const&   timeline_dir,
     MediaReferencePolicy media_reference_policy,
-    std::map<std::string, std::vector<SerializableObject::Retainer<ExternalReference>>>&);
+    std::map<std::string, std::string>&);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

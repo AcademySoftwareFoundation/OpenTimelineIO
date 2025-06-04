@@ -34,6 +34,14 @@ enum class MediaReferencePolicy
     AllMissing
 };
 
+/// @brief Options for writing bundles.
+struct ToBundleOptions
+{
+    MediaReferencePolicy media_reference_policy =
+        MediaReferencePolicy::ErrorIfNotFile;
+    int indent = 4;
+};
+
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
 /// @param timeline The timeline to write.
@@ -45,14 +53,12 @@ enum class MediaReferencePolicy
 /// @param target_family_label_spec @todo Add comment.
 /// @param indent The number of spaces to use for indentation.
 bool to_otioz(
-    Timeline const*      timeline,
-    std::string const&   timeline_dir,
-    std::string const&   file_name,
-    MediaReferencePolicy media_reference_policy =
-        MediaReferencePolicy::ErrorIfNotFile,
+    Timeline const*           timeline,
+    std::string const&        timeline_dir,
+    std::string const&        file_name,
+    ToBundleOptions const&    options                  = ToBundleOptions(),
     ErrorStatus*              error_status             = nullptr,
-    schema_version_map const* target_family_label_spec = nullptr,
-    int                       indent                   = 4);
+    schema_version_map const* target_family_label_spec = nullptr);
 
 /// @brief Read a timeline from an .otioz bundle. The timeline and timeline
 /// file name are returned.
@@ -76,14 +82,18 @@ std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otioz(
 /// @param target_family_label_spec @todo Add comment.
 /// @param indent The number of spaces to use for indentation.
 bool to_otiod(
-    Timeline const*      timeline,
-    std::string const&   timeline_dir,
-    std::string const&   file_name,
-    MediaReferencePolicy media_reference_policy =
-        MediaReferencePolicy::ErrorIfNotFile,
+    Timeline const*           timeline,
+    std::string const&        timeline_dir,
+    std::string const&        file_name,
+    ToBundleOptions const&    options                  = ToBundleOptions(),
     ErrorStatus*              error_status             = nullptr,
-    schema_version_map const* target_family_label_spec = nullptr,
-    int                       indent                   = 4);
+    schema_version_map const* target_family_label_spec = nullptr);
+
+/// @brief Options for reading .otiod bundles.
+struct FromOtiodOptions
+{
+    bool absolute_media_reference_paths = false;
+};
 
 /// @brief Read a timeline from an .otiod bundle. The timeline and timeline
 /// file name are returned.
@@ -91,8 +101,10 @@ bool to_otiod(
 /// @param file_name The bundle file name.
 /// @param timeline_file_name Returns the timeline file name.
 /// @param error_status The error status.
-std::pair<SerializableObject::Retainer<Timeline>, std::string>
-from_otiod(std::string const& file_name, ErrorStatus* error_status = nullptr);
+std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otiod(
+    std::string const&      file_name,
+    FromOtiodOptions const& options      = FromOtiodOptions(),
+    ErrorStatus*            error_status = nullptr);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

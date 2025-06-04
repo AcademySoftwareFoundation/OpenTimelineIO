@@ -118,10 +118,9 @@ to_otioz(
     Timeline const*           timeline,
     std::string const&        timeline_dir,
     std::string const&        file_name,
-    MediaReferencePolicy      media_reference_policy,
+    ToBundleOptions const&    options,
     ErrorStatus*              error_status,
-    schema_version_map const* target_family_label_spec,
-    int                       indent)
+    schema_version_map const* target_family_label_spec)
 {
     try
     {
@@ -139,7 +138,7 @@ to_otioz(
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(timeline_dir),
-            media_reference_policy,
+            options.media_reference_policy,
             manifest);
 
         // Write the archive.
@@ -152,7 +151,7 @@ to_otioz(
         std::string const result_otio = result_timeline->to_json_string(
             error_status,
             target_family_label_spec,
-            indent);
+            options.indent);
         if (error_status && is_error(error_status))
         {
             throw std::runtime_error(error_status->details);

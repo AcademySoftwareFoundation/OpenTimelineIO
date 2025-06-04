@@ -4,7 +4,9 @@
 #include "opentimelineio/bundle.h"
 
 #include "opentimelineio/bundleUtils.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/errorStatus.h"
+#include "opentimelineio/externalReference.h"
 #include "opentimelineio/timeline.h"
 
 #include <filesystem>
@@ -18,10 +20,9 @@ to_otiod(
     Timeline const*           timeline,
     std::string const&        timeline_dir,
     std::string const&        file_name,
-    MediaReferencePolicy      media_reference_policy,
+    ToBundleOptions const&    options,
     ErrorStatus*              error_status,
-    schema_version_map const* target_family_label_spec,
-    int                       indent)
+    schema_version_map const* target_family_label_spec)
 {
     try
     {
@@ -60,7 +61,7 @@ to_otiod(
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(timeline_dir),
-            media_reference_policy,
+            options.media_reference_policy,
             manifest);
 
         // Create the output directory.
@@ -79,7 +80,7 @@ to_otiod(
             result_otio_file,
             error_status,
             target_family_label_spec,
-            indent))
+            options.indent))
         {
             std::stringstream ss;
             if (error_status)
@@ -116,14 +117,30 @@ to_otiod(
 
 std::pair<SerializableObject::Retainer<Timeline>, std::string>
 from_otiod(
-    std::string const& file_name,
-    ErrorStatus* error_status)
+    std::string const&      file_name,
+    FromOtiodOptions const& options,
+    ErrorStatus*            error_status)
 {
     // Read the timeline.
     std::filesystem::path const timeline_path =
         std::filesystem::u8path(file_name) / otio_file;
     SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(
         Timeline::from_json_file(timeline_path.u8string(), error_status)));
+
+    if (options.absolute_media_reference_paths)
+    {
+        for (auto cl : timeline->find_clips())
+        {
+            if (auto er = dynamic_cast<ExternalReference*>(cl->media_reference()))
+            {
+                std::filesystem::path const path =
+                    timeline_path.parent_path()
+                    / std::filesystem::u8path(
+                        bundle::filepath_from_url(er->target_url()));
+                er->set_target_url(url_from_filepath(path.u8string()));
+            }
+        }
+    }
 
     return std::make_pair(timeline, timeline_path.u8string());
 }

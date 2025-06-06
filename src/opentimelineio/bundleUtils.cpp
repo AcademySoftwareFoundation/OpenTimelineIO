@@ -383,16 +383,16 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             // Relink the media reference.
             if (er)
             {
-                std::string const url =
+                std::string const new_url =
                     url_from_filepath(bundle_path.u8string());
-                er->set_target_url(url);
+                er->set_target_url(new_url);
             }
             else if (isr)
             {
-                std::string const url =
+                std::string const new_url =
                     url_from_filepath(bundle_path.parent_path().u8string())
                     + "/";
-                isr->set_target_url_base(url);
+                isr->set_target_url_base(new_url);
             }
         }
     }

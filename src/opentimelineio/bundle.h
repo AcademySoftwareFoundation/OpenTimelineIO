@@ -37,28 +37,32 @@ enum class MediaReferencePolicy
 /// @brief Options for writing bundles.
 struct ToBundleOptions
 {
+    /// @brief The timeline's parent directory. This is used to locate media
+    /// with relative file paths.
+    std::string timeline_dir;
+
+    /// @brief The media reference policy.
     MediaReferencePolicy media_reference_policy =
         MediaReferencePolicy::ErrorIfNotFile;
+
+    /// @todo Add comment.
+    schema_version_map const* target_family_label_spec = nullptr;
+
+    /// @brief The number of spaces to use for indentation.
     int indent = 4;
 };
 
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
 /// @param timeline The timeline to write.
-/// @param timeline_dir The timeline's parent directory. This is used to locate
-///        media with relative file paths.
 /// @param file_name The bundle file name.
-/// @param media_reference_policy The media reference policy.
+/// @param options The bundle options.
 /// @param error_status The error status.
-/// @param target_family_label_spec @todo Add comment.
-/// @param indent The number of spaces to use for indentation.
 bool to_otioz(
-    Timeline const*           timeline,
-    std::string const&        timeline_dir,
-    std::string const&        file_name,
-    ToBundleOptions const&    options                  = ToBundleOptions(),
-    ErrorStatus*              error_status             = nullptr,
-    schema_version_map const* target_family_label_spec = nullptr);
+    Timeline const*        timeline,
+    std::string const&     file_name,
+    ToBundleOptions const& options      = ToBundleOptions(),
+    ErrorStatus*           error_status = nullptr);
 
 /// @brief Read a timeline from an .otioz bundle. The timeline and timeline
 /// file name are returned.
@@ -74,24 +78,19 @@ std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otioz(
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
 /// @param timeline The timeline to write.
-/// @param timeline_dir The timeline's parent directory. This is used to locate
-///        media with relative file paths.
 /// @param file_name The bundle file name.
-/// @param media_reference_policy The media reference policy.
+/// @param options The bundle options.
 /// @param error_status The error status.
-/// @param target_family_label_spec @todo Add comment.
-/// @param indent The number of spaces to use for indentation.
 bool to_otiod(
-    Timeline const*           timeline,
-    std::string const&        timeline_dir,
-    std::string const&        file_name,
-    ToBundleOptions const&    options                  = ToBundleOptions(),
-    ErrorStatus*              error_status             = nullptr,
-    schema_version_map const* target_family_label_spec = nullptr);
+    Timeline const*        timeline,
+    std::string const&     file_name,
+    ToBundleOptions const& options      = ToBundleOptions(),
+    ErrorStatus*           error_status = nullptr);
 
 /// @brief Options for reading .otiod bundles.
 struct FromOtiodOptions
 {
+    /// @brief Use absolute paths for media references.
     bool absolute_media_reference_paths = false;
 };
 

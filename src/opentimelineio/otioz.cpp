@@ -116,11 +116,9 @@ ZipWriter::add_uncompressed(
 bool
 to_otioz(
     Timeline const*           timeline,
-    std::string const&        timeline_dir,
     std::string const&        file_name,
     ToBundleOptions const&    options,
-    ErrorStatus*              error_status,
-    schema_version_map const* target_family_label_spec)
+    ErrorStatus*              error_status)
 {
     try
     {
@@ -137,7 +135,7 @@ to_otioz(
         std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            std::filesystem::u8path(timeline_dir),
+            std::filesystem::u8path(options.timeline_dir),
             options.media_reference_policy,
             manifest);
 
@@ -150,7 +148,7 @@ to_otioz(
         // Write the .otio file.
         std::string const result_otio = result_timeline->to_json_string(
             error_status,
-            target_family_label_spec,
+            options.target_family_label_spec,
             options.indent);
         if (error_status && is_error(error_status))
         {

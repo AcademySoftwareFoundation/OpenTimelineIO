@@ -21,7 +21,8 @@ main(int argc, char** argv)
     Tests tests;
 
     std::filesystem::path const sample_data_dir =
-        std::filesystem::current_path() / "sample_data";
+        //std::filesystem::current_path() / "sample_data";
+        "C:/Dev/otio/darby/tests/sample_data";
     std::string const screening_example_path = bundle::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 
@@ -101,10 +102,9 @@ main(int argc, char** argv)
         {
             std::string const temp_file =
                 std::string(std::tmpnam(nullptr)) + ".otiod";
-            assertTrue(bundle::to_otiod(
-                timeline,
-                sample_data_dir.u8string(),
-                temp_file));
+            bundle::ToBundleOptions options;
+            options.timeline_dir = sample_data_dir.u8string();
+            assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
             // By default will provide relative paths.
             auto result = bundle::from_otiod(temp_file);
@@ -145,14 +145,11 @@ main(int argc, char** argv)
         {
             std::string const temp_file =
                 std::string(std::tmpnam(nullptr)) + ".otiod";
-            bundle::ToBundleOptions toOptions;
-            toOptions.media_reference_policy =
+            bundle::ToBundleOptions options;
+            options.timeline_dir = sample_data_dir.u8string();
+            options.media_reference_policy =
                 bundle::MediaReferencePolicy::AllMissing;
-            assertTrue(bundle::to_otiod(
-                timeline,
-                sample_data_dir.u8string(),
-                temp_file,
-                toOptions));
+            assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
             auto result = bundle::from_otiod(temp_file);
 
@@ -183,10 +180,9 @@ main(int argc, char** argv)
 
             std::string const temp_file =
                 std::string(std::tmpnam(nullptr)) + ".otiod";
-            assertTrue(bundle::to_otiod(
-                timeline,
-                sample_data_dir.u8string(),
-                temp_file));
+            bundle::ToBundleOptions toOptions;
+            toOptions.timeline_dir = sample_data_dir.u8string();
+            assertTrue(bundle::to_otiod(timeline, temp_file, toOptions));
 
             // Can optionally generate absolute paths.
             bundle::FromOtiodOptions options;

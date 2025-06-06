@@ -17,12 +17,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
 
 bool
 to_otiod(
-    Timeline const*           timeline,
-    std::string const&        timeline_dir,
-    std::string const&        file_name,
-    ToBundleOptions const&    options,
-    ErrorStatus*              error_status,
-    schema_version_map const* target_family_label_spec)
+    Timeline const*        timeline,
+    std::string const&     file_name,
+    ToBundleOptions const& options,
+    ErrorStatus*           error_status)
 {
     try
     {
@@ -60,7 +58,7 @@ to_otiod(
         std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            std::filesystem::u8path(timeline_dir),
+            std::filesystem::u8path(options.timeline_dir),
             options.media_reference_policy,
             manifest);
 
@@ -79,7 +77,7 @@ to_otiod(
         if (!result_timeline->to_json_file(
             result_otio_file,
             error_status,
-            target_family_label_spec,
+            options.target_family_label_spec,
             options.indent))
         {
             std::stringstream ss;

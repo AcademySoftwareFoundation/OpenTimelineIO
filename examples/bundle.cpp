@@ -55,11 +55,10 @@ main(int argc, char** argv)
 
         // Create .otioz bundle.
         bundle::ToBundleOptions options;
-        std::string const timeline_dir =
+        options.timeline_dir =
             std::filesystem::u8path(input).parent_path().u8string();
         if (!bundle::to_otioz(
             timeline.value,
-            timeline_dir,
             output,
             options,
             &error_status))
@@ -94,14 +93,13 @@ main(int argc, char** argv)
 
         // Create .otiod bundle.
         bundle::ToBundleOptions options;
-        std::string const timeline_dir =
+        options.timeline_dir =
             std::filesystem::u8path(input).parent_path().u8string();
         if (!bundle::to_otiod(
-                timeline.value,
-                timeline_dir,
-                output,
-                options,
-                &error_status))
+            timeline.value,
+            output,
+            options,
+            &error_status))
         {
             examples::print_error(error_status);
             return 1;

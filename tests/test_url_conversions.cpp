@@ -16,11 +16,13 @@ main(int argc, char** argv)
 {
     Tests tests;
 
+    // Sample data paths.
     std::filesystem::path const sample_data_dir =
         std::filesystem::current_path() / "sample_data";
     std::string const screening_example_path = bundle::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 
+    // Sample media paths.
     std::string const media_example_path_rel = "OpenTimelineIO@3xDark.png";
     std::string const media_example_path_url_rel = bundle::to_unix_separators(
         bundle::url_from_filepath(media_example_path_rel));
@@ -29,18 +31,23 @@ main(int argc, char** argv)
     std::string const media_example_path_url_abs = bundle::to_unix_separators(
         bundle::url_from_filepath(media_example_path_abs));
 
+    // Windows test paths.
     std::string const windows_encoded_url = "file://host/S%3a/path/file.ext";
-    std::string const windows_drive_url = "file://S:/path/file.ext";
-    std::string const windows_drive_path = "S:/path/file.ext";
+    std::string const windows_drive_url   = "file://S:/path/file.ext";
+    std::string const windows_drive_path  = "S:/path/file.ext";
 
-    std::string const windows_encoded_unc_url = "file://unc/path/sub%20dir/file.ext";
-    std::string const windows_unc_url = "file://unc/path/sub dir/file.ext";
+    // Windows UNC test paths.
+    std::string const windows_encoded_unc_url =
+        "file://unc/path/sub%20dir/file.ext";
+    std::string const windows_unc_url  = "file://unc/path/sub dir/file.ext";
     std::string const windows_unc_path = "//unc/path/sub dir/file.ext";
 
-    std::string const posix_localhost_url = "file://localhost/path/sub dir/file.ext";
+    // POSIX test paths.
+    std::string const posix_localhost_url =
+        "file://localhost/path/sub dir/file.ext";
     std::string const posix_encoded_url = "file:///path/sub%20dir/file.ext";
-    std::string const posix_url = "file:///path/sub dir/file.ext";
-    std::string const posix_path = "/path/sub dir/file.ext";
+    std::string const posix_url         = "file:///path/sub dir/file.ext";
+    std::string const posix_path        = "/path/sub dir/file.ext";
 
     tests.add_test(
         "test_roundtrip_abs",

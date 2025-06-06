@@ -20,12 +20,14 @@ main(int argc, char** argv)
 {
     Tests tests;
 
+    // Sample data paths.
     std::filesystem::path const sample_data_dir =
         //std::filesystem::current_path() / "sample_data";
         "C:/Dev/otio/darby/tests/sample_data";
     std::string const screening_example_path = bundle::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 
+    // Sample media paths.
     std::string const media_example_path_rel     = "OpenTimelineIO@3xDark.png";
     std::string const media_example_path_url_rel = bundle::to_unix_separators(
         bundle::url_from_filepath(media_example_path_rel));
@@ -34,11 +36,12 @@ main(int argc, char** argv)
     std::string const media_example_path_url_abs = bundle::to_unix_separators(
         bundle::url_from_filepath(media_example_path_abs));
 
+    // Test timeline.
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
         dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(
             screening_example_path)));
     
-    // Convert to contrived local reference.
+    // Convert to contrived local references.
     bool last_rel = false;
     for (auto cl : timeline->find_clips())
     {
@@ -53,13 +56,14 @@ main(int argc, char** argv)
         "test_file_bundle_manifest_missing_reference",
         [sample_data_dir, timeline]
         {
-            // All missing should be empty.
             std::map<std::filesystem::path, std::filesystem::path> manifest;
             auto result_timeline = bundle::timeline_for_bundle_and_manifest(
                 timeline,
                 sample_data_dir,
                 bundle::MediaReferencePolicy::AllMissing,
                 manifest);
+
+            // All missing should be empty.
             assertTrue(manifest.empty());
             for (auto cl : result_timeline->find_clips())
             {
@@ -82,7 +86,8 @@ main(int argc, char** argv)
                 manifest);
             assertEqual(manifest.size(), 2);
 
-            std::set<std::filesystem::path> known_files = {
+            // Compare absolute paths.
+            std::set<std::filesystem::path> const known_files = {
                 std::filesystem::u8path(media_example_path_abs),
                 sample_data_dir / std::filesystem::u8path(media_example_path_rel)
             };
@@ -91,8 +96,6 @@ main(int argc, char** argv)
             {
                 manifest_abs.insert(i.first);
             }
-
-            // Should only contain absolute paths.
             assertEqual(manifest_abs, known_files);
         });
 
@@ -108,21 +111,22 @@ main(int argc, char** argv)
 
             // By default will provide relative paths.
             auto result = bundle::from_otiod(temp_file);
-
             for (auto cl: result.first->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                     cl->media_reference()))
                 {
-                    assertNotEqual(
-                        er->target_url(),
-                        media_example_path_url_rel);
+                    assertTrue(std::filesystem::u8path(
+                                   bundle::filepath_from_url(er->target_url()))
+                                   .is_relative());
                 }
             }
 
-            // Conform media references in input to what they should be in the
-            // output.
-            for (auto cl: timeline->find_clips())
+            // Clone the input and conform the media references to what they
+            // should be in the output.
+            otio::SerializableObject::Retainer<otio::Timeline> clone(
+                dynamic_cast<otio::Timeline*>(timeline->clone()));
+            for (auto cl: clone->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                     cl->media_reference()))
@@ -136,7 +140,7 @@ main(int argc, char** argv)
 
             assertEqual(
                 result.first->to_json_string(),
-                timeline->to_json_string());
+                clone->to_json_string());
         });
 
     tests.add_test(
@@ -164,20 +168,6 @@ main(int argc, char** argv)
         "test_round_trip_absolute_paths",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            // Reset the timeline URLs.
-            for (auto clip: timeline->find_clips())
-            {
-                if (auto er = dynamic_cast<otio::ExternalReference*>(
-                    clip->media_reference()))
-                {
-                    std::filesystem::path const path = std::filesystem::u8path(
-                        bundle::filepath_from_url(er->target_url()));
-                    std::string const url =
-                        bundle::url_from_filepath(path.filename().u8string());
-                    er->set_target_url(url);
-                }
-            }
-
             std::string const temp_file =
                 std::string(std::tmpnam(nullptr)) + ".otiod";
             bundle::ToBundleOptions toOptions;
@@ -194,15 +184,17 @@ main(int argc, char** argv)
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                     clip->media_reference()))
                 {
-                    assertNotEqual(
-                        er->target_url(),
-                        media_example_path_url_rel);
+                    assertTrue(std::filesystem::u8path(
+                                   bundle::filepath_from_url(er->target_url()))
+                                   .is_absolute());
                 }
             }
 
-            // Conform media references in input to what they should be in the
-            // output.
-            for (auto cl: timeline->find_clips())
+            // Clone the input and conform the media references to what they
+            // should be in the output.
+            otio::SerializableObject::Retainer<otio::Timeline> clone(
+                dynamic_cast<otio::Timeline*>(timeline->clone()));
+            for (auto cl: clone->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                         cl->media_reference()))
@@ -216,7 +208,7 @@ main(int argc, char** argv)
 
             assertEqual(
                 result.first->to_json_string(),
-                timeline->to_json_string());
+                clone->to_json_string());
         });
 
     tests.run(argc, argv);

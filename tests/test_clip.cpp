@@ -260,6 +260,107 @@ main(int argc, char** argv)
         assertEqual(marker->color().c_str(), red);
     });
 
+    // test to ensure null error_status pointers are correctly handled
+    tests.add_test("test_error_ptr_null", [] {
+
+        // std::cout << "running error null test" << std::endl;
+
+        using namespace otio;
+
+        // tests for no image bounds on media reference on clip
+        otio::ErrorStatus              status_mr;
+        SerializableObject::Retainer<> so_mr =
+            SerializableObject::from_json_string(
+                R"(
+            {
+                "OTIO_SCHEMA": "Clip.1",
+                "media_reference": {
+                    "OTIO_SCHEMA": "ExternalReference.1",
+                    "target_url": "unit_test_url",
+                    "available_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 8
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 10
+                        }
+                    },
+                    "available_image_bounds": null
+                }
+            })",
+                &status_mr);
+
+        // checks status is not an error
+        assertFalse(is_error(status_mr));
+
+        // makes sure clip has a value and isn't null
+        const Clip* mr_clip = dynamic_cast<const Clip*>(so_mr.value);
+        assertNotNull(mr_clip);
+
+        // check that there is an error, and that it's the correct error
+        otio::ErrorStatus mr_bounds_error;
+        mr_clip->available_image_bounds(&mr_bounds_error);
+        assertTrue(otio::is_error(mr_bounds_error));
+        assertEqual(
+            mr_bounds_error.outcome,
+            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+
+        // check that if null ptr, nothing happens
+        otio::ErrorStatus* null_test = nullptr;
+
+        assertEqual(
+            mr_clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
+        );
+
+
+
+    });
+
+    tests.add_test("test_error_ptr_null_no_media", [] {
+        using namespace otio;
+
+        // tests for no image bounds and no media reference on clip
+
+        otio::ErrorStatus              status;
+        SerializableObject::Retainer<> so =
+            SerializableObject::from_json_string(
+                R"(
+            {
+                "OTIO_SCHEMA": "Clip.1"
+            })",
+                &status);
+
+        assertFalse(is_error(status));
+
+        Clip* clip = dynamic_cast<Clip*>(so.value);
+        assertNotNull(clip);
+
+        // set media reference key to null
+        otio::ErrorStatus* media_ref_key_error;
+        clip->set_active_media_reference_key("", media_ref_key_error);
+
+        otio::ErrorStatus bounds_error_no_mr;
+        clip->available_image_bounds(&bounds_error_no_mr);
+        assertTrue(otio::is_error(bounds_error_no_mr));
+
+        assertEqual(
+            bounds_error_no_mr.outcome,
+            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+
+        // std::cout<< "bounds error details: " << bounds_error_no_mr.details << std::endl;
+
+        otio::ErrorStatus* null_test_no_mr = nullptr;
+
+        assertEqual(
+            clip->available_image_bounds(null_test_no_mr), std::optional<IMATH_NAMESPACE::Box2d>()
+        );
+    });
+
     tests.run(argc, argv);
     return 0;
 }

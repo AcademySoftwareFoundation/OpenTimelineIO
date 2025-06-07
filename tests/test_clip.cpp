@@ -316,9 +316,6 @@ main(int argc, char** argv)
         assertEqual(
             mr_clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
         );
-
-
-
     });
 
     tests.add_test("test_error_ptr_null_no_media", [] {

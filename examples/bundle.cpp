@@ -70,8 +70,11 @@ main(int argc, char** argv)
     else if (ends_with(input, ".otioz"))
     {
         // Extract .otioz bundle.
+        bundle::FromOtiozOptions options;
+        options.extract = true;
+        options.output_dir = output;
         otio::ErrorStatus error_status;
-        auto result = bundle::from_otioz(input, output, &error_status);
+        auto result = bundle::from_otioz(input, options, &error_status);
         if (otio::is_error(error_status))
         {
             examples::print_error(error_status);

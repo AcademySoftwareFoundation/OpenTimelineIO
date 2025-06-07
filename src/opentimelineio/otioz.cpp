@@ -13,7 +13,6 @@
 #include <mz_zip.h>
 #include <mz_zip_rw.h>
 
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -143,7 +142,7 @@ to_otioz(
         ZipWriter zip(file_name);
 
         // Write the version file.
-        zip.add_compressed(otioz_version, version_file.u8string());
+        zip.add_compressed(otioz_version, version_file);
 
         // Write the .otio file.
         std::string const result_otio = result_timeline->to_json_string(
@@ -154,7 +153,7 @@ to_otioz(
         {
             throw std::runtime_error(error_status->details);
         }
-        zip.add_compressed(result_otio, otio_file.u8string());
+        zip.add_compressed(result_otio, otio_file);
 
         // Write the files from the manifest.
         for (auto const& i: manifest)
@@ -179,18 +178,20 @@ namespace {
 class ZipReader
 {
 public:
-    ZipReader(
-        std::string const& zip_file_name,
-        std::string const& output_dir);
+    ZipReader(std::string const& zip_file_name);
     ~ZipReader();
 
+    void extract(std::string const& file_name, std::string&);
+
+    void extract_all(std::string const& output_dir);
+
 private:
+    std::string _zip_file_name;
     void* _zip = nullptr;
 };
 
-ZipReader::ZipReader(
-    std::string const& zip_file_name,
-    std::string const& output_dir)
+ZipReader::ZipReader(std::string const& zip_file_name)
+    : _zip_file_name(zip_file_name)
 {
     _zip = mz_zip_reader_create();
     if (!_zip)
@@ -207,14 +208,6 @@ ZipReader::ZipReader(
         ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
         throw std::runtime_error(ss.str());
     }
-
-    err = mz_zip_reader_save_all(_zip, output_dir.c_str());
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot extract ZIP file: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }
 }
 
 ZipReader::~ZipReader()
@@ -226,36 +219,83 @@ ZipReader::~ZipReader()
     }
 }
 
+void ZipReader::extract(std::string const& file_name, std::string& text)
+{
+    int32_t err = mz_zip_reader_locate_entry(_zip, file_name.c_str(), 0);
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot locate file in ZIP: '" << file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    int32_t const size = mz_zip_reader_entry_save_buffer_length(_zip);
+    text.resize(size);
+    err = mz_zip_reader_entry_save_buffer(_zip, text.data(), size);
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot read file in ZIP: '" << file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+}
+
+void
+ZipReader::extract_all(std::string const& output_dir)
+{
+    int32_t err = mz_zip_reader_save_all(_zip, output_dir.c_str());
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot extract ZIP file: '" << _zip_file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+}
+
 } // namespace
 
-std::pair<SerializableObject::Retainer<Timeline>, std::string>
+SerializableObject::Retainer<Timeline>
 from_otioz(
-    std::string const& file_name,
-    std::string const& output_dir,
-    ErrorStatus*       error_status)
+    std::string const&      file_name,
+    FromOtiozOptions const& options,
+    ErrorStatus*            error_status)
 {
-    std::pair<SerializableObject::Retainer<Timeline>, std::string> out;
+    SerializableObject::Retainer<Timeline> timeline;
     try
     {
-        // Check the output directory does not already exist.
-        std::filesystem::path const path = std::filesystem::u8path(output_dir);
-        if (std::filesystem::exists(path))
+        // Open the archive.
+        ZipReader zip(file_name);
+
+        if (options.extract)
         {
-            std::stringstream ss;
-            ss << "'" << path.u8string() << "' exists, will not overwrite.";
-            throw std::runtime_error(ss.str());
+            // Check the path does not already exist.
+            std::filesystem::path const output_path =
+                std::filesystem::u8path(options.output_dir);
+            if (std::filesystem::exists(output_path))
+            {
+                std::stringstream ss;
+                ss << "'" << output_path.u8string()
+                   << "' exists, will not overwrite.";
+                throw std::runtime_error(ss.str());
+            }
+
+            // Extract the archive.
+            zip.extract_all(output_path.u8string());
+
+            // Read the timeline.
+            std::string const timeline_file =
+                (output_path / otio_file).u8string();
+            timeline = dynamic_cast<Timeline*>(
+                Timeline::from_json_file(timeline_file, error_status));
         }
-
-        // Extract the archive.
-        ZipReader(file_name, output_dir);
-
-        // Read the timeline.
-        std::string const timeline_file =
-            (std::filesystem::u8path(output_dir) / otio_file).u8string();
-        SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(
-            Timeline::from_json_file(timeline_file, error_status)));
-
-        out = std::make_pair(timeline, timeline_file);
+        else
+        {
+            // Extract and read the timeline.
+            std::string json;
+            zip.extract(otio_file, json);
+            timeline = dynamic_cast<Timeline*>(
+                Timeline::from_json_string(json, error_status));
+        }
     }
     catch (std::exception const& e)
     {
@@ -265,7 +305,7 @@ from_otioz(
                 ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
         }
     }
-    return out;
+    return timeline;
 }
 
 } // namespace bundle

@@ -72,6 +72,8 @@ assertNotNull(const void* a)
     assert(a != nullptr);
 }
 
+std::string get_temp_file(std::string const& extension = "");
+
 class Tests
 {
 public:

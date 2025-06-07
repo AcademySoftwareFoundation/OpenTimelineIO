@@ -41,6 +41,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
+    bundle.cpp
     bundleUtils.cpp
     clip.cpp
     composable.cpp

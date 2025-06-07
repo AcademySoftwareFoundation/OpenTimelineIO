@@ -9,7 +9,6 @@
 #include "opentimelineio/externalReference.h"
 #include "opentimelineio/timeline.h"
 
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -113,7 +112,7 @@ to_otiod(
     return true;
 }
 
-std::pair<SerializableObject::Retainer<Timeline>, std::string>
+SerializableObject::Retainer<Timeline>
 from_otiod(
     std::string const&      file_name,
     FromOtiodOptions const& options,
@@ -140,7 +139,7 @@ from_otiod(
         }
     }
 
-    return std::make_pair(timeline, timeline_path.u8string());
+    return timeline;
 }
 
 } // namespace bundle

@@ -103,15 +103,14 @@ main(int argc, char** argv)
         "test_round_trip",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const temp_file =
-                std::string(std::tmpnam(nullptr)) + ".otiod";
+            std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions options;
             options.timeline_dir = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
             // By default will provide relative paths.
             auto result = bundle::from_otiod(temp_file);
-            for (auto cl: result.first->find_clips())
+            for (auto cl: result->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                     cl->media_reference()))
@@ -139,7 +138,7 @@ main(int argc, char** argv)
             }
 
             assertEqual(
-                result.first->to_json_string(),
+                result->to_json_string(),
                 clone->to_json_string());
         });
 
@@ -147,8 +146,7 @@ main(int argc, char** argv)
         "test_round_trip_all_missing_references",
         [sample_data_dir, timeline]
         {
-            std::string const temp_file =
-                std::string(std::tmpnam(nullptr)) + ".otiod";
+            std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions options;
             options.timeline_dir = sample_data_dir.u8string();
             options.media_reference_policy =
@@ -157,7 +155,7 @@ main(int argc, char** argv)
 
             auto result = bundle::from_otiod(temp_file);
 
-            for (auto clip: result.first->find_clips())
+            for (auto clip: result->find_clips())
             {
                 assertTrue(dynamic_cast<otio::MissingReference*>(
                     clip->media_reference()));
@@ -168,8 +166,7 @@ main(int argc, char** argv)
         "test_round_trip_absolute_paths",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const temp_file =
-                std::string(std::tmpnam(nullptr)) + ".otiod";
+            std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions toOptions;
             toOptions.timeline_dir = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, toOptions));
@@ -179,7 +176,7 @@ main(int argc, char** argv)
             options.absolute_media_reference_paths = true;
             auto result = bundle::from_otiod(temp_file, options);
 
-            for (auto clip: result.first->find_clips())
+            for (auto clip: result->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(
                     clip->media_reference()))
@@ -207,7 +204,7 @@ main(int argc, char** argv)
             }
 
             assertEqual(
-                result.first->to_json_string(),
+                result->to_json_string(),
                 clone->to_json_string());
         });
 

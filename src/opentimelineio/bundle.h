@@ -11,10 +11,9 @@ class Timeline;
 
 /// @todo Should the .otioz/.otiod file versions be bumped?
 /// @todo Shoudle we use a library for URL conversions?
-/// @todo Add support for dry runs?
 /// @todo Document that paths are relative to the timeline.
 /// @todo Should bundle support be optional?
-/// @todo Add C++ bundle tests.
+/// @todo Add C++ image sequence bundle tests.
 /// @todo Python wrappings.
 /// @todo Convert Python adapters to use C++ functions.
 /// @todo Update documentation.
@@ -25,6 +24,15 @@ static std::string const otioz_version = "1.0.0";
 
 /// @brief This constant provides the current otiod version.
 static std::string const otiod_version = "1.0.0";
+
+/// @brief Version file name.
+static std::string const version_file = "version.txt";
+
+/// @brief OTIO file name.
+static std::string const otio_file = "content.otio";
+
+/// @brief Media directory name.
+static std::string const media_dir = "media";
 
 /// @brief This enumeration provides the bundle media reference policy.
 enum class MediaReferencePolicy
@@ -52,6 +60,13 @@ struct ToBundleOptions
     int indent = 4;
 };
 
+/// @brief Get the total size (in bytes) of the media files that will be
+/// put into the bundle.
+size_t get_media_size(
+    Timeline const*        timeline,
+    ToBundleOptions const& options      = ToBundleOptions(),
+    ErrorStatus*           error_status = nullptr);
+
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
 /// @param timeline The timeline to write.
@@ -64,16 +79,25 @@ bool to_otioz(
     ToBundleOptions const& options      = ToBundleOptions(),
     ErrorStatus*           error_status = nullptr);
 
-/// @brief Read a timeline from an .otioz bundle. The timeline and timeline
-/// file name are returned.
+/// @brief Options for reading .otioz bundles.
+struct FromOtiozOptions
+{
+    /// @brief Extract the contents of the bundle.
+    bool extract = false;
+
+    /// @brief The output directory for the extracted contents.
+    std::string output_dir;
+};
+
+/// @brief Read a timeline from an .otioz bundle.
 ///
 /// @param file_name The bundle file name.
 /// @param output_dir The directory where the bundle will be extracted.
 /// @param error_status The error status.
-std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otioz(
-    std::string const& file_name,
-    std::string const& output_dir,
-    ErrorStatus*       error_status = nullptr);
+SerializableObject::Retainer<Timeline> from_otioz(
+    std::string const&      file_name,
+    FromOtiozOptions const& options      = FromOtiozOptions(),
+    ErrorStatus*            error_status = nullptr);
 
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
@@ -94,13 +118,12 @@ struct FromOtiodOptions
     bool absolute_media_reference_paths = false;
 };
 
-/// @brief Read a timeline from an .otiod bundle. The timeline and timeline
-/// file name are returned.
+/// @brief Read a timeline from an .otiod bundle.
 ///
 /// @param file_name The bundle file name.
 /// @param timeline_file_name Returns the timeline file name.
 /// @param error_status The error status.
-std::pair<SerializableObject::Retainer<Timeline>, std::string> from_otiod(
+SerializableObject::Retainer<Timeline> from_otiod(
     std::string const&      file_name,
     FromOtiodOptions const& options      = FromOtiodOptions(),
     ErrorStatus*            error_status = nullptr);

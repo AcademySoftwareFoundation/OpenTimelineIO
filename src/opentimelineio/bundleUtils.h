@@ -10,15 +10,6 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 namespace bundle {
 
-/// @brief Version file name.
-std::filesystem::path const version_file = "version.txt";
-
-/// @brief OTIO file name.
-std::filesystem::path const otio_file = "content.otio";
-
-/// @brief Media directory name.
-std::filesystem::path const media_dir = "media";
-
 /// @brief Convert a media reference policy to a string.
 std::string to_string(MediaReferencePolicy);
 

@@ -231,6 +231,7 @@ reference_cloned_and_missing(
         metadata["original_frame_zero_padding"] =
             orig_isr->frame_zero_padding();
     }
+    result->metadata() = metadata;
     return result;
 }
 
@@ -370,7 +371,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                         std::stringstream ss;
                         ss << "Bundles require that the media files have unique "
                            << "basenames. File '" << path.u8string()
-                           << "' and '" << i->second
+                           << "' and '" << j->second
                            << "' have matching basenames of: '"
                            << path.filename().u8string() << "'.";
                         throw std::runtime_error(ss.str());

@@ -36,6 +36,7 @@ public:
 
  private:
     void* _zip = nullptr;
+    uint32_t _attributes = 0;
 };
 
 ZipWriter::ZipWriter(std::string const& zip_file_name)
@@ -53,6 +54,14 @@ ZipWriter::ZipWriter(std::string const& zip_file_name)
     {
         std::stringstream ss;
         ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    err = mz_os_get_file_attribs(zip_file_name.c_str(), &_attributes);
+    if (err != MZ_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot get file attributes: '" << zip_file_name << "'.";
         throw std::runtime_error(ss.str());
     }
 }
@@ -78,7 +87,9 @@ ZipWriter::add_compressed(
     file_info.flag               = MZ_ZIP_FLAG_UTF8;
     file_info.modified_date      = std::time(nullptr);
     file_info.compression_method = MZ_COMPRESS_METHOD_DEFLATE;
+    file_info.uncompressed_size  = content.size();
     file_info.filename           = file_name_in_zip.c_str();
+    file_info.external_fa        = _attributes;
     int32_t err                  = mz_zip_writer_add_buffer(
         _zip,
         (void*)(content.c_str()),

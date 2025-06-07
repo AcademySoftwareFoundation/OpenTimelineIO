@@ -22,8 +22,7 @@ main(int argc, char** argv)
 
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
-        //std::filesystem::current_path() / "sample_data";
-        "C:/Dev/otio/darby/tests/sample_data";
+        std::filesystem::current_path() / "sample_data";
     std::string const screening_example_path = bundle::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 
@@ -167,9 +166,9 @@ main(int argc, char** argv)
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
             std::string const       temp_file = get_temp_file(".otiod");
-            bundle::ToBundleOptions toOptions;
-            toOptions.timeline_dir = sample_data_dir.u8string();
-            assertTrue(bundle::to_otiod(timeline, temp_file, toOptions));
+            bundle::ToBundleOptions to_options;
+            to_options.timeline_dir = sample_data_dir.u8string();
+            assertTrue(bundle::to_otiod(timeline, temp_file, to_options));
 
             // Can optionally generate absolute paths.
             bundle::FromOtiodOptions options;

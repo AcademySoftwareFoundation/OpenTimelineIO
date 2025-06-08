@@ -169,9 +169,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-13, macos-latest]
         python-build: ['cp39', 'cp310', 'cp311', 'cp312']
-        exclude:
-          # none currently
-          # - { os: macos-latest, python-build: 'cp37' }
+        #exclude:
+        #   none currently
+        #   - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 

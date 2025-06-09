@@ -337,9 +337,9 @@ main(int argc, char** argv)
         Clip* clip = dynamic_cast<Clip*>(so.value);
         assertNotNull(clip);
 
-        // set media reference key to null
-        otio::ErrorStatus* media_ref_key_error;
-        clip->set_active_media_reference_key("", media_ref_key_error);
+        // set media reference key to empty string
+        otio::ErrorStatus media_ref_key_error;
+        clip->set_active_media_reference_key("", &media_ref_key_error);
 
         otio::ErrorStatus bounds_error_no_mr;
         clip->available_image_bounds(&bounds_error_no_mr);

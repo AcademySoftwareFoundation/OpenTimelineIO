@@ -7,8 +7,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-class Timeline;
-
 /// @todo Should the .otioz/.otiod file versions be bumped?
 /// @todo Shoudle we use a library for URL conversions?
 /// @todo Document that paths are relative to the timeline.
@@ -69,6 +67,21 @@ size_t get_media_size(
 
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
+/// Takes as input an OTIO file that has media references which are all
+/// ExternalReferences with target_urls to files with unique basenames that are
+/// accessible through the file system and bundles those files and the otio
+/// file into a single zip file with the suffix .otioz.
+///
+/// The otio file and version file are compressed using the ZIP "deflate"
+/// mode. All media files are store uncompressed.
+///
+/// Can error out if files are not locally referenced. or provide missing
+/// references.
+///
+/// Note that OTIOZ files _always_ use the unix style path separator ('/').
+/// This ensures that regardless of which platform a bundle was created on, it
+/// can be read on UNIX and Windows platforms.
+///
 /// @param timeline The timeline to write.
 /// @param file_name The bundle file name.
 /// @param options The bundle options.
@@ -93,12 +106,17 @@ struct FromOtiozOptions
 /// @param file_name The bundle file name.
 /// @param output_dir The directory where the bundle will be extracted.
 /// @param error_status The error status.
-SerializableObject::Retainer<Timeline> from_otioz(
+Timeline* from_otioz(
     std::string const&      file_name,
     FromOtiozOptions const& options      = FromOtiozOptions(),
     ErrorStatus*            error_status = nullptr);
 
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
+///
+/// Takes as input an OTIO file that has media references which are all
+/// ExternalReferences with target_urls to files with unique basenames that are
+/// accessible through the file system and bundles those files and the otio file
+/// into a single directory named with a suffix of .otiod.
 ///
 /// @param timeline The timeline to write.
 /// @param file_name The bundle file name.
@@ -122,7 +140,7 @@ struct FromOtiodOptions
 /// @param file_name The bundle file name.
 /// @param timeline_file_name Returns the timeline file name.
 /// @param error_status The error status.
-SerializableObject::Retainer<Timeline> from_otiod(
+Timeline* from_otiod(
     std::string const&      file_name,
     FromOtiodOptions const& options      = FromOtiodOptions(),
     ErrorStatus*            error_status = nullptr);

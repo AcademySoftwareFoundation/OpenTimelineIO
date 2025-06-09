@@ -265,13 +265,13 @@ ZipReader::extract_all(std::string const& output_dir)
 
 } // namespace
 
-SerializableObject::Retainer<Timeline>
+Timeline*
 from_otioz(
     std::string const&      file_name,
     FromOtiozOptions const& options,
     ErrorStatus*            error_status)
 {
-    SerializableObject::Retainer<Timeline> timeline;
+    Timeline* timeline = nullptr;
     try
     {
         // Open the archive.

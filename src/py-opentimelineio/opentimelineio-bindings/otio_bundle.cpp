@@ -2,6 +2,8 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/stl.h>
 
 #include "otio_errorStatusHandler.h"
 

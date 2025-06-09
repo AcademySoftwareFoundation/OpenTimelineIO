@@ -112,7 +112,7 @@ to_otiod(
     return true;
 }
 
-SerializableObject::Retainer<Timeline>
+Timeline*
 from_otiod(
     std::string const&      file_name,
     FromOtiodOptions const& options,
@@ -121,8 +121,8 @@ from_otiod(
     // Read the timeline.
     std::filesystem::path const timeline_path =
         std::filesystem::u8path(file_name) / otio_file;
-    SerializableObject::Retainer<Timeline> timeline(dynamic_cast<Timeline*>(
-        Timeline::from_json_file(timeline_path.u8string(), error_status)));
+    Timeline* timeline = dynamic_cast<Timeline*>(
+        Timeline::from_json_file(timeline_path.u8string(), error_status));
 
     if (options.absolute_media_reference_paths)
     {

@@ -18,6 +18,8 @@ from . import (
 )
 
 from .. import (
+    _otio,
+    core,
     exceptions,
     url_utils,
 )
@@ -31,27 +33,9 @@ def read_from_file(
     # convert the media_reference paths to absolute paths
     absolute_media_reference_paths=False,
 ):
-    result = otio_json.read_from_file(
-        os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
-    )
-
-    if not absolute_media_reference_paths:
-        return result
-
-    for cl in result.find_clips():
-        try:
-            source_fpath = cl.media_reference.target_url
-        except AttributeError:
-            continue
-
-        rel_path = urlparse.urlparse(source_fpath).path
-        new_fpath = url_utils.url_from_filepath(
-            os.path.join(filepath, rel_path)
-        )
-
-        cl.media_reference.target_url = new_fpath
-
-    return result
+    options = _otio.bundle.FromOtiodOptions()
+    options.absolute_media_reference_paths = absolute_media_reference_paths
+    return _otio.bundle.from_otiod(filepath)
 
 
 def write_to_file(

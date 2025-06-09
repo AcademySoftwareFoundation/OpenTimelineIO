@@ -145,7 +145,7 @@ to_otioz(
         std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            std::filesystem::u8path(options.timeline_dir),
+            std::filesystem::u8path(options.parent_path),
             options.media_reference_policy,
             manifest);
 
@@ -277,25 +277,25 @@ from_otioz(
         // Open the archive.
         ZipReader zip(file_name);
 
-        if (options.extract)
+        if (!options.extract_path.empty())
         {
             // Check the path does not already exist.
-            std::filesystem::path const output_path =
-                std::filesystem::u8path(options.output_dir);
-            if (std::filesystem::exists(output_path))
+            std::filesystem::path const extract_path =
+                std::filesystem::u8path(options.extract_path);
+            if (std::filesystem::exists(extract_path))
             {
                 std::stringstream ss;
-                ss << "'" << output_path.u8string()
+                ss << "'" << extract_path.u8string()
                    << "' exists, will not overwrite.";
                 throw std::runtime_error(ss.str());
             }
 
             // Extract the archive.
-            zip.extract_all(output_path.u8string());
+            zip.extract_all(extract_path.u8string());
 
             // Read the timeline.
             std::string const timeline_file =
-                (output_path / otio_file).u8string();
+                (extract_path / otio_file).u8string();
             timeline = dynamic_cast<Timeline*>(
                 Timeline::from_json_file(timeline_file, error_status));
         }

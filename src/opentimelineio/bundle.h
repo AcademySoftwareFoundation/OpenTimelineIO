@@ -19,44 +19,44 @@ class Timeline;
 /// @todo Update documentation.
 namespace bundle {
 
-/// @brief This constant provides the current otioz version.
+/// @brief The current otioz version.
 static std::string const otioz_version = "1.0.0";
 
-/// @brief This constant provides the current otiod version.
+/// @brief The current otiod version.
 static std::string const otiod_version = "1.0.0";
 
-/// @brief Version file name.
+/// @brief The version file name in the bundle.
 static std::string const version_file = "version.txt";
 
-/// @brief OTIO file name.
+/// @brief The OTIO file name in the bundle.
 static std::string const otio_file = "content.otio";
 
-/// @brief Media directory name.
+/// @brief The media directory name in the bundle.
 static std::string const media_dir = "media";
 
 /// @brief This enumeration provides the bundle media reference policy.
 enum class MediaReferencePolicy
 {
-    ErrorIfNotFile,
-    MissingIfNotFile,
-    AllMissing
+    ErrorIfNotFile,   ///< Return an error if there are any non-file media references.
+    MissingIfNotFile, ///< Replace non-file media references with missing references.
+    AllMissing        ///< Replace all media references with missing references.
 };
 
 /// @brief Options for writing bundles.
 struct ToBundleOptions
 {
-    /// @brief The timeline's parent directory. This is used to locate media
-    /// with relative file paths.
-    std::string timeline_dir;
+    /// @brief The parent path is used to locate media with relative paths. If
+    /// parent path is empty, paths are relative to the current working directory.
+    std::string parent_path;
 
-    /// @brief The media reference policy.
+    /// @brief The bundle media reference policy.
     MediaReferencePolicy media_reference_policy =
         MediaReferencePolicy::ErrorIfNotFile;
 
     /// @todo Add comment.
     schema_version_map const* target_family_label_spec = nullptr;
 
-    /// @brief The number of spaces to use for indentation.
+    /// @brief The number of spaces to use for JSON indentation.
     int indent = 4;
 };
 
@@ -82,11 +82,10 @@ bool to_otioz(
 /// @brief Options for reading .otioz bundles.
 struct FromOtiozOptions
 {
-    /// @brief Extract the contents of the bundle.
-    bool extract = false;
-
-    /// @brief The output directory for the extracted contents.
-    std::string output_dir;
+    /// @brief Extract the contents of the bundle to the given path. If the
+    /// path is empty, the contents are not extracted, and only the timeline
+    /// is read from the bundle.
+    std::string extract_path;
 };
 
 /// @brief Read a timeline from an .otioz bundle.

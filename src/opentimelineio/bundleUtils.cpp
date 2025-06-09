@@ -239,7 +239,7 @@ reference_cloned_and_missing(
 
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const& timeline,
-    std::filesystem::path const&                  timeline_dir,
+    std::filesystem::path const&                  parent_path,
     MediaReferencePolicy                          media_reference_policy,
     std::map<std::filesystem::path, std::filesystem::path>& manifest)
 {
@@ -326,7 +326,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                 target_path = std::filesystem::u8path(target_file);
                 if (scheme.empty())
                 {
-                    target_path = timeline_dir / target_path;
+                    target_path = parent_path / target_path;
                 }
                 target_path = std::filesystem::absolute(target_path);
                 if (!std::filesystem::exists(target_path)

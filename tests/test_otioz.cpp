@@ -59,8 +59,8 @@ main(int argc, char** argv)
          timeline]
         {
             bundle::ToBundleOptions options;
-            options.timeline_dir = sample_data_dir.u8string();
-            size_t const size    = bundle::get_media_size(timeline, options);
+            options.parent_path = sample_data_dir.u8string();
+            size_t const size   = bundle::get_media_size(timeline, options);
             size_t const size_compare =
                 std::filesystem::file_size(
                     sample_data_dir / media_example_path_rel)
@@ -117,7 +117,7 @@ main(int argc, char** argv)
 
             std::string temp_file = get_temp_file(".otioz");
             bundle::ToBundleOptions options;
-            options.timeline_dir = sample_data_dir.u8string();
+            options.parent_path = sample_data_dir.u8string();
             otio::ErrorStatus error;
             assertFalse(bundle::to_otioz(clone, temp_file, options, &error));
             std::cout << "ERROR: " << error.details << std::endl;
@@ -130,7 +130,7 @@ main(int argc, char** argv)
         {
             std::string temp_file = get_temp_file(".otioz");
             bundle::ToBundleOptions options;
-            options.timeline_dir = sample_data_dir.u8string();
+            options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otioz(timeline, temp_file, options));
 
             auto result = bundle::from_otioz(temp_file);
@@ -180,15 +180,14 @@ main(int argc, char** argv)
         {
             std::string temp_file = get_temp_file(".otioz");
             bundle::ToBundleOptions to_options;
-            to_options.timeline_dir = sample_data_dir.u8string();
+            to_options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otioz(timeline, temp_file, to_options));
 
             bundle::FromOtiozOptions from_options;
-            from_options.extract = true;
             std::filesystem::path const output_path =
                 std::filesystem::u8path(get_temp_file());
-            from_options.output_dir = output_path.u8string();
-            auto result            = bundle::from_otioz(temp_file, from_options);
+            from_options.extract_path = output_path.u8string();
+            auto result               = bundle::from_otioz(temp_file, from_options);
 
             // Make sure that all the references are ExternalReference.
             for (auto cl : result->find_clips())
@@ -250,17 +249,16 @@ main(int argc, char** argv)
         {
             std::string             temp_file = get_temp_file(".otioz");
             bundle::ToBundleOptions to_options;
-            to_options.timeline_dir = sample_data_dir.u8string();
+            to_options.parent_path = sample_data_dir.u8string();
             to_options.media_reference_policy =
                 bundle::MediaReferencePolicy::AllMissing;
             assertTrue(bundle::to_otioz(timeline, temp_file, to_options));
 
             bundle::FromOtiozOptions from_options;
-            from_options.extract = true;
             std::filesystem::path const output_path =
                 std::filesystem::u8path(get_temp_file());
-            from_options.output_dir = output_path.u8string();
-            auto result            = bundle::from_otioz(temp_file, from_options);
+            from_options.extract_path = output_path.u8string();
+            auto result               = bundle::from_otioz(temp_file, from_options);
 
             // Check the version file exists.
             assertTrue(

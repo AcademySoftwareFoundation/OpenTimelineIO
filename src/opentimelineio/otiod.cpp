@@ -57,7 +57,7 @@ to_otiod(
         std::map<std::filesystem::path, std::filesystem::path> manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
-            std::filesystem::u8path(options.timeline_dir),
+            std::filesystem::u8path(options.parent_path),
             options.media_reference_policy,
             manifest);
 

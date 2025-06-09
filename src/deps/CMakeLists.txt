@@ -43,6 +43,7 @@ endif()
 
 if(NOT OTIO_FIND_MINIZIP_NG)
     set(BUILD_SHARED_LIBS OFF)
+    set(SKIP_INSTALL_ALL ON)
     set(MZ_ZLIB ON)
     set(MZ_BZIP2 OFF)
     set(MZ_LZMA OFF)

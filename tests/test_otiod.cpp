@@ -104,7 +104,7 @@ main(int argc, char** argv)
         {
             std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions options;
-            options.timeline_dir = sample_data_dir.u8string();
+            options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
             // By default will provide relative paths.
@@ -147,7 +147,7 @@ main(int argc, char** argv)
         {
             std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions options;
-            options.timeline_dir = sample_data_dir.u8string();
+            options.parent_path = sample_data_dir.u8string();
             options.media_reference_policy =
                 bundle::MediaReferencePolicy::AllMissing;
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
@@ -167,7 +167,7 @@ main(int argc, char** argv)
         {
             std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions to_options;
-            to_options.timeline_dir = sample_data_dir.u8string();
+            to_options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, to_options));
 
             // Can optionally generate absolute paths.

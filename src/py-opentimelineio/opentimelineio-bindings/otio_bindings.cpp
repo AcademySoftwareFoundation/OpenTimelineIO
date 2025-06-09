@@ -180,6 +180,7 @@ PYBIND11_MODULE(_otio, m) {
     otio_imath_bindings(m);
     otio_serializable_object_bindings(m);
     otio_tests_bindings(m);
+    otio_bundle_bindings(m);
 
     m.def(
             "_serialize_json_to_string",

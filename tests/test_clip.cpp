@@ -291,10 +291,30 @@ main(int argc, char** argv)
 
         SerializableObject::Retainer<Clip> clip(new Clip);
 
+<<<<<<< HEAD
         // set media reference to empty
         Clip::MediaReferences empty_mrs;
         empty_mrs["empty"] = nullptr;
         clip->set_media_references(empty_mrs, "empty");
+=======
+        otio::ErrorStatus              status;
+        SerializableObject::Retainer<> so =
+            SerializableObject::from_json_string(
+                R"(
+            {
+                "OTIO_SCHEMA": "Clip.1"
+            })",
+                &status);
+
+        assertFalse(is_error(status));
+
+        Clip* clip = dynamic_cast<Clip*>(so.value);
+        assertNotNull(clip);
+
+        // set media reference key to empty string
+        otio::ErrorStatus media_ref_key_error;
+        clip->set_active_media_reference_key("", &media_ref_key_error);
+>>>>>>> 3fad221 (fixed non-initialized pointer)
 
         otio::ErrorStatus bounds_error_no_mr;
         clip->available_image_bounds(&bounds_error_no_mr);

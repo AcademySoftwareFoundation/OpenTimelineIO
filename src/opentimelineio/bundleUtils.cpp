@@ -240,10 +240,10 @@ reference_cloned_and_missing(
 SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const& timeline,
     std::filesystem::path const&                  parent_path,
-    MediaReferencePolicy                          media_reference_policy,
-    std::map<std::filesystem::path, std::filesystem::path>& manifest)
+    MediaReferencePolicy                          media_policy,
+    Manifest&                                     output_manifest)
 {
-    manifest.clear();
+    output_manifest.clear();
     std::map<std::filesystem::path, std::filesystem::path>
         bundle_paths_to_abs_paths;
 
@@ -259,10 +259,10 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
         auto isr = dynamic_cast<ImageSequenceReference*>(cl->media_reference());
         if (er || isr)
         {
-            if (MediaReferencePolicy::AllMissing == media_reference_policy)
+            if (MediaReferencePolicy::AllMissing == media_policy)
             {
                 std::stringstream ss;
-                ss << to_string(media_reference_policy)
+                ss << to_string(media_policy)
                    << " specified as the MediaReferencePolicy";
                 cl->set_media_reference(
                     reference_cloned_and_missing(mr, ss.str()));
@@ -277,7 +277,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             std::string const scheme = scheme_from_url(url);
             if (!(scheme == "file://" || scheme.empty()))
             {
-                if (MediaReferencePolicy::ErrorIfNotFile == media_reference_policy)
+                if (MediaReferencePolicy::ErrorIfNotFile == media_policy)
                 {
                     std::stringstream ss;
                     ss << "Bundles only work with media reference target URLs "
@@ -285,7 +285,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                        << "'" << url << "'.";
                     throw std::runtime_error(ss.str());
                 }
-                if (MediaReferencePolicy::MissingIfNotFile == media_reference_policy)
+                if (MediaReferencePolicy::MissingIfNotFile == media_policy)
                 {
                     cl->set_media_reference(reference_cloned_and_missing(
                         mr,
@@ -339,16 +339,14 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             }
             if (target_error)
             {
-                if (MediaReferencePolicy::ErrorIfNotFile
-                    == media_reference_policy)
+                if (MediaReferencePolicy::ErrorIfNotFile == media_policy)
                 {
                     std::stringstream ss;
                     ss << "'" << target_path.u8string()
                        << "' is not a file or does not exist.";
                     throw std::runtime_error(ss.str());
                 }
-                if (MediaReferencePolicy::MissingIfNotFile
-                    == media_reference_policy)
+                if (MediaReferencePolicy::MissingIfNotFile == media_policy)
                 {
                     cl->set_media_reference(reference_cloned_and_missing(
                         mr,
@@ -362,8 +360,8 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             for (auto const& path: target_paths)
             {
                 bundle_path = media_dir / path.filename();
-                const auto i = manifest.find(path);
-                if (i == manifest.end())
+                const auto i = output_manifest.find(path);
+                if (i == output_manifest.end())
                 {
                     const auto j = bundle_paths_to_abs_paths.find(bundle_path);
                     if (j != bundle_paths_to_abs_paths.end())
@@ -377,7 +375,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                         throw std::runtime_error(ss.str());
                     }
                     bundle_paths_to_abs_paths[bundle_path] = path;
-                    manifest[path] = bundle_path;
+                    output_manifest[path] = bundle_path;
                 }
             }
 

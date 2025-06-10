@@ -71,7 +71,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_not_a_file_error(self):
         # dryrun should compute what the total size of the zipfile will be.
-        tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
+        tempdir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tempdir, "test_not_a_file_error.otioz")
         with tempfile.NamedTemporaryFile() as bogusfile:
             fname = bogusfile.name
         for cl in self.tl.find_clips():
@@ -109,7 +110,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.url_utils.url_from_filepath(new_path)
         )
 
-        tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
+        tmp_path = os.path.join(tempdir, "test_colliding_basename.otioz")
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path)
 
@@ -151,15 +152,15 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_with_extraction(self):
-        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
-            tmp_path = bogusfile.name
+        tempdir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tempdir, "test_round_trip_with_extraction.otioz")
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
-        tempdir = tempfile.mkdtemp()
+        extract_path = os.path.join(tempdir, "extract")
         result = otio.adapters.read_from_file(
             tmp_path,
-            extract_to_directory=tempdir
+            extract_to_directory=extract_path
         )
 
         # make sure that all the references are ExternalReference
@@ -182,8 +183,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(
             os.path.exists(
                 os.path.join(
-                    tempdir,
-                    otio.adapters.file_bundle_utils.BUNDLE_PLAYLIST_PATH
+                    extract_path,
+                    otio._otio.bundle.otio_file
                 )
             )
         )
@@ -192,8 +193,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(
             os.path.exists(
                 os.path.join(
-                    tempdir,
-                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME
+                    extract_path,
+                    otio._otio.bundle.media_dir
                 )
             )
         )
@@ -202,42 +203,41 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(
             os.path.exists(
                 os.path.join(
-                    tempdir,
-                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
+                    extract_path,
+                    otio._otio.bundle.media_dir,
                     os.path.basename(MEDIA_EXAMPLE_PATH_URL_REL)
                 )
             )
         )
 
     def test_round_trip_with_extraction_no_media(self):
-        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
-            tmp_path = bogusfile.name
+        tempdir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tempdir, "test_round_trip_with_extraction_no_media.otioz")
         otio.adapters.write_to_file(
             self.tl,
             tmp_path,
             media_policy=(
-                otio.adapters.file_bundle_utils.MediaReferencePolicy.AllMissing
+                otio._otio.bundle.MediaReferencePolicy.AllMissing
             ),
         )
 
-        tempdir = tempfile.mkdtemp()
+        extract_path = os.path.join(tempdir, "extract")
         result = otio.adapters.read_from_file(
             tmp_path,
-            extract_to_directory=tempdir,
+            extract_to_directory=extract_path
         )
 
         version_file_path = os.path.join(
-            tempdir,
-            otio.adapters.file_bundle_utils.BUNDLE_VERSION_FILE
+            extract_path,
+            otio._otio.bundle.version_file
         )
         self.assertTrue(os.path.exists(version_file_path))
         with open(version_file_path) as fi:
             self.assertEqual(
                 fi.read(),
-                otio.adapters.file_bundle_utils.BUNDLE_VERSION
+                otio._otio.bundle.otioz_version
             )
 
-        # conform media references in input to what they should be in the output
         for cl in result.find_clips():
             # should be all MissingReferences
             self.assertIsInstance(

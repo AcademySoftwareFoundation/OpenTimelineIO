@@ -142,11 +142,11 @@ to_otioz(
         }
 
         // Create the new timeline and file manifest.
-        std::map<std::filesystem::path, std::filesystem::path> manifest;
+        Manifest manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
-            options.media_reference_policy,
+            options.media_policy,
             manifest);
 
         // Write the archive.
@@ -177,7 +177,7 @@ to_otioz(
         if (error_status)
         {
             *error_status =
-                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
+                ErrorStatus(ErrorStatus::BUNDLE_WRITE_ERROR, e.what());
         }
         return false;
     }
@@ -313,7 +313,7 @@ from_otioz(
         if (error_status)
         {
             *error_status =
-                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
+                ErrorStatus(ErrorStatus::BUNDLE_READ_ERROR, e.what());
         }
     }
     return timeline;

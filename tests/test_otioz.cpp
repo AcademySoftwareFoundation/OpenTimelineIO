@@ -250,8 +250,7 @@ main(int argc, char** argv)
             std::string             temp_file = get_temp_file(".otioz");
             bundle::ToBundleOptions to_options;
             to_options.parent_path = sample_data_dir.u8string();
-            to_options.media_reference_policy =
-                bundle::MediaReferencePolicy::AllMissing;
+            to_options.media_policy = bundle::MediaReferencePolicy::AllMissing;
             assertTrue(bundle::to_otioz(timeline, temp_file, to_options));
 
             bundle::FromOtiozOptions from_options;

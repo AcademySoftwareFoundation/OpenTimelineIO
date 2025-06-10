@@ -148,8 +148,7 @@ main(int argc, char** argv)
             std::string const       temp_file = get_temp_file(".otiod");
             bundle::ToBundleOptions options;
             options.parent_path = sample_data_dir.u8string();
-            options.media_reference_policy =
-                bundle::MediaReferencePolicy::AllMissing;
+            options.media_policy = bundle::MediaReferencePolicy::AllMissing;
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
             auto result = bundle::from_otiod(temp_file);

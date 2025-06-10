@@ -47,13 +47,15 @@ std::string url_from_filepath(std::string const&);
 /// standard library at some point.
 std::string filepath_from_url(std::string const&);
 
-/// @brief Create a new timeline based on input_otio that has had media
-/// references replaced according to the media_policy.
-/// 
-/// The media references are relinked to relative files paths in media_dir.
-/// 
-/// The new timeline and a set of all absolute file paths (not URLs) to be
-/// used in the bundle.
+/// @brief This maps absolute paths of media references to their relative
+/// paths in the bundle media directory.
+typedef std::map<std::filesystem::path, std::filesystem::path> Manifest;
+
+/// @brief Create a new timeline based on the input timeline that has media
+/// references replaced according to the media reference policy.
+///
+/// The media references are relinked to relative file paths in the media
+/// directory.
 ///
 /// This is considered an internal API.
 /// 
@@ -62,7 +64,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     SerializableObject::Retainer<Timeline> const&,
     std::filesystem::path const& timeline_dir,
     MediaReferencePolicy media_reference_policy,
-    std::map<std::filesystem::path, std::filesystem::path>&);
+    Manifest& output_manifest);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

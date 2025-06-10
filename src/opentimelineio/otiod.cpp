@@ -54,11 +54,11 @@ to_otiod(
         }
 
         // Create the new timeline and file manifest.
-        std::map<std::filesystem::path, std::filesystem::path> manifest;
+        Manifest manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
-            options.media_reference_policy,
+            options.media_policy,
             manifest);
 
         // Create the output directory.
@@ -105,7 +105,7 @@ to_otiod(
         if (error_status)
         {
             *error_status =
-                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
+                ErrorStatus(ErrorStatus::BUNDLE_WRITE_ERROR, e.what());
         }
         return false;
     }
@@ -118,27 +118,38 @@ from_otiod(
     FromOtiodOptions const& options,
     ErrorStatus*            error_status)
 {
-    // Read the timeline.
-    std::filesystem::path const timeline_path =
-        std::filesystem::u8path(file_name) / otio_file;
-    Timeline* timeline = dynamic_cast<Timeline*>(
-        Timeline::from_json_file(timeline_path.u8string(), error_status));
-
-    if (options.absolute_media_reference_paths)
+    Timeline* timeline = nullptr;
+    try
     {
-        for (auto cl : timeline->find_clips())
+        // Read the timeline.
+        std::filesystem::path const timeline_path =
+            std::filesystem::u8path(file_name) / otio_file;
+        timeline = dynamic_cast<Timeline*>(
+            Timeline::from_json_file(timeline_path.u8string(), error_status));
+
+        if (options.absolute_media_reference_paths)
         {
-            if (auto er = dynamic_cast<ExternalReference*>(cl->media_reference()))
+            for (auto cl : timeline->find_clips())
             {
-                std::filesystem::path const path =
-                    timeline_path.parent_path()
-                    / std::filesystem::u8path(
-                        bundle::filepath_from_url(er->target_url()));
-                er->set_target_url(url_from_filepath(path.u8string()));
+                if (auto er = dynamic_cast<ExternalReference*>(cl->media_reference()))
+                {
+                    std::filesystem::path const path =
+                        timeline_path.parent_path()
+                        / std::filesystem::u8path(
+                            bundle::filepath_from_url(er->target_url()));
+                    er->set_target_url(url_from_filepath(path.u8string()));
+                }
             }
         }
     }
-
+    catch (const std::exception& e)
+    {
+        if (error_status)
+        {
+            *error_status =
+                ErrorStatus(ErrorStatus::BUNDLE_READ_ERROR, e.what());
+        }
+    }
     return timeline;
 }
 

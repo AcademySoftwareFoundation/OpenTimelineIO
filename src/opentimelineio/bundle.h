@@ -9,11 +9,8 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @todo Should the .otioz/.otiod file versions be bumped?
 /// @todo Shoudle we use a library for URL conversions?
-/// @todo Document that paths are relative to the timeline.
 /// @todo Should bundle support be optional?
 /// @todo Add C++ image sequence bundle tests.
-/// @todo Python wrappings.
-/// @todo Convert Python adapters to use C++ functions.
 /// @todo Update documentation.
 namespace bundle {
 
@@ -48,8 +45,7 @@ struct ToBundleOptions
     std::string parent_path;
 
     /// @brief The bundle media reference policy.
-    MediaReferencePolicy media_reference_policy =
-        MediaReferencePolicy::ErrorIfNotFile;
+    MediaReferencePolicy media_policy = MediaReferencePolicy::ErrorIfNotFile;
 
     /// @todo Add comment.
     schema_version_map const* target_family_label_spec = nullptr;

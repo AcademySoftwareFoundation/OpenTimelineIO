@@ -53,8 +53,8 @@ Options for writing bundles.
             "parent path is empty, paths are relative to the current working "
             "directory.")
         .def_readwrite(
-            "media_reference_policy",
-            &ToBundleOptions::media_reference_policy,
+            "media_policy",
+            &ToBundleOptions::media_policy,
             "The bundle media reference policy.")
         .def_readwrite(
             "indent",

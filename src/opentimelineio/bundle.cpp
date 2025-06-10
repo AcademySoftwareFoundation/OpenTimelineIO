@@ -20,7 +20,7 @@ size_t get_media_size(
         timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
-            options.media_reference_policy,
+            options.media_policy,
             manifest);
 
         // Count the bytes in each file.
@@ -34,9 +34,8 @@ size_t get_media_size(
         if (error_status)
         {
             *error_status =
-                ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, e.what());
+                ErrorStatus(ErrorStatus::BUNDLE_SIZE_ERROR, e.what());
         }
-        return false;
     }
     return byte_count;
 }

@@ -6,6 +6,7 @@
 """Utility assertions for OTIO Unit tests."""
 
 import re
+from typing import Any
 
 from . import (
     adapters
@@ -13,14 +14,14 @@ from . import (
 
 
 class OTIOAssertions:
-    def assertJsonEqual(self, known, test_result):
+    def assertJsonEqual(self, known: Any, test_result: Any) -> None:
         """Convert to json and compare that (more readable)."""
         self.maxDiff = None
 
         known_str = adapters.write_to_string(known, 'otio_json')
         test_str = adapters.write_to_string(test_result, 'otio_json')
 
-        def strip_trailing_decimal_zero(s):
+        def strip_trailing_decimal_zero(s: str) -> str:
             return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
 
         self.assertMultiLineEqual(
@@ -28,7 +29,7 @@ class OTIOAssertions:
             strip_trailing_decimal_zero(test_str)
         )
 
-    def assertIsOTIOEquivalentTo(self, known, test_result):
+    def assertIsOTIOEquivalentTo(self, known: Any, test_result: Any) -> None:
         """Test using the 'is equivalent to' method on SerializableObject"""
 
         self.assertTrue(known.is_equivalent_to(test_result))

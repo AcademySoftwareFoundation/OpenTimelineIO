@@ -5,6 +5,7 @@ from . import (
     plugins,
     core,
 )
+from typing import Any, Optional, Dict, List
 
 __doc__ = """
 HookScripts are plugins that run at defined points ("Hooks").
@@ -82,14 +83,14 @@ class HookScript(plugins.PythonPlugin):
 
     def __init__(
         self,
-        name=None,
-        filepath=None,
-    ):
+        name: Optional[str] = None,
+        filepath: Optional[str] = None,
+    ) -> None:
         """HookScript plugin constructor."""
 
         super().__init__(name, filepath)
 
-    def run(self, in_timeline, argument_map={}):
+    def run(self, in_timeline: Any, argument_map: Optional[Dict[str, Any]] = {}) -> Any:
         """Run the hook_function associated with this plugin."""
 
         # @TODO: should in_timeline be passed in place?  or should a copy be
@@ -100,13 +101,13 @@ class HookScript(plugins.PythonPlugin):
             argument_map=argument_map
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "HookScript({}, {})".format(
             repr(self.name),
             repr(self.filepath)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "otio.hooks.HookScript("
             "name={}, "
@@ -118,24 +119,24 @@ class HookScript(plugins.PythonPlugin):
         )
 
 
-def names():
+def names() -> List[str]:
     """Return a list of all the registered hooks."""
 
     return plugins.ActiveManifest().hooks.keys()
 
 
-def available_hookscript_names():
+def available_hookscript_names() -> List[str]:
     """Return the names of HookScripts that have been registered."""
 
     return [hs.name for hs in plugins.ActiveManifest().hook_scripts]
 
 
-def available_hookscripts():
+def available_hookscripts() -> List[Any]:
     """Return the HookScripts objects that have been registered."""
     return plugins.ActiveManifest().hook_scripts
 
 
-def scripts_attached_to(hook):
+def scripts_attached_to(hook: str) -> List[str]:
     """Return an editable list of all the hook scripts that are attached to
     the specified hook, in execution order.  Changing this list will change the
     order that scripts run in, and deleting a script will remove it from
@@ -146,7 +147,7 @@ def scripts_attached_to(hook):
     return plugins.ActiveManifest().hooks[hook]
 
 
-def run(hook, tl, extra_args=None):
+def run(hook: str, tl: Any, extra_args: Optional[Dict[str, Any]] = None) -> Any:
     """Run all the scripts associated with hook, passing in tl and extra_args.
 
     Will return the return value of the last hook script.

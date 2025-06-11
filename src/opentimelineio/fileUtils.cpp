@@ -3,6 +3,7 @@
 
 #include "opentimelineio/fileUtils.h"
 
+#include <memory>
 #include <vector>
 
 #if defined(_WINDOWS)

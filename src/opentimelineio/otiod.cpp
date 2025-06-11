@@ -8,6 +8,7 @@
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/externalReference.h"
 #include "opentimelineio/timeline.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <fstream>
 #include <sstream>
@@ -136,7 +137,7 @@ from_otiod(
                     std::filesystem::path const path =
                         timeline_path.parent_path()
                         / std::filesystem::u8path(
-                            bundle::filepath_from_url(er->target_url()));
+                            filepath_from_url(er->target_url()));
                     er->set_target_url(url_from_filepath(path.u8string()));
                 }
             }

@@ -6,6 +6,7 @@
 #include "opentimelineio/bundleUtils.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/timeline.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <mz.h>
 #include <mz_os.h>

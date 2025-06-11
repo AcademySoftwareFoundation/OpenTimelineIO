@@ -5,8 +5,9 @@
 
 #include "util.h"
 
-#include <opentimelineio/bundle.h>
-#include <opentimelineio/timeline.h>
+#include "opentimelineio/bundle.h"
+#include "opentimelineio/fileUtils.h"
+#include "opentimelineio/timeline.h"
 
 #include <filesystem>
 
@@ -37,8 +38,8 @@ main(int argc, char** argv)
                   << "Extract an .otioz bundle.\n";
         return 1;
     }
-    const std::string input = examples::normalize_path(argv[1]);
-    const std::string output = examples::normalize_path(argv[2]);
+    const std::string input = otio::to_unix_separators(argv[1]);
+    const std::string output = otio::to_unix_separators(argv[2]);
 
     if (ends_with(input, ".otio") && ends_with(output, ".otioz"))
     {
@@ -54,8 +55,8 @@ main(int argc, char** argv)
         }
 
         // Create .otioz bundle.
-        bundle::ToBundleOptions options;
-        options.timeline_dir =
+        bundle::WriteOptions options;
+        options.parent_path =
             std::filesystem::u8path(input).parent_path().u8string();
         if (!bundle::to_otioz(
             timeline.value,
@@ -70,9 +71,8 @@ main(int argc, char** argv)
     else if (ends_with(input, ".otioz"))
     {
         // Extract .otioz bundle.
-        bundle::FromOtiozOptions options;
-        options.extract = true;
-        options.output_dir = output;
+        bundle::OtiozReadOptions options;
+        options.extract_path = output;
         otio::ErrorStatus error_status;
         auto result = bundle::from_otioz(input, options, &error_status);
         if (otio::is_error(error_status))
@@ -95,8 +95,8 @@ main(int argc, char** argv)
         }
 
         // Create .otiod bundle.
-        bundle::ToBundleOptions options;
-        options.timeline_dir =
+        bundle::WriteOptions options;
+        options.parent_path =
             std::filesystem::u8path(input).parent_path().u8string();
         if (!bundle::to_otiod(
             timeline.value,

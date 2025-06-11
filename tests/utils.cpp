@@ -18,17 +18,6 @@ assertFalse(bool value)
     assert(!value);
 }
 
-std::string
-get_temp_file(std::string const& extension)
-{
-    const char* c = std::tmpnam(nullptr);
-    if (!c)
-    {
-        throw std::runtime_error("cannot get temp file");
-    }
-    return std::string(c) + extension;
-}
-
 void
 Tests::add_test(std::string const& name, std::function<void(void)> const& test)
 {

@@ -3,13 +3,18 @@
 
 #include "utils.h"
 
-#include <opentimelineio/bundle.h>
-#include <opentimelineio/bundleUtils.h>
-#include <opentimelineio/clip.h>
-#include <opentimelineio/externalReference.h>
-#include <opentimelineio/missingReference.h>
+#include "opentimelineio/bundle.h"
+#include "opentimelineio/bundleUtils.h"
+#include "opentimelineio/clip.h"
+#include "opentimelineio/externalReference.h"
+#include "opentimelineio/fileUtils.h"
+#include "opentimelineio/imageSequenceReference.h"
+#include "opentimelineio/missingReference.h"
+#include "opentimelineio/urlUtils.h"
 
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 namespace otime  = opentime::OPENTIME_VERSION;
 namespace otio   = opentimelineio::OPENTIMELINEIO_VERSION;
@@ -23,17 +28,17 @@ main(int argc, char** argv)
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
         std::filesystem::current_path() / "sample_data";
-    std::string const screening_example_path = bundle::to_unix_separators(
+    std::string const screening_example_path = otio::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 
     // Sample media paths.
     std::string const media_example_path_rel     = "OpenTimelineIO@3xDark.png";
-    std::string const media_example_path_url_rel = bundle::to_unix_separators(
-        bundle::url_from_filepath(media_example_path_rel));
-    std::string const media_example_path_abs = bundle::to_unix_separators(
+    std::string const media_example_path_url_rel = otio::to_unix_separators(
+        otio::url_from_filepath(media_example_path_rel));
+    std::string const media_example_path_abs = otio::to_unix_separators(
         (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string());
-    std::string const media_example_path_url_abs = bundle::to_unix_separators(
-        bundle::url_from_filepath(media_example_path_abs));
+    std::string const media_example_path_url_abs = otio::to_unix_separators(
+        otio::url_from_filepath(media_example_path_abs));
 
     // Test timeline.
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
@@ -102,7 +107,8 @@ main(int argc, char** argv)
         "test_round_trip",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const    temp_file = get_temp_file(".otiod");
+            std::filesystem::path const temp_dir  = otio::create_temp_dir();
+            std::filesystem::path const temp_file = temp_dir / "test.otiod";
             bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
@@ -115,7 +121,7 @@ main(int argc, char** argv)
                     cl->media_reference()))
                 {
                     assertTrue(std::filesystem::u8path(
-                                   bundle::filepath_from_url(er->target_url()))
+                                   otio::filepath_from_url(er->target_url()))
                                    .is_relative());
                 }
             }
@@ -130,8 +136,8 @@ main(int argc, char** argv)
                     cl->media_reference()))
                 {
                     std::filesystem::path const path =
-                        bundle::filepath_from_url(er->target_url());
-                    er->set_target_url(bundle::url_from_filepath(
+                        otio::filepath_from_url(er->target_url());
+                    er->set_target_url(otio::url_from_filepath(
                         (bundle::media_dir / path.filename()).u8string()));
                 }
             }
@@ -145,13 +151,17 @@ main(int argc, char** argv)
         "test_round_trip_all_missing_references",
         [sample_data_dir, timeline]
         {
-            std::string const    temp_file = get_temp_file(".otiod");
+            std::filesystem::path const temp_dir  = otio::create_temp_dir();
+            std::filesystem::path const temp_file = temp_dir / "test.otiod";
             bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             options.media_policy = bundle::MediaReferencePolicy::AllMissing;
-            assertTrue(bundle::to_otiod(timeline, temp_file, options));
+            assertTrue(bundle::to_otiod(
+                timeline,
+                temp_file.u8string(),
+                options));
 
-            auto result = bundle::from_otiod(temp_file);
+            auto result = bundle::from_otiod(temp_file.u8string());
 
             for (auto clip: result->find_clips())
             {
@@ -164,15 +174,21 @@ main(int argc, char** argv)
         "test_round_trip_absolute_paths",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const    temp_file = get_temp_file(".otiod");
+            std::filesystem::path const temp_dir  = otio::create_temp_dir();
+            std::filesystem::path const temp_file = temp_dir / "test.otiod";
             bundle::WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            assertTrue(bundle::to_otiod(timeline, temp_file, write_options));
+            assertTrue(bundle::to_otiod(
+                timeline,
+                temp_file.u8string(),
+                write_options));
 
             // Can optionally generate absolute paths.
             bundle::OtiodReadOptions read_options;
             read_options.absolute_media_reference_paths = true;
-            auto result = bundle::from_otiod(temp_file, read_options);
+            auto result = bundle::from_otiod(
+                temp_file.u8string(),
+                read_options);
 
             for (auto clip: result->find_clips())
             {
@@ -180,7 +196,7 @@ main(int argc, char** argv)
                     clip->media_reference()))
                 {
                     assertTrue(std::filesystem::u8path(
-                                   bundle::filepath_from_url(er->target_url()))
+                                   otio::filepath_from_url(er->target_url()))
                                    .is_absolute());
                 }
             }
@@ -195,15 +211,74 @@ main(int argc, char** argv)
                         cl->media_reference()))
                 {
                     std::filesystem::path const path =
-                        bundle::filepath_from_url(er->target_url());
-                    er->set_target_url(bundle::url_from_filepath(
-                        (std::filesystem::u8path(temp_file) / bundle::media_dir / path.filename()).u8string()));
+                        otio::filepath_from_url(er->target_url());
+                    er->set_target_url(otio::url_from_filepath(
+                        (temp_file / bundle::media_dir / path.filename()).u8string()));
                 }
             }
 
             assertEqual(
                 result->to_json_string(),
                 clone->to_json_string());
+        });
+
+    tests.add_test(
+        "test_round_trip_with_sequence",
+        [sample_data_dir, media_example_path_rel]
+        {
+            // Create an image sequence.
+            std::filesystem::path const temp_dir = otio::create_temp_dir();
+            std::string const name_prefix = "sequence.";
+            std::string const name_suffix = ".png";
+            int const frame_zero_padding = 4;
+            int const sequence_frames = 10;
+            for (int frame = 0; frame < sequence_frames; ++frame)
+            {
+                std::stringstream ss;
+                ss << name_prefix <<
+                    std::setfill('0') << std::setw(frame_zero_padding) <<
+                    frame <<
+                    name_suffix;
+                std::filesystem::copy(
+                    sample_data_dir / media_example_path_rel,
+                    temp_dir / ss.str());
+            }
+
+            // Create a timeline with an image sequence reference.
+            otio::SerializableObject::Retainer<otio::Timeline> timeline(
+                new otio::Timeline);
+            auto track = new otio::Track;
+            timeline->tracks()->append_child(track);
+            auto isr = new otio::ImageSequenceReference(
+                "",
+                name_prefix,
+                name_suffix,
+                0,
+                1,
+                24.0,
+                frame_zero_padding,
+                otio::ImageSequenceReference::MissingFramePolicy::error,
+                otio::TimeRange(0.0, sequence_frames, 24.0));
+            auto clip = new otio::Clip("Sequence", isr);
+            track->append_child(clip);
+
+            // Write the bundle.
+            std::filesystem::path const temp_file = temp_dir / "test.otiod";
+            bundle::WriteOptions        write_options;
+            write_options.parent_path = temp_dir.u8string();
+            assertTrue(bundle::to_otiod(timeline, temp_file, write_options));
+
+            // Check the media exists.
+            for (int frame = 0; frame < sequence_frames; ++frame)
+            {
+                std::stringstream ss;
+                ss << name_prefix <<
+                    std::setfill('0') << std::setw(frame_zero_padding) <<
+                    frame <<
+                    name_suffix;
+                assertTrue(std::filesystem::exists(
+                    temp_file / bundle::media_dir / ss.str()));
+            }
         });
 
     tests.run(argc, argv);

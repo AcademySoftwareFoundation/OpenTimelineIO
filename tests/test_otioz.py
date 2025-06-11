@@ -23,7 +23,7 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = otio._otio.bundle.url_from_filepath(
+MEDIA_EXAMPLE_PATH_URL_REL = otio._otio.url_from_filepath(
     MEDIA_EXAMPLE_PATH_REL
 )
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
@@ -32,7 +32,7 @@ MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
         "3xLight"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_ABS = otio._otio.bundle.url_from_filepath(
+MEDIA_EXAMPLE_PATH_URL_ABS = otio._otio.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
@@ -57,12 +57,11 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.tl = tl
 
     def test_dryrun(self):
-        # generate a fake name
-        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
-            fname = bogusfile.name
+        tempdir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tempdir, "test.otioz")
 
         # dryrun should compute what the total size of the zipfile will be.
-        size = otio.adapters.write_to_file(self.tl, fname, dryrun=True)
+        size = otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
         self.assertEqual(
             size,
             os.path.getsize(MEDIA_EXAMPLE_PATH_ABS) +
@@ -72,7 +71,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_not_a_file_error(self):
         # dryrun should compute what the total size of the zipfile will be.
         tempdir = tempfile.mkdtemp()
-        tmp_path = os.path.join(tempdir, "test_not_a_file_error.otioz")
+        tmp_path = os.path.join(tempdir, "test.otioz")
         with tempfile.NamedTemporaryFile() as bogusfile:
             fname = bogusfile.name
         for cl in self.tl.find_clips():
@@ -85,7 +84,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         for cl in self.tl.find_clips():
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=otio._otio.bundle.url_from_filepath(fname)
+                target_url=otio._otio.url_from_filepath(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -107,10 +106,10 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             new_path
         )
         list(self.tl.find_clips())[0].media_reference.target_url = (
-            otio._otio.bundle.url_from_filepath(new_path)
+            otio._otio.url_from_filepath(new_path)
         )
 
-        tmp_path = os.path.join(tempdir, "test_colliding_basename.otioz")
+        tmp_path = os.path.join(tempdir, "test.otioz")
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path)
 
@@ -120,8 +119,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         shutil.rmtree(tempdir)
 
     def test_round_trip(self):
-        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
-            tmp_path = bogusfile.name
+        tempdir = tempfile.mkdtemp()
+        tmp_path = os.path.join(tempdir, "test.otioz")
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -153,7 +152,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_round_trip_with_extraction(self):
         tempdir = tempfile.mkdtemp()
-        tmp_path = os.path.join(tempdir, "test_round_trip_with_extraction.otioz")
+        tmp_path = os.path.join(tempdir, "test.otioz")
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assertTrue(os.path.exists(tmp_path))
 
@@ -212,7 +211,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_round_trip_with_extraction_no_media(self):
         tempdir = tempfile.mkdtemp()
-        tmp_path = os.path.join(tempdir, "test_round_trip_with_extraction_no_media.otioz")
+        tmp_path = os.path.join(tempdir, "test.otioz")
         otio.adapters.write_to_file(
             self.tl,
             tmp_path,

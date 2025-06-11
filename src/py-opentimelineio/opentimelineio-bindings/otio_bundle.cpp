@@ -148,26 +148,4 @@ Options for reading .otiod bundles.
         "Read a timeline from an .otiod bundle.",
         py::arg("file_name"),
         py::arg("options") = OtiodReadOptions());
-
-    mbundle.def(
-        "url_from_filepath",
-        &url_from_filepath,
-        "Convert a filesystem path to a file URL.\n"
-        "\n"
-        "For example:\n"
-        "* '/var/tmp/thing.otio' -> 'file:///var/tmp/thing.otio'\n"
-        "* 'subdir/thing.otio' -> 'tmp/thing.otio'",
-        py::arg("url"));
-
-    mbundle.def(
-        "filepath_from_url",
-        &filepath_from_url,
-        "Convert a file URL to a filesystem path.\n"
-        "\n"
-        "URLs can either be encoded according to the `RFC 3986` standard or "
-        "not. Additionally, Windows mapped drive letter and UNC paths need to "
-        "be accounted for when processing URLs.\n"
-        "\n"
-        "RFC 3986: https://tools.ietf.org/html/rfc3986",
-        py::arg("filepath"));
 }

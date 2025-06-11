@@ -58,7 +58,7 @@ main(int argc, char** argv)
          media_example_path_abs,
          timeline]
         {
-            bundle::ToBundleOptions options;
+            bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             size_t const size   = bundle::get_media_size(timeline, options);
             size_t const size_compare =
@@ -90,7 +90,7 @@ main(int argc, char** argv)
             assertFalse(bundle::to_otioz(
                 clone,
                 temp_file,
-                bundle::ToBundleOptions(),
+                bundle::WriteOptions(),
                 &error));
             std::cout << "ERROR: " << error.details << std::endl;
             assertTrue(otio::is_error(error));
@@ -115,8 +115,8 @@ main(int argc, char** argv)
                 er->set_target_url(bundle::url_from_filepath(colliding_file.u8string()));
             }
 
-            std::string temp_file = get_temp_file(".otioz");
-            bundle::ToBundleOptions options;
+            std::string          temp_file = get_temp_file(".otioz");
+            bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             otio::ErrorStatus error;
             assertFalse(bundle::to_otioz(clone, temp_file, options, &error));
@@ -128,8 +128,8 @@ main(int argc, char** argv)
         "test_round_trip",
         [sample_data_dir, timeline]
         {
-            std::string temp_file = get_temp_file(".otioz");
-            bundle::ToBundleOptions options;
+            std::string          temp_file = get_temp_file(".otioz");
+            bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otioz(timeline, temp_file, options));
 
@@ -178,16 +178,16 @@ main(int argc, char** argv)
         "test_round_trip_with_extraction",
         [sample_data_dir, timeline]
         {
-            std::string temp_file = get_temp_file(".otioz");
-            bundle::ToBundleOptions to_options;
-            to_options.parent_path = sample_data_dir.u8string();
-            assertTrue(bundle::to_otioz(timeline, temp_file, to_options));
+            std::string          temp_file = get_temp_file(".otioz");
+            bundle::WriteOptions write_options;
+            write_options.parent_path = sample_data_dir.u8string();
+            assertTrue(bundle::to_otioz(timeline, temp_file, write_options));
 
-            bundle::FromOtiozOptions from_options;
+            bundle::OtiozReadOptions read_options;
             std::filesystem::path const output_path =
                 std::filesystem::u8path(get_temp_file());
-            from_options.extract_path = output_path.u8string();
-            auto result               = bundle::from_otioz(temp_file, from_options);
+            read_options.extract_path = output_path.u8string();
+            auto result               = bundle::from_otioz(temp_file, read_options);
 
             // Make sure that all the references are ExternalReference.
             for (auto cl : result->find_clips())
@@ -248,16 +248,16 @@ main(int argc, char** argv)
         [sample_data_dir, timeline]
         {
             std::string             temp_file = get_temp_file(".otioz");
-            bundle::ToBundleOptions to_options;
-            to_options.parent_path = sample_data_dir.u8string();
-            to_options.media_policy = bundle::MediaReferencePolicy::AllMissing;
-            assertTrue(bundle::to_otioz(timeline, temp_file, to_options));
+            bundle::WriteOptions    write_options;
+            write_options.parent_path = sample_data_dir.u8string();
+            write_options.media_policy = bundle::MediaReferencePolicy::AllMissing;
+            assertTrue(bundle::to_otioz(timeline, temp_file, write_options));
 
-            bundle::FromOtiozOptions from_options;
+            bundle::OtiozReadOptions read_options;
             std::filesystem::path const output_path =
                 std::filesystem::u8path(get_temp_file());
-            from_options.extract_path = output_path.u8string();
-            auto result               = bundle::from_otioz(temp_file, from_options);
+            read_options.extract_path = output_path.u8string();
+            auto result               = bundle::from_otioz(temp_file, read_options);
 
             // Check the version file exists.
             assertTrue(

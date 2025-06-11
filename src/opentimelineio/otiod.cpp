@@ -16,10 +16,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
 
 bool
 to_otiod(
-    Timeline const*        timeline,
-    std::string const&     file_name,
-    ToBundleOptions const& options,
-    ErrorStatus*           error_status)
+    Timeline const*     timeline,
+    std::string const&  file_name,
+    WriteOptions const& options,
+    ErrorStatus*        error_status)
 {
     try
     {
@@ -115,7 +115,7 @@ to_otiod(
 Timeline*
 from_otiod(
     std::string const&      file_name,
-    FromOtiodOptions const& options,
+    OtiodReadOptions const& options,
     ErrorStatus*            error_status)
 {
     Timeline* timeline = nullptr;

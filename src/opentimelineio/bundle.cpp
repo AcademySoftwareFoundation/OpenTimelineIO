@@ -7,10 +7,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
 
-size_t get_media_size(
-    Timeline const* timeline,
-    ToBundleOptions const& options,
-    ErrorStatus* error_status)
+size_t
+get_media_size(
+    Timeline const*     timeline,
+    WriteOptions const& options,
+    ErrorStatus*        error_status)
 {
     size_t byte_count = 0;
     try

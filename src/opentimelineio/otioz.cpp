@@ -125,10 +125,10 @@ ZipWriter::add_uncompressed(
 
 bool
 to_otioz(
-    Timeline const*           timeline,
-    std::string const&        file_name,
-    ToBundleOptions const&    options,
-    ErrorStatus*              error_status)
+    Timeline const*     timeline,
+    std::string const&  file_name,
+    WriteOptions const& options,
+    ErrorStatus*        error_status)
 {
     try
     {
@@ -268,7 +268,7 @@ ZipReader::extract_all(std::string const& output_dir)
 Timeline*
 from_otioz(
     std::string const&      file_name,
-    FromOtiozOptions const& options,
+    OtiozReadOptions const& options,
     ErrorStatus*            error_status)
 {
     Timeline* timeline = nullptr;

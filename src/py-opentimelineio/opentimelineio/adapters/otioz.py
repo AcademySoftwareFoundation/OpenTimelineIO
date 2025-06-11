@@ -26,7 +26,7 @@ def read_from_file(
     # if provided, will extract contents of zip to this directory
     extract_to_directory=None,
 ):
-    options = _otio.bundle.FromOtiozOptions()
+    options = _otio.bundle.OtiozReadOptions()
     if extract_to_directory != None:
         options.extract_path = extract_to_directory
     return _otio.bundle.from_otioz(filepath, options)
@@ -39,7 +39,7 @@ def write_to_file(
     media_policy=_otio.bundle.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    options = _otio.bundle.ToBundleOptions()
+    options = _otio.bundle.WriteOptions()
     options.media_policy = media_policy
 
     if dryrun:

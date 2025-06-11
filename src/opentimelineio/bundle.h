@@ -38,7 +38,7 @@ enum class MediaReferencePolicy
 };
 
 /// @brief Options for writing bundles.
-struct ToBundleOptions
+struct WriteOptions
 {
     /// @brief The parent path is used to locate media with relative paths. If
     /// parent path is empty, paths are relative to the current working directory.
@@ -54,12 +54,28 @@ struct ToBundleOptions
     int indent = 4;
 };
 
+/// @brief Options for reading .otioz bundles.
+struct OtiozReadOptions
+{
+    /// @brief Extract the contents of the bundle to the given path. If the
+    /// path is empty, the contents are not extracted, and only the timeline
+    /// is read from the bundle.
+    std::string extract_path;
+};
+
+/// @brief Options for reading .otiod bundles.
+struct OtiodReadOptions
+{
+    /// @brief Use absolute paths for media references.
+    bool absolute_media_reference_paths = false;
+};
+
 /// @brief Get the total size (in bytes) of the media files that will be
 /// put into the bundle.
 size_t get_media_size(
-    Timeline const*        timeline,
-    ToBundleOptions const& options      = ToBundleOptions(),
-    ErrorStatus*           error_status = nullptr);
+    Timeline const*     timeline,
+    WriteOptions const& options      = WriteOptions(),
+    ErrorStatus*        error_status = nullptr);
 
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
@@ -83,19 +99,10 @@ size_t get_media_size(
 /// @param options The bundle options.
 /// @param error_status The error status.
 bool to_otioz(
-    Timeline const*        timeline,
-    std::string const&     file_name,
-    ToBundleOptions const& options      = ToBundleOptions(),
-    ErrorStatus*           error_status = nullptr);
-
-/// @brief Options for reading .otioz bundles.
-struct FromOtiozOptions
-{
-    /// @brief Extract the contents of the bundle to the given path. If the
-    /// path is empty, the contents are not extracted, and only the timeline
-    /// is read from the bundle.
-    std::string extract_path;
-};
+    Timeline const*     timeline,
+    std::string const&  file_name,
+    WriteOptions const& options      = WriteOptions(),
+    ErrorStatus*        error_status = nullptr);
 
 /// @brief Read a timeline from an .otioz bundle.
 ///
@@ -104,7 +111,7 @@ struct FromOtiozOptions
 /// @param error_status The error status.
 Timeline* from_otioz(
     std::string const&      file_name,
-    FromOtiozOptions const& options      = FromOtiozOptions(),
+    OtiozReadOptions const& options      = OtiozReadOptions(),
     ErrorStatus*            error_status = nullptr);
 
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
@@ -119,17 +126,10 @@ Timeline* from_otioz(
 /// @param options The bundle options.
 /// @param error_status The error status.
 bool to_otiod(
-    Timeline const*        timeline,
-    std::string const&     file_name,
-    ToBundleOptions const& options      = ToBundleOptions(),
-    ErrorStatus*           error_status = nullptr);
-
-/// @brief Options for reading .otiod bundles.
-struct FromOtiodOptions
-{
-    /// @brief Use absolute paths for media references.
-    bool absolute_media_reference_paths = false;
-};
+    Timeline const*     timeline,
+    std::string const&  file_name,
+    WriteOptions const& options      = WriteOptions(),
+    ErrorStatus*        error_status = nullptr);
 
 /// @brief Read a timeline from an .otiod bundle.
 ///
@@ -138,7 +138,7 @@ struct FromOtiodOptions
 /// @param error_status The error status.
 Timeline* from_otiod(
     std::string const&      file_name,
-    FromOtiodOptions const& options      = FromOtiodOptions(),
+    OtiodReadOptions const& options      = OtiodReadOptions(),
     ErrorStatus*            error_status = nullptr);
 
 } // namespace bundle

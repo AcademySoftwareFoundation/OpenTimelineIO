@@ -102,8 +102,8 @@ main(int argc, char** argv)
         "test_round_trip",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const       temp_file = get_temp_file(".otiod");
-            bundle::ToBundleOptions options;
+            std::string const    temp_file = get_temp_file(".otiod");
+            bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
 
@@ -145,8 +145,8 @@ main(int argc, char** argv)
         "test_round_trip_all_missing_references",
         [sample_data_dir, timeline]
         {
-            std::string const       temp_file = get_temp_file(".otiod");
-            bundle::ToBundleOptions options;
+            std::string const    temp_file = get_temp_file(".otiod");
+            bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
             options.media_policy = bundle::MediaReferencePolicy::AllMissing;
             assertTrue(bundle::to_otiod(timeline, temp_file, options));
@@ -164,15 +164,15 @@ main(int argc, char** argv)
         "test_round_trip_absolute_paths",
         [sample_data_dir, media_example_path_url_rel, timeline]
         {
-            std::string const       temp_file = get_temp_file(".otiod");
-            bundle::ToBundleOptions to_options;
-            to_options.parent_path = sample_data_dir.u8string();
-            assertTrue(bundle::to_otiod(timeline, temp_file, to_options));
+            std::string const    temp_file = get_temp_file(".otiod");
+            bundle::WriteOptions write_options;
+            write_options.parent_path = sample_data_dir.u8string();
+            assertTrue(bundle::to_otiod(timeline, temp_file, write_options));
 
             // Can optionally generate absolute paths.
-            bundle::FromOtiodOptions options;
-            options.absolute_media_reference_paths = true;
-            auto result = bundle::from_otiod(temp_file, options);
+            bundle::OtiodReadOptions read_options;
+            read_options.absolute_media_reference_paths = true;
+            auto result = bundle::from_otiod(temp_file, read_options);
 
             for (auto clip: result->find_clips())
             {

@@ -19,7 +19,7 @@ def read_from_file(
     # convert the media_reference paths to absolute paths
     absolute_media_reference_paths=False,
 ):
-    options = _otio.bundle.FromOtiodOptions()
+    options = _otio.bundle.OtiodReadOptions()
     options.absolute_media_reference_paths = absolute_media_reference_paths
     return _otio.bundle.from_otiod(filepath, options)
 
@@ -31,7 +31,7 @@ def write_to_file(
     media_policy=_otio.bundle.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    options = _otio.bundle.ToBundleOptions()
+    options = _otio.bundle.WriteOptions()
     options.media_policy = media_policy
 
     if dryrun:

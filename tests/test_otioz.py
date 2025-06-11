@@ -23,7 +23,7 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = otio.url_utils.url_from_filepath(
+MEDIA_EXAMPLE_PATH_URL_REL = otio._otio.bundle.url_from_filepath(
     MEDIA_EXAMPLE_PATH_REL
 )
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
@@ -32,7 +32,7 @@ MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
         "3xLight"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
+MEDIA_EXAMPLE_PATH_URL_ABS = otio._otio.bundle.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
@@ -85,7 +85,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         for cl in self.tl.find_clips():
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=otio.url_utils.url_from_filepath(fname)
+                target_url=otio._otio.bundle.url_from_filepath(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -107,7 +107,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             new_path
         )
         list(self.tl.find_clips())[0].media_reference.target_url = (
-            otio.url_utils.url_from_filepath(new_path)
+            otio._otio.bundle.url_from_filepath(new_path)
         )
 
         tmp_path = os.path.join(tempdir, "test_colliding_basename.otioz")

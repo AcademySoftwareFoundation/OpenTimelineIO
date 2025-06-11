@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
-// Example OTIO script that converts a timeline to an .otiod file bundle.
+// Example OTIO script that can create and extract bundles.
 
 #include "util.h"
 

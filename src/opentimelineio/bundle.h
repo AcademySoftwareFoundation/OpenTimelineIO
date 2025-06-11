@@ -74,18 +74,19 @@ size_t get_media_size(
 
 /// @brief Write a timeline and it's referenced media to an .otioz bundle.
 ///
-/// Takes as input an OTIO file that has media references which are all
-/// ExternalReferences with target_urls to files with unique basenames that are
-/// accessible through the file system and bundles those files and the otio
-/// file into a single zip file with the suffix .otioz.
+/// Takes as input a timeline that has media references which are all
+/// ExternalReferences, with target_urls to files with unique basenames that are
+/// accessible through the file system. The timeline .otio file, a version file,
+/// and media references are bundled into a single zip file with the suffix
+/// .otioz.
 ///
-/// The otio file and version file are compressed using the ZIP "deflate"
-/// mode. All media files are store uncompressed.
+/// The timline .otio file and version file are compressed using the ZIP
+/// "deflate" mode. All media files are store uncompressed.
 ///
 /// Can error out if files are not locally referenced. or provide missing
 /// references.
 ///
-/// Note that OTIOZ files _always_ use the unix style path separator ('/').
+/// Note that .otioz files _always_ use the unix style path separator ('/').
 /// This ensures that regardless of which platform a bundle was created on, it
 /// can be read on UNIX and Windows platforms.
 ///
@@ -111,10 +112,11 @@ Timeline* from_otioz(
 
 /// @brief Write a timeline and it's referenced media to an .otiod bundle.
 ///
-/// Takes as input an OTIO file that has media references which are all
-/// ExternalReferences with target_urls to files with unique basenames that are
-/// accessible through the file system and bundles those files and the otio file
-/// into a single directory named with a suffix of .otiod.
+/// Takes as input a timeline that has media references which are all
+/// ExternalReferences, with target_urls to files with unique basenames that are
+/// accessible through the file system. The timeline .otio file, a version file,
+/// and media references are bundled into a single directory named with a
+/// suffix of .otiod.
 ///
 /// @param timeline The timeline to write.
 /// @param file_name The bundle file name.

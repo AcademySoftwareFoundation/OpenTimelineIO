@@ -8,6 +8,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @name URL Utilities
+/// @todo Shoudle we use a thrid party library for URL conversions?
 ///@{
 
 /// @brief Get the scheme from a URL.

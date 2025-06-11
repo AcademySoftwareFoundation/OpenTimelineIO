@@ -8,10 +8,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @todo Should the .otioz/.otiod file versions be bumped?
-/// @todo Shoudle we use a library for URL conversions?
 /// @todo Should bundle support be optional?
-/// @todo Add C++ image sequence bundle tests.
-/// @todo Update documentation.
 namespace bundle {
 
 /// @brief The current otioz version.

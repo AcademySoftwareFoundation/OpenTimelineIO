@@ -8,7 +8,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @name URL Utilities
-/// @todo Shoudle we use a thrid party library for URL conversions?
+/// @todo Should we use a thrid party library for handling URLs?
 ///@{
 
 /// @brief Get the scheme from a URL.

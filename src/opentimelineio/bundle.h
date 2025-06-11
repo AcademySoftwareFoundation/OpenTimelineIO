@@ -7,8 +7,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-/// @todo Should the .otioz/.otiod file versions be bumped?
-/// @todo Should bundle support be optional?
 namespace bundle {
 
 /// @brief The current otioz version.

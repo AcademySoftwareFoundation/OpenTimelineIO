@@ -111,10 +111,10 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             bundle::WriteOptions options;
             options.parent_path = sample_data_dir.u8string();
-            assertTrue(bundle::to_otiod(timeline, temp_file, options));
+            assertTrue(bundle::to_otiod(timeline, temp_file.u8string(), options));
 
             // By default will provide relative paths.
-            auto result = bundle::from_otiod(temp_file);
+            auto result = bundle::from_otiod(temp_file.u8string());
             for (auto cl: result->find_clips())
             {
                 if (auto er = dynamic_cast<otio::ExternalReference*>(

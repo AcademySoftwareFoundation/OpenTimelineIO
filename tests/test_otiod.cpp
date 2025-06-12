@@ -266,7 +266,10 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             bundle::WriteOptions        write_options;
             write_options.parent_path = temp_dir.u8string();
-            assertTrue(bundle::to_otiod(timeline, temp_file, write_options));
+            assertTrue(bundle::to_otiod(
+                timeline,
+                temp_file.u8string(),
+                write_options));
 
             // Check the media exists.
             for (int frame = 0; frame < sequence_frames; ++frame)

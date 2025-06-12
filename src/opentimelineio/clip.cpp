@@ -190,6 +190,8 @@ std::optional<IMATH_NAMESPACE::Box2d>
 Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
+    
+    //this code path most likely never runs due to null media handling in other parts
     if (!active_media)
     {
         if(error_status)

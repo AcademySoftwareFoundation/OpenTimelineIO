@@ -204,7 +204,9 @@ main(int argc, char** argv)
             bundle::OtiozReadOptions    read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            auto result               = bundle::from_otioz(temp_file, read_options);
+            auto result = bundle::from_otioz(
+                temp_file.u8string(),
+                read_options);
 
             // Make sure that all the references are ExternalReference.
             for (auto cl : result->find_clips())
@@ -269,12 +271,17 @@ main(int argc, char** argv)
             bundle::WriteOptions        write_options;
             write_options.parent_path = sample_data_dir.u8string();
             write_options.media_policy = bundle::MediaReferencePolicy::AllMissing;
-            assertTrue(bundle::to_otioz(timeline, temp_file, write_options));
+            assertTrue(bundle::to_otioz(
+                timeline,
+                temp_file.u8string(),
+                write_options));
 
             bundle::OtiozReadOptions    read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            auto result = bundle::from_otioz(temp_file, read_options);
+            auto result = bundle::from_otioz(
+                temp_file.u8string(),
+                read_options);
 
             // Check the version file exists.
             assertTrue(
@@ -340,13 +347,18 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             bundle::WriteOptions        write_options;
             write_options.parent_path = temp_dir.u8string();
-            assertTrue(bundle::to_otioz(timeline, temp_file, write_options));
+            assertTrue(bundle::to_otioz(
+                timeline,
+                temp_file.u8string(),
+                write_options));
             
             // Extract the bundle.
             bundle::OtiozReadOptions    read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            auto result = bundle::from_otioz(temp_file, read_options);
+            auto result = bundle::from_otioz(
+                temp_file.u8string(),
+                read_options);
             
             // Check the media exists.
             for (int frame = 0; frame < sequence_frames; ++frame)

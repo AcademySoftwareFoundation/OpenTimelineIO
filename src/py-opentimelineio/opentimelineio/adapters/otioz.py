@@ -27,7 +27,7 @@ def read_from_file(
     extract_to_directory=None,
 ):
     options = _otio.bundle.OtiozReadOptions()
-    if extract_to_directory != None:
+    if extract_to_directory is not None:
         options.extract_path = extract_to_directory
     return _otio.bundle.from_otioz(filepath, options)
 

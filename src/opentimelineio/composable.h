@@ -47,7 +47,7 @@ public:
 
     /// @brief Return the available image bounds.
     virtual std::optional<IMATH_NAMESPACE::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const;
+    available_image_bounds(ErrorStatus* error_status = nullptr) const;
 
 protected:
     bool        _set_parent(Composition*) noexcept;

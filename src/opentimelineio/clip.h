@@ -84,7 +84,7 @@ public:
     available_range(ErrorStatus* error_status = nullptr) const override;
 
     std::optional<IMATH_NAMESPACE::Box2d>
-    available_image_bounds(ErrorStatus* error_status) const override;
+    available_image_bounds(ErrorStatus* error_status = nullptr) const override;
 
 protected:
     virtual ~Clip();

@@ -34,7 +34,6 @@ option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
-option(OTIO_FIND_ZLIB_NG              "Find zlib-ng using find_package" OFF)
 option(OTIO_FIND_MINIZIP_NG           "Find minizip-ng using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
@@ -262,16 +261,6 @@ if(OTIO_FIND_RAPIDJSON)
     endif()
 else()
     message(STATUS "Using src/deps/rapidjson by default")
-endif()
-
-#----- zlib-ng
-if(OTIO_FIND_ZLIB_NG)
-    find_package(zlib-ng CONFIG REQUIRED)
-    if (zlib-ng_FOUND)
-        message(STATUS "Found zlib-ng at ${zlib-ng_CONFIG}")
-    endif()
-else()
-    message(STATUS "Using src/deps/zlib-ng by default")
 endif()
 
 #----- minizip-ng

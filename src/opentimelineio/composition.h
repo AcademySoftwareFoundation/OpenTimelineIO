@@ -9,6 +9,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+class Clip;
+
 /// @brief Base class for an Item that contains Composables.
 ///
 /// Should be subclassed (for example by Track Stack), not used directly.
@@ -157,6 +159,17 @@ public:
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;
+   
+    /// @brief Find child clips.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
+    std::vector<Retainer<Clip>> find_clips(
+        ErrorStatus*                    error_status   = nullptr,
+        std::optional<TimeRange> const& search_range   = std::nullopt,
+        bool                            shallow_search = false) const;
 
 protected:
     virtual ~Composition();

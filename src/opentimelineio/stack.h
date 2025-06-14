@@ -58,17 +58,6 @@ public:
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
-    /// @brief Find child clips.
-    ///
-    /// @param error_status The return status.
-    /// @param search_range An optional range to limit the search.
-    /// @param shallow_search The search is recursive unless shallow_search is
-    /// set to true.
-    std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*                    error_status   = nullptr,
-        std::optional<TimeRange> const& search_range   = std::nullopt,
-        bool                            shallow_search = false) const;
-
 protected:
     virtual ~Stack();
 

@@ -213,6 +213,22 @@ main(int argc, char** argv)
         assertEqual(result->duration().value(), 300);
     });
 
+    // test stack correctly calls find_clips from superclass
+    tests.add_test(
+        "test_find_clips", [] {
+        using namespace otio;
+        SerializableObject::Retainer<Stack> stack = new Stack();
+        SerializableObject::Retainer<Track> track = new Track;
+        SerializableObject::Retainer<Clip>  clip  = new Clip;
+        stack->append_child(track);
+        track->append_child(clip);
+
+        opentimelineio::v1_0::ErrorStatus err;
+        auto items = stack->find_clips(&err);
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 1);
+    });
+
     tests.run(argc, argv);
     return 0;
 }

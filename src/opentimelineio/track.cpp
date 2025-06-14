@@ -263,15 +263,6 @@ Track::range_of_all_children(ErrorStatus* error_status) const
     return result;
 }
 
-std::vector<SerializableObject::Retainer<Clip>>
-Track::find_clips(
-    ErrorStatus*                    error_status,
-    std::optional<TimeRange> const& search_range,
-    bool                            shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
-}
-
 std::optional<IMATH_NAMESPACE::Box2d>
 Track::available_image_bounds(ErrorStatus* error_status) const
 {

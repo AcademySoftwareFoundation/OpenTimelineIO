@@ -31,7 +31,7 @@ to_unix_separators(std::string const& path)
     return result;
 }
 
-#if defined(_WINDOWS)
+#if defined(_WIN32) || defined(_WIN64)
 
 std::string create_temp_dir()
 {
@@ -71,7 +71,7 @@ std::string create_temp_dir()
     return out;
 }
 
-#else // _WINDOWS
+#else // _WIN32 || _WIN64
 
 std::string create_temp_dir()
 {
@@ -103,6 +103,6 @@ std::string create_temp_dir()
     return mkdtemp(buf.data());
 }
 
-#endif // _WINDOWS
+#endif // _WIN32 || _WIN64
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

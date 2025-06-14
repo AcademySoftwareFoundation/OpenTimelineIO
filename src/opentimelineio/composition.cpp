@@ -709,4 +709,13 @@ Composition::has_clips() const
     return false;
 }
 
+std::vector<SerializableObject::Retainer<Clip>>
+Composition::find_clips(
+    ErrorStatus*                    error_status,
+    std::optional<TimeRange> const& search_range,
+    bool                            shallow_search) const
+{
+    return find_children<Clip>(error_status, search_range, shallow_search);
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

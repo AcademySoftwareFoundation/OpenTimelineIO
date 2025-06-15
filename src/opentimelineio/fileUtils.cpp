@@ -18,6 +18,9 @@ to_unix_separators(std::string const& path)
 
 std::string create_temp_dir()
 {
+    // \todo Replace std::tmpnam(), since it is potentially unsafe. A possible
+    // replacement might be mkdtemp(), but that does not seem to be available
+    // on Cygwin.
     std::string const out(std::tmpnam(nullptr));
     std::filesystem::create_directory(out);
     return out;

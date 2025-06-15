@@ -66,6 +66,12 @@ ErrorStatus::outcome_to_string(Outcome o)
             return "the media references cannot contain an empty key";
         case NOT_A_GAP:
             return "object is not descendent of Gap type";
+        case BUNDLE_SIZE_ERROR:
+            return "error compiting the size of the bundle";
+        case BUNDLE_WRITE_ERROR:
+            return "error writing bundle";
+        case BUNDLE_READ_ERROR:
+            return "error reading bundle";
         default:
             return "unknown/illegal ErrorStatus::Outcome code";
     };

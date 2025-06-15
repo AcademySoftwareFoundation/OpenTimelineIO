@@ -29,10 +29,12 @@ if(OTIO_PYTHON_INSTALL)
 endif()
 
 if(NOT OTIO_FIND_IMATH)
+    set(BUILD_SHARED_LIBS OFF)
     add_subdirectory(Imath)
 endif()
 
 if(NOT OTIO_FIND_MINIZIP_NG)
+    set(BUILD_SHARED_LIBS OFF)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     set(MZ_COMPAT ON)
     set(MZ_ZLIB ON)

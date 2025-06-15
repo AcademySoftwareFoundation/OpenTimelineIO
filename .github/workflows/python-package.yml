@@ -83,8 +83,6 @@ jobs:
         cd ${{ env.OTIO_BUILD_DIR }}
         cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
     - name: Consumer tests
-# \todo The consumer test fails on Windows because it cannot find zlib-ng.
-      if: matrix.os != 'windows-latest'
       run: |
         cmake -E make_directory ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
         cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}

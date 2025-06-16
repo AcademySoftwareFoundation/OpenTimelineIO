@@ -191,7 +191,8 @@ Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
     
-    //this code path most likely never runs due to null media handling in other parts
+    //this code path most likely never runs since a null or empty media_reference gets
+    //replaced with a placeholder value when instantiated
     if (!active_media)
     {
         if(error_status)

@@ -6,6 +6,8 @@
 """User facing classes."""
 
 from .. _otio import (
+    AudioFade,
+    AudioVolume,
     Box2d,
     Clip,
     Effect,
@@ -24,6 +26,10 @@ from .. _otio import (
     Track,
     Transition,
     V2d,
+    VideoCrop,
+    VideoPosition,
+    VideoRotate,
+    VideoScale,
 )
 
 MarkerColor = Marker.Color
@@ -56,6 +62,8 @@ def timeline_from_clips(clips):
     return Timeline(tracks=[trck])
 
 __all__ = [
+    'AudioFade',
+    'AudioVolume',
     'Box2d',
     'Clip',
     'Effect',
@@ -74,5 +82,9 @@ __all__ = [
     'Transition',
     'SchemaDef',
     'timeline_from_clips',
-    'V2d'
+    'V2d',
+    'VideoCrop',
+    'VideoPosition',
+    'VideoRotate',
+    'VideoScale',
 ]

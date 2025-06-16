@@ -24,10 +24,12 @@
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
+#include "opentimelineio/transformEffects.h"
 #include "opentimelineio/transition.h"
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/stack.h"
 #include "opentimelineio/unknownSchema.h"
+#include "opentimelineio/volumeEffects.h"
 
 #include "otio_utils.h"
 #include "otio_anyDictionary.h"
@@ -630,9 +632,10 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def(py::init([](std::string name,
                          std::optional<std::vector<Composable*>> children,
                          std::optional<RationalTime> global_start_time,
+                         std::optional<IMATH_NAMESPACE::V2d> canvas_size,
                          py::object metadata) {
                           auto composable_children = vector_or_default<Composable>(children);
-                          Timeline* t = new Timeline(name, global_start_time,
+                          Timeline* t = new Timeline(name, global_start_time, canvas_size,
                                                      py_to_any_dictionary(metadata));
                           if (!composable_children.empty())
                               t->tracks()->set_children(composable_children, ErrorStatusHandler());
@@ -641,8 +644,10 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              py::arg_v("name"_a = std::string()),
              "tracks"_a = py::none(),
              "global_start_time"_a = std::nullopt,
+             "canvas_size"_a = std::nullopt,
              py::arg_v("metadata"_a = py::none()))
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
+        .def_property("canvas_size", &Timeline::canvas_size, &Timeline::set_canvas_size)
         .def_property("tracks", &Timeline::tracks, &Timeline::set_tracks)
         .def("duration", [](Timeline* t) {
                 return t->duration(ErrorStatusHandler());
@@ -707,6 +712,90 @@ Instead it affects the speed of the media displayed within that item.
                     return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
             py::arg_v("name"_a = std::string()),
             py::arg_v("metadata"_a = py::none()));
+
+    py::class_<VideoScale, Effect, managing_ptr<VideoScale>>(m, "VideoScale", py::dynamic_attr(), R"docstring(
+An effect that scales video to the given dimensions.
+)docstring")
+        .def(py::init([](std::string name, int64_t width, int64_t height, py::object metadata) {
+                return new VideoScale(name, width, height, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "width"_a = 0,
+            "height"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("width", &VideoScale::width, &VideoScale::set_width, "Width to scale to")
+        .def_property("height", &VideoScale::height, &VideoScale::set_height, "Height to scale to");
+
+    py::class_<VideoCrop, Effect, managing_ptr<VideoCrop>>(m, "VideoCrop", py::dynamic_attr(), R"docstring(
+An effect that crops video by a given amount of pixels on each side.
+)docstring")
+        .def(py::init([](std::string name, int64_t left, int64_t right, int64_t top, int64_t bottom, py::object metadata) {
+                return new VideoCrop(name, left, right, top, bottom, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "left"_a = 0,
+            "right"_a = 0,
+            "top"_a = 0,
+            "bottom"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("left", &VideoCrop::left, &VideoCrop::set_left)
+        .def_property("right", &VideoCrop::right, &VideoCrop::set_right)
+        .def_property("top", &VideoCrop::top, &VideoCrop::set_top)
+        .def_property("bottom", &VideoCrop::bottom, &VideoCrop::set_bottom);
+
+    py::class_<VideoPosition, Effect, managing_ptr<VideoPosition>>(m, "VideoPosition", py::dynamic_attr(), R"docstring(
+An effect that positions video by a given offset in the frame.
+The position is the location of the top left of the image on the canvas
+)docstring")
+        .def(py::init([](std::string name, int64_t x, int64_t y, py::object metadata) {
+                return new VideoPosition(name, x, y, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "x"_a = 0,
+            "y"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("x", &VideoPosition::x, &VideoPosition::set_x)
+        .def_property("y", &VideoPosition::y, &VideoPosition::set_y);
+
+    py::class_<VideoRotate, Effect, managing_ptr<VideoRotate>>(m, "VideoRotate", py::dynamic_attr(), R"docstring(
+An effect that rotates video by a given amount.
+The rotation is specified in degrees clockwise.
+)docstring")
+        .def(py::init([](std::string name, double rotation, py::object metadata) {
+                return new VideoRotate(name, rotation, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "angle"_a = 0.0,
+            "metadata"_a = py::none())
+        .def_property("angle", &VideoRotate::angle, &VideoRotate::set_angle, "Rotation angle in degrees clockwise");
+
+    py::class_<AudioVolume, Effect, managing_ptr<AudioVolume>>(m, "AudioVolume", py::dynamic_attr(), R"docstring(
+An effect that multiplies the audio volume by a given gain value
+)docstring")
+        .def(py::init([](std::string name, double gain, py::object metadata) {
+            return new AudioVolume(name, gain, py_to_any_dictionary(metadata));
+        }),
+        "name"_a = std::string(),
+        "gain"_a = 1.0,
+        "metadata"_a = py::none())
+        .def_property("gain", &AudioVolume::gain, &AudioVolume::set_gain, "Gain multiplier");
+
+    py::class_<AudioFade, Effect, managing_ptr<AudioFade>>(m, "AudioFade", py::dynamic_attr(), R"docstring(
+An effect that defines an audio fade.
+If fade_in is true, audio is fading in from the start time for the duration
+If fade_in is false, the audio is fading out from the start time for the duration
+)docstring")
+        .def(py::init([](std::string name, bool fade_in, double start_time, double duration, py::object metadata) {
+            return new AudioFade(name, fade_in, start_time, duration, py_to_any_dictionary(metadata));
+        }),
+        "name"_a = std::string(),
+        "fade_in"_a = true,
+        "start_time"_a = 0,
+        "duration"_a = 0,
+        "metadata"_a = py::none())
+        .def_property("fade_in", &AudioFade::fade_in, &AudioFade::set_fade_in, "Fade direction")
+        .def_property("start_time", &AudioFade::start_time, &AudioFade::set_start_time, "Fade start time")
+        .def_property("duration", &AudioFade::duration, &AudioFade::set_duration, "Fade duration");
 }
 
 static void define_media_references(py::module m) {

@@ -1,5 +1,6 @@
 {
-    "OTIO_SCHEMA": "Timeline.1",
+    "OTIO_SCHEMA": "Timeline.2",
+    "canvas": null,
     "metadata": {},
     "name": "Example_Screening.01",
     "global_start_time": null,

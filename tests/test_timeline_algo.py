@@ -18,7 +18,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = otio.adapters.read_from_string(
             """
             {
-                "OTIO_SCHEMA": "Timeline.1",
+                "OTIO_SCHEMA": "Timeline.2",
+                "canvas_size": null,
                 "metadata": {},
                 "name": null,
                 "tracks": {
@@ -264,7 +265,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         expected = otio.adapters.read_from_string(
             """
             {
-                "OTIO_SCHEMA": "Timeline.1",
+                "OTIO_SCHEMA": "Timeline.2",
+                "canvas_size": null,
                 "metadata": {},
                 "name": null,
                 "tracks": {

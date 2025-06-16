@@ -274,6 +274,48 @@ parameters:
 
 ## Module: opentimelineio.schema
 
+### AudioFade.1
+
+*full module path*: `opentimelineio.schema.AudioFade`
+
+*documentation*:
+
+```
+
+An effect that defines an audio fade.
+If fade_in is true, audio is fading in from the start time for the duration
+If fade_in is false, the audio is fading out from the start time for the duration
+
+```
+
+parameters:
+- *duration*: Fade duration
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *fade_in*: Fade direction
+- *metadata*: 
+- *name*: 
+- *start_time*: Fade start time
+
+### AudioVolume.1
+
+*full module path*: `opentimelineio.schema.AudioVolume`
+
+*documentation*:
+
+```
+
+An effect that multiplies the audio volume by a given gain value
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *gain*: Gain multiplier
+- *metadata*: 
+- *name*: 
+
 ### Clip.2
 
 *full module path*: `opentimelineio.schema.Clip`
@@ -614,7 +656,7 @@ parameters:
 - *metadata*: 
 - *name*: 
 
-### Timeline.1
+### Timeline.2
 
 *full module path*: `opentimelineio.schema.Timeline`
 
@@ -625,6 +667,7 @@ None
 ```
 
 parameters:
+- *canvas_size*: 
 - *global_start_time*: 
 - *metadata*: 
 - *name*: 
@@ -666,6 +709,89 @@ parameters:
 - *name*: 
 - *out_offset*: Amount of the next clip this transition overlaps, exclusive.
 - *transition_type*: Kind of transition, as defined by the :class:`Type` enum.
+
+### VideoCrop.1
+
+*full module path*: `opentimelineio.schema.VideoCrop`
+
+*documentation*:
+
+```
+
+An effect that crops video by a given amount of pixels on each side.
+
+```
+
+parameters:
+- *bottom*: 
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *left*: 
+- *metadata*: 
+- *name*: 
+- *right*: 
+- *top*: 
+
+### VideoPosition.1
+
+*full module path*: `opentimelineio.schema.VideoPosition`
+
+*documentation*:
+
+```
+
+An effect that positions video by a given offset in the frame.
+The position is the location of the top left of the image on the canvas
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+- *x*: 
+- *y*: 
+
+### VideoRotate.1
+
+*full module path*: `opentimelineio.schema.VideoRotate`
+
+*documentation*:
+
+```
+
+An effect that rotates video by a given amount.
+The rotation is specified in degrees clockwise.
+
+```
+
+parameters:
+- *angle*: Rotation angle in degrees clockwise
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+
+### VideoScale.1
+
+*full module path*: `opentimelineio.schema.VideoScale`
+
+*documentation*:
+
+```
+
+An effect that scales video to the given dimensions.
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *height*: Height to scale to
+- *metadata*: 
+- *name*: 
+- *width*: Width to scale to
 
 ### SchemaDef.1
 

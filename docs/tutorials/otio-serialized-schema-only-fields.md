@@ -128,6 +128,26 @@ parameters:
 
 ## Module: opentimelineio.schema
 
+### AudioFade.1
+
+parameters:
+- *duration*
+- *effect_name*
+- *enabled*
+- *fade_in*
+- *metadata*
+- *name*
+- *start_time*
+
+### AudioVolume.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *gain*
+- *metadata*
+- *name*
+
 ### Clip.2
 
 parameters:
@@ -252,9 +272,10 @@ parameters:
 - *metadata*
 - *name*
 
-### Timeline.1
+### Timeline.2
 
 parameters:
+- *canvas_size*
 - *global_start_time*
 - *metadata*
 - *name*
@@ -279,6 +300,47 @@ parameters:
 - *name*
 - *out_offset*
 - *transition_type*
+
+### VideoCrop.1
+
+parameters:
+- *bottom*
+- *effect_name*
+- *enabled*
+- *left*
+- *metadata*
+- *name*
+- *right*
+- *top*
+
+### VideoPosition.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *x*
+- *y*
+
+### VideoRotate.1
+
+parameters:
+- *angle*
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+
+### VideoScale.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *height*
+- *metadata*
+- *name*
+- *width*
 
 ### SchemaDef.1
 

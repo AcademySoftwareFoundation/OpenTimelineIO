@@ -1,6 +1,7 @@
 {
-    "OTIO_SCHEMA" : "Timeline.1",
+    "OTIO_SCHEMA" : "Timeline.2",
     "global_start_time" : null,
+    "canvas_size" : null,
     "metadata" : {
         "comments"   : "adding some stuff to metadata to try out",
         "a number"   : 1.0

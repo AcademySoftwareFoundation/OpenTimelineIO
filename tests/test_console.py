@@ -111,7 +111,7 @@ class OTIOStatTest(ConsoleTester, unittest.TestCase):
     def test_basic(self):
         sys.argv = ['otiostat', SCREENING_EXAMPLE_PATH]
         self.run_test()
-        self.assertIn("top level object: Timeline.1", sys.stdout.getvalue())
+        self.assertIn("top level object: Timeline.2", sys.stdout.getvalue())
 
 
 OTIOStatTest_ShellOut = CreateShelloutTest(OTIOStatTest)

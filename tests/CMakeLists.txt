@@ -15,13 +15,13 @@ foreach(test ${tests_opentime})
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
-list(APPEND tests_opentimelineio test_clip test_serialization test_serializableCollection test_stack_algo test_timeline test_track test_editAlgorithm)
+list(APPEND tests_opentimelineio test_clip test_serialization test_serializableCollection test_stack_algo test_timeline test_track test_editAlgorithm test_transform_effects test_volume_effects)
 foreach(test ${tests_opentimelineio})
     add_executable(${test} utils.h utils.cpp ${test}.cpp)
 
     target_link_libraries(${test} opentimelineio)
     set_target_properties(${test} PROPERTIES FOLDER tests)
-    add_test(NAME ${test} 
+    add_test(NAME ${test}
            COMMAND ${test}
            # Set the pwd to the source directory so we can load the samples
            # like the python tests do

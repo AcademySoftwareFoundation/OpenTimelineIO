@@ -32,11 +32,13 @@ set(OPENTIMELINEIO_HEADER_FILES
     timeline.h
     track.h
     trackAlgorithm.h
+    transformEffects.h
     transition.h
     typeRegistry.h
     unknownSchema.h
     vectorIndexing.h
-    version.h)
+    version.h
+    volumeEffects.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
     clip.cpp
@@ -69,9 +71,11 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     timeline.cpp
     track.cpp
     trackAlgorithm.cpp
+    transformEffects.cpp
     transition.cpp
     typeRegistry.cpp
-    unknownSchema.cpp 
+    unknownSchema.cpp
+    volumeEffects.cpp
     CORE_VERSION_MAP.cpp
     ${OPENTIMELINEIO_HEADER_FILES})
 

@@ -6,6 +6,7 @@
 #include <opentimelineio/clip.h>
 #include <opentimelineio/timeline.h>
 #include <opentimelineio/track.h>
+#include <opentimelineio/transformEffects.h>
 #include <opentimelineio/serialization.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/serializableObjectWithMetadata.h>
@@ -13,6 +14,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace otime = opentime::OPENTIME_VERSION;
 namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
@@ -26,6 +28,10 @@ main(int argc, char** argv)
         "success with default indent", [] {
         otio::SerializableObject::Retainer<otio::Clip> cl =
             new otio::Clip();
+
+        otio::SerializableObject::Retainer<otio::Effect> vs =
+            new otio::VideoScale("scale", 1920, 1280);
+        cl->effects().push_back(vs);
         otio::SerializableObject::Retainer<otio::Track> tr =
             new otio::Track();
         tr->append_child(cl);
@@ -37,10 +43,11 @@ main(int argc, char** argv)
         auto output = tl.value->to_json_string(&err, {});
         assertFalse(otio::is_error(err));
         assertEqual(output.c_str(), R"CONTENT({
-    "OTIO_SCHEMA": "Timeline.1",
+    "OTIO_SCHEMA": "Timeline.2",
     "metadata": {},
     "name": "",
     "global_start_time": null,
+    "canvas_size": null,
     "tracks": {
         "OTIO_SCHEMA": "Stack.1",
         "metadata": {},
@@ -64,7 +71,17 @@ main(int argc, char** argv)
                         "metadata": {},
                         "name": "",
                         "source_range": null,
-                        "effects": [],
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "VideoScale.1",
+                                "metadata": {},
+                                "name": "scale",
+                                "effect_name": "VideoScale",
+                                "enabled": true,
+                                "width": 1920,
+                                "height": 1280
+                            }
+                        ],
                         "markers": [],
                         "enabled": true,
                         "media_references": {

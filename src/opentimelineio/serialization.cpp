@@ -925,6 +925,15 @@ SerializableObject::Writer::write(
 }
 
 void
+SerializableObject::Writer::write(
+    std::string const&                  key,
+    std::optional<IMATH_NAMESPACE::V2d> value)
+{
+    _encoder_write_key(key);
+    value ? _encoder.write_value(*value) : _encoder.write_null_value();
+}
+
+void
 SerializableObject::Writer::write(std::string const& key, TimeTransform value)
 {
     _encoder_write_key(key);

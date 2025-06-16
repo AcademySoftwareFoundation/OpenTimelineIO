@@ -7,11 +7,13 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Timeline::Timeline(
-    std::string const&          name,
-    std::optional<RationalTime> global_start_time,
-    AnyDictionary const&        metadata)
+    std::string const&                  name,
+    std::optional<RationalTime>         global_start_time,
+    std::optional<IMATH_NAMESPACE::V2d> canvas_size,
+    AnyDictionary const&                metadata)
     : SerializableObjectWithMetadata(name, metadata)
     , _global_start_time(global_start_time)
+    , _canvas_size(canvas_size)
     , _tracks(new Stack("tracks"))
 {}
 
@@ -29,6 +31,7 @@ Timeline::read_from(Reader& reader)
 {
     return reader.read("tracks", &_tracks)
            && reader.read_if_present("global_start_time", &_global_start_time)
+           && reader.read_if_present("canvas_size", &_canvas_size)
            && Parent::read_from(reader);
 }
 
@@ -37,6 +40,7 @@ Timeline::write_to(Writer& writer) const
 {
     Parent::write_to(writer);
     writer.write("global_start_time", _global_start_time);
+    writer.write("canvas_size", _canvas_size);
     writer.write("tracks", _tracks);
 }
 

@@ -826,6 +826,14 @@ SerializableObject::Reader::read(
 
 bool
 SerializableObject::Reader::read(
+    std::string const&                   key,
+    std::optional<IMATH_NAMESPACE::V2d>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
     std::string const&                     key,
     std::optional<IMATH_NAMESPACE::Box2d>* value)
 {

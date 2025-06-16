@@ -20,7 +20,7 @@ public:
     struct Schema
     {
         static auto constexpr name   = "Timeline";
-        static int constexpr version = 1;
+        static int constexpr version = 2;
     };
 
     using Parent = SerializableObjectWithMetadata;
@@ -29,11 +29,13 @@ public:
     ///
     /// @param name The timeline name.
     /// @param global_start_time The global start time of the timeline.
+    /// @param canvas_size The dimensions of the target canvas
     /// @param metadata The metadata for the timeline.
     Timeline(
-        std::string const&          name              = std::string(),
-        std::optional<RationalTime> global_start_time = std::nullopt,
-        AnyDictionary const&        metadata          = AnyDictionary());
+        std::string const&                  name              = std::string(),
+        std::optional<RationalTime>         global_start_time = std::nullopt,
+        std::optional<IMATH_NAMESPACE::V2d> canvas_size       = std::nullopt,
+        AnyDictionary const&                metadata          = AnyDictionary());
 
     /// @brief Return the timeline stack.
     Stack* tracks() const noexcept { return _tracks; }
@@ -57,6 +59,19 @@ public:
     set_global_start_time(std::optional<RationalTime> const& global_start_time)
     {
         _global_start_time = global_start_time;
+    }
+
+    /// @brief Return the canvas size
+    std::optional<IMATH_NAMESPACE::V2d> canvas_size() const noexcept
+    {
+        return _canvas_size;
+    }
+
+    /// @brief Set the canvas size
+    void
+    set_canvas_size(std::optional<IMATH_NAMESPACE::V2d> const& canvas_size)
+    {
+        _canvas_size = canvas_size;
     }
 
     /// @brief Return the duration of the timeline.
@@ -116,8 +131,9 @@ protected:
     void write_to(Writer&) const override;
 
 private:
-    std::optional<RationalTime> _global_start_time;
-    Retainer<Stack>             _tracks;
+    std::optional<RationalTime>         _global_start_time;
+    std::optional<IMATH_NAMESPACE::V2d> _canvas_size;
+    Retainer<Stack>                     _tracks;
 };
 
 template <typename T>

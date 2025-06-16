@@ -145,6 +145,8 @@ const label_to_schema_version_map CORE_VERSION_MAP{
     { "0.18.0.dev1",
       {
           { "Adapter", 1 },
+          { "AudioFade", 1 },
+          { "AudioVolume", 1 },
           { "Clip", 2 },
           { "Composable", 1 },
           { "Composition", 1 },
@@ -169,10 +171,14 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "Stack", 1 },
           { "Test", 1 },
           { "TimeEffect", 1 },
-          { "Timeline", 1 },
+          { "Timeline", 2 },
           { "Track", 1 },
           { "Transition", 1 },
           { "UnknownSchema", 1 },
+          { "VideoCrop", 1 },
+          { "VideoPosition", 1 },
+          { "VideoRotate", 1 },
+          { "VideoScale", 1 },
       } },
     // {next}
 };

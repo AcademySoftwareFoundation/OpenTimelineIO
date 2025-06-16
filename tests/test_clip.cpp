@@ -12,6 +12,7 @@
 #include <opentimelineio/freezeFrame.h>
 #include <opentimelineio/linearTimeWarp.h>
 #include <opentimelineio/marker.h>
+#include <opentimelineio/transformEffects.h>
 
 #include <iostream>
 
@@ -154,12 +155,21 @@ main(int argc, char** argv)
         using namespace otio;
 
         static constexpr auto time_scalar = 1.5;
+        static constexpr auto width = 1920;
+        static constexpr auto height = 1280;
 
         SerializableObject::Retainer<LinearTimeWarp> ltw(new LinearTimeWarp(
             LinearTimeWarp::Schema::name,
             LinearTimeWarp::Schema::name,
             time_scalar));
-        std::vector<Effect*> effects = { ltw };
+
+        SerializableObject::Retainer<VideoScale> vscl(
+            new VideoScale(
+                VideoScale::Schema::name,
+                100,
+                200));
+
+        std::vector<Effect*> effects = { ltw, vscl };
 
         static constexpr auto red = Marker::Color::red;
 
@@ -247,11 +257,15 @@ main(int argc, char** argv)
         clip->set_media_references({ { "cloud", ref4 } }, "cloud");
         assertEqual(clip->media_reference(), ref4.value);
 
-        // basic test for an effect
+        // basic test for effects
         assertEqual(clip->effects().size(), effects.size());
         auto effect = dynamic_cast<OTIO_NS::LinearTimeWarp*>(
-            clip->effects().front().value);
+            clip->effects()[0].value);
         assertEqual(effect->time_scalar(), time_scalar);
+        auto scale = dynamic_cast<OTIO_NS::VideoScale*>(
+            clip->effects()[1].value);
+        assertEqual(scale->width(), 100);
+        assertEqual(scale->height(), 200);
 
         // basic test for a marker
         assertEqual(clip->markers().size(), markers.size());

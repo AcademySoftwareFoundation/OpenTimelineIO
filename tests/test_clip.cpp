@@ -289,17 +289,7 @@ main(int argc, char** argv)
     tests.add_test("test_error_ptr_null_no_media", [] {
         using namespace otio;
 
-        // tests for no image bounds and no media reference on clip
-        otio::ErrorStatus              status;
-        SerializableObject::Retainer<> so =
-            SerializableObject::from_json_string(
-                R"(
-            {
-                "OTIO_SCHEMA": "Clip.1"
-            })",
-                &status);
-
-        Clip* clip = dynamic_cast<Clip*>(so.value);
+        SerializableObject::Retainer<Clip> clip(new Clip);
 
         // set media reference to empty
         Clip::MediaReferences empty_mrs;

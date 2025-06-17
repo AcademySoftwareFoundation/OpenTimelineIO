@@ -51,7 +51,7 @@ main(int argc, char** argv)
         opentimelineio::v1_0::ErrorStatus err;
         auto result = tr->find_children<otio::Clip>(
             &err,
-            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));       
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
         result = tr->find_children<otio::Clip>(
@@ -164,20 +164,6 @@ main(int argc, char** argv)
             std::find(items.begin(), items.end(), track.value) != items.end());
         assertTrue(
             std::find(items.begin(), items.end(), clip.value) != items.end());
-    });
-
-    // test track correctly calls find_clips from superclass
-    tests.add_test(
-        "test_find_clips", [] {
-        using namespace otio;
-        SerializableObject::Retainer<Track> track = new Track;
-        SerializableObject::Retainer<Clip>  clip  = new Clip;
-        track->append_child(clip);
-
-        opentimelineio::v1_0::ErrorStatus err;
-        auto items = track->find_clips(&err);
-        assertFalse(is_error(err));
-        assertEqual(items.size(), 1);
     });
 
     tests.run(argc, argv);

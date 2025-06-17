@@ -190,21 +190,32 @@ std::optional<IMATH_NAMESPACE::Box2d>
 Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
+    
+    //this code path most likely never runs since a null or empty media_reference gets
+    //replaced with a placeholder value when instantiated
     if (!active_media)
     {
-        *error_status = ErrorStatus(
-            ErrorStatus::CANNOT_COMPUTE_BOUNDS,
-            "No image bounds set on clip",
-            this);
+        if(error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                "No image bounds set on clip",
+                this);
+        }
+
         return std::optional<IMATH_NAMESPACE::Box2d>();
     }
 
     if (!active_media->available_image_bounds())
     {
-        *error_status = ErrorStatus(
-            ErrorStatus::CANNOT_COMPUTE_BOUNDS,
-            "No image bounds set on media reference on clip",
-            this);
+        if(error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                "No image bounds set on media reference on clip",
+                this);
+        }
+
         return std::optional<IMATH_NAMESPACE::Box2d>();
     }
 

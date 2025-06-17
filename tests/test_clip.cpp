@@ -260,6 +260,59 @@ main(int argc, char** argv)
         assertEqual(marker->color().c_str(), red);
     });
 
+    // test to ensure null error_status pointers are correctly handled
+    tests.add_test("test_error_ptr_null", [] {
+
+        using namespace otio;
+
+        // tests for no image bounds on media reference on clip
+        SerializableObject::Retainer<Clip> clip(new Clip);
+
+        // check that there is an error, and that it's the correct error
+        otio::ErrorStatus mr_bounds_error;
+        clip->available_image_bounds(&mr_bounds_error);
+        assertTrue(otio::is_error(mr_bounds_error));
+        assertEqual(
+            mr_bounds_error.outcome,
+            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+
+        // check that if null ptr, nothing happens
+        otio::ErrorStatus* null_test = nullptr;
+
+        assertEqual(
+            clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
+        );
+    });
+
+    // test to ensure null error_status pointers are correctly handled
+    // when there's no media reference
+    tests.add_test("test_error_ptr_null_no_media", [] {
+        using namespace otio;
+
+        SerializableObject::Retainer<Clip> clip(new Clip);
+
+        // set media reference to empty
+        Clip::MediaReferences empty_mrs;
+        empty_mrs["empty"] = nullptr;
+        clip->set_media_references(empty_mrs, "empty");
+
+        otio::ErrorStatus bounds_error_no_mr;
+        clip->available_image_bounds(&bounds_error_no_mr);
+        assertTrue(otio::is_error(bounds_error_no_mr));
+
+        assertEqual(
+            bounds_error_no_mr.outcome,
+            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+
+        // std::cout<< "bounds error details: " << bounds_error_no_mr.details << std::endl;
+
+        otio::ErrorStatus* null_test_no_mr = nullptr;
+
+        assertEqual(
+            clip->available_image_bounds(null_test_no_mr), std::optional<IMATH_NAMESPACE::Box2d>()
+        );
+    });
+
     tests.run(argc, argv);
     return 0;
 }

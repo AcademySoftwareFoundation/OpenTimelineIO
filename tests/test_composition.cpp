@@ -52,6 +52,11 @@ main(int argc, char** argv)
         assertFalse(is_error(err));
         assertEqual(items.size(), 1);
         assertEqual(items[0].value, clip.value);
+
+        items = track->find_clips(&err);
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 1);
+        assertEqual(items[0].value, clip.value);
     });
 
     tests.run(argc, argv);

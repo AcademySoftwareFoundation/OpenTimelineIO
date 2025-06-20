@@ -133,15 +133,6 @@ Stack::available_range(ErrorStatus* error_status) const
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
-std::vector<SerializableObject::Retainer<Clip>>
-Stack::find_clips(
-    ErrorStatus*                    error_status,
-    std::optional<TimeRange> const& search_range,
-    bool                            shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
-}
-
 std::optional<IMATH_NAMESPACE::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {

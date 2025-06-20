@@ -513,6 +513,9 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def("find_children", [](Composition* c, py::object descended_from_type, std::optional<TimeRange> const& search_range, bool shallow_search) {
                 return find_children(c, descended_from_type, search_range, shallow_search);
             }, "descended_from_type"_a = py::none(), "search_range"_a = std::nullopt, "shallow_search"_a = false)
+        .def("find_clips", [](Composition* c, std::optional<TimeRange> const& search_range, bool shallow_search) {
+                return find_clips(c, search_range, shallow_search);
+            }, "search_range"_a = std::nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -586,15 +589,11 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
-            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
-        .def("find_clips", [](Track* t, std::optional<TimeRange> const& search_range, bool shallow_search) {
-                return find_clips(t, search_range, shallow_search);
-            }, "search_range"_a = std::nullopt, "shallow_search"_a = false);
+            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never);
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
         .def_property_readonly_static("Video", [](py::object /* self */) { return Track::Kind::video; });
-
 
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -621,10 +620,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
              "source_range"_a = std::nullopt,
              "markers"_a = py::none(),
              "effects"_a = py::none(),
-             py::arg_v("metadata"_a = py::none()))
-        .def("find_clips", [](Stack* s, std::optional<TimeRange> const& search_range, bool shallow_search) {
-                return find_clips(s, search_range, shallow_search);
-            }, "search_range"_a = std::nullopt, "shallow_search"_a = false);
+             py::arg_v("metadata"_a = py::none()));
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,

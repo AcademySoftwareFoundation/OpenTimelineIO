@@ -7,9 +7,10 @@ import os
 import urllib
 from urllib import request
 import pathlib
+from typing import Union, Any
 
 
-def url_from_filepath(fpath):
+def url_from_filepath(fpath: Union[str, os.PathLike]) -> str:
     """Convert a filesystem path to an url in a portable way.
 
     ensures that `fpath` conforms to the following pattern:
@@ -42,7 +43,7 @@ def url_from_filepath(fpath):
         )
 
 
-def filepath_from_url(urlstr):
+def filepath_from_url(urlstr: str) -> str:
     """
     Take an url and return a filepath.
 

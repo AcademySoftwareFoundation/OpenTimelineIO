@@ -154,6 +154,16 @@ if(OTIO_CXX_INSTALL)
     else()
         message(STATUS "  Not installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
     endif()
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/src/OpenTimelineIO-Version.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIO-Version.h
+    )
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIO-Version.h
+        DESTINATION
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include
+    )
 else()
     message(STATUS "Install C++ bindings: OFF")
 endif()

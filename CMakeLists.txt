@@ -8,8 +8,7 @@ cmake_minimum_required(VERSION 3.18.2)
 
 set(OTIO_VERSION_MAJOR "0")
 set(OTIO_VERSION_MINOR "18")
-set(OTIO_VERSION_PATCH "0")
-set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
+set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.0)
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
@@ -154,16 +153,6 @@ if(OTIO_CXX_INSTALL)
     else()
         message(STATUS "  Not installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
     endif()
-    configure_file(
-        ${PROJECT_SOURCE_DIR}/src/OpenTimelineIO-Version.h.in
-        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIO-Version.h
-    )
-    install(
-        FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIO-Version.h
-        DESTINATION
-            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include
-    )
 else()
     message(STATUS "Install C++ bindings: OFF")
 endif()

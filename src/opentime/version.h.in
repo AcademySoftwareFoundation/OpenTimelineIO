@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define OPENTIME_VERSION v1_0
+#define OPENTIME_VERSION v@PROJECT_VERSION_MAJOR@_@OpenTimelineIO_VERSION_MINOR@
 
 namespace opentime {
 namespace OPENTIME_VERSION {

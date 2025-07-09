@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define OPENTIMELINEIO_VERSION v1_0
+#define OPENTIMELINEIO_VERSION v@PROJECT_VERSION_MAJOR@_@OpenTimelineIO_VERSION_MINOR@
 
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"

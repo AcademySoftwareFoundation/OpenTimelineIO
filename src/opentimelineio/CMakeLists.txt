@@ -35,8 +35,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    vectorIndexing.h
-    version.h)
+    vectorIndexing.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
     clip.cpp
@@ -77,8 +76,12 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-target_include_directories(opentimelineio
-    PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(
+    opentimelineio
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_BINARY_DIR}/.."
+)
 
 if(OTIO_FIND_RAPIDJSON)
     target_include_directories(opentimelineio
@@ -150,5 +153,15 @@ if(OTIO_CXX_INSTALL)
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
+    )
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.h
+    )
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/version.h
+        DESTINATION
+            "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio"
     )
 endif()

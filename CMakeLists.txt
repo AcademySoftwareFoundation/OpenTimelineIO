@@ -8,7 +8,8 @@ cmake_minimum_required(VERSION 3.18.2)
 
 set(OTIO_VERSION_MAJOR "0")
 set(OTIO_VERSION_MINOR "18")
-set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.0)
+set(OTIO_VERSION_PATCH "0")
+set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")

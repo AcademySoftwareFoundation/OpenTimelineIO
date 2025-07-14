@@ -47,6 +47,11 @@ target_compile_options(opentime PRIVATE
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
 )
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
+)
+
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} 
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime")
@@ -78,10 +83,7 @@ if(OTIO_CXX_INSTALL)
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
     )
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
-        ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    )
+
     install(
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/version.h

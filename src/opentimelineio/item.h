@@ -4,6 +4,7 @@
 #pragma once
 
 #include "opentime/timeRange.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
@@ -42,7 +43,8 @@ public:
         AnyDictionary const&            metadata     = AnyDictionary(),
         std::vector<Effect*> const&     effects      = std::vector<Effect*>(),
         std::vector<Marker*> const&     markers      = std::vector<Marker*>(),
-        bool                            enabled      = true);
+        bool                            enabled      = true,
+        std::optional<Color> const&     color        = std::nullopt);
 
     bool visible() const override;
     bool overlapping() const override;
@@ -117,6 +119,17 @@ public:
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;
 
+    std::optional<Color> color() const noexcept
+    {
+        return _color;
+    }
+
+    /// @brief Set the color of the item.
+    void set_color(std::optional<Color> const& color)
+    {
+        _color = color;
+    }
+
 protected:
     virtual ~Item();
 
@@ -127,6 +140,7 @@ private:
     std::optional<TimeRange>      _source_range;
     std::vector<Retainer<Effect>> _effects;
     std::vector<Retainer<Marker>> _markers;
+    std::optional<Color>          _color;
     bool                          _enabled;
 };
 

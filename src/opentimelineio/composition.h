@@ -40,7 +40,8 @@ public:
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),
         std::vector<Effect*> const&     effects      = std::vector<Effect*>(),
-        std::vector<Marker*> const&     markers      = std::vector<Marker*>());
+        std::vector<Marker*> const&     markers      = std::vector<Marker*>(),
+        std::optional<Color> const&     color        = std::nullopt);
 
     /// @brief Return the kind of composition.
     virtual std::string composition_kind() const;

@@ -88,6 +88,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -106,6 +107,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -290,6 +292,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 
 parameters:
 - *active_media_reference_key*: 
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -363,6 +366,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -591,6 +595,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -641,6 +646,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *kind*: 

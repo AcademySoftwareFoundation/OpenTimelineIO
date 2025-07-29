@@ -236,7 +236,8 @@ static void define_bases2(py::module m) {
         .def_property_readonly_static("PURPLE", [](py::object) { return new Color(Color::purple); }, py::return_value_policy::take_ownership)
         .def_property_readonly_static("MAGENTA", [](py::object) { return new Color(Color::magenta); }, py::return_value_policy::take_ownership)
         .def_property_readonly_static("BLACK", [](py::object) { return new Color(Color::black); }, py::return_value_policy::take_ownership)
-        .def_property_readonly_static("WHITE", [](py::object) { return new Color(Color::white); }, py::return_value_policy::take_ownership);
+        .def_property_readonly_static("WHITE", [](py::object) { return new Color(Color::white); }, py::return_value_policy::take_ownership)
+        .def_property_readonly_static("TRANSPARENT", [](py::object) { return new Color(Color::transparent); }, py::return_value_policy::take_ownership);
 
     auto marker_class =
         py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr(), R"docstring(

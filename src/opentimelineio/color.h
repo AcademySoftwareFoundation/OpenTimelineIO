@@ -50,6 +50,7 @@ public:
     static const Color magenta;
     static const Color black;
     static const Color white;
+    static const Color transparent;
 
     static Color* from_hex(std::string const& color);
     static Color* from_int_list(std::vector<int> const& color, int bit_depth);

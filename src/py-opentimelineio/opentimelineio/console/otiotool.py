@@ -112,6 +112,12 @@ def main():
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
 
+    # ===== NEW Phase 5.5: Diff otio files ======
+
+    if args.diff:
+        print("got diff from args")
+        diff_otio()
+
     # Phase 6: Remove/Redaction
 
     if args.remove_metadata_key:
@@ -443,6 +449,16 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         are supported. Use '-' to write OTIO to standard output."""
     )
 
+    # NEW ==============
+    parser.add_argument(
+        "--diff",
+        "-d",
+        action="store_true",
+        help="""Diff and compare two otio files"""
+    )
+
+    # ==================
+
     args = parser.parse_args()
 
     # At least one of these must be specified
@@ -480,6 +496,12 @@ def read_inputs(input_paths):
         timelines.append(timeline)
     return timelines
 
+# ======= NEW =======
+
+def diff_otio():
+    print("hello world from diff otio")
+
+# ===================
 
 def keep_only_video_tracks(timeline):
     """Remove all tracks except for video tracks from a timeline."""

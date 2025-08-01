@@ -634,7 +634,7 @@ TRACK:  (Audio)
   CLIP: sc01_sh010_anim.mov
 """, out)
 
-    def test_remote_transition(self):
+    def test_remove_transition(self):
         sys.argv = [
             'otiotool',
             '-i', TRANSITION_PATH,
@@ -649,7 +649,7 @@ TRACK:  (Audio)
         out_timeline = otio.adapters.read_from_string(out, "otio_json")
         self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
 
-    def test_remote_effects(self):
+    def test_remove_effects(self):
         sys.argv = [
             'otiotool',
             '-i', EFFECTS_PATH,

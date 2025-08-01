@@ -171,7 +171,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 '--tracks', '0'
             ]
             self.run_test()
@@ -189,7 +188,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "foobar"
             ]
             with self.assertRaises(SystemExit):
@@ -200,7 +198,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--end", "foobar"
             ]
             with self.assertRaises(SystemExit):
@@ -211,7 +208,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0,24",
             ]
@@ -222,7 +218,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0",
                 "--end", "0,24",
             ]
@@ -233,14 +228,13 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0",
             ]
             with self.assertRaises(SystemExit):
                 self.run_test()
 
-            result = otio.adapters.read_from_file(temp_file, "otio_json")
+            result = otio.adapters.read_from_file(temp_file)
             self.assertEqual(len(result.tracks[0]), 0)
             self.assertEqual(result.name, "Example_Screening.01")
 
@@ -269,7 +263,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "-A", "foobar",
             ]
 
@@ -287,7 +280,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "-m", "fake_linker",
                 "-M", "somestring=foobar",
                 "-M", "foobar",
@@ -645,7 +637,7 @@ TRACK:  (Audio)
         self.assertNotIn('"OTIO_SCHEMA": "Transition.', out)
 
         # make sure the timeline has the same clips in it
-        in_timeline = otio.adapters.read_from_file(TRANSITION_PATH, "otio_json")
+        in_timeline = otio.adapters.read_from_file(TRANSITION_PATH)
         out_timeline = otio.adapters.read_from_string(out, "otio_json")
         self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
 
@@ -660,7 +652,7 @@ TRACK:  (Audio)
         self.assertNotIn('"OTIO_SCHEMA": "Effect.', out)
 
         # make sure the timeline has the same clips in it
-        in_timeline = otio.adapters.read_from_file(EFFECTS_PATH, "otio_json")
+        in_timeline = otio.adapters.read_from_file(EFFECTS_PATH)
         out_timeline = otio.adapters.read_from_string(out, "otio_json")
         self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
 

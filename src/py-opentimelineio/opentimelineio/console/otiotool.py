@@ -510,11 +510,13 @@ def filter_transitions(timelines):
 
 
 def filter_effects(timelines):
-    """Return a copy of the input timelines with all effects removed.
-    The overall duration of the timelines should not be affected, with
-    the possible exception of time warp effects, which are also removed."""
+    """Remove all effects from the input timelines. The inputs are modified
+    in place, and also returned."""
     for timeline in timelines:
-        for item in timeline.find_children():
+        # Items have an effects attribute, but other Composables do not.
+        # (e.g. Transitions) so we need to find only Items.
+        for item in timeline.find_children(descended_from_type=otio.core.Item):
+            # Clear the effects list contents
             item.effects[:] = []
     return timelines
 

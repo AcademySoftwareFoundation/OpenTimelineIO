@@ -26,6 +26,7 @@ PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.otio")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 SIMPLE_CUT_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
 TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition.otio")
+EFFECTS_PATH = os.path.join(SAMPLE_DATA_DIR, "effects.otio")
 
 
 def CreateShelloutTest(cl):
@@ -642,6 +643,26 @@ TRACK:  (Audio)
         ]
         out, err = self.run_test()
         self.assertNotIn('"OTIO_SCHEMA": "Transition.', out)
+
+        # make sure the timeline has the same clips in it
+        in_timeline = otio.adapters.read_from_file(TRANSITION_PATH, "otio_json")
+        out_timeline = otio.adapters.read_from_string(out, "otio_json")
+        self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
+
+    def test_remote_effects(self):
+        sys.argv = [
+            'otiotool',
+            '-i', EFFECTS_PATH,
+            '-o', '-',
+            '--remove-effects'
+        ]
+        out, err = self.run_test()
+        self.assertNotIn('"OTIO_SCHEMA": "Effect.', out)
+
+        # make sure the timeline has the same clips in it
+        in_timeline = otio.adapters.read_from_file(EFFECTS_PATH, "otio_json")
+        out_timeline = otio.adapters.read_from_string(out, "otio_json")
+        self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
 
     def test_trim(self):
         sys.argv = [

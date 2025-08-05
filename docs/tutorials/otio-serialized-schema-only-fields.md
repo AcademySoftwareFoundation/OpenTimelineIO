@@ -40,6 +40,7 @@ parameters:
 ### Composition.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -50,6 +51,7 @@ parameters:
 ### Item.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -132,6 +134,7 @@ parameters:
 
 parameters:
 - *active_media_reference_key*
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -169,6 +172,7 @@ parameters:
 ### Gap.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -237,6 +241,7 @@ parameters:
 ### Stack.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -263,6 +268,7 @@ parameters:
 ### Track.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *kind*

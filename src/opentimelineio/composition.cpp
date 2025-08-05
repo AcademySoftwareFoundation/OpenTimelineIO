@@ -15,8 +15,9 @@ Composition::Composition(
     std::optional<TimeRange> const& source_range,
     AnyDictionary const&            metadata,
     std::vector<Effect*> const&     effects,
-    std::vector<Marker*> const&     markers)
-    : Parent(name, source_range, metadata, effects, markers)
+    std::vector<Marker*> const&     markers,
+    std::optional<Color> const&     color)
+    : Parent(name, source_range, metadata, effects, markers, /*enabled*/ true, color)
 {}
 
 Composition::~Composition()

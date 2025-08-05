@@ -48,8 +48,8 @@ def read_from_file(
 
         if not os.path.exists(extract_to_directory):
             raise exceptions.OTIOError(
-                f"Directory '{extract_to_directory()}' does not exist, cannot"
-                " unpack otioz there."
+                f"Directory '{extract_to_directory}' does not exist, cannot"
+                f" unpack otioz there."
             )
 
         if os.path.exists(output_media_directory):

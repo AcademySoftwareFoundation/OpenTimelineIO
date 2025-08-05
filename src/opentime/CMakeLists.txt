@@ -6,8 +6,7 @@ set(OPENTIME_HEADER_FILES
     rationalTime.h
     stringPrintf.h
     timeRange.h
-    timeTransform.h
-    version.h)
+    timeTransform.h)
 
 add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB} 
             errorStatus.cpp
@@ -16,7 +15,12 @@ add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentime ALIAS opentime)
 
-target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(
+    opentime
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_BINARY_DIR}/.."
+)
 
 set_target_properties(opentime PROPERTIES 
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
@@ -41,6 +45,11 @@ target_compile_options(opentime PRIVATE
      -Wall>
      $<$<CXX_COMPILER_ID:MSVC>: /W4>
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
 if(OTIO_CXX_INSTALL)
@@ -73,6 +82,13 @@ if(OTIO_CXX_INSTALL)
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+    )
+
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/version.h
+        DESTINATION
+            "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime"
     )
 endif()
 

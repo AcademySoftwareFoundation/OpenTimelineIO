@@ -32,7 +32,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::SerializableCollection>
             sc = new otio::SerializableCollection();
         sc->insert_child(0, tl);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = sc->find_children<otio::Clip>(&err, {}, false);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
@@ -61,7 +61,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::SerializableCollection>
             sc = new otio::SerializableCollection();
         sc->insert_child(0, tl);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = sc->find_children<otio::Clip>(&err, range);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
@@ -80,7 +80,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::SerializableCollection>
             sc = new otio::SerializableCollection();
         sc->insert_child(0, tl);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = sc->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 0);
         result = sc->find_children<otio::Clip>(&err, std::nullopt, false);

@@ -28,7 +28,7 @@ main(int argc, char** argv)
         SerializableObject::Retainer<Item>  item  = new Item;
 
         comp->append_child(item);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = comp->find_children<>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, item.value);
@@ -47,7 +47,7 @@ main(int argc, char** argv)
         track->append_child(transition);
         track->append_child(clip);
      
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto items = stack->find_clips(&err);
         assertFalse(is_error(err));
         assertEqual(items.size(), 1);

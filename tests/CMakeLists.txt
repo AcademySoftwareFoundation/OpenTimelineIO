@@ -1,7 +1,10 @@
-include_directories(${PROJECT_SOURCE_DIR}/src
+include_directories(
+    ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/deps
     ${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include
-	${PROJECT_SOURCE_DIR}/src/tests)
+    ${PROJECT_SOURCE_DIR}/src/tests
+    ${CMAKE_BINARY_DIR}/src
+)
 
 list(APPEND tests_opentime test_opentime)
 foreach(test ${tests_opentime})

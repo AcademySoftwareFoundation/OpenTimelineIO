@@ -26,6 +26,7 @@ PREMIERE_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.otio")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.otio")
 SIMPLE_CUT_PATH = os.path.join(SAMPLE_DATA_DIR, "simple_cut.otio")
 TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition.otio")
+EFFECTS_PATH = os.path.join(SAMPLE_DATA_DIR, "effects.otio")
 
 
 def CreateShelloutTest(cl):
@@ -170,7 +171,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 '--tracks', '0'
             ]
             self.run_test()
@@ -188,7 +188,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "foobar"
             ]
             with self.assertRaises(SystemExit):
@@ -199,7 +198,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--end", "foobar"
             ]
             with self.assertRaises(SystemExit):
@@ -210,7 +208,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0,24",
             ]
@@ -221,7 +218,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0",
                 "--end", "0,24",
             ]
@@ -232,14 +228,13 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0",
             ]
             with self.assertRaises(SystemExit):
                 self.run_test()
 
-            result = otio.adapters.read_from_file(temp_file, "otio_json")
+            result = otio.adapters.read_from_file(temp_file)
             self.assertEqual(len(result.tracks[0]), 0)
             self.assertEqual(result.name, "Example_Screening.01")
 
@@ -268,7 +263,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "-A", "foobar",
             ]
 
@@ -286,7 +280,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', temp_file,
-                '-O', 'otio_json',
                 "-m", "fake_linker",
                 "-M", "somestring=foobar",
                 "-M", "foobar",
@@ -633,7 +626,7 @@ TRACK:  (Audio)
   CLIP: sc01_sh010_anim.mov
 """, out)
 
-    def test_remote_transition(self):
+    def test_remove_transition(self):
         sys.argv = [
             'otiotool',
             '-i', TRANSITION_PATH,
@@ -642,6 +635,26 @@ TRACK:  (Audio)
         ]
         out, err = self.run_test()
         self.assertNotIn('"OTIO_SCHEMA": "Transition.', out)
+
+        # make sure the timeline has the same clips in it
+        in_timeline = otio.adapters.read_from_file(TRANSITION_PATH)
+        out_timeline = otio.adapters.read_from_string(out, "otio_json")
+        self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
+
+    def test_remove_effects(self):
+        sys.argv = [
+            'otiotool',
+            '-i', EFFECTS_PATH,
+            '-o', '-',
+            '--remove-effects'
+        ]
+        out, err = self.run_test()
+        self.assertNotIn('"OTIO_SCHEMA": "Effect.', out)
+
+        # make sure the timeline has the same clips in it
+        in_timeline = otio.adapters.read_from_file(EFFECTS_PATH)
+        out_timeline = otio.adapters.read_from_string(out, "otio_json")
+        self.assertEqual(len(in_timeline.find_clips()), len(out_timeline.find_clips()))
 
     def test_trim(self):
         sys.argv = [

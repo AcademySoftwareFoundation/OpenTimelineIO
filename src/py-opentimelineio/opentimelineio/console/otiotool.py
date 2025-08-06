@@ -122,7 +122,7 @@ def main():
         print("got diff from args, using tl:", timelines[0].name, timelines[1].name)
 
         # function that serves as wrapper to call actual getDif main
-        diff_otio(timelines[0], timelines[1])
+        timelines = [diff_otio(timelines[0], timelines[1])]
 
     # Phase 6: Remove/Redaction
 
@@ -505,7 +505,7 @@ def read_inputs(input_paths):
 
 def diff_otio(tlA, tlB):
     print("hello world from diff otio")
-    getDif.main(tlA, tlB)
+    return getDif.main(tlA, tlB)
 
 # ===================
 

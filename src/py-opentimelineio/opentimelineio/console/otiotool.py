@@ -23,8 +23,12 @@ from copy import deepcopy
 
 import opentimelineio as otio
 
+# sys.path.append("src/py-opentimelineio/opentimelineio/console/otiodiff")
+
+from .otiodiff import getDif
 
 def main():
+    
     """otiotool main program.
     This function is responsible for executing the steps specified
     by all of the command line arguments in the right order.
@@ -115,8 +119,10 @@ def main():
     # ===== NEW Phase 5.5: Diff otio files ======
 
     if args.diff:
-        print("got diff from args")
-        diff_otio()
+        print("got diff from args, using tl:", timelines[0].name, timelines[1].name)
+
+        # function that serves as wrapper to call actual getDif main
+        diff_otio(timelines[0], timelines[1])
 
     # Phase 6: Remove/Redaction
 
@@ -452,9 +458,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     # NEW ==============
     parser.add_argument(
         "--diff",
-        "-d",
         action="store_true",
-        help="""Diff and compare two otio files"""
+        help="""Diff and compare two otio files. Input file type must be .otio"""
     )
 
     # ==================
@@ -498,8 +503,9 @@ def read_inputs(input_paths):
 
 # ======= NEW =======
 
-def diff_otio():
+def diff_otio(tlA, tlB):
     print("hello world from diff otio")
+    getDif.main(tlA, tlB)
 
 # ===================
 

@@ -46,15 +46,11 @@ OTIO_DEFAULT_MEDIA_LINKER =
 
 
 # run all the unit tests
-test: test-core test-contrib
+test: test-core
 
 test-core: python-version
 	@echo "$(ccgreen)Running Core tests...$(ccend)"
 	@python -m unittest discover -s tests $(TEST_ARGS)
-
-test-contrib: python-version
-	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 # CI
 ###################################
@@ -65,10 +61,10 @@ ci-postbuild: coverage
 python-version:
 	@python --version
 
-coverage: coverage-core coverage-contrib coverage-report
+coverage: coverage-core coverage-report
 
 coverage-report:
-	@${COV_PROG} combine .coverage* contrib/opentimelineio_contrib/adapters/.coverage*
+	@${COV_PROG} combine .coverage*
 	@${COV_PROG} xml
 	@${COV_PROG} report -m
 
@@ -82,10 +78,7 @@ ifndef COV_PROG
 endif
 	@${COV_PROG} run -p -m unittest discover tests
 
-coverage-contrib: python-version
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
-
-lcov: 
+lcov:
 ifndef LCOV_PROG
 	$(error $(newline)$(ccred) lcov is not available please see:$(newline)$(ccend)\
 	$(ccblue)	https://github.com/linux-test-project/lcov/blob/master/README $(ccend))
@@ -99,14 +92,10 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		C++ coverage will not work, because intermediate build products will \
 		not be found.)
 endif
-	lcov --rc lcov_branch_coverage=1 --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+	lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
-	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
+	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g" \
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
-	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
-		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
-	lcov --rc lcov_branch_coverage=1 --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
-		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	rm ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info
 	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
 
@@ -127,7 +116,6 @@ clean:
 ifdef COV_PROG
 	@${COV_PROG} erase
 endif
-	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
 	rm -vf *.whl
 	@cd docs; ${MAKE_PROG} clean
 
@@ -259,7 +247,7 @@ update-contributors: check-github-token
 	@echo "Updating CONTRIBUTORS.md..."
 	@python maintainers/fetch_contributors.py \
 		--repo AcademySoftwareFoundation/OpenTimelineIO \
-		--token $(OTIO_RELEASE_GITHUB_TOKEN)
+		--token "${OTIO_RELEASE_GITHUB_TOKEN}"
 
 dev-python-install:
 	@python setup.py install

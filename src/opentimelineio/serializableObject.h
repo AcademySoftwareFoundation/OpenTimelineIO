@@ -8,77 +8,106 @@
 #include "opentime/timeTransform.h"
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/anyVector.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/errorStatus.h"
-#include "opentimelineio/optional.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
-#include "ImathBox.h"
+#include "Imath/ImathBox.h"
 #include "serialization.h"
 
 #include <list>
+#include <optional>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class CloningEncoder;
 
+/// @brief A serializable object.
 class SerializableObject
 {
 public:
+    /// @brief This struct provides the SerializableObject schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableObject";
         static int constexpr version = 1;
     };
 
+    /// @brief Create a new serializable object.
     SerializableObject();
 
-    /**
-     * You cannot directly delete a SerializableObject* (or, hopefully, anything
-     * derived from it, as all derivations are required to protect the destructor).
-     *
-     * Instead, call the member function possibly_delete(), which deletes the object
-     * (and, recursively, the objects owned by this object), provided the objects
-     * are not under external management (e.g. prevented from being deleted because an
-     * external scripting system is holding a reference to them).
-     */
+    /// @brief Delete a serializable object.
+    ///
+    /// You cannot directly delete a SerializableObject* (or, hopefully, anything
+    /// derived from it, as all derivations are required to protect the destructor).
+    ///
+    /// Instead, call the member function possibly_delete(), which deletes the object
+    /// (and, recursively, the objects owned by this object), provided the objects
+    /// are not under external management (e.g. prevented from being deleted because an
+    /// external scripting system is holding a reference to them).
     bool possibly_delete();
 
+    /// @brief Serialize this object to a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
     bool to_json_file(
         std::string const&        file_name,
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
+    /// @brief Serialize this object to a JSON string.
+    ///
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
     std::string to_json_string(
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
     static SerializableObject* from_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr);
+
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param input The input string.
+    /// @param error_status The return status.
     static SerializableObject* from_json_string(
         std::string const& input,
         ErrorStatus*       error_status = nullptr);
 
+    /// @brief Return whether this object is equivalent to another.
     bool is_equivalent_to(SerializableObject const& other) const;
 
-    // Makes a (deep) clone of this instance.
-    //
-    // Descendent SerializableObjects are cloned as well.
-    // If the operation fails, nullptr is returned and error_status
-    // is set appropriately.
+    /// @brief Makes a (deep) clone of this instance.
+    ///
+    /// Descendent objects are cloned as well.
+    ///
+    /// If the operation fails, nullptr is returned and error_status
+    /// is set appropriately.
     SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
 
-    // Allow external system (e.g. Python, Swift) to add serializable fields
-    // on the fly.  C++ implementations should have no need for this functionality.
+    /// @brief Allow external system (e.g. Python, Swift) to add serializable
+    /// fields on the fly.
+    ///
+    /// C++ implementations should have no need for this functionality.
     AnyDictionary& dynamic_fields() { return _dynamic_fields; }
 
     template <typename T = SerializableObject>
     struct Retainer;
 
+    /// @brief This class provides reading functionality.
     class Reader
     {
     public:
@@ -97,32 +126,35 @@ public:
         bool read(std::string const& key, RationalTime* dest);
         bool read(std::string const& key, TimeRange* dest);
         bool read(std::string const& key, class TimeTransform* dest);
+        bool read(std::string const& key, Color* dest);
         bool read(std::string const& key, IMATH_NAMESPACE::V2d* value);
         bool read(std::string const& key, IMATH_NAMESPACE::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
         bool read(std::string const& key, AnyDictionary* dest);
-        bool read(std::string const& key, any* dest);
+        bool read(std::string const& key, std::any* dest);
 
-        bool read(std::string const& key, optional<bool>* dest);
-        bool read(std::string const& key, optional<int>* dest);
-        bool read(std::string const& key, optional<double>* dest);
-        bool read(std::string const& key, optional<RationalTime>* dest);
-        bool read(std::string const& key, optional<TimeRange>* dest);
-        bool read(std::string const& key, optional<TimeTransform>* dest);
-        bool
-        read(std::string const& key, optional<IMATH_NAMESPACE::Box2d>* value);
+        bool read(std::string const& key, std::optional<bool>* dest);
+        bool read(std::string const& key, std::optional<int>* dest);
+        bool read(std::string const& key, std::optional<double>* dest);
+        bool read(std::string const& key, std::optional<RationalTime>* dest);
+        bool read(std::string const& key, std::optional<TimeRange>* dest);
+        bool read(std::string const& key, std::optional<TimeTransform>* dest);
+        bool read(std::string const& key, std::optional<Color>* dest);
+        bool read(
+            std::string const&                     key,
+            std::optional<IMATH_NAMESPACE::Box2d>* value);
 
         // skipping std::string because we translate null into the empty
         // string, so the conversion is somewhat ambiguous
 
-        // no other optionals are allowed:
+        // no other std::optionals are allowed:
         template <typename T>
-        bool read(std::string const& key, optional<T>* dest) = delete;
+        bool read(std::string const& key, std::optional<T>* dest) = delete;
 
         template <typename T>
         bool read(std::string const& key, T* dest)
         {
-            any a;
+            std::any a;
             return read(key, &a) && _from_any(a, dest);
         }
 
@@ -176,7 +208,7 @@ public:
         // forward functions to keep stringUtils.h private
         static std::string
         fwd_type_name_for_error_message(std::type_info const&);
-        static std::string fwd_type_name_for_error_message(any const& a);
+        static std::string fwd_type_name_for_error_message(std::any const& a);
         static std::string
         fwd_type_name_for_error_message(class SerializableObject*);
 
@@ -202,17 +234,17 @@ public:
             }
         };
 
-        any _decode(_Resolver& resolver);
+        std::any _decode(_Resolver& resolver);
 
         template <typename T>
-        bool _from_any(any const& source, std::vector<T>* dest)
+        bool _from_any(std::any const& source, std::vector<T>* dest)
         {
             if (!_type_check(typeid(AnyVector), source.type()))
             {
                 return false;
             }
 
-            AnyVector const& av = any_cast<AnyVector const&>(source);
+            AnyVector const& av = std::any_cast<AnyVector const&>(source);
             std::vector<T>   result;
             result.reserve(av.size());
 
@@ -232,14 +264,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, std::list<T>* dest)
+        bool _from_any(std::any const& source, std::list<T>* dest)
         {
             if (!_type_check(typeid(AnyVector), source.type()))
             {
                 return false;
             }
 
-            AnyVector const& av = any_cast<AnyVector const&>(source);
+            AnyVector const& av = std::any_cast<AnyVector const&>(source);
             std::list<T>     result;
 
             for (auto e: av)
@@ -258,14 +290,15 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, std::map<std::string, T>* dest)
+        bool _from_any(std::any const& source, std::map<std::string, T>* dest)
         {
             if (!_type_check(typeid(AnyDictionary), source.type()))
             {
                 return false;
             }
 
-            AnyDictionary const& dict = any_cast<AnyDictionary const&>(source);
+            AnyDictionary const& dict =
+                std::any_cast<AnyDictionary const&>(source);
             std::map<std::string, T> result;
 
             for (auto e: dict)
@@ -284,7 +317,7 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, T** dest)
+        bool _from_any(std::any const& source, T** dest)
         {
             if (source.type() == typeid(void))
             {
@@ -298,7 +331,7 @@ public:
             }
 
             SerializableObject* so =
-                any_cast<SerializableObject::Retainer<>>(source).value;
+                std::any_cast<SerializableObject::Retainer<>>(source).value;
             if (!so)
             {
                 *dest = nullptr;
@@ -316,14 +349,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, Retainer<T>* dest)
+        bool _from_any(std::any const& source, Retainer<T>* dest)
         {
             if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T)))
             {
                 return false;
             }
 
-            Retainer<> const& rso = any_cast<Retainer<> const&>(source);
+            Retainer<> const& rso = std::any_cast<Retainer<> const&>(source);
             if (!rso.value)
             {
                 *dest = Retainer<T>(nullptr);
@@ -340,14 +373,14 @@ public:
         }
 
         template <typename T>
-        bool _from_any(any const& source, T* dest)
+        bool _from_any(std::any const& source, T* dest)
         {
             if (!_type_check(typeid(T), source.type()))
             {
                 return false;
             }
 
-            *dest = any_cast<T>(source);
+            *dest = std::any_cast<T>(source);
             return true;
         }
 
@@ -363,7 +396,7 @@ public:
         bool _fetch(std::string const& key, T* dest, bool* had_null = nullptr);
 
         template <typename T>
-        bool _read_optional(std::string const& key, optional<T>* value);
+        bool _read_optional(std::string const& key, std::optional<T>* value);
 
         bool _fetch(std::string const& key, int64_t* dest);
         bool _fetch(std::string const& key, double* dest);
@@ -381,7 +414,7 @@ public:
             _Resolver&,
             int line_number);
         static void _fix_reference_ids(
-            any&,
+            std::any&,
             error_function_t const& error_function,
             _Resolver&,
             int line_number);
@@ -401,11 +434,12 @@ public:
         friend class TypeRegistry;
     };
 
+    /// @brief This class provides writing functionality.
     class Writer
     {
     public:
         static bool write_root(
-            any const&                value,
+            std::any const&           value,
             class Encoder&            encoder,
             const schema_version_map* downgrade_version_manifest = nullptr,
             ErrorStatus*              error_status               = nullptr);
@@ -418,11 +452,14 @@ public:
         void write(std::string const& key, TimeRange value);
         void write(std::string const& key, IMATH_NAMESPACE::V2d value);
         void write(std::string const& key, IMATH_NAMESPACE::Box2d value);
-        void write(std::string const& key, optional<RationalTime> value);
-        void write(std::string const& key, optional<TimeRange> value);
-        void
-        write(std::string const& key, optional<IMATH_NAMESPACE::Box2d> value);
+        void write(std::string const& key, std::optional<Color> value);
+        void write(std::string const& key, std::optional<RationalTime> value);
+        void write(std::string const& key, std::optional<TimeRange> value);
+        void write(
+            std::string const&                    key,
+            std::optional<IMATH_NAMESPACE::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
+        void write(std::string const& key, Color value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)
         {
@@ -430,7 +467,7 @@ public:
         }
         void write(std::string const& key, AnyDictionary const& value);
         void write(std::string const& key, AnyVector const& value);
-        void write(std::string const& key, any const& value);
+        void write(std::string const& key, std::any const& value);
 
         template <typename T>
         void write(std::string const& key, T const& value)
@@ -445,12 +482,12 @@ public:
         }
 
     private:
+        /// Convenience routines for converting various STL structures of specific
+        /// types to a parallel hierarchy holding std::any.
         ///@{
-        /** Convience routines for converting various STL structures of specific
-          types to a parallel hierarchy holding anys!. */
 
         template <typename T>
-        static any _to_any(std::vector<T> const& value)
+        static std::any _to_any(std::vector<T> const& value)
         {
             AnyVector av;
             av.reserve(value.size());
@@ -460,11 +497,11 @@ public:
                 av.emplace_back(_to_any(e));
             }
 
-            return any(std::move(av));
+            return std::any(std::move(av));
         }
 
         template <typename T>
-        static any _to_any(std::map<std::string, T> const& value)
+        static std::any _to_any(std::map<std::string, T> const& value)
         {
             AnyDictionary am;
             for (const auto& e: value)
@@ -472,11 +509,11 @@ public:
                 am.emplace(e.first, _to_any(e.second));
             }
 
-            return any(std::move(am));
+            return std::any(std::move(am));
         }
 
         template <typename T>
-        static any _to_any(std::list<T> const& value)
+        static std::any _to_any(std::list<T> const& value)
         {
             AnyVector av;
             av.reserve(value.size());
@@ -486,35 +523,36 @@ public:
                 av.emplace_back(_to_any(e));
             }
 
-            return any(std::move(av));
+            return std::any(std::move(av));
         }
 
         template <typename T>
-        static any _to_any(T const* value)
+        static std::any _to_any(T const* value)
         {
             SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(T* value)
+        static std::any _to_any(T* value)
         {
             SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(Retainer<T> const& value)
+        static std::any _to_any(Retainer<T> const& value)
         {
             SerializableObject* so = value.value;
-            return any(SerializableObject::Retainer<>(so));
+            return std::any(SerializableObject::Retainer<>(so));
         }
 
         template <typename T>
-        static any _to_any(T const& value)
+        static std::any _to_any(T const& value)
         {
-            return any(value);
+            return std::any(value);
         }
+
         ///@}
 
         Writer(
@@ -533,24 +571,24 @@ public:
         Writer operator=(Writer const&) = delete;
 
         void _build_dispatch_tables();
-        void _write(std::string const& key, any const& value);
+        void _write(std::string const& key, std::any const& value);
         void _encoder_write_key(std::string const& key);
 
-        bool _any_dict_equals(any const& lhs, any const& rhs);
-        bool _any_array_equals(any const& lhs, any const& rhs);
-        bool _any_equals(any const& lhs, any const& rhs);
+        bool _any_dict_equals(std::any const& lhs, std::any const& rhs);
+        bool _any_array_equals(std::any const& lhs, std::any const& rhs);
+        bool _any_equals(std::any const& lhs, std::any const& rhs);
 
         std::string _no_key;
         std::unordered_map<
             std::type_info const*,
-            std::function<void(any const&)>>
+            std::function<void(std::any const&)>>
             _write_dispatch_table;
         std::unordered_map<
             std::type_info const*,
-            std::function<bool(any const&, any const&)>>
+            std::function<bool(std::any const&, std::any const&)>>
             _equality_dispatch_table;
 
-        std::unordered_map<std::string, std::function<void(any const&)>>
+        std::unordered_map<std::string, std::function<void(std::any const&)>>
             _write_dispatch_table_by_name;
         std::unordered_map<SerializableObject const*, std::string>
                                              _id_for_object;
@@ -564,15 +602,22 @@ public:
         friend class SerializableObject;
     };
 
+    /// @brief Deserialize from the given reader.
     virtual bool read_from(Reader&);
+
+    /// @brief Serialize to the given writer.
     virtual void write_to(Writer&) const;
 
+    /// @brief Return whether this schema is unknown.
     virtual bool is_unknown_schema() const;
 
+    /// @brief Return the schema name.
     std::string schema_name() const { return _type_record()->schema_name; }
 
+    /// @brief Return the schema version.
     int schema_version() const { return _type_record()->schema_version; }
 
+    /// @brief This struct provides similar functionality to a smart pointer.
     template <typename T>
     struct Retainer
     {
@@ -643,6 +688,7 @@ private:
     void _managed_release();
 
 public:
+    /// @brief This struct provides a reference ID.
     struct ReferenceId
     {
         std::string id;
@@ -652,12 +698,15 @@ public:
         }
     };
 
+    /// @todo Add comment.
     void install_external_keepalive_monitor(
         std::function<void()> monitor,
         bool                  apply_now);
 
+    /// @brief Return the current reference count.
     int current_ref_count() const;
 
+    /// @brief This struct provides an unknown type.
     struct UnknownType
     {
         std::string type_name;

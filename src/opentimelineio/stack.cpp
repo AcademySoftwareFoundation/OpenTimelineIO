@@ -8,11 +8,11 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Stack::Stack(
-    std::string const&          name,
-    optional<TimeRange> const&  source_range,
-    AnyDictionary const&        metadata,
-    std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers)
+    std::string const&              name,
+    std::optional<TimeRange> const& source_range,
+    AnyDictionary const&            metadata,
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers)
     : Parent(name, source_range, metadata, effects, markers)
 {}
 
@@ -79,6 +79,26 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
     return result;
 }
 
+std::vector<SerializableObject::Retainer<Composable>>
+Stack::children_in_range(
+    TimeRange const& search_range,
+    ErrorStatus* error_status) const
+{
+    std::vector<SerializableObject::Retainer<Composable>> children;
+    for (const auto& child : this->children())
+    {
+        if (const auto& item = dynamic_retainer_cast<Item>(child))
+        {
+            const auto range = item->trimmed_range_in_parent(error_status);
+            if (range.has_value() && range.value().intersects(search_range))
+            {
+                children.push_back(child);
+            }
+        }
+    }
+    return children;
+}
+
 TimeRange
 Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
     const
@@ -113,30 +133,21 @@ Stack::available_range(ErrorStatus* error_status) const
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
-std::vector<SerializableObject::Retainer<Clip>>
-Stack::find_clips(
-    ErrorStatus*               error_status,
-    optional<TimeRange> const& search_range,
-    bool                       shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
-}
-
-optional<IMATH_NAMESPACE::Box2d>
+std::optional<IMATH_NAMESPACE::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {
-    optional<IMATH_NAMESPACE::Box2d> box;
-    bool                             found_first_child = false;
+    std::optional<IMATH_NAMESPACE::Box2d> box;
+    bool                                  found_first_child = false;
     for (auto clip: find_children<Clip>(error_status))
     {
-        optional<IMATH_NAMESPACE::Box2d> child_box;
+        std::optional<IMATH_NAMESPACE::Box2d> child_box;
         if (auto clip_box = clip->available_image_bounds(error_status))
         {
             child_box = clip_box;
         }
         if (is_error(error_status))
         {
-            return optional<IMATH_NAMESPACE::Box2d>();
+            return std::optional<IMATH_NAMESPACE::Box2d>();
         }
         if (child_box)
         {

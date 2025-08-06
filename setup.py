@@ -113,7 +113,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
             # turn off the C++ tests during a Python build
             '-DBUILD_TESTING:BOOL=OFF',
-            # Python modules wil be installed by setuptools.
+            # Python modules will be installed by setuptools.
             '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
         if self.is_windows():
@@ -205,10 +205,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 # check the python version first
 if (
     sys.version_info[0] < 3 or
-    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
+    (sys.version_info[0] == 3 and sys.version_info[1] < 9)
 ):
     sys.exit(
-        'OpenTimelineIO requires python3.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.9 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -218,7 +218,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.16.0.dev1",
+    "version": "0.18.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Apache 2.0 License',
@@ -237,7 +237,6 @@ def _append_version_info_to_init_scripts(build_lib):
 
     for module, parentdir in [
             ("opentimelineio", "src/py-opentimelineio"),
-            ("opentimelineio_contrib", "contrib"),
             ("opentimelineview", "src")
     ]:
         target_file = os.path.join(build_lib, module, "__init__.py")
@@ -264,7 +263,13 @@ class OTIO_build_py(setuptools.command.build_py.build_py):
     def run(self):
         super().run()
 
-        if not self.dry_run and not self.editable_mode:
+        # editable_mode isn't always present
+        try:
+            editable_mode = self.editable_mode
+        except AttributeError:
+            editable_mode = False
+
+        if not self.dry_run and not editable_mode:
             # Only run when not in dry-mode (a dry run should not have any side effect)
             # and in non-editable mode. We don't want to edit files when in editable
             # mode because that could lead to modifications to the source files.
@@ -312,11 +317,10 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -329,15 +333,11 @@ setup(
         'opentimelineio': [
             'adapters/builtin_adapters.plugin_manifest.json',
         ],
-        'opentimelineio_contrib': [
-            'adapters/contrib_adapters.plugin_manifest.json',
-        ],
     },
 
     packages=(
         find_packages(where="src/py-opentimelineio") +  # opentimelineio
-        find_packages(where="src") +  # opentimelineview
-        find_packages(where="contrib", exclude=["opentimelineio_contrib.adapters.tests"])  # opentimelineio_contrib # noqa
+        find_packages(where="src")  # opentimelineview
     ),
 
     ext_modules=[
@@ -351,17 +351,14 @@ setup(
     ],
 
     package_dir={
-        'opentimelineio_contrib': 'contrib/opentimelineio_contrib',
         'opentimelineio': 'src/py-opentimelineio/opentimelineio',
         'opentimelineview': 'src/opentimelineview',
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>=3.7, !=3.9.0',  # noqa: E501
+    python_requires='>3.9.0',  # noqa: E501
 
     install_requires=[
-        'pyaaf2>=1.4,<1.7',
-        'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={
         'console_scripts': [

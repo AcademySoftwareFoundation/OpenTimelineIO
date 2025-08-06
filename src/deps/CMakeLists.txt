@@ -4,7 +4,12 @@
 #----- Other dependencies
 
 # detect if the submodules haven't been updated
-set(DEPS_SUBMODULES any optional-lite pybind11 rapidjson)
+set(DEPS_SUBMODULES pybind11)
+
+if(NOT OTIO_FIND_RAPIDJSON)
+    set(DEPS_SUBMODULES ${DEPS_SUBMODULES} rapidjson)
+endif()
+
 foreach(submodule IN LISTS DEPS_SUBMODULES)
     file(GLOB SUBMOD_CONTENTS ${submodule})
     list(LENGTH SUBMOD_CONTENTS SUBMOD_CONTENT_LEN)
@@ -20,14 +25,7 @@ if(OTIO_PYTHON_INSTALL)
     add_subdirectory(pybind11)
 endif()
 
-if(OTIO_CXX_INSTALL AND OTIO_DEPENDENCIES_INSTALL)
-    install(FILES any/any.hpp 
-            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps/any")
-    install(FILES optional-lite/include/nonstd/optional.hpp
-    	    DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps/nonstd")
-endif()
-
-if (USE_DEPS_IMATH)
+if(NOT OTIO_FIND_IMATH)
     # preserve BUILD_SHARED_LIBS options for this project, but set it off for Imath
     option(BUILD_SHARED_LIBS "Build shared libraries" ON)
     set(BUILD_SHARED_LIBS OFF)

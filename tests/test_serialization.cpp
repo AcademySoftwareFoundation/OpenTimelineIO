@@ -49,6 +49,7 @@ main(int argc, char** argv)
         "effects": [],
         "markers": [],
         "enabled": true,
+        "color": null,
         "children": [
             {
                 "OTIO_SCHEMA": "Track.1",
@@ -58,6 +59,7 @@ main(int argc, char** argv)
                 "effects": [],
                 "markers": [],
                 "enabled": true,
+                "color": null,
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.2",
@@ -67,6 +69,7 @@ main(int argc, char** argv)
                         "effects": [],
                         "markers": [],
                         "enabled": true,
+                        "color": null,
                         "media_references": {
                             "DEFAULT_MEDIA": {
                                 "OTIO_SCHEMA": "MissingReference.1",

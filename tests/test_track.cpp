@@ -99,13 +99,71 @@ main(int argc, char** argv)
         tr->append_child(cl0);
         tr->append_child(st);
         opentimelineio::v1_0::ErrorStatus err;
-        auto result = tr->find_children<otio::Clip>(&err, nullopt, true);
+        auto result = tr->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->find_children<otio::Clip>(&err, nullopt, false);
+        result = tr->find_children<otio::Clip>(&err, std::nullopt, false);
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);
+    });
+
+    tests.add_test(
+        "test_find_children_stack", [] {
+        using namespace otio;
+
+        SerializableObject::Retainer<Stack> stack = new Stack();
+        SerializableObject::Retainer<Track> track = new Track;
+        SerializableObject::Retainer<Clip>  clip  = new Clip;
+        stack->append_child(track);
+        track->append_child(clip);
+
+        // Simple find.
+        clip->set_source_range(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(3.0, 24.0)));
+        otio::ErrorStatus err;
+        auto items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 2);
+        assertTrue(
+            std::find(items.begin(), items.end(), track.value) != items.end());
+        assertTrue(
+            std::find(items.begin(), items.end(), clip.value) != items.end());
+
+        // Set a short source range on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(2.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(2.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 0);
+
+        // Set a source range with a positive offset on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(3.0, 24.0), RationalTime(3.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(2.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 1);
+        assertTrue(
+            std::find(items.begin(), items.end(), track.value) != items.end());
+
+        // Set a source range with a negative offset on the track.
+        track->set_source_range(
+            TimeRange(RationalTime(-1.0, 24.0), RationalTime(3.0, 24.0)));
+        items = stack->find_children(
+            &err,
+            TimeRange(RationalTime(1.0, 24.0), RationalTime(1.0, 24.0)));
+        assertFalse(is_error(err));
+        assertEqual(items.size(), 2);
+        assertTrue(
+            std::find(items.begin(), items.end(), track.value) != items.end());
+        assertTrue(
+            std::find(items.begin(), items.end(), clip.value) != items.end());
     });
 
     tests.run(argc, argv);

@@ -13,75 +13,68 @@ namespace opentime { namespace OPENTIME_VERSION {
 
 RationalTime RationalTime::_invalid_time{ 0, RationalTime::_invalid_rate };
 
-static constexpr std::array<double, 4> dropframe_timecode_rates{ {
-    // 23.976,
-    // 23.98,
-    // 23.97,
-    // 24000.0/1001.0,
-    29.97,
+static constexpr std::array<double, 2> dropframe_timecode_rates{ {
     30000.0 / 1001.0,
-    59.94,
     60000.0 / 1001.0,
 } };
 
+// See the official source of these numbers here:
+// ST 12-1:2014 - SMPTE Standard - Time and Control Code
+// https://ieeexplore.ieee.org/document/7291029
+//
 static constexpr std::array<double, 11> smpte_timecode_rates{
-    { 1.0,
-      12.0,
-      24000.0 / 1001.0,
+    { 24000.0 / 1001.0,
       24.0,
       25.0,
       30000.0 / 1001.0,
       30.0,
+      48000.0 / 1001.0,
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0 }
+      60.0
+    }
 };
 
-static constexpr std::array<double, 16> valid_timecode_rates{
-    { 1.0,
-      12.0,
-      23.97,
-      23.976,
-      23.98,
-      24000.0 / 1001.0,
-      24.0,
-      25.0,
-      29.97,
-      30000.0 / 1001.0,
-      30.0,
-      48.0,
-      50.0,
-      59.94,
-      60000.0 / 1001.0,
-      60.0 }
-};
-
+// deprecated in favor of `is_smpte_timecode_rate`
 bool
 RationalTime::is_valid_timecode_rate(double fps)
 {
-    auto b = valid_timecode_rates.begin(), e = valid_timecode_rates.end();
+    return is_smpte_timecode_rate(fps);
+}
+
+bool
+RationalTime::is_smpte_timecode_rate(double fps)
+{
+    auto b = smpte_timecode_rates.begin(), e = smpte_timecode_rates.end();
     return std::find(b, e, fps) != e;
 }
 
+// deprecated in favor of `is_smpte_timecode_rate`
 double
 RationalTime::nearest_valid_timecode_rate(double rate)
 {
+    return nearest_smpte_timecode_rate(rate);
+}
+
+double
+RationalTime::nearest_smpte_timecode_rate(double rate)
+{
     double nearest_rate = 0;
     double min_diff     = std::numeric_limits<double>::max();
-    for (auto valid_rate: smpte_timecode_rates)
+    for (auto smpte_rate: smpte_timecode_rates)
     {
-        if (valid_rate == rate)
+        if (smpte_rate == rate)
         {
             return rate;
         }
-        auto diff = std::abs(rate - valid_rate);
+        auto diff = std::abs(rate - smpte_rate);
         if (diff >= min_diff)
         {
             continue;
         }
         min_diff     = diff;
-        nearest_rate = valid_rate;
+        nearest_rate = smpte_rate;
     }
     return nearest_rate;
 }
@@ -200,7 +193,7 @@ RationalTime::from_timecode(
     double             rate,
     ErrorStatus*       error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate))
+    if (!RationalTime::is_smpte_timecode_rate(rate))
     {
         if (error_status)
         {
@@ -331,7 +324,7 @@ RationalTime::from_time_string(
     double             rate,
     ErrorStatus*       error_status)
 {
-    if (!RationalTime::is_valid_timecode_rate(rate))
+    if (!RationalTime::is_smpte_timecode_rate(rate))
     {
         set_error(
             time_string,
@@ -460,7 +453,12 @@ RationalTime::to_timecode(
         return std::string();
     }
 
-    if (!is_valid_timecode_rate(rate))
+    // It is common practice to use truncated or rounded values
+    // like 29.97 instead of exact SMPTE rates like 30000/1001
+    // so as a convenience we will snap the rate to the nearest
+    // SMPTE rate if it is close enough.
+    double nearest_smpte_rate = nearest_smpte_timecode_rate(rate);
+    if (abs(nearest_smpte_rate - rate) > 0.1)
     {
         if (error_status)
         {
@@ -468,6 +466,9 @@ RationalTime::to_timecode(
         }
         return std::string();
     }
+
+    // Let's assume this is the rate instead of the given rate.
+    rate = nearest_smpte_rate;
 
     bool rate_is_dropframe = is_dropframe_rate(rate);
     if (drop_frame == IsDropFrameRate::ForceYes and not rate_is_dropframe)
@@ -504,11 +505,11 @@ RationalTime::to_timecode(
     }
     else
     {
-        if ((rate == 29.97) or (rate == 30000 / 1001.0))
+        if (rate == 30000 / 1001.0)
         {
             dropframes = 2;
         }
-        else if (rate == 59.94)
+        else if (rate == 60000 / 1001.0)
         {
             dropframes = 4;
         }
@@ -568,6 +569,26 @@ RationalTime::to_timecode(
         seconds,
         div,
         frames);
+}
+
+std::string
+RationalTime::to_nearest_timecode(
+    double          rate,
+    IsDropFrameRate drop_frame,
+    ErrorStatus*    error_status) const
+{
+    std::string result = to_timecode(rate, drop_frame, error_status);
+
+    if (error_status)
+    {
+        *error_status = ErrorStatus();
+
+        double nearest_rate = nearest_smpte_timecode_rate(rate);
+
+        return to_timecode(nearest_rate, drop_frame, error_status);
+    }
+
+    return result;
 }
 
 std::string

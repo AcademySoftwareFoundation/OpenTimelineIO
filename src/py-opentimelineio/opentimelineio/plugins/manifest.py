@@ -7,13 +7,9 @@ from importlib import resources
 import inspect
 import logging
 import os
-from pathlib import Path
 
-try:
-    from importlib import metadata
-except ImportError:
-    # For python 3.7
-    import importlib_metadata as metadata
+# for python <= 3.9
+from importlib import metadata
 
 from .. import (
     core,
@@ -87,7 +83,7 @@ class Manifest(core.SerializableObject):
     or other features (in the case of adapters, what file suffixes they
     advertise support for).
 
-    For more information, consult the documenation.
+    For more information, consult the documentation.
     """
     _serializable_label = "PluginManifest.1"
 
@@ -234,7 +230,6 @@ def load_manifest():
        1. Manifests specified via the :term:`OTIO_PLUGIN_MANIFEST_PATH` variable
        2. Entrypoint based plugin manifests
        3. Builtin plugin manifest
-       4. Contrib plugin manifest
     """
 
     result = Manifest()
@@ -288,12 +283,7 @@ def load_manifest():
                 except AttributeError:
                     name = plugin_entry_point.__name__
 
-                    try:
-                        filepath = resources.files(name) / "plugin_manifest.json"
-                    except AttributeError:
-                        # For python <= 3.7
-                        with resources.path(name, "plugin_manifest.json") as p:
-                            filepath = Path(p)
+                    filepath = resources.files(name) / "plugin_manifest.json"
 
                     if filepath.as_posix() in result.source_files:
                         continue
@@ -318,45 +308,14 @@ def load_manifest():
         )
 
     # the builtin plugin manifest
-    try:
-        builtin_manifest_path = (
-            resources.files("opentimelineio.adapters")
-            / "builtin_adapters.plugin_manifest.json"
-        ).as_posix()
-    except AttributeError:
-        # For python <= 3.7
-        with resources.path(
-            "opentimelineio.adapters",
-            "builtin_adapters.plugin_manifest.json"
-        ) as p:
-            builtin_manifest_path = p.as_posix()
+    builtin_manifest_path = (
+        resources.files("opentimelineio.adapters")
+        / "builtin_adapters.plugin_manifest.json"
+    ).as_posix()
 
     if os.path.abspath(builtin_manifest_path) not in result.source_files:
         plugin_manifest = manifest_from_file(builtin_manifest_path)
         result.extend(plugin_manifest)
-
-    # the contrib plugin manifest (located in the opentimelineio_contrib package)
-    try:
-        try:
-            contrib_manifest_path = (
-                resources.files("opentimelineio_contrib.adapters")
-                / "contrib_adapters.plugin_manifest.json"
-            ).as_posix()
-        except AttributeError:
-            # For python <= 3.7
-            with resources.path(
-                "opentimelineio_contrib.adapters",
-                "contrib_adapters.plugin_manifest.json"
-            ) as p:
-                contrib_manifest_path = p.as_posix()
-
-    except ModuleNotFoundError:
-        logging.debug("no opentimelineio_contrib.adapters package found")
-
-    else:
-        if os.path.abspath(contrib_manifest_path) not in result.source_files:
-            contrib_manifest = manifest_from_file(contrib_manifest_path)
-            result.extend(contrib_manifest)
 
     # force the schemadefs to load and add to schemadef module namespace
     for s in result.schemadefs:

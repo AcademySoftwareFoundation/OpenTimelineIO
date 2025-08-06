@@ -11,17 +11,19 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Item::Item(
-    std::string const&          name,
-    optional<TimeRange> const&  source_range,
-    AnyDictionary const&        metadata,
-    std::vector<Effect*> const& effects,
-    std::vector<Marker*> const& markers,
-    bool                        enabled)
+    std::string const&              name,
+    std::optional<TimeRange> const& source_range,
+    AnyDictionary const&            metadata,
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers,
+    bool                            enabled,
+    std::optional<Color> const&     color)
     : Parent(name, metadata)
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
     , _markers(markers.begin(), markers.end())
     , _enabled(enabled)
+    , _color(color)
 {}
 
 Item::~Item()
@@ -82,7 +84,7 @@ Item::visible_range(ErrorStatus* error_status) const
     return result;
 }
 
-optional<TimeRange>
+std::optional<TimeRange>
 Item::trimmed_range_in_parent(ErrorStatus* error_status) const
 {
     if (!parent() && error_status)
@@ -176,6 +178,7 @@ Item::read_from(Reader& reader)
            && reader.read_if_present("effects", &_effects)
            && reader.read_if_present("markers", &_markers)
            && reader.read_if_present("enabled", &_enabled)
+           && reader.read_if_present("color", &_color)
            && Parent::read_from(reader);
 }
 
@@ -187,6 +190,7 @@ Item::write_to(Writer& writer) const
     writer.write("effects", _effects);
     writer.write("markers", _markers);
     writer.write("enabled", _enabled);
+    writer.write("color", _color);
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

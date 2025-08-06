@@ -10,8 +10,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class SerializableObject;
 
+/// @brief This struct represents the return status of a function.
 struct ErrorStatus
 {
+    /// @brief This enumeration represents the possible outcomes.
     enum Outcome
     {
         OK = 0,
@@ -45,11 +47,13 @@ struct ErrorStatus
         NOT_A_GAP
     };
 
+    /// @brief Construct a new status with no error.
     ErrorStatus()
         : outcome(OK)
         , object_details(nullptr)
     {}
 
+    /// @brief Construct a new status with the given outcome.
     ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome)
         , details(outcome_to_string(in_outcome))
@@ -57,6 +61,7 @@ struct ErrorStatus
         , object_details(nullptr)
     {}
 
+    /// @brief Construct a new status with the given outcome, details, and object.
     ErrorStatus(
         Outcome                   in_outcome,
         std::string const&        in_details,
@@ -67,28 +72,37 @@ struct ErrorStatus
         , object_details(object)
     {}
 
+    /// @brief Copy operator.
     ErrorStatus& operator=(Outcome in_outcome)
     {
         *this = ErrorStatus(in_outcome);
         return *this;
     }
 
-    Outcome                   outcome;
-    std::string               details;
-    std::string               full_description;
+    /// @brief The outcome of the function.
+    Outcome outcome;
+
+    /// @brief A human readable string that provides details about the outcome.
+    std::string details;
+
+    /// @brief A human readable string that provides the full description of the status.
+    std::string full_description;
+
+    /// @brief The object related to the status.
     SerializableObject const* object_details;
 
+    //! @brief Return a human readable string for the given outcome.
     static std::string outcome_to_string(Outcome);
 };
 
-// Check whether the given ErrorStatus is an error.
+/// @brief Check whether the given ErrorStatus is an error.
 constexpr bool
 is_error(const ErrorStatus& es) noexcept
 {
     return ErrorStatus::Outcome::OK != es.outcome;
 }
 
-// Check whether the given ErrorStatus* is non-null and an error.
+/// @brief Check whether the given ErrorStatus* is non-null and an error.
 constexpr bool
 is_error(const ErrorStatus* es) noexcept
 {

@@ -26,6 +26,14 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t.value, 0)
         self.assertEqual(t.rate, 1.0)
 
+    def test_valid(self):
+        t1 = otio.opentime.RationalTime(0, 0)
+        self.assertTrue(t1.is_invalid_time())
+        self.assertFalse(t1.is_valid_time())
+        t2 = otio.opentime.RationalTime(24)
+        self.assertTrue(t2.is_valid_time())
+        self.assertFalse(t2.is_invalid_time())
+
     def test_equality(self):
         t1 = otio.opentime.RationalTime(30.2)
         self.assertEqual(t1, t1)
@@ -200,29 +208,30 @@ class TestTime(unittest.TestCase):
 
     def test_timecode_23976_fps(self):
         # This should behave exactly like 24 fps
+        ntsc_23976 = 24000 / 1001.0
         timecode = "00:00:01:00"
-        t = otio.opentime.RationalTime(value=24, rate=23.976)
-        self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
+        t = otio.opentime.RationalTime(value=24, rate=ntsc_23976)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
         timecode = "00:01:00:00"
-        t = otio.opentime.RationalTime(value=24 * 60, rate=23.976)
-        self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
+        t = otio.opentime.RationalTime(value=24 * 60, rate=ntsc_23976)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
         timecode = "01:00:00:00"
-        t = otio.opentime.RationalTime(value=24 * 60 * 60, rate=23.976)
-        self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
+        t = otio.opentime.RationalTime(value=24 * 60 * 60, rate=ntsc_23976)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
         timecode = "24:00:00:00"
-        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24, rate=23.976)
-        self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
+        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24, rate=ntsc_23976)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
         timecode = "23:59:59:23"
         t = otio.opentime.RationalTime(
             value=24 * 60 * 60 * 24 - 1,
-            rate=(24000 / 1001.0)
+            rate=ntsc_23976
         )
         self.assertEqual(
-            t, otio.opentime.from_timecode(timecode, (24000 / 1001.0))
+            t, otio.opentime.from_timecode(timecode, ntsc_23976)
         )
 
     def test_converting_negative_values_to_timecode(self):
@@ -234,7 +243,7 @@ class TestTime(unittest.TestCase):
         """Test drop frame in action. Focused on minute roll overs
 
         We nominal_fps 30 for frame calculation
-        For this frame rate we drop 2 frames per minute execpt every 10th.
+        For this frame rate we drop 2 frames per minute except every 10th.
 
         Compensation is calculated like this when below 10 minutes:
           (fps * seconds + frames - dropframes * (minutes - 1))
@@ -318,15 +327,17 @@ class TestTime(unittest.TestCase):
             ]
         }
 
+        ntsc_2997 = otio.opentime.RationalTime.nearest_smpte_timecode_rate(29.97)
+        self.assertEqual(ntsc_2997, 30000 / 1001.0)
         for time_key, time_values in test_values.items():
             for value, tc in time_values:
-                t = otio.opentime.RationalTime(value, 29.97)
+                t = otio.opentime.RationalTime(value, ntsc_2997)
                 self.assertEqual(
                     tc, otio.opentime.to_timecode(
-                        t, rate=29.97, drop_frame=True
+                        t, rate=ntsc_2997, drop_frame=True
                     )
                 )
-                t1 = otio.opentime.from_timecode(tc, rate=29.97)
+                t1 = otio.opentime.from_timecode(tc, rate=ntsc_2997)
                 self.assertEqual(t, t1)
 
     def test_timecode_ntsc_2997fps(self):
@@ -340,7 +351,7 @@ class TestTime(unittest.TestCase):
         tc = otio.opentime.to_timecode(t, rate_float, drop_frame=False)
         self.assertEqual(tc, '10:02:23:29')
 
-        # Detect DFTC from rate for backward compatability with old versions
+        # Detect DFTC from rate for backward compatibility with old versions
         tc_auto = otio.opentime.to_timecode(t, rate_float)
         self.assertEqual(tc_auto, '10:03:00;05')
 
@@ -351,12 +362,16 @@ class TestTime(unittest.TestCase):
             )
 
     def test_timecode_infer_drop_frame(self):
+        # These rates are all non-integer SMPTE rates.
+        # When `to_timecode` is called without specifying
+        # a value for `drop_frame`, it will infer that these
+        # should be displayed as drop-frame timecode.
         frames = 1084319
         rates = [
             (29.97, '10:03:00;05'),
             (30000.0 / 1001.0, '10:03:00;05'),
             (59.94, '05:01:30;03'),
-            (60000.0 / 1001.0, '05:01:11;59')
+            (60000.0 / 1001.0, '05:01:30;03')
         ]
         for rate, timecode in rates:
             t = otio.opentime.RationalTime(frames, rate)
@@ -373,14 +388,14 @@ class TestTime(unittest.TestCase):
             (17983, '00:09:59:13', '00:10:00;01'),
             (17984, '00:09:59:14', '00:10:00;02'),
         ]
-
+        ntsc_2997 = 30000 / 1001.0
         for value, tc, dftc in ref_values:
-            t = otio.opentime.RationalTime(value, 29.97)
-            to_dftc = otio.opentime.to_timecode(t, rate=29.97, drop_frame=True)
-            to_tc = otio.opentime.to_timecode(t, rate=29.97, drop_frame=False)
-            to_auto_tc = otio.opentime.to_timecode(t, rate=29.97)
+            t = otio.opentime.RationalTime(value, ntsc_2997)
+            to_dftc = otio.opentime.to_timecode(t, rate=ntsc_2997, drop_frame=True)
+            to_tc = otio.opentime.to_timecode(t, rate=ntsc_2997, drop_frame=False)
+            to_auto_tc = otio.opentime.to_timecode(t, rate=ntsc_2997)
 
-            # 29.97 should auto-detect dftc for backward compatability
+            # 29.97 should auto-detect dftc for backward compatibility
             self.assertEqual(to_dftc, to_auto_tc)
 
             # check calculated against reference
@@ -388,10 +403,10 @@ class TestTime(unittest.TestCase):
             self.assertEqual(tc, to_tc)
 
             # Check they convert back
-            t1 = otio.opentime.from_timecode(to_dftc, rate=29.97)
+            t1 = otio.opentime.from_timecode(to_dftc, rate=ntsc_2997)
             self.assertEqual(t1, t)
 
-            t2 = otio.opentime.from_timecode(to_tc, rate=29.97)
+            t2 = otio.opentime.from_timecode(to_tc, rate=ntsc_2997)
             self.assertEqual(t2, t)
 
     def test_faulty_formatted_timecode_24(self):
@@ -411,11 +426,16 @@ class TestTime(unittest.TestCase):
         with self.assertRaises(ValueError):
             otio.opentime.from_timecode('01:00:13;23', 24)
 
+    def test_faulty_time_string(self):
+        with self.assertRaises(ValueError):
+            otio.opentime.from_time_string("bogus", 24)
+
     def test_invalid_rate_to_timecode_functions(self):
-        t = otio.opentime.RationalTime(100, 29.98)
+        # Use a bogus rate, expecting `to_timecode` to complain
+        t = otio.opentime.RationalTime(100, 999)
 
         with self.assertRaises(ValueError):
-            otio.opentime.to_timecode(t, 29.98)
+            otio.opentime.to_timecode(t, 777)
 
         with self.assertRaises(ValueError):
             otio.opentime.to_timecode(t)
@@ -691,46 +711,53 @@ class TestTime(unittest.TestCase):
         DF_TC = "01:00:02;05"
         NDF_TC = "00:59:58:17"
         frames = 107957
+        ntsc_2997 = otio.opentime.RationalTime.nearest_smpte_timecode_rate(29.97)
+        self.assertEqual(ntsc_2997, 30000 / 1001.0)
 
         tc1 = otio.opentime.to_timecode(
-            otio.opentime.RationalTime(frames, 29.97)
+            otio.opentime.RationalTime(frames, ntsc_2997)
         )
         self.assertEqual(tc1, DF_TC)
 
         tc2 = otio.opentime.to_timecode(
-            otio.opentime.RationalTime(frames, 29.97),
-            29.97,
+            otio.opentime.RationalTime(frames, ntsc_2997),
+            ntsc_2997,
             drop_frame=False
         )
         self.assertEqual(tc2, NDF_TC)
 
-        t1 = otio.opentime.from_timecode(DF_TC, 29.97)
+        t1 = otio.opentime.from_timecode(DF_TC, ntsc_2997)
         self.assertEqual(t1.value, frames)
 
-        t2 = otio.opentime.from_timecode(NDF_TC, 29.97)
+        t2 = otio.opentime.from_timecode(NDF_TC, ntsc_2997)
         self.assertEqual(t2.value, frames)
 
-    def test_nearest_valid_timecode_rate(self):
-        invalid_valid_rates = (
+    def test_nearest_smpte_timecode_rate(self):
+        rate_pairs = (
             (23.97602397602397, 24000.0 / 1001.0),
             (23.97, 24000.0 / 1001.0),
             (23.976, 24000.0 / 1001.0),
             (23.98, 24000.0 / 1001.0),
             (29.97, 30000.0 / 1001.0),
             (59.94, 60000.0 / 1001.0),
+            (24.0, 24.0),
+            (23.999999, 24.0),
+            (29.999999, 30.0),
+            (30.01, 30.0),
+            (60.01, 60.0)
         )
 
-        for invalid_rate, nearest_valid_rate in invalid_valid_rates:
+        for wonky_rate, smpte_rate in rate_pairs:
             self.assertTrue(
-                otio.opentime.RationalTime.is_valid_timecode_rate(
-                    nearest_valid_rate
+                otio.opentime.RationalTime.is_smpte_timecode_rate(
+                    smpte_rate
                 )
             )
             self.assertEqual(
-                otio.opentime.RationalTime.nearest_valid_timecode_rate(
-                    invalid_rate
+                otio.opentime.RationalTime.nearest_smpte_timecode_rate(
+                    wonky_rate
                 ),
-                nearest_valid_rate,
+                smpte_rate,
             )
 
 
@@ -850,6 +877,21 @@ class TestTimeRange(unittest.TestCase):
             duration=otio.opentime.RationalTime(10, 48)
         )
         self.assertEqual(tr2.start_time.rate, tr2.duration.rate)
+
+        tr3 = otio.opentime.TimeRange(0, 48, 24)
+        self.assertEqual(tr3.start_time, otio.opentime.RationalTime(0, 24))
+        self.assertEqual(tr3.duration, otio.opentime.RationalTime(48, 24))
+
+    def test_valid(self):
+        tr = otio.opentime.TimeRange(0, 0, 0)
+        self.assertTrue(tr.is_invalid_range())
+        self.assertFalse(tr.is_valid_range())
+        tr2 = otio.opentime.TimeRange(0, 48, 24)
+        self.assertTrue(tr2.is_valid_range())
+        self.assertFalse(tr2.is_invalid_range())
+        tr3 = otio.opentime.TimeRange(0, -48, 24)
+        self.assertFalse(tr3.is_valid_range())
+        self.assertTrue(tr3.is_invalid_range())
 
     def test_duration_validation(self):
         tr = otio.opentime.TimeRange()
@@ -1334,7 +1376,7 @@ class TestTimeRange(unittest.TestCase):
         t = otio.opentime.from_timecode(timecode, 24)
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
         self.assertEqual(timecode, otio.opentime.to_timecode(t, 24))
-        self.assertNotEqual(timecode, otio.opentime.to_timecode(t, 12))
+        self.assertNotEqual(timecode, otio.opentime.to_timecode(t, 48))
 
         time1 = otio.opentime.RationalTime(24.0, 24.0)
         time2 = otio.opentime.RationalTime(1.0, 1.0)

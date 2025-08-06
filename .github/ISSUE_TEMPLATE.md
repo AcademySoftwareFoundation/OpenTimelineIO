@@ -1,3 +1,7 @@
+---
+labels: triage
+---
+
 # Required:
 ------------
 [ ] I believe this isn't a duplicate topic  

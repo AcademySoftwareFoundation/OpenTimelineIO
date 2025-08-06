@@ -12,9 +12,20 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
+/// @brief A container which can hold an ordered list of any serializable objects.
+///
+/// Note that this is not a Composition nor is it Composable.
+///
+/// This container approximates the concept of a bin - a collection of
+/// SerializableObjects that do not have any compositional meaning, but can
+/// serialize to/from OTIO correctly, with metadata and a named collection.
+///
+/// A SerializableCollection is useful for serializing multiple timelines,
+/// clips, or media references to a single file.
 class SerializableCollection : public SerializableObjectWithMetadata
 {
 public:
+    /// @brief This struct provides the SerializableCollection schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableCollection";
@@ -23,55 +34,72 @@ public:
 
     using Parent = SerializableObjectWithMetadata;
 
+    /// @brief Create a new serializable collection.
+    ///
+    /// @param name The name of the collection.
+    /// @param child The list of children in the collection. Note that the
+    /// collection keeps a retainer to each child.
+    /// @param metadata The metadata for the collection.
     SerializableCollection(
         std::string const&               name = std::string(),
         std::vector<SerializableObject*> children =
             std::vector<SerializableObject*>(),
         AnyDictionary const& metadata = AnyDictionary());
 
+    /// @brief Return the list of children.
     std::vector<Retainer<SerializableObject>> const& children() const noexcept
     {
         return _children;
     }
 
+    /// @brief Modify the list of children.
     std::vector<Retainer<SerializableObject>>& children() noexcept
     {
         return _children;
     }
 
+    /// @brief Set the list of children.
     void set_children(std::vector<SerializableObject*> const& children);
 
+    /// @brief Clear the children.
     void clear_children();
 
+    /// @brief Insert a child at the given index. Note that the collection
+    /// keeps a retainer to the child.
     void insert_child(int index, SerializableObject* child);
 
+    /// @brief Set the child at the given index. Note that the collection
+    /// keeps a retainer to the child.
     bool set_child(
         int                 index,
         SerializableObject* child,
         ErrorStatus*        error_status = nullptr);
 
+    /// @brief Remove the child at the given index.
     bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
+    /// @brief Find child clips.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
     std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*               error_status   = nullptr,
-        optional<TimeRange> const& search_range   = nullopt,
-        bool                       shallow_search = false) const;
+        ErrorStatus*                    error_status   = nullptr,
+        std::optional<TimeRange> const& search_range   = std::nullopt,
+        bool                            shallow_search = false) const;
 
-    // Find child objects that match the given template type.
-    //
-    // An optional search_time may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
+    /// @brief Find child objects that match the given template type.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
     template <typename T = Composable>
     std::vector<Retainer<T>> find_children(
-        ErrorStatus*        error_status   = nullptr,
-        optional<TimeRange> search_range   = nullopt,
-        bool                shallow_search = false) const;
+        ErrorStatus*             error_status   = nullptr,
+        std::optional<TimeRange> search_range   = std::nullopt,
+        bool                     shallow_search = false) const;
 
 protected:
     virtual ~SerializableCollection();
@@ -86,9 +114,9 @@ private:
 template <typename T>
 inline std::vector<SerializableObject::Retainer<T>>
 SerializableCollection::find_children(
-    ErrorStatus*        error_status,
-    optional<TimeRange> search_range,
-    bool                shallow_search) const
+    ErrorStatus*             error_status,
+    std::optional<TimeRange> search_range,
+    bool                     shallow_search) const
 {
     std::vector<Retainer<T>> out;
     for (const auto& child: _children)

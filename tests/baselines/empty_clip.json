@@ -7,6 +7,7 @@
     "enabled" : true,
     "effects" : [],
     "active_media_reference_key": "DEFAULT_MEDIA",
+    "color": null,
     "media_references" : { 
         "DEFAULT_MEDIA" : {
             "FROM_TEST_FILE" : "empty_missingreference.json"

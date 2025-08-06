@@ -26,7 +26,7 @@ import opentimelineio as otio
 
 def main():
     """otiotool main program.
-    This function is resposible for executing the steps specified
+    This function is responsible for executing the steps specified
     by all of the command line arguments in the right order.
     """
 
@@ -137,7 +137,8 @@ def main():
                         args.list_media or
                         args.verify_media or
                         args.list_tracks or
-                        args.list_markers)
+                        args.list_markers or
+                        args.verify_ranges)
     if should_summarize:
         for timeline in timelines:
             summarize_timeline(
@@ -146,6 +147,7 @@ def main():
                 args.list_media,
                 args.verify_media,
                 args.list_markers,
+                args.verify_ranges,
                 timeline)
 
     # Final Phase: Output
@@ -207,8 +209,8 @@ This tool works in phases, as follows:
 
 6. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
-    --verify-media, --list-markers, and --inspect will examine the OTIO and
-    print information to standard output.
+    --verify-media, --list-markers, --verify-ranges, and --inspect
+    will examine the OTIO and print information to standard output.
 
 7. Output
     Finally, if the "--output <filename>" option is specified, the resulting
@@ -396,6 +398,13 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--list-markers",
         action='store_true',
         help="List summary of all markers"
+    )
+    parser.add_argument(
+        "--verify-ranges",
+        action='store_true',
+        help="""Verify that each clip in a timeline has a source range
+        within the available range of media
+        (acceptable in some use cases, not in others)"""
     )
     parser.add_argument(
         "--inspect",
@@ -702,6 +711,7 @@ def redact_timeline(timeline):
                 has_target_url = hasattr(media_reference, 'target_url')
                 if has_target_url and media_reference.target_url:
                     media_reference.target_url = f"URL #{counter}"
+                media_reference.name = f"{media_reference.schema_name()} #{counter}"
                 media_reference.metadata.clear()
 
 
@@ -851,7 +861,7 @@ def inspect_timelines(name_regex, timeline):
 
 
 def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
-                       list_markers, timeline):
+                       list_markers, verify_ranges, timeline):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -860,8 +870,30 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
             if list_tracks:
                 print(f"TRACK: {child.name} ({child.kind})")
         if isinstance(child, otio.schema.Clip):
-            if list_clips:
-                print("  CLIP:", child.name)
+            if list_clips or verify_ranges:
+                if verify_ranges:
+                    range_msg = ""
+                    try:
+                        source = child.source_range
+                        available = child.available_range()
+
+                        # contains() uses end_time_exclusive(),
+                        # does not handle case when
+                        # the end of the source range
+                        # meets available range exactly
+                        available_start = available.start_time
+                        available_end = available.end_time_inclusive()
+                        src_start = source.start_time
+                        src_end = source.end_time_inclusive()
+                        if src_start < available_start or available_end < src_end:
+                            range_msg = "SOURCE MEDIA OUT OF BOUNDS"
+                        else:
+                            range_msg = "IN BOUNDS"
+                    except Exception:  # available range is, well, unavailable
+                        pass
+                    print("  CLIP:", child.name, range_msg)
+                else:
+                    print("  CLIP:", child.name)
             if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url

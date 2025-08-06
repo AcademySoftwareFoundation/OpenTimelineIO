@@ -2,6 +2,7 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #include "opentimelineio/stackAlgorithm.h"
+#include "opentimelineio/gap.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
@@ -9,6 +10,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
+typedef std::vector<SerializableObject::Retainer<Track>>   TrackRetainerVector;
 
 static void
 _flatten_next_item(
@@ -16,7 +18,7 @@ _flatten_next_item(
     Track*                     flat_track,
     std::vector<Track*> const& tracks,
     int                        track_index,
-    optional<TimeRange>        trim_range,
+    std::optional<TimeRange>   trim_range,
     ErrorStatus*               error_status)
 {
     if (track_index < 0)
@@ -123,10 +125,60 @@ _flatten_next_item(
     }
 }
 
+// add a gap to end of a track if it is shorter then the longest track.
+// shorter tracks are clones and get added to the tracks_retainer.
+// a new track will replace the original pointer in the track vector.
+static void
+_normalize_tracks_lengths(
+    std::vector<Track*>& tracks,
+    TrackRetainerVector& tracks_retainer,
+    ErrorStatus*         error_status)
+{
+    RationalTime duration;
+    for (auto track: tracks)
+    {
+        duration = std::max(duration, track->duration(error_status));
+        if (is_error(error_status))
+        {
+            return;
+        }
+    }
+
+    for (size_t i = 0; i < tracks.size(); i++)
+    {
+        Track*       old_track      = tracks[i];
+        RationalTime track_duration = old_track->duration(error_status);
+        if (track_duration < duration)
+        {
+            Track* new_track =
+                static_cast<Track*>(old_track->clone(error_status));
+            if (is_error(error_status))
+            {
+                return;
+            }
+            // add track to retainer so it can be freed later
+            tracks_retainer.push_back(
+                SerializableObject::Retainer<Track>(new_track));
+            new_track->append_child(
+                new Gap(duration - track_duration),
+                error_status);
+            if (is_error(error_status))
+            {
+                return;
+            }
+            tracks[i] = new_track;
+        }
+    }
+}
+
 Track*
 flatten_stack(Stack* in_stack, ErrorStatus* error_status)
 {
     std::vector<Track*> tracks;
+    // tracks are cloned if they need to be normalized
+    // they get added to this retainer so they can be
+    // freed when the algorithm is complete
+    TrackRetainerVector tracks_retainer;
     tracks.reserve(in_stack->children().size());
 
     for (auto c: in_stack->children())
@@ -151,6 +203,12 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
         }
     }
 
+    _normalize_tracks_lengths(tracks, tracks_retainer, error_status);
+    if (is_error(error_status))
+    {
+        return nullptr;
+    }
+
     Track* flat_track = new Track;
     flat_track->set_name("Flattened");
 
@@ -160,7 +218,7 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
         flat_track,
         tracks,
         -1,
-        nullopt,
+        std::nullopt,
         error_status);
     return flat_track;
 }
@@ -168,6 +226,23 @@ flatten_stack(Stack* in_stack, ErrorStatus* error_status)
 Track*
 flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
 {
+    std::vector<Track*> flat_tracks;
+    // tracks are cloned if they need to be normalized
+    // they get added to this retainer so they can be
+    // freed when the algorithm is complete
+    TrackRetainerVector tracks_retainer;
+    flat_tracks.reserve(tracks.size());
+    for (auto track: tracks)
+    {
+        flat_tracks.push_back(track);
+    }
+
+    _normalize_tracks_lengths(flat_tracks, tracks_retainer, error_status);
+    if (is_error(error_status))
+    {
+        return nullptr;
+    }
+
     Track* flat_track = new Track;
     flat_track->set_name("Flattened");
 
@@ -175,9 +250,9 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
     _flatten_next_item(
         range_track_map,
         flat_track,
-        tracks,
+        flat_tracks,
         -1,
-        nullopt,
+        std::nullopt,
         error_status);
     return flat_track;
 }

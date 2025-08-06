@@ -26,13 +26,17 @@ from .. import (
 
 from . import (
     file_bundle_utils as utils,
-    otio_json
+    otio_json,
 )
 
 import pathlib
 
 
-def read_from_file(filepath, extract_to_directory=None):
+def read_from_file(
+    filepath,
+    # if provided, will extract contents of zip to this directory
+    extract_to_directory=None,
+):
     if not zipfile.is_zipfile(filepath):
         raise exceptions.OTIOError(f"Not a zipfile: {filepath}")
 
@@ -44,22 +48,20 @@ def read_from_file(filepath, extract_to_directory=None):
 
         if not os.path.exists(extract_to_directory):
             raise exceptions.OTIOError(
-                "Directory '{}' does not exist, cannot unpack otioz "
-                "there.".format(extract_to_directory)
+                f"Directory '{extract_to_directory()}' does not exist, cannot"
+                " unpack otioz there."
             )
 
         if os.path.exists(output_media_directory):
             raise exceptions.OTIOError(
-                "Error: '{}' already exists on disk, cannot overwrite while "
-                " unpacking OTIOZ file '{}'.".format(
-                    output_media_directory,
-                    filepath
-                )
-
+                f"Error: '{output_media_directory}' already exists on disk, "
+                f"cannot overwrite while unpacking OTIOZ file '{filepath}'."
             )
 
     with zipfile.ZipFile(filepath, 'r') as zi:
-        result = otio_json.read_from_string(zi.read(utils.BUNDLE_PLAYLIST_PATH))
+        result = otio_json.read_from_string(
+            zi.read(utils.BUNDLE_PLAYLIST_PATH)
+        )
 
         if extract_to_directory:
             zi.extractall(extract_to_directory)
@@ -70,10 +72,11 @@ def read_from_file(filepath, extract_to_directory=None):
 def write_to_file(
     input_otio,
     filepath,
+    # see documentation in file_bundle_utils for more information on the
+    # media_policy
     media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-
     if os.path.exists(filepath):
         raise exceptions.OTIOError(
             f"'{filepath}' exists, will not overwrite."

@@ -2,9 +2,9 @@
 # opentimelineio/CMakeLists.txt
 
 set(OPENTIMELINEIO_HEADER_FILES
-    any.h
     anyDictionary.h
     anyVector.h
+    color.h
     clip.h
     composable.h
     composition.h
@@ -22,7 +22,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     marker.h
     mediaReference.h
     missingReference.h
-    optional.h
     safely_typed_any.h
     serializableCollection.h
     serializableObject.h
@@ -40,7 +39,8 @@ set(OPENTIMELINEIO_HEADER_FILES
     vectorIndexing.h
     version.h)
 
-add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
+add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    color.cpp
     clip.cpp
     composable.cpp
     composition.cpp
@@ -80,21 +80,31 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
 target_include_directories(opentimelineio
-    PRIVATE       "${IMATH_INCLUDES}"
-                  "${PROJECT_SOURCE_DIR}/src"
-                  "${PROJECT_SOURCE_DIR}/src/deps"
-                  "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
-                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
-                  "${IMATH_INCLUDES}")
+    PRIVATE "${PROJECT_SOURCE_DIR}/src")
+
+if(OTIO_FIND_RAPIDJSON)
+    target_include_directories(opentimelineio
+        PRIVATE "${RapidJSON_INCLUDE_DIRS}")
+else()
+    target_include_directories(opentimelineio
+        PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+endif()
+
 
 target_link_libraries(opentimelineio 
-    PUBLIC opentime ${OTIO_IMATH_TARGETS})
+    PUBLIC opentime Imath::Imath)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"
     POSITION_INDEPENDENT_CODE TRUE
     WINDOWS_EXPORT_ALL_SYMBOLS true)
+
+if(BUILD_SHARED_LIBS)
+    set_target_properties(opentimelineio PROPERTIES
+        SOVERSION ${OTIO_SOVERSION}
+        VERSION ${OTIO_VERSION})
+endif()
 
 if(APPLE)
     set_target_properties(opentimelineio PROPERTIES 
@@ -115,9 +125,6 @@ if(OTIO_CXX_INSTALL)
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
-    if(OTIO_DEPENDENCIES_INSTALL)
-        list(APPEND OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps)
-    endif()
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOTargets

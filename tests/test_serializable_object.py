@@ -136,6 +136,16 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with self.assertRaises(ValueError):
             o.clone()
 
+    def test_imath(self):
+        b = otio.schema.Box2d(
+            otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0))
+        so = otio.core.SerializableObjectWithMetadata()
+        so.metadata["box"] = b
+        self.assertEqual(repr(so.metadata["box"]), repr(b))
+        v = [b.min, b.max]
+        so.metadata["vectors"] = v
+        self.assertEqual(repr(so.metadata["vectors"]), repr(v))
+
 
 class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_schema_definition(self):

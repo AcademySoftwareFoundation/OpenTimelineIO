@@ -39,8 +39,8 @@ file should be regenerated.
 
 # Manifests
 
-The manifests describe plugins that are visible to OpenTimelineIO.  The core and
-contrib manifests are listed first, then any user-defined local plugins.
+The manifests describe plugins that are visible to OpenTimelineIO.  The core
+manifest is listed first, then any user-defined local plugins.
 
 {manifests}
 
@@ -49,14 +49,6 @@ contrib manifests are listed first, then any user-defined local plugins.
 Manifest path: `{manifest_path}`
 
 {manifest_contents}
-
-# Contrib Plugins
-
-Plugins in Contrib are supported by the community and provided as-is.
-
-Manifest path: `{contrib_manifest_path}`
-
-{contrib_manifest_contents}
 
 {local_manifest_text}
 """
@@ -278,6 +270,11 @@ def _manifest_formatted(
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
         pt_lines = []
 
+        if pt == "hooks":
+            # hooks get handled differently by plugin_info_map() so we will skip them
+            display_map[pt] = ""
+            continue
+
         sorted_plugins = [
             plugin_info_map[pt][name]
             for name in sorted(plugin_info_map[pt].keys())
@@ -324,39 +321,36 @@ def generate_and_write_documentation_plugins(
     manifest_path_list = plugin_info_map['manifests'][:]
 
     if public_only:
-        manifest_path_list = manifest_path_list[:2]
+        # keep only core manifests
+        manifest_path_list = [
+            p for p in manifest_path_list
+            if p.replace("\\", PATH_SEP).split(PATH_SEP)[-3] == "opentimelineio"
+        ]
 
-    sanitized_paths = manifest_path_list[:]
+    sanitized_path_list = manifest_path_list.copy()
+
     if sanitized_paths:
         # conform all paths to unix-style path separators and leave relative
         # paths (relative to root of OTIO directory)
-        sanitized_paths = [
+        sanitized_path_list = [
             PATH_SEP.join(p.replace("\\", PATH_SEP).split(PATH_SEP)[-3:])
-            for p in manifest_path_list
+            for p in sanitized_path_list
         ]
 
-    manifest_list = "\n".join(f"- `{mp}`" for mp in sanitized_paths)
+    manifest_list = "\n".join(f"- `{mp}`" for mp in sanitized_path_list)
 
     core_manifest_path = manifest_path_list[0]
-    core_manifest_path_sanitized = sanitized_paths[0]
+    core_manifest_path_sanitized = sanitized_path_list[0]
     core_manifest_text = _manifest_formatted(
         plugin_info_map,
         [core_manifest_path],
         sanitized_paths
     )
 
-    contrib_manifest_path = manifest_path_list[1]
-    contrib_manifest_path_sanitized = sanitized_paths[1]
-    contrib_manifest_text = _manifest_formatted(
-        plugin_info_map,
-        [contrib_manifest_path],
-        sanitized_paths
-    )
-
     local_manifest_text = ""
     if len(plugin_info_map) > 2 and not public_only:
         local_manifest_paths = manifest_path_list[2:]
-        local_manifest_paths_sanitized = sanitized_paths[2:]
+        local_manifest_paths_sanitized = sanitized_path_list[2:]
         local_manifest_list = "\n".join(
             f"- `{mp}`" for mp in local_manifest_paths_sanitized
         )
@@ -378,8 +372,6 @@ def generate_and_write_documentation_plugins(
             manifests=manifest_list,
             manifest_path=core_manifest_path_sanitized,
             manifest_contents=core_manifest_text,
-            contrib_manifest_path=contrib_manifest_path_sanitized,
-            contrib_manifest_contents=contrib_manifest_text,
             local_manifest_text=local_manifest_text,
         )
     )

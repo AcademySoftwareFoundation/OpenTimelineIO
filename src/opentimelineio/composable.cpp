@@ -74,11 +74,11 @@ Composable::duration(ErrorStatus* error_status) const
     return RationalTime();
 }
 
-optional<IMATH_NAMESPACE::Box2d>
+std::optional<IMATH_NAMESPACE::Box2d>
 Composable::available_image_bounds(ErrorStatus* error_status) const
 {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
-    return optional<IMATH_NAMESPACE::Box2d>();
+    return std::optional<IMATH_NAMESPACE::Box2d>();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

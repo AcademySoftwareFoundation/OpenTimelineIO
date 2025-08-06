@@ -3,25 +3,26 @@
 
 #pragma once
 
-#include "opentimelineio/any.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
-#include <opentimelineio/optional.h>
 
+#include <any>
 #include <string>
 #include <unordered_map>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Serialize JSON data to a string.
 std::string serialize_json_to_string(
-    const any&                value,
+    const std::any&           value,
     const schema_version_map* schema_version_targets = nullptr,
     ErrorStatus*              error_status           = nullptr,
     int                       indent                 = 4);
 
+/// @brief Serialize JSON data to a file.
 bool serialize_json_to_file(
-    const any&                value,
+    const std::any&           value,
     std::string const&        file_name,
     const schema_version_map* schema_version_targets = nullptr,
     ErrorStatus*              error_status           = nullptr,

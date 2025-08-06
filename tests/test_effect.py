@@ -13,14 +13,19 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         ef = otio.schema.Effect(
             name="blur it",
             effect_name="blur",
-            metadata={"foo": "bar"}
+            metadata={"foo": "bar"},
+            enabled=False
         )
+
+        self.assertEqual(ef.enabled, False)
+
         encoded = otio.adapters.otio_json.write_to_string(ef)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(ef, decoded)
         self.assertEqual(decoded.name, "blur it")
         self.assertEqual(decoded.effect_name, "blur")
         self.assertEqual(decoded.metadata['foo'], 'bar')
+        self.assertEqual(decoded.enabled, False)
 
     def test_eq(self):
         ef = otio.schema.Effect(
@@ -39,14 +44,16 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         ef = otio.schema.Effect(
             name="blur it",
             effect_name="blur",
-            metadata={"foo": "bar"}
+            metadata={"foo": "bar"},
+            enabled=False
         )
         self.assertMultiLineEqual(
             str(ef),
-            "Effect({}, {}, {})".format(
+            "Effect({}, {}, {}, {})".format(
                 str(ef.name),
                 str(ef.effect_name),
-                str(ef.metadata)
+                str(ef.metadata),
+                str(ef.enabled)
             )
         )
         self.assertMultiLineEqual(
@@ -54,11 +61,13 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "otio.schema.Effect("
             "name={}, "
             "effect_name={}, "
-            "metadata={}"
+            "metadata={}, "
+            "enabled={}"
             ")".format(
                 repr(ef.name),
                 repr(ef.effect_name),
                 repr(ef.metadata),
+                repr(ef.enabled)
             )
         )
 
@@ -71,6 +80,7 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(ef.effect_name, "blur")
         ef.effect_name = "flop"
         self.assertEqual(ef.effect_name, "flop")
+        self.assertEqual(ef.enabled, True)
 
 
 class TestLinearTimeWarp(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -80,6 +90,7 @@ class TestLinearTimeWarp(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(ef.name, "Foo")
         self.assertEqual(ef.time_scalar, 2.5)
         self.assertEqual(ef.metadata, {"foo": "bar"})
+        self.assertEqual(ef.enabled, True)
 
     def test_serialize(self):
         ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
@@ -101,6 +112,7 @@ class TestFreezeFrame(unittest.TestCase):
         self.assertEqual(ef.name, "Foo")
         self.assertEqual(ef.time_scalar, 0)
         self.assertEqual(ef.metadata, {"foo": "bar"})
+        self.assertEqual(ef.enabled, True)
 
 
 if __name__ == '__main__':

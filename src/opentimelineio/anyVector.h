@@ -3,41 +3,43 @@
 
 #pragma once
 
-#include "opentimelineio/any.h"
 #include "opentimelineio/version.h"
+
+#include <any>
 #include <assert.h>
 #include <vector>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-/**
- * An AnyVector has exactly the same API as
- *    std::vector<any>
- *
- * except that it records a "time-stamp" that
- * lets external observers know when the vector has been destroyed (which includes
- * the case of the vector being relocated in memory).
- *
- * This allows us to hand out iterators that can be aware of moves
- * and take steps to safe-guard themselves from causing a crash.
- */
-
-class AnyVector : private std::vector<any>
+/// @brief This class provides a replacement for "std::vector<std::any>".
+///
+/// This class has exactly the same API as "std::vector<std::any>", except
+/// that it records a "time-stamp" that lets external observers know when
+/// the vector has been destroyed (which includes the case of the vector
+/// being relocated in memory).
+///
+/// This allows us to hand out iterators that can be aware of moves
+/// and take steps to safe-guard themselves from causing a crash.
+class AnyVector : private std::vector<std::any>
 {
 public:
     using vector::vector;
 
+    /// @brief Create an empty vector.
     AnyVector()
         : _mutation_stamp{}
     {}
 
-    // must avoid brace-initialization so as to not trigger
-    // list initialization behavior in older compilers:
+    /// @brief Create a copy of a vector.
+    ///
+    /// To be safe, avoid brace-initialization so as to not trigger
+    /// list initialization behavior in older compilers:
     AnyVector(const AnyVector& other)
         : vector(other)
         , _mutation_stamp{ nullptr }
     {}
 
+    /// @brief Destructor.
     ~AnyVector()
     {
         if (_mutation_stamp)
@@ -46,18 +48,21 @@ public:
         }
     }
 
+    /// @brief Copy operator.
     AnyVector& operator=(const AnyVector& other)
     {
         vector::operator=(other);
         return *this;
     }
 
+    /// @brief Move operator.
     AnyVector& operator=(AnyVector&& other)
     {
         vector::operator=(other);
         return *this;
     }
 
+    /// @brief Copy operator.
     AnyVector& operator=(std::initializer_list<value_type> ilist)
     {
         vector::operator=(ilist);
@@ -112,10 +117,13 @@ public:
     using vector::size_type;
     using vector::value_type;
 
+    /// @brief Swap vectors.
     void swap(AnyVector& other) { vector::swap(other); }
 
+    /// @brief This struct provides a mutation time stamp.
     struct MutationStamp
     {
+        /// @brief Create a new time stamp.
         MutationStamp(AnyVector* v)
             : any_vector{ v }
             , owning{ false }
@@ -126,6 +134,7 @@ public:
         MutationStamp(MutationStamp const&)            = delete;
         MutationStamp& operator=(MutationStamp const&) = delete;
 
+        /// @brief Destructor.
         ~MutationStamp()
         {
             if (any_vector)
@@ -150,6 +159,7 @@ public:
         }
     };
 
+    /// @brief Get or create a mutation time stamp.
     MutationStamp* get_or_create_mutation_stamp()
     {
         if (!_mutation_stamp)

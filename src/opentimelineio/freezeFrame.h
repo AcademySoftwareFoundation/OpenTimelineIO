@@ -8,9 +8,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief Hold the first frame of the clip for the duration of the clip.
 class FreezeFrame : public LinearTimeWarp
 {
 public:
+    /// @brief This struct provides the FreezeFrame schema.
     struct Schema
     {
         static auto constexpr name   = "FreezeFrame";
@@ -19,6 +21,10 @@ public:
 
     using Parent = LinearTimeWarp;
 
+    /// @brief Create a new freeze frame time effect.
+    ///
+    /// @param name The name of the time effect.
+    /// @param metadata The metadata for the time effect.
     FreezeFrame(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());

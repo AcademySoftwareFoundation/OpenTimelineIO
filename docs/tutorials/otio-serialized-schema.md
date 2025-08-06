@@ -88,6 +88,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -106,6 +107,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -244,7 +246,7 @@ Defines an OTIO plugin Manifest.
     or other features (in the case of adapters, what file suffixes they
     advertise support for).
 
-    For more information, consult the documenation.
+    For more information, consult the documentation.
     
 ```
 
@@ -290,6 +292,7 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 
 parameters:
 - *active_media_reference_key*: 
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -310,6 +313,7 @@ None
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 
@@ -342,6 +346,7 @@ Hold the first frame of the clip for the duration of the clip.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -361,6 +366,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -500,6 +506,7 @@ A time warp that applies a linear speed up or slow down across the entire clip.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -588,6 +595,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -607,6 +615,7 @@ Base class for all effects that alter the timing of an item.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 
@@ -637,6 +646,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *kind*: 

@@ -9,7 +9,7 @@
 
 namespace examples {
 
-// Normalize path (change '\' path delimeters to '/').
+// Normalize path (change '\' path delimiters to '/').
 std::string normalize_path(std::string const&);
 
 // Get the absolute path.
@@ -25,4 +25,3 @@ std::vector<std::string> glob(std::string const& path, std::string const& patter
 void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
 
 }
-

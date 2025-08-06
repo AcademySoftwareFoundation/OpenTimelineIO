@@ -40,6 +40,7 @@ parameters:
 ### Composition.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -50,6 +51,7 @@ parameters:
 ### Item.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -132,6 +134,7 @@ parameters:
 
 parameters:
 - *active_media_reference_key*
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -144,6 +147,7 @@ parameters:
 
 parameters:
 - *effect_name*
+- *enabled*
 - *metadata*
 - *name*
 
@@ -160,6 +164,7 @@ parameters:
 
 parameters:
 - *effect_name*
+- *enabled*
 - *metadata*
 - *name*
 - *time_scalar*
@@ -167,6 +172,7 @@ parameters:
 ### Gap.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -204,6 +210,7 @@ parameters:
 
 parameters:
 - *effect_name*
+- *enabled*
 - *metadata*
 - *name*
 - *time_scalar*
@@ -234,6 +241,7 @@ parameters:
 ### Stack.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *markers*
@@ -245,6 +253,7 @@ parameters:
 
 parameters:
 - *effect_name*
+- *enabled*
 - *metadata*
 - *name*
 
@@ -259,6 +268,7 @@ parameters:
 ### Track.1
 
 parameters:
+- *color*
 - *effects*
 - *enabled*
 - *kind*

@@ -1,0 +1,42 @@
+name: Publish Release to PyPI
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Debug information
+      run: |
+        echo 'sha: ${{ github.sha }}'
+        echo 'ref: ${{ github.ref }}'
+
+    # This action will download the artifact for workflow runs that
+    # happen for this actual commit (the commit that the tag points to).
+    # It also restores the files timestamps.
+    - name: Download wheels from commit ${{ github.sha }}
+      uses: dawidd6/action-download-artifact@v8
+      with:
+        workflow: python-package.yml
+        workflow_conclusion: success
+        commit: ${{ github.sha }}
+        name_is_regexp: true
+        name: 'wheel-.*'
+        path: dist
+
+    - name: Download sdist from commit ${{ github.sha }}
+      uses: dawidd6/action-download-artifact@v8
+      with:
+        workflow: python-package.yml
+        workflow_conclusion: success
+        commit: ${{ github.sha }}
+        name: sdist
+        path: dist
+
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}

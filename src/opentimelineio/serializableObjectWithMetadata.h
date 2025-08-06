@@ -8,9 +8,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
+/// @brief A serializable object with metadata.
 class SerializableObjectWithMetadata : public SerializableObject
 {
 public:
+    /// @brief This struct provides the SerializableObjectWithMetadata schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableObjectWithMetadata";
@@ -19,16 +21,24 @@ public:
 
     using Parent = SerializableObject;
 
+    /// @brief Create a new serializable object.
+    ///
+    /// @param name The object name.
+    /// @param metadata The metadata for the object.
     SerializableObjectWithMetadata(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
+    /// @brief Return the object name.
     std::string name() const noexcept { return _name; }
 
+    /// @brief Set the object name.
     void set_name(std::string const& name) { _name = name; }
 
+    /// @brief Modify the object metadata.
     AnyDictionary& metadata() noexcept { return _metadata; }
 
+    /// @brief Return the object metadata.
     AnyDictionary metadata() const noexcept { return _metadata; }
 
 protected:

@@ -56,6 +56,27 @@ parameters:
 
 ## Module: opentimelineio.core
 
+### Color.1
+
+*full module path*: `opentimelineio.core.Color`
+
+*documentation*:
+
+```
+:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing
+ conversion between different formats. To be considered interoperable, the sRGB transfer function 
+encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the 
+intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant
+ for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
+```
+
+parameters:
+- *a*: 
+- *b*: 
+- *g*: 
+- *name*: 
+- *r*: 
+
 ### Composable.1
 
 *full module path*: `opentimelineio.core.Composable`

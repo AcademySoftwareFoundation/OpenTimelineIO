@@ -12,9 +12,38 @@ from . import makeOtio
 os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = "OTIO_CORE:0.17.0"
 
 def main(tlA, tlB):
+    hasVideo = False
+    hasAudio = False
+
+    if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
+        hasVideo = True
+    else:
+        print("no video tracks")
+
+    if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
+        hasAudio = True
+    else:
+        print("no audio tracks")
+
+
+    outputTl = None
+
+    if hasVideo and hasAudio:
+        videoTl = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+        outputTl = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        for t in videoTl.tracks:
+            outputTl.tracks.append(copy.deepcopy(t))
+        # combine
+    elif hasVideo:
+        outputTl = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+
+    elif hasAudio:
+        outputTl = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+
+    
 
     # videoTl = processAllTracks(tlA, tlB, "video", displayMode)
-    videoTl = processAllTracksAB(tlA, tlB)
+    # videoTl = processAllTracksAB(tlA, tlB)
 
     # # audio only
     # audioTl = processAllTracks(tlA, tlB, "audio")
@@ -31,10 +60,10 @@ def main(tlA, tlB):
         origClipCount += len(t.find_clips())
 
     print(origClipCount)
-    print(len(videoTl.find_clips()))
+    print(len(outputTl.find_clips()))
     # assert(len(tlA.find_clips()) + len(tlB.find_clips()) == len(videoTl.find_clips())), "Clip count doesn't match across two timelines"
 
-    return videoTl
+    return outputTl
 
 def toOtio(data, path):
     otio.adapters.write_to_file(data, path)
@@ -174,86 +203,6 @@ def compareClips(clipDatasA, clipDatasB):
 
     return added, edited, unchanged, deleted
 
-def processVideo(videoTrackA, videoTrackB):
-    clipDatasA = []
-    clipDatasB = []
-
-    for c in videoTrackA.find_clips():
-        take = None
-        if(len(c.name.split(" ")) > 1):
-            take = c.name.split(" ")[1]
-        else:
-            take = None
-        cd = ClipData(c.name.split(" ")[0],
-                      c.media_reference,
-                      c.source_range,
-                      c.trimmed_range_in_parent(),
-                      c,
-                      take)
-        clipDatasA.append(cd)
-    
-    for c in videoTrackB.find_clips():
-        take = None
-        if(len(c.name.split(" ")) > 1):
-            take = c.name.split(" ")[1]
-        else:
-            take = None
-        cd = ClipData(c.name.split(" ")[0],
-                      c.media_reference,
-                      c.source_range,
-                      c.trimmed_range_in_parent(),
-                      c,
-                      take)
-        clipDatasB.append(cd)
-
-    (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
-
-    # compare clips and put into categories
-    addV = []
-    editV = []
-    sameV = []
-    deleteV = []
-    
-    # compare and categorize unique clips
-    addV, editV, sameV, deleteV = compareClips(nonClonesA, nonClonesB)
-
-    # compare and categorize cloned clips
-    addCloneV, sameCloneV, deleteCloneV = compareClones(clonesA, clonesB)
-    addV.extend(addCloneV)
-    sameV.extend(sameCloneV)
-    deleteV.extend(deleteCloneV)
-
-    return addV, editV, sameV, deleteV
-
-def processAudio(audioTrackA, audioTrackB):
-    addA = []
-    editA = []
-    sameA = []
-    deleteA = []
-
-    audioClipDatasA = []
-    audioClipDatasB = []
-
-    for c in audioTrackA.find_clips():
-        cd = ClipData(c.name,
-                    c.media_reference,
-                    c.source_range,
-                    c.trimmed_range_in_parent(),
-                    c)
-        audioClipDatasA.append(cd)
-    
-    for c in audioTrackB.find_clips():
-        cd = ClipData(c.name,
-                    c.media_reference,
-                    c.source_range,
-                    c.trimmed_range_in_parent(),
-                    c)
-        audioClipDatasB.append(cd)
-
-    addA, editA, sameA, deleteA = compareClips(audioClipDatasA, audioClipDatasB)
-    
-    return addA, editA, sameA, deleteA
-
 # clip is an otio Clip
 def getTake(clip):
     take = None
@@ -313,83 +262,60 @@ def compareTracks(trackA, trackB):
     # return addV, editV, sameV, deleteV
     return videoGroup
 
-def processAllTracks(tlA, tlB, trackType, displayMode):
-    # determine which track set is shorter
-    assert(trackType is not None), "Missing type of track in function call"
-    # TODO add check that timeline track length is not 0
-
-    tracksA = None
-    tracksB = None
+def processTracks(tracksA, tracksB, trackType):
     newTl = otio.schema.Timeline(name="timeline")
-    tempB = otio.schema.Timeline(name="timeline")
-
-    if(trackType.lower() == "video"):
-        tracksA = tlA.video_tracks()
-        tracksB = tlB.video_tracks()
-    elif(trackType.lower() == "audio"):
-        tracksA = tlA.audio_tracks()
-        tracksB = tlB.audio_tracks()
-    elif(trackType.lower() == "all"):
-        print("show both video and audio")        
+    displayA = []
+    displayB = []
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
-    print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+    # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
 
-    # Process Matched Video Tracks
-    # index through all the video tracks of the timeline with less tracks
-    tracksOfDels = []
+    # Process Matched Tracks
+    # index through all the tracks of the timeline with less tracks
     for i in range(0, len(shorterTlTracks)):
         currTrackA = tracksA[i]
         currTrackB = tracksB[i]
 
-        videoGroup = compareTracks(currTrackA, currTrackB)
+        clipGroup = compareTracks(currTrackA, currTrackB)
 
-        # videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
+        trackNum = i + 1
+        newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
+        displayA.append(newA)       
 
-        # add processed tracks to display timeline
-        getTl = None
-        if displayMode is None:
-            print("Warning: Display mode not specified, defaulting to inline")
-            getTl = makeOtio.makeTimelineOfType("simple", currTrackA, currTrackB, videoGroup)
-        else:
-            # getTl = makeOtio.makeTimelineOfType(displayMode, currTrackA, currTrackB, videoGroup)
-            
-            # split delete out
-            getTl, tDelV = makeOtio.makeTimelineSplitDelete(currTrackA, currTrackB, videoGroup)
-            tracksOfDels.insert(0, tDelV)
+        newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
+        displayB.append(newB)
 
-        for t in getTl.tracks:
-            newTl.tracks.append(copy.deepcopy(t))
-        print("current track stack size:", len(newTl.tracks))
-
-    # Process Unmatched Video Tracks
-    # mark unmatched tracks as either "added" or "deleted" and add to display timeline
+    # Process Unmatched Tracks
     if shorterTlTracks == tracksA:
         # tlA is shorter so tlB has added tracks
         for i in range(len(shorterTlTracks), len(tracksB)):
             newTrack = tracksB[i]
+            newTrack.name = trackType + " B" + str(i + 1)
             for c in newTrack.find_clips():
                 c = makeOtio.addRavenColor(c, "GREEN")
+                # newMarker = makeOtio.addMarker(c, "GREEN")
+                # c.markers.append(newMarker)
 
             # add to top of track stack
-            newTl.tracks.append(copy.deepcopy(newTrack))
-            print("added unmatched track", len(newTl.tracks))
+            displayB.append(copy.deepcopy(newTrack))
+            # print("added unmatched track", len(newTl.tracks))
     else:
         for i in range(len(shorterTlTracks), len(tracksA)):
             # color clips
             newTrack = tracksA[i]
+            newTrack.name = trackType + " A" + str(i + 1)
             for c in newTrack.find_clips():
                 c = makeOtio.addRavenColor(c, "PINK")
+                # newMarker = makeOtio.addMarker(c, "PINK")
+                # c.markers.append(newMarker)
+            displayA.append(copy.deepcopy(newTrack))
 
-            # add to bottom of track stack
-            # newTl.tracks.append(copy.deepcopy(newTrack))
+    newTl.tracks.extend(displayA)
 
-            # split delete out
-            # tracksOfDels.insert(0, newTrack)
-
-            print("added unmatched track", len(newTl.tracks))
-
-    makeOtio.makeDeletes(newTl, tracksOfDels)
+    newEmpty = makeOtio.makeEmptyTrack(trackType)
+    newTl.tracks.append(newEmpty)
+    
+    newTl.tracks.extend(displayB)
 
     return newTl
 
@@ -397,6 +323,27 @@ def processAllTracks(tlA, tlB, trackType, displayMode):
 def processAllTracksAB(tlA, tlB):
     # determine which track set is shorter
 
+    hasVideo = False
+    hasAudio = False
+
+    if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
+        hasVideo = True
+    else:
+        print("no video tracks")
+
+    if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
+        hasAudio = True
+    else:
+        print("no audio tracks")
+
+
+    if hasVideo:
+        processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+
+    if hasAudio:
+        processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+    
+    
     tracksA = tlA.video_tracks()
     tracksB = tlB.video_tracks()
     newTl = otio.schema.Timeline(name="timeline")
@@ -416,10 +363,10 @@ def processAllTracksAB(tlA, tlB):
         videoGroup = compareTracks(currTrackA, currTrackB)
 
         trackNum = i + 1
-        newA = makeOtio.makeTrackA(videoGroup, trackNum)
+        newA = makeOtio.makeTrackA(videoGroup, trackNum, "Video")
         displayA.append(newA)       
 
-        newB = makeOtio.makeTrackB(videoGroup, trackNum)
+        newB = makeOtio.makeTrackB(videoGroup, trackNum, "Video")
         displayB.append(newB)
 
     if shorterTlTracks == tracksA:
@@ -427,9 +374,9 @@ def processAllTracksAB(tlA, tlB):
         for i in range(len(shorterTlTracks), len(tracksB)):
             newTrack = tracksB[i]
             for c in newTrack.find_clips():
-                # c = makeOtio.addRavenColor(c, "GREEN")
-                newMarker = makeOtio.addMarker(c, "GREEN")
-                c.markers.append(newMarker)
+                c = makeOtio.addRavenColor(c, "GREEN")
+                # newMarker = makeOtio.addMarker(c, "GREEN")
+                # c.markers.append(newMarker)
 
             # add to top of track stack
             displayB.append(copy.deepcopy(newTrack))
@@ -439,9 +386,9 @@ def processAllTracksAB(tlA, tlB):
             # color clips
             newTrack = tracksA[i]
             for c in newTrack.find_clips():
-                # c = makeOtio.addRavenColor(c, "PINK")
-                newMarker = makeOtio.addMarker(c, "PINK")
-                c.markers.append(newMarker)
+                c = makeOtio.addRavenColor(c, "PINK")
+                # newMarker = makeOtio.addMarker(c, "PINK")
+                # c.markers.append(newMarker)
             displayA.append(copy.deepcopy(newTrack))
 
     newTl.tracks.extend(displayA)
@@ -479,7 +426,7 @@ def makeSummary(tlA, tlB, videoGroup):
     #     print(k, ":", len(clonesB[k]))
 
     
-    print("======= Video Clip Info Overview =======")
+    print("======= Clip Info Overview =======")
     print("added: ", len(videoGroup.add))
     for c in videoGroup.add:
         print(c.name)
@@ -501,86 +448,6 @@ def makeSummary(tlA, tlB, videoGroup):
     for c in videoGroup.delete:
         print(c.name)
     print("=======")   
-
-def processSingleTrack(tlA, tlB):
-    assert len(tlA.video_tracks()) == 1, "File A contains more than 1 video track. Please flatten to a single track."
-    assert len(tlB.video_tracks()) == 1, "File B contains more than 1 video track. Please flatten to a single track."
-
-    videoTrackA = tlA.video_tracks()[0]
-    videoTrackB = tlB.video_tracks()[0]
-
-    # check for nested video tracks and stacks
-    assert(not videoTrackA.find_children(otio._otio.Track)), "File A contains nested track(s). Please flatten to a single track."
-    # assert(not videoTrackA.find_children(otio._otio.Stack)), "File A contains nested stack(s). Please flatten to a single track."
-    assert(not videoTrackB.find_children(otio._otio.Track)), "File B contains nested track(s). Please flatten to a single track."
-    # assert(not videoTrackB.find_children(otio._otio.Stack)), "File B contains nested stack(s). Please flatten to a single track."
-
-
-    # ====== VIDEO TRACK PROCESSING ======
-    addV, editV, sameV, deleteV = processVideo(videoTrackA, videoTrackB)
-
-    # ====== AUDIO TRACK PROCESSING ======
-    # check if audio tracks exist
-    hasAudio = False
-
-    if(len(tlA.audio_tracks()) != 0):
-        assert len(tlA.audio_tracks()) == 1, "File A contains more than 1 audio track"
-        hasAudio = True
-    if(len(tlB.audio_tracks()) != 0):
-        assert len(tlB.audio_tracks()) == 1, "File B contains more than 1 audio track"
-        hasAudio = True
-
-    # if audio track(s) present, compare audio track(s)
-    if(hasAudio):
-        audioTrackA = tlA.audio_tracks()[0]
-        audioTrackB = tlB.audio_tracks()[0]
-
-        addA, editA, sameA, deleteA = processAudio(audioTrackA, audioTrackB)      
-
-    # ====== MAKE NEW OTIO ======
-    SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
-    videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
-
-    # check which display mode is toggled
-    if(args.display is None):
-        print("no display mode specified, defaulting to inline")
-        flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup)
-        toOtio(flatTl)
-
-    # multi-track output
-    elif(args.display.lower() == "stack"):
-        print("display mode: stack")
-        if(hasAudio):
-            audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
-            stackTl = makeOtio.makeTimelineStack(videoTrackA, videoTrackB, videoGroup, audioGroup)
-        else:
-            stackTl = makeOtio.makeTimelineStack(videoTrackA, videoTrackB, videoGroup)
-        toOtio(stackTl)
-
-    # single-track output
-    elif(args.display.lower() == "inline"):
-        print("display mode: inline")
-        if(hasAudio):
-            audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
-            flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup, audioGroup)
-
-        # flat track output
-        else:
-            flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup)
-        toOtio(flatTl)
-
-    # both multi and single track output
-    elif(args.display.lower() == "full"):
-        print("display mode: full")
-        if(hasAudio):
-            audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
-            fullTl = makeOtio.makeTimelineFull(videoTrackA, videoTrackB, videoGroup, audioGroup)
-        else:
-            fullTl = makeOtio.makeTimelineFull(videoTrackA, videoTrackB, videoGroup)
-        toOtio(fullTl)
-        
-    else:
-        print("not an accepted display mode, no otios made")
 
 if __name__ == "__main__":
     main()
@@ -614,3 +481,245 @@ if __name__ == "__main__":
     Test shot multitrack:
         python ./src/getDif.py /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
 '''
+
+# def processAllTracks(tlA, tlB, trackType, displayMode):
+#     # determine which track set is shorter
+#     assert(trackType is not None), "Missing type of track in function call"
+#     # TODO add check that timeline track length is not 0
+
+#     tracksA = None
+#     tracksB = None
+#     newTl = otio.schema.Timeline(name="timeline")
+#     tempB = otio.schema.Timeline(name="timeline")
+
+#     if(trackType.lower() == "video"):
+#         tracksA = tlA.video_tracks()
+#         tracksB = tlB.video_tracks()
+#     elif(trackType.lower() == "audio"):
+#         tracksA = tlA.audio_tracks()
+#         tracksB = tlB.audio_tracks()
+#     elif(trackType.lower() == "all"):
+#         print("show both video and audio")        
+    
+#     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
+#     print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+
+#     # Process Matched Video Tracks
+#     # index through all the video tracks of the timeline with less tracks
+#     tracksOfDels = []
+#     for i in range(0, len(shorterTlTracks)):
+#         currTrackA = tracksA[i]
+#         currTrackB = tracksB[i]
+
+#         videoGroup = compareTracks(currTrackA, currTrackB)
+
+#         # videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
+
+#         # add processed tracks to display timeline
+#         getTl = None
+#         if displayMode is None:
+#             print("Warning: Display mode not specified, defaulting to inline")
+#             getTl = makeOtio.makeTimelineOfType("simple", currTrackA, currTrackB, videoGroup)
+#         else:
+#             # getTl = makeOtio.makeTimelineOfType(displayMode, currTrackA, currTrackB, videoGroup)
+            
+#             # split delete out
+#             getTl, tDelV = makeOtio.makeTimelineSplitDelete(currTrackA, currTrackB, videoGroup)
+#             tracksOfDels.insert(0, tDelV)
+
+#         for t in getTl.tracks:
+#             newTl.tracks.append(copy.deepcopy(t))
+#         print("current track stack size:", len(newTl.tracks))
+
+#     # Process Unmatched Video Tracks
+#     # mark unmatched tracks as either "added" or "deleted" and add to display timeline
+#     if shorterTlTracks == tracksA:
+#         # tlA is shorter so tlB has added tracks
+#         for i in range(len(shorterTlTracks), len(tracksB)):
+#             newTrack = tracksB[i]
+#             for c in newTrack.find_clips():
+#                 c = makeOtio.addRavenColor(c, "GREEN")
+
+#             # add to top of track stack
+#             newTl.tracks.append(copy.deepcopy(newTrack))
+#             print("added unmatched track", len(newTl.tracks))
+#     else:
+#         for i in range(len(shorterTlTracks), len(tracksA)):
+#             # color clips
+#             newTrack = tracksA[i]
+#             for c in newTrack.find_clips():
+#                 c = makeOtio.addRavenColor(c, "PINK")
+
+#             # add to bottom of track stack
+#             # newTl.tracks.append(copy.deepcopy(newTrack))
+
+#             # split delete out
+#             # tracksOfDels.insert(0, newTrack)
+
+#             print("added unmatched track", len(newTl.tracks))
+
+#     makeOtio.makeDeletes(newTl, tracksOfDels)
+
+#     return newTl
+
+
+# def processVideo(videoTrackA, videoTrackB):
+#     clipDatasA = []
+#     clipDatasB = []
+
+#     for c in videoTrackA.find_clips():
+#         take = None
+#         if(len(c.name.split(" ")) > 1):
+#             take = c.name.split(" ")[1]
+#         else:
+#             take = None
+#         cd = ClipData(c.name.split(" ")[0],
+#                       c.media_reference,
+#                       c.source_range,
+#                       c.trimmed_range_in_parent(),
+#                       c,
+#                       take)
+#         clipDatasA.append(cd)
+    
+#     for c in videoTrackB.find_clips():
+#         take = None
+#         if(len(c.name.split(" ")) > 1):
+#             take = c.name.split(" ")[1]
+#         else:
+#             take = None
+#         cd = ClipData(c.name.split(" ")[0],
+#                       c.media_reference,
+#                       c.source_range,
+#                       c.trimmed_range_in_parent(),
+#                       c,
+#                       take)
+#         clipDatasB.append(cd)
+
+#     (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
+
+#     # compare clips and put into categories
+#     addV = []
+#     editV = []
+#     sameV = []
+#     deleteV = []
+    
+#     # compare and categorize unique clips
+#     addV, editV, sameV, deleteV = compareClips(nonClonesA, nonClonesB)
+
+#     # compare and categorize cloned clips
+#     addCloneV, sameCloneV, deleteCloneV = compareClones(clonesA, clonesB)
+#     addV.extend(addCloneV)
+#     sameV.extend(sameCloneV)
+#     deleteV.extend(deleteCloneV)
+
+#     return addV, editV, sameV, deleteV
+
+# def processAudio(audioTrackA, audioTrackB):
+#     addA = []
+#     editA = []
+#     sameA = []
+#     deleteA = []
+
+#     audioClipDatasA = []
+#     audioClipDatasB = []
+
+#     for c in audioTrackA.find_clips():
+#         cd = ClipData(c.name,
+#                     c.media_reference,
+#                     c.source_range,
+#                     c.trimmed_range_in_parent(),
+#                     c)
+#         audioClipDatasA.append(cd)
+    
+#     for c in audioTrackB.find_clips():
+#         cd = ClipData(c.name,
+#                     c.media_reference,
+#                     c.source_range,
+#                     c.trimmed_range_in_parent(),
+#                     c)
+#         audioClipDatasB.append(cd)
+
+#     addA, editA, sameA, deleteA = compareClips(audioClipDatasA, audioClipDatasB)
+    
+#     return addA, editA, sameA, deleteA
+
+
+# def processSingleTrack(tlA, tlB):
+#     assert len(tlA.video_tracks()) == 1, "File A contains more than 1 video track. Please flatten to a single track."
+#     assert len(tlB.video_tracks()) == 1, "File B contains more than 1 video track. Please flatten to a single track."
+
+#     videoTrackA = tlA.video_tracks()[0]
+#     videoTrackB = tlB.video_tracks()[0]
+
+#     # check for nested video tracks and stacks
+#     assert(not videoTrackA.find_children(otio._otio.Track)), "File A contains nested track(s). Please flatten to a single track."
+#     # assert(not videoTrackA.find_children(otio._otio.Stack)), "File A contains nested stack(s). Please flatten to a single track."
+#     assert(not videoTrackB.find_children(otio._otio.Track)), "File B contains nested track(s). Please flatten to a single track."
+#     # assert(not videoTrackB.find_children(otio._otio.Stack)), "File B contains nested stack(s). Please flatten to a single track."
+
+
+#     # ====== VIDEO TRACK PROCESSING ======
+#     addV, editV, sameV, deleteV = processVideo(videoTrackA, videoTrackB)
+
+#     # ====== AUDIO TRACK PROCESSING ======
+#     # check if audio tracks exist
+#     hasAudio = False
+
+#     if(len(tlA.audio_tracks()) != 0):
+#         assert len(tlA.audio_tracks()) == 1, "File A contains more than 1 audio track"
+#         hasAudio = True
+#     if(len(tlB.audio_tracks()) != 0):
+#         assert len(tlB.audio_tracks()) == 1, "File B contains more than 1 audio track"
+#         hasAudio = True
+
+#     # if audio track(s) present, compare audio track(s)
+#     if(hasAudio):
+#         audioTrackA = tlA.audio_tracks()[0]
+#         audioTrackB = tlB.audio_tracks()[0]
+
+#         addA, editA, sameA, deleteA = processAudio(audioTrackA, audioTrackB)      
+
+#     # ====== MAKE NEW OTIO ======
+#     SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
+#     videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
+
+#     # check which display mode is toggled
+#     if(args.display is None):
+#         print("no display mode specified, defaulting to inline")
+#         flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup)
+#         toOtio(flatTl)
+
+#     # multi-track output
+#     elif(args.display.lower() == "stack"):
+#         print("display mode: stack")
+#         if(hasAudio):
+#             audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
+#             stackTl = makeOtio.makeTimelineStack(videoTrackA, videoTrackB, videoGroup, audioGroup)
+#         else:
+#             stackTl = makeOtio.makeTimelineStack(videoTrackA, videoTrackB, videoGroup)
+#         toOtio(stackTl)
+
+#     # single-track output
+#     elif(args.display.lower() == "inline"):
+#         print("display mode: inline")
+#         if(hasAudio):
+#             audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
+#             flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup, audioGroup)
+
+#         # flat track output
+#         else:
+#             flatTl = makeOtio.makeTimelineInline(videoTrackA, videoTrackB, videoGroup)
+#         toOtio(flatTl)
+
+#     # both multi and single track output
+#     elif(args.display.lower() == "full"):
+#         print("display mode: full")
+#         if(hasAudio):
+#             audioGroup = SortedClipDatas(addA, editA, sameA, deleteA)
+#             fullTl = makeOtio.makeTimelineFull(videoTrackA, videoTrackB, videoGroup, audioGroup)
+#         else:
+#             fullTl = makeOtio.makeTimelineFull(videoTrackA, videoTrackB, videoGroup)
+#         toOtio(fullTl)
+        
+#     else:
+#         print("not an accepted display mode, no otios made")

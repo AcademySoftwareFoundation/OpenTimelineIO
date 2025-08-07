@@ -11,37 +11,7 @@ from . import makeOtio
 # set otio version to 0.17
 os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = "OTIO_CORE:0.17.0"
 
-def main(fileA, fileB):
-    
-    # parser = argparse.ArgumentParser(description="compare two .otio files with flattened video tracks (one video track only)")
-    # parser.add_argument("fileA", metavar="fileA", type=str, help="file path to otio file")
-    # parser.add_argument("fileB", metavar="fileB", type=str, help="file path to otio file")
-    # parser.add_argument("--display", metavar="display", type=str, help="Specify how the new otio file displays info. Options: 'stack', 'inline', or 'full'")
-    # parser.add_argument("--flatten", action='store_true', help="Toggle to flatten input files")
-
-    # args = parser.parse_args()
-
-    # assert(fileA[-5:] == ".otio"), "File A is not an otio file"
-    # assert(fileB[-5:] == ".otio"), "File B is not an otio file"
-
-    # tlA = otio.adapters.read_from_file(fileA)
-    # tlB = otio.adapters.read_from_file(fileB)
-    tlA = fileA
-    tlB = fileB
-
-    # old implmentation
-    # videoTl = processSingleTrack(tlA, tlB)
-
-    # new implementation that can process inputs with multiple tracks
-    # displayMode = None
-    
-    # if args.display is not None:
-    #     displayMode = args.display.lower()
-    #     displaySettings = ("inline", "stack", "full", "simple")
-    #     if displayMode not in displaySettings:
-    #         print("Not a recognized display mode, defaulting to 'simple'.")
-    #         displayMode = "simple"
-    
+def main(tlA, tlB):
 
     # videoTl = processAllTracks(tlA, tlB, "video", displayMode)
     videoTl = processAllTracksAB(tlA, tlB)
@@ -64,7 +34,6 @@ def main(fileA, fileB):
     print(len(videoTl.find_clips()))
     # assert(len(tlA.find_clips()) + len(tlB.find_clips()) == len(videoTl.find_clips())), "Clip count doesn't match across two timelines"
 
-    # commented out display for now
     return videoTl
 
 def toOtio(data, path):
@@ -344,7 +313,6 @@ def compareTracks(trackA, trackB):
     # return addV, editV, sameV, deleteV
     return videoGroup
 
-# ============================= NEW FOR MULTITRACK =============================
 def processAllTracks(tlA, tlB, trackType, displayMode):
     # determine which track set is shorter
     assert(trackType is not None), "Missing type of track in function call"
@@ -426,11 +394,8 @@ def processAllTracks(tlA, tlB, trackType, displayMode):
     return newTl
 
 
-# maybe just loop through all of the tracks in A and then all of the tracks in B??
-# see if can simplify organization
 def processAllTracksAB(tlA, tlB):
     # determine which track set is shorter
-    # TODO add check that timeline track length is not 0
 
     tracksA = tlA.video_tracks()
     tracksB = tlB.video_tracks()
@@ -440,7 +405,7 @@ def processAllTracksAB(tlA, tlB):
 
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
-    print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+    # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
 
     # Process Matched Video Tracks
     # index through all the video tracks of the timeline with less tracks
@@ -537,8 +502,6 @@ def makeSummary(tlA, tlB, videoGroup):
         print(c.name)
     print("=======")   
 
-
-# TODO: add a flatten flag
 def processSingleTrack(tlA, tlB):
     assert len(tlA.video_tracks()) == 1, "File A contains more than 1 video track. Please flatten to a single track."
     assert len(tlB.video_tracks()) == 1, "File B contains more than 1 video track. Please flatten to a single track."

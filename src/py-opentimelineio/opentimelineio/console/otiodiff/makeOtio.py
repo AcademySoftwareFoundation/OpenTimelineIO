@@ -108,7 +108,7 @@ def makeTrackB(videoGroup, trackNum, audioGroup=None):
     tSameV = makeTrack("same", "Video", videoGroup.same)
 
     flat_videoB = otio.core.flatten_stack([tSameV, tEditedV, tAddV])
-    flat_videoB.name = "Video B" + str(trackNum)
+    flat_videoB.name = str(trackNum) + "Video B"
 
     return flat_videoB
 
@@ -124,7 +124,7 @@ def makeTrackA(videoGroup, trackNum, audioGroup=None):
     tDelV = makeTrack("deleted", "Video", videoGroup.delete, "PINK")
 
     flat_videoA = otio.core.flatten_stack([tSameV, tEditedV, tDelV])
-    flat_videoA.name = "Video A" + str(trackNum)
+    flat_videoA.name = str(trackNum) + "Video A"
 
     return flat_videoA
 

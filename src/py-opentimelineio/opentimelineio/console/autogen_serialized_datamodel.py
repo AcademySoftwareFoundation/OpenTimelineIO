@@ -159,6 +159,7 @@ def _generate_model_for_module(mod, classes, modules):
                 otio.opentime.RationalTime,
                 otio.opentime.TimeRange,
                 otio.opentime.TimeTransform,
+                otio.core.Color
             )
         )
     ]

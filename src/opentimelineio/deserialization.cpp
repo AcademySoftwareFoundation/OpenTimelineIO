@@ -590,13 +590,13 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     }
     else if (schema_name_and_version == "Color.1")
     {
-        float r, g, b, a;
+        double       r, g, b, a;
         std::string name;
-        return _fetch("r", &r)
+        return _fetch("name", &name)
+                       && _fetch("r", &r)
                        && _fetch("g", &g)
                        && _fetch("b", &b)
                        && _fetch("a", &a)
-                       && _fetch("name", &name)
                    ? std::any(Color(r, g, b, a, name))
                    : std::any();
     }

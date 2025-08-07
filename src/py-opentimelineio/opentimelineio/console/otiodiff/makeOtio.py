@@ -60,12 +60,13 @@ def addMarker(newClip, color, clipData):
     return newClip
 
 
-def makeEmptyTrack():
-    return otio.schema.Track(name="=====================")
+def makeEmptyTrack(trackType):
+    return otio.schema.Track(name="=====================", kind=trackType)
 
 
 def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False):
     # make new blank track with name of kind 
+    # print("make track of kind: ", trackKind)
     track = otio.schema.Track(name=trackName, kind=trackKind)
 
     # sort clips by start time in timeline
@@ -102,31 +103,41 @@ def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False)
 
     return track
 
-def makeTrackB(videoGroup, trackNum, audioGroup=None):
-    tAddV = makeTrack("added", "Video", videoGroup.add, "GREEN")
-    tEditedV = makeTrack("edited", "Video", videoGroup.edit, "ORANGE", markersOn=True)
-    tSameV = makeTrack("same", "Video", videoGroup.same)
+def makeTrackB(clipGroup, trackNum, trackKind):
+    tAddV = makeTrack("added", trackKind, clipGroup.add, "GREEN")
+    tEditedV = makeTrack("edited", trackKind, clipGroup.edit, "ORANGE", markersOn=True)
+    tSameV = makeTrack("same", trackKind, clipGroup.same)
 
-    flat_videoB = otio.core.flatten_stack([tSameV, tEditedV, tAddV])
-    flat_videoB.name = str(trackNum) + "Video B"
+    flatB = otio.core.flatten_stack([tSameV, tEditedV, tAddV])
+    if trackKind == "Video":
+        flatB.name = "Video B" + str(trackNum)
+    elif trackKind == "Audio":
+        flatB.name = "Audio B" + str(trackNum)
 
-    return flat_videoB
+    flatB.kind = trackKind
 
-def makeTrackA(videoGroup, trackNum, audioGroup=None):
-    tSameV = makeTrack("same", "Video", videoGroup.same)
+    return flatB
+
+def makeTrackA(clipGroup, trackNum, trackKind):
+    tSameV = makeTrack("same", trackKind, clipGroup.same)
     # grab the original pair from all the edit clipDatas
     
     actualEdited = []
-    for e in videoGroup.edit:
+    for e in clipGroup.edit:
         actualEdited.append(e.pair)
-    tEditedV = makeTrack("edited", "Video", actualEdited, "ORANGE")
+    tEditedV = makeTrack("edited", trackKind, actualEdited, "ORANGE")
 
-    tDelV = makeTrack("deleted", "Video", videoGroup.delete, "PINK")
+    tDelV = makeTrack("deleted", trackKind, clipGroup.delete, "PINK")
 
-    flat_videoA = otio.core.flatten_stack([tSameV, tEditedV, tDelV])
-    flat_videoA.name = str(trackNum) + "Video A"
+    flatA = otio.core.flatten_stack([tSameV, tEditedV, tDelV])
+    if trackKind == "Video":
+        flatA.name = "Video A" + str(trackNum)
+    elif trackKind == "Audio":
+        flatA.name = "Audio A" + str(trackNum)
+    
+    flatA.kind = trackKind
 
-    return flat_videoA
+    return flatA
 
 def makeTimelineOfType(tlType, trackA, trackB, videoGroup, audioGroup=None):
     newTl = None

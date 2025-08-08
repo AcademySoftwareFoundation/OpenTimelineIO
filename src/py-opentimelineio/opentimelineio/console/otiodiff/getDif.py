@@ -15,6 +15,7 @@ def main(tlA, tlB):
     hasVideo = False
     hasAudio = False
 
+    # check input timelines for video and audio tracks
     if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
         hasVideo = True
     else:
@@ -25,43 +26,27 @@ def main(tlA, tlB):
     else:
         print("no audio tracks")
 
-
     outputTl = None
 
+    # process video tracks, audio tracks, or both
     if hasVideo and hasAudio:
         videoTl = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
         outputTl = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        # combine
         for t in videoTl.tracks:
             outputTl.tracks.append(copy.deepcopy(t))
-        # combine
+    
     elif hasVideo:
         outputTl = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
 
     elif hasAudio:
         outputTl = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
 
-    
-
-    # videoTl = processAllTracks(tlA, tlB, "video", displayMode)
-    # videoTl = processAllTracksAB(tlA, tlB)
-
-    # # audio only
-    # audioTl = processAllTracks(tlA, tlB, "audio")
-
-    # # both
-    # allTl = processAllTracks(tlA, tlB, "all")
-    # setDisplay(args.display.lower())
-
-    origClipCount = 0
-    for t in tlA.video_tracks():
-        origClipCount += len(t.find_clips())
-
-    for t in tlB.video_tracks():
-        origClipCount += len(t.find_clips())
+    # Debug
+    origClipCount = len(tlA.find_clips()) + len(tlB.find_clips())
 
     print(origClipCount)
     print(len(outputTl.find_clips()))
-    # assert(len(tlA.find_clips()) + len(tlB.find_clips()) == len(videoTl.find_clips())), "Clip count doesn't match across two timelines"
 
     return outputTl
 
@@ -212,6 +197,15 @@ def getTake(clip):
         take = None 
     return take
 
+def makeClipData(clip):
+    cd = ClipData(clip.name.split(" ")[0],
+                  clip.media_reference,
+                  clip.source_range,
+                  clip.trimmed_range_in_parent(),
+                  clip,
+                  getTake(clip))
+    return cd
+
 # the consolidated version of processVideo and processAudio, meant to replace both
 def compareTracks(trackA, trackB):
     clipDatasA = []
@@ -219,22 +213,12 @@ def compareTracks(trackA, trackB):
 
     for c in trackA.find_clips():
         # put clip info into ClipData
-        cd = ClipData(c.name.split(" ")[0],
-                      c.media_reference,
-                      c.source_range,
-                      c.trimmed_range_in_parent(),
-                      c,
-                      getTake(c))
+        cd = makeClipData(c)
         clipDatasA.append(cd)
     
     for c in trackB.find_clips():
         # put clip info into ClipData
-        cd = ClipData(c.name.split(" ")[0],
-                      c.media_reference,
-                      c.source_range,
-                      c.trimmed_range_in_parent(),
-                      c,
-                      getTake(c))
+        cd = makeClipData(c)
         clipDatasB.append(cd)
 
     (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
@@ -262,10 +246,45 @@ def compareTracks(trackA, trackB):
     # return addV, editV, sameV, deleteV
     return videoGroup
 
+def processDB(clipDB):
+    print("add total: ", len(clipDB["add"]))
+    print("edit total: ", len(clipDB["edit"]))
+    print("same total: ", len(clipDB["same"]))
+    print("delete total: ", len(clipDB["delete"]))
+
+    # use full names to compare
+    # constrain "moved" to be same dep and take too, otherwise
+    # shotA (layout) and shotA (anim) would count as a move and not as add
+    for c in clipDB["add"]:
+        c.name = c.source.name
+    for c in clipDB["delete"]:
+        c.name = c.source.name
+
+    # problem is this one breaks the relats with track
+    newAdd, newEdit, newSame, newDel = compareClips(clipDB["add"], clipDB["delete"])
+    clipDB["newEdit"] = newEdit
+    clipDB["movedTracks"] = newSame
+
+    # good to run make summary here
+    print("comparing all adds with all deletes:", len(newAdd), "e", len(newEdit), "s", len(newSame), "d", len(newDel))
+    for c in newEdit:
+        print(c.name)
+
+    print("sum: ", len(clipDB["add"]) + 2 * len(clipDB["edit"]) + 2 * len(clipDB["same"]) +len(clipDB["delete"]))
+
+    # print all the adds
+    def printAdd():
+        for track in clipDB.keys():
+            print(track, clipDB[track]["add"])
+
+    return clipDB
+
+
 def processTracks(tracksA, tracksB, trackType):
     newTl = otio.schema.Timeline(name="timeline")
     displayA = []
     displayB = []
+    clipDB = {"add": [], "edit": [], "same": [], "delete": []}
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
     # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
@@ -278,6 +297,12 @@ def processTracks(tracksA, tracksB, trackType):
 
         clipGroup = compareTracks(currTrackA, currTrackB)
 
+        clipDB["add"] += clipGroup.add
+        clipDB["edit"] += clipGroup.edit
+        clipDB["same"] += clipGroup.same
+        clipDB["delete"] += clipGroup.delete
+
+        # add to display otio
         trackNum = i + 1
         newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
         displayA.append(newA)       
@@ -295,6 +320,8 @@ def processTracks(tracksA, tracksB, trackType):
                 c = makeOtio.addRavenColor(c, "GREEN")
                 # newMarker = makeOtio.addMarker(c, "GREEN")
                 # c.markers.append(newMarker)
+                cd = makeClipData(c)
+                clipDB["add"].append(cd)
 
             # add to top of track stack
             displayB.append(copy.deepcopy(newTrack))
@@ -308,6 +335,10 @@ def processTracks(tracksA, tracksB, trackType):
                 c = makeOtio.addRavenColor(c, "PINK")
                 # newMarker = makeOtio.addMarker(c, "PINK")
                 # c.markers.append(newMarker)
+
+                cd = makeClipData(c)
+                clipDB["delete"].append(cd)
+
             displayA.append(copy.deepcopy(newTrack))
 
     newTl.tracks.extend(displayA)
@@ -317,91 +348,11 @@ def processTracks(tracksA, tracksB, trackType):
     
     newTl.tracks.extend(displayB)
 
+    clipDB = processDB(clipDB)
+
+
     return newTl
 
-
-def processAllTracksAB(tlA, tlB):
-    # determine which track set is shorter
-
-    hasVideo = False
-    hasAudio = False
-
-    if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
-        hasVideo = True
-    else:
-        print("no video tracks")
-
-    if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
-        hasAudio = True
-    else:
-        print("no audio tracks")
-
-
-    if hasVideo:
-        processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
-
-    if hasAudio:
-        processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
-    
-    
-    tracksA = tlA.video_tracks()
-    tracksB = tlB.video_tracks()
-    newTl = otio.schema.Timeline(name="timeline")
-    displayA = []
-    displayB = []
-
-    
-    shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
-    # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
-
-    # Process Matched Video Tracks
-    # index through all the video tracks of the timeline with less tracks
-    for i in range(0, len(shorterTlTracks)):
-        currTrackA = tracksA[i]
-        currTrackB = tracksB[i]
-
-        videoGroup = compareTracks(currTrackA, currTrackB)
-
-        trackNum = i + 1
-        newA = makeOtio.makeTrackA(videoGroup, trackNum, "Video")
-        displayA.append(newA)       
-
-        newB = makeOtio.makeTrackB(videoGroup, trackNum, "Video")
-        displayB.append(newB)
-
-    if shorterTlTracks == tracksA:
-        # tlA is shorter so tlB has added tracks
-        for i in range(len(shorterTlTracks), len(tracksB)):
-            newTrack = tracksB[i]
-            for c in newTrack.find_clips():
-                c = makeOtio.addRavenColor(c, "GREEN")
-                # newMarker = makeOtio.addMarker(c, "GREEN")
-                # c.markers.append(newMarker)
-
-            # add to top of track stack
-            displayB.append(copy.deepcopy(newTrack))
-            # print("added unmatched track", len(newTl.tracks))
-    else:
-        for i in range(len(shorterTlTracks), len(tracksA)):
-            # color clips
-            newTrack = tracksA[i]
-            for c in newTrack.find_clips():
-                c = makeOtio.addRavenColor(c, "PINK")
-                # newMarker = makeOtio.addMarker(c, "PINK")
-                # c.markers.append(newMarker)
-            displayA.append(copy.deepcopy(newTrack))
-
-    newTl.tracks.extend(displayA)
-
-    newEmpty = makeOtio.makeEmptyTrack()
-    newTl.tracks.append(newEmpty)
-    
-    newTl.tracks.extend(displayB)
-
-    return newTl
-    # =================================================================================
-
-# TODO: organize the current terminal print-out into a document/txt file
 def makeSummary(tlA, tlB, videoGroup):
     print("===================================")
     print("          Overview Summary        ")
@@ -481,6 +432,88 @@ if __name__ == "__main__":
     Test shot multitrack:
         python ./src/getDif.py /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
 '''
+
+# def processAllTracksAB(tlA, tlB):
+#     # determine which track set is shorter
+
+#     hasVideo = False
+#     hasAudio = False
+
+#     if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
+#         hasVideo = True
+#     else:
+#         print("no video tracks")
+
+#     if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
+#         hasAudio = True
+#     else:
+#         print("no audio tracks")
+
+
+#     if hasVideo:
+#         processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+
+#     if hasAudio:
+#         processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+    
+    
+#     tracksA = tlA.video_tracks()
+#     tracksB = tlB.video_tracks()
+#     newTl = otio.schema.Timeline(name="timeline")
+#     displayA = []
+#     displayB = []
+
+    
+#     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
+#     # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+
+#     # Process Matched Video Tracks
+#     # index through all the video tracks of the timeline with less tracks
+#     for i in range(0, len(shorterTlTracks)):
+#         currTrackA = tracksA[i]
+#         currTrackB = tracksB[i]
+
+#         videoGroup = compareTracks(currTrackA, currTrackB)
+
+#         trackNum = i + 1
+#         newA = makeOtio.makeTrackA(videoGroup, trackNum, "Video")
+#         displayA.append(newA)       
+
+#         newB = makeOtio.makeTrackB(videoGroup, trackNum, "Video")
+#         displayB.append(newB)
+
+#     if shorterTlTracks == tracksA:
+#         # tlA is shorter so tlB has added tracks
+#         for i in range(len(shorterTlTracks), len(tracksB)):
+#             newTrack = tracksB[i]
+#             for c in newTrack.find_clips():
+#                 c = makeOtio.addRavenColor(c, "GREEN")
+#                 # newMarker = makeOtio.addMarker(c, "GREEN")
+#                 # c.markers.append(newMarker)
+
+#             # add to top of track stack
+#             displayB.append(copy.deepcopy(newTrack))
+#             # print("added unmatched track", len(newTl.tracks))
+#     else:
+#         for i in range(len(shorterTlTracks), len(tracksA)):
+#             # color clips
+#             newTrack = tracksA[i]
+#             for c in newTrack.find_clips():
+#                 c = makeOtio.addRavenColor(c, "PINK")
+#                 # newMarker = makeOtio.addMarker(c, "PINK")
+#                 # c.markers.append(newMarker)
+#             displayA.append(copy.deepcopy(newTrack))
+
+#     newTl.tracks.extend(displayA)
+
+#     newEmpty = makeOtio.makeEmptyTrack()
+#     newTl.tracks.append(newEmpty)
+    
+#     newTl.tracks.extend(displayB)
+
+#     return newTl
+#     # =================================================================================
+
 
 # def processAllTracks(tlA, tlB, trackType, displayMode):
 #     # determine which track set is shorter

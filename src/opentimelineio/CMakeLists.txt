@@ -96,7 +96,8 @@ endif()
 
 
 target_link_libraries(opentimelineio 
-    PUBLIC opentime Imath::Imath)
+    PUBLIC opentime Imath::Imath
+    PRIVATE MINIZIP::minizip)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"

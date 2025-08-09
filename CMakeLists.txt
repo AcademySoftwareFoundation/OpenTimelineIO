@@ -28,11 +28,11 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 # Installation options
 option(OTIO_CXX_INSTALL               "Install the C++ bindings" ON)
 option(OTIO_PYTHON_INSTALL            "Install the Python bindings" OFF)
-option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (Imath)" ON)
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
+option(OTIO_FIND_MINIZIP_NG           "Find minizip-ng using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -148,12 +148,6 @@ set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 if(OTIO_CXX_INSTALL)
     message(STATUS "Installing C++ bindings to: ${OTIO_RESOLVED_CXX_INSTALL_DIR}")
     message(STATUS "Installing C++ dynamic libraries to: ${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
-
-    if(OTIO_DEPENDENCIES_INSTALL)
-        message(STATUS "  Installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=ON)")
-    else()
-        message(STATUS "  Not installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
-    endif()
 else()
     message(STATUS "Install C++ bindings: OFF")
 endif()
@@ -261,6 +255,16 @@ if(OTIO_FIND_RAPIDJSON)
     endif()
 else()
     message(STATUS "Using src/deps/rapidjson by default")
+endif()
+
+#----- minizip-ng
+if(OTIO_FIND_MINIZIP_NG)
+    find_package(minizip-ng CONFIG REQUIRED)
+    if (minizip-ng_FOUND)
+        message(STATUS "Found minizip-ng at ${minizip-ng_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/minizip-ng by default")
 endif()
 
 # set up the internally hosted dependencies

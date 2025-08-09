@@ -134,7 +134,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         tempdir = tempfile.mkdtemp()
-        result = otio.adapters.read_from_file(
+        otio.adapters.read_from_file(
             tmp_path,
             extract_to_directory=os.path.join(tempdir, "extracted"),
         )

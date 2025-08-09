@@ -3,5 +3,6 @@
 include(CMakeFindDependencyMacro)
 find_dependency(OpenTime)
 find_dependency(Imath)
+find_dependency(minizip)
 
 include("${CMAKE_CURRENT_LIST_DIR}/OpenTimelineIOTargets.cmake")

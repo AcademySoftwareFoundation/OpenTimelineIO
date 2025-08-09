@@ -30,6 +30,7 @@ endif()
 
 if(NOT OTIO_FIND_IMATH)
     set(BUILD_SHARED_LIBS OFF)
+    add_subdirectory(Imath)
 endif()
 
 if(NOT OTIO_FIND_MINIZIP_NG)

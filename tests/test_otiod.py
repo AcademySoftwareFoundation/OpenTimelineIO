@@ -51,7 +51,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         track.append(cl1)
         self.tl = otio.schema.Timeline("test_round_trip", tracks=[track])
-    
+
     def test_round_trip(self):
 
         with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:
@@ -95,7 +95,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
     def test_round_trip_absolute_paths(self):
- 
+
         with tempfile.NamedTemporaryFile(suffix=".otiod") as bogusfile:
             tmp_path = bogusfile.name
         otio.adapters.write_to_file(self.tl, tmp_path)

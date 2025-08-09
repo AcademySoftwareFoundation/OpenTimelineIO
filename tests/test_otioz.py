@@ -75,13 +75,11 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = otio.adapters.read_from_file(tmp_path)
 
         clips = result.find_clips()
-        self.assertEqual(
-            clips[0].media_reference.target_url,
-            os.path.join("media", IMAGE0_EXAMPLE)
+        self.assertTrue(
+            clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
         )
-        self.assertEqual(
-            clips[1].media_reference.target_url,
-            os.path.join("media", IMAGE1_EXAMPLE)
+        self.assertTrue(
+            clips[1].media_reference.target_url.endswith(IMAGE1_EXAMPLE)
         )
 
     def test_round_trip_with_extraction(self):

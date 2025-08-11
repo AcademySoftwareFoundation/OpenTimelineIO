@@ -167,6 +167,7 @@ def compareClips(clipDatasA, clipDatasB):
         else:
             isSame = cB.checkSame(namesA[cB.name])
             if(isSame):
+                cB.pair = namesA[cB.name]
                 unchanged.append(cB)
             else:
                 isEdited = cB.checkEdited(namesA[cB.name])
@@ -197,28 +198,29 @@ def getTake(clip):
         take = None 
     return take
 
-def makeClipData(clip):
+def makeClipData(clip, trackNum):
     cd = ClipData(clip.name.split(" ")[0],
                   clip.media_reference,
                   clip.source_range,
                   clip.trimmed_range_in_parent(),
+                  trackNum,
                   clip,
                   getTake(clip))
     return cd
 
 # the consolidated version of processVideo and processAudio, meant to replace both
-def compareTracks(trackA, trackB):
+def compareTracks(trackA, trackB, trackNum):
     clipDatasA = []
     clipDatasB = []
 
     for c in trackA.find_clips():
         # put clip info into ClipData
-        cd = makeClipData(c)
+        cd = makeClipData(c, trackNum)
         clipDatasA.append(cd)
     
     for c in trackB.find_clips():
         # put clip info into ClipData
-        cd = makeClipData(c)
+        cd = makeClipData(c, trackNum)
         clipDatasB.append(cd)
 
     (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
@@ -243,48 +245,116 @@ def compareTracks(trackA, trackB):
 
     makeSummary(trackA, trackB, videoGroup)
 
-    # return addV, editV, sameV, deleteV
-    return videoGroup
+    return addV, editV, sameV, deleteV
+    # return videoGroup
+
+def checkMoved(allDel, allAdd):
+    # ones found as same = moved
+    # ones found as edited = moved and edited
+
+    # wanted to compare full names to account for dif dep/take
+    for c in allDel:
+        c.name = c.source.name
+    for c in allAdd:
+        c.name = c.source.name
+
+    newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd)
+    for i in moved:           
+        i.note = "Moved from track: " + str(i.pair.track_num)
+        # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
+    
+    for i in moveEdit:
+        i.note += " and moved from track " + str(i.pair.track_num)
+        # print(i.name, i.note)
+
+    return newAdd, moveEdit, moved, newDel
+
 
 def processDB(clipDB):
-    print("add total: ", len(clipDB["add"]))
-    print("edit total: ", len(clipDB["edit"]))
-    print("same total: ", len(clipDB["same"]))
-    print("delete total: ", len(clipDB["delete"]))
+    allAdd = []
+    allEdit = []
+    allSame = []
+    allDel = []
 
-    # use full names to compare
-    # constrain "moved" to be same dep and take too, otherwise
-    # shotA (layout) and shotA (anim) would count as a move and not as add
-    for c in clipDB["add"]:
-        c.name = c.source.name
-    for c in clipDB["delete"]:
-        c.name = c.source.name
+    for track in clipDB.keys():
+        clipGroup = clipDB[track]
+        add = clipDB[track]
+        # print(clipDB[track]["add"])
+        allAdd.extend(clipGroup["add"])
+        allDel.extend(clipGroup["delete"])
+        allSame.extend(clipGroup["same"])
+        allEdit.extend(clipGroup["edit"])
 
-    # problem is this one breaks the relats with track
-    newAdd, newEdit, newSame, newDel = compareClips(clipDB["add"], clipDB["delete"])
-    clipDB["newEdit"] = newEdit
-    clipDB["movedTracks"] = newSame
+        clipGroup["moved"] = []
 
-    # good to run make summary here
-    print("comparing all adds with all deletes:", len(newAdd), "e", len(newEdit), "s", len(newSame), "d", len(newDel))
-    for c in newEdit:
-        print(c.name)
+    add, moveEdit, moved, delete = checkMoved(allDel, allAdd)
 
-    print("sum: ", len(clipDB["add"]) + 2 * len(clipDB["edit"]) + 2 * len(clipDB["same"]) +len(clipDB["delete"]))
+    # currently has redundancy where moved clips aren't deleted from add
+    for cd in moved:
+        # clipDB[cd.track_num]["add"].remove(cd)
+        # clipDB[cd.track_num]["delete"].remove(cd)
+        clipDB[cd.track_num]["moved"].append(cd)
+        # clipDB[cd.pair.track_num]["moved"].append(cd.pair)
+    
+    return clipDB
+
+def newMakeOtio(clipDB, trackType):
+    displayA = []
+    displayB = []
+    for trackNum in clipDB.keys():
+        SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete', 'move'])
+        clipGroup = SortedClipDatas(clipDB[trackNum]["add"], clipDB[trackNum]["edit"], clipDB[trackNum]["same"], clipDB[trackNum]["delete"], clipDB[trackNum]["moved"])
+
+        newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
+        displayA.append(newA)       
+
+        newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
+        displayB.append(newB)
+
+    return displayA, displayB
+
+    # add note moved from track# and moved to track#
+
+
+    # print("add total: ", len(clipDB["add"]))
+    # print("edit total: ", len(clipDB["edit"]))
+    # print("same total: ", len(clipDB["same"]))
+    # print("delete total: ", len(clipDB["delete"]))
+
+    # # use full names to compare
+    # # constrain "moved" to be same dep and take too, otherwise
+    # # shotA (layout) and shotA (anim) would count as a move and not as add
+    # for c in clipDB["add"]:
+    #     c.name = c.source.name
+    # for c in clipDB["delete"]:
+    #     c.name = c.source.name
+
+    # # problem is this one breaks the relats with track
+    # newAdd, newEdit, newSame, newDel = compareClips(clipDB["add"], clipDB["delete"])
+    # clipDB["newEdit"] = newEdit
+    # clipDB["movedTracks"] = newSame
+
+    # # good to run make summary here
+    # print("comparing all adds with all deletes:", len(newAdd), "e", len(newEdit), "s", len(newSame), "d", len(newDel))
+    # for c in newEdit:
+    #     print(c.name)
+
+    # print("sum: ", len(clipDB["add"]) + 2 * len(clipDB["edit"]) + 2 * len(clipDB["same"]) +len(clipDB["delete"]))
 
     # print all the adds
-    def printAdd():
-        for track in clipDB.keys():
-            print(track, clipDB[track]["add"])
+    # def printAdd():
+    #     for track in clipDB.keys():
+    #         print(track, clipDB[track]["add"])
 
-    return clipDB
+    # return clipDB
 
 
 def processTracks(tracksA, tracksB, trackType):
     newTl = otio.schema.Timeline(name="timeline")
     displayA = []
     displayB = []
-    clipDB = {"add": [], "edit": [], "same": [], "delete": []}
+    clipDB = {}
+    # clipDB = {"add": [], "edit": [], "same": [], "delete": []}
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
     # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
@@ -294,52 +364,66 @@ def processTracks(tracksA, tracksB, trackType):
     for i in range(0, len(shorterTlTracks)):
         currTrackA = tracksA[i]
         currTrackB = tracksB[i]
+        trackNum = i + 1
 
-        clipGroup = compareTracks(currTrackA, currTrackB)
 
-        clipDB["add"] += clipGroup.add
-        clipDB["edit"] += clipGroup.edit
-        clipDB["same"] += clipGroup.same
-        clipDB["delete"] += clipGroup.delete
+        # clipGroup = compareTracks(currTrackA, currTrackB, trackNum)
+        add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
+        # print(add)
+
+        # newDict = {"add": add, "edit": edit, "same": same, "delete": delete}
+        # clipDB[trackNum] = newDict
+        clipDB[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
+        print("here", clipDB[trackNum]["add"][0].name)
+
+        # clipDB["add"] += clipGroup.add
+        # clipDB["edit"] += clipGroup.edit
+        # clipDB["same"] += clipGroup.same
+        # clipDB["delete"] += clipGroup.delete
 
         # add to display otio
-        trackNum = i + 1
-        newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
-        displayA.append(newA)       
+        # newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
+        # displayA.append(newA)       
 
-        newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
-        displayB.append(newB)
+        # newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
+        # displayB.append(newB)
 
-    # Process Unmatched Tracks
-    if shorterTlTracks == tracksA:
-        # tlA is shorter so tlB has added tracks
-        for i in range(len(shorterTlTracks), len(tracksB)):
-            newTrack = tracksB[i]
-            newTrack.name = trackType + " B" + str(i + 1)
-            for c in newTrack.find_clips():
-                c = makeOtio.addRavenColor(c, "GREEN")
-                # newMarker = makeOtio.addMarker(c, "GREEN")
-                # c.markers.append(newMarker)
-                cd = makeClipData(c)
-                clipDB["add"].append(cd)
+    # # Process Unmatched Tracks
+    # if shorterTlTracks == tracksA:
+    #     # tlA is shorter so tlB has added tracks
+    #     for i in range(len(shorterTlTracks), len(tracksB)):
+    #         newTrack = tracksB[i]
+    #         trackNum = i + 1
+    #         newTrack.name = trackType + " B" + str(trackNum)
+    #         for c in newTrack.find_clips():
+    #             c = makeOtio.addRavenColor(c, "GREEN")
+    #             # newMarker = makeOtio.addMarker(c, "GREEN")
+    #             # c.markers.append(newMarker)
 
-            # add to top of track stack
-            displayB.append(copy.deepcopy(newTrack))
-            # print("added unmatched track", len(newTl.tracks))
-    else:
-        for i in range(len(shorterTlTracks), len(tracksA)):
-            # color clips
-            newTrack = tracksA[i]
-            newTrack.name = trackType + " A" + str(i + 1)
-            for c in newTrack.find_clips():
-                c = makeOtio.addRavenColor(c, "PINK")
-                # newMarker = makeOtio.addMarker(c, "PINK")
-                # c.markers.append(newMarker)
+    #             # cd = makeClipData(c, trackNum)
+    #             # clipDB[trackNum].append(cd)
 
-                cd = makeClipData(c)
-                clipDB["delete"].append(cd)
+    #         # add to top of track stack
+    #         displayB.append(copy.deepcopy(newTrack))
+    #         # print("added unmatched track", len(newTl.tracks))
+    # else:
+    #     for i in range(len(shorterTlTracks), len(tracksA)):
+    #         # color clips
+    #         newTrack = tracksA[i]
+    #         trackNum = i + 1
+    #         newTrack.name = trackType + " A" + str(trackNum)
+    #         for c in newTrack.find_clips():
+    #             c = makeOtio.addRavenColor(c, "PINK")
+    #             # newMarker = makeOtio.addMarker(c, "PINK")
+    #             # c.markers.append(newMarker)
 
-            displayA.append(copy.deepcopy(newTrack))
+    #             # cd = makeClipData(c, trackNum)
+    #             # clipDB[trackNum].append(cd)
+
+    #         displayA.append(copy.deepcopy(newTrack))
+
+    clipDB = processDB(clipDB)
+    displayA, displayB = newMakeOtio(clipDB, trackType)
 
     newTl.tracks.extend(displayA)
 
@@ -347,9 +431,6 @@ def processTracks(tracksA, tracksB, trackType):
     newTl.tracks.append(newEmpty)
     
     newTl.tracks.extend(displayB)
-
-    clipDB = processDB(clipDB)
-
 
     return newTl
 

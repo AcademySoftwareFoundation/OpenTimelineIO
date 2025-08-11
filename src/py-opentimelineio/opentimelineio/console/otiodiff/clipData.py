@@ -9,12 +9,14 @@ class ClipData:
     note = ""
     source = otio.schema.Clip()
     pair = None
+    track_num = None
 
-    def __init__(self, name, media_ref, source_range, timeline_range, source, take=None, note=None):
+    def __init__(self, name, media_ref, source_range, timeline_range, track_num, source, take=None, note=None):
         self.name = name
         self.media_ref = media_ref
         self.source_range = source_range
         self.timeline_range = timeline_range
+        self.track_num = track_num
         self.source = source
         self.take = take
         self.note = note

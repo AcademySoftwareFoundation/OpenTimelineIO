@@ -47,7 +47,7 @@ def addMarker(newClip, color, clipData):
     newMarker.color = color
 
     if isinstance(clipData, ClipData) and clipData.note is not None:
-        print("edit note added")
+        # print("edit note added")
         newMarker.name = clipData.note
 
     if(color == "GREEN"):
@@ -107,8 +107,9 @@ def makeTrackB(clipGroup, trackNum, trackKind):
     tAddV = makeTrack("added", trackKind, clipGroup.add, "GREEN")
     tEditedV = makeTrack("edited", trackKind, clipGroup.edit, "ORANGE", markersOn=True)
     tSameV = makeTrack("same", trackKind, clipGroup.same)
+    tMovedV = makeTrack("moved", trackKind, clipGroup.move, "PURPLE", markersOn=True)
 
-    flatB = otio.core.flatten_stack([tSameV, tEditedV, tAddV])
+    flatB = otio.core.flatten_stack([tSameV, tEditedV, tAddV, tMovedV])
     if trackKind == "Video":
         flatB.name = "Video B" + str(trackNum)
     elif trackKind == "Audio":
@@ -122,10 +123,15 @@ def makeTrackA(clipGroup, trackNum, trackKind):
     tSameV = makeTrack("same", trackKind, clipGroup.same)
     # grab the original pair from all the edit clipDatas
     
-    actualEdited = []
+    prevEdited = []
+    prevMoved = []
     for e in clipGroup.edit:
-        actualEdited.append(e.pair)
-    tEditedV = makeTrack("edited", trackKind, actualEdited, "ORANGE")
+        prevEdited.append(e.pair)
+    tEditedV = makeTrack("edited", trackKind, prevEdited, "ORANGE")
+
+    for m in clipGroup.move:
+        prevMoved.append(m.pair)
+    tMovedV = makeTrack("moved", trackKind, prevMoved, "PURPLE",  markersOn=True)
 
     tDelV = makeTrack("deleted", trackKind, clipGroup.delete, "PINK")
 

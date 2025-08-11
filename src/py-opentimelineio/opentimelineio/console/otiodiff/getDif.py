@@ -240,10 +240,10 @@ def compareTracks(trackA, trackB, trackNum):
     sameV.extend(sameCloneV)
     deleteV.extend(deleteCloneV)
 
-    SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
-    videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
+    # SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
+    # videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
 
-    makeSummary(trackA, trackB, videoGroup)
+    # makeSummary(trackA, trackB, videoGroup)
 
     return addV, editV, sameV, deleteV
     # return videoGroup
@@ -259,8 +259,9 @@ def checkMoved(allDel, allAdd):
         c.name = c.source.name
 
     newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd)
-    for i in moved:           
-        i.note = "Moved from track: " + str(i.pair.track_num)
+    moved = [clip for clip in moved if clip.track_num != clip.pair.track_num]
+    for clip in moved:
+        clip.note = "Moved from track: " + str(clip.pair.track_num)
         # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
     
     for i in moveEdit:
@@ -278,14 +279,13 @@ def processDB(clipDB):
 
     for track in clipDB.keys():
         clipGroup = clipDB[track]
-        add = clipDB[track]
         # print(clipDB[track]["add"])
         allAdd.extend(clipGroup["add"])
         allDel.extend(clipGroup["delete"])
         allSame.extend(clipGroup["same"])
         allEdit.extend(clipGroup["edit"])
 
-        clipGroup["moved"] = []
+        clipGroup["move"] = []
 
     add, moveEdit, moved, delete = checkMoved(allDel, allAdd)
 
@@ -293,7 +293,7 @@ def processDB(clipDB):
     for cd in moved:
         # clipDB[cd.track_num]["add"].remove(cd)
         # clipDB[cd.track_num]["delete"].remove(cd)
-        clipDB[cd.track_num]["moved"].append(cd)
+        clipDB[cd.track_num]["move"].append(cd)
         # clipDB[cd.pair.track_num]["moved"].append(cd.pair)
     
     return clipDB
@@ -303,7 +303,7 @@ def newMakeOtio(clipDB, trackType):
     displayB = []
     for trackNum in clipDB.keys():
         SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete', 'move'])
-        clipGroup = SortedClipDatas(clipDB[trackNum]["add"], clipDB[trackNum]["edit"], clipDB[trackNum]["same"], clipDB[trackNum]["delete"], clipDB[trackNum]["moved"])
+        clipGroup = SortedClipDatas(clipDB[trackNum]["add"], clipDB[trackNum]["edit"], clipDB[trackNum]["same"], clipDB[trackNum]["delete"], clipDB[trackNum]["move"])
 
         newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
         displayA.append(newA)       
@@ -374,7 +374,7 @@ def processTracks(tracksA, tracksB, trackType):
         # newDict = {"add": add, "edit": edit, "same": same, "delete": delete}
         # clipDB[trackNum] = newDict
         clipDB[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
-        print("here", clipDB[trackNum]["add"][0].name)
+        # print("here", clipDB[trackNum]["add"][0].name)
 
         # clipDB["add"] += clipGroup.add
         # clipDB["edit"] += clipGroup.edit
@@ -423,6 +423,8 @@ def processTracks(tracksA, tracksB, trackType):
     #         displayA.append(copy.deepcopy(newTrack))
 
     clipDB = processDB(clipDB)
+
+    newMakeSummary(clipDB, "perTrack")
     displayA, displayB = newMakeOtio(clipDB, trackType)
 
     newTl.tracks.extend(displayA)
@@ -433,6 +435,43 @@ def processTracks(tracksA, tracksB, trackType):
     newTl.tracks.extend(displayB)
 
     return newTl
+
+def newMakeSummary(clipDB, mode):
+    print("===================================")
+    print("          Overview Summary        ")
+    print("===================================")
+    allAdd = []
+    allEdit = []
+    allSame = []
+    allDel = []
+    allMove = []
+
+    if mode == "summary":
+        for track in clipDB.keys():
+            clipGroup = clipDB[track]
+
+            allAdd.extend(clipGroup["add"])
+            allDel.extend(clipGroup["delete"])
+            allSame.extend(clipGroup["same"])
+            allEdit.extend(clipGroup["edit"])
+            allMove.extend(clipGroup["move"])
+
+        print("total added:", len(allAdd))
+        print("total edited:", len(allEdit))
+        print("total moved:", len(allMove))
+        print("total deleted:", len(allDel))
+
+    if mode == "perTrack":
+        # print by track
+        for track in clipDB.keys():
+            clipGroup = clipDB[track]
+            print("================== Track", track, "==================")
+            for cat in clipGroup.keys():
+                print("")
+                print(cat.upper(), ":", len(clipGroup[cat]))
+                for i in clipGroup[cat]:
+                    print(i.name)
+    print("")
 
 def makeSummary(tlA, tlB, videoGroup):
     print("===================================")

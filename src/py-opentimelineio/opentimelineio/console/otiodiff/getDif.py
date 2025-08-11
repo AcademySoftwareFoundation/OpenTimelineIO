@@ -280,10 +280,10 @@ def processDB(clipDB):
     for track in clipDB.keys():
         clipGroup = clipDB[track]
         # print(clipDB[track]["add"])
-        allAdd.extend(clipGroup["add"])
-        allDel.extend(clipGroup["delete"])
-        allSame.extend(clipGroup["same"])
-        allEdit.extend(clipGroup["edit"])
+        allAdd.extend(clipGroup["add"]) if "add" in clipGroup.keys() else print("no add ")
+        allDel.extend(clipGroup["delete"]) if "delete" in clipGroup.keys() else print("no del")
+        allSame.extend(clipGroup["same"]) if "same" in clipGroup.keys() else print("no same")
+        allEdit.extend(clipGroup["edit"]) if "edit" in clipGroup.keys() else print("no edit")
 
         clipGroup["move"] = []
 
@@ -389,42 +389,50 @@ def processTracks(tracksA, tracksB, trackType):
         # displayB.append(newB)
 
     # # Process Unmatched Tracks
-    # if shorterTlTracks == tracksA:
+    if shorterTlTracks == tracksA:
     #     # tlA is shorter so tlB has added tracks
-    #     for i in range(len(shorterTlTracks), len(tracksB)):
-    #         newTrack = tracksB[i]
-    #         trackNum = i + 1
-    #         newTrack.name = trackType + " B" + str(trackNum)
-    #         for c in newTrack.find_clips():
+        for i in range(len(shorterTlTracks), len(tracksB)):
+            newTrack = tracksB[i]
+            trackNum = i + 1
+            newTrack.name = trackType + " B" + str(trackNum)
+
+            added = []
+            for c in newTrack.find_clips():
     #             c = makeOtio.addRavenColor(c, "GREEN")
     #             # newMarker = makeOtio.addMarker(c, "GREEN")
     #             # c.markers.append(newMarker)
 
-    #             # cd = makeClipData(c, trackNum)
-    #             # clipDB[trackNum].append(cd)
+                cd = makeClipData(c, trackNum)
+                added.append(cd)
 
     #         # add to top of track stack
     #         displayB.append(copy.deepcopy(newTrack))
     #         # print("added unmatched track", len(newTl.tracks))
-    # else:
-    #     for i in range(len(shorterTlTracks), len(tracksA)):
+            
+            clipDB[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
+    else:
+        for i in range(len(shorterTlTracks), len(tracksA)):
     #         # color clips
-    #         newTrack = tracksA[i]
-    #         trackNum = i + 1
-    #         newTrack.name = trackType + " A" + str(trackNum)
-    #         for c in newTrack.find_clips():
+            newTrack = tracksA[i]
+            trackNum = i + 1
+            newTrack.name = trackType + " A" + str(trackNum)
+
+            deleted = []
+            for c in newTrack.find_clips():
     #             c = makeOtio.addRavenColor(c, "PINK")
     #             # newMarker = makeOtio.addMarker(c, "PINK")
     #             # c.markers.append(newMarker)
 
-    #             # cd = makeClipData(c, trackNum)
-    #             # clipDB[trackNum].append(cd)
+                cd = makeClipData(c, trackNum)
+                deleted.append(cd)
 
     #         displayA.append(copy.deepcopy(newTrack))
 
+            clipDB[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}
+
     clipDB = processDB(clipDB)
 
-    newMakeSummary(clipDB, "perTrack")
+    newMakeSummary(clipDB, "summary")
     displayA, displayB = newMakeOtio(clipDB, trackType)
 
     newTl.tracks.extend(displayA)
@@ -450,11 +458,11 @@ def newMakeSummary(clipDB, mode):
         for track in clipDB.keys():
             clipGroup = clipDB[track]
 
-            allAdd.extend(clipGroup["add"])
-            allDel.extend(clipGroup["delete"])
-            allSame.extend(clipGroup["same"])
-            allEdit.extend(clipGroup["edit"])
-            allMove.extend(clipGroup["move"])
+            allAdd.extend(clipGroup["add"]) if "add" in clipGroup.keys() else print("no add")
+            allDel.extend(clipGroup["delete"]) if "delete" in clipGroup.keys() else print("no del")
+            allSame.extend(clipGroup["same"]) if "same" in clipGroup.keys() else print("no same")
+            allEdit.extend(clipGroup["edit"]) if "edit" in clipGroup.keys() else print("no edit")
+            allMove.extend(clipGroup["move"]) if "move" in clipGroup.keys() else print("no move")
 
         print("total added:", len(allAdd))
         print("total edited:", len(allEdit))

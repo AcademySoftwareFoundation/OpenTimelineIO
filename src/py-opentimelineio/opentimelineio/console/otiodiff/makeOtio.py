@@ -119,6 +119,27 @@ def makeTrackB(clipGroup, trackNum, trackKind):
 
     return flatB
 
+def colorMovedA(tl, clipDB):
+    # maybe make an extract all add/edit/move, etc from clipDB
+    movedClips = []
+    for track in clipDB.keys():
+        movedClips.extend(clipDB[track]["move"])
+
+    for m in movedClips:
+        movedA = m.pair
+        track = movedA.track_num
+
+        # find clip in new track that was created
+        currentTrack = tl.tracks[track]
+        clips = currentTrack.find_clips()
+        if movedA.source in clips:
+            print("found corresponding clip")
+        # clipToColor = clips.index(movedA.source)
+
+        # print(clipToColor.name)
+    
+    # tMovedV = makeTrack("moved", trackKind, prevMoved, "PURPLE",  markersOn=True)
+
 def makeTrackA(clipGroup, trackNum, trackKind):
     tSameV = makeTrack("same", trackKind, clipGroup.same)
     # grab the original pair from all the edit clipDatas
@@ -127,11 +148,7 @@ def makeTrackA(clipGroup, trackNum, trackKind):
     prevMoved = []
     for e in clipGroup.edit:
         prevEdited.append(e.pair)
-    tEditedV = makeTrack("edited", trackKind, prevEdited, "ORANGE")
-
-    for m in clipGroup.move:
-        prevMoved.append(m.pair)
-    tMovedV = makeTrack("moved", trackKind, prevMoved, "PURPLE",  markersOn=True)
+    tEditedV = makeTrack("edited", trackKind, prevEdited, "ORANGE") 
 
     tDelV = makeTrack("deleted", trackKind, clipGroup.delete, "PINK")
 

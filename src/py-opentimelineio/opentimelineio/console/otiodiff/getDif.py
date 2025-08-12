@@ -435,18 +435,28 @@ def processTracks(tracksA, tracksB, trackType):
     newMakeSummary(clipDB, "summary")
     displayA, displayB = newMakeOtio(clipDB, trackType)
 
-    newTl.tracks.extend(displayA)
+    if trackType == "Video":
+        newTl.tracks.extend(displayA)
 
-    newEmpty = makeOtio.makeEmptyTrack(trackType)
-    newTl.tracks.append(newEmpty)
-    
-    newTl.tracks.extend(displayB)
+        newEmpty = makeOtio.makeEmptyTrack(trackType)
+        newTl.tracks.append(newEmpty)
+        
+        newTl.tracks.extend(displayB)
+    elif trackType == "Audio":
+        newTl.tracks.extend(displayB)
+
+        newEmpty = makeOtio.makeEmptyTrack(trackType)
+        newTl.tracks.append(newEmpty)
+        
+        newTl.tracks.extend(displayA)
+
+    makeOtio.colorMovedA(newTl, clipDB)
 
     return newTl
 
 def newMakeSummary(clipDB, mode):
     print("===================================")
-    print("          Overview Summary        ")
+    print("          Overview Summary         ")
     print("===================================")
     allAdd = []
     allEdit = []

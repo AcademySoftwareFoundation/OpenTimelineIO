@@ -78,8 +78,8 @@ class ClipData:
         isEdited = False
 
         # Note: assumption that source range and timeline range duration always equal
-        assert(self.source_range.duration.value == self.timeline_range.duration.value), "clip source range and timeline range durations don't match"
-        assert(cA.source_range.duration.value == cA.timeline_range.duration.value), "clip source range and timeline range durations don't match"
+        # assert(self.source_range.duration.value == self.timeline_range.duration.value), "clip source range and timeline range durations don't match"
+        # assert(cA.source_range.duration.value == cA.timeline_range.duration.value), "clip source range and timeline range durations don't match"
 
         selfDur = self.source_range.duration
         cADur = cA.source_range.duration

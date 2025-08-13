@@ -15,8 +15,9 @@ Clip::Clip(
     AnyDictionary const&            metadata,
     std::vector<Effect*> const&     effects,
     std::vector<Marker*> const&     markers,
-    std::string const&              active_media_reference_key)
-    : Parent{ name, source_range, metadata, effects, markers }
+    std::string const&              active_media_reference_key,
+    std::optional<Color> const&     color)
+    : Parent{ name, source_range, metadata, effects, markers, /*enabled*/ true, color }
     , _active_media_reference_key(active_media_reference_key)
 {
     set_media_reference(media_reference);

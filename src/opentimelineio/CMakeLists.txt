@@ -4,6 +4,7 @@
 set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
+    color.h
     clip.h
     composable.h
     composition.h
@@ -37,7 +38,8 @@ set(OPENTIMELINEIO_HEADER_FILES
     unknownSchema.h
     vectorIndexing.h)
 
-add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
+add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    color.cpp
     clip.cpp
     composable.cpp
     composition.cpp

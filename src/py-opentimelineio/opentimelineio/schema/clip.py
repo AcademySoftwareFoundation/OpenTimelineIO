@@ -24,6 +24,7 @@ def __repr__(self):
         'name={}, '
         'media_reference={}, '
         'source_range={}, '
+        'color={}, '
         'metadata={}, '
         'effects={}, '
         'markers={}'
@@ -31,6 +32,7 @@ def __repr__(self):
             repr(self.name),
             repr(self.media_reference),
             repr(self.source_range),
+            repr(self.color),
             repr(self.metadata),
             repr(self.effects),
             repr(self.markers)

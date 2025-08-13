@@ -8,6 +8,7 @@
 #include "opentime/timeTransform.h"
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/anyVector.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
@@ -125,6 +126,7 @@ public:
         bool read(std::string const& key, RationalTime* dest);
         bool read(std::string const& key, TimeRange* dest);
         bool read(std::string const& key, class TimeTransform* dest);
+        bool read(std::string const& key, Color* dest);
         bool read(std::string const& key, IMATH_NAMESPACE::V2d* value);
         bool read(std::string const& key, IMATH_NAMESPACE::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
@@ -137,6 +139,7 @@ public:
         bool read(std::string const& key, std::optional<RationalTime>* dest);
         bool read(std::string const& key, std::optional<TimeRange>* dest);
         bool read(std::string const& key, std::optional<TimeTransform>* dest);
+        bool read(std::string const& key, std::optional<Color>* dest);
         bool read(
             std::string const&                     key,
             std::optional<IMATH_NAMESPACE::Box2d>* value);
@@ -449,12 +452,14 @@ public:
         void write(std::string const& key, TimeRange value);
         void write(std::string const& key, IMATH_NAMESPACE::V2d value);
         void write(std::string const& key, IMATH_NAMESPACE::Box2d value);
+        void write(std::string const& key, std::optional<Color> value);
         void write(std::string const& key, std::optional<RationalTime> value);
         void write(std::string const& key, std::optional<TimeRange> value);
         void write(
             std::string const&                    key,
             std::optional<IMATH_NAMESPACE::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
+        void write(std::string const& key, Color value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)
         {

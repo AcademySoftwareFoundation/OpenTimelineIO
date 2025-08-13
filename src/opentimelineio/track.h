@@ -47,7 +47,8 @@ public:
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
-        AnyDictionary const&            metadata     = AnyDictionary());
+        AnyDictionary const&            metadata     = AnyDictionary(),
+        std::optional<Color> const&     color        = std::nullopt);
 
     /// @brief Return this kind of track.
     std::string kind() const noexcept { return _kind; }

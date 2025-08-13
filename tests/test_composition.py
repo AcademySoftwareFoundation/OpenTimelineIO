@@ -432,6 +432,7 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name=" + repr(st.name) + ", " +
             "children=" + repr(list(st)) + ", " +
             "source_range=" + repr(st.source_range) + ", " +
+            "color=None, "
             "metadata=" + repr(st.metadata) +
             ")"
         )
@@ -943,6 +944,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name=" + repr(sq.name) + ", " +
             "children=" + repr(list(sq)) + ", " +
             "source_range=" + repr(sq.source_range) + ", " +
+            "color=None, " +
             "metadata=" + repr(sq.metadata) +
             ")"
         )

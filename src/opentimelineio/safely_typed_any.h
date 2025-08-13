@@ -22,6 +22,7 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
@@ -38,6 +39,7 @@ std::any create_safely_typed_any(double&&);
 std::any create_safely_typed_any(std::string&&);
 std::any create_safely_typed_any(RationalTime&&);
 std::any create_safely_typed_any(TimeRange&&);
+std::any create_safely_typed_any(Color&&);
 std::any create_safely_typed_any(TimeTransform&&);
 std::any create_safely_typed_any(IMATH_NAMESPACE::V2d&&);
 std::any create_safely_typed_any(IMATH_NAMESPACE::Box2d&&);
@@ -59,6 +61,7 @@ std::string            safely_cast_string_any(std::any const& a);
 RationalTime           safely_cast_rational_time_any(std::any const& a);
 TimeRange              safely_cast_time_range_any(std::any const& a);
 TimeTransform          safely_cast_time_transform_any(std::any const& a);
+Color                  safely_cast_color_any(std::any const& a);
 IMATH_NAMESPACE::V2d   safely_cast_point_any(std::any const& a);
 IMATH_NAMESPACE::Box2d safely_cast_box_any(std::any const& a);
 

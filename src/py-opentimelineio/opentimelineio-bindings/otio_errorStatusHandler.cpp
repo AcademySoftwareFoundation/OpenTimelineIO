@@ -27,6 +27,18 @@ struct _CannotComputeAvailableRangeException : public OTIOException {
     using  OTIOException::OTIOException;
 };
 
+struct _BundleSizeException : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
+struct _BundleWriteException : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
+struct _BundleReadException : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
 ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
     if (!is_error(error_status)) {
         return;
@@ -69,6 +81,12 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
         throw py::value_error("The media references do not contain the active key");
     case ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY:
         throw py::value_error("The media references contain an empty key");
+    case ErrorStatus::BUNDLE_SIZE_ERROR:
+        throw _BundleSizeException(full_details());
+    case ErrorStatus::BUNDLE_WRITE_ERROR:
+        throw _BundleWriteException(full_details());
+    case ErrorStatus::BUNDLE_READ_ERROR:
+        throw _BundleReadException(full_details());
     default:
         throw py::value_error(full_details());
     }

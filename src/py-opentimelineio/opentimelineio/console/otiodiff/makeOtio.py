@@ -21,7 +21,7 @@ def toTimeline(tracks, timeline=None):
 def toOtio(file):
     otio.adapters.write_to_file(file, "display.otio")
 
-# input is list of clipDatas
+# input is list of clipDatas, sorts them by start time on the timeline
 def sortClips(trackClips):
     # sort by clip start time in timeline
     return sorted(trackClips, key=lambda clipData: clipData.timeline_range.start_time.value)
@@ -59,10 +59,9 @@ def addMarker(newClip, color, clipData):
 
     return newClip
 
-
+# make new blank track that acts as a separator between the A and B sections
 def makeEmptyTrack(trackType):
     return otio.schema.Track(name="=====================", kind=trackType)
-
 
 def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False):
     # make new blank track with name of kind 
@@ -103,6 +102,7 @@ def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False)
 
     return track
 
+# make tracks from timeline B
 def makeTrackB(clipGroup, trackNum, trackKind):
     tAddV = makeTrack("added", trackKind, clipGroup.add, "GREEN")
     tEditedV = makeTrack("edited", trackKind, clipGroup.edit, "ORANGE", markersOn=True)
@@ -119,27 +119,7 @@ def makeTrackB(clipGroup, trackNum, trackKind):
 
     return flatB
 
-def colorMovedA(tl, clipDB):
-    # maybe make an extract all add/edit/move, etc from clipDB
-    movedClips = []
-    for track in clipDB.keys():
-        movedClips.extend(clipDB[track]["move"])
-
-    for m in movedClips:
-        movedA = m.pair
-        track = movedA.track_num
-
-        # find clip in new track that was created
-        currentTrack = tl.tracks[track]
-        clips = currentTrack.find_clips()
-        if movedA.source in clips:
-            print("found corresponding clip")
-        # clipToColor = clips.index(movedA.source)
-
-        # print(clipToColor.name)
-    
-    # tMovedV = makeTrack("moved", trackKind, prevMoved, "PURPLE",  markersOn=True)
-
+# make tracks from timeline A
 def makeTrackA(clipGroup, trackNum, trackKind):
     tSameV = makeTrack("same", trackKind, clipGroup.same)
     # grab the original pair from all the edit clipDatas
@@ -161,6 +141,27 @@ def makeTrackA(clipGroup, trackNum, trackKind):
     flatA.kind = trackKind
 
     return flatA
+
+# def colorMovedA(tl, clipDB):
+#     # maybe make an extract all add/edit/move, etc from clipDB
+#     movedClips = []
+#     for track in clipDB.keys():
+#         movedClips.extend(clipDB[track]["move"])
+
+#     for m in movedClips:
+#         movedA = m.pair
+#         track = movedA.track_num
+
+#         # find clip in new track that was created
+#         currentTrack = tl.tracks[track]
+#         clips = currentTrack.find_clips()
+#         if movedA.source in clips:
+#             print("found corresponding clip")
+#         # clipToColor = clips.index(movedA.source)
+
+#         # print(clipToColor.name)
+    
+#     # tMovedV = makeTrack("moved", trackKind, prevMoved, "PURPLE",  markersOn=True)
 
 def makeTimelineOfType(tlType, trackA, trackB, videoGroup, audioGroup=None):
     newTl = None

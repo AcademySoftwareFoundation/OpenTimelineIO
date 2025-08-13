@@ -31,27 +31,27 @@ def main(tlA, tlB):
     outputTl = None
     # process video tracks, audio tracks, or both
     if hasVideo and hasAudio:
-        videoDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
-        audioDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
 
-        makeSummary(videoDB, "Video", "perTrack")
-        makeSummary(audioDB, "Audio", "summary")
+        makeSummary(videoClipDB, "Video", "perTrack")
+        makeSummary(audioClipDB, "Audio", "summary")
 
-        videoTl = makeNewOtio(videoDB, "Video")
-        outputTl = makeNewOtio(audioDB, "Audio")
+        videoTl = makeNewOtio(videoClipDB, "Video")
+        outputTl = makeNewOtio(audioClipDB, "Audio")
         # combine
         for t in videoTl.tracks:
             outputTl.tracks.append(copy.deepcopy(t))
     
     elif hasVideo:
-        videoDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
-        makeSummary(videoDB, "Video", "summary")
-        outputTl = makeNewOtio(videoDB, "Video")
+        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+        makeSummary(videoClipDB, "Video", "summary")
+        outputTl = makeNewOtio(videoClipDB, "Video")
 
     elif hasAudio:
-        audioDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
-        makeSummary(audioDB, "Audio", "summary")
-        outputTl = makeNewOtio(audioDB, "Audio")
+        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        makeSummary(audioClipDB, "Audio", "summary")
+        outputTl = makeNewOtio(audioClipDB, "Audio")
 
     # Debug
     # origClipCount = len(tlA.find_clips()) + len(tlB.find_clips())
@@ -280,7 +280,7 @@ def checkMoved(allDel, allAdd):
 
     return newAdd, moveEdit, moved, newDel
 
-
+# TODO: account for move edit, currently only identifies strictly moved
 def sortMoved(clipDB):
     allAdd = []
     allEdit = []
@@ -290,10 +290,14 @@ def sortMoved(clipDB):
     for track in clipDB.keys():
         clipGroup = clipDB[track]
         # print(clipDB[track]["add"])
-        allAdd.extend(clipGroup["add"]) if "add" in clipGroup.keys() else print("no add ")
-        allDel.extend(clipGroup["delete"]) if "delete" in clipGroup.keys() else print("no del")
-        allSame.extend(clipGroup["same"]) if "same" in clipGroup.keys() else print("no same")
-        allEdit.extend(clipGroup["edit"]) if "edit" in clipGroup.keys() else print("no edit")
+        if "add" in clipGroup.keys():
+            allAdd.extend(clipGroup["add"])
+        if "delete" in clipGroup.keys():
+            allDel.extend(clipGroup["delete"])
+        if "same" in clipGroup.keys():
+            allSame.extend(clipGroup["same"])
+        if "edit" in clipGroup.keys():
+            allEdit.extend(clipGroup["edit"])
 
         clipGroup["move"] = []
 
@@ -312,7 +316,10 @@ def makeNewOtio(clipDB, trackType):
     newTl = otio.schema.Timeline(name="diffed")
     displayA = []
     displayB = []
+
+    # make tracks A and B in output timeline
     for trackNum in clipDB.keys():
+        # use named tuple here since clip categories won't change anymore
         SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete', 'move'])
         clipGroup = SortedClipDatas(clipDB[trackNum]["add"], clipDB[trackNum]["edit"], clipDB[trackNum]["same"], clipDB[trackNum]["delete"], clipDB[trackNum]["move"])
 
@@ -322,6 +329,7 @@ def makeNewOtio(clipDB, trackType):
         newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
         displayB.append(newB)
 
+    # write order to output timeline so that timeline B is on top for both video and audio
     if trackType == "Video":
         newTl.tracks.extend(displayA)
 
@@ -341,11 +349,11 @@ def makeNewOtio(clipDB, trackType):
 
     return newTl
 
-def processTracks(tracksA, tracksB, trackType):
-    displayA = []
-    displayB = []
+def processTracks(tracksA, tracksB):
     clipDB = {}
-    # clipDB = {"add": [], "edit": [], "same": [], "delete": []}
+    # clipDB structure: {{1:{"add": [], "edit": [], "same": [], "delete": []}}
+    # clipDB keys are track numbers, values are dictionaries
+    # per track dictionary keys are clip categories, values are lists of clips of that category
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
     # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
@@ -361,8 +369,6 @@ def processTracks(tracksA, tracksB, trackType):
         add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
         # print(add)
 
-        # newDict = {"add": add, "edit": edit, "same": same, "delete": delete}
-        # clipDB[trackNum] = newDict
         clipDB[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
         # print("here", clipDB[trackNum]["add"][0].name)
 

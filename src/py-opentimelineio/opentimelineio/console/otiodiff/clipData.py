@@ -1,7 +1,11 @@
 import opentimelineio as otio
 
+# clip comparable??? ClipInfo
+# TODO: add fullname, full name = name + take, name is just name, add ex, split on space, b4 is name, after is version
+# TODO: rename take to version?
 class ClipData:
     name = ""
+    # currently not used in comparisons
     take = None
     media_ref = None
     source_range = otio.opentime.TimeRange()
@@ -11,6 +15,10 @@ class ClipData:
     pair = None
     track_num = None
 
+    # TODO: sort so above is compare, bottom is additional compare result info
+
+# TODO: rename source to sourceClip, rename pair to matchedClipData?
+# just pass source clip and track num so construct here
     def __init__(self, name, media_ref, source_range, timeline_range, track_num, source, take=None, note=None):
         self.name = name
         self.media_ref = media_ref
@@ -41,24 +49,24 @@ class ClipData:
     # note: local and source duration should always match, can assume same
     # compare the duration within the timeline for 2 clips
     def sameDuration(self, cA):
-        if(self.timeline_range.duration.value == cA.timeline_range.duration.value):
-            return True
-        else:
-            return False
+        return self.timeline_range.duration.value == cA.timeline_range.duration.value
 
     # compare 2 clips and see if they are the exact same, whether exact or moved along
-    # the timeline
+    # the timeline and also changes note based on edits
     def checkSame(self, cA):
         isSame = False
         # check names are same
-        if(self.sameName(cA)):
+        if self.sameName(cA):
             # check source range is same
+            # TODO: call trimmed range instead of source range
+            # TODO: make test where has null source range -> see things break, then go back and change <- low priority
             if(self.source_range == cA.source_range):
                 # print(self.name, " ", self.timeline_range, " ", cA.timeline_range)
                 # check in same place on timeline
                 if(self.timeline_range == cA.timeline_range):
                     isSame = True
                     # check duration is same but not necessarily in same place on timeline
+                # TODO: change to else? (does the elif always run?)
                 elif(self.sameDuration(cA)):
                     # Note: check in relation to left and right?
                     #       know if moved in seq rather than everything shifted over because of lengthen/shorten of other clips
@@ -104,6 +112,8 @@ class ClipData:
             if(selfDur.value == cADur.value):
                 self.note = "start time changed"
 
+# put note assignment into function, return note?
+# self, other, olderClipData rather than cA
             # clip duration shorter
             elif(selfDur.value < cADur.value):
                 self.note = "trimmed " + deltaFramesStr + " frames"

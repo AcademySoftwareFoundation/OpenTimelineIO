@@ -8,10 +8,13 @@ import opentimelineio as otio
 from .clipData import ClipData
 from . import makeOtio
 
-# set otio version to 0.17
-os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = "OTIO_CORE:0.17.0"
 
+# TODO: rename main?, rename tlA to timelineA
+#currently only handles video and audio tracks
+
+# TODO: constant for video and audio (track.kind.video?)
 def main(tlA, tlB):
+    # TODO: put docstring here, descriptive name, most wordy descrip
     hasVideo = False
     hasAudio = False
 
@@ -19,6 +22,7 @@ def main(tlA, tlB):
     if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
         hasVideo = True
     else:
+        # TODO: put this in summary report
         print("no video tracks")
 
     if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
@@ -30,9 +34,10 @@ def main(tlA, tlB):
 
     outputTl = None
     # process video tracks, audio tracks, or both
+    # TODO: maybe table rather than db
     if hasVideo and hasAudio:
-        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
-        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks())
+        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks())
 
         makeSummary(videoClipDB, "Video", "perTrack")
         makeSummary(audioClipDB, "Audio", "summary")
@@ -44,14 +49,18 @@ def main(tlA, tlB):
             outputTl.tracks.append(copy.deepcopy(t))
     
     elif hasVideo:
-        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks(), "Video")
+        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks())
         makeSummary(videoClipDB, "Video", "summary")
         outputTl = makeNewOtio(videoClipDB, "Video")
 
     elif hasAudio:
-        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks(), "Audio")
+        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks())
         makeSummary(audioClipDB, "Audio", "summary")
         outputTl = makeNewOtio(audioClipDB, "Audio")
+
+    else:
+        # TODO: log no vid/aud or throw
+        pass
 
     # Debug
     # origClipCount = len(tlA.find_clips()) + len(tlB.find_clips())
@@ -176,12 +185,13 @@ def compareClips(clipDatasA, clipDatasB):
         if cB.name not in namesA:
             added.append(cB)
         else:
-            isSame = cB.checkSame(namesA[cB.name])
+            cB.pair = namesA[cB.name]
+            isSame = cB.checkSame(cB.pair)
             if(isSame):
-                cB.pair = namesA[cB.name]
+                # cB.pair = namesA[cB.name]
                 unchanged.append(cB)
             else:
-                isEdited = cB.checkEdited(namesA[cB.name])
+                isEdited = cB.checkEdited(cB.pair)
                 if(isEdited):
                     cB.pair = namesA[cB.name]
                     edited.append(cB)
@@ -198,6 +208,7 @@ def compareClips(clipDatasA, clipDatasB):
         if cA.name not in namesB:
             deleted.append(cA)
 
+# TODO: some can be sets instead of lists
     return added, edited, unchanged, deleted
 
 # clip is an otio Clip
@@ -209,6 +220,8 @@ def getTake(clip):
         take = None 
     return take
 
+# TODO: change name, make comparable rep? clip comparator? 
+# TODO: learn abt magic functions ex __eq__
 def makeClipData(clip, trackNum):
     cd = ClipData(clip.name.split(" ")[0],
                   clip.media_reference,
@@ -262,18 +275,20 @@ def checkMoved(allDel, allAdd):
     # ones found as edited = moved and edited
 
     # wanted to compare full names to account for dif dep/take
-    # otherwise shotA (layout) and shotA (anim) would count as a move and not as add
+    # otherwise shotA (layout123) and shotA (anim123) would count as a move and not as add
+    # TODO: maybe preserve full name and also clip name, ex. id and name
     for c in allDel:
         c.name = c.source.name
     for c in allAdd:
         c.name = c.source.name
 
     newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd)
+    # removes clips that are moved in same track, just keep clips moved between tracks
     moved = [clip for clip in moved if clip.track_num != clip.pair.track_num]
     for clip in moved:
         clip.note = "Moved from track: " + str(clip.pair.track_num)
         # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
-    
+    # TODO: check if empty string or not
     for i in moveEdit:
         i.note += " and moved from track " + str(i.pair.track_num)
         # print(i.name, i.note)
@@ -345,18 +360,28 @@ def makeNewOtio(clipDB, trackType):
         
         newTl.tracks.extend(displayA)
 
-    makeOtio.colorMovedA(newTl, clipDB)
+    # makeOtio.colorMovedA(newTl, clipDB)
 
     return newTl
 
+# TODO: rename to create bucket/cat/db/stuff; categorizeClipsByTracks + comment
+
 def processTracks(tracksA, tracksB):
+    # TODO: add docstring like this for public facing functions, otherwise comment is ok
+    """Return a copy of the input timelines with only tracks that match
+    either the list of names given, or the list of track indexes given."""
     clipDB = {}
-    # clipDB structure: {{1:{"add": [], "edit": [], "same": [], "delete": []}}
+    # READ ME IMPORTANT READ MEEEEEEE clipDB structure: {1:{"add": [], "edit": [], "same": [], "delete": []}
     # clipDB keys are track numbers, values are dictionaries
     # per track dictionary keys are clip categories, values are lists of clips of that category
+
+    # TODO? ^change to class perhaps? low priority
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
     # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+
+    # TODO: compute min of 2, then go through leftover and assign accordingly
+    # maybe compare unmatched against empty track? pad shorter one with empty
 
     # Process Matched Tracks
     # index through all the tracks of the timeline with less tracks
@@ -400,7 +425,7 @@ def processTracks(tracksA, tracksB):
 
             clipDB[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}
 
-
+    # recat added/deleted into moved
     clipDB = sortMoved(clipDB)
 
     # displayA, displayB = makeNewOtio(clipDB, trackType)

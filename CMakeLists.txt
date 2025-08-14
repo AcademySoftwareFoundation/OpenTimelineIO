@@ -192,6 +192,8 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+include(GenerateExportHeader)
+
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested
 #

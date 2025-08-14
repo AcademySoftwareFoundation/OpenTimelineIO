@@ -8,7 +8,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
 
 //! Enum used by 3/4 Point Edit (aka. as fill)
-enum class ReferencePoint
+enum class OPENTIMELINEIO_EXPORT ReferencePoint
 {
     Source,
     Sequence,
@@ -38,7 +38,7 @@ enum class ReferencePoint
 //            
 // If overwrite range starts and ends before A, a gap hole is filled with
 // fill_template.
-void overwrite(
+OPENTIMELINEIO_EXPORT void overwrite(
     Item*            item,
     Composition*     composition,
     TimeRange const& range,
@@ -62,7 +62,7 @@ void overwrite(
 // If A and B's length is L1 and C's length is L2, the end result is L1 + L2.
 // A is split.
 //
-void insert(
+OPENTIMELINEIO_EXPORT void insert(
     Item* const         item,
     Composition*        composition,
     RationalTime const& time,
@@ -88,7 +88,7 @@ void insert(
 // Fill now-"empty" time with gap or template
 // Unless item is meeting a Gap, then, existing Gap's duration will be augmented
 //    
-void trim(
+OPENTIMELINEIO_EXPORT void trim(
     Item*               item,
     RationalTime const& delta_in,
     RationalTime const& delta_out,
@@ -101,7 +101,7 @@ void trim(
 //   ^
 // composition = usually a track item.
 //        time = time to slice at.
-void slice(
+OPENTIMELINEIO_EXPORT void slice(
     Composition*        composition,
     RationalTime const& time,
     bool const          remove_transitions = true,
@@ -119,7 +119,7 @@ void slice(
 // Do not affect item duration.
 // Do not affect surrounding items.
 // Clamp to available_range of media (if available)
-void slip(Item* item, RationalTime const& delta);
+OPENTIMELINEIO_EXPORT void slip(Item* item, RationalTime const& delta);
 
 //
 // Slide an item start_time by + or -, adjusting the previous item's duration.
@@ -133,7 +133,7 @@ void slip(Item* item, RationalTime const& delta);
 //
 // If item is the first clip, it does nothing.
 //
-void slide(Item* item, RationalTime const& delta);
+OPENTIMELINEIO_EXPORT void slide(Item* item, RationalTime const& delta);
 
 //
 // Adjust a source_range without affecting any other items.
@@ -146,7 +146,7 @@ void slide(Item* item, RationalTime const& delta);
 //             will be adjusted by
 // delta_out = RationalTime that the item's
 //             source_range().end_time_exclusive() will be adjusted by
-void ripple(
+OPENTIMELINEIO_EXPORT void ripple(
     Item*               item,
     RationalTime const& delta_in,
     RationalTime const& delta_out,
@@ -168,7 +168,7 @@ void ripple(
 //             will be adjusted by
 // delta_out = RationalTime that the item's
 //             source_range().end_time_exclusive() will be adjusted by
-void roll(
+OPENTIMELINEIO_EXPORT void roll(
     Item*               item,
     RationalTime const& delta_in,
     RationalTime const& delta_out,
@@ -186,7 +186,7 @@ void roll(
 // reference_point = For 4 point editing, the reference point dictates what
 //                   transform to use when running the fill.
 //
-void fill(
+OPENTIMELINEIO_EXPORT void fill(
     Item*                item,
     Composition*         track,
     RationalTime const&  track_time,
@@ -207,7 +207,7 @@ void fill(
 //
 // if fill is not set, A and B become concatenated, with no fill.
 //
-void remove(
+OPENTIMELINEIO_EXPORT void remove(
     Composition*        composition,
     RationalTime const& time,
     bool         const  fill = true,

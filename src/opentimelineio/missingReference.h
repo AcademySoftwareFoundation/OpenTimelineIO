@@ -12,7 +12,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 ///
 /// Note that a missing reference may have useful metadata, even if the
 /// location of the media is not known.
-class MissingReference final : public MediaReference
+class OPENTIMELINEIO_EXPORT MissingReference final : public MediaReference
 {
 public:
     /// @brief This struct provides the MissingReference schema.

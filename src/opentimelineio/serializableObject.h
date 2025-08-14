@@ -25,7 +25,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class CloningEncoder;
 
 /// @brief A serializable object.
-class SerializableObject
+class OPENTIMELINEIO_EXPORT SerializableObject
 {
 public:
     /// @brief This struct provides the SerializableObject schema.

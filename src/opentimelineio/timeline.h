@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A timeline contains a stack of tracks.
-class Timeline : public SerializableObjectWithMetadata
+class OPENTIMELINEIO_EXPORT Timeline : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the Timeline schema.

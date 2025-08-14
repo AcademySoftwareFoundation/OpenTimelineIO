@@ -13,7 +13,7 @@
 namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief This enumeration provides options for drop frame timecode.
-enum IsDropFrameRate : int
+enum OPENTIME_EXPORT IsDropFrameRate : int
 {
     InferFromRate = -1,
     ForceNo       = 0,
@@ -23,7 +23,7 @@ enum IsDropFrameRate : int
 /// @brief Returns the absolute value.
 ///
 /// \todo Document why this function is used instead of "std::fabs()".
-constexpr double
+OPENTIME_EXPORT constexpr double
 fabs(double val) noexcept
 {
     union
@@ -36,7 +36,7 @@ fabs(double val) noexcept
 }
 
 /// @brief This class represents a measure of time defined by a value and rate.
-class RationalTime
+class OPENTIME_EXPORT RationalTime
 {
 public:
     /// @brief Construct a new time with an optional value and rate.

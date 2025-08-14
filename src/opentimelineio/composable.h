@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Composition;
 
 /// @brief An object that can be composed within a Composition (such as a Track or Stack).
-class Composable : public SerializableObjectWithMetadata
+class OPENTIMELINEIO_EXPORT Composable : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the Composable schema.

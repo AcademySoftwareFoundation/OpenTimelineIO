@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A reference to dynamically generated media.
-class GeneratorReference final : public MediaReference
+class OPENTIMELINEIO_EXPORT GeneratorReference final : public MediaReference
 {
 public:
     /// @brief This struct provides the GeneratorReference schema.

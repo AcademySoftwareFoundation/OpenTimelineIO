@@ -17,7 +17,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// * Name prefix: "image."
 /// * Name suffix: ".exr"
 /// * Frame number padded to six zeroes: "000100"
-class ImageSequenceReference final : public MediaReference
+class OPENTIMELINEIO_EXPORT ImageSequenceReference final : public MediaReference
 {
 public:
     /// @brief How to handle missing frames.

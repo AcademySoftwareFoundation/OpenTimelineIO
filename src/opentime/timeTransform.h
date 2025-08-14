@@ -11,7 +11,7 @@
 namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief One-dimensional time transform.
-class TimeTransform
+class OPENTIME_EXPORT TimeTransform
 {
 public:
     /// @brief Construct a new transform with an optional offset, scale, and rate.

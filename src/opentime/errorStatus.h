@@ -3,13 +3,14 @@
 
 #pragma once
 
+#include "opentime/export.h"
 #include "opentime/version.h"
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief This struct represents the return status of a function.
-struct ErrorStatus
+struct OPENTIME_EXPORT ErrorStatus
 {
     /// @brief This enumeration represents the possible outcomes.
     enum Outcome
@@ -51,14 +52,14 @@ struct ErrorStatus
 };
 
 ///! @brief Check whether the given ErrorStatus is an error.
-constexpr bool
+OPENTIME_EXPORT constexpr bool
 is_error(const ErrorStatus& es) noexcept
 {
     return ErrorStatus::Outcome::OK != es.outcome;
 }
 
 ///! @brief Check whether the given ErrorStatus is non-null and an error.
-constexpr bool
+OPENTIME_EXPORT constexpr bool
 is_error(const ErrorStatus* es) noexcept
 {
     return es && ErrorStatus::Outcome::OK != es->outcome;

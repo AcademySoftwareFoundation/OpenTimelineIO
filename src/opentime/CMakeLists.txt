@@ -25,8 +25,7 @@ target_include_directories(
 set_target_properties(opentime PROPERTIES 
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentime"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
 
 if(BUILD_SHARED_LIBS)
     set_target_properties(opentime PROPERTIES
@@ -51,6 +50,10 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
+
+generate_export_header(
+    opentime
+    EXPORT_FILE_NAME export.h)
 
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} 
@@ -86,6 +89,7 @@ if(OTIO_CXX_INSTALL)
 
     install(
         FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/export.h
             ${CMAKE_CURRENT_BINARY_DIR}/version.h
         DESTINATION
             "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime"

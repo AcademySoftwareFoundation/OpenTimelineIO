@@ -22,7 +22,7 @@ class Clip;
 ///
 /// A SerializableCollection is useful for serializing multiple timelines,
 /// clips, or media references to a single file.
-class SerializableCollection : public SerializableObjectWithMetadata
+class OPENTIMELINEIO_EXPORT SerializableCollection : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the SerializableCollection schema.

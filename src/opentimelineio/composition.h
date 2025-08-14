@@ -14,7 +14,7 @@ class Clip;
 /// @brief Base class for an Item that contains Composables.
 ///
 /// Should be subclassed (for example by Track Stack), not used directly.
-class Composition : public Item
+class OPENTIMELINEIO_EXPORT Composition : public Item
 {
 public:
     /// @brief This struct provides the Composition schema.

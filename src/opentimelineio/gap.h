@@ -10,7 +10,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief An empty item within a timeline.
-class Gap : public Item
+class OPENTIMELINEIO_EXPORT Gap : public Item
 {
 public:
     /// @brief This struct provides the Gap schema.

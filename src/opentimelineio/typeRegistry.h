@@ -33,10 +33,10 @@ using label_to_schema_version_map =
 
 ///@}
 
-extern const label_to_schema_version_map CORE_VERSION_MAP;
+OPENTIMELINEIO_EXPORT extern const label_to_schema_version_map CORE_VERSION_MAP;
 
 /// @brief Type registry.
-class TypeRegistry
+class OPENTIMELINEIO_EXPORT TypeRegistry
 {
 public:
     /// @brief Get the type registry singleton.

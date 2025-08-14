@@ -11,7 +11,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A track is a composition of a certain kind, like video or audio.
-class Track : public Composition
+class OPENTIMELINEIO_EXPORT Track : public Composition
 {
 public:
     /// @brief This struct provides the base set of kinds of tracks.

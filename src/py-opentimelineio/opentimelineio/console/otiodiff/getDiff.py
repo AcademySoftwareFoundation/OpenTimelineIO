@@ -8,62 +8,56 @@ import opentimelineio as otio
 from .clipData import ClipData
 from . import makeOtio
 
-
-# TODO: rename main?, rename tlA to timelineA
 #currently only handles video and audio tracks
-
-# TODO: constant for video and audio (track.kind.video?)
-def main(tlA, tlB):
+def diff(timelineA, timelineB):
     # TODO: put docstring here, descriptive name, most wordy descrip
     hasVideo = False
     hasAudio = False
 
     # check input timelines for video and audio tracks
-    if len(tlA.video_tracks()) > 0 or len(tlB.video_tracks()) > 0:
+    if len(timelineA.video_tracks()) > 0 or len(timelineB.video_tracks()) > 0:
         hasVideo = True
-    else:
-        # TODO: put this in summary report
-        print("no video tracks")
+    # else:
+    #     print("no video tracks")
 
-    if len(tlA.audio_tracks()) > 0 or len(tlB.audio_tracks()) > 0:
+    if len(timelineA.audio_tracks()) > 0 or len(timelineB.audio_tracks()) > 0:
         hasAudio = True
-    else:
-        print("no audio tracks")
+    # else:
+    #     print("no audio tracks")
 
-    makeTlSummary(tlA, tlB)
+    makeTlSummary(timelineA, timelineB)
 
     outputTl = None
     # process video tracks, audio tracks, or both
-    # TODO: maybe table rather than db
     if hasVideo and hasAudio:
-        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks())
-        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks())
+        videoClipTable = processTracks(timelineA.video_tracks(), timelineB.video_tracks())
+        audioClipTable = processTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
 
-        makeSummary(videoClipDB, "Video", "perTrack")
-        makeSummary(audioClipDB, "Audio", "summary")
+        makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "perTrack")
+        makeSummary(audioClipTable, otio.schema.Track.Kind.Audio, "summary")
 
-        videoTl = makeNewOtio(videoClipDB, "Video")
-        outputTl = makeNewOtio(audioClipDB, "Audio")
+        videoTl = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
+        outputTl = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
         # combine
         for t in videoTl.tracks:
             outputTl.tracks.append(copy.deepcopy(t))
     
     elif hasVideo:
-        videoClipDB = processTracks(tlA.video_tracks(), tlB.video_tracks())
-        makeSummary(videoClipDB, "Video", "summary")
-        outputTl = makeNewOtio(videoClipDB, "Video")
+        videoClipTable = processTracks(timelineA.video_tracks(), timelineB.video_tracks())
+        makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "summary")
+        outputTl = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
 
     elif hasAudio:
-        audioClipDB = processTracks(tlA.audio_tracks(), tlB.audio_tracks())
-        makeSummary(audioClipDB, "Audio", "summary")
-        outputTl = makeNewOtio(audioClipDB, "Audio")
+        audioClipTable = processTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
+        makeSummary(audioClipTable, "Audio", "summary")
+        outputTl = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
 
     else:
         # TODO: log no vid/aud or throw
         pass
 
     # Debug
-    # origClipCount = len(tlA.find_clips()) + len(tlB.find_clips())
+    # origClipCount = len(timelineA.find_clips()) + len(timelineB.find_clips())
 
     # print(origClipCount)
     # print(len(outputTl.find_clips()))
@@ -295,16 +289,16 @@ def checkMoved(allDel, allAdd):
 
     return newAdd, moveEdit, moved, newDel
 
-# TODO: account for move edit, currently only identifies strictly moved
-def sortMoved(clipDB):
+# TODO? account for move edit, currently only identifies strictly moved
+def sortMoved(clipTable):
     allAdd = []
     allEdit = []
     allSame = []
     allDel = []
 
-    for track in clipDB.keys():
-        clipGroup = clipDB[track]
-        # print(clipDB[track]["add"])
+    for track in clipTable.keys():
+        clipGroup = clipTable[track]
+        # print(clipTable[track]["add"])
         if "add" in clipGroup.keys():
             allAdd.extend(clipGroup["add"])
         if "delete" in clipGroup.keys():
@@ -320,47 +314,48 @@ def sortMoved(clipDB):
 
     # currently moved clips are still marked as delete in timelineA 
     for cd in moved:
-        clipDB[cd.track_num]["add"].remove(cd)
-        clipDB[cd.track_num]["move"].append(cd)
-        # clipDB[cd.track_num]["delete"].remove(cd)
-        # clipDB[cd.pair.track_num]["moved"].append(cd.pair)
+        clipTable[cd.track_num]["add"].remove(cd)
+        clipTable[cd.track_num]["move"].append(cd)
+        # clipTable[cd.track_num]["delete"].remove(cd)
+        # clipTable[cd.pair.track_num]["moved"].append(cd.pair)
     
-    return clipDB
+    return clipTable
 
-def makeNewOtio(clipDB, trackType):
+def makeNewOtio(clipTable, trackType):
     newTl = otio.schema.Timeline(name="diffed")
-    displayA = []
-    displayB = []
+    # TODO: rename into track sets
+    tracksInA = []
+    tracksInB = []
 
     # make tracks A and B in output timeline
-    for trackNum in clipDB.keys():
+    for trackNum in clipTable.keys():
         # use named tuple here since clip categories won't change anymore
-        SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete', 'move'])
-        clipGroup = SortedClipDatas(clipDB[trackNum]["add"], clipDB[trackNum]["edit"], clipDB[trackNum]["same"], clipDB[trackNum]["delete"], clipDB[trackNum]["move"])
+        SortedClipDatas = namedtuple('ClipGroup', ['add', 'edit', 'same', 'delete', 'move'])
+        clipGroup = SortedClipDatas(clipTable[trackNum]["add"], clipTable[trackNum]["edit"], clipTable[trackNum]["same"], clipTable[trackNum]["delete"], clipTable[trackNum]["move"])
 
-        newA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
-        displayA.append(newA)       
+        newTrackA = makeOtio.makeTrackA(clipGroup, trackNum, trackType)
+        tracksInA.append(newTrackA)       
 
-        newB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
-        displayB.append(newB)
+        newTrackB = makeOtio.makeTrackB(clipGroup, trackNum, trackType)
+        tracksInB.append(newTrackB)
 
     # write order to output timeline so that timeline B is on top for both video and audio
-    if trackType == "Video":
-        newTl.tracks.extend(displayA)
+    if trackType == otio.schema.Track.Kind.Video:
+        newTl.tracks.extend(tracksInA)
 
         newEmpty = makeOtio.makeEmptyTrack(trackType)
         newTl.tracks.append(newEmpty)
         
-        newTl.tracks.extend(displayB)
-    elif trackType == "Audio":
-        newTl.tracks.extend(displayB)
+        newTl.tracks.extend(tracksInB)
+    elif trackType == otio.schema.Track.Kind.Audio:
+        newTl.tracks.extend(tracksInB)
 
         newEmpty = makeOtio.makeEmptyTrack(trackType)
         newTl.tracks.append(newEmpty)
         
-        newTl.tracks.extend(displayA)
+        newTl.tracks.extend(tracksInA)
 
-    # makeOtio.colorMovedA(newTl, clipDB)
+    # makeOtio.colorMovedA(newTl, clipTable)
 
     return newTl
 
@@ -370,9 +365,9 @@ def processTracks(tracksA, tracksB):
     # TODO: add docstring like this for public facing functions, otherwise comment is ok
     """Return a copy of the input timelines with only tracks that match
     either the list of names given, or the list of track indexes given."""
-    clipDB = {}
-    # READ ME IMPORTANT READ MEEEEEEE clipDB structure: {1:{"add": [], "edit": [], "same": [], "delete": []}
-    # clipDB keys are track numbers, values are dictionaries
+    clipTable = {}
+    # READ ME IMPORTANT READ MEEEEEEE clipTable structure: {1:{"add": [], "edit": [], "same": [], "delete": []}
+    # clipTable keys are track numbers, values are dictionaries
     # per track dictionary keys are clip categories, values are lists of clips of that category
 
     # TODO? ^change to class perhaps? low priority
@@ -394,12 +389,12 @@ def processTracks(tracksA, tracksB):
         add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
         # print(add)
 
-        clipDB[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
-        # print("here", clipDB[trackNum]["add"][0].name)
+        clipTable[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
+        # print("here", clipTable[trackNum]["add"][0].name)
 
     # Process Unmatched Tracks
     if shorterTlTracks == tracksA:
-        # tlA is shorter so tlB has added tracks
+        # timelineA is shorter so timelineB has added tracks
         for i in range(len(shorterTlTracks), len(tracksB)):
             newTrack = tracksB[i]
             trackNum = i + 1
@@ -410,7 +405,7 @@ def processTracks(tracksA, tracksB):
                 cd = makeClipData(c, trackNum)
                 added.append(cd)
 
-            clipDB[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
+            clipTable[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
            
     else:
         for i in range(len(shorterTlTracks), len(tracksA)):
@@ -423,15 +418,15 @@ def processTracks(tracksA, tracksB):
                 cd = makeClipData(c, trackNum)
                 deleted.append(cd)
 
-            clipDB[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}
+            clipTable[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}
 
     # recat added/deleted into moved
-    clipDB = sortMoved(clipDB)
+    clipTable = sortMoved(clipTable)
 
-    # displayA, displayB = makeNewOtio(clipDB, trackType)
-    return clipDB
+    # tracksInA, tracksInB = makeNewOtio(clipTable, trackType)
+    return clipTable
    
-def makeSummary(clipDB, trackType, mode):
+def makeSummary(clipTable, trackType, mode):
     print(trackType.upper(), "CLIPS")
     print("===================================")
     print("          Overview Summary         ")
@@ -444,8 +439,8 @@ def makeSummary(clipDB, trackType, mode):
     allMove = []
 
     if mode == "summary":
-        for track in clipDB.keys():
-            clipGroup = clipDB[track]
+        for track in clipTable.keys():
+            clipGroup = clipTable[track]
 
             allAdd.extend(clipGroup["add"]) if "add" in clipGroup.keys() else print("no add")
             allDel.extend(clipGroup["delete"]) if "delete" in clipGroup.keys() else print("no del")
@@ -460,8 +455,8 @@ def makeSummary(clipDB, trackType, mode):
 
     if mode == "perTrack":
         # print by track
-        for track in clipDB.keys():
-            clipGroup = clipDB[track]
+        for track in clipTable.keys():
+            clipGroup = clipTable[track]
             print("================== Track", track, "==================")
             for cat in clipGroup.keys():
                 print("")
@@ -471,23 +466,31 @@ def makeSummary(clipDB, trackType, mode):
                         print(i.name)
     print("")
 
-def makeTlSummary(tlA, tlB):
-    print("Comparing Timeline B:", tlB.name, "vs")
-    print("          Timeline A:", tlA.name)
+def makeTlSummary(timelineA, timelineB):
+    print("Comparing Timeline B:", timelineB.name, "vs")
+    print("          Timeline A:", timelineA.name)
     print("")
+
+    if len(timelineA.video_tracks()) == 0:
+        print("No video tracks in A")
+    if len(timelineB.video_tracks()) == 0:
+        print("No video tracks in B")
+
+    if len(timelineA.audio_tracks()) == 0:
+        print("No audio tracks in A")
+    if len(timelineB.audio_tracks()) == 0:
+        print("No audio tracks in B")
+
     # compare overall file duration
-    if(tlB.duration() > tlA.duration()):
-        delta = tlB.duration().to_seconds() - tlA.duration().to_seconds()
+    if(timelineB.duration() > timelineA.duration()):
+        delta = timelineB.duration().to_seconds() - timelineA.duration().to_seconds()
         print(f"Timeline duration increased by {delta:.2f} seconds")
-    elif(tlB.duration() < tlA.duration()):
-        delta = tlA.duration().to_seconds() - tlB.duration().to_seconds()
+    elif(timelineB.duration() < timelineA.duration()):
+        delta = timelineA.duration().to_seconds() - timelineB.duration().to_seconds()
         print(f"Timeline duration decreased by {delta:.2f} seconds")   
     else:
         print("Timeline duration did not change")
     print("")  
-
-if __name__ == "__main__":
-    main()
 
 ''' ======= Notes =======
     maybe can make use of algorithms.filter.filter_composition

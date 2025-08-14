@@ -30,6 +30,8 @@ def sortClips(trackClips):
 def addRavenColor(clip, color):
     # print(clip.metadata)
 
+    # TODO: if raven not in metadata, add empty dict
+
     if "raven" in clip.metadata:
         clip.metadata["raven"]["color"] = color.upper()
     else:
@@ -46,20 +48,22 @@ def addMarker(newClip, color, clipData):
     color = color.upper()
     newMarker.color = color
 
-    if isinstance(clipData, ClipData) and clipData.note is not None:
-        # print("edit note added")
-        newMarker.name = clipData.note
-
     if(color == "GREEN"):
         newMarker.name = "added"
     elif(color == "PINK"):
         newMarker.name = "deleted"
+
+    if isinstance(clipData, ClipData) and clipData.note is not None:
+        # print("edit note added")
+        newMarker.name = clipData.note
+
 
     newClip.markers.append(newMarker)
 
     return newClip
 
 # make new blank track that acts as a separator between the A and B sections
+# TODO: make separater track
 def makeEmptyTrack(trackType):
     return otio.schema.Track(name="=====================", kind=trackType)
 
@@ -96,6 +100,7 @@ def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False)
             newClip = copy.deepcopy(clipData.source)
             if clipColor is not None:
                 newClip = addRavenColor(newClip, clipColor)
+            # TODO: move out of if and make clipColor optional with default color
                 if markersOn:
                     newClip = addMarker(newClip, clipColor, clipData)
             track.append(newClip)
@@ -110,9 +115,9 @@ def makeTrackB(clipGroup, trackNum, trackKind):
     tMovedV = makeTrack("moved", trackKind, clipGroup.move, "PURPLE", markersOn=True)
 
     flatB = otio.core.flatten_stack([tSameV, tEditedV, tAddV, tMovedV])
-    if trackKind == "Video":
+    if trackKind == otio.schema.Track.Kind.Video:
         flatB.name = "Video B" + str(trackNum)
-    elif trackKind == "Audio":
+    elif trackKind == otio.schema.Track.Kind.Audio:
         flatB.name = "Audio B" + str(trackNum)
 
     flatB.kind = trackKind
@@ -132,10 +137,13 @@ def makeTrackA(clipGroup, trackNum, trackKind):
 
     tDelV = makeTrack("deleted", trackKind, clipGroup.delete, "PINK")
 
+    # TODO: explain the make sep then merge flatten tracks thing
     flatA = otio.core.flatten_stack([tSameV, tEditedV, tDelV])
-    if trackKind == "Video":
+
+    # TODO: change video to directly use trackKind
+    if trackKind == otio.schema.Track.Kind.Video:
         flatA.name = "Video A" + str(trackNum)
-    elif trackKind == "Audio":
+    elif trackKind == otio.schema.Track.Kind.Audio:
         flatA.name = "Audio A" + str(trackNum)
     
     flatA.kind = trackKind

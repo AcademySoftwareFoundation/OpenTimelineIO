@@ -25,7 +25,7 @@ import opentimelineio as otio
 
 # sys.path.append("src/py-opentimelineio/opentimelineio/console/otiodiff")
 
-from .otiodiff import getDif
+from .otiodiff import getDiff
 
 def main():
     
@@ -116,13 +116,21 @@ def main():
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
 
+    # TODO: Update help text and numbering
     # ===== NEW Phase 5.5: Diff otio files ======
 
     if args.diff:
+        # TODO: check there's exactly 2 timelines, complain if not
+        # error if less than 2, if more than 2
+        # TODO? stack, concat, diff make mutually exclusive
+
         # print("comparing:", timelines[0].name, timelines[1].name)
 
-        # function that serves as wrapper to call actual getDif main
+        # function that serves as wrapper to call actual getDiff main
         timelines = [diff_otio(timelines[0], timelines[1])]
+
+        # TODO: warning? if timeline empty (no output)
+        # TODO: test for empty timeline inputs
 
     # Phase 6: Remove/Redaction
 
@@ -247,6 +255,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
+
+# TODO: add ex for otiodiff above^
 
     # Input...
     parser.add_argument(
@@ -504,7 +514,7 @@ def read_inputs(input_paths):
 # ======= NEW =======
 
 def diff_otio(tlA, tlB):
-    return getDif.main(tlA, tlB)
+    return getDiff.main(tlA, tlB)
 
 # ===================
 

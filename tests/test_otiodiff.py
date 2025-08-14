@@ -3,7 +3,7 @@ import opentimelineio as otio
 
 from opentimelineio.console.otiodiff.clipData import ClipData
 import opentimelineio.console.otiodiff.makeOtio as makeOtio
-import opentimelineio.console.otiodiff.getDif as getDiff
+import opentimelineio.console.otiodiff.getDiff as getDiff
 
 from collections import namedtuple
 

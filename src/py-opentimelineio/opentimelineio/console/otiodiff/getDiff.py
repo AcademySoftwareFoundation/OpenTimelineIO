@@ -8,9 +8,18 @@ import opentimelineio as otio
 from .clipData import ClipData
 from . import makeOtio
 
-#currently only handles video and audio tracks
-def diff(timelineA, timelineB):
-    # TODO: put docstring here, descriptive name, most wordy descrip
+def diffTimelines(timelineA, timelineB):
+    '''Diff two OTIO timelines and identify how clips on video and/or audio tracks changed from timeline A to timeline B.
+    Return an annotated otio file with the differences and print a text summary to console.
+     
+     Parameters:
+     timelineA (otio.schema.Timeline()): timeline from the file you want to compare against, ex. clip1 version 1
+     timelineB (otio.schema.Timeline()): timeline from the file you want to compare, ex. clip1 version 2
+     
+     Returns:
+     outputTimeline (otio.schema.Timeline()): timeline with color coded clips and marker annotations showing the
+     differences between the input tracks with the tracks from timeline B stacked on top of timeline A    
+    '''
     hasVideo = False
     hasAudio = False
 
@@ -25,61 +34,58 @@ def diff(timelineA, timelineB):
     # else:
     #     print("no audio tracks")
 
-    makeTlSummary(timelineA, timelineB)
+    makeTimelineSummary(timelineA, timelineB)
 
-    outputTl = None
+    outputTimeline = None
     # process video tracks, audio tracks, or both
     if hasVideo and hasAudio:
-        videoClipTable = processTracks(timelineA.video_tracks(), timelineB.video_tracks())
-        audioClipTable = processTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
+        videoClipTable = categorizeClipsByTracks(timelineA.video_tracks(), timelineB.video_tracks())
+        audioClipTable = categorizeClipsByTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
 
         makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "perTrack")
         makeSummary(audioClipTable, otio.schema.Track.Kind.Audio, "summary")
 
         videoTl = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
-        outputTl = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
+        outputTimeline = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
         # combine
         for t in videoTl.tracks:
-            outputTl.tracks.append(copy.deepcopy(t))
+            outputTimeline.tracks.append(copy.deepcopy(t))
     
     elif hasVideo:
-        videoClipTable = processTracks(timelineA.video_tracks(), timelineB.video_tracks())
+        videoClipTable = categorizeClipsByTracks(timelineA.video_tracks(), timelineB.video_tracks())
         makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "summary")
-        outputTl = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
+        outputTimeline = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
 
     elif hasAudio:
-        audioClipTable = processTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
+        audioClipTable = categorizeClipsByTracks(timelineA.audio_tracks(), timelineB.audio_tracks())
         makeSummary(audioClipTable, "Audio", "summary")
-        outputTl = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
+        outputTimeline = makeNewOtio(audioClipTable, otio.schema.Track.Kind.Audio)
 
     else:
-        # TODO: log no vid/aud or throw
-        pass
+        print("No video or audio tracks found in both timelines.")
 
     # Debug
     # origClipCount = len(timelineA.find_clips()) + len(timelineB.find_clips())
 
     # print(origClipCount)
-    # print(len(outputTl.find_clips()))
+    # print(len(outputTimeline.find_clips()))
 
-    return outputTl
+    return outputTimeline
 
-def toOtio(data, path):
-    otio.adapters.write_to_file(data, path)
-
-# for debugging, put response into file
-def toJson(file):
-    with open("clipDebug.json", "w") as f:
-        f.write(file)
-
-def toTxt(file):
-    with open("report.txt", "w") as f:
-        f.write(file)
-
-# create a dictionary with all the cloned clips (ones that share the same truncated name)
-# key is the truncated name, value is a list of ClipDatas
-# @parameter clips, list of ClipDatas
+# TODO: make nonClones a set rather than a list
 def findClones(clips):
+    """Separate the cloned ClipDatas (ones that share the same name) from the unique ClipDatas and return both
+    
+    Paramenters:
+    clips (list of ClipDatas): list of ClipDatas
+
+    Returns:
+    clones (dictionary): dictionary of all clones in the group of ClipDatas
+                        keys: name of clone
+                        values: list of ClipDatas of that name
+    nonClones (list): list of unique clones in group of ClipDatas\    
+    """
+
     clones = {}
     nonClones = []
     names = []
@@ -98,6 +104,8 @@ def findClones(clips):
     return clones, nonClones
 
 def sortClones(clipDatasA, clipDatasB):
+    """Identify cloned ClipDatas (ones that share the same name) across two groups of ClipDatas and separate from the unique
+    ClipDatas (ones that only appear once in each group)"""
     # find cloned clips and separate out from unique clips
     clonesA, nonClonesA = findClones(clipDatasA)
     clonesB, nonClonesB = findClones(clipDatasB)
@@ -120,8 +128,8 @@ def sortClones(clipDatasA, clipDatasB):
     # clipCountB = 0
     return (clonesA, nonClonesA), (clonesB, nonClonesB)
 
-# compare all clips that had a clone
 def compareClones(clonesA, clonesB):
+    """Compare two groups of cloned ClipDatas and categorize into added, unchanged, or deleted"""
     added = []
     unchanged = []
     deleted = []
@@ -160,8 +168,8 @@ def compareClones(clonesA, clonesB):
     
     return added, unchanged, deleted
 
-# compare all strictly unique clips
 def compareClips(clipDatasA, clipDatasB):
+    """Compare two groups of unique ClipDatas and categorize into added, edited, unchanged, and deleted"""
     namesA = {}
     namesB = {}
 
@@ -176,6 +184,7 @@ def compareClips(clipDatasA, clipDatasB):
         namesB[c.name] = c
 
     for cB in clipDatasB:
+        
         if cB.name not in namesA:
             added.append(cB)
         else:
@@ -205,29 +214,8 @@ def compareClips(clipDatasA, clipDatasB):
 # TODO: some can be sets instead of lists
     return added, edited, unchanged, deleted
 
-# # clip is an otio Clip
-# def getTake(clip):
-#     take = None
-#     if(len(clip.name.split(" ")) > 1):
-#         take = clip.name.split(" ")[1]
-#     else:
-#         take = None 
-#     return take
-
-# TODO: change name, make comparable rep? clip comparator? 
-# TODO: learn abt magic functions ex __eq__
-# def makeClipData(clip, trackNum):
-#     cd = ClipData(clip.name.split(" ")[0],
-#                   clip.media_reference,
-#                   clip.source_range,
-#                   clip.trimmed_range_in_parent(),
-#                   trackNum,
-#                   clip,
-#                   getTake(clip))
-#     return cd
-
-# the consolidated version of processVideo and processAudio, meant to replace both
 def compareTracks(trackA, trackB, trackNum):
+    """Compare clipis in two OTIO tracks and categorize into added, edited, same, and deleted"""
     clipDatasA = []
     clipDatasB = []
 
@@ -244,27 +232,25 @@ def compareTracks(trackA, trackB, trackNum):
     (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
 
     # compare clips and put into categories
-    addV = []
-    editV = []
-    sameV = []
-    deleteV = []
+    added = []
+    edited = []
+    unchanged = []
+    deleted = []
     
     # compare and categorize unique clips
-    addV, editV, sameV, deleteV = compareClips(nonClonesA, nonClonesB)
+    added, edited, unchanged, deleted = compareClips(nonClonesA, nonClonesB)
 
     # compare and categorize cloned clips
-    addCloneV, sameCloneV, deleteCloneV = compareClones(clonesA, clonesB)
-    addV.extend(addCloneV)
-    sameV.extend(sameCloneV)
-    deleteV.extend(deleteCloneV)
+    addedClone, unchangedClone, deletedClone = compareClones(clonesA, clonesB)
+    added.extend(addedClone)
+    unchanged.extend(unchangedClone)
+    deleted.extend(deletedClone)
 
-    # SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
-    # videoGroup = SortedClipDatas(addV, editV, sameV, deleteV)
+    return added, edited, unchanged, deleted
 
-    return addV, editV, sameV, deleteV
-    # return videoGroup
-
+# TODO? account for move edit, currently only identifies strictly moved
 def checkMoved(allDel, allAdd):
+    """Identify ClipDatas that have moved between different tracks"""
     # ones found as same = moved
     # ones found as edited = moved and edited
 
@@ -290,8 +276,8 @@ def checkMoved(allDel, allAdd):
 
     return newAdd, moveEdit, moved, newDel
 
-# TODO? account for move edit, currently only identifies strictly moved
 def sortMoved(clipTable):
+    """Put ClipDatas that have moved between tracks into their own category and remove from their previous category"""
     allAdd = []
     allEdit = []
     allSame = []
@@ -323,8 +309,17 @@ def sortMoved(clipTable):
     return clipTable
 
 def makeNewOtio(clipTable, trackType):
+    """Make a new annotated OTIO timeline showing the change from timeline A to timeline B, with the tracks
+    from timeline B stacked on top of the tracks from timeline A
+    
+    Ex. New timeline showing the differences of timeline A and B with 2 tracks each
+        Track 2B
+        Track 1B
+        ========
+        Track 2A
+        Track 1A    
+    """
     newTl = otio.schema.Timeline(name="diffed")
-    # TODO: rename into track sets
     tracksInA = []
     tracksInB = []
 
@@ -362,15 +357,29 @@ def makeNewOtio(clipTable, trackType):
 
 # TODO: rename to create bucket/cat/db/stuff; categorizeClipsByTracks + comment
 
-def processTracks(tracksA, tracksB):
-    # TODO: add docstring like this for public facing functions, otherwise comment is ok
-    """Return a copy of the input timelines with only tracks that match
-    either the list of names given, or the list of track indexes given."""
-    clipTable = {}
-    # READ ME IMPORTANT READ MEEEEEEE clipTable structure: {1:{"add": [], "edit": [], "same": [], "delete": []}
-    # clipTable keys are track numbers, values are dictionaries
-    # per track dictionary keys are clip categories, values are lists of clips of that category
+def categorizeClipsByTracks(tracksA, tracksB):
+    """Compare the clips in each track in tracksB against the corresponding track in tracksA
+    and categorize based on how they have changed. Return a dictionary table of ClipDatas
+    categorized by added, edited, unchanged, deleted, and moved and ordered by track.
+    
+    Parameters:
+    tracksA (list of otio.schema.Track() elements): list of tracks from timeline A
+    tracksB (list of otio.schema.Track() elements): list of tracks from timeline B
 
+    Returns:
+    clipTable (dictionary): dictionary holding categorized ClipDatas, organized by the track number of the ClipDatas
+                           dictionary keys: track number (int)
+                           dictionary values: dictionary holding categorized ClipDatas of that track
+                           nested dictionary keys: category name (string)
+                           nested dictionary values: list of ClipDatas that fall into the category
+        
+        ex: clipTable when tracksA and tracksB contain 3 tracks
+            {1 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
+             2 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
+             3 : {"add": [], "edit": [], "same": [], "delete": []}, "move": []}
+    """
+
+    clipTable = {}
     # TODO? ^change to class perhaps? low priority
     
     shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
@@ -428,6 +437,8 @@ def processTracks(tracksA, tracksB):
     return clipTable
    
 def makeSummary(clipTable, trackType, mode):
+    """Summarize what clips got changed and how they changed and print to console."""
+
     print(trackType.upper(), "CLIPS")
     print("===================================")
     print("          Overview Summary         ")
@@ -464,10 +475,11 @@ def makeSummary(clipTable, trackType, mode):
                 print(cat.upper(), ":", len(clipGroup[cat]))
                 if cat != "same":
                     for i in clipGroup[cat]:
-                        print(i.name)
+                        print(i.name + ": " + i.note) if i.note is not None else print(i.name)
     print("")
 
-def makeTlSummary(timelineA, timelineB):
+def makeTimelineSummary(timelineA, timelineB):
+    """Summarize information about the two timelines compared and print to console."""
     print("Comparing Timeline B:", timelineB.name, "vs")
     print("          Timeline A:", timelineA.name)
     print("")
@@ -494,31 +506,12 @@ def makeTlSummary(timelineA, timelineB):
     print("")  
 
 ''' ======= Notes =======
-    maybe can make use of algorithms.filter.filter_composition
-
-# a test using python difflib, prob not useful
-    # # find deltas of 2 files and print into html site
-    # d = HtmlDiff(wrapcolumn=100)
-    # diff = d.make_file(file1.splitlines(), file2.splitlines(), context=True)
-    # with open("diff.html", "w", encoding="utf-8") as f:
-    #     f.write(diff)
-
-    # s = SequenceMatcher(None, file1, file2)
-    # print(s.quick_ratio())   
-
-    # each one in new check with each one in old
-    # if everything matches, unchanged <- can't just check with first instance because might have added one before it
-    # if everything matches except for timeline position-> moved
-    # if length doesn't match, look for ordering? or just classify as added/deleted
-    # if counts of old and new dif then def add/deleted
-
-    
     Test shot simple:
-        python ./src/getDif.py /Users/yingjiew/Documents/testDifFiles/h150_104a.105j_2025.04.04_ANIM-flat.otio /Users/yingjiew/Documents/testDifFiles/150_104a.105jD_2025.06.27-flat.otio     
+        /Users/yingjiew/Documents/testDifFiles/h150_104a.105j_2025.04.04_ANIM-flat.otio /Users/yingjiew/Documents/testDifFiles/150_104a.105jD_2025.06.27-flat.otio     
 
     Test seq matching edit's skywalker:
-        python ./src/getDif.py /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.09_Skywalker_v3.0_ChangeNotes.Relinked.01.otio /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.23_Skywalker_v4.0_ChangeNotes.otio
+        /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.09_Skywalker_v3.0_ChangeNotes.Relinked.01.otio /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.23_Skywalker_v4.0_ChangeNotes.otio
 
     Test shot multitrack:
-        python ./src/getDif.py /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
+        /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
 '''

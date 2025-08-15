@@ -65,7 +65,7 @@ class ClipData:
         # check names are same
         if self.sameName(cA):
             # check source range is same
-            # TODO: call trimmed range instead of source range
+            # TODO: call trimmed range instead of source range ???
             # TODO: make test where has null source range -> see things break, then go back and change <- low priority
             if(self.source_range == cA.source_range):
                 # print(self.name, " ", self.timeline_range, " ", cA.timeline_range)

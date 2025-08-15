@@ -166,7 +166,7 @@ otiotool -i multitrack.otio --only-tracks-with-name "Sequence 3" --list-clips
 otiotool -i multitrack.otio --only-tracks-with-index 3 --list-clips
 ```
 
-Note that indexes for `--only-tracks-with-index` begin at 1 for the first track, and that you often want to use it in combination with `--video-only` or `--audio-only`.
+Indexes for `--only-tracks-with-index` begin at 1 for the first track, and that you often want to use it in combination with `--video-only` or `--audio-only`.
 
 ### Filter Clips by Name or Regex
 ```bash
@@ -174,7 +174,7 @@ otiotool -i premiere_example.otio --list-clips --only-clips-with-name "sc01_sh01
 otiotool -i premiere_example.otio --list-clips --only-clips-with-name-regex "sh\d+_anim"
 ```
 
-Note that `--only-clips-with-name-regex` uses the [Python Regular Expression syntax](https://docs.python.org/3/library/re.html).
+The `--only-clips-with-name-regex` option uses the [Python Regular Expression syntax](https://docs.python.org/3/library/re.html).
 
 ## Media Information
 
@@ -184,7 +184,7 @@ otiotool -i multitrack.otio --list-tracks --list-clips --list-media
 ```
 
 ### Verify Media Existence
-Checks if media files exist. Note: only local file paths are checked by `otiotool`, not URLs or other non-file path media references.
+Checks if media files exist. Only local file paths are checked by `otiotool`, not URLs or other non-file path media references.
 ```bash
 otiotool -i premiere_example.otio --verify-media
 ```
@@ -239,7 +239,7 @@ otiotool -i one.otio two.otio three.otio --concat -o result.otio
 Modifications to the timeline(s) can be written out to a new file with the
 `--output <filename.otio>` option.
 
-Note: The input files are never modified unless the
+[!NOTE] The input files are never modified unless the
 output path specifies the same file, in which case that file will be overwritten (not recommended).
 
 ### Multiple Timelines

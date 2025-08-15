@@ -192,6 +192,8 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Explicitly export C++ symbols for shared libraries.
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 include(GenerateExportHeader)
 
 #------------------------------------------------------------------------------

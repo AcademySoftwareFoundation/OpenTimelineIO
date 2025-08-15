@@ -310,13 +310,22 @@ otiotool -i multitrack.otio --flatten video -o output.otio --list-tracks
 ```
 
 ### Stack or Concatenate Timelines
-Stack multiple timelines:
+
+[!NOTE] With `--stack` and `--concat` the order of the input files affects the outcome.
+
+When concatenated, the inputs are assembled in the order listed, so the first input is earliest on the output timeline.
+
+Concat Example:
 ```bash
-otiotool -i multitrack.otio premiere_example.otio --stack -o output.otio --list-tracks
+otiotool -i opening.otio end_credits.otio --concat -o output.otio
 ```
-Concatenate timelines end-to-end:
+```
+
+When stacked, video tracks layer bottom-to-top, so the video tracks of the second input are layered above the first input. This follows conventional video/audio ordering where video tracks are layered numerically increasing upward (V2 is above V1). Audio tracks are layered in the opposite order, since traditionally audio tracks are layered numerically increasing downward (A2 is below A1).
+
+Stack Example:
 ```bash
-otiotool -i multitrack.otio premiere_example.otio --concat -o output.otio --stats
+otiotool -i a.otio b.otio --stack -o output.otio
 ```
 
 ### Redact Timeline

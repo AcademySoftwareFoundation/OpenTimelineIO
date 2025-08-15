@@ -1,37 +1,44 @@
 import opentimelineio as otio
 
-# clip comparable??? ClipInfo
-# TODO: add fullname, full name = name + take, name is just name, add ex, split on space, b4 is name, after is version
-# TODO: rename take to version?
+# TODO: clip comparable??? ClipInfo
+# source clip or clip ref?
+# full name = name + version, name is just name, add ex, split on space, b4 is name, after is version
 class ClipData:
+    full_name = ""
     name = ""
-    # currently not used in comparisons
-    take = None
+    version = None    # currently not used in comparisons
     media_ref = None
     source_range = otio.opentime.TimeRange()
     timeline_range = otio.opentime.TimeRange()
+    track_num = None    # not originally stored in otio.schema.Clip 
+    source_clip = otio.schema.Clip()
+    # everything below holds comparison result info
     note = ""
-    source = otio.schema.Clip()
-    pair = None
-    track_num = None
+    matched_clipData = None
 
-    # TODO: sort so above is compare, bottom is additional compare result info
-
-# TODO: rename source to sourceClip, rename pair to matchedClipData?
-# just pass source clip and track num so construct here
-    def __init__(self, name, media_ref, source_range, timeline_range, track_num, source, take=None, note=None):
-        self.name = name
-        self.media_ref = media_ref
-        self.source_range = source_range
-        self.timeline_range = timeline_range
+    def __init__(self, source_clip, track_num, note=None):
+        self.full_name = source_clip.name
+        self.name = self.splitFullName(source_clip)[0]
+        self.version = self.splitFullName(source_clip)[1]
+        self.media_ref = source_clip.media_reference
+        self.source_range = source_clip.source_range
+        self.timeline_range = source_clip.trimmed_range_in_parent()
         self.track_num = track_num
-        self.source = source
-        self.take = take
+        self.source_clip = source_clip
         self.note = note
+
+
+    # split full name into name of clip and version by white space
+    # uses structure of "clipA v1" where clipA is the name and v1 is the version
+    def splitFullName(self, clip):
+        shortName = clip.name.split(" ")[0]
+        version = clip.name.split(" ")[1] if len(clip.name.split(" ")) > 1 else None
+
+        return shortName, version
 
     def printData(self):
         print("name: ", self.name)
-        print("take: ", self.take)
+        print("version: ", self.version)
         print("media ref: ", self.media_ref)
         print("source start time: ", self.source_range.start_time.value, " duration: ", self.source_range.duration.value)
         print("timeline start time:", self.timeline_range.start_time.value, " duration: ", self.timeline_range.duration.value)
@@ -110,7 +117,7 @@ class ClipData:
             deltaFramesStr = str(abs(selfDur.to_frames() - cADur.to_frames()))
 
             if(selfDur.value == cADur.value):
-                self.note = "start time changed"
+                self.note = "start time in source range changed"
 
 # put note assignment into function, return note?
 # self, other, olderClipData rather than cA

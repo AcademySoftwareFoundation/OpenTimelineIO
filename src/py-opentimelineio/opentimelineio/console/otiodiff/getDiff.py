@@ -179,15 +179,15 @@ def compareClips(clipDatasA, clipDatasB):
         if cB.name not in namesA:
             added.append(cB)
         else:
-            cB.pair = namesA[cB.name]
-            isSame = cB.checkSame(cB.pair)
+            cB.matched_clipData = namesA[cB.name]
+            isSame = cB.checkSame(cB.matched_clipData)
             if(isSame):
                 # cB.pair = namesA[cB.name]
                 unchanged.append(cB)
             else:
-                isEdited = cB.checkEdited(cB.pair)
+                isEdited = cB.checkEdited(cB.matched_clipData)
                 if(isEdited):
-                    cB.pair = namesA[cB.name]
+                    # cB.matched_clipData = namesA[cB.name]
                     edited.append(cB)
                 else:
                     print("======== not categorized ==========")
@@ -205,26 +205,26 @@ def compareClips(clipDatasA, clipDatasB):
 # TODO: some can be sets instead of lists
     return added, edited, unchanged, deleted
 
-# clip is an otio Clip
-def getTake(clip):
-    take = None
-    if(len(clip.name.split(" ")) > 1):
-        take = clip.name.split(" ")[1]
-    else:
-        take = None 
-    return take
+# # clip is an otio Clip
+# def getTake(clip):
+#     take = None
+#     if(len(clip.name.split(" ")) > 1):
+#         take = clip.name.split(" ")[1]
+#     else:
+#         take = None 
+#     return take
 
 # TODO: change name, make comparable rep? clip comparator? 
 # TODO: learn abt magic functions ex __eq__
-def makeClipData(clip, trackNum):
-    cd = ClipData(clip.name.split(" ")[0],
-                  clip.media_reference,
-                  clip.source_range,
-                  clip.trimmed_range_in_parent(),
-                  trackNum,
-                  clip,
-                  getTake(clip))
-    return cd
+# def makeClipData(clip, trackNum):
+#     cd = ClipData(clip.name.split(" ")[0],
+#                   clip.media_reference,
+#                   clip.source_range,
+#                   clip.trimmed_range_in_parent(),
+#                   trackNum,
+#                   clip,
+#                   getTake(clip))
+#     return cd
 
 # the consolidated version of processVideo and processAudio, meant to replace both
 def compareTracks(trackA, trackB, trackNum):
@@ -233,12 +233,12 @@ def compareTracks(trackA, trackB, trackNum):
 
     for c in trackA.find_clips():
         # put clip info into ClipData
-        cd = makeClipData(c, trackNum)
+        cd = ClipData(c, trackNum)
         clipDatasA.append(cd)
     
     for c in trackB.find_clips():
         # put clip info into ClipData
-        cd = makeClipData(c, trackNum)
+        cd = ClipData(c, trackNum)
         clipDatasB.append(cd)
 
     (clonesA, nonClonesA), (clonesB, nonClonesB) = sortClones(clipDatasA, clipDatasB)
@@ -271,20 +271,21 @@ def checkMoved(allDel, allAdd):
     # wanted to compare full names to account for dif dep/take
     # otherwise shotA (layout123) and shotA (anim123) would count as a move and not as add
     # TODO: maybe preserve full name and also clip name, ex. id and name
+    # TODO: fix compareClips so that it allows check by full name
     for c in allDel:
-        c.name = c.source.name
+        c.name = c.full_name
     for c in allAdd:
-        c.name = c.source.name
+        c.name = c.full_name
 
     newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd)
     # removes clips that are moved in same track, just keep clips moved between tracks
-    moved = [clip for clip in moved if clip.track_num != clip.pair.track_num]
+    moved = [clip for clip in moved if clip.track_num != clip.matched_clipData.track_num]
     for clip in moved:
-        clip.note = "Moved from track: " + str(clip.pair.track_num)
+        clip.note = "Moved from track: " + str(clip.matched_clipData.track_num)
         # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
     # TODO: check if empty string or not
     for i in moveEdit:
-        i.note += " and moved from track " + str(i.pair.track_num)
+        i.note += " and moved from track " + str(i.matched_clipData.track_num)
         # print(i.name, i.note)
 
     return newAdd, moveEdit, moved, newDel
@@ -402,7 +403,7 @@ def processTracks(tracksA, tracksB):
 
             added = []
             for c in newTrack.find_clips():
-                cd = makeClipData(c, trackNum)
+                cd = ClipData(c, trackNum)
                 added.append(cd)
 
             clipTable[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
@@ -415,7 +416,7 @@ def processTracks(tracksA, tracksB):
 
             deleted = []
             for c in newTrack.find_clips():
-                cd = makeClipData(c, trackNum)
+                cd = ClipData(c, trackNum)
                 deleted.append(cd)
 
             clipTable[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}

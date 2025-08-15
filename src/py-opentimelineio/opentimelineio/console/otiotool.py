@@ -65,6 +65,9 @@ def main():
     if args.remove_transitions:
         timelines = filter_transitions(timelines)
 
+    if args.remove_effects:
+        timelines = filter_effects(timelines)
+
     if args.only_tracks_with_name or args.only_tracks_with_index:
         timelines = filter_tracks(
             args.only_tracks_with_name,
@@ -184,10 +187,10 @@ This tool works in phases, as follows:
 
 2. Filtering
     Options such as --video-only, --audio-only, --only-tracks-with-name,
-    -only-tracks-with-index, --only-clips-with-name,
-    --only-clips-with-name-regex, --remove-transitions, and --trim will remove
-    content. Only the tracks, clips, etc. that pass all of the filtering options
-    provided are passed to the next phase.
+    --only-tracks-with-index, --only-clips-with-name,
+    --only-clips-with-name-regex, --remove-transitions, --remove-effects and
+    --trim will remove content. Only the tracks, clips, etc. that pass all of
+    the filtering options provided are passed to the next phase.
 
 3. Combine
     If specified, the --stack, --concat, and --flatten operations are
@@ -294,6 +297,11 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--remove-transitions",
         action='store_true',
         help="Remove all transitions"
+    )
+    parser.add_argument(
+        "--remove-effects",
+        action='store_true',
+        help="Remove all effects"
     )
     parser.add_argument(
         "--trim",
@@ -499,6 +507,18 @@ def filter_transitions(timelines):
             return None
         return item
     return [otio.algorithms.filtered_composition(t, _f) for t in timelines]
+
+
+def filter_effects(timelines):
+    """Remove all effects from the input timelines. The inputs are modified
+    in place, and also returned."""
+    for timeline in timelines:
+        # Items have an effects attribute, but other Composables do not.
+        # (e.g. Transitions) so we need to find only Items.
+        for item in timeline.find_children(descended_from_type=otio.core.Item):
+            # Clear the effects list contents
+            item.effects[:] = []
+    return timelines
 
 
 def _filter(item, names, patterns):

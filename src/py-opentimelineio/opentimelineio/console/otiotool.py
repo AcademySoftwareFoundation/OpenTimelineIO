@@ -193,29 +193,31 @@ This tool works in phases, as follows:
     the filtering options provided are passed to the next phase.
 
 3. Combine
-    If specified, the --stack, --concat, and --flatten operations are
+    If specified, the --stack, or --concat operations are
     performed (in that order) to combine all of the input timeline(s) into one.
 
-4. Relink
+4. Flatten
+    If --flatten is specified, then multiple tracks are flattened into one.
+
+5. Relink
     The --relink-by-name option, will scan the specified folder(s) looking for
     files which match the name of each clip in the input timeline(s).
     If matching files are found, clips will be relinked to those files (using
     file:// URLs). Clip names are matched to filenames ignoring file extension.
     If specified, the --copy-media-to-folder option, will copy or download
     all linked media, and relink the OTIO to reference the local copies.
-
-5. Remove/Redact
+6. Remove/Redact
     The --remove-metadata-key option allows you to remove a specific piece of
     metadata from all objects.
     If specified, the --redact option, will remove ALL metadata and rename all
     objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
 
-6. Inspect
+7. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
     --verify-media, --list-markers, --verify-ranges, and --inspect
     will examine the OTIO and print information to standard output.
 
-7. Output
+8. Output
     Finally, if the "--output <filename>" option is specified, the resulting
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
@@ -251,18 +253,20 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Filter...
-    parser.add_argument(
+    track_type_group = parser.add_mutually_exclusive_group()
+    track_type_group.add_argument(
         "--video-only",
         "-v",
         action='store_true',
         help="Output only video tracks"
     )
-    parser.add_argument(
+    track_type_group.add_argument(
         "--audio-only",
         "-a",
         action='store_true',
         help="Output only audio tracks"
     )
+
     parser.add_argument(
         "--only-tracks-with-name",
         type=str,
@@ -328,13 +332,15 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="""When used with --flatten, the new flat track is added above the
         others instead of replacing them."""
     )
-    parser.add_argument(
+
+    combine_group = parser.add_mutually_exclusive_group()
+    combine_group.add_argument(
         "--stack",
         "-s",
         action='store_true',
         help="Stack multiple input files into one timeline"
     )
-    parser.add_argument(
+    combine_group.add_argument(
         "--concat",
         "-c",
         action='store_true',
@@ -342,7 +348,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Relink
-    parser.add_argument(
+    relink_group = parser.add_mutually_exclusive_group()
+    relink_group.add_argument(
         "--relink-by-name",
         type=str,
         nargs='+',
@@ -350,7 +357,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="""Scan the specified folder looking for filenames which match
         each clip's name. If found, clips are relinked to those files."""
     )
-    parser.add_argument(
+    relink_group.add_argument(
         "--copy-media-to-folder",
         type=str,
         metavar='FOLDER',
@@ -457,19 +464,9 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     if not any([args.input, args.list_versions]):
         parser.error("Must specify at least one of --input or --list-versions.")
 
-    # Some options cannot be combined.
-
-    if args.video_only and args.audio_only:
-        parser.error("Cannot use --video-only and --audio-only at the same time.")
-
-    if args.stack and args.concat:
-        parser.error("Cannot use --stack and --concat at the same time.")
-
+    # Check some options combination.
     if args.keep_flattened_tracks and not args.flatten:
         parser.error("Cannot use --keep-flattened-tracks without also using --flatten.")
-
-    if args.input and args.list_versions:
-        parser.error("Cannot combine --input and --list-versions.")
 
     return args
 

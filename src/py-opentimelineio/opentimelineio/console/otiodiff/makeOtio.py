@@ -97,7 +97,7 @@ def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False)
                 currentEnd += tlDuration
 
             # add clip to track
-            newClip = copy.deepcopy(clipData.source)
+            newClip = copy.deepcopy(clipData.source_clip)
             if clipColor is not None:
                 newClip = addRavenColor(newClip, clipColor)
             # TODO: move out of if and make clipColor optional with default color
@@ -132,7 +132,7 @@ def makeTrackA(clipGroup, trackNum, trackKind):
     prevEdited = []
     prevMoved = []
     for e in clipGroup.edit:
-        prevEdited.append(e.pair)
+        prevEdited.append(e.matched_clipData)
     tEditedV = makeTrack("edited", trackKind, prevEdited, "ORANGE") 
 
     tDelV = makeTrack("deleted", trackKind, clipGroup.delete, "PINK")

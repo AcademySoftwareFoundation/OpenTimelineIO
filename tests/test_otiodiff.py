@@ -10,201 +10,398 @@ from collections import namedtuple
 
 class TestClipData(unittest.TestCase):
     # check if the names of two ClipDatas are the same
+
     def test_same_name(self):
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        assert(clipA.sameName(clipB))
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert clipDataB.sameName(clipDataA)
 
     def test_different_name(self):
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName2",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        assert(not clipA.sameName(clipB))
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName2 testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert not clipDataB.sameName(clipDataA)
 
 
     def test_same_duration(self):
         # check that length of clip is the same
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName2",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        assert(clipA.sameDuration(clipB))
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
 
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert clipDataB.sameDuration(clipDataA)
+        
     def test_different_duration(self):
         # check that length of clip is the different
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(duration=otio.opentime.RationalTime(100,1)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName2",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        assert(not clipA.sameDuration(clipB))
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(20, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert not clipDataB.sameDuration(clipDataA)
 
 
     def test_check_same(self):
         # check that two exact same clips are the same
         # check that two exact same clips but moved in the timeline are the same
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        
-        assert clipA.checkSame(clipB)
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
 
-    def test_check_not_same(self):
-        # check that two exact same clips are the same
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert clipDataB.checkSame(clipDataA)
+
+    def test_check_same_if_move(self):
         # check that two exact same clips but moved in the timeline are the same
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName2",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),                                    
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),                                    
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        gapDur = otio.opentime.RationalTime(5, 24)
+        gap = otio.schema.Gap(duration = gapDur)
+
+        trackA.append(clipA)
+        trackB.extend([gap, clipB])
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert clipDataB.checkSame(clipDataA)
+        assert clipDataB.note == "moved"
         
-        assert not clipA.checkSame(clipB)
-        assert clipA.note is None
+    def test_check_not_same(self):
+        # check that two clips with different names are not the same
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName2 testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        assert not clipDataB.checkSame(clipDataA)
+        assert clipDataB.note is None
 
     def test_check_not_same2(self):
-        # check that two exact same clips are the same
-        # check that two exact same clips but moved in the timeline are the same
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(duration=otio.opentime.RationalTime(100,1)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        
-        assert not clipA.checkSame(clipB)
-        assert clipA.note is None
+        # check that two clips with different source range start durations are not the same
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(20, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
 
-    def test_check_not_same3_moved(self):
-        # check that two exact same clips are the same
-        # check that two exact same clips but moved in the timeline are the same
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(100,1)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
         
-        assert clipA.checkSame(clipB)
-        assert clipA.note == "moved"
+        assert not clipDataB.checkSame(clipDataA)
+        assert clipDataB.note is None
+
+    def test_check_not_same3(self):
+        # check that two clips with different source range start times are not the same
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        
+        assert not clipDataB.checkSame(clipDataA)
+        assert clipDataB.note is None
 
     def test_check_Edited(self):
         # check for trim head/tail and lengthen head/tail
-        clipA = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(0,1)),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("testName",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(100,1)),
-                    otio.opentime.TimeRange(),
-                    otio.schema.Clip(),
-                    "testTake")
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(90, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(90, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
         
-        assert clipA.checkEdited(clipB)
-        assert clipA.note == "start time changed"
+        assert clipDataB.checkEdited(clipDataA)
+        assert clipDataB.note == "trimmed 10 frames"
 
 class TestGetDif(unittest.TestCase):
     def test_find_clones(self):
-        clipA = ClipData("clipA",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("clipB",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(10, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipC = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(20, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipCClone = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(30, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipD = ClipData("clipD",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(40, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
+        clipA = otio.schema.Clip(
+            name = "clipA testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipB = otio.schema.Clip(
+            name = "clipB testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipC = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(20, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipCClone = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(30, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipD = otio.schema.Clip(
+            name = "clipD testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(40, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        trackA = otio.schema.Track()
+
+        trackA.extend([clipA, clipB, clipC, clipCClone, clipD])
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        clipDataC = ClipData(clipC, 1)
+        clipDataCClone = ClipData(clipCClone, 1)
+        clipDataD = ClipData(clipD, 1)
         
-        testClips = [clipA, clipB, clipC, clipCClone, clipD]
+        testClips = [clipDataA, clipDataB, clipDataC, clipDataCClone, clipDataD]
         clones, nonClones = getDiff.findClones(testClips)
 
-        correctClones = {clipC.name: [clipC, clipCClone]}
-        correctNonClones = [clipA, clipB, clipD]
+        correctClones = {clipDataC.name: [clipDataC, clipDataCClone]}
+        correctNonClones = [clipDataA, clipDataB, clipDataD]
 
         assert(clones == correctClones), "Not all cloned clips correctly identified"
         assert(nonClones == correctNonClones), "Not all unique clips correctly identified"
@@ -212,38 +409,53 @@ class TestGetDif(unittest.TestCase):
 
     def test_sort_clones_clones_in_both(self):
         # SETUP
-        clipA = ClipData("clipA",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipB = ClipData("clipB",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(10, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipC = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(20, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipCClone = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(30, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipD = ClipData("clipD",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipDatasA = [clipA, clipB, clipC, clipCClone]
-        clipDatasB = [clipB, clipC, clipCClone, clipD]
+        clipA = otio.schema.Clip(
+            name = "clipA testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipB = otio.schema.Clip(
+            name = "clipB testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipC = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(20, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipCClone = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(30, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipD = otio.schema.Clip(
+            name = "clipD testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(40, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        trackA = otio.schema.Track()
+
+        trackA.extend([clipA, clipB, clipC, clipCClone, clipD])
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        clipDataC = ClipData(clipC, 1)
+        clipDataCClone = ClipData(clipCClone, 1)
+        clipDataD = ClipData(clipD, 1)
+
+        clipDatasA = [clipDataA, clipDataB, clipDataC, clipDataCClone]
+        clipDatasB = [clipDataB, clipDataC, clipDataCClone, clipDataD]
 
         # EXERCISE
         sortedClonesA, sortedClonesB = getDiff.sortClones(clipDatasA, clipDatasB)
@@ -258,38 +470,54 @@ class TestGetDif(unittest.TestCase):
         assert(len(nonClonesB) == 2), "Number of non-clones found in trackB doesn't match"
 
     def test_sort_clones_clones_in_one(self):
-        clipA = ClipData("clipA",
-                "testMR.mov",
-                otio.opentime.TimeRange(),
-                otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                otio.schema.Clip(),
-                "testTake")
-        clipB = ClipData("clipB",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(10, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipC = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(20, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipCClone = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(30, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipD = ClipData("clipD",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipDatasA = [clipA, clipB, clipC, clipCClone]
-        clipDatasB = [clipA, clipB, clipD]
+        # SETUP
+        clipA = otio.schema.Clip(
+            name = "clipA testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipB = otio.schema.Clip(
+            name = "clipB testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipC = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(20, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipCClone = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(30, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipD = otio.schema.Clip(
+            name = "clipD testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(40, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        trackA = otio.schema.Track()
+
+        trackA.extend([clipA, clipB, clipC, clipCClone, clipD])
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        clipDataC = ClipData(clipC, 1)
+        clipDataCClone = ClipData(clipCClone, 1)
+        clipDataD = ClipData(clipD, 1)
+
+        clipDatasA = [clipDataA, clipDataB, clipDataC, clipDataCClone]
+        clipDatasB = [clipDataA, clipDataB, clipDataD]
 
         # EXERCISE
         sortedClonesA, sortedClonesB = getDiff.sortClones(clipDatasA, clipDatasB)
@@ -304,38 +532,54 @@ class TestGetDif(unittest.TestCase):
         assert(len(nonClonesB) == 3), "Number of non-clones found in trackB doesn't match"
         
     def test_sort_clones_clones_in_one_single_in_other(self):
-        clipA = ClipData("clipA",
-                "testMR.mov",
-                otio.opentime.TimeRange(),
-                otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                otio.schema.Clip(),
-                "testTake")
-        clipB = ClipData("clipB",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(10, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipC = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(20, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipCClone = ClipData("clipC",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(30, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipD = ClipData("clipD",
-                    "testMR.mov",
-                    otio.opentime.TimeRange(),
-                    otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(10, 24)),
-                    otio.schema.Clip(),
-                    "testTake")
-        clipDatasA = [clipA, clipB, clipC, clipCClone]
-        clipDatasB = [clipB, clipC, clipD]
+        # SETUP
+        clipA = otio.schema.Clip(
+            name = "clipA testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipB = otio.schema.Clip(
+            name = "clipB testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipC = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(20, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipCClone = otio.schema.Clip(
+            name = "clipC testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(30, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        clipD = otio.schema.Clip(
+            name = "clipD testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(40, 24),
+                                    otio.opentime.RationalTime(10, 24))),
+        )
+        trackA = otio.schema.Track()
+
+        trackA.extend([clipA, clipB, clipC, clipCClone, clipD])
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        clipDataC = ClipData(clipC, 1)
+        clipDataCClone = ClipData(clipCClone, 1)
+        clipDataD = ClipData(clipD, 1)
+
+        clipDatasA = [clipDataA, clipDataB, clipDataC, clipDataCClone]
+        clipDatasB = [clipDataB, clipDataC, clipDataD]
 
         # EXERCISE
         sortedClonesA, sortedClonesB = getDiff.sortClones(clipDatasA, clipDatasB)
@@ -349,13 +593,13 @@ class TestGetDif(unittest.TestCase):
         assert(len(clonesB) == 1), "Number of clones found in trackB doesn't match"
         assert(len(nonClonesB) == 2), "Number of non-clones found in trackB doesn't match"
 
-class TestMakeOtio(unittest.TestCase):
-    # Test the type parameter to makeTimelineOfType, but not the detailed results.
-    def test_make_timeline_type(self):
-        # SETUP
-        trackA = otio.schema.Track()
-        trackB = otio.schema.Track()
-        pass
+# class TestMakeOtio(unittest.TestCase):
+#     # Test the type parameter to makeTimelineOfType, but not the detailed results.
+#     def test_make_timeline_type(self):
+#         # SETUP
+#         trackA = otio.schema.Track()
+#         trackB = otio.schema.Track()
+#         pass
 
         # SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
         # videoGroup = SortedClipDatas([], [], [], [])

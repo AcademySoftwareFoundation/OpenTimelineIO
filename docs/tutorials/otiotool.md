@@ -6,11 +6,11 @@
 
 `otiotool` is included with several other command line utilities as part of the
 OpenTimelineIO Python module. You can install it via typical Python utilities
-like `pip`, etc.
+like `pip`, etc. See [Quickstart](./quickstart#install-otio]) for details.
 
-If you don't already have that module installed, but you do have
+[!NOTE] If you have
 [uv installed](https://docs.astral.sh/uv/), then you can use `otiotool` with
-this handy shortcut:
+this handy shortcut without having to deal with any installation:
 
 ```bash
 uvx --from opentimelineio otiotool
@@ -20,10 +20,18 @@ uvx --from opentimelineio otiotool
 
 `otiotool` reads one or more OTIO timeline files, optionally makes changes to the timelines, and outputs a text report and/or a new OTIO file with the result.
 
-To run `otiotool` for reporting, use:
+To run `otiotool` for reporting, use options like `--list-clips` or `--list-tracks`. The report output is
+printed to the console:
 
 ```bash
 otiotool --input <input_file.otio> [more inputs...] [options]
+```
+
+Report output can be redirected from standard output
+to a file like any terminal program:
+
+```bash
+otiotool --input <input_file.otio> [more inputs...] [options] > report.txt
 ```
 
 To run `otiotool` to create a new OTIO file, use:
@@ -34,20 +42,37 @@ otiotool --input <input_file.otio> [more inputs...] [options] --output <output_f
 
 Many of `otiotool`'s command line options have a long and a short form. For example: `--input` is also `-i`, and `--output` is `-o`.
 
+Multiple options of `otiotool` can be combined into
+a single invocation. For example, you might read a file,
+trim it, remove some tracks, verify missing media into
+a report and output a new file all in one command like this:
+
+```bash
+otiotool -i multitrack.otio -trim 20 30 --video-only --verify-media -o output.otio > report.txt
+```
+
 For a complete listing of all options use `otiotool -h`.
 
 ## Phases
 
 Unlike some other command line tools, the order in which options appear on
-the command line does not matter. For example `otiotool -i input.otio --flatten -o output.otio` is the same as `otiotool --flatten -o output.otio -i input.otio`
+the command line does not matter. For example these two commands do the same thing:
+
+```bash
+otiotool -i input.otio --flatten -o output.otio
+otiotool --flatten -o output.otio -i input.otio
+```
+
 Instead, the features of this tool work in phases, as follows:
 
 1. Input
+
     Input files provided by the `--input <filename>` argument(s) are read into
     memory. Files may be OTIO format, or any format supported by adapter
     plugins.
 
 2. Filtering
+
     Options such as `--video-only`, `--audio-only`, `--only-tracks-with-name`,
     `--only-tracks-with-index`, `--only-clips-with-name`,
     `--only-clips-with-name-regex`, `--remove-transitions`, and `--trim` will remove
@@ -55,13 +80,16 @@ Instead, the features of this tool work in phases, as follows:
     provided are passed to the next phase.
 
 3. Combine
+
     If specified, the `--stack` or `--concat` operations are
     performed (in that order) to combine all of the input timeline(s) into one.
 
 4. Flatten
+
     If `--flatten` is specified, multiple tracks are flattened into one.
 
 5. Relink
+
     The `--relink-by-name` option, will scan the specified folder(s) looking for
     files which match the name of each clip in the input timeline(s).
     If matching files are found, clips will be relinked to those files (using
@@ -70,17 +98,20 @@ Instead, the features of this tool work in phases, as follows:
     all linked media, and relink the OTIO to reference the local copies.
 
 6. Remove/Redact
+
     The `--remove-metadata-key` option allows you to remove a specific piece of
     metadata from all objects.
     If specified, the `--redact` option, will remove ALL metadata and rename all
     objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
 
 7. Inspect
+
     Options such as `--stats`, `--list-clips`, `--list-tracks`, `--list-media`,
     `--verify-media`, `--list-markers`, `--verify-ranges`, and `--inspect`
     will examine the OTIO and print information to standard output.
 
 8. Output
+
     Finally, if the `--output <filename>` option is specified, the resulting
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
@@ -143,7 +174,7 @@ otiotool -i premiere_example.otio --list-clips --only-clips-with-name "sc01_sh01
 otiotool -i premiere_example.otio --list-clips --only-clips-with-name-regex "sh\d+_anim"
 ```
 
-Note that `--only-clips-with-name-regex` uses the Regular Expression syntax [documented here](https://docs.python.org/3/library/re.html).
+Note that `--only-clips-with-name-regex` uses the [Python Regular Expression syntax](https://docs.python.org/3/library/re.html).
 
 ## Media Information
 
@@ -153,7 +184,7 @@ otiotool -i multitrack.otio --list-tracks --list-clips --list-media
 ```
 
 ### Verify Media Existence
-Checks if media files exist. Note, only local file paths are checked by `otiotool` not URLs or other non-file path media references.
+Checks if media files exist. Note: only local file paths are checked by `otiotool`, not URLs or other non-file path media references.
 ```bash
 otiotool -i premiere_example.otio --verify-media
 ```
@@ -191,15 +222,29 @@ TIMELINE: OTIO TEST - multitrack.Exported.01
     range in NestedScope (<class 'opentimelineio._otio.Stack'>): TimeRange(RationalTime(1198, 24), RationalTime(640, 24))
 ```
 
+## Input/Output
 
-## Output File
+### Input File(s)
+
+Multiple input files can be specified via `--input` like this:
+
+```bash
+otiotool -i one.otio two.otio three.otio --concat -o result.otio
+```
+
+[!NOTE] When `otiotool` is given multiple inputs, the order of those inputs will affect the outcome of `--concat`, `--stack`, and any text reports printed to the console.
+
+### Output File
 
 Modifications to the timeline(s) can be written out to a new file with the
 `--output <filename.otio>` option.
 
+Note: The input files are never modified unless the
+output path specifies the same file, in which case that file will be overwritten (not recommended).
+
 ### Multiple Timelines
 
-If the result is a single timeline, then resulting file contains that timeline
+If the result is a single timeline, then the output file will contain that timeline
 as expected. However, if there were multiple input files and those timelines
 were not combined with `--concat` or `--stack` then the output will be a single
 file containing a SerializableCollection with multiple timelines. This is a
@@ -208,20 +253,30 @@ timeline in an OTIO file.
 
 ### Standard In/Out
 
-If you specify the `--output` file as a single `-` then the resulting OTIO will
-be written to as text to stdout instead of a file. You can also use `-` as an
-input file. This allows you to chain `otiotool` with other tools on the command
+You can chain `otiotool` with other tools on the command
 line.
+
+If you specify the `--output` file as a single `-` then the resulting OTIO will
+be printed as text to stdout instead of a file. 
 
 ```bash
 otiotool -i multitrack.otio --video-only -o - | grep MissingReference
 ```
 
+You can also use `-` as an
+input from stdin.
+
+```bash
+curl https://example.com/some/path/premiere_example.otio | otiotool -i - --verify-media --stats
+```
+
 ### Format Conversion
 
-The format of the output file is inferred
+The format of the input and output file is inferred
 from the filename extension. It can be `.otio` for an OTIO file, or any other
-file format supported by an available OTIO adapter plugin. Thus `otiotool`
+file format supported by an available [OTIO adapter plugin](./adapters).
+
+Thus `otiotool`
 can operate much like `otioconvert` however some more advanced conversion
 options are only available in `otioconvert`. If you need both, you can write
 to an intermediate OTIO file and convert to/from the other format in a separate
@@ -249,7 +304,7 @@ The start and end times for `--trim` can be either a floating point number of se
 or timecode `HH:MM:SS:FF` in the frame rate inferred from the timeline itself.
 
 ### Flatten Tracks
-Combine tracks into one:
+Combine multiple tracks into one with `--flatten <TYPE>` where `TYPE` is either `video`, `audio`, or `all`:
 ```bash
 otiotool -i multitrack.otio --flatten video -o output.otio --list-tracks
 ```
@@ -285,7 +340,7 @@ When working with an application or workflow that requires an older OTIO
 file format, you can use `otiotool` to downgrade an OTIO to a specific schema
 version which is compatible.
 
-See [Versioning Schemas](versioning-schemas.md) to understand this in detail.
+See [Versioning Schemas](./versioning-schemas) to understand this in detail.
 
 ```bash
 otiotool --list-versions

@@ -324,6 +324,21 @@ Replace names of clips, tracks, etc. with generic labels:
 ```bash
 otiotool -i multitrack.otio --redact -o output.otio --list-clips
 ```
+Output:
+```
+TIMELINE: Timeline #1
+  CLIP: Clip #1
+  CLIP: Clip #2
+  CLIP: Clip #3
+  CLIP: Clip #4
+  CLIP: Clip #5
+```
+
+This feature is meant for cases where you want to share an OTIO without leaking
+sensitive information that might appear in a clip name, metadata, etc. For
+example when filing a bug report.
+Please look at the file contents after running this to ensure everything you
+care about was handled.
 
 ### Remove Transitions
 Remove all transitions:

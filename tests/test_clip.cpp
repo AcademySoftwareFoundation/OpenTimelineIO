@@ -263,6 +263,24 @@ main(int argc, char** argv)
     // test to ensure null error_status pointers are correctly handled
     tests.add_test("test_error_ptr_null", [] {
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        // std::cout << "running error null test" << std::endl;
+
+>>>>>>> 25de98d (merge)
+        using namespace otio;
+
+        // tests for no image bounds on media reference on clip
+        SerializableObject::Retainer<Clip> clip(new Clip);
+
+        // check that there is an error, and that it's the correct error
+        otio::ErrorStatus mr_bounds_error;
+<<<<<<< HEAD
+        clip->available_image_bounds(&mr_bounds_error);
+=======
+        mr_clip->available_image_bounds(&mr_bounds_error);
+=======
         using namespace otio;
 
         // tests for no image bounds on media reference on clip
@@ -271,6 +289,8 @@ main(int argc, char** argv)
         // check that there is an error, and that it's the correct error
         otio::ErrorStatus mr_bounds_error;
         clip->available_image_bounds(&mr_bounds_error);
+>>>>>>> bacf095 (fixed image bounds error status null bug + test case (#1896))
+>>>>>>> 25de98d (merge)
         assertTrue(otio::is_error(mr_bounds_error));
         assertEqual(
             mr_bounds_error.outcome,
@@ -280,6 +300,49 @@ main(int argc, char** argv)
         otio::ErrorStatus* null_test = nullptr;
 
         assertEqual(
+<<<<<<< HEAD
+            clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
+=======
+<<<<<<< HEAD
+            mr_clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
+>>>>>>> 25de98d (merge)
+        );
+    });
+
+    // test to ensure null error_status pointers are correctly handled
+    // when there's no media reference
+    tests.add_test("test_error_ptr_null_no_media", [] {
+        using namespace otio;
+
+        SerializableObject::Retainer<Clip> clip(new Clip);
+
+<<<<<<< HEAD
+        // set media reference to empty
+        Clip::MediaReferences empty_mrs;
+        empty_mrs["empty"] = nullptr;
+        clip->set_media_references(empty_mrs, "empty");
+=======
+        otio::ErrorStatus              status;
+        SerializableObject::Retainer<> so =
+            SerializableObject::from_json_string(
+                R"(
+            {
+                "OTIO_SCHEMA": "Clip.1"
+            })",
+                &status);
+
+        assertFalse(is_error(status));
+
+        Clip* clip = dynamic_cast<Clip*>(so.value);
+        assertNotNull(clip);
+
+        // set media reference key to empty string
+        otio::ErrorStatus media_ref_key_error;
+        clip->set_active_media_reference_key("", &media_ref_key_error);
+<<<<<<< HEAD
+>>>>>>> 3fad221 (fixed non-initialized pointer)
+=======
+=======
             clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
         );
     });
@@ -295,6 +358,8 @@ main(int argc, char** argv)
         Clip::MediaReferences empty_mrs;
         empty_mrs["empty"] = nullptr;
         clip->set_media_references(empty_mrs, "empty");
+>>>>>>> bacf095 (fixed image bounds error status null bug + test case (#1896))
+>>>>>>> 25de98d (merge)
 
         otio::ErrorStatus bounds_error_no_mr;
         clip->available_image_bounds(&bounds_error_no_mr);

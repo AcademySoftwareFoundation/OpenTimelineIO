@@ -36,7 +36,7 @@ def diffTimelines(timelineA, timelineB):
 
     makeTimelineSummary(timelineA, timelineB)
 
-    outputTimeline = None
+    outputTimeline = otio.schema.Timeline()
     # process video tracks, audio tracks, or both
     if hasVideo and hasAudio:
         videoClipTable = categorizeClipsByTracks(timelineA.video_tracks(), timelineB.video_tracks())

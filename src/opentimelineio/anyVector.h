@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 #include <any>
@@ -20,7 +21,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 ///
 /// This allows us to hand out iterators that can be aware of moves
 /// and take steps to safe-guard themselves from causing a crash.
-class AnyVector : private std::vector<std::any>
+class OPENTIMELINEIO_EXPORT AnyVector : private std::vector<std::any>
 {
 public:
     using vector::vector;

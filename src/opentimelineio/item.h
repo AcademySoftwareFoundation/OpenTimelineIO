@@ -15,7 +15,7 @@ class Effect;
 class Marker;
 
 /// @brief An item in the timeline.
-class Item : public Composable
+class OPENTIMELINEIO_EXPORT Item : public Composable
 {
 public:
     /// @brief This struct provides the Item schema.

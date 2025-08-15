@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 ///
 /// The marked range may have a zero duration. The marked range is in the
 /// owning item's time coordinate system.
-class Marker : public SerializableObjectWithMetadata
+class OPENTIMELINEIO_EXPORT Marker : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the base set of colors.

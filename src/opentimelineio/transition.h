@@ -10,7 +10,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// @brief Represents a transition between the two adjacent items in a Track.
 ///
 /// For example, a cross dissolve or wipe.
-class Transition : public Composable
+class OPENTIMELINEIO_EXPORT Transition : public Composable
 {
 public:
     /// @brief This struct provides base set of transitions.

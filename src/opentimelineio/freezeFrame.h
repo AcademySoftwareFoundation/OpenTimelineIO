@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief Hold the first frame of the clip for the duration of the clip.
-class FreezeFrame : public LinearTimeWarp
+class OPENTIMELINEIO_EXPORT FreezeFrame : public LinearTimeWarp
 {
 public:
     /// @brief This struct provides the FreezeFrame schema.

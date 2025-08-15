@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -21,7 +22,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// Round-trip conversions may not be guaranteed outside that.
 /// This class is meant for use in user interface elements,
 // like marker or clip coloring, NOT for image pixel content.
-class Color
+class OPENTIMELINEIO_EXPORT Color
 {
 public:
     struct Schema

@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A serializable object with metadata.
-class SerializableObjectWithMetadata : public SerializableObject
+class OPENTIMELINEIO_EXPORT SerializableObjectWithMetadata : public SerializableObject
 {
 public:
     /// @brief This struct provides the SerializableObjectWithMetadata schema.

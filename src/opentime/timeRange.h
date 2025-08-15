@@ -16,7 +16,7 @@ namespace opentime { namespace OPENTIME_VERSION {
 /// a resolution of half a frame at 192kHz. The value can be changed in the future if
 /// necessary, due to higher sampling rates or some other kind of numeric tolerance
 /// detected in the library.
-constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
+OPENTIME_EXPORT constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 /// @brief This class represents a time range defined by a start time and duration.
 ///
@@ -27,7 +27,7 @@ constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 /// The duration on a TimeRange indicates a time range that is inclusive of the
 /// start time, and exclusive of the end time. All of the predicates are
 /// computed accordingly.
-class TimeRange
+class OPENTIME_EXPORT TimeRange
 {
 public:
     /// @brief Construct a new time range with a zero start time and duration.

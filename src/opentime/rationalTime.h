@@ -22,8 +22,12 @@ enum OPENTIME_EXPORT IsDropFrameRate : int
 
 /// @brief Returns the absolute value.
 ///
-/// \todo Document why this function is used instead of "std::fabs()".
-OPENTIME_EXPORT constexpr double
+/// \todo This function is used instead of "std::fabs()" so we can mark it as
+/// constexpr. We can remove this and replace it with the std version when we
+/// upgrade to C++ 23.
+///
+/// \todo Remove this function from the public API.
+constexpr double
 fabs(double val) noexcept
 {
     union

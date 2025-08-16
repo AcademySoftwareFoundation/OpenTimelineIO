@@ -339,14 +339,14 @@ def makeNewOtio(clipTable, trackType):
     if trackType == otio.schema.Track.Kind.Video:
         newTl.tracks.extend(tracksInA)
 
-        newEmpty = makeOtio.makeEmptyTrack(trackType)
+        newEmpty = makeOtio.makeSeparaterTrack(trackType)
         newTl.tracks.append(newEmpty)
         
         newTl.tracks.extend(tracksInB)
     elif trackType == otio.schema.Track.Kind.Audio:
         newTl.tracks.extend(tracksInB)
 
-        newEmpty = makeOtio.makeEmptyTrack(trackType)
+        newEmpty = makeOtio.makeSeparaterTrack(trackType)
         newTl.tracks.append(newEmpty)
         
         newTl.tracks.extend(tracksInA)

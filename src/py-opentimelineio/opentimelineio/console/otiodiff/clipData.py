@@ -78,7 +78,7 @@ class ClipData:
                     # Note: check in relation to left and right?
                     #       know if moved in seq rather than everything shifted over because of lengthen/shorten of other clips
                     isSame = True
-                    self.note = "moved"
+                    self.note = "shifted laterally in track"
             else:
                 # print("source range different", cA.name, self.name)
                 # print(self.media_ref)

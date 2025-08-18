@@ -23,6 +23,10 @@ from copy import deepcopy
 
 import opentimelineio as otio
 
+# sys.path.append("src/py-opentimelineio/opentimelineio/console/otiodiff")
+
+from .otiodiff import getDiff
+
 
 def main():
     """otiotool main program.
@@ -114,6 +118,13 @@ def main():
     if args.copy_media_to_folder:
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
+
+    # TODO: Update numbering
+    # ===== NEW Phase 5.5: Diff otio files ======
+
+    if args.diff:
+        # TODO? stack, concat, diff make mutually exclusive
+        timelines = [diff_otio(timelines)]
 
     # Phase 6: Remove/Redaction
 
@@ -210,6 +221,13 @@ This tool works in phases, as follows:
     If specified, the --redact option, will remove ALL metadata and rename all
     objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
 
+5.5 Diff
+    The --diff option allows you to compare two OTIO files. It generates an
+    OTIO file annotated with the differences between their clips as well as a
+    text summary report in the console. Ordering of files given to --input matters
+    as diff compares the second file to the first.
+    --diff can't be used concurrently with --stack or --concat
+
 6. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
     --verify-media, --list-markers, --verify-ranges, and --inspect
@@ -234,7 +252,11 @@ Verify that all referenced media files are accessible:
 otiotool -i playlist.otio --verify-media
 
 Inspect specific audio clips in detail:
-otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
+otiotool -i playlist.otio --audio-only --list-tracks --inspect "Interview"
+
+Diff fileB against fileA
+(ordering matters where fileA is the file fileBcompares against):
+otiotool -i fileA.otio fileB.otio --diff --o display.otio
 """,
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -451,6 +473,16 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         are supported. Use '-' to write OTIO to standard output."""
     )
 
+    # NEW ==============
+    parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="""Diff and compare two otio files. Input file type must be .otio
+            and input file order matters"""
+    )
+
+    # ==================
+
     args = parser.parse_args()
 
     # At least one of these must be specified
@@ -487,6 +519,21 @@ def read_inputs(input_paths):
             timeline = otio.adapters.read_from_file(input_path)
         timelines.append(timeline)
     return timelines
+
+
+def diff_otio(timelines):
+    # TODO: check file format of timelines for OTIO
+    """Return an annotated timeline showing how clips changed from the first to
+    the second timeline"""
+    assert len(
+        timelines) >= 2, "Less than 2 timelines given. 2 timelines are required"
+    " to perform a diff"
+
+    if len(timelines) != 2:
+        print("Warning: more than 2 timelines provided as input. Only the first"
+              " two timelines will be diffed.")
+    else:
+        return getDiff.diffTimelines(timelines[0], timelines[1])
 
 
 def keep_only_video_tracks(timeline):

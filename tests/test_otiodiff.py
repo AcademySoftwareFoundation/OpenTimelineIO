@@ -212,7 +212,7 @@ class TestClipData(unittest.TestCase):
         clipDataB = ClipData(clipB, 1)
 
         assert clipDataB.checkSame(clipDataA)
-        assert clipDataB.note == "moved"
+        assert clipDataB.note == "shifted laterally in track"
         
     def test_check_not_same(self):
         # check that two clips with different names are not the same
@@ -315,8 +315,8 @@ class TestClipData(unittest.TestCase):
         
         assert not clipDataB.checkSame(clipDataA)
         assert clipDataB.note is None
-
-    def test_check_Edited(self):
+    
+    def test_check_edited_trimmed_head(self):
         # check for trim head/tail and lengthen head/tail
         clipA = otio.schema.Clip(
             name = "testName testTake",
@@ -332,8 +332,8 @@ class TestClipData(unittest.TestCase):
             name = "testName testTake",
             media_reference = otio.core.MediaReference(
                                 available_range=otio.opentime.TimeRange(
-                                    otio.opentime.RationalTime(10, 24),
-                                    otio.opentime.RationalTime(90, 24))),
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
             source_range = otio.opentime.TimeRange(
                                     otio.opentime.RationalTime(10, 24),
                                     otio.opentime.RationalTime(90, 24)),
@@ -346,9 +346,115 @@ class TestClipData(unittest.TestCase):
 
         clipDataA = ClipData(clipA, 1)
         clipDataB = ClipData(clipB, 1)
+
         
         assert clipDataB.checkEdited(clipDataA)
-        assert clipDataB.note == "trimmed 10 frames"
+        print("note is:", clipDataB.note)
+        assert clipDataB.note == "trimmed head by 10 frames"
+
+    def test_check_edited_trimmed_tail(self):
+        # check for trim head/tail and lengthen head/tail
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(90, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+
+        
+        assert clipDataB.checkEdited(clipDataA)
+        assert clipDataB.note == "trimmed tail by 10 frames"
+
+    def test_check_edited_lengthened_head(self):
+        # check for trim head/tail and lengthen head/tail
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(10, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(20, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        
+        assert clipDataB.checkEdited(clipDataA)
+        print("note:", clipDataB.note)
+        assert clipDataB.note == "lengthened head by 10 frames"
+
+    def test_check_edited_lengthened_tail(self):
+        # check for trim head/tail and lengthen head/tail
+        clipA = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(10, 24)),
+        )
+        clipB = otio.schema.Clip(
+            name = "testName testTake",
+            media_reference = otio.core.MediaReference(
+                                available_range=otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(100, 24))),
+            source_range = otio.opentime.TimeRange(
+                                    otio.opentime.RationalTime(0, 24),
+                                    otio.opentime.RationalTime(20, 24)),
+        )
+        trackA = otio.schema.Track()
+        trackB = otio.schema.Track()
+
+        trackA.append(clipA)
+        trackB.append(clipB)
+
+        clipDataA = ClipData(clipA, 1)
+        clipDataB = ClipData(clipB, 1)
+        
+        assert clipDataB.checkEdited(clipDataA)
+        assert clipDataB.note == "lengthened tail by 10 frames"
 
 class TestGetDif(unittest.TestCase):
     def test_find_clones(self):
@@ -593,28 +699,14 @@ class TestGetDif(unittest.TestCase):
         assert(len(clonesB) == 1), "Number of clones found in trackB doesn't match"
         assert(len(nonClonesB) == 2), "Number of non-clones found in trackB doesn't match"
 
-# class TestMakeOtio(unittest.TestCase):
-#     # Test the type parameter to makeTimelineOfType, but not the detailed results.
-#     def test_make_timeline_type(self):
-#         # SETUP
-#         trackA = otio.schema.Track()
-#         trackB = otio.schema.Track()
-#         pass
+    # TODO: test case for timelines with unmatched track nums
+    # test case for timeline with matched track nums
 
-        # SortedClipDatas = namedtuple('VideoGroup', ['add', 'edit', 'same', 'delete'])
-        # videoGroup = SortedClipDatas([], [], [], [])
+class TestMakeOtio(unittest.TestCase):
+    # TODO: test sort clips
 
-        # # EXERCISE
-        # tlStack = makeOtio.makeTimelineOfType("stack", trackA, trackB, videoGroup)
-        # tlInline = makeOtio.makeTimelineOfType("inline", trackA, trackB, videoGroup)
-        # tlFull = makeOtio.makeTimelineOfType("full", trackA, trackB, videoGroup)
-        # bogus = makeOtio.makeTimelineOfType("bogus", trackA, trackB, videoGroup)
-
-        # # VERIFY
-        # assert(len(tlStack.tracks) == 6), "Number of tracks for stack display mode not matched"
-        # assert(len(tlInline.tracks) == 2), "Number of tracks for inline display mode not matched"
-        # assert(len(tlFull.tracks) == 5), "Number of tracks for full display mode not matched"
-        # assert(bogus is None), "Should have been invalid result"
+    # test make track
+    pass
 
 
 if __name__ == '__main__':

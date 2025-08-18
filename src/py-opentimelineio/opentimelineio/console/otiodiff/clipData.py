@@ -132,7 +132,7 @@ class ClipData:
 
             # clip duration longer
             elif(selfDur.value > cADur.value):
-                self.note = "lengthened"
+                self.note = "lengthened " + deltaFramesStr + " frames"
 
                 if(selfSourceStart.value == cASourceStart.value):
                     self.note = "lengthened tail by " + deltaFramesStr + " frames"

@@ -27,8 +27,8 @@ import opentimelineio as otio
 
 from .otiodiff import getDiff
 
+
 def main():
-    
     """otiotool main program.
     This function is responsible for executing the steps specified
     by all of the command line arguments in the right order.
@@ -223,7 +223,7 @@ This tool works in phases, as follows:
 
 5.5 Diff
     The --diff option allows you to compare two OTIO files. It generates an
-    OTIO file annotated with the differences between their clips as well as a 
+    OTIO file annotated with the differences between their clips as well as a
     text summary report in the console. Ordering of files given to --input matters
     as diff compares the second file to the first.
     --diff can't be used concurrently with --stack or --concat
@@ -254,7 +254,8 @@ otiotool -i playlist.otio --verify-media
 Inspect specific audio clips in detail:
 otiotool -i playlist.otio --audio-only --list-tracks --inspect "Interview"
 
-Diff fileB against fileA (ordering matters where fileA is the file fileB compares against):
+Diff fileB against fileA
+(ordering matters where fileA is the file fileBcompares against):
 otiotool -i fileA.otio fileB.otio --diff --o display.otio
 """,
         formatter_class=argparse.RawDescriptionHelpFormatter
@@ -476,7 +477,8 @@ otiotool -i fileA.otio fileB.otio --diff --o display.otio
     parser.add_argument(
         "--diff",
         action="store_true",
-        help="""Diff and compare two otio files. Input file type must be .otio and input file order matters"""
+        help="""Diff and compare two otio files. Input file type must be .otio
+            and input file order matters"""
     )
 
     # ==================
@@ -518,15 +520,21 @@ def read_inputs(input_paths):
         timelines.append(timeline)
     return timelines
 
+
 def diff_otio(timelines):
     # TODO: check file format of timelines for OTIO
-    """Return an annotated timeline showing how clips changed from the first to the second timeline"""
-    assert len(timelines) >= 2, "Less than 2 timelines given. 2 timelines are required to perform a diff"
+    """Return an annotated timeline showing how clips changed from the first to
+    the second timeline"""
+    assert len(
+        timelines) >= 2, "Less than 2 timelines given. 2 timelines are required"
+    " to perform a diff"
 
     if len(timelines) != 2:
-        print("Warning: more than 2 timelines provided as input. Only the first two timelines will be diffed.")
+        print("Warning: more than 2 timelines provided as input. Only the first"
+              " two timelines will be diffed.")
     else:
         return getDiff.diffTimelines(timelines[0], timelines[1])
+
 
 def keep_only_video_tracks(timeline):
     """Remove all tracks except for video tracks from a timeline."""

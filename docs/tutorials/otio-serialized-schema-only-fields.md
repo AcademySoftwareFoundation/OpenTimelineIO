@@ -31,6 +31,15 @@ parameters:
 
 ## Module: opentimelineio.core
 
+### Color.1
+
+parameters:
+- *a*
+- *b*
+- *g*
+- *name*
+- *r*
+
 ### Composable.1
 
 parameters:

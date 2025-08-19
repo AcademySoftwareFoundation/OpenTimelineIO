@@ -6,9 +6,10 @@
 
 `otiotool` is included with several other command line utilities as part of the
 OpenTimelineIO Python module. You can install it via typical Python utilities
-like `pip`, etc. See [Quickstart](./quickstart#install-otio]) for details.
+like `pip`, etc. See [Quickstart](./quickstart]) for details.
 
-[!NOTE] If you have
+> [!TIP]
+> If you have
 [uv installed](https://docs.astral.sh/uv/), then you can use `otiotool` with
 this handy shortcut without having to deal with any installation:
 
@@ -232,14 +233,16 @@ Multiple input files can be specified via `--input` like this:
 otiotool -i one.otio two.otio three.otio --concat -o result.otio
 ```
 
-[!NOTE] When `otiotool` is given multiple inputs, the order of those inputs will affect the outcome of `--concat`, `--stack`, and any text reports printed to the console.
+> [!NOTE]
+> When `otiotool` is given multiple inputs, the order of those inputs will affect the outcome of `--concat`, `--stack`, and any text reports printed to the console.
 
 ### Output File
 
 Modifications to the timeline(s) can be written out to a new file with the
 `--output <filename.otio>` option.
 
-[!NOTE] The input files are never modified unless the
+> [!NOTE]
+> The input files are never modified unless the
 output path specifies the same file, in which case that file will be overwritten (not recommended).
 
 ### Multiple Timelines
@@ -311,7 +314,8 @@ otiotool -i multitrack.otio --flatten video -o output.otio --list-tracks
 
 ### Stack or Concatenate Timelines
 
-[!NOTE] With `--stack` and `--concat` the order of the input files affects the outcome.
+> [!NOTE]
+> With `--stack` and `--concat` the order of the input files affects the outcome.
 
 When concatenated, the inputs are assembled in the order listed, so the first input is earliest on the output timeline.
 

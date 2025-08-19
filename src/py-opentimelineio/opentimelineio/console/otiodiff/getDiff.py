@@ -92,8 +92,8 @@ def findClones(clips):
 
     Returns:
     clones (dictionary): dictionary of all clones in the group of ClipDatas
-                        keys: name of clone
-                        values: list of ClipDatas of that name
+        keys: name of clone
+        values: list of ClipDatas of that name
     nonClones (list): list of unique clones in group of ClipDatas
     """
 
@@ -208,6 +208,8 @@ def compareClips(clipDatasA, clipDatasB):
         if cB.name not in namesA:
             added.append(cB)
         else:
+            if namesA[cB.name] is None:
+                print("has none pair")
             cB.matched_clipData = namesA[cB.name]
             isSame = cB.checkSame(cB.matched_clipData)
             if (isSame):
@@ -407,17 +409,17 @@ def categorizeClipsByTracks(tracksA, tracksB):
     Returns:
     clipTable (dictionary): dictionary holding categorized ClipDatas, organized
     by the track number of the ClipDatas
-                           dictionary keys: track number (int)
-                           dictionary values: dictionary holding categorized
-                           ClipDatas of that track
-                           nested dictionary keys: category name (string)
-                           nested dictionary values: list of ClipDatas that fall
-                           into the category
+        dictionary keys: track number (int)
+        dictionary values: dictionary holding categorized
+        ClipDatas of that track
+        nested dictionary keys: category name (string)
+        nested dictionary values: list of ClipDatas that fall
+        into the category
 
-        ex: clipTable when tracksA and tracksB contain 3 tracks
-            {1 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
-             2 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
-             3 : {"add": [], "edit": [], "same": [], "delete": []}, "move": []}
+    Ex: clipTable when tracksA and tracksB contain 3 tracks
+        {1 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
+         2 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
+         3 : {"add": [], "edit": [], "same": [], "delete": []}, "move": []}
     """
 
     clipTable = {}

@@ -141,6 +141,15 @@ def makeTrackB(clipGroup, trackNum, trackKind):
 
     return flatB
 
+def getMatchedClips(clipGroup):
+    pairedClips = []
+    for clipData in clipGroup:
+        # print(clipData.name, clipData.matched_clipData)
+        if clipData.matched_clipData is None:
+            pairedClips.append(clipData)
+        else:
+            pairedClips.append(clipData.matched_clipData)
+    return pairedClips
 
 def makeTrackA(clipGroup, trackNum, trackKind):
     """Make an annotated track from timeline A. Shows deleted clips and the original clips
@@ -161,12 +170,13 @@ def makeTrackA(clipGroup, trackNum, trackKind):
     """
 
     # for each category of clips, make an indivdual track and color code accordingly
-    tSame = makeTrack("same", trackKind, clipGroup.same)
-    # grab the original pair from all the edit clipDatas
-    prevEdited = []
-    for e in clipGroup.edit:
-        prevEdited.append(e.matched_clipData)
-    tEdited = makeTrack("edited", trackKind, prevEdited, editedClipsColor)
+    # grab the original pair from all the edit and same clipDatas since they only
+    # save the ones in timeline B
+    originalEdited = getMatchedClips(clipGroup.edit)
+    originalUnchanged = getMatchedClips(clipGroup.same)
+
+    tSame = makeTrack("same", trackKind, originalUnchanged)
+    tEdited = makeTrack("edited", trackKind, originalEdited, editedClipsColor)
     tDel = makeTrack("deleted", trackKind, clipGroup.delete, deletedClipsColor)
 
     # put all the tracks into a list and flatten them down to a single track

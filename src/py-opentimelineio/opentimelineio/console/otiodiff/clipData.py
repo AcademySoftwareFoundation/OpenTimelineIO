@@ -78,7 +78,8 @@ class ClipData:
                 # check in same place on timeline
                 if (self.timeline_range == cA.timeline_range):
                     isSame = True
-                    # check duration is same but not necessarily in same place on timeline
+                    # check duration is same but not necessarily in same place
+                    # on timeline
                 # TODO: change to else? (does the elif always run?)
                 elif (self.sameDuration(cA)):
                     # Note: check in relation to left and right?

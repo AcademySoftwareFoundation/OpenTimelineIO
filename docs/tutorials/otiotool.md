@@ -6,7 +6,7 @@
 
 `otiotool` is included with several other command line utilities as part of the
 OpenTimelineIO Python module. You can install it via typical Python utilities
-like `pip`, etc. See [Quickstart](./quickstart]) for details.
+like `pip`, etc. See [Quickstart](./quickstart) for details.
 
 > [!TIP]
 > If you have
@@ -56,13 +56,16 @@ For a complete listing of all options use `otiotool -h`.
 
 ## Phases
 
-Unlike some other command line tools, the order in which options appear on
+Unlike some other command line tools, the order in which most options appear on
 the command line does not matter. For example these two commands do the same thing:
 
 ```bash
 otiotool -i input.otio --flatten -o output.otio
 otiotool --flatten -o output.otio -i input.otio
 ```
+
+The only time that command line argument ordering matters is when multiple input files are specified and operations like `--stack` and `--concat` combine them
+together.
 
 Instead, the features of this tool work in phases, as follows:
 

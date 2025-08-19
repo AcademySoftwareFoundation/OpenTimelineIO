@@ -28,6 +28,7 @@ Quick Start
 
    tutorials/quickstart
    tutorials/otio-env-variables
+   tutorials/otiotool
 
 Tutorials
 ------------

@@ -238,7 +238,7 @@ def compareClips(clipDatasA, clipDatasB):
 
 
 def compareTracks(trackA, trackB, trackNum):
-    """Compare clipis in two OTIO tracks and categorize into
+    """Compare clips in two OTIO tracks and categorize into
     added, edited, same, and deleted"""
     clipDatasA = []
     clipDatasB = []
@@ -297,9 +297,11 @@ def checkMoved(allDel, allAdd):
     for clip in moved:
         clip.note = "Moved from track: " + str(clip.matched_clipData.track_num)
         # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
-    # TODO: check if empty string or not
     for i in moveEdit:
-        i.note += " and moved from track " + str(i.matched_clipData.track_num)
+        if i.note == "":
+            i.note = "Moved from track: " + str(clip.matched_clipData.track_num)
+        else:
+            i.note += " and moved from track " + str(i.matched_clipData.track_num)
         # print(i.name, i.note)
 
     return newAdd, moveEdit, moved, newDel
@@ -393,8 +395,6 @@ def makeNewOtio(clipTable, trackType):
 
     return newTl
 
-# TODO: rename to create bucket/cat/db/stuff; categorizeClipsByTracks + comment
-
 
 def categorizeClipsByTracks(tracksA, tracksB):
     """Compare the clips in each track in tracksB against the corresponding track
@@ -423,55 +423,29 @@ def categorizeClipsByTracks(tracksA, tracksB):
     """
 
     clipTable = {}
-    # TODO? ^change to class perhaps? low priority
 
-    shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
-    # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+    matchedTrackNum = min(len(tracksA), len(tracksB))
+    totalTrackNum = max(len(tracksA), len(tracksB))
+    print(matchedTrackNum)
+    print(totalTrackNum)
+    
+    trackNumDiff = totalTrackNum - matchedTrackNum
+    shorterTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
 
-    # TODO: compute min of 2, then go through leftover and assign accordingly
-    # maybe compare unmatched against empty track? pad shorter one with empty
+    for i in range(0, trackNumDiff):
+        # pad shorter tracks with empty tracks
+        shorterTracks.append(makeOtio.makeEmptyTrack(shorterTracks[0].kind))
+    
+    print(len(tracksA))
 
-    # Process Matched Tracks
-    # index through all the tracks of the timeline with less tracks
-    for i in range(0, len(shorterTlTracks)):
+    for i in range(0, totalTrackNum):
         currTrackA = tracksA[i]
         currTrackB = tracksB[i]
         trackNum = i + 1
 
-        # clipGroup = compareTracks(currTrackA, currTrackB, trackNum)
         add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
-        # print(add)
 
         clipTable[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
-        # print("here", clipTable[trackNum]["add"][0].name)
-
-    # Process Unmatched Tracks
-    if shorterTlTracks == tracksA:
-        # timelineA is shorter so timelineB has added tracks
-        for i in range(len(shorterTlTracks), len(tracksB)):
-            newTrack = tracksB[i]
-            trackNum = i + 1
-            # newTrack.name = trackType + " B" + str(trackNum)
-
-            added = []
-            for c in newTrack.find_clips():
-                cd = ClipData(c, trackNum)
-                added.append(cd)
-
-            clipTable[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
-
-    else:
-        for i in range(len(shorterTlTracks), len(tracksA)):
-            newTrack = tracksA[i]
-            trackNum = i + 1
-            # newTrack.name = trackType + " A" + str(trackNum)
-
-            deleted = []
-            for c in newTrack.find_clips():
-                cd = ClipData(c, trackNum)
-                deleted.append(cd)
-
-            clipTable[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}
 
     # recat added/deleted into moved
     clipTable = sortMoved(clipTable)
@@ -575,3 +549,52 @@ def makeTimelineSummary(timelineA, timelineB):
         /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio
         /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
 '''
+
+
+# =========
+
+
+    # shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
+    # # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
+
+    # # Process Matched Tracks
+    # # index through all the tracks of the timeline with less tracks
+    # for i in range(0, len(shorterTlTracks)):
+    #     currTrackA = tracksA[i]
+    #     currTrackB = tracksB[i]
+    #     trackNum = i + 1
+
+    #     # clipGroup = compareTracks(currTrackA, currTrackB, trackNum)
+    #     add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
+    #     # print(add)
+
+    #     clipTable[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
+    #     # print("here", clipTable[trackNum]["add"][0].name)
+
+    # # Process Unmatched Tracks
+    # if shorterTlTracks == tracksA:
+    #     # timelineA is shorter so timelineB has added tracks
+    #     for i in range(len(shorterTlTracks), len(tracksB)):
+    #         newTrack = tracksB[i]
+    #         trackNum = i + 1
+    #         # newTrack.name = trackType + " B" + str(trackNum)
+
+    #         added = []
+    #         for c in newTrack.find_clips():
+    #             cd = ClipData(c, trackNum)
+    #             added.append(cd)
+
+    #         clipTable[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
+
+    # else:
+    #     for i in range(len(shorterTlTracks), len(tracksA)):
+    #         newTrack = tracksA[i]
+    #         trackNum = i + 1
+    #         # newTrack.name = trackType + " A" + str(trackNum)
+
+    #         deleted = []
+    #         for c in newTrack.find_clips():
+    #             cd = ClipData(c, trackNum)
+    #             deleted.append(cd)
+
+    #         clipTable[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}

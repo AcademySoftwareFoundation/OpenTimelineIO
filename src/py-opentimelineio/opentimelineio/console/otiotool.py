@@ -119,11 +119,9 @@ def main():
         for timeline in timelines:
             copy_media_to_folder(timeline, args.copy_media_to_folder)
 
-    # TODO: Update numbering
-    # ===== NEW Phase 5.5: Diff otio files ======
+    # Phase 5.5 Diff two timelines
 
     if args.diff:
-        # TODO? stack, concat, diff make mutually exclusive
         timelines = [diff_otio(timelines)]
 
     # Phase 6: Remove/Redaction
@@ -522,11 +520,10 @@ def read_inputs(input_paths):
 
 
 def diff_otio(timelines):
-    # TODO: check file format of timelines for OTIO
     """Return an annotated timeline showing how clips changed from the first to
     the second timeline"""
-    assert len(
-        timelines) >= 2, "Less than 2 timelines given. 2 timelines are required"
+    assert (len(timelines) >= 2
+        ), "Less than 2 timelines given. 2 timelines are required"
     " to perform a diff"
 
     if len(timelines) != 2:

@@ -56,6 +56,9 @@ def makeSeparaterTrack(trackType):
     from the timeline B tracks"""
     return otio.schema.Track(name="=====================", kind=trackType)
 
+def makeEmptyTrack(trackType):
+    """Make empty track"""
+    return otio.schema.Track(kind=trackType)
 
 def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False):
     """Make OTIO track from ClipDatas with option to add markers

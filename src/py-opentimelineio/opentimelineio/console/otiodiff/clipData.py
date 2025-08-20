@@ -2,11 +2,19 @@ import opentimelineio as otio
 
 # TODO: clip comparable??? ClipInfo
 # source clip or clip ref?
-# full name = name + version, name is just name,
-# add ex, split on space, b4 is name, after is version
-
 
 class ClipData:
+    """ClipData holds information from an OTIO clip that's necessary for
+    comparing differences. It also keeps some information associated with
+    the clip after comparisons are made, such as a matched ClipData and a note
+    about what has changed.
+    
+    source_clip = original OTIO clip the ClipData represents
+    full_name = full name of source_clip
+    name and version splits full_name on space
+    ex: full_name: clipA version1, name: clipA, version: version1
+    """
+
     full_name = ""
     name = ""
     version = None    # currently not used in comparisons
@@ -34,12 +42,14 @@ class ClipData:
     # uses structure of "clipA v1" where clipA is the name and v1 is the version
 
     def splitFullName(self, clip):
+        """Split full name into name and version"""
         shortName = clip.name.split(" ")[0]
         version = clip.name.split(" ")[1] if len(clip.name.split(" ")) > 1 else None
 
         return shortName, version
 
     def printData(self):
+        """Prints to console all parameters of ClipData"""
         print("name: ", self.name)
         print("version: ", self.version)
         print("media ref: ", self.media_ref)
@@ -51,21 +61,23 @@ class ClipData:
             print("note: ", self.note)
         print("source clip: ", self.source.name)
 
-    # compare truncated names
     def sameName(self, cA):
+        """Compare names and returns if they are the same"""
         if (self.name.lower() == cA.name.lower()):
             return True
         else:
             return False
 
     # note: local and source duration should always match, can assume same
-    # compare the duration within the timeline for 2 clips
     def sameDuration(self, cA):
+        """Compare duration within the timeline of this ClipData
+        against another ClipData"""
         return self.timeline_range.duration.value == cA.timeline_range.duration.value
 
-    # compare 2 clips and see if they are the exact same, whether exact or moved along
-    # the timeline and also changes note based on edits
+
     def checkSame(self, cA):
+        """Check if this ClipData is the exact same as another ClipData or if
+        it's the same just moved along the timeline. Updates note based on edits"""
         isSame = False
         # check names are same
         if self.sameName(cA):
@@ -94,9 +106,8 @@ class ClipData:
 
         return isSame
 
-    # compare 2 clips and see if they have been
-    # compare self: "new", to old
     def checkEdited(self, cA):
+        """Compare 2 ClipDatas and see if they have been edited"""
         isEdited = False
 
         # Note: assumption that source range and timeline range duration always equal
@@ -128,8 +139,8 @@ class ClipData:
             if (selfDur.value == cADur.value):
                 self.note = "start time in source range changed"
 
-# put note assignment into function, return note?
-# self, other, olderClipData rather than cA
+        # TODO: put note assignment into function, return note?
+        # self, other, olderClipData rather than cA
             # clip duration shorter
             elif (selfDur.value < cADur.value):
                 self.note = "trimmed " + deltaFramesStr + " frames"

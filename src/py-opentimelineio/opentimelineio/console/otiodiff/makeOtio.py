@@ -48,8 +48,6 @@ def addMarker(newClip, clipData, color=None):
 
     return newClip
 
-# TODO: make variables for add, edit, delete, move colors?
-
 
 def makeSeparaterTrack(trackType):
     """Make empty track that separates the timeline A tracks

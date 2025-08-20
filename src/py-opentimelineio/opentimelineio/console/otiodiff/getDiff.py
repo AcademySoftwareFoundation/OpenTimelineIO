@@ -187,7 +187,7 @@ def compareClones(clonesA, clonesB):
     return added, unchanged, deleted
 
 
-def compareClips(clipDatasA, clipDatasB):
+def compareClips(clipDatasA, clipDatasB, nameType=""):
     """Compare two groups of unique ClipDatas and categorize into
     added, edited, unchanged, and deleted"""
     namesA = {}
@@ -198,19 +198,32 @@ def compareClips(clipDatasA, clipDatasB):
     unchanged = []
     deleted = []
 
-    for c in clipDatasA:
-        namesA[c.name] = c
-    for c in clipDatasB:
-        namesB[c.name] = c
+    # use full_name if nameType is specified,
+    # otherwise default to using name
+    if nameType.lower() == "full":
+        for c in clipDatasA:
+            namesA[c.full_name] = c
+        for c in clipDatasB:
+            namesB[c.full_name] = c
+    else:
+        for c in clipDatasA:
+            namesA[c.name] = c
+        for c in clipDatasB:
+            namesB[c.name] = c
 
     for cB in clipDatasB:
+        # check which name to use
+        clipDataBName = cB.name
+        if nameType.lower() == "full":
+            clipDataBName = cB.full_name
 
-        if cB.name not in namesA:
+        # do comparisons
+        if clipDataBName not in namesA:
             added.append(cB)
         else:
-            if namesA[cB.name] is None:
+            if namesA[clipDataBName] is None:
                 print("has none pair")
-            cB.matched_clipData = namesA[cB.name]
+            cB.matched_clipData = namesA[clipDataBName]
             isSame = cB.checkSame(cB.matched_clipData)
             if (isSame):
                 # cB.pair = namesA[cB.name]
@@ -222,15 +235,18 @@ def compareClips(clipDatasA, clipDatasB):
                     edited.append(cB)
                 else:
                     print("======== not categorized ==========")
-                    cA = namesA[cB.name]
-                    print("Clips: ", cA.name, cB.name)
+                    cA = namesA[clipDataBName]
+                    print("Clips: ", cA.name, clipDataBName)
                     # cA.printData()
                     # cB.printData()
                     # print("===================")
                     # print type of object
 
     for cA in clipDatasA:
-        if cA.name not in namesB:
+        clipDataAName = cA.name
+        if nameType.lower() == "full":
+            clipDataAName = cA.full_name
+        if clipDataAName not in namesB:
             deleted.append(cA)
 
 # TODO: some can be sets instead of lists
@@ -283,17 +299,14 @@ def checkMoved(allDel, allAdd):
     # wanted to compare full names to account for dif dep/take
     # otherwise shotA (layout123) and shotA (anim123) would count as a move and
     # not as add
-    # TODO: maybe preserve full name and also clip name, ex. id and name
-    # TODO: fix compareClips so that it allows check by full name
-    for c in allDel:
-        c.name = c.full_name
-    for c in allAdd:
-        c.name = c.full_name
+    newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd, nameType="full")
 
-    newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd)
     # removes clips that are moved in same track, just keep clips moved between tracks
     moved = [clip for clip in moved if clip.track_num !=
              clip.matched_clipData.track_num]
+    
+    # print(len(moved), len(moveEdit))
+
     for clip in moved:
         clip.note = "Moved from track: " + str(clip.matched_clipData.track_num)
         # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
@@ -426,8 +439,8 @@ def categorizeClipsByTracks(tracksA, tracksB):
 
     matchedTrackNum = min(len(tracksA), len(tracksB))
     totalTrackNum = max(len(tracksA), len(tracksB))
-    print(matchedTrackNum)
-    print(totalTrackNum)
+    # print(matchedTrackNum)
+    # print(totalTrackNum)
     
     trackNumDiff = totalTrackNum - matchedTrackNum
     shorterTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
@@ -436,7 +449,7 @@ def categorizeClipsByTracks(tracksA, tracksB):
         # pad shorter tracks with empty tracks
         shorterTracks.append(makeOtio.makeEmptyTrack(shorterTracks[0].kind))
     
-    print(len(tracksA))
+    # print(len(tracksA))
 
     for i in range(0, totalTrackNum):
         currTrackA = tracksA[i]

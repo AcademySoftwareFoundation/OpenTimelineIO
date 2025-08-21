@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A reference to a media file.
-class ExternalReference final : public MediaReference
+class OPENTIMELINEIO_EXPORT ExternalReference final : public MediaReference
 {
 public:
     /// @brief This struct provides the ExternalReference schema.

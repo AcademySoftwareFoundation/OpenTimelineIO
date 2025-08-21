@@ -12,7 +12,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// @brief A clip is a segment of editable media (usually audio or video).
 ///
 /// Contains a MediaReference and a trim on that media reference.
-class Clip : public Item
+class OPENTIMELINEIO_EXPORT Clip : public Item
 {
 public:
     /// @brief The default media within a clip.

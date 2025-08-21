@@ -192,6 +192,11 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+# Default to not exporting C++ symbols, symbols that need to be exported are
+# explicitly marked with the OPENTIME_EXPORT or OPENTIMELINEIO_EXPORT macros
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+include(GenerateExportHeader)
+
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested
 #

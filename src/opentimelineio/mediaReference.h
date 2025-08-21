@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 using namespace opentime;
 
 /// @brief A reference to a piece of media, for example a movie on a clip.
-class MediaReference : public SerializableObjectWithMetadata
+class OPENTIMELINEIO_EXPORT MediaReference : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the MediaReference schema.

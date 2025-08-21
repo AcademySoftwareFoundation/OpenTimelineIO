@@ -31,48 +31,48 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// @name Any Create
 ///@{
 
-std::any create_safely_typed_any(bool&&);
-std::any create_safely_typed_any(int&&);
-std::any create_safely_typed_any(int64_t&&);
-std::any create_safely_typed_any(uint64_t&&);
-std::any create_safely_typed_any(double&&);
-std::any create_safely_typed_any(std::string&&);
-std::any create_safely_typed_any(RationalTime&&);
-std::any create_safely_typed_any(TimeRange&&);
-std::any create_safely_typed_any(Color&&);
-std::any create_safely_typed_any(TimeTransform&&);
-std::any create_safely_typed_any(IMATH_NAMESPACE::V2d&&);
-std::any create_safely_typed_any(IMATH_NAMESPACE::Box2d&&);
-std::any create_safely_typed_any(AnyVector&&);
-std::any create_safely_typed_any(AnyDictionary&&);
-std::any create_safely_typed_any(SerializableObject*);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(bool&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(int&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(int64_t&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(uint64_t&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(double&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(std::string&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(RationalTime&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(TimeRange&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(Color&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(TimeTransform&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(IMATH_NAMESPACE::V2d&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(IMATH_NAMESPACE::Box2d&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(AnyVector&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(AnyDictionary&&);
+OPENTIMELINEIO_EXPORT std::any create_safely_typed_any(SerializableObject*);
 
 ///@}
 
 /// @name Any Casting
 ///@{
 
-bool                   safely_cast_bool_any(std::any const& a);
-int                    safely_cast_int_any(std::any const& a);
-int64_t                safely_cast_int64_any(std::any const& a);
-uint64_t               safely_cast_uint64_any(std::any const& a);
-double                 safely_cast_double_any(std::any const& a);
-std::string            safely_cast_string_any(std::any const& a);
-RationalTime           safely_cast_rational_time_any(std::any const& a);
-TimeRange              safely_cast_time_range_any(std::any const& a);
-TimeTransform          safely_cast_time_transform_any(std::any const& a);
-Color                  safely_cast_color_any(std::any const& a);
-IMATH_NAMESPACE::V2d   safely_cast_point_any(std::any const& a);
-IMATH_NAMESPACE::Box2d safely_cast_box_any(std::any const& a);
+OPENTIMELINEIO_EXPORT bool                   safely_cast_bool_any(std::any const& a);
+OPENTIMELINEIO_EXPORT int                    safely_cast_int_any(std::any const& a);
+OPENTIMELINEIO_EXPORT int64_t                safely_cast_int64_any(std::any const& a);
+OPENTIMELINEIO_EXPORT uint64_t               safely_cast_uint64_any(std::any const& a);
+OPENTIMELINEIO_EXPORT double                 safely_cast_double_any(std::any const& a);
+OPENTIMELINEIO_EXPORT std::string            safely_cast_string_any(std::any const& a);
+OPENTIMELINEIO_EXPORT RationalTime           safely_cast_rational_time_any(std::any const& a);
+OPENTIMELINEIO_EXPORT TimeRange              safely_cast_time_range_any(std::any const& a);
+OPENTIMELINEIO_EXPORT TimeTransform          safely_cast_time_transform_any(std::any const& a);
+OPENTIMELINEIO_EXPORT Color                  safely_cast_color_any(std::any const& a);
+OPENTIMELINEIO_EXPORT IMATH_NAMESPACE::V2d   safely_cast_point_any(std::any const& a);
+OPENTIMELINEIO_EXPORT IMATH_NAMESPACE::Box2d safely_cast_box_any(std::any const& a);
 
-SerializableObject* safely_cast_retainer_any(std::any const& a);
+OPENTIMELINEIO_EXPORT SerializableObject* safely_cast_retainer_any(std::any const& a);
 
-AnyDictionary safely_cast_any_dictionary_any(std::any const& a);
-AnyVector     safely_cast_any_vector_any(std::any const& a);
+OPENTIMELINEIO_EXPORT AnyDictionary safely_cast_any_dictionary_any(std::any const& a);
+OPENTIMELINEIO_EXPORT AnyVector     safely_cast_any_vector_any(std::any const& a);
 
 /// @bug Don't use these unless you know what you're doing...
-AnyDictionary& temp_safely_cast_any_dictionary_any(std::any const& a);
-AnyVector&     temp_safely_cast_any_vector_any(std::any const& a);
+OPENTIMELINEIO_EXPORT AnyDictionary& temp_safely_cast_any_dictionary_any(std::any const& a);
+OPENTIMELINEIO_EXPORT AnyVector&     temp_safely_cast_any_vector_any(std::any const& a);
 
 ///@}
 

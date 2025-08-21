@@ -11,7 +11,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A stack of items in a timeline, for example a stack of tracks in a timelime.
-class Stack : public Composition
+class OPENTIMELINEIO_EXPORT Stack : public Composition
 {
 public:
     /// @brief This struct provides the Stack schema.

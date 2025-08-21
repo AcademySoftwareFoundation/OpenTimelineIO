@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A time warp that applies a linear speed up or slow down across the entire clip.
-class LinearTimeWarp : public TimeEffect
+class OPENTIMELINEIO_EXPORT LinearTimeWarp : public TimeEffect
 {
 public:
     /// @brief This struct provides the LinearTimeWarp schema.

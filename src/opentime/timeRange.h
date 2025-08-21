@@ -16,7 +16,7 @@ namespace opentime { namespace OPENTIME_VERSION {
 /// a resolution of half a frame at 192kHz. The value can be changed in the future if
 /// necessary, due to higher sampling rates or some other kind of numeric tolerance
 /// detected in the library.
-constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
+OPENTIME_EXPORT constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 /// @brief This class represents a time range defined by a start time and duration.
 ///
@@ -27,7 +27,7 @@ constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 /// The duration on a TimeRange indicates a time range that is inclusive of the
 /// start time, and exclusive of the end time. All of the predicates are
 /// computed accordingly.
-class TimeRange
+class OPENTIME_EXPORT TimeRange
 {
 public:
     /// @brief Construct a new time range with a zero start time and duration.
@@ -440,6 +440,24 @@ private:
     lesser_than(double lhs, double rhs, double epsilon) const noexcept
     {
         return rhs - lhs >= epsilon;
+    }
+
+    /// @brief Returns the absolute value.
+    ///
+    /// \todo This function is used instead of "std::fabs()" so we can mark it as
+    /// constexpr. We can remove this and replace it with the std version when we
+    /// upgrade to C++ 23. There are two copies of this function, in both
+    /// RationalTime and TimeRange.
+    static constexpr double
+    fabs(double val) noexcept
+    {
+        union
+        {
+            double   f;
+            uint64_t i;
+        } bits = { val };
+        bits.i &= std::numeric_limits<uint64_t>::max() / 2;
+        return bits.f;
     }
 };
 

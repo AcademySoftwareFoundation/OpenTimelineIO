@@ -6,6 +6,7 @@ import opentimelineio as otio
 from .clipData import ClipData
 from . import makeOtio
 
+# TODO: change some todos to be suggestions for future work instead of todos
 
 def diffTimelines(timelineA, timelineB):
     '''Diff two OTIO timelines and identify how clips on video and/or audio tracks
@@ -289,6 +290,7 @@ def compareTracks(trackA, trackB, trackNum):
     return added, edited, unchanged, deleted
 
 # TODO? account for move edit, currently only identifies strictly moved
+# TODO: update all "same" to "unchanged"
 
 
 def checkMoved(allDel, allAdd):
@@ -547,6 +549,7 @@ def makeTimelineSummary(timelineA, timelineB):
         print("Timeline duration did not change")
     print("")
 
+# TODO:remove notes before push
 
 ''' ======= Notes =======
     Test shot simple:

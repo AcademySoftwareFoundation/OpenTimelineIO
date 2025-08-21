@@ -455,6 +455,22 @@ class TestClipData(unittest.TestCase):
 
 
 class TestGetDif(unittest.TestCase):
+    # TODO: test case for timelines with unmatched track nums
+    # test case for timeline with matched track nums
+
+    def test_single_track(self):
+        pass
+
+    def test_multi_track_matched(self):
+        pass
+
+    def test_multi_track_unmatched_more_A(self):
+        pass
+
+    def test_multi_track_unmatched_more_B(self):
+        pass
+
+
     def test_find_clones(self):
         clipA = otio.schema.Clip(
             name="clipA testTake",
@@ -709,9 +725,6 @@ class TestGetDif(unittest.TestCase):
                 ), "Number of clones found in trackB doesn't match"
         assert (len(nonClonesB) == 2
                 ), "Number of non-clones found in trackB doesn't match"
-
-    # TODO: test case for timelines with unmatched track nums
-    # test case for timeline with matched track nums
 
 
 class TestMakeOtio(unittest.TestCase):

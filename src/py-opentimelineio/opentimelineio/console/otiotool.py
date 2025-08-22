@@ -23,8 +23,6 @@ from copy import deepcopy
 
 import opentimelineio as otio
 
-# sys.path.append("src/py-opentimelineio/opentimelineio/console/otiodiff")
-
 from .otiodiff import getDiff
 
 
@@ -471,15 +469,12 @@ otiotool -i fileA.otio fileB.otio --diff --o display.otio
         are supported. Use '-' to write OTIO to standard output."""
     )
 
-    # NEW ==============
     parser.add_argument(
         "--diff",
         action="store_true",
         help="""Diff and compare two otio files. Input file type must be .otio
             and input file order matters"""
     )
-
-    # ==================
 
     args = parser.parse_args()
 

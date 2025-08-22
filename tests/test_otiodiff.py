@@ -5,12 +5,8 @@ from opentimelineio.console.otiodiff.clipData import ClipData
 # import opentimelineio.console.otiodiff.makeOtio as makeOtio
 import opentimelineio.console.otiodiff.getDiff as getDiff
 
-# from collections import namedtuple
-
-
 class TestClipData(unittest.TestCase):
     # check if the names of two ClipDatas are the same
-
     def test_same_name(self):
         clipA = otio.schema.Clip(
             name="testName testTake",
@@ -453,6 +449,8 @@ class TestClipData(unittest.TestCase):
         assert clipDataB.checkEdited(clipDataA)
         assert clipDataB.note == "lengthened tail by 10 frames"
 
+    # TODO: make test where clip has null source range
+
 
 class TestGetDif(unittest.TestCase):
     # TODO: test case for timelines with unmatched track nums
@@ -730,7 +728,7 @@ class TestGetDif(unittest.TestCase):
 class TestMakeOtio(unittest.TestCase):
     # TODO: test sort clips
 
-    # test make track
+    # TODO: test make track
     pass
 
 

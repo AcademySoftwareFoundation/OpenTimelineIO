@@ -84,14 +84,12 @@ def makeTrack(trackName, trackKind, trackClips, clipColor=None, markersOn=False)
                 track.append(gap)
 
                 currentEnd = tlStart + tlDuration
-                # print("new end: ", currentEnd)
             else:
                 currentEnd += tlDuration
 
             # add clip to track
             newClip = copy.deepcopy(clipData.source_clip)
             if clipColor is not None:
-                # testing
                 newClip = addRavenColor(newClip, clipColor)
                 newClip.color = clipColor
 
@@ -145,7 +143,6 @@ def makeTrackB(clipGroup, trackNum, trackKind):
 def getMatchedClips(clipGroup):
     pairedClips = []
     for clipData in clipGroup:
-        # print(clipData.name, clipData.matched_clipData)
         if clipData.matched_clipData is None:
             pairedClips.append(clipData)
         else:

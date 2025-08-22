@@ -6,8 +6,6 @@ import opentimelineio as otio
 from .clipData import ClipData
 from . import makeOtio
 
-# TODO: change some todos to be suggestions for future work instead of todos
-
 def diffTimelines(timelineA, timelineB):
     '''Diff two OTIO timelines and identify how clips on video and/or audio tracks
     changed from timeline A to timeline B.
@@ -31,13 +29,9 @@ def diffTimelines(timelineA, timelineB):
     # check input timelines for video and audio tracks
     if len(timelineA.video_tracks()) > 0 or len(timelineB.video_tracks()) > 0:
         hasVideo = True
-    # else:
-    #     print("no video tracks")
 
     if len(timelineA.audio_tracks()) > 0 or len(timelineB.audio_tracks()) > 0:
         hasAudio = True
-    # else:
-    #     print("no audio tracks")
 
     makeTimelineSummary(timelineA, timelineB)
 
@@ -49,7 +43,7 @@ def diffTimelines(timelineA, timelineB):
         audioClipTable = categorizeClipsByTracks(
             timelineA.audio_tracks(), timelineB.audio_tracks())
 
-        makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "perTrack")
+        makeSummary(videoClipTable, otio.schema.Track.Kind.Video, "summary")
         makeSummary(audioClipTable, otio.schema.Track.Kind.Audio, "summary")
 
         videoTl = makeNewOtio(videoClipTable, otio.schema.Track.Kind.Video)
@@ -73,15 +67,7 @@ def diffTimelines(timelineA, timelineB):
     else:
         print("No video or audio tracks found in both timelines.")
 
-    # Debug
-    # origClipCount = len(timelineA.find_clips()) + len(timelineB.find_clips())
-
-    # print(origClipCount)
-    # print(len(outputTimeline.find_clips()))
-
     return outputTimeline
-
-# TODO: make nonClones a set rather than a list
 
 
 def findClones(clips):
@@ -124,22 +110,18 @@ def sortClones(clipDatasA, clipDatasB):
     clonesA, nonClonesA = findClones(clipDatasA)
     clonesB, nonClonesB = findClones(clipDatasB)
 
-    # move clips that are clones in the other files into the clones folder
+    # move clips that are clones in the other files into the clones table
     # leaves stricly unique clips in nonClones
-    # if a clip is a clone in the other timeline, put into clones dictionary
+    # if a clip is a clone in the other timeline, put into clones table
     for c in nonClonesA:
         if c.name in clonesB.keys():
             clonesA[c.name] = [c]
             nonClonesA.remove(c)
-            # print("clone in B file: ", c.name)
     for c in nonClonesB:
         if c.name in clonesA.keys():
             clonesB[c.name] = [c]
             nonClonesB.remove(c)
-            # print("clone in A file: ", c.name)
 
-    # clipCountA = 0
-    # clipCountB = 0
     return (clonesA, nonClonesA), (clonesB, nonClonesB)
 
 
@@ -153,15 +135,14 @@ def compareClones(clonesA, clonesB):
     for nameB in clonesB:
         # if there are no clips in timeline A with the same name
         # as cloneB, all of the clones of cloneB are new and added
-        # print("name b: ", nameB)
         if nameB not in clonesA:
             added.extend(clonesB[nameB])
 
         # name matched, there exists clones in both A and B, check if there are
         # same clips
-        # technically can be the first one is "edited" and the rest are
+        # Note: Potential categorization: first clone is "edited" and the rest are
         # "added"/"deleted" -> depends on how want to define
-        # currently, all clones that aren't the exact same get categorized as \
+        # Note: currently, all clones that aren't the exact same get categorized as
         # either "added" or "deleted"
         else:
             clipsA = clonesA[nameB]
@@ -182,8 +163,6 @@ def compareClones(clonesA, clonesB):
     for nameA in clonesA:
         if nameA not in clonesB:
             deleted.extend(clonesA[nameA])
-
-    # print("from clones added: ", len(added), " deleted: ", len(deleted))
 
     return added, unchanged, deleted
 
@@ -224,24 +203,19 @@ def compareClips(clipDatasA, clipDatasB, nameType=""):
         else:
             if namesA[clipDataBName] is None:
                 print("has none pair")
+
             cB.matched_clipData = namesA[clipDataBName]
             isSame = cB.checkSame(cB.matched_clipData)
             if (isSame):
-                # cB.pair = namesA[cB.name]
                 unchanged.append(cB)
             else:
                 isEdited = cB.checkEdited(cB.matched_clipData)
                 if (isEdited):
-                    # cB.matched_clipData = namesA[cB.name]
                     edited.append(cB)
                 else:
                     print("======== not categorized ==========")
                     cA = namesA[clipDataBName]
                     print("Clips: ", cA.name, clipDataBName)
-                    # cA.printData()
-                    # cB.printData()
-                    # print("===================")
-                    # print type of object
 
     for cA in clipDatasA:
         clipDataAName = cA.name
@@ -250,7 +224,6 @@ def compareClips(clipDatasA, clipDatasB, nameType=""):
         if clipDataAName not in namesB:
             deleted.append(cA)
 
-# TODO: some can be sets instead of lists
     return added, edited, unchanged, deleted
 
 
@@ -289,35 +262,32 @@ def compareTracks(trackA, trackB, trackNum):
 
     return added, edited, unchanged, deleted
 
-# TODO? account for move edit, currently only identifies strictly moved
+
 # TODO: update all "same" to "unchanged"
 
 
 def checkMoved(allDel, allAdd):
-    """Identify ClipDatas that have moved between different tracks"""
+    """Identify ClipDatas that have moved between different tracks.
+    """
     # ones found as same = moved
     # ones found as edited = moved and edited
 
-    # wanted to compare full names to account for dif dep/take
-    # otherwise shotA (layout123) and shotA (anim123) would count as a move and
-    # not as add
+    # want to compare full names to account for dif departments/takes
+    # ex. shotA (layout123) and shotA (anim123) should count as an add
+    # rather than a move
     newAdd, moveEdit, moved, newDel = compareClips(allDel, allAdd, nameType="full")
 
     # removes clips that are moved in same track, just keep clips moved between tracks
     moved = [clip for clip in moved if clip.track_num !=
              clip.matched_clipData.track_num]
     
-    # print(len(moved), len(moveEdit))
-
     for clip in moved:
         clip.note = "Moved from track: " + str(clip.matched_clipData.track_num)
-        # print(i.name, i.track_num, i.note, i.pair.name, i.pair.track_num)
     for i in moveEdit:
         if i.note == "":
             i.note = "Moved from track: " + str(clip.matched_clipData.track_num)
         else:
             i.note += " and moved from track " + str(i.matched_clipData.track_num)
-        # print(i.name, i.note)
 
     return newAdd, moveEdit, moved, newDel
 
@@ -332,7 +302,6 @@ def sortMoved(clipTable):
 
     for track in clipTable.keys():
         clipGroup = clipTable[track]
-        # print(clipTable[track]["add"])
         if "add" in clipGroup.keys():
             allAdd.extend(clipGroup["add"])
         if "delete" in clipGroup.keys():
@@ -344,12 +313,14 @@ def sortMoved(clipTable):
 
         clipGroup["move"] = []
 
+    # currently only adds moved clips to table, ignores moved and edited clips
     add, moveEdit, moved, delete = checkMoved(allDel, allAdd)
 
     # currently moved clips are still marked as delete in timelineA
     for cd in moved:
         clipTable[cd.track_num]["add"].remove(cd)
         clipTable[cd.track_num]["move"].append(cd)
+        # moved clips should be marked as moved in timelineA rather than deleted
         # clipTable[cd.track_num]["delete"].remove(cd)
         # clipTable[cd.pair.track_num]["moved"].append(cd.pair)
 
@@ -406,8 +377,6 @@ def makeNewOtio(clipTable, trackType):
 
         newTl.tracks.extend(tracksInA)
 
-    # makeOtio.colorMovedA(newTl, clipTable)
-
     return newTl
 
 
@@ -434,15 +403,13 @@ def categorizeClipsByTracks(tracksA, tracksB):
     Ex: clipTable when tracksA and tracksB contain 3 tracks
         {1 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
          2 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}
-         3 : {"add": [], "edit": [], "same": [], "delete": []}, "move": []}
+         3 : {"add": [], "edit": [], "same": [], "delete": [], "move": []}}
     """
 
     clipTable = {}
 
     matchedTrackNum = min(len(tracksA), len(tracksB))
     totalTrackNum = max(len(tracksA), len(tracksB))
-    # print(matchedTrackNum)
-    # print(totalTrackNum)
     
     trackNumDiff = totalTrackNum - matchedTrackNum
     shorterTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
@@ -450,8 +417,6 @@ def categorizeClipsByTracks(tracksA, tracksB):
     for i in range(0, trackNumDiff):
         # pad shorter tracks with empty tracks
         shorterTracks.append(makeOtio.makeEmptyTrack(shorterTracks[0].kind))
-    
-    # print(len(tracksA))
 
     for i in range(0, totalTrackNum):
         currTrackA = tracksA[i]
@@ -462,10 +427,9 @@ def categorizeClipsByTracks(tracksA, tracksB):
 
         clipTable[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
 
-    # recat added/deleted into moved
+    # recategorize added/deleted into moved
     clipTable = sortMoved(clipTable)
 
-    # tracksInA, tracksInB = makeNewOtio(clipTable, trackType)
     return clipTable
 
 
@@ -548,69 +512,3 @@ def makeTimelineSummary(timelineA, timelineB):
     else:
         print("Timeline duration did not change")
     print("")
-
-# TODO:remove notes before push
-
-''' ======= Notes =======
-    Test shot simple:
-        /Users/yingjiew/Documents/testDifFiles/h150_104a.105j_2025.04.04_ANIM-flat.otio
-        /Users/yingjiew/Documents/testDifFiles/150_104a.105jD_2025.06.27-flat.otio
-
-    Test seq matching edit's skywalker:
-        /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.09_Skywalker_v3.0_
-        ChangeNotes.Relinked.01.otio
-        /Users/yingjiew/Folio/casa/Dream_EP101_2024.02.23_Skywalker_v4.0_ChangeNotes.otio
-
-    Test shot multitrack:
-        /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2022.07.28_BT3.otio
-        /Users/yingjiew/Folio/edit-dept/More_OTIO/i110_BeliefSystem_2023.06.09.otio
-'''
-
-
-# =========
-
-
-    # shorterTlTracks = tracksA if len(tracksA) < len(tracksB) else tracksB
-    # # print("len tracksA: ", len(tracksA), "len tracksB:", len(tracksB))
-
-    # # Process Matched Tracks
-    # # index through all the tracks of the timeline with less tracks
-    # for i in range(0, len(shorterTlTracks)):
-    #     currTrackA = tracksA[i]
-    #     currTrackB = tracksB[i]
-    #     trackNum = i + 1
-
-    #     # clipGroup = compareTracks(currTrackA, currTrackB, trackNum)
-    #     add, edit, same, delete = compareTracks(currTrackA, currTrackB, trackNum)
-    #     # print(add)
-
-    #     clipTable[trackNum] = {"add": add, "edit": edit, "same": same, "delete": delete}
-    #     # print("here", clipTable[trackNum]["add"][0].name)
-
-    # # Process Unmatched Tracks
-    # if shorterTlTracks == tracksA:
-    #     # timelineA is shorter so timelineB has added tracks
-    #     for i in range(len(shorterTlTracks), len(tracksB)):
-    #         newTrack = tracksB[i]
-    #         trackNum = i + 1
-    #         # newTrack.name = trackType + " B" + str(trackNum)
-
-    #         added = []
-    #         for c in newTrack.find_clips():
-    #             cd = ClipData(c, trackNum)
-    #             added.append(cd)
-
-    #         clipTable[trackNum] = {"add": added, "edit": [], "same": [], "delete": []}
-
-    # else:
-    #     for i in range(len(shorterTlTracks), len(tracksA)):
-    #         newTrack = tracksA[i]
-    #         trackNum = i + 1
-    #         # newTrack.name = trackType + " A" + str(trackNum)
-
-    #         deleted = []
-    #         for c in newTrack.find_clips():
-    #             cd = ClipData(c, trackNum)
-    #             deleted.append(cd)
-
-    #         clipTable[trackNum] = {"add": [], "edit": [], "same": [], "delete": deleted}

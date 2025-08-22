@@ -14,37 +14,25 @@ class ClipData:
     name and version splits full_name on space
     ex: full_name: clipA version1, name: clipA, version: version1
     """
-
-    full_name = ""
-    name = ""
-    version = None    # currently not used in comparisons
-    media_ref = None
-    source_range = otio.opentime.TimeRange()
-    timeline_range = otio.opentime.TimeRange()
-    track_num = None    # not originally stored in otio.schema.Clip
-    source_clip = otio.schema.Clip()
-    # everything below holds comparison result info
-    note = ""
-    matched_clipData = None
-
     def __init__(self, source_clip, track_num, note=None):
         self.full_name = source_clip.name
-        self.name = self.splitFullName(source_clip)[0]
-        self.version = self.splitFullName(source_clip)[1]
+        self.name, self.version = self.splitFullName(source_clip)
         self.media_ref = source_clip.media_reference
         self.source_range = source_clip.source_range
         self.timeline_range = source_clip.trimmed_range_in_parent()
         self.track_num = track_num
         self.source_clip = source_clip
         self.note = note
+        self.matched_clipData = None
 
     # split full name into name of clip and version by white space
     # uses structure of "clipA v1" where clipA is the name and v1 is the version
-
     def splitFullName(self, clip):
-        """Split full name into name and version"""
-        shortName = clip.name.split(" ")[0]
-        version = clip.name.split(" ")[1] if len(clip.name.split(" ")) > 1 else None
+        """Split full name into name and version by space. Returns None for
+        version if full name contains no spaces."""
+        parts = clip.name.split(" ")
+        shortName = parts[0]
+        version = parts[1] if len(parts) > 1 else None
 
         return shortName, version
 
@@ -82,10 +70,7 @@ class ClipData:
         # check names are same
         if self.sameName(cA):
             # check source range is same
-            # TODO: make test where has null source range -> see things break,
-            # then go back and change <- low priority
             if (self.source_range == cA.source_range):
-                # print(self.name, " ", self.timeline_range, " ", cA.timeline_range)
                 # check in same place on timeline
                 if (self.timeline_range == cA.timeline_range):
                     isSame = True
@@ -93,17 +78,10 @@ class ClipData:
                     # on timeline
                 # TODO: change to else? (does the elif always run?)
                 elif (self.sameDuration(cA)):
-                    # Note: check in relation to left and right?
-                    #       know if moved in seq rather than everything shifted over
-                    # because of lengthen/shorten of other clips
+                    # Note: currently only checks for lateral shifts, doesn't
+                    # check for reordering of clips
                     isSame = True
                     self.note = "shifted laterally in track"
-            else:
-                # print("source range different", cA.name, self.name)
-                # print(self.media_ref)
-                # print(self.media_ref.target_url)
-                pass
-
         return isSame
 
     def checkEdited(self, cA):
@@ -111,6 +89,7 @@ class ClipData:
         isEdited = False
 
         # Note: assumption that source range and timeline range duration always equal
+        # TODO: sometimes asserts get triggered, more investigation needed
         # assert(self.source_range.duration.value == self.timeline_range.duration.value
         # ), "clip source range and timeline range durations don't match"
         # assert(cA.source_range.duration.value == cA.timeline_range.duration.value
@@ -122,15 +101,6 @@ class ClipData:
         selfSourceStart = self.source_range.start_time
         cASourceStart = cA.source_range.start_time
 
-        # clip duration same but referencing different areas on the same timeline
-        # if selfDur.value == cADur.value:
-        #     if (self.source_range.start_time != cA.source_range.start_time):
-        #         # print("source range dif between: ", self.name, "and", cA.name)
-        #         # self.printData()
-        #         # cA.printData()
-        #         self.note = "source range start times differ"
-        #         isEdited = True
-
         if (self.source_range != cA.source_range):
             self.note = "source range changed"
             isEdited = True
@@ -139,8 +109,6 @@ class ClipData:
             if (selfDur.value == cADur.value):
                 self.note = "start time in source range changed"
 
-        # TODO: put note assignment into function, return note?
-        # self, other, olderClipData rather than cA
             # clip duration shorter
             elif (selfDur.value < cADur.value):
                 self.note = "trimmed " + deltaFramesStr + " frames"

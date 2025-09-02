@@ -337,7 +337,7 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
 
         result_range = TimeRange(
             result_range->start_time() + parent_range.start_time(),
-            result_range->duration());
+            std::min(result_range->duration(), parent_range.duration()));
         current = parent;
     }
 
@@ -388,7 +388,7 @@ Composition::trimmed_range_of_child(
 
         result_range = TimeRange(
             result_range->start_time() + parent_range.start_time(),
-            result_range->duration());
+            std::min(result_range->duration(), parent_range.duration()));
     }
 
     if (!source_range())

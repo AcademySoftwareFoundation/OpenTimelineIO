@@ -179,6 +179,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "VideoPosition", 1 },
           { "VideoRotate", 1 },
           { "VideoScale", 1 },
+          { "VideoRoundedCorners", 1 },
       } },
     // {next}
 };

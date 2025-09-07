@@ -223,7 +223,6 @@ public:
     {}
 
     int64_t radius() const noexcept { return _radius; }
-
     void set_radius(int64_t radius) noexcept { _radius = radius; }
 
 protected:

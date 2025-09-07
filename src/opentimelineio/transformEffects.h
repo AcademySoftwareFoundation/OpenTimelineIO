@@ -194,4 +194,44 @@ protected:
     double _angle; ///< The angle of rotation, degrees clockwise
 };
 
+/// @brief A rounded corner effect
+class VideoRoundedCorners : public Effect
+{
+public:
+    /// @brief This struct provides the Effect schema.
+    struct Schema
+    {
+        static auto constexpr name   = "VideoRoundedCorners";
+        static int constexpr version = 1;
+    };
+
+    using Parent = Effect;
+
+    /// @brief Create a new rounded corner effect.
+    ///
+    /// @param name The name of the effect object.
+    /// @param radius The corner radius.
+    /// @param metadata The metadata for the effect.
+    /// @param enabled Whether the effect is enabled.
+    VideoRoundedCorners(
+        std::string const&   name        = std::string(),
+        int64_t const       radius      = 0,
+        AnyDictionary const& metadata    = AnyDictionary(),
+        bool const           enabled     = true)
+        : Effect(name, Schema::name, metadata, enabled),
+        _radius(radius)
+    {}
+
+    int64_t radius() const noexcept { return _radius; }
+
+    void set_radius(int64_t radius) noexcept { _radius = radius; }
+
+protected:
+    ~VideoRoundedCorners() override = default;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
+
+    int64_t _radius;
+};
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

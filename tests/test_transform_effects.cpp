@@ -71,18 +71,26 @@ main(int argc, char** argv)
                         "bottom": 8,
                         "effect_name": "VideoCrop",
                         "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoRoundedCorners.1",
+                        "name": "roundedCorners",
+                        "radius": 80,
+                        "effect_name": "VideoRoundedCorners",
+                        "enabled": true
                     }
                 ]
             })",
                 &status);
 
-        assertFalse(is_error(status));
+        if (is_error(status))
+            throw std::invalid_argument(status.details);
 
         const Clip* clip = dynamic_cast<const Clip*>(so.value);
         assertNotNull(clip);
 
         auto effects = clip->effects();
-        assertEqual(effects.size(), 4);
+        assertEqual(effects.size(), 5);
 
         auto video_scale = dynamic_cast<const VideoScale*>(effects[0].value);
         assertNotNull(video_scale);
@@ -117,7 +125,8 @@ main(int argc, char** argv)
             { new otio::VideoScale("scale", 100, 120),
               new otio::VideoPosition("position", 10, 20),
               new otio::VideoRotate("rotate", 40.5),
-              new otio::VideoCrop("crop", 1, 2, 3, 4) }));
+              new otio::VideoCrop("crop", 1, 2, 3, 4),
+              new otio::VideoRoundedCorners("roundedCorners",80)}));
 
         auto json = clip.value->to_json_string();
 
@@ -163,6 +172,14 @@ main(int argc, char** argv)
             "right": 2,
             "top": 3,
             "bottom": 4
+        },
+        {
+            "OTIO_SCHEMA": "VideoRoundedCorners.1",
+            "metadata": {},
+            "name": "roundedCorners",
+            "effect_name": "VideoRoundedCorners",
+            "enabled": true,
+            "radius": 80
         }
     ],
     "markers": [],

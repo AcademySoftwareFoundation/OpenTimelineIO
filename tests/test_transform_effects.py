@@ -263,3 +263,66 @@ class VideoRotateTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(rotate.angle, 45.25)
         rotate.angle = 90.0
         self.assertEqual(rotate.angle, 90.0)
+
+class VideoFlipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
+    def test_constructor(self):
+        flip = otio.schema.VideoFlip(
+            name="FlipIt",
+            flip_horizontally=True,
+            flip_vertically=False,
+            metadata={
+                "flip": "val"
+            }
+        )
+        self.assertEqual(flip.flip_horizontally, True)
+        self.assertEqual(flip.flip_vertically, False)
+        self.assertEqual(flip.name, "FlipIt")
+        self.assertEqual(flip.metadata, {"flip": "val"})
+
+    def test_eq(self):
+        flip1 = otio.schema.VideoFlip(
+            name="FlipIt",
+            flip_horizontally=True,
+            flip_vertically=False,
+            metadata={
+                "flip": "val"
+            }
+        )
+        flip2 = otio.schema.VideoFlip(
+            name="FlipIt",
+            flip_horizontally=True,
+            flip_vertically=False,
+            metadata={
+                "flip": "val"
+            }
+        )
+        self.assertIsOTIOEquivalentTo(flip1, flip2)
+
+    def test_serialize(self):
+        flip = otio.schema.VideoFlip(
+            name="FlipIt",
+            flip_horizontally=True,
+            flip_vertically=False,
+            metadata={
+                "flip": "val"
+            }
+        )
+        encoded = otio.adapters.otio_json.write_to_string(flip)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(flip, decoded)
+
+    def test_setters(self):
+        flip = otio.schema.VideoFlip(
+            name="FlipIt",
+            flip_horizontally=True,
+            flip_vertically=False,
+            metadata={
+                "flip": "val"
+            }
+        )
+        self.assertEqual(flip.flip_horizontally, True)
+        flip.flip_horizontally = False
+        self.assertEqual(flip.flip_horizontally, False)
+        self.assertEqual(flip.flip_vertically, False)
+        flip.flip_vertically = True
+        self.assertEqual(flip.flip_vertically, True)

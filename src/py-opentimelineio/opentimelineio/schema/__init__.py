@@ -27,6 +27,7 @@ from .. _otio import (
     Transition,
     V2d,
     VideoCrop,
+    VideoFlip,
     VideoPosition,
     VideoRotate,
     VideoScale,

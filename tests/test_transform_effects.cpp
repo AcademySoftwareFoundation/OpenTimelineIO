@@ -71,6 +71,14 @@ main(int argc, char** argv)
                         "bottom": 8,
                         "effect_name": "VideoCrop",
                         "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoFlip.1",
+                        "name": "flip",
+                        "flip_horizontally": true,
+                        "flip_vertically": false,
+                        "effect_name": "VideoFlip",
+                        "enabled": true
                     }
                 ]
             })",
@@ -82,7 +90,7 @@ main(int argc, char** argv)
         assertNotNull(clip);
 
         auto effects = clip->effects();
-        assertEqual(effects.size(), 4);
+        assertEqual(effects.size(), 5);
 
         auto video_scale = dynamic_cast<const VideoScale*>(effects[0].value);
         assertNotNull(video_scale);
@@ -104,6 +112,11 @@ main(int argc, char** argv)
         assertEqual(video_crop->right(), 6);
         assertEqual(video_crop->top(), 7);
         assertEqual(video_crop->bottom(), 8);
+
+        auto video_flip = dynamic_cast<const VideoFlip*>(effects[4].value);
+        assertNotNull(video_flip);
+        assertEqual(video_flip->flip_horizontally(), true);
+        assertEqual(video_flip->flip_vertically(), false);
     });
 
     tests.add_test("test_video_transform_write", [] {
@@ -117,7 +130,8 @@ main(int argc, char** argv)
             { new otio::VideoScale("scale", 100, 120),
               new otio::VideoPosition("position", 10, 20),
               new otio::VideoRotate("rotate", 40.5),
-              new otio::VideoCrop("crop", 1, 2, 3, 4) }));
+              new otio::VideoCrop("crop", 1, 2, 3, 4),
+              new otio::VideoFlip("flip", true, false) }));
 
         auto json = clip.value->to_json_string();
 
@@ -163,6 +177,15 @@ main(int argc, char** argv)
             "right": 2,
             "top": 3,
             "bottom": 4
+        },
+        {
+            "OTIO_SCHEMA": "VideoFlip.1",
+            "metadata": {},
+            "name": "flip",
+            "effect_name": "VideoFlip",
+            "enabled": true,
+            "flip_horizontally": true,
+            "flip_vertically": false
         }
     ],
     "markers": [],

@@ -732,6 +732,26 @@ parameters:
 - *right*: 
 - *top*: 
 
+### VideoFlip.1
+
+*full module path*: `opentimelineio.schema.VideoFlip`
+
+*documentation*:
+
+```
+
+An effect that flips video horizontally or vertically.
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *flip_horizontally*: 
+- *flip_vertically*: 
+- *metadata*: 
+- *name*: 
+
 ### VideoPosition.1
 
 *full module path*: `opentimelineio.schema.VideoPosition`

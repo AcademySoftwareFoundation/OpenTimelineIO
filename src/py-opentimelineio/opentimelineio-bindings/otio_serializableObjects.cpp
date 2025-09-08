@@ -442,14 +442,14 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
              "effects"_a = py::none(),
              "markers"_a = py::none(),
              "active_media_reference"_a = std::string(Clip::default_media_key))
-        .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) { 
-            return Clip::default_media_key; 
+        .def_property_readonly_static("DEFAULT_MEDIA_KEY",[](py::object /* self */) {
+            return Clip::default_media_key;
            })
         .def_property("media_reference", &Clip::media_reference, &Clip::set_media_reference)
-        .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) { 
-            clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler()); 
+        .def_property("active_media_reference_key", &Clip::active_media_reference_key, [](Clip* clip, std::string const& new_active_key) {
+            clip->set_active_media_reference_key(new_active_key, ErrorStatusHandler());
             })
-        .def("media_references", &Clip::media_references) 
+        .def("media_references", &Clip::media_references)
         .def("set_media_references", [](Clip* clip, Clip::MediaReferences const& media_references, std::string const& new_active_key) {
             clip->set_media_references(media_references, new_active_key, ErrorStatusHandler());
             });
@@ -769,6 +769,19 @@ The rotation is specified in degrees clockwise.
             "metadata"_a = py::none())
         .def_property("angle", &VideoRotate::angle, &VideoRotate::set_angle, "Rotation angle in degrees clockwise");
 
+    py::class_<VideoFlip, Effect, managing_ptr<VideoFlip>>(m, "VideoFlip", py::dynamic_attr(), R"docstring(
+An effect that flips video horizontally or vertically.
+)docstring")
+        .def(py::init([](std::string name, bool flip_horizontally, bool flip_vertically, py::object metadata) {
+                return new VideoFlip(name, flip_horizontally, flip_vertically, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "flip_horizontally"_a = false,
+            "flip_vertically"_a = false,
+            "metadata"_a = py::none())
+        .def_property("flip_horizontally", &VideoFlip::flip_horizontally, &VideoFlip::set_flip_horizontally)
+        .def_property("flip_vertically", &VideoFlip::flip_vertically, &VideoFlip::set_flip_vertically);
+
     py::class_<AudioVolume, Effect, managing_ptr<AudioVolume>>(m, "AudioVolume", py::dynamic_attr(), R"docstring(
 An effect that multiplies the audio volume by a given gain value
 )docstring")
@@ -812,7 +825,7 @@ static void define_media_references(py::module m) {
              "available_image_bounds"_a = std::nullopt)
 
         .def_property("available_range", &MediaReference::available_range, &MediaReference::set_available_range)
-        .def_property("available_image_bounds", &MediaReference::available_image_bounds, &MediaReference::set_available_image_bounds) 
+        .def_property("available_image_bounds", &MediaReference::available_image_bounds, &MediaReference::set_available_image_bounds)
         .def_property_readonly("is_missing_reference", &MediaReference::is_missing_reference);
 
     py::class_<GeneratorReference, MediaReference,
@@ -853,7 +866,7 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
                                   name,
                                   available_range,
                                   py_to_any_dictionary(metadata),
-                                  available_image_bounds); 
+                                  available_image_bounds);
                     }),
              py::arg_v("name"_a = std::string()),
              "available_range"_a = std::nullopt,

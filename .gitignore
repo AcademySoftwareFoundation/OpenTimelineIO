@@ -11,6 +11,10 @@ htmlcov
 xcuserdata/
 .venv/
 .cache
+cmake-build-debug/
+bin/
+lib/
+pyvenv.cfg
 
 # Pycharm metadata
 .idea/

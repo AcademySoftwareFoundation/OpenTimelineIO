@@ -263,3 +263,57 @@ class VideoRotateTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(rotate.angle, 45.25)
         rotate.angle = 90.0
         self.assertEqual(rotate.angle, 90.0)
+
+class VideoRoundCornersTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
+    def test_constructor(self):
+        rounded_corners = otio.schema.VideoRoundCorners(
+            name="doRoundCorners",
+            radius=10,
+            metadata={
+                "round": "corners"
+            }
+        )
+        self.assertEqual(rounded_corners.radius, 10)
+        self.assertEqual(rounded_corners.name, "doRoundCorners")
+        self.assertEqual(rounded_corners.metadata, {"round": "corners"})
+
+    def test_eq(self):
+        rounded_corners1 = otio.schema.VideoRoundCorners(
+            name="doRoundCorners",
+            radius=10,
+            metadata={
+                "round": "corners"
+            }
+        )
+        rounded_corners2 = otio.schema.VideoRoundCorners(
+            name="doRoundCorners",
+            radius=10,
+            metadata={
+                "round": "corners"
+            }
+        )
+        self.assertIsOTIOEquivalentTo(rounded_corners1, rounded_corners2)
+
+    def test_serialize(self):
+        rounded_corners = otio.schema.VideoRoundCorners(
+            name="doRoundCorners",
+            radius=10,
+            metadata={
+                "round": "corners"
+            }
+        )
+        encoded = otio.adapters.otio_json.write_to_string(rounded_corners)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(rounded_corners, decoded)
+
+    def test_setters(self):
+        rounded_corners = otio.schema.VideoRoundCorners(
+            name="doRoundCorners",
+            radius=10,
+            metadata={
+                "round": "corners"
+            }
+        )
+        self.assertEqual(rounded_corners.radius, 10)
+        rounded_corners.radius = 20
+        self.assertEqual(rounded_corners.radius, 20)

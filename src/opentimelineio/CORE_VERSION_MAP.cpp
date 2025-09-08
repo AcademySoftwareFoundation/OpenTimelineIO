@@ -178,6 +178,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "VideoCrop", 1 },
           { "VideoPosition", 1 },
           { "VideoRotate", 1 },
+          { "VideoRoundedCorners", 1 },
           { "VideoScale", 1 },
       } },
     // {next}

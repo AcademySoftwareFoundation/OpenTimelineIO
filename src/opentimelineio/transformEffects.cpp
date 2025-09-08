@@ -55,4 +55,15 @@ void VideoRotate::write_to(Writer &writer) const {
     writer.write("angle", _angle);
 }
 
+bool VideoRoundedCorners::read_from(Reader &reader)
+{
+    return reader.read("radius", &_radius)
+           && Parent::read_from(reader);
+}
+
+void VideoRoundedCorners::write_to(Writer &writer) const {
+    Parent::write_to(writer);
+    writer.write("radius", _radius);
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

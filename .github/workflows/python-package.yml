@@ -140,6 +140,9 @@ jobs:
     - name: Install python build dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
+    # \todo Temporarily disable check-manifest on MinGW, it is failing
+    # intermittently with this error:
+    # ModuleNotFoundError: No module named 'pip._vendor.distlib'
     - name: Run check-manifest and lint check
       if: matrix.python-version != 'mingw64'
       run: make ci-prebuild

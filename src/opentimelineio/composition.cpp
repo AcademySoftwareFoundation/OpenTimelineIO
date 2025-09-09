@@ -386,9 +386,10 @@ Composition::trimmed_range_of_child(
             continue;
         }
 
-        result_range = TimeRange(
-            result_range->start_time() + parent_range.start_time(),
-            std::min(result_range->duration(), parent_range.duration()));
+		result_range = TimeRange(
+			std::max(result_range->start_time(), parent_range.start_time()),
+			std::min(result_range->duration(), parent_range.duration()));
+		current = parent;
     }
 
     if (!source_range())

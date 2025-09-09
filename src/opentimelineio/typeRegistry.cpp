@@ -93,6 +93,7 @@ TypeRegistry::TypeRegistry()
     register_type_from_existing_type("Sequence", 1, "Track", nullptr);
 
     register_type<VideoCrop>();
+    register_type<VideoFlip>();
     register_type<VideoScale>();
     register_type<VideoPosition>();
     register_type<VideoRotate>();

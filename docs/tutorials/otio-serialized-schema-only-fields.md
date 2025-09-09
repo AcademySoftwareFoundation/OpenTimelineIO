@@ -313,6 +313,16 @@ parameters:
 - *right*
 - *top*
 
+### VideoFlip.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *flip_horizontally*
+- *flip_vertically*
+- *metadata*
+- *name*
+
 ### VideoPosition.1
 
 parameters:

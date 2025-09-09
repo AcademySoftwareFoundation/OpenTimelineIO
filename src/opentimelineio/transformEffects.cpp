@@ -66,4 +66,17 @@ void VideoRoundedCorners::write_to(Writer &writer) const {
     writer.write("radius", _radius);
 }
 
+bool VideoFlip::read_from(Reader &reader)
+{
+    return reader.read("flip_horizontally", &_flip_horizontally)
+           && reader.read("flip_vertically", &_flip_vertically)
+           && Parent::read_from(reader);
+}
+
+void VideoFlip::write_to(Writer &writer) const {
+    Parent::write_to(writer);
+    writer.write("flip_horizontally", _flip_horizontally);
+    writer.write("flip_vertically", _flip_vertically);
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

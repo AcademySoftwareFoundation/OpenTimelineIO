@@ -78,6 +78,14 @@ main(int argc, char** argv)
                         "radius": 80,
                         "effect_name": "VideoRoundedCorners",
                         "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoFlip.1",
+                        "name": "flip",
+                        "flip_horizontally": true,
+                        "flip_vertically": false,
+                        "effect_name": "VideoFlip",
+                        "enabled": true
                     }
                 ]
             })",
@@ -90,7 +98,7 @@ main(int argc, char** argv)
         assertNotNull(clip);
 
         auto effects = clip->effects();
-        assertEqual(effects.size(), 5);
+        assertEqual(effects.size(), 6);
 
         auto video_scale = dynamic_cast<const VideoScale*>(effects[0].value);
         assertNotNull(video_scale);
@@ -112,6 +120,15 @@ main(int argc, char** argv)
         assertEqual(video_crop->right(), 6);
         assertEqual(video_crop->top(), 7);
         assertEqual(video_crop->bottom(), 8);
+
+        auto video_rounded_corners = dynamic_cast<const VideoRoundedCorners*>(effects[4].value);
+        assertNotNull(video_rounded_corners);
+        assertEqual(video_rounded_corners->radius(), 80);
+
+        auto video_flip = dynamic_cast<const VideoFlip*>(effects[5].value);
+        assertNotNull(video_flip);
+        assertEqual(video_flip->flip_horizontally(), true);
+        assertEqual(video_flip->flip_vertically(), false);
     });
 
     tests.add_test("test_video_transform_write", [] {
@@ -126,7 +143,8 @@ main(int argc, char** argv)
               new otio::VideoPosition("position", 10, 20),
               new otio::VideoRotate("rotate", 40.5),
               new otio::VideoCrop("crop", 1, 2, 3, 4),
-              new otio::VideoRoundedCorners("roundedCorners",80)}));
+              new otio::VideoRoundedCorners("roundedCorners",80),
+              new otio::VideoFlip("flip", true, false)}));
 
         auto json = clip.value->to_json_string();
 
@@ -180,6 +198,15 @@ main(int argc, char** argv)
             "effect_name": "VideoRoundedCorners",
             "enabled": true,
             "radius": 80
+        },
+        {
+            "OTIO_SCHEMA": "VideoFlip.1",
+            "metadata": {},
+            "name": "flip",
+            "effect_name": "VideoFlip",
+            "enabled": true,
+            "flip_horizontally": true,
+            "flip_vertically": false
         }
     ],
     "markers": [],

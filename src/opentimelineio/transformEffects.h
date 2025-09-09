@@ -233,4 +233,49 @@ protected:
     int64_t _radius;
 };
 
+/// @brief A flip effect
+class VideoFlip : public Effect
+{
+public:
+    struct Schema
+    {
+        static auto constexpr name   = "VideoFlip";
+        static int constexpr version = 1;
+    };
+
+    using Parent = Effect;
+
+    /// @brief Create a new flip effect.
+    ///
+    /// @param name The name of the effect object.
+    /// @param flip_horizontally Whether to flip horizontally.
+    /// @param flip_vertically Whether to flip vertically.
+    /// @param metadata The metadata for the effect.
+    /// @param enabled Whether the effect is enabled.
+    VideoFlip(
+        std::string const&   name        = std::string(),
+        bool                 flip_horizontally = false,
+        bool                 flip_vertically = false,
+        AnyDictionary const& metadata    = AnyDictionary(),
+        bool                 enabled     = true)
+        : Effect(name, Schema::name, metadata, enabled)
+        , _flip_horizontally(flip_horizontally)
+        , _flip_vertically(flip_vertically)
+    {}
+
+    bool flip_horizontally() const noexcept { return _flip_horizontally; }
+    void set_flip_horizontally(bool flip_horizontally) noexcept { _flip_horizontally = flip_horizontally; }
+
+    bool flip_vertically() const noexcept { return _flip_vertically; }
+    void set_flip_vertically(bool flip_vertically) noexcept { _flip_vertically = flip_vertically; }
+
+protected:
+    virtual ~VideoFlip() = default;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
+
+    bool _flip_horizontally; ///< Whether to flip horizontally
+    bool _flip_vertically; ///< Whether to flip vertically
+};
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

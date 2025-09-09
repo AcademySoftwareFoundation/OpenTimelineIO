@@ -780,6 +780,19 @@ An effect that rounds the corners of a video
         "metadata"_a = py::none())
         .def_property("radius", &VideoRoundedCorners::radius, &VideoRoundedCorners::set_radius, "Radius of the corners");
 
+    py::class_<VideoFlip, Effect, managing_ptr<VideoFlip>>(m, "VideoFlip", py::dynamic_attr(), R"docstring(
+An effect that flips video horizontally or vertically.
+)docstring")
+        .def(py::init([](std::string name, bool flip_horizontally, bool flip_vertically, py::object metadata) {
+                return new VideoFlip(name, flip_horizontally, flip_vertically, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "flip_horizontally"_a = false,
+            "flip_vertically"_a = false,
+            "metadata"_a = py::none())
+        .def_property("flip_horizontally", &VideoFlip::flip_horizontally, &VideoFlip::set_flip_horizontally)
+        .def_property("flip_vertically", &VideoFlip::flip_vertically, &VideoFlip::set_flip_vertically);
+
     py::class_<AudioVolume, Effect, managing_ptr<AudioVolume>>(m, "AudioVolume", py::dynamic_attr(), R"docstring(
 An effect that multiplies the audio volume by a given gain value
 )docstring")

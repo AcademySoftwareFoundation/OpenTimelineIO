@@ -793,6 +793,25 @@ parameters:
 - *metadata*: 
 - *name*: 
 
+### VideoRoundedCorners.1
+
+*full module path*: `opentimelineio.schema.VideoRoundCorners`
+
+*documentation*:
+
+```
+
+An effect that rounds the corners of a video
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+- *radius*: Radius of the corners
+
 ### VideoScale.1
 
 *full module path*: `opentimelineio.schema.VideoScale`

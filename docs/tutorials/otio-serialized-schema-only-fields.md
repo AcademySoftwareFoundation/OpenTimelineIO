@@ -342,6 +342,15 @@ parameters:
 - *metadata*
 - *name*
 
+### VideoRoundedCorners.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *radius*
+
 ### VideoScale.1
 
 parameters:

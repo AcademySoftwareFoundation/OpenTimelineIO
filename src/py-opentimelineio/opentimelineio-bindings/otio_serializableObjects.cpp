@@ -769,6 +769,17 @@ The rotation is specified in degrees clockwise.
             "metadata"_a = py::none())
         .def_property("angle", &VideoRotate::angle, &VideoRotate::set_angle, "Rotation angle in degrees clockwise");
 
+    py::class_<VideoRoundedCorners, Effect, managing_ptr<VideoRoundedCorners>>(m, "VideoRoundCorners", py::dynamic_attr(), R"docstring(
+An effect that rounds the corners of a video
+)docstring")
+        .def(py::init([](std::string name, double radius, py::object metadata) {
+            return new VideoRoundedCorners(name, radius, py_to_any_dictionary(metadata));
+        }),
+        "name"_a = std::string(),
+        "radius"_a = 0.0,
+        "metadata"_a = py::none())
+        .def_property("radius", &VideoRoundedCorners::radius, &VideoRoundedCorners::set_radius, "Radius of the corners");
+
     py::class_<VideoFlip, Effect, managing_ptr<VideoFlip>>(m, "VideoFlip", py::dynamic_attr(), R"docstring(
 An effect that flips video horizontally or vertically.
 )docstring")

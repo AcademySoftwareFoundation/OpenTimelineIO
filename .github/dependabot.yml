@@ -4,12 +4,13 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "daily"
 
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "monthly"
+      day: "monday"
+      interval: "weekly"
 
   - package-ecosystem: "gitsubmodule"
     directory: "/"

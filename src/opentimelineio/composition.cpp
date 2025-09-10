@@ -386,9 +386,19 @@ Composition::trimmed_range_of_child(
             continue;
         }
 
-		result_range = TimeRange(
-			std::max(result_range->start_time(), parent_range.start_time()),
-			std::min(result_range->duration(), parent_range.duration()));
+		auto untrimmed_range = parent->range_of_child_at_index(index, error_status);
+        if (is_error(error_status))
+        {
+            return TimeRange();
+        }
+
+		auto current_trimmed_range = static_cast<const Composition *>(current)->trimmed_range();
+		auto untrimmed_start_time = result_range->start_time() - current_trimmed_range.start_time();
+
+		auto start_time = std::max(untrimmed_start_time, parent_range.start_time());
+		result_range = TimeRange::range_from_start_end_time(
+			start_time,
+			std::min(start_time + result_range->duration(), parent_range.end_time_exclusive()));
 		current = parent;
     }
 

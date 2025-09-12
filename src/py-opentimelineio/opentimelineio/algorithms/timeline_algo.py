@@ -24,7 +24,7 @@ def timeline_trimmed_to_range(in_timeline, trim_range):
 
     :param Timeline in_timeline: Timeline to trim
     :param TimeRange trim_range:
-    :returnd: New trimmed timeline
+    :returns: New trimmed timeline
     :rtype: Timeline
     """
     new_timeline = copy.deepcopy(in_timeline)

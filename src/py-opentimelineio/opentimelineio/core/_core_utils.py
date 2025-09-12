@@ -32,6 +32,7 @@ SUPPORTED_VALUE_TYPES = (
     "opentime.RationalTime",
     "opentime.TimeRange",
     "opentime.TimeTransform",
+    "opentimelineio.core.Color",
     "opentimelineio.core.SerializableObject"
 )
 

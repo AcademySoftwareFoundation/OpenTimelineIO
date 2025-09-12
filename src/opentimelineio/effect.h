@@ -42,7 +42,7 @@ public:
         _effect_name = effect_name;
     }
 
-    /// @brief Return whether the effect is enabed.
+    /// @brief Return whether the effect is enabled.
     bool enabled() const { return _enabled; };
 
     /// @brief Set whether the effect is enabled.

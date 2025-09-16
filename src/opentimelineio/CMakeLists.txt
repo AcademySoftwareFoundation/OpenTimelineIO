@@ -5,6 +5,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
     clip.h
+    colorManagementEffects.h
     composable.h
     composition.h
     deserialization.h
@@ -42,6 +43,7 @@ set(OPENTIMELINEIO_HEADER_FILES
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
     clip.cpp
+    colorManagementEffects.cpp
     composable.cpp
     composition.cpp
     deserialization.cpp

@@ -5,6 +5,7 @@
 
 #include "anyDictionary.h"
 #include "opentimelineio/clip.h"
+#include "opentimelineio/colorManagementEffects.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 #include "opentimelineio/effect.h"
@@ -92,9 +93,13 @@ TypeRegistry::TypeRegistry()
     register_type<Track>();
     register_type_from_existing_type("Sequence", 1, "Track", nullptr);
 
+    register_type<VideoBrightness>();
+    register_type<VideoContrast>();
+    register_type<VideoColorTemperature>();
     register_type<VideoCrop>();
     register_type<VideoFlip>();
     register_type<VideoMask>();
+    register_type<VideoSaturation>();
     register_type<VideoScale>();
     register_type<VideoPosition>();
     register_type<VideoRotate>();

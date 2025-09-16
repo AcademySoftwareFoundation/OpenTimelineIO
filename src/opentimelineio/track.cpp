@@ -321,4 +321,11 @@ Track::available_image_bounds(ErrorStatus* error_status) const
     return box;
 }
 
+void
+Track::invalidate_cache() const
+{
+    _availableRangeCache = std::nullopt;
+    _childRangesCacche.clear();
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

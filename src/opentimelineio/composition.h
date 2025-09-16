@@ -158,6 +158,9 @@ public:
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;
 
+
+    virtual void invalidate_cache() const {};
+
 protected:
     virtual ~Composition();
 

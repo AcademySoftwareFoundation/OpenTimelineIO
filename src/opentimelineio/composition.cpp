@@ -98,6 +98,7 @@ Composition::insert_child(
     }
 
     _child_set.insert(child);
+    invalidate_cache();
     return true;
 }
 
@@ -130,6 +131,7 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status)
         child->_set_parent(this);
         _children[index] = child;
         _child_set.insert(child);
+        invalidate_cache();
     }
     return true;
 }
@@ -161,6 +163,7 @@ Composition::remove_child(int index, ErrorStatus* error_status)
         _children[index]->_set_parent(nullptr);
         _children.erase(_children.begin() + index);
     }
+    invalidate_cache();
 
     return true;
 }

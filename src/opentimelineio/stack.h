@@ -69,6 +69,9 @@ public:
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
 
+
+
+    void invalidate_cache() const override;
 protected:
     virtual ~Stack();
 

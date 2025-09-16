@@ -76,6 +76,9 @@ protected:
 
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
+
+    mutable std::unordered_map<int, TimeRange> _childRangesCacche;
+    mutable std::optional<TimeRange> _availableRangeCache;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

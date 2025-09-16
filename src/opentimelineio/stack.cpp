@@ -41,6 +41,11 @@ Stack::write_to(Writer& writer) const
 TimeRange
 Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const
 {
+    auto it = _childRangesCacche.find(index);
+    if (it != _childRangesCacche.end()) {
+        return it->second;
+    }
+
     index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size()))
     {
@@ -48,6 +53,7 @@ Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const
         {
             *error_status = ErrorStatus::ILLEGAL_INDEX;
         }
+        _childRangesCacche[index] = TimeRange();
         return TimeRange();
     }
 
@@ -55,10 +61,13 @@ Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const
     auto        duration = child->duration(error_status);
     if (is_error(error_status))
     {
+        _childRangesCacche[index] = TimeRange();
         return TimeRange();
     }
 
-    return TimeRange(RationalTime(0, duration.rate()), duration);
+    auto result = TimeRange(RationalTime(0, duration.rate()), duration);
+    _childRangesCacche[index] = result;
+    return result;
 }
 
 std::map<Composable*, TimeRange>
@@ -118,9 +127,14 @@ Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
 TimeRange
 Stack::available_range(ErrorStatus* error_status) const
 {
+    if (_availableRangeCache.has_value()) {
+        return _availableRangeCache.value();
+    }
+
     if (children().empty())
     {
-        return TimeRange();
+        _availableRangeCache = TimeRange();
+        return _availableRangeCache.value();
     }
 
     auto duration = children()[0].value->duration(error_status);
@@ -130,7 +144,8 @@ Stack::available_range(ErrorStatus* error_status) const
             std::max(duration, children()[i].value->duration(error_status));
     }
 
-    return TimeRange(RationalTime(0, duration.rate()), duration);
+    _availableRangeCache = TimeRange(RationalTime(0, duration.rate()), duration);
+    return _availableRangeCache.value();
 }
 
 std::vector<SerializableObject::Retainer<Clip>>

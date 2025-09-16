@@ -2,6 +2,7 @@
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/deserialization.h>
+#include <opentimelineio/externalReference.h>
 #include <opentimelineio/colorManagementEffects.h>
 
 namespace otime = opentime::OPENTIME_VERSION;

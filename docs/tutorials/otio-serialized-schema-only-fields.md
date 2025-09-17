@@ -301,6 +301,33 @@ parameters:
 - *out_offset*
 - *transition_type*
 
+### VideoBrightness.1
+
+parameters:
+- *brightness*
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+
+### VideoColorTemperature.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *temperature*
+
+### VideoContrast.1
+
+parameters:
+- *contrast*
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+
 ### VideoCrop.1
 
 parameters:
@@ -324,12 +351,14 @@ parameters:
 - *name*
 
 ### VideoMask.1
+### VideoLightness.1
 
 parameters:
 - *effect_name*
 - *enabled*
 - *mask_type*
 - *mask_url*
+- *lightness*
 - *metadata*
 - *name*
 
@@ -360,6 +389,15 @@ parameters:
 - *metadata*
 - *name*
 - *radius*
+
+### VideoSaturation.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *saturation*
 
 ### VideoScale.1
 

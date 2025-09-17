@@ -92,6 +92,8 @@ public:
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
 
+    void invalidate_cache() const override;
+
 protected:
     virtual ~Track();
 
@@ -102,6 +104,8 @@ protected:
 
 private:
     std::string _kind;
+    mutable std::unordered_map<int, TimeRange> _childRangesCacche;
+    mutable std::optional<TimeRange> _availableRangeCache;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

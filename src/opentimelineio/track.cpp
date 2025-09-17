@@ -45,12 +45,18 @@ TimeRange
 Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
 {
     index = adjusted_vector_index(index, children());
+    auto it = _childRangesCacche.find(index);
+    if (it != _childRangesCacche.end()) {
+        return it->second;
+    }
+
     if (index < 0 || index >= int(children().size()))
     {
         if (error_status)
         {
             *error_status = ErrorStatus::ILLEGAL_INDEX;
         }
+        _childRangesCacche[index] = TimeRange();
         return TimeRange();
     }
 
@@ -58,6 +64,7 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
     RationalTime child_duration = child->duration(error_status);
     if (is_error(error_status))
     {
+        _childRangesCacche[index] = TimeRange();
         return TimeRange();
     }
 
@@ -72,6 +79,7 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
         }
         if (is_error(error_status))
         {
+            _childRangesCacche[index] = TimeRange();
             return TimeRange();
         }
     }
@@ -81,7 +89,9 @@ Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
         start_time -= transition->in_offset();
     }
 
-    return TimeRange(start_time, child_duration);
+    auto result = TimeRange(start_time, child_duration);
+    _childRangesCacche[index] = result;
+    return result;
 }
 
 TimeRange
@@ -110,6 +120,10 @@ Track::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
 TimeRange
 Track::available_range(ErrorStatus* error_status) const
 {
+    if (_availableRangeCache.has_value()) {
+        return _availableRangeCache.value();
+    }
+
     RationalTime duration;
     for (const auto& child: children())
     {
@@ -118,7 +132,8 @@ Track::available_range(ErrorStatus* error_status) const
             duration += item->duration(error_status);
             if (is_error(error_status))
             {
-                return TimeRange();
+                _availableRangeCache = TimeRange();
+                return _availableRangeCache.value();
             }
         }
     }
@@ -137,7 +152,8 @@ Track::available_range(ErrorStatus* error_status) const
         }
     }
 
-    return TimeRange(RationalTime(0, duration.rate()), duration);
+    _availableRangeCache = TimeRange(RationalTime(0, duration.rate()), duration);
+    return _availableRangeCache.value();
 }
 
 std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
@@ -303,6 +319,13 @@ Track::available_image_bounds(ErrorStatus* error_status) const
         }
     }
     return box;
+}
+
+void
+Track::invalidate_cache() const
+{
+    _availableRangeCache = std::nullopt;
+    _childRangesCacche.clear();
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

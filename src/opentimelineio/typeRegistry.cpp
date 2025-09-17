@@ -101,9 +101,12 @@ TypeRegistry::TypeRegistry()
     register_type<VideoMask>();
     register_type<VideoSaturation>();
     register_type<VideoScale>();
+    register_type<VideoLightness>();
     register_type<VideoPosition>();
     register_type<VideoRotate>();
     register_type<VideoRoundedCorners>();
+    register_type<VideoSaturation>();
+    register_type<VideoScale>();
 
     register_type<Transition>();
 

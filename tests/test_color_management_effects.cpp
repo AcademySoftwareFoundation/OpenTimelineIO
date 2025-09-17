@@ -23,7 +23,20 @@ main(int argc, char** argv)
                 "OTIO_SCHEMA": "Clip.1",
                 "media_reference": {
                     "OTIO_SCHEMA": "ExternalReference.1",
-                    "target_url": "unit_test_url"
+                    "target_url": "unit_test_url",
+                    "available_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 8
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 10
+                        }
+                    }
                 },
                 "effects": [
                     {

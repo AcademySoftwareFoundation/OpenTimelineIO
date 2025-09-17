@@ -44,12 +44,12 @@ Track::write_to(Writer& writer) const
 TimeRange
 Track::range_of_child_at_index(int index, ErrorStatus* error_status) const
 {
+    index = adjusted_vector_index(index, children());
     auto it = _childRangesCacche.find(index);
     if (it != _childRangesCacche.end()) {
         return it->second;
     }
 
-    index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size()))
     {
         if (error_status)

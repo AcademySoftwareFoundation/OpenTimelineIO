@@ -278,4 +278,54 @@ protected:
     bool _flip_vertically; ///< Whether to flip vertically
 };
 
+class VideoMask : public Effect
+{
+public:
+
+    struct MaskType
+    {
+        static auto constexpr remove = "REMOVE";
+        static auto constexpr replace = "REPLACE";
+        static auto constexpr blur = "BLUR";
+    };
+
+    struct Schema
+    {
+        static auto constexpr name   = "VideoMask";
+        static int constexpr version = 1;
+    };
+
+    using Parent = Effect;
+
+    VideoMask(
+        std::string const& name = std::string(),
+        std::string const& mask_type = MaskType::remove,
+        std::string const& mask_url = std::string(),
+        AnyDictionary const& metadata = AnyDictionary(),
+        bool enabled = true)
+        : Effect(name, Schema::name, metadata, enabled)
+        , _mask_type(mask_type)
+        , _mask_url(mask_url)
+    {}
+
+    std::string mask_type() const noexcept { return _mask_type; }
+    void set_mask_type(std::string mask_type) noexcept { _mask_type = mask_type; }
+    std::string mask_url() const noexcept { return _mask_url; }
+    void set_mask_url(std::string mask_url) noexcept { _mask_url = mask_url; }
+    std::optional<std::string> mask_replacement_url() const noexcept { return _mask_replacement_url; }
+    void set_mask_replacement_url(std::optional<std::string> mask_replacement_url) noexcept { _mask_replacement_url = mask_replacement_url; }
+    std::optional<double> blur_radius() const noexcept { return _blur_radius; }
+    void set_blur_radius(std::optional<double> blur_radius) noexcept { _blur_radius = blur_radius; }
+
+protected:
+    virtual ~VideoMask() = default;
+    bool read_from(Reader&) override;
+    void write_to(Writer&) const override;
+
+    std::string _mask_type;
+    std::string _mask_url;
+    std::optional<std::string> _mask_replacement_url;
+    std::optional<double> _blur_radius;
+};
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

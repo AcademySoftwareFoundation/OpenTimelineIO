@@ -28,13 +28,15 @@ from .. _otio import (
     V2d,
     VideoCrop,
     VideoFlip,
+    VideoMask,
     VideoPosition,
     VideoRotate,
-    VideoScale,
     VideoRoundCorners,
+    VideoScale,
 )
 
 MarkerColor = Marker.Color
+MaskType = VideoMask.MaskType
 TrackKind = Track.Kind
 TransitionTypes = Transition.Type
 NeighborGapPolicy = Track.NeighborGapPolicy
@@ -86,7 +88,10 @@ __all__ = [
     'timeline_from_clips',
     'V2d',
     'VideoCrop',
+    'VideoFlip',
+    'VideoMask',
     'VideoPosition',
     'VideoRotate',
+    'VideoRoundCorners',
     'VideoScale',
 ]

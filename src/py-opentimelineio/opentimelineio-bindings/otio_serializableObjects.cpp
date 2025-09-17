@@ -793,6 +793,28 @@ An effect that flips video horizontally or vertically.
         .def_property("flip_horizontally", &VideoFlip::flip_horizontally, &VideoFlip::set_flip_horizontally)
         .def_property("flip_vertically", &VideoFlip::flip_vertically, &VideoFlip::set_flip_vertically);
 
+auto video_mask_class =
+    py::class_<VideoMask, Effect, managing_ptr<VideoMask>>(m, "VideoMask", py::dynamic_attr(), R"docstring(
+An effect that applies a mask to a video
+)docstring");
+video_mask_class
+        .def(py::init([](std::string name, std::string const& mask_type, const std::string& mask_url, py::object metadata) {
+            return new VideoMask(name, mask_type, mask_url, py_to_any_dictionary(metadata));
+        }),
+        "name"_a = std::string(),
+        "mask_type"_a = VideoMask::MaskType::remove,
+        "mask_url"_a = std::string(),
+        "metadata"_a = py::none())
+        .def_property("mask_type", &VideoMask::mask_type, &VideoMask::set_mask_type)
+        .def_property("mask_url", &VideoMask::mask_url, &VideoMask::set_mask_url)
+        .def_property("mask_replacement_url", &VideoMask::mask_replacement_url, &VideoMask::set_mask_replacement_url)
+        .def_property("blur_radius", &VideoMask::blur_radius, &VideoMask::set_blur_radius);
+
+    py::class_<VideoMask::MaskType>(video_mask_class, "MaskType")
+        .def_property_readonly_static("REMOVE", [](py::object /* self */) { return VideoMask::MaskType::remove; })
+        .def_property_readonly_static("REPLACE", [](py::object /* self */) { return VideoMask::MaskType::replace; })
+        .def_property_readonly_static("BLUR", [](py::object /* self */) { return VideoMask::MaskType::blur; });
+
     py::class_<AudioVolume, Effect, managing_ptr<AudioVolume>>(m, "AudioVolume", py::dynamic_attr(), R"docstring(
 An effect that multiplies the audio volume by a given gain value
 )docstring")

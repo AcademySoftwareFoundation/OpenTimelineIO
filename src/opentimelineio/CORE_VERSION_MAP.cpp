@@ -177,6 +177,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "UnknownSchema", 1 },
           { "VideoCrop", 1 },
           { "VideoFlip", 1 },
+          { "VideoMask", 1 },
           { "VideoPosition", 1 },
           { "VideoRotate", 1 },
           { "VideoRoundedCorners", 1 },

@@ -134,6 +134,7 @@ public:
         bool read(std::string const& key, std::optional<bool>* dest);
         bool read(std::string const& key, std::optional<int>* dest);
         bool read(std::string const& key, std::optional<double>* dest);
+        bool read(std::string const& key, std::optional<std::string>* dest);
         bool read(std::string const& key, std::optional<RationalTime>* dest);
         bool read(std::string const& key, std::optional<TimeRange>* dest);
         bool read(std::string const& key, std::optional<TimeTransform>* dest);

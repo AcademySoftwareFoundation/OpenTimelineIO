@@ -380,3 +380,72 @@ class VideoFlipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(flip.flip_vertically, False)
         flip.flip_vertically = True
         self.assertEqual(flip.flip_vertically, True)
+
+class VideoMaskTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
+    def test_constructor(self):
+        mask = otio.schema.VideoMask(
+            name="MaskIt",
+            mask_type=otio.schema.MaskType.REMOVE,
+            mask_url="mask_url",
+            metadata={
+                "mask": "val"
+            }
+        )
+        self.assertEqual(mask.mask_type, otio.schema.MaskType.REMOVE)
+        self.assertEqual(mask.mask_url, "mask_url")
+        self.assertEqual(mask.name, "MaskIt")
+        self.assertEqual(mask.metadata, {"mask": "val"})
+
+    def test_eq(self):
+        mask1 = otio.schema.VideoMask(
+            name="MaskIt",
+            mask_type=otio.schema.MaskType.REMOVE,
+            mask_url="mask_url",
+            metadata={
+                "mask": "val"
+            }
+        )
+        mask2 = otio.schema.VideoMask(
+            name="MaskIt",
+            mask_type=otio.schema.MaskType.REMOVE,
+            mask_url="mask_url",
+            metadata={
+                "mask": "val"
+            }
+        )
+        self.assertIsOTIOEquivalentTo(mask1, mask2)
+
+    def test_serialize(self):
+        mask = otio.schema.VideoMask(
+            name="MaskIt",
+            mask_type=otio.schema.MaskType.REMOVE,
+            mask_url="mask_url",
+            metadata={
+                "mask": "val"
+            }
+        )
+        encoded = otio.adapters.otio_json.write_to_string(mask)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(mask, decoded)
+
+    def test_setters(self):
+        mask = otio.schema.VideoMask(
+            name="MaskIt",
+            mask_type=otio.schema.MaskType.REMOVE,
+            mask_url="mask_url",
+            metadata={
+                "mask": "val"
+            }
+        )
+        self.assertEqual(mask.mask_type, otio.schema.MaskType.REMOVE)
+        mask.mask_type = otio.schema.MaskType.REPLACE
+        self.assertEqual(mask.mask_type, otio.schema.MaskType.REPLACE)
+        mask.mask_url = "mask_url_2"
+        self.assertEqual(mask.mask_url, "mask_url_2")
+        mask.mask_replacement_url = "mask_replacement_url"
+        self.assertEqual(mask.mask_replacement_url, "mask_replacement_url")
+        mask.blur_radius = 10.0
+        self.assertEqual(mask.blur_radius, 10.0)
+
+if __name__ == "__main__":
+    unittest.main()

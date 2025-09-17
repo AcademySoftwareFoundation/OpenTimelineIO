@@ -94,6 +94,7 @@ TypeRegistry::TypeRegistry()
 
     register_type<VideoCrop>();
     register_type<VideoFlip>();
+    register_type<VideoMask>();
     register_type<VideoScale>();
     register_type<VideoPosition>();
     register_type<VideoRotate>();

@@ -86,6 +86,32 @@ main(int argc, char** argv)
                         "flip_vertically": false,
                         "effect_name": "VideoFlip",
                         "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoMask.1",
+                        "name": "mask",
+                        "mask_type": "REMOVE",
+                        "mask_url": "mask_url",
+                        "effect_name": "VideoMaskRemove",
+                        "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoMask.1",
+                        "name": "mask",
+                        "mask_type": "REPLACE",
+                        "mask_url": "mask_url",
+                        "effect_name": "VideoMaskReplace",
+                        "mask_replacement_url": "mask_replacement_url",
+                        "enabled": true
+                    },
+                    {
+                        "OTIO_SCHEMA": "VideoMask.1",
+                        "name": "mask",
+                        "mask_type": "BLUR",
+                        "mask_url": "mask_url",
+                        "effect_name": "VideoMaskBlur",
+                        "blur_radius": 10.1,
+                        "enabled": true
                     }
                 ]
             })",
@@ -98,7 +124,7 @@ main(int argc, char** argv)
         assertNotNull(clip);
 
         auto effects = clip->effects();
-        assertEqual(effects.size(), 6);
+        assertEqual(effects.size(), 9);
 
         auto video_scale = dynamic_cast<const VideoScale*>(effects[0].value);
         assertNotNull(video_scale);
@@ -129,6 +155,23 @@ main(int argc, char** argv)
         assertNotNull(video_flip);
         assertEqual(video_flip->flip_horizontally(), true);
         assertEqual(video_flip->flip_vertically(), false);
+
+        auto video_mask_remove = dynamic_cast<const VideoMask*>(effects[6].value);
+        assertNotNull(video_mask_remove);
+        assertEqual(video_mask_remove->mask_type(), std::string(VideoMask::MaskType::remove));
+        assertEqual(video_mask_remove->mask_url(), std::string("mask_url"));
+
+        auto video_mask_replace = dynamic_cast<const VideoMask*>(effects[7].value);
+        assertNotNull(video_mask_replace);
+        assertEqual(video_mask_replace->mask_type(), std::string(VideoMask::MaskType::replace));
+        assertEqual(video_mask_replace->mask_url(), std::string("mask_url"));
+        assertEqual(video_mask_replace->mask_replacement_url().value(), std::string("mask_replacement_url"));
+
+        auto video_mask_blur = dynamic_cast<const VideoMask*>(effects[8].value);
+        assertNotNull(video_mask_blur);
+        assertEqual(video_mask_blur->mask_type(), std::string(VideoMask::MaskType::blur));
+        assertEqual(video_mask_blur->mask_url(), std::string("mask_url"));
+        assertEqual(video_mask_blur->blur_radius().value(), 10.1);
     });
 
     tests.add_test("test_video_transform_write", [] {
@@ -144,7 +187,9 @@ main(int argc, char** argv)
               new otio::VideoRotate("rotate", 40.5),
               new otio::VideoCrop("crop", 1, 2, 3, 4),
               new otio::VideoRoundedCorners("roundedCorners",80),
-              new otio::VideoFlip("flip", true, false)}));
+              new otio::VideoFlip("flip", true, false),
+              new otio::VideoMask("mask", otio::VideoMask::MaskType::remove, "mask_url")
+            }));
 
         auto json = clip.value->to_json_string();
 
@@ -207,6 +252,15 @@ main(int argc, char** argv)
             "enabled": true,
             "flip_horizontally": true,
             "flip_vertically": false
+        },
+        {
+            "OTIO_SCHEMA": "VideoMask.1",
+            "metadata": {},
+            "name": "mask",
+            "effect_name": "VideoMask",
+            "enabled": true,
+            "mask_type": "REMOVE",
+            "mask_url": "mask_url"
         }
     ],
     "markers": [],
@@ -223,6 +277,7 @@ main(int argc, char** argv)
     },
     "active_media_reference_key": "DEFAULT_MEDIA"
 })";
+
 
         assertEqual(json, expected_json);
 

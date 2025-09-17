@@ -803,6 +803,14 @@ SerializableObject::Reader::read(
 bool
 SerializableObject::Reader::read(
     std::string const&           key,
+    std::optional<std::string>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
+    std::string const&           key,
     std::optional<RationalTime>* value)
 {
     return _read_optional(key, value);

@@ -79,4 +79,40 @@ void VideoFlip::write_to(Writer &writer) const {
     writer.write("flip_vertically", _flip_vertically);
 }
 
+bool VideoMask::read_from(Reader &reader)
+{
+    bool result = reader.read("mask_type", &_mask_type)
+           && reader.read("mask_url", &_mask_url)
+           && reader.read_if_present("mask_replacement_url", &_mask_replacement_url)
+           && reader.read_if_present("blur_radius", &_blur_radius)
+           && Parent::read_from(reader);
+
+    if (result) {
+        // Check optionals are present for the mask type
+        if (_mask_type == MaskType::replace) {
+            if (!_mask_replacement_url) {
+                return false;
+            }
+        } else if (_mask_type == MaskType::blur) {
+            if (!_blur_radius) {
+                return false;
+            }
+        }
+    }
+
+    return result;
+}
+
+void VideoMask::write_to(Writer &writer) const {
+    Parent::write_to(writer);
+    writer.write("mask_type", _mask_type);
+    writer.write("mask_url", _mask_url);
+    if (_mask_replacement_url) {
+        writer.write("mask_replacement_url", _mask_replacement_url.value());
+    }
+    if (_blur_radius) {
+        writer.write("blur_radius", _blur_radius.value());
+    }
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

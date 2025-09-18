@@ -809,9 +809,6 @@ parameters:
 - *metadata*: 
 - *name*: 
 
-### VideoMask.1
-
-*full module path*: `opentimelineio.schema.VideoMask`
 ### VideoLightness.1
 
 *full module path*: `opentimelineio.schema.VideoLightness`
@@ -820,7 +817,6 @@ parameters:
 
 ```
 
-An effect that applies a mask to a video
 An effect that adjusts video lightness.
 
 ```
@@ -828,8 +824,6 @@ An effect that adjusts video lightness.
 parameters:
 - *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *mask_type*: 
-- *mask_url*: 
 - *lightness*: Lightness value
 - *metadata*: 
 - *name*: 

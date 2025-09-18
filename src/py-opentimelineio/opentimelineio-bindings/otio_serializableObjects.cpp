@@ -667,7 +667,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 }
 
 static void define_effects(py::module m) {
-     py::class_<Effect, SOWithMetadata, managing_ptr<Effect>>(m, "Effect", py::dynamic_attr())
+    py::class_<Effect, SOWithMetadata, managing_ptr<Effect>>(m, "Effect", py::dynamic_attr())
         .def(py::init([](std::string name,
                          std::string effect_name,
                          py::object metadata,
@@ -815,6 +815,7 @@ video_mask_class
         .def_property_readonly_static("REMOVE", [](py::object /* self */) { return VideoMask::MaskType::remove; })
         .def_property_readonly_static("REPLACE", [](py::object /* self */) { return VideoMask::MaskType::replace; })
         .def_property_readonly_static("BLUR", [](py::object /* self */) { return VideoMask::MaskType::blur; });
+    
     py::class_<VideoBrightness, Effect, managing_ptr<VideoBrightness>>(m, "VideoBrightness", py::dynamic_attr(), R"docstring(
 An effect that adjusts video brightness.
 )docstring")

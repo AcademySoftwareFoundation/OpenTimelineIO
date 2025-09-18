@@ -37,6 +37,7 @@ from .. _otio import (
     VideoRotate,
     VideoRoundCorners,
     VideoSaturation,
+    VideoScale,
 )
 
 MarkerColor = Marker.Color

@@ -359,6 +359,16 @@ parameters:
 - *metadata*
 - *name*
 
+### VideoMask.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *mask_type*
+- *mask_url*
+- *metadata*
+- *name*
+
 ### VideoPosition.1
 
 parameters:

@@ -25,6 +25,7 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/transformEffects.h"
+#include "opentimelineio/colorManagementEffects.h"
 #include "opentimelineio/transition.h"
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/stack.h"
@@ -814,6 +815,63 @@ video_mask_class
         .def_property_readonly_static("REMOVE", [](py::object /* self */) { return VideoMask::MaskType::remove; })
         .def_property_readonly_static("REPLACE", [](py::object /* self */) { return VideoMask::MaskType::replace; })
         .def_property_readonly_static("BLUR", [](py::object /* self */) { return VideoMask::MaskType::blur; });
+    
+    py::class_<VideoBrightness, Effect, managing_ptr<VideoBrightness>>(m, "VideoBrightness", py::dynamic_attr(), R"docstring(
+An effect that adjusts video brightness.
+)docstring")
+        .def(py::init([](std::string name, int64_t brightness, py::object metadata) {
+                return new VideoBrightness(name, brightness, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "brightness"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("brightness", &VideoBrightness::brightness, &VideoBrightness::set_brightness, "Brightness value");
+
+    py::class_<VideoContrast, Effect, managing_ptr<VideoContrast>>(m, "VideoContrast", py::dynamic_attr(), R"docstring(
+An effect that adjusts video contrast.
+)docstring")
+        .def(py::init([](std::string name, int64_t contrast, py::object metadata) {
+                return new VideoContrast(name, contrast, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "contrast"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("contrast", &VideoContrast::contrast, &VideoContrast::set_contrast, "Contrast value");
+
+    py::class_<VideoSaturation, Effect, managing_ptr<VideoSaturation>>(m, "VideoSaturation", py::dynamic_attr(), R"docstring(
+An effect that adjusts video saturation.
+)docstring")
+        .def(py::init([](std::string name, int64_t saturation, py::object metadata) {
+                return new VideoSaturation(name, saturation, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "saturation"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("saturation", &VideoSaturation::saturation, &VideoSaturation::set_saturation, "Saturation value");
+
+    py::class_<VideoLightness, Effect, managing_ptr<VideoLightness>>(m, "VideoLightness", py::dynamic_attr(), R"docstring(
+An effect that adjusts video lightness.
+)docstring")
+        .def(py::init([](std::string name, int64_t lightness, py::object metadata) {
+                return new VideoLightness(name, lightness, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "lightness"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("lightness", &VideoLightness::lightness, &VideoLightness::set_lightness, "Lightness value");
+
+    py::class_<VideoColorTemperature, Effect, managing_ptr<VideoColorTemperature>>(m, "VideoColorTemperature", py::dynamic_attr(), R"docstring(
+An effect that adjusts video color temperature.
+)docstring")
+        .def(py::init([](std::string name, int64_t temperature, py::object metadata) {
+                return new VideoColorTemperature(name, temperature, py_to_any_dictionary(metadata));
+            }),
+            "name"_a = std::string(),
+            "temperature"_a = 0,
+            "metadata"_a = py::none())
+        .def_property("temperature", &VideoColorTemperature::temperature, &VideoColorTemperature::set_temperature, "Color temperature value");
+    
+   
 
     py::class_<AudioVolume, Effect, managing_ptr<AudioVolume>>(m, "AudioVolume", py::dynamic_attr(), R"docstring(
 An effect that multiplies the audio volume by a given gain value

@@ -710,6 +710,63 @@ parameters:
 - *out_offset*: Amount of the next clip this transition overlaps, exclusive.
 - *transition_type*: Kind of transition, as defined by the :class:`Type` enum.
 
+### VideoBrightness.1
+
+*full module path*: `opentimelineio.schema.VideoBrightness`
+
+*documentation*:
+
+```
+
+An effect that adjusts video brightness.
+
+```
+
+parameters:
+- *brightness*: Brightness value
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+
+### VideoColorTemperature.1
+
+*full module path*: `opentimelineio.schema.VideoColorTemperature`
+
+*documentation*:
+
+```
+
+An effect that adjusts video color temperature.
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+- *temperature*: Color temperature value
+
+### VideoContrast.1
+
+*full module path*: `opentimelineio.schema.VideoContrast`
+
+*documentation*:
+
+```
+
+An effect that adjusts video contrast.
+
+```
+
+parameters:
+- *contrast*: Contrast value
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+
 ### VideoCrop.1
 
 *full module path*: `opentimelineio.schema.VideoCrop`
@@ -749,6 +806,25 @@ parameters:
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *flip_horizontally*: 
 - *flip_vertically*: 
+- *metadata*: 
+- *name*: 
+
+### VideoLightness.1
+
+*full module path*: `opentimelineio.schema.VideoLightness`
+
+*documentation*:
+
+```
+
+An effect that adjusts video lightness.
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *lightness*: Lightness value
 - *metadata*: 
 - *name*: 
 
@@ -831,6 +907,25 @@ parameters:
 - *metadata*: 
 - *name*: 
 - *radius*: Radius of the corners
+
+### VideoSaturation.1
+
+*full module path*: `opentimelineio.schema.VideoSaturation`
+
+*documentation*:
+
+```
+
+An effect that adjusts video saturation.
+
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+- *saturation*: Saturation value
 
 ### VideoScale.1
 

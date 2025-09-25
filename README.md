@@ -135,10 +135,6 @@ There are more code examples here: https://github.com/AcademySoftwareFoundation/
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/AcademySoftwareFoundation/OpenTimelineIO/tree/main/tests
 
-OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
-
-![OTIO View Screenshot](docs/_static/otioview.png)
-
 Developing
 ----------
 
@@ -197,4 +193,3 @@ Contact
 For more information, please visit http://opentimeline.io/
 or https://github.com/AcademySoftwareFoundation/OpenTimelineIO
 or join our discussion forum: https://lists.aswf.io/g/otio-discussion
-

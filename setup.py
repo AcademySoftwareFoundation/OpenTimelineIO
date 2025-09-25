@@ -237,7 +237,6 @@ def _append_version_info_to_init_scripts(build_lib):
 
     for module, parentdir in [
             ("opentimelineio", "src/py-opentimelineio"),
-            ("opentimelineview", "src")
     ]:
         target_file = os.path.join(build_lib, module, "__init__.py")
         source_file = os.path.join(
@@ -336,8 +335,7 @@ setup(
     },
 
     packages=(
-        find_packages(where="src/py-opentimelineio") +  # opentimelineio
-        find_packages(where="src")  # opentimelineview
+        find_packages(where="src/py-opentimelineio")  # opentimelineio
     ),
 
     ext_modules=[
@@ -352,7 +350,6 @@ setup(
 
     package_dir={
         'opentimelineio': 'src/py-opentimelineio/opentimelineio',
-        'opentimelineview': 'src/opentimelineview',
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
@@ -367,7 +364,6 @@ setup(
             'otiopluginfo = opentimelineio.console.otiopluginfo:main',
             'otiostat = opentimelineio.console.otiostat:main',
             'otiotool = opentimelineio.console.otiotool:main',
-            'otioview = opentimelineview.console:main',
             (
                 'otioautogen_serialized_schema_docs = '
                 'opentimelineio.console.autogen_serialized_datamodel:main'
@@ -381,10 +377,6 @@ setup(
             'coverage>=4.5',
             'urllib3>=1.24.3'
         ],
-        'view': [
-            'PySide2~=5.11; platform.machine=="x86_64"',
-            'PySide6~=6.2; platform.machine=="aarch64"'
-        ]
     },
 
     # because we need to open() the adapters manifest, we aren't zip-safe

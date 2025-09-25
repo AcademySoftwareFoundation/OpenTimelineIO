@@ -9,9 +9,4 @@ if(OTIO_INSTALL_PYTHON_MODULES)
     install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/py-opentimelineio/opentimelineio/"
         DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
 
-    if(OTIO_INSTALL_COMMANDLINE_TOOLS)
-        install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/opentimelineview"
-            DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
-    endif()
-
 endif()

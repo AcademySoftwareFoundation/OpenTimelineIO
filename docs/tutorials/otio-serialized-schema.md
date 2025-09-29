@@ -29,24 +29,24 @@ changes.  If it needs to be updated and this file regenerated, run:
 ```
 Adapters convert between OTIO and other formats.
 
-Note that this class is not subclassed by adapters. Rather, an adapter is
-a python module that implements at least one of the following functions:
+    Note that this class is not subclassed by adapters. Rather, an adapter is
+    a python module that implements at least one of the following functions:
 
-.. code-block:: python
+    .. code-block:: python
 
-    write_to_string(input_otio)
-    write_to_file(input_otio, filepath) (optionally inferred)
-    read_from_string(input_str)
-    read_from_file(filepath) (optionally inferred)
+        write_to_string(input_otio)
+        write_to_file(input_otio, filepath) (optionally inferred)
+        read_from_string(input_str)
+        read_from_file(filepath) (optionally inferred)
 
-...as well as a small json file that advertises the features of the adapter
-to OTIO.  This class serves as the wrapper around these modules internal
-to OTIO.  You should not need to extend this class to create new adapters
-for OTIO.
+    ...as well as a small json file that advertises the features of the adapter
+    to OTIO.  This class serves as the wrapper around these modules internal
+    to OTIO.  You should not need to extend this class to create new adapters
+    for OTIO.
 
-For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-
+    For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-
 adapter.html. # noqa
-
+    
 ```
 
 parameters:
@@ -261,14 +261,14 @@ parameters:
 ```
 Defines an OTIO plugin Manifest.
 
-This is considered an internal OTIO implementation detail.
+    This is considered an internal OTIO implementation detail.
 
-A manifest tracks a collection of plugins and enables finding them by name
-or other features (in the case of adapters, what file suffixes they
-advertise support for).
+    A manifest tracks a collection of plugins and enables finding them by name
+    or other features (in the case of adapters, what file suffixes they
+    advertise support for).
 
-For more information, consult the documentation.
-
+    For more information, consult the documentation.
+    
 ```
 
 parameters:
@@ -287,8 +287,8 @@ parameters:
 
 ```
 A class of plugin that is encoded in a python module, exposed via a
-manifest.
-
+    manifest.
+    
 ```
 
 parameters:

@@ -219,7 +219,7 @@ class Main(QtWidgets.QMainWindow):
 
         def __callback():
             self._navigation_filter_callback(actions)
-        navigation_menu.triggered[[QAction]].connect(__callback)
+        navigation_menu.triggered.connect(__callback)
 
     def _navigation_filter_callback(self, filters):
         nav_filter = 0

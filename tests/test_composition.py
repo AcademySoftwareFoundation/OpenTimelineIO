@@ -1895,6 +1895,7 @@ class NestingTest(unittest.TestCase):
             wrapper = _nest(self, clip)
             wrappers.append(wrapper)
 
+        timeline.invalidate_cache()
         # nothing should have shifted at all
 
         # print otio.adapters.otio_json.write_to_string(timeline)
@@ -1927,6 +1928,8 @@ class NestingTest(unittest.TestCase):
             wrapper.source_range = trim
 
         # print otio.adapters.otio_json.write_to_string(timeline)
+
+        timeline.invalidate_cache()
 
         # the clip should be the same
         self.assertEqual(clip.duration(), onehundred)

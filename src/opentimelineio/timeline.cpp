@@ -90,4 +90,27 @@ Timeline::find_clips(
         shallow_search);
 }
 
+void
+Timeline::invalidate_cache() const
+{
+    std::stack<Composition*> stack;
+    stack.push(_tracks.value);
+    while (!stack.empty())
+    {
+        auto composition = stack.top();
+        composition->invalidate_cache();
+
+        stack.pop();
+
+        for (auto child : composition->children())
+        {
+            auto* next_composition = dynamic_cast<Composition*>(child.value);
+            if (next_composition)
+            {
+                stack.push(next_composition);
+            }
+        }
+    }
+}
+
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

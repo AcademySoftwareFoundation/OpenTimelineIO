@@ -124,6 +124,9 @@ public:
         return _tracks.value->available_image_bounds(error_status);
     }
 
+    /// @brief Invalidate the cache.
+    void invalidate_cache() const;
+
 protected:
     virtual ~Timeline();
 

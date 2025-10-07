@@ -663,7 +663,8 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             }, "search_range"_a = std::nullopt, "shallow_search"_a = false)
         .def("find_children", [](Timeline* t, py::object descended_from_type, std::optional<TimeRange> const& search_range, bool shallow_search) {
                 return find_children(t, descended_from_type, search_range, shallow_search);
-            }, "descended_from_type"_a = py::none(), "search_range"_a = std::nullopt, "shallow_search"_a = false);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = std::nullopt, "shallow_search"_a = false)
+        .def("invalidate_cache", &Timeline::invalidate_cache);
 }
 
 static void define_effects(py::module m) {

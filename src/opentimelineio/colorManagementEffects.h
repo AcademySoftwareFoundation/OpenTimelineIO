@@ -17,22 +17,22 @@ public:
 
     VideoBrightness(
         std::string const&   name        = std::string(),
-        int64_t              brightness  = 0,
+        double               brightness  = 0,
         AnyDictionary const& metadata    = AnyDictionary(),
         bool                 enabled     = true)
         : Effect(name, Schema::name, metadata, enabled)
         , _brightness(brightness)
     {}
 
-    int64_t brightness() const noexcept { return _brightness; }
-    void set_brightness(int64_t brightness) noexcept { _brightness = brightness; }
+    double brightness() const noexcept { return _brightness; }
+    void set_brightness(double brightness) noexcept { _brightness = brightness; }
 
 protected:
     virtual ~VideoBrightness() = default;
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 
-    int64_t _brightness;
+    double _brightness;
 };
 
 /// @brief A contrast effect
@@ -47,15 +47,15 @@ public:
 
     VideoContrast(
         std::string const&   name        = std::string(),
-        int64_t              contrast    = 0,
+        double               contrast    = 0,
         AnyDictionary const& metadata    = AnyDictionary(),
         bool                 enabled     = true)
         : Effect(name, Schema::name, metadata, enabled)
         , _contrast(contrast)
     {}
 
-    int64_t contrast() const noexcept { return _contrast; }
-    void set_contrast(int64_t contrast) noexcept { _contrast = contrast; }
+    double contrast() const noexcept { return _contrast; }
+    void set_contrast(double contrast) noexcept { _contrast = contrast; }
 
 protected:
     virtual ~VideoContrast() = default;
@@ -77,22 +77,22 @@ public:
 
     VideoSaturation(
         std::string const&   name        = std::string(),
-        int64_t              saturation  = 0,
+        double               saturation  = 0,
         AnyDictionary const& metadata    = AnyDictionary(),
         bool                 enabled     = true)
         : Effect(name, Schema::name, metadata, enabled)
         , _saturation(saturation)
     {}
 
-    int64_t saturation() const noexcept { return _saturation; }
-    void set_saturation(int64_t saturation) noexcept { _saturation = saturation; }
+    double saturation() const noexcept { return _saturation; }
+    void set_saturation(double saturation) noexcept { _saturation = saturation; }
 
 protected:
     virtual ~VideoSaturation() = default;
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 
-    int64_t _saturation;
+    double _saturation;
 };
 
 /// @brief A lightness effect
@@ -107,22 +107,22 @@ public:
 
     VideoLightness(
         std::string const&   name        = std::string(),
-        int64_t              lightness   = 0,
+        double               lightness   = 0,
         AnyDictionary const& metadata    = AnyDictionary(),
         bool                 enabled     = true)
         : Effect(name, Schema::name, metadata, enabled)
         , _lightness(lightness)
     {}
 
-    int64_t lightness() const noexcept { return _lightness; }
-    void set_lightness(int64_t lightness) noexcept { _lightness = lightness; }
+    double lightness() const noexcept { return _lightness; }
+    void set_lightness(double lightness) noexcept { _lightness = lightness; }
 
 protected:
     virtual ~VideoLightness() = default;
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 
-    int64_t _lightness;
+    double _lightness;
 };
 
 /// @brief A color temperature effect
@@ -137,22 +137,22 @@ public:
 
     VideoColorTemperature(
         std::string const&   name        = std::string(),
-        int64_t              temperature = 0,
+        double               temperature = 0,
         AnyDictionary const& metadata    = AnyDictionary(),
         bool                 enabled     = true)
         : Effect(name, Schema::name, metadata, enabled)
         , _temperature(temperature)
     {}
 
-    int64_t temperature() const noexcept { return _temperature; }
-    void set_temperature(int64_t temperature) noexcept { _temperature = temperature; }
+    double temperature() const noexcept { return _temperature; }
+    void set_temperature(double temperature) noexcept { _temperature = temperature; }
 
 protected:
     virtual ~VideoColorTemperature() = default;
     bool read_from(Reader&) override;
     void write_to(Writer&) const override;
 
-    int64_t _temperature;
+    double _temperature;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

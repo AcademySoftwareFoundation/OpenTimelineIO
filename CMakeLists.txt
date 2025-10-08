@@ -109,12 +109,6 @@ if(OTIO_SHARED_LIBS)
 else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
-    if (OTIO_PYTHON_INSTALL)
-        # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
-        # Note that this has no effect on Windows.
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-    endif()
 endif()
 
 # Set the SO version. The SO version must be incremented every time a change

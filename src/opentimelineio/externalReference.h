@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A reference to a media file.
-class ExternalReference final : public MediaReference
+class OTIO_API_TYPE ExternalReference final : public MediaReference
 {
 public:
     /// @brief This struct provides the ExternalReference schema.
@@ -27,7 +27,7 @@ public:
     /// @param available_range The available range of the media.
     /// @param metadata The metadata for the media.
     /// @param available_image_bounds The spatial bounds of the media.
-    ExternalReference(
+    OTIO_API ExternalReference(
         std::string const&              target_url      = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),

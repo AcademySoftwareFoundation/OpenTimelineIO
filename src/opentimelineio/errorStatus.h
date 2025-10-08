@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 #include <string>
 
@@ -11,7 +12,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class SerializableObject;
 
 /// @brief This struct represents the return status of a function.
-struct ErrorStatus
+struct OTIO_API_TYPE ErrorStatus
 {
     /// @brief This enumeration represents the possible outcomes.
     enum Outcome
@@ -96,14 +97,14 @@ struct ErrorStatus
 };
 
 /// @brief Check whether the given ErrorStatus is an error.
-constexpr bool
+OTIO_API constexpr bool
 is_error(const ErrorStatus& es) noexcept
 {
     return ErrorStatus::Outcome::OK != es.outcome;
 }
 
 /// @brief Check whether the given ErrorStatus* is non-null and an error.
-constexpr bool
+OTIO_API constexpr bool
 is_error(const ErrorStatus* es) noexcept
 {
     return es && ErrorStatus::Outcome::OK != es->outcome;

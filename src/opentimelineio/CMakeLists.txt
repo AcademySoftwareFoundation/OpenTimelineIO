@@ -101,8 +101,7 @@ target_link_libraries(opentimelineio
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
 
 if(BUILD_SHARED_LIBS)
     set_target_properties(opentimelineio PROPERTIES

@@ -25,13 +25,13 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// This allows us to hand out iterators that can be aware of mutation and moves
 /// and take steps to safe-guard themselves from causing a crash.  (Yes, I'm
 /// talking to you, Python...)
-class OTIO_API AnyDictionary : private std::map<std::string, std::any>
+class OTIO_API_TYPE AnyDictionary : private std::map<std::string, std::any>
 {
 public:
     using map::map;
 
     /// @brief Create an empty dictionary.
-    OTIO_API AnyDictionary()
+    AnyDictionary()
         : map{}
         , _mutation_stamp{}
     {}
@@ -40,13 +40,13 @@ public:
     ///
     /// To be safe, avoid brace-initialization so as to not trigger
     /// list initialization behavior in older compilers:
-    OTIO_API AnyDictionary(const AnyDictionary& other)
+    AnyDictionary(const AnyDictionary& other)
         : map(other)
         , _mutation_stamp{}
     {}
 
     /// @brief Destructor.
-    OTIO_API ~AnyDictionary()
+    ~AnyDictionary()
     {
         if (_mutation_stamp)
         {
@@ -56,7 +56,7 @@ public:
     }
 
     /// @brief Copy operator.
-    OTIO_API AnyDictionary& operator=(const AnyDictionary& other)
+    AnyDictionary& operator=(const AnyDictionary& other)
     {
         mutate();
         map::operator=(other);
@@ -64,7 +64,7 @@ public:
     }
 
     /// @brief Move operator.
-    OTIO_API AnyDictionary& operator=(AnyDictionary&& other)
+    AnyDictionary& operator=(AnyDictionary&& other)
     {
         mutate();
         other.mutate();
@@ -73,7 +73,7 @@ public:
     }
 
     /// @brief Copy operator.
-    OTIO_API AnyDictionary& operator=(std::initializer_list<value_type> ilist)
+    AnyDictionary& operator=(std::initializer_list<value_type> ilist)
     {
         mutate();
         map::operator=(ilist);
@@ -95,7 +95,7 @@ public:
     using map::rend;
 
     /// @brief Clear the dictionary.
-    OTIO_API void clear() noexcept
+    void clear() noexcept
     {
         mutate();
         map::clear();
@@ -105,28 +105,28 @@ public:
     using map::insert;
 
     /// @brief Erase an item.
-    OTIO_API iterator erase(const_iterator pos)
+    iterator erase(const_iterator pos)
     {
         mutate();
         return map::erase(pos);
     }
 
     /// @brief Erase a range of items.
-    OTIO_API iterator erase(const_iterator first, const_iterator last)
+    iterator erase(const_iterator first, const_iterator last)
     {
         mutate();
         return map::erase(first, last);
     }
 
     /// @brief Erase an item with the given key.
-    OTIO_API size_type erase(const key_type& key)
+    size_type erase(const key_type& key)
     {
         mutate();
         return map::erase(key);
     }
 
     /// @brief Swap dictionaries.
-    OTIO_API void swap(AnyDictionary& other)
+    void swap(AnyDictionary& other)
     {
         mutate();
         other.mutate();

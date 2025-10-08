@@ -12,6 +12,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     algo/editAlgorithm.h
     effect.h
     errorStatus.h
+    export.h
     externalReference.h
     freezeFrame.h
     gap.h
@@ -107,6 +108,15 @@ if(BUILD_SHARED_LIBS)
     set_target_properties(opentimelineio PROPERTIES
         SOVERSION ${OTIO_SOVERSION}
         VERSION ${OTIO_VERSION})
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_EXPORTS)
+else()
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_STATIC)
 endif()
 
 if(APPLE)

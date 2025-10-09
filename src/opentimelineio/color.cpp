@@ -37,7 +37,7 @@ const Color Color::purple(0.5, 0.0, 0.5, 1.0, "Purple");
 const Color Color::magenta(1.0, 0.0, 1.0, 1.0, "Magenta");
 const Color Color::black(0.0, 0.0, 0.0, 1.0, "Black");
 const Color Color::white(1.0, 1.0, 1.0, 1.0, "White");
-const Color Color::transparent(1.0, 1.0, 1.0, 0.0, "Transparent");
+const Color Color::transparent(0.0, 0.0, 0.0, 0.0, "Transparent");
 
 Color*
 Color::from_hex(std::string const& color)

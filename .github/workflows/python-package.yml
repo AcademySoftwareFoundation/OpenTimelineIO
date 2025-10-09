@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
@@ -34,7 +34,7 @@ jobs:
             OTIO_TEST_TARGET: RUN_TESTS
           - os: macos-latest
             OTIO_TEST_TARGET: test
-          - os: macos-13
+          - os: macos-14
             OTIO_TEST_TARGET: test
 
     env:
@@ -92,12 +92,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
-          - { os: macos-13, shell: bash }
+          - { os: macos-14, shell: bash }
           - { os: windows-latest, shell: pwsh }
           - { os: windows-latest, shell: msys2, python-version: "mingw64" }
         exclude:
@@ -176,7 +176,7 @@ jobs:
             ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
-            macos-13,
+            macos-14,
             macos-latest,
           ]
         python-build: ["cp39", "cp310", "cp311", "cp312"]

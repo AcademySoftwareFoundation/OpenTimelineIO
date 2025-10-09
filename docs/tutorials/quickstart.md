@@ -15,11 +15,16 @@ A curated list of adapters for popular file formats like EDL, AAF, ALE, and FCP 
 For more information, see the [Adapters](./adapters) section.
 
 
-## OTIO-stat
+## Timeline Viewers
+OpenTimelineIO provides applications to view timelines in a graphical interface.
 
-Once you have pip installed OpenTimelineIO, you should be able to run:
+### Raven
+[Raven](https://github.com/OpenTimelineIO/raven) is the preferred application and replaces OTIOView as the main 
+application for viewing timelines.
 
-+ `otiostat path/to/your/file.otio`
+### OTIOView
+[OTIOView](https://github.com/OpenTimelineIO/otioview) has been moved to its own repository so those who rely on it 
+still have access to it.
 
 # Developer Quickstart
 

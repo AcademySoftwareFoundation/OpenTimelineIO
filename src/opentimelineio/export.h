@@ -3,35 +3,7 @@
 
 #pragma once
 
-#if defined(_WINDOWS)
-#   if defined(__GNUC__) && __GNUC__ >= 4 || defined(__clang__)
-#       define ARCH_EXPORT __attribute__((dllexport))
-#       define ARCH_IMPORT __attribute__((dllimport))
-#       define ARCH_HIDDEN
-#       define ARCH_EXPORT_TYPE
-#   else
-#       define ARCH_EXPORT __declspec(dllexport)
-#       define ARCH_IMPORT __declspec(dllimport)
-#       define ARCH_HIDDEN
-#       define ARCH_EXPORT_TYPE
-#   endif
-#elif defined(__GNUC__) && __GNUC__ >= 4 || defined(__clang__)
-#   define ARCH_EXPORT __attribute__((visibility("default")))
-#   define ARCH_IMPORT
-#   define ARCH_HIDDEN __attribute__((visibility("hidden")))
-#   if defined(__clang__)
-#       define ARCH_EXPORT_TYPE __attribute__((type_visibility("default")))
-#   else
-#       define ARCH_EXPORT_TYPE __attribute__((visibility("default")))
-#   endif
-#else
-#   define ARCH_EXPORT
-#   define ARCH_IMPORT
-#   define ARCH_HIDDEN
-#   define ARCH_EXPORT_TYPE
-#endif
-#define ARCH_EXPORT_TEMPLATE(type, ...)
-#define ARCH_IMPORT_TEMPLATE(type, ...) extern template type ARCH_IMPORT __VA_ARGS__
+#include "opentime/export.h"
 
 #if defined(OTIO_STATIC)
 #   define OTIO_API

@@ -93,7 +93,7 @@ struct OTIO_API_TYPE ErrorStatus
     SerializableObject const* object_details;
 
     //! @brief Return a human readable string for the given outcome.
-    static std::string outcome_to_string(Outcome);
+    static OTIO_API std::string outcome_to_string(Outcome);
 };
 
 /// @brief Check whether the given ErrorStatus is an error.

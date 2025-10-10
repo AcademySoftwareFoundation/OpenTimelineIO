@@ -331,6 +331,8 @@ setup(
     package_data={
         'opentimelineio': [
             'adapters/builtin_adapters.plugin_manifest.json',
+            '*.pyi',
+            '*/**/*.pyi',
         ],
     },
 

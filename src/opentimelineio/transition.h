@@ -10,7 +10,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// @brief Represents a transition between the two adjacent items in a Track.
 ///
 /// For example, a cross dissolve or wipe.
-class Transition : public Composable
+class OTIO_API_TYPE Transition : public Composable
 {
 public:
     /// @brief This struct provides base set of transitions.
@@ -36,7 +36,7 @@ public:
     /// @param in_offset The in time offset.
     /// @param out_offset The out time offset.
     /// @param metadata The metadata for the transition.
-    Transition(
+    OTIO_API Transition(
         std::string const&   name            = std::string(),
         std::string const&   transition_type = std::string(),
         RationalTime         in_offset       = RationalTime(),

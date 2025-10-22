@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief An unknown schema.
-class UnknownSchema : public SerializableObject
+class OTIO_API_TYPE UnknownSchema : public SerializableObject
 {
 public:
     /// @brief This struct provides the UnknownSchema schema.

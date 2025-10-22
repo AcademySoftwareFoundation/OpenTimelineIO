@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 ///
 /// The marked range may have a zero duration. The marked range is in the
 /// owning item's time coordinate system.
-class Marker : public SerializableObjectWithMetadata
+class OTIO_API_TYPE Marker : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the base set of colors.
@@ -48,7 +48,7 @@ public:
     /// @param color The color associated with the marker.
     /// @param metadata The metadata for the marker.
     /// @param comment The text comment for the marker.
-    Marker(
+    OTIO_API Marker(
         std::string const&   name         = std::string(),
         TimeRange const&     marked_range = TimeRange(),
         std::string const&   color        = Color::green,

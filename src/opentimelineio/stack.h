@@ -11,7 +11,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A stack of items in a timeline, for example a stack of tracks in a timelime.
-class Stack : public Composition
+class OTIO_API_TYPE Stack : public Composition
 {
 public:
     /// @brief This struct provides the Stack schema.
@@ -32,7 +32,7 @@ public:
     /// the stack keeps a retainer to each effect.
     /// @param markers The list of markers for the stack. Note that the
     /// the stack keeps a retainer to each marker.
-    Stack(
+    OTIO_API Stack(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),

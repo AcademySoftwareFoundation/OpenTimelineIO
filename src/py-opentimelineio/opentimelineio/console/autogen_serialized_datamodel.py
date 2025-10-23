@@ -12,7 +12,6 @@ import json
 import tempfile
 import sys
 import textwrap
-import inspect
 
 import io
 

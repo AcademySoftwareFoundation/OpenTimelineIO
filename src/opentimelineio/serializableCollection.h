@@ -22,7 +22,8 @@ class Clip;
 ///
 /// A SerializableCollection is useful for serializing multiple timelines,
 /// clips, or media references to a single file.
-class SerializableCollection : public SerializableObjectWithMetadata
+class OTIO_API_TYPE SerializableCollection
+    : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the SerializableCollection schema.
@@ -40,7 +41,7 @@ public:
     /// @param child The list of children in the collection. Note that the
     /// collection keeps a retainer to each child.
     /// @param metadata The metadata for the collection.
-    SerializableCollection(
+    OTIO_API SerializableCollection(
         std::string const&               name = std::string(),
         std::vector<SerializableObject*> children =
             std::vector<SerializableObject*>(),
@@ -59,24 +60,25 @@ public:
     }
 
     /// @brief Set the list of children.
-    void set_children(std::vector<SerializableObject*> const& children);
+    OTIO_API void
+    set_children(std::vector<SerializableObject*> const& children);
 
     /// @brief Clear the children.
-    void clear_children();
+    OTIO_API void clear_children();
 
     /// @brief Insert a child at the given index. Note that the collection
     /// keeps a retainer to the child.
-    void insert_child(int index, SerializableObject* child);
+    OTIO_API void insert_child(int index, SerializableObject* child);
 
     /// @brief Set the child at the given index. Note that the collection
     /// keeps a retainer to the child.
-    bool set_child(
+    OTIO_API bool set_child(
         int                 index,
         SerializableObject* child,
         ErrorStatus*        error_status = nullptr);
 
     /// @brief Remove the child at the given index.
-    bool remove_child(int index, ErrorStatus* error_status = nullptr);
+    OTIO_API bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
     /// @brief Find child clips.
     ///
@@ -84,7 +86,7 @@ public:
     /// @param search_range An optional range to limit the search.
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    OTIO_API std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
@@ -96,7 +98,7 @@ public:
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    OTIO_API std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;

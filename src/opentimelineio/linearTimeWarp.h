@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A time warp that applies a linear speed up or slow down across the entire clip.
-class LinearTimeWarp : public TimeEffect
+class OTIO_API_TYPE LinearTimeWarp : public TimeEffect
 {
 public:
     /// @brief This struct provides the LinearTimeWarp schema.
@@ -27,7 +27,7 @@ public:
     /// @param effect_name The name of the time effect.
     /// @param time_scalar The amount to scale the time.
     /// @param metadata The metadata for the time effect.
-    LinearTimeWarp(
+    OTIO_API LinearTimeWarp(
         std::string const&   name        = std::string(),
         std::string const&   effect_name = std::string(),
         double               time_scalar = 1,

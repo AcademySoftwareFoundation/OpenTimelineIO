@@ -10,7 +10,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief An empty item within a timeline.
-class Gap : public Item
+class OTIO_API_TYPE Gap : public Item
 {
 public:
     /// @brief This struct provides the Gap schema.
@@ -31,6 +31,7 @@ public:
     /// @param markers The list of markers for the gap. Note that the
     /// the gap keeps a retainer to each marker.
     /// @param metadata The metadata for the gap.
+    OTIO_API
     Gap(TimeRange const&            source_range = TimeRange(),
         std::string const&          name         = std::string(),
         std::vector<Effect*> const& effects      = std::vector<Effect*>(),

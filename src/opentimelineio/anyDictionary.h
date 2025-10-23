@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 #include <any>
@@ -24,7 +25,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// This allows us to hand out iterators that can be aware of mutation and moves
 /// and take steps to safe-guard themselves from causing a crash.  (Yes, I'm
 /// talking to you, Python...)
-class AnyDictionary : private std::map<std::string, std::any>
+class OTIO_API_TYPE AnyDictionary : private std::map<std::string, std::any>
 {
 public:
     using map::map;

@@ -3,6 +3,7 @@
 
 set(OPENTIME_HEADER_FILES
     errorStatus.h
+    export.h
     rationalTime.h
     stringPrintf.h
     timeRange.h
@@ -25,13 +26,21 @@ target_include_directories(
 set_target_properties(opentime PROPERTIES 
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentime"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
 
 if(BUILD_SHARED_LIBS)
     set_target_properties(opentime PROPERTIES
         SOVERSION ${OTIO_SOVERSION}
         VERSION ${OTIO_VERSION})
+    target_compile_definitions(
+        opentime
+        PUBLIC
+        OPENTIME_EXPORTS)
+else()
+    target_compile_definitions(
+        opentime
+        PUBLIC
+        OPENTIME_STATIC)
 endif()
 
 if(APPLE)

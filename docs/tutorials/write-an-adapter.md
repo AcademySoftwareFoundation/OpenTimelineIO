@@ -240,4 +240,5 @@ def export_timeline(timeline):
 
 ## Examples
 
-OTIO includes a number of "core" (supported by the core team) adapters in `opentimelineio/adapters` as well as a number of community supported adapters in `opentimelineio_contrib/adapters`.
+OTIO includes "core" adapters for `.otio`, `.otiod` and `otioz` files found in in `opentimelineio/adapters`.  
+In addition to these you'll find many more adapters in the various repositories under the [OpenTimelineIO Organization](https://github.com/OpenTimelineIO)

@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -21,7 +22,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// Round-trip conversions may not be guaranteed outside that.
 /// This class is meant for use in user interface elements,
 // like marker or clip coloring, NOT for image pixel content.
-class Color
+class OTIO_API_TYPE Color
 {
 public:
     struct Schema
@@ -30,14 +31,14 @@ public:
         static int constexpr version = 1;
     };
 
-    Color(
+    OTIO_API Color(
         double const         r        = 1.f,
         double const         g        = 1.f,
         double const         b        = 1.f,
         double const         a        = 1.f,
         std::string const&   name     = "");
 
-    Color(Color const& other);
+    OTIO_API Color(Color const& other);
 
     static const Color pink;
     static const Color red;
@@ -63,10 +64,10 @@ public:
         return lhs.to_hex() == rhs.to_hex() && lhs.to_agbr_integer() == rhs.to_agbr_integer();
     }
 
-    std::string to_hex();
-    std::vector<int> to_rgba_int_list(int base);
-    unsigned int to_agbr_integer();
-    std::vector<double> to_rgba_float_list();
+    OTIO_API std::string to_hex();
+    OTIO_API std::vector<int> to_rgba_int_list(int base);
+    OTIO_API unsigned int     to_agbr_integer();
+    OTIO_API std::vector<double> to_rgba_float_list();
 
     double r() const { return _r; }
     double g() const { return _g; }

@@ -25,7 +25,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class CloningEncoder;
 
 /// @brief A serializable object.
-class SerializableObject
+class OTIO_API_TYPE SerializableObject
 {
 public:
     /// @brief This struct provides the SerializableObject schema.
@@ -36,7 +36,7 @@ public:
     };
 
     /// @brief Create a new serializable object.
-    SerializableObject();
+    OTIO_API SerializableObject();
 
     /// @brief Delete a serializable object.
     ///
@@ -47,7 +47,7 @@ public:
     /// (and, recursively, the objects owned by this object), provided the objects
     /// are not under external management (e.g. prevented from being deleted because an
     /// external scripting system is holding a reference to them).
-    bool possibly_delete();
+    OTIO_API bool possibly_delete();
 
     /// @brief Serialize this object to a JSON file.
     ///
@@ -55,7 +55,7 @@ public:
     /// @param error_status The return status.
     /// @param target_family_label_spec @todo Add comment.
     /// @param indent The number of spaces to use for indentation.
-    bool to_json_file(
+    OTIO_API bool to_json_file(
         std::string const&        file_name,
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
@@ -66,7 +66,7 @@ public:
     /// @param error_status The return status.
     /// @param target_family_label_spec @todo Add comment.
     /// @param indent The number of spaces to use for indentation.
-    std::string to_json_string(
+    OTIO_API std::string to_json_string(
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
@@ -75,7 +75,7 @@ public:
     ///
     /// @param file_name The file name.
     /// @param error_status The return status.
-    static SerializableObject* from_json_file(
+    static OTIO_API SerializableObject* from_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr);
 
@@ -83,12 +83,12 @@ public:
     ///
     /// @param input The input string.
     /// @param error_status The return status.
-    static SerializableObject* from_json_string(
+    static OTIO_API SerializableObject* from_json_string(
         std::string const& input,
         ErrorStatus*       error_status = nullptr);
 
     /// @brief Return whether this object is equivalent to another.
-    bool is_equivalent_to(SerializableObject const& other) const;
+    OTIO_API bool is_equivalent_to(SerializableObject const& other) const;
 
     /// @brief Makes a (deep) clone of this instance.
     ///
@@ -96,7 +96,8 @@ public:
     ///
     /// If the operation fails, nullptr is returned and error_status
     /// is set appropriately.
-    SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
+    OTIO_API SerializableObject*
+    clone(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Allow external system (e.g. Python, Swift) to add serializable
     /// fields on the fly.
@@ -684,8 +685,8 @@ private:
     template <typename T>
     friend struct Retainer;
 
-    void _managed_retain();
-    void _managed_release();
+    OTIO_API void _managed_retain();
+    OTIO_API void _managed_release();
 
 public:
     /// @brief This struct provides a reference ID.

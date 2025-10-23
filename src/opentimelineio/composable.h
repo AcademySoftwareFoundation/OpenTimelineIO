@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Composition;
 
 /// @brief An object that can be composed within a Composition (such as a Track or Stack).
-class Composable : public SerializableObjectWithMetadata
+class OTIO_API_TYPE Composable : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the Composable schema.
@@ -29,7 +29,7 @@ public:
     ///
     /// @param name The name of the composable.
     /// @param metadata The metadata for the clip.
-    Composable(
+    OTIO_API Composable(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 

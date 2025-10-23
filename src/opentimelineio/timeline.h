@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A timeline contains a stack of tracks.
-class Timeline : public SerializableObjectWithMetadata
+class OTIO_API_TYPE Timeline : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the Timeline schema.
@@ -30,7 +30,7 @@ public:
     /// @param name The timeline name.
     /// @param global_start_time The global start time of the timeline.
     /// @param metadata The metadata for the timeline.
-    Timeline(
+    OTIO_API Timeline(
         std::string const&          name              = std::string(),
         std::optional<RationalTime> global_start_time = std::nullopt,
         AnyDictionary const&        metadata          = AnyDictionary());
@@ -74,10 +74,10 @@ public:
     }
 
     /// @brief Return the list of audio tracks.
-    std::vector<Track*> audio_tracks() const;
+    OTIO_API std::vector<Track*> audio_tracks() const;
 
     /// @brief Return the list of video tracks.
-    std::vector<Track*> video_tracks() const;
+    OTIO_API std::vector<Track*> video_tracks() const;
 
     /// @brief Find child clips.
     ///
@@ -85,7 +85,7 @@ public:
     /// @param search_range An optional range to limit the search.
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    OTIO_API std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
@@ -97,7 +97,7 @@ public:
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    OTIO_API std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;

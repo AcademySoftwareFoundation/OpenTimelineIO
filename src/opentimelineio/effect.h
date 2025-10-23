@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief An effect that can be applied to an item, such as an image or audio filter.
-class Effect : public SerializableObjectWithMetadata
+class OTIO_API_TYPE Effect : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the Effect schema.
@@ -42,7 +42,7 @@ public:
         _effect_name = effect_name;
     }
 
-    /// @brief Return whether the effect is enabed.
+    /// @brief Return whether the effect is enabled.
     bool enabled() const { return _enabled; };
 
     /// @brief Set whether the effect is enabled.

@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief Base class for all effects that alter the timing of an item.
-class TimeEffect : public Effect
+class OTIO_API_TYPE TimeEffect : public Effect
 {
 public:
     /// @brief This struct provides the TimeEffect schema.

@@ -13,7 +13,7 @@
 namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief This enumeration provides options for drop frame timecode.
-enum IsDropFrameRate : int
+enum OPENTIME_API_TYPE IsDropFrameRate : int
 {
     InferFromRate = -1,
     ForceNo       = 0,
@@ -21,7 +21,7 @@ enum IsDropFrameRate : int
 };
 
 /// @brief This class represents a measure of time defined by a value and rate.
-class RationalTime
+class OPENTIME_API_TYPE RationalTime
 {
 public:
     /// @brief Construct a new time with an optional value and rate.
@@ -167,17 +167,17 @@ public:
 
     /// @brief Returns true is the rate is supported by SMPTE timecode.
     [[deprecated("Use is_smpte_timecode_rate() instead")]]
-    static bool is_valid_timecode_rate(double rate);
+    static OPENTIME_API bool is_valid_timecode_rate(double rate);
 
     /// @brief Returns true is the rate is supported by SMPTE timecode.
-    static bool is_smpte_timecode_rate(double rate);
+    static OPENTIME_API bool is_smpte_timecode_rate(double rate);
 
     /// @brief Returns the SMPTE timecode rate nearest to the given rate.
     [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
-    static double nearest_valid_timecode_rate(double rate);
+    static OPENTIME_API double nearest_valid_timecode_rate(double rate);
 
     /// @brief Returns the SMPTE timecode rate nearest to the given rate.
-    static double nearest_smpte_timecode_rate(double rate);
+    static OPENTIME_API double nearest_smpte_timecode_rate(double rate);
 
     /// @brief Convert a frame number and rate into a time.
     static constexpr RationalTime
@@ -204,7 +204,7 @@ public:
     /// @param timecode The timecode string.
     /// @param rate The timecode rate.
     /// @param error_status Optional error status.
-    static RationalTime from_timecode(
+    static OPENTIME_API RationalTime from_timecode(
         std::string const& timecode,
         double             rate,
         ErrorStatus*       error_status = nullptr);
@@ -218,7 +218,7 @@ public:
     /// @param time_string The time string.
     /// @param rate The time rate.
     /// @param error_status Optional error status.
-    static RationalTime from_time_string(
+    static OPENTIME_API RationalTime from_time_string(
         std::string const& time_string,
         double             rate,
         ErrorStatus*       error_status = nullptr);
@@ -243,7 +243,7 @@ public:
     /// @param rate The timecode rate.
     /// @param drop_frame Whether to use drop frame timecode.
     /// @param error_status Optional error status.
-    std::string to_timecode(
+    OPENTIME_API std::string to_timecode(
         double          rate,
         IsDropFrameRate drop_frame,
         ErrorStatus*    error_status = nullptr) const;
@@ -259,7 +259,7 @@ public:
     /// @param rate The timecode rate.
     /// @param drop_frame Whether to use drop frame timecode.
     /// @param error_status Optional error status.
-    std::string to_nearest_timecode(
+    OPENTIME_API std::string to_nearest_timecode(
         double          rate,
         IsDropFrameRate drop_frame,
         ErrorStatus*    error_status = nullptr) const;
@@ -278,7 +278,7 @@ public:
     /// Seconds may have up to microsecond precision.
     ///
     /// @return The time string, which may have a leading negative sign.
-    std::string to_time_string() const;
+    OPENTIME_API std::string to_time_string() const;
 
     /// @brief Add a time to this time.
     constexpr RationalTime const& operator+=(RationalTime other) noexcept

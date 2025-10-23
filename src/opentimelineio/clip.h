@@ -12,7 +12,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 /// @brief A clip is a segment of editable media (usually audio or video).
 ///
 /// Contains a MediaReference and a trim on that media reference.
-class Clip : public Item
+class OTIO_API_TYPE Clip : public Item
 {
 public:
     /// @brief The default media within a clip.
@@ -39,7 +39,7 @@ public:
     /// @param markers The list of markers for the clip. Note that the
     /// the clip keeps a retainer to each marker.
     /// @param active_media_reference_key The active media reference.
-    Clip(
+    OTIO_API Clip(
         std::string const&              name            = std::string(),
         MediaReference*                 media_reference = nullptr,
         std::optional<TimeRange> const& source_range    = std::nullopt,
@@ -54,37 +54,37 @@ public:
 
     /// @brief Set the media reference. Note that the Clip keeps a Retainer to
     /// the media reference.
-    void set_media_reference(MediaReference* media_reference);
+    OTIO_API void set_media_reference(MediaReference* media_reference);
 
     /// @brief Return the media reference.
-    MediaReference* media_reference() const noexcept;
+    OTIO_API MediaReference* media_reference() const noexcept;
 
     using MediaReferences = std::map<std::string, MediaReference*>;
 
     /// @brief Return the list of media references.
-    MediaReferences media_references() const noexcept;
+    OTIO_API MediaReferences media_references() const noexcept;
 
     /// @brief Set the list of media references. Note that the Clip keeps a
     /// Retainer to each media reference.
-    void set_media_references(
+    OTIO_API void set_media_references(
         MediaReferences const& media_references,
         std::string const&     new_active_key,
         ErrorStatus*           error_status = nullptr) noexcept;
 
     /// @brief Return the active media reference.
-    std::string active_media_reference_key() const noexcept;
+    OTIO_API std::string active_media_reference_key() const noexcept;
 
     /// @brief Set the active media reference.
-    void set_active_media_reference_key(
+    OTIO_API void set_active_media_reference_key(
         std::string const& new_active_key,
         ErrorStatus*       error_status = nullptr) noexcept;
 
     ///@}
 
-    TimeRange
+    OTIO_API TimeRange
     available_range(ErrorStatus* error_status = nullptr) const override;
 
-    std::optional<IMATH_NAMESPACE::Box2d>
+    OTIO_API std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status = nullptr) const override;
 
 protected:

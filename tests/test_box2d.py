@@ -9,6 +9,11 @@ import opentimelineio.test_utils as otio_test_utils
 
 class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
+        box = otio.schema.Box2d()
+
+        self.assertEqual(box.min, otio.schema.V2d(0.0, 0.0))
+        self.assertEqual(box.max, otio.schema.V2d(0.0, 0.0))
+
         v1 = otio.schema.V2d(1.0, 2.0)
         v2 = otio.schema.V2d(3.0, 4.0)
         box = otio.schema.Box2d(v1, v2)

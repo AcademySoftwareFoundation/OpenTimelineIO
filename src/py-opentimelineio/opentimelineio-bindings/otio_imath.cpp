@@ -28,7 +28,7 @@ static void define_imath_2d(py::module m) {
     // Imath classes are binded with Pybind11 more than once.
     // Using module_local will avoid conflicts in such cases.
     py::class_<IMATH_NAMESPACE::V2d>(m, "V2d", py::module_local())
-        .def(py::init<>())
+        .def(py::init<>([]() { return IMATH_NAMESPACE::V2d(0.0, 0.0); }))
         .def(py::init<double>())
         .def(py::init<double, double>())
         .def_readwrite("x", &IMATH_NAMESPACE::V2d::x)
@@ -101,7 +101,7 @@ static void define_imath_2d(py::module m) {
             });
 
     py::class_<IMATH_NAMESPACE::Box2d>(m, "Box2d", py::module_local())
-        .def(py::init<>())
+        .def(py::init<>([]() { return IMATH_NAMESPACE::Box2d(IMATH_NAMESPACE::V2d(0.0, 0.0)); }))
         .def(py::init<IMATH_NAMESPACE::V2d>())
         .def(py::init<IMATH_NAMESPACE::V2d, IMATH_NAMESPACE::V2d>())
         .def_readwrite("min", &IMATH_NAMESPACE::Box2d::min)

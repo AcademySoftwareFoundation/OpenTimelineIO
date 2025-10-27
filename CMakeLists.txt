@@ -36,6 +36,13 @@ option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
+#
+# If you are building OpenTimelineIO as a static library you will need to
+# defined OPENTIME_STATIC and OTIO_STATIC. If you use the provided CMake
+# config files these will be automatically defined for you. To use the
+# provided config files add `find_package(OpenTimelineIO)` to your
+# CMakeLists.txt file.
+#
 option(OTIO_SHARED_LIBS          "Build shared if ON, static if OFF" ON)
 option(OTIO_CXX_COVERAGE         "Invoke code coverage if lcov/gcov is available" OFF)
 option(OTIO_CXX_EXAMPLES         "Build CXX examples (also requires OTIO_PYTHON_INSTALL=ON)" OFF)

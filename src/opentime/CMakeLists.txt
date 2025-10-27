@@ -28,7 +28,7 @@ set_target_properties(opentime PROPERTIES
     LIBRARY_OUTPUT_NAME "opentime"
     POSITION_INDEPENDENT_CODE TRUE)
 
-if(BUILD_SHARED_LIBS)
+if(OTIO_SHARED_LIBS)
     set_target_properties(opentime PROPERTIES
         SOVERSION ${OTIO_SOVERSION}
         VERSION ${OTIO_VERSION})

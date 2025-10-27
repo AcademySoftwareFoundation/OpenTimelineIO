@@ -11,11 +11,13 @@
 #       define OPENTIMELINIO_IMPORT __attribute__((dllimport))
 #       define OPENTIMELINIO_HIDDEN
 #       define OPENTIMELINIO_EXPORT_TYPE
+#       define OPENTIMELINIO_IMPORT_TYPE
 #   else
 #       define OPENTIMELINIO_EXPORT __declspec(dllexport)
 #       define OPENTIMELINIO_IMPORT __declspec(dllimport)
 #       define OPENTIMELINIO_HIDDEN
 #       define OPENTIMELINIO_EXPORT_TYPE
+#       define OPENTIMELINIO_IMPORT_TYPE
 #   endif
 #elif defined(__GNUC__) && __GNUC__ >= 4 || defined(__clang__)
 #   define OPENTIMELINIO_EXPORT __attribute__((visibility("default")))
@@ -26,11 +28,13 @@
 #   else
 #       define OPENTIMELINIO_EXPORT_TYPE __attribute__((visibility("default")))
 #   endif
+#   define OPENTIMELINIO_IMPORT_TYPE
 #else
 #   define OPENTIMELINIO_EXPORT
 #   define OPENTIMELINIO_IMPORT
 #   define OPENTIMELINIO_HIDDEN
 #   define OPENTIMELINIO_EXPORT_TYPE
+#   define OPENTIMELINIO_IMPORT_TYPE
 #endif
 #define OPENTIMELINIO_EXPORT_TEMPLATE(type, ...)
 #define OPENTIMELINIO_IMPORT_TEMPLATE(type, ...) \

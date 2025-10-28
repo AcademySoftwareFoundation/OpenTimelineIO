@@ -22,8 +22,8 @@ Item::Item(
     , _source_range(source_range)
     , _effects(effects.begin(), effects.end())
     , _markers(markers.begin(), markers.end())
-    , _enabled(enabled)
     , _color(color)
+    , _enabled(enabled)
 {}
 
 Item::~Item()

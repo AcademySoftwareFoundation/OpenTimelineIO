@@ -103,7 +103,7 @@ set_target_properties(opentimelineio PROPERTIES
     LIBRARY_OUTPUT_NAME "opentimelineio"
     POSITION_INDEPENDENT_CODE TRUE)
 
-if(BUILD_SHARED_LIBS)
+if(OTIO_SHARED_LIBS)
     set_target_properties(opentimelineio PROPERTIES
         SOVERSION ${OTIO_SOVERSION}
         VERSION ${OTIO_VERSION})

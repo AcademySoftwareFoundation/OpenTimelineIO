@@ -30,7 +30,7 @@ television industries. It is natively supported in most non-linear editing
 applications, and has deep integration in game engines, digital content creation
 tools and adjacent industries as well.
 
-The API for OpenTimelineIO v1 is considered stable, but is still undergoing
+The API for OpenTimelineIO is considered stable, but is still undergoing
 active development, refinement and bug fixes. Work is underway to strengthen
 the mathematical and theoretical underpinnings of OpenTimelineIO. The current
 version of OpenTimelineIO may be confidently deployed in your domain.

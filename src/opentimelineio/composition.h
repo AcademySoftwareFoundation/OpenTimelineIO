@@ -14,7 +14,7 @@ class Clip;
 /// @brief Base class for an Item that contains Composables.
 ///
 /// Should be subclassed (for example by Track Stack), not used directly.
-class Composition : public Item
+class OTIO_API_TYPE Composition : public Item
 {
 public:
     /// @brief This struct provides the Composition schema.
@@ -35,7 +35,7 @@ public:
     /// the composition keeps a retainer to each effect.
     /// @param markers The list of markers for the composition. Note that the
     /// the composition keeps a retainer to each marker.
-    Composition(
+    OTIO_API Composition(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),
@@ -53,29 +53,29 @@ public:
     }
 
     /// @brief Clear the children.
-    void clear_children();
+    OTIO_API void clear_children();
 
     /// @brief Set the list of children. Note that the composition keeps a
     /// retainer to each child.
-    bool set_children(
+    OTIO_API bool set_children(
         std::vector<Composable*> const& children,
         ErrorStatus*                    error_status = nullptr);
 
     /// @brief Insert a child. Note that the composition keeps a retainer to the child.
-    bool insert_child(
+    OTIO_API bool insert_child(
         int          index,
         Composable*  child,
         ErrorStatus* error_status = nullptr);
 
     /// @brief Set the child at the given index. Note that the composition keeps a
     /// retainer to the child.
-    bool set_child(
+    OTIO_API bool set_child(
         int          index,
         Composable*  child,
         ErrorStatus* error_status = nullptr);
 
     /// @brief Remove the child at the given index.
-    bool remove_child(int index, ErrorStatus* error_status = nullptr);
+    OTIO_API bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
     /// @brief Append the child. Note that the composition keeps a retainer to
     /// the child.
@@ -85,12 +85,12 @@ public:
     }
 
     /// @brief Return the index of the given child.
-    int index_of_child(
+    OTIO_API int index_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
 
     /// @brief Return whether this is the parent of the given child.
-    bool is_parent_of(Composable const* other) const;
+    OTIO_API bool is_parent_of(Composable const* other) const;
 
     /// @brief Return the in and out handles of the given child.
     virtual std::pair<std::optional<RationalTime>, std::optional<RationalTime>>
@@ -111,23 +111,24 @@ public:
     /// @brief Return the range of the given child.
     ///
     /// @todo Leaving out reference_space argument for now.
-    TimeRange range_of_child(
+    OTIO_API TimeRange range_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
 
     /// @brief Return the trimmed range of the given child.
-    std::optional<TimeRange> trimmed_range_of_child(
+    OTIO_API std::optional<TimeRange> trimmed_range_of_child(
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const;
 
     /// @brief Return the given range trimmed to this source range.
-    std::optional<TimeRange> trim_child_range(TimeRange child_range) const;
+    OTIO_API std::optional<TimeRange>
+             trim_child_range(TimeRange child_range) const;
 
     /// @brief Return whether this contains the given child.
-    bool has_child(Composable* child) const;
+    OTIO_API bool has_child(Composable* child) const;
 
     /// @brief Return whether this contains any child clips.
-    bool has_clips() const;
+    OTIO_API bool has_clips() const;
 
     /// @brief Return the range of all children.
     virtual std::map<Composable*, TimeRange>
@@ -139,7 +140,7 @@ public:
     /// @param error_status The return status.
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
-    Retainer<Composable> child_at_time(
+    OTIO_API Retainer<Composable> child_at_time(
         RationalTime const& search_time,
         ErrorStatus*        error_status   = nullptr,
         bool                shallow_search = false) const;
@@ -156,7 +157,7 @@ public:
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    OTIO_API std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;
@@ -167,7 +168,7 @@ public:
     /// @param search_range An optional range to limit the search.
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    OTIO_API std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;

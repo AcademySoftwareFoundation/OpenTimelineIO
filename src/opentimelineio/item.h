@@ -15,7 +15,7 @@ class Effect;
 class Marker;
 
 /// @brief An item in the timeline.
-class Item : public Composable
+class OTIO_API_TYPE Item : public Composable
 {
 public:
     /// @brief This struct provides the Item schema.
@@ -37,7 +37,7 @@ public:
     /// @param markers The list of markers for the item. Note that the
     /// the item keeps a retainer to each marker.
     /// @param enabled Whether the item is enabled.
-    Item(
+    OTIO_API Item(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),
@@ -98,23 +98,24 @@ public:
     }
 
     /// @brief Return the visible range of the item.
-    TimeRange visible_range(ErrorStatus* error_status = nullptr) const;
+    OTIO_API TimeRange visible_range(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the trimmed range of the item in the parent's time.
-    std::optional<TimeRange>
+    OTIO_API std::optional<TimeRange>
     trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the range of the item in the parent's time.
-    TimeRange range_in_parent(ErrorStatus* error_status = nullptr) const;
+    OTIO_API TimeRange
+    range_in_parent(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the time transformed to another item in the hierarchy.
-    RationalTime transformed_time(
+    OTIO_API RationalTime transformed_time(
         RationalTime time,
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the time range transformed to another item in the hierarchy.
-    TimeRange transformed_time_range(
+    OTIO_API TimeRange transformed_time_range(
         TimeRange    time_range,
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;

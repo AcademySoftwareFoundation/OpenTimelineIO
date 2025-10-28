@@ -9,7 +9,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief A serializable object with metadata.
-class SerializableObjectWithMetadata : public SerializableObject
+class OTIO_API_TYPE SerializableObjectWithMetadata : public SerializableObject
 {
 public:
     /// @brief This struct provides the SerializableObjectWithMetadata schema.
@@ -25,7 +25,7 @@ public:
     ///
     /// @param name The object name.
     /// @param metadata The metadata for the object.
-    SerializableObjectWithMetadata(
+    OTIO_API SerializableObjectWithMetadata(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 

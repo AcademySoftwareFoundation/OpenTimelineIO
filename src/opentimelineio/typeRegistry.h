@@ -36,7 +36,7 @@ using label_to_schema_version_map =
 extern const label_to_schema_version_map CORE_VERSION_MAP;
 
 /// @brief Type registry.
-class TypeRegistry
+class OTIO_API_TYPE TypeRegistry
 {
 public:
     /// @brief Get the type registry singleton.

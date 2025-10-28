@@ -5,7 +5,7 @@ name: OpenTimelineIO
 
 # for configuring which build will be a C++ coverage build / coverage report
 env:
-  GH_COV_PY: "3.10"
+  GH_COV_PY: "3.13"
   GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 
@@ -162,9 +162,8 @@ jobs:
           flags: py-unittests
           name: py-opentimelineio-codecov
           fail_ci_if_error: false
-        env:
-          # based on: https://github.com/codecov/codecov-action?tab=readme-ov-file#usage
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
 
   package_wheels:
     needs: py_build_test

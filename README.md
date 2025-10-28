@@ -22,13 +22,21 @@ Links
   * To join, create an account here first: https://slack.aswf.io/
 * [Presentations](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki/Presentations)
 
-PUBLIC BETA NOTICE
+DEVELOPMENT STATUS
 ------------------
 
-OpenTimelineIO is currently in Public Beta. That means that it may be missing
-some essential features and there are large changes planned. During this phase
-we actively encourage you to provide feedback, requests, comments, and/or
-contributions.
+OpenTimelineIO is a mature framework widely deployed across the film and
+television industries. It is natively supported in most non-linear editing
+applications, and has deep integration in game engines, digital content creation
+tools and adjacent industries as well.
+
+The API for OpenTimelineIO v1 is considered stable, but is still undergoing
+active development, refinement and bug fixes. Work is underway to strengthen
+the mathematical and theoretical underpinnings of OpenTimelineIO. The current
+version of OpenTimelineIO may be confidently deployed in your domain.
+
+We encourage all developers and end users to provide feedback, requests, 
+comments, and/or code contributions.
 
 Overview
 --------

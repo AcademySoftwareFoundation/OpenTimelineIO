@@ -31,12 +31,18 @@ option(OTIO_PYTHON_INSTALL            "Install the Python bindings" OFF)
 option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (Imath)" ON)
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
-option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
+#
+# If you are building OpenTimelineIO as a static library you will need to
+# defined OPENTIME_STATIC and OTIO_STATIC. If you use the provided CMake
+# config files these will be automatically defined for you. To use the
+# provided config files add `find_package(OpenTimelineIO)` to your
+# CMakeLists.txt file.
+#
 option(OTIO_SHARED_LIBS          "Build shared if ON, static if OFF" ON)
 option(OTIO_CXX_COVERAGE         "Invoke code coverage if lcov/gcov is available" OFF)
 option(OTIO_CXX_EXAMPLES         "Build CXX examples (also requires OTIO_PYTHON_INSTALL=ON)" OFF)
@@ -110,12 +116,6 @@ if(OTIO_SHARED_LIBS)
 else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
-    if (OTIO_PYTHON_INSTALL)
-        # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
-        # Note that this has no effect on Windows.
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-    endif()
 endif()
 
 # Set the SO version. The SO version must be incremented every time a change

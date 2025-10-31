@@ -12,6 +12,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     algo/editAlgorithm.h
     effect.h
     errorStatus.h
+    export.h
     externalReference.h
     freezeFrame.h
     gap.h
@@ -100,13 +101,21 @@ target_link_libraries(opentimelineio
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
 
-if(BUILD_SHARED_LIBS)
+if(OTIO_SHARED_LIBS)
     set_target_properties(opentimelineio PROPERTIES
         SOVERSION ${OTIO_SOVERSION}
         VERSION ${OTIO_VERSION})
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_EXPORTS)
+else()
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_STATIC)
 endif()
 
 if(APPLE)

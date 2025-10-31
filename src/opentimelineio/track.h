@@ -11,7 +11,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Clip;
 
 /// @brief A track is a composition of a certain kind, like video or audio.
-class Track : public Composition
+class OTIO_API_TYPE Track : public Composition
 {
 public:
     /// @brief This struct provides the base set of kinds of tracks.
@@ -43,7 +43,7 @@ public:
     /// @param source_range The source range of the track.
     /// @param kind The kind of track.
     /// @param metadata The metadata for the track.
-    Track(
+    OTIO_API Track(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
@@ -71,7 +71,7 @@ public:
         ErrorStatus*      error_status = nullptr) const override;
 
     /// @brief Return the neighbors of the given item.
-    std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
+    OTIO_API std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
         Composable const* item,
         ErrorStatus*      error_status = nullptr,
         NeighborGapPolicy insert_gap   = NeighborGapPolicy::never) const;

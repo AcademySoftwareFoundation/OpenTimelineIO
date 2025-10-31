@@ -14,17 +14,17 @@ Color::Color(
     double const         b,
     double const         a,
     std::string const&   name)
-    : _name(name),
-    _r(r),
+    : _r(r),
     _g(g),
     _b(b),
-    _a(a) {}
+    _a(a),
+    _name(name) {}
 
-Color::Color(Color const& other) : _name(other.name()),
-                                   _r(other.r()),
+Color::Color(Color const& other) : _r(other.r()),
                                    _g(other.g()),
                                    _b(other.b()),
-                                   _a(other.a()) {}
+                                   _a(other.a()),
+                                   _name(other.name()) {}
 
 const Color Color::pink(1.0, 0.0, 1.0, 1.0, "Pink");
 const Color Color::red(1.0, 0.0, 0.0, 1.0, "Red");
@@ -37,7 +37,7 @@ const Color Color::purple(0.5, 0.0, 0.5, 1.0, "Purple");
 const Color Color::magenta(1.0, 0.0, 1.0, 1.0, "Magenta");
 const Color Color::black(0.0, 0.0, 0.0, 1.0, "Black");
 const Color Color::white(1.0, 1.0, 1.0, 1.0, "White");
-const Color Color::transparent(1.0, 1.0, 1.0, 0.0, "Transparent");
+const Color Color::transparent(0.0, 0.0, 0.0, 0.0, "Transparent");
 
 Color*
 Color::from_hex(std::string const& color)

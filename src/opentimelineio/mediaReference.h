@@ -13,7 +13,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 using namespace opentime;
 
 /// @brief A reference to a piece of media, for example a movie on a clip.
-class MediaReference : public SerializableObjectWithMetadata
+class OTIO_API_TYPE MediaReference : public SerializableObjectWithMetadata
 {
 public:
     /// @brief This struct provides the MediaReference schema.
@@ -31,7 +31,7 @@ public:
     /// @param available_range The available range of the media reference.
     /// @param metadata The metadata for the media reference.
     /// @param available_image_bounds The spatial bounds of the media reference.
-    MediaReference(
+    OTIO_API MediaReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),

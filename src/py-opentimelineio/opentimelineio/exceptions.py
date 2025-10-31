@@ -8,6 +8,7 @@ from . _otio import ( # noqa
     UnsupportedSchemaError,
     CannotComputeAvailableRangeError
 )
+from typing import Type
 
 __all__ = [
     'OTIOError',

@@ -132,7 +132,10 @@ std::string normalize_path(std::string const& in)
 std::string absolute(std::string const& in)
 {
     char buf[PATH_MAX];
-    realpath(in.c_str(), buf);
+    if (NULL == realpath(in.c_str(), buf))
+    {
+        buf[0] = 0;
+    }
     return buf;
 }
 

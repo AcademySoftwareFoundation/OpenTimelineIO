@@ -12,6 +12,11 @@ import opentimelineio as otio
 
 class V2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
+        v = otio.schema.V2d()
+
+        self.assertEqual(v.x, 0.0)
+        self.assertEqual(v.y, 0.0)
+
         v = otio.schema.V2d(1.0, 2.0)
 
         self.assertEqual(v.x, 1.0)

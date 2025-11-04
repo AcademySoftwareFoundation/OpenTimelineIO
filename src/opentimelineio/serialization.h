@@ -13,13 +13,15 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-std::string serialize_json_to_string(
+/// @brief Serialize JSON data to a string.
+OTIO_API std::string serialize_json_to_string(
     const std::any&           value,
     const schema_version_map* schema_version_targets = nullptr,
     ErrorStatus*              error_status           = nullptr,
     int                       indent                 = 4);
 
-bool serialize_json_to_file(
+/// @brief Serialize JSON data to a file.
+OTIO_API bool serialize_json_to_file(
     const std::any&           value,
     std::string const&        file_name,
     const schema_version_map* schema_version_targets = nullptr,

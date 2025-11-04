@@ -13,8 +13,11 @@ Clip::Clip(
     MediaReference*                 media_reference,
     std::optional<TimeRange> const& source_range,
     AnyDictionary const&            metadata,
-    std::string const&              active_media_reference_key)
-    : Parent{ name, source_range, metadata }
+    std::vector<Effect*> const&     effects,
+    std::vector<Marker*> const&     markers,
+    std::string const&              active_media_reference_key,
+    std::optional<Color> const&     color)
+    : Parent{ name, source_range, metadata, effects, markers, /*enabled*/ true, color }
     , _active_media_reference_key(active_media_reference_key)
 {
     set_media_reference(media_reference);
@@ -188,21 +191,32 @@ std::optional<IMATH_NAMESPACE::Box2d>
 Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
+    
+    //this code path most likely never runs since a null or empty media_reference gets
+    //replaced with a placeholder value when instantiated
     if (!active_media)
     {
-        *error_status = ErrorStatus(
-            ErrorStatus::CANNOT_COMPUTE_BOUNDS,
-            "No image bounds set on clip",
-            this);
+        if(error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                "No image bounds set on clip",
+                this);
+        }
+
         return std::optional<IMATH_NAMESPACE::Box2d>();
     }
 
     if (!active_media->available_image_bounds())
     {
-        *error_status = ErrorStatus(
-            ErrorStatus::CANNOT_COMPUTE_BOUNDS,
-            "No image bounds set on media reference on clip",
-            this);
+        if(error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                "No image bounds set on media reference on clip",
+                this);
+        }
+
         return std::optional<IMATH_NAMESPACE::Box2d>();
     }
 

@@ -44,7 +44,6 @@ pygments_style = 'sphinx'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 htmlhelp_basename = f'{project.lower()}doc'
 
@@ -99,6 +98,9 @@ autodoc_default_options = {
 linkcheck_exclude_documents = [
     r'cxx/cxx'
 ]
+
+# For some reason this URL gives 403 Forbidden when running in github actions
+linkcheck_ignore = [r'https://opensource.org/licenses/MIT']
 
 # -- Options for MySt-Parser -----------------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/sphinx/reference.html

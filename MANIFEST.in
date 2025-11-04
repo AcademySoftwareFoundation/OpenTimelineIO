@@ -12,6 +12,7 @@ exclude readthedocs-conda.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
 exclude *.pdf
+exclude ADOPTERS.md
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
 exclude CONTRIBUTORS.md

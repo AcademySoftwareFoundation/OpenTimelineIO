@@ -19,9 +19,11 @@ class ComposableTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(seqi.metadata, {'foo': 'bar'})
 
     def test_serialize(self):
+        b = otio.schema.Box2d(
+            otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0))
         seqi = otio.core.Composable(
             name="test",
-            metadata={"foo": "bar"}
+            metadata={"box": b}
         )
         encoded = otio.adapters.otio_json.write_to_string(seqi)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.18.2)
 # TODO: read this information from a configuration file, here, and in setup.py
 
 set(OTIO_VERSION_MAJOR "0")
-set(OTIO_VERSION_MINOR "17")
+set(OTIO_VERSION_MINOR "18")
 set(OTIO_VERSION_PATCH "0")
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
@@ -16,7 +16,7 @@ set(OTIO_AUTHOR_EMAIL "otio-discussion@lists.aswf.io")
 set(OTIO_LICENSE      "Modified Apache 2.0 License")
 
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.14" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version")
 
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
@@ -28,15 +28,21 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 # Installation options
 option(OTIO_CXX_INSTALL               "Install the C++ bindings" ON)
 option(OTIO_PYTHON_INSTALL            "Install the Python bindings" OFF)
-option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (any and nonstd)" ON)
+option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (Imath)" ON)
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
-option(OTIO_INSTALL_CONTRIB           "Install the opentimelineio_contrib Python package" ON)
-set(OTIO_IMATH_LIBS "" CACHE STRING   "Imath library overrides to use instead of src/deps or find_package")
-option(OTIO_FIND_IMATH                "Find Imath using find_package, ignored if OTIO_IMATH_LIBS is set" OFF)
+option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
+option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
+#
+# If you are building OpenTimelineIO as a static library you will need to
+# defined OPENTIME_STATIC and OTIO_STATIC. If you use the provided CMake
+# config files these will be automatically defined for you. To use the
+# provided config files add `find_package(OpenTimelineIO)` to your
+# CMakeLists.txt file.
+#
 option(OTIO_SHARED_LIBS          "Build shared if ON, static if OFF" ON)
 option(OTIO_CXX_COVERAGE         "Invoke code coverage if lcov/gcov is available" OFF)
 option(OTIO_CXX_EXAMPLES         "Build CXX examples (also requires OTIO_PYTHON_INSTALL=ON)" OFF)
@@ -110,13 +116,32 @@ if(OTIO_SHARED_LIBS)
 else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
-    if (OTIO_PYTHON_INSTALL)
-        # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
-        # Note that this has no effect on Windows.
-        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-    endif()
 endif()
+
+# Set the SO version. The SO version must be incremented every time a change
+# occurs to the ABI that causes a backward incompatibility. Such changes
+# include, exhaustively:
+#
+# * a change to struct or class layout
+# * enum changes that would cause a renumbering of previously published enums
+# * a removal of a struct, class, enumeration, or function
+# * a change in parameters to a free standing function
+# * a removal of a global variable
+#
+# OTIO currently designates the minor version number for breaking changes,
+# e.g. v0.15, v0.16.0, v0.17.0, accordingly the SO version will be incremented
+# to match. SO version must be monotically increasing, so the ABI version
+# should be computed as: major * 100 + revision. The third digit will never
+# implicate an ABI version change. So for example, the following OTIO versions
+# would map to these ABI versions:
+#
+# * v0.18.0 - 18
+# * v0.19.0 - 19
+# * v0.19.1 - 19 # No ABI changes with minor version changes
+# * v1.0.0 - 100
+# * v1.1.0 - 101
+#
+math(EXPR OTIO_SOVERSION "${OTIO_VERSION_MAJOR} * 100 + ${OTIO_VERSION_MINOR}")
 
 set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
@@ -125,9 +150,9 @@ if(OTIO_CXX_INSTALL)
     message(STATUS "Installing C++ dynamic libraries to: ${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
     if(OTIO_DEPENDENCIES_INSTALL)
-        message(STATUS "  Installing 'any' and 'nonstd' for C++ (OTIO_DEPENDENCIES_INSTALL=ON)")
+        message(STATUS "  Installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=ON)")
     else()
-        message(STATUS "  Not installing any and nonstd for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
+        message(STATUS "  Not installing header dependencies for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
     endif()
 else()
     message(STATUS "Install C++ bindings: OFF")
@@ -150,7 +175,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(OTIO_CXX_COVERAGE AND NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-update=atomic -fprofile-exclude-files='/usr/*;src/deps/*'")
     # this causes cmake to produce file.gcno instead of file.cpp.gcno
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
     message(STATUS "Building C++ with Coverage: ON")
@@ -217,46 +242,29 @@ set(CTEST_OUTPUT_ON_FAILURE ON)
 # Build the dependencies and components
 
 #----- Imath
-set(OTIO_RESOLVED_IMATH_LIBRARIES "")
-if (NOT "${OTIO_IMATH_LIBS}" STREQUAL "")
-    message(STATUS "Using Imath from OTIO_MATH_LIBS: ${OTIO_IMATH_LIBS}")
-    set(OTIO_RESOLVED_IMATH_LIBRARIES "${OTIO_IMATH_LIBS}")
-    set(USE_DEPS_IMATH OFF)
-elseif(OTIO_FIND_IMATH)
-    find_package(Imath QUIET)
+if(OTIO_FIND_IMATH)
+    find_package(Imath REQUIRED)
     if (Imath_FOUND)
         message(STATUS "Found Imath 3 at ${Imath_CONFIG}")
-        set(USE_DEPS_IMATH OFF)
-    else()
-        find_package(IlmBase QUIET)
-        if (IlmBase_FOUND)
-            message(STATUS "Imath 3 not found, found Imath 2 at ${IlmBase_CONFIG}")
-            message(STATUS "You may need to point to the Imath headers by setting IMATH_INCLUDES")
-            set(USE_DEPS_IMATH_OFF)
-            set(OTIO_RESOLVED_IMATH_LIBRARIES "${IlmBase_LIBRARIES")
-        else()
-            message(STATUS "Imath 3 and 2 were not found, using src/deps/Imath")
-            set(USE_DEPS_IMATH ON)
-        endif()
     endif()
 else()
     message(STATUS "Using src/deps/Imath by default")
-    set(USE_DEPS_IMATH ON)
+    include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
+#----- RapidJSON
+
+if(OTIO_FIND_RAPIDJSON)
+    find_package(RapidJSON CONFIG REQUIRED)
+    if (RapidJSON_FOUND)
+        message(STATUS "Found RapidJSON at ${RapidJSON_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/rapidjson by default")
 endif()
 
 # set up the internally hosted dependencies
 add_subdirectory(src/deps)
-
-set (OTIO_IMATH_TARGETS
-    # For OpenEXR/Imath 3.x:
-    $<TARGET_NAME_IF_EXISTS:Imath::Imath>
-    $<TARGET_NAME_IF_EXISTS:Imath::Half>
-    # For OpenEXR >= 2.4/2.5 with reliable exported targets
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Imath>
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Half>
-    $<TARGET_NAME_IF_EXISTS:IlmBase::Iex>
-    # For OpenEXR <= 2.3:
-    ${ILMBASE_LIBRARIES})
 
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
@@ -272,4 +280,3 @@ endif()
 if(OTIO_CXX_EXAMPLES)
     add_subdirectory(examples)
 endif()
-

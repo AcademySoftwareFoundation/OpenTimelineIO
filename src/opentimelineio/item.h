@@ -4,6 +4,7 @@
 #pragma once
 
 #include "opentime/timeRange.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
@@ -13,9 +14,11 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 class Effect;
 class Marker;
 
-class Item : public Composable
+/// @brief An item in the timeline.
+class OTIO_API_TYPE Item : public Composable
 {
 public:
+    /// @brief This struct provides the Item schema.
     struct Schema
     {
         static auto constexpr name   = "Item";
@@ -24,40 +27,59 @@ public:
 
     using Parent = Composable;
 
-    Item(
+    /// @brief Create a new item.
+    ///
+    /// @param name The name of the item.
+    /// @param source_range The source range of the item.
+    /// @param metadata The metadata for the item.
+    /// @param effects The list of effects for the item. Note that the
+    /// the item keeps a retainer to each effect.
+    /// @param markers The list of markers for the item. Note that the
+    /// the item keeps a retainer to each marker.
+    /// @param enabled Whether the item is enabled.
+    OTIO_API Item(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),
         std::vector<Effect*> const&     effects      = std::vector<Effect*>(),
         std::vector<Marker*> const&     markers      = std::vector<Marker*>(),
-        bool                            enabled      = true);
+        bool                            enabled      = true,
+        std::optional<Color> const&     color        = std::nullopt);
 
     bool visible() const override;
     bool overlapping() const override;
 
+    /// @brief Return whether the item is enabled.
     bool enabled() const { return _enabled; };
 
+    /// @brief Set whether the item is enabled.
     void set_enabled(bool enabled) { _enabled = enabled; }
 
+    /// @brief Return the source range of the item.
     std::optional<TimeRange> source_range() const noexcept
     {
         return _source_range;
     }
 
+    /// @brief Set the source range of the item.
     void set_source_range(std::optional<TimeRange> const& source_range)
     {
         _source_range = source_range;
     }
 
+    /// @brief Modify the list of effects.
     std::vector<Retainer<Effect>>& effects() noexcept { return _effects; }
 
+    /// @brief Return the list of effects.
     std::vector<Retainer<Effect>> const& effects() const noexcept
     {
         return _effects;
     }
 
+    /// @brief Modify the list of markers.
     std::vector<Retainer<Marker>>& markers() noexcept { return _markers; }
 
+    /// @brief Return the list of markers.
     std::vector<Retainer<Marker>> const& markers() const noexcept
     {
         return _markers;
@@ -65,30 +87,49 @@ public:
 
     RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
+    /// @brief Return the available range of the item.
     virtual TimeRange
     available_range(ErrorStatus* error_status = nullptr) const;
 
+    /// @brief Return the trimmed range of the item.
     TimeRange trimmed_range(ErrorStatus* error_status = nullptr) const
     {
         return _source_range ? *_source_range : available_range(error_status);
     }
 
-    TimeRange visible_range(ErrorStatus* error_status = nullptr) const;
+    /// @brief Return the visible range of the item.
+    OTIO_API TimeRange visible_range(ErrorStatus* error_status = nullptr) const;
 
-    std::optional<TimeRange>
+    /// @brief Return the trimmed range of the item in the parent's time.
+    OTIO_API std::optional<TimeRange>
     trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
-    TimeRange range_in_parent(ErrorStatus* error_status = nullptr) const;
+    /// @brief Return the range of the item in the parent's time.
+    OTIO_API TimeRange
+    range_in_parent(ErrorStatus* error_status = nullptr) const;
 
-    RationalTime transformed_time(
+    /// @brief Return the time transformed to another item in the hierarchy.
+    OTIO_API RationalTime transformed_time(
         RationalTime time,
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;
 
-    TimeRange transformed_time_range(
+    /// @brief Return the time range transformed to another item in the hierarchy.
+    OTIO_API TimeRange transformed_time_range(
         TimeRange    time_range,
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;
+
+    std::optional<Color> color() const noexcept
+    {
+        return _color;
+    }
+
+    /// @brief Set the color of the item.
+    void set_color(std::optional<Color> const& color)
+    {
+        _color = color;
+    }
 
 protected:
     virtual ~Item();
@@ -100,6 +141,7 @@ private:
     std::optional<TimeRange>      _source_range;
     std::vector<Retainer<Effect>> _effects;
     std::vector<Retainer<Marker>> _markers;
+    std::optional<Color>          _color;
     bool                          _enabled;
 };
 

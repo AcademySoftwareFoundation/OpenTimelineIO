@@ -11,6 +11,8 @@
 #include "opentimelineio/safely_typed_any.h"
 #include "opentimelineio/stringUtils.h"
 
+#include <Imath/ImathBox.h>
+
 #include <map>
 #include <cstring>
 
@@ -60,6 +62,9 @@ void _build_any_to_py_dispatch_table() {
     t[&typeid(RationalTime)] = [](std::any const& a, bool) { return py::cast(safely_cast_rational_time_any(a)); };
     t[&typeid(TimeRange)] = [](std::any const& a, bool) { return py::cast(safely_cast_time_range_any(a)); };
     t[&typeid(TimeTransform)] = [](std::any const& a, bool) { return py::cast(safely_cast_time_transform_any(a)); };
+    t[&typeid(Color)] = [](std::any const& a, bool) { return py::cast(safely_cast_color_any(a)); };
+    t[&typeid(IMATH_NAMESPACE::V2d)] = [](std::any const& a, bool) { return py::cast(safely_cast_point_any(a)); };
+    t[&typeid(IMATH_NAMESPACE::Box2d)] = [](std::any const& a, bool) { return py::cast(safely_cast_box_any(a)); };
     t[&typeid(SerializableObject::Retainer<>)] = [](std::any const& a, bool) {
         SerializableObject* so = safely_cast_retainer_any(a);
         return py::cast(managing_ptr<SerializableObject>(so)); };

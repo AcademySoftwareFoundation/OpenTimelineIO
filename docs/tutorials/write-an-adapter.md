@@ -24,7 +24,7 @@ so we can add it to the list of [Tools and Projects Using OpenTimelineIO](https:
 
 Adapters may also be organized into their own independent Python project for subsequent [packaging](https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives), [distribution](https://packaging.python.org/tutorials/packaging-projects/#uploading-the-distribution-archives) and [installation](https://packaging.python.org/tutorials/packaging-projects/#installing-your-newly-uploaded-package) by [`pip`](https://packaging.python.org/key_projects/#pip).
 
-The easist way is to [otio-plugin-template repo](https://github.com/OpenTimelineIO/otio-plugin-template) and click "Use this template". This will get you started with plugin boilerplate and allow you to develop the adapter in your own GitHub account.
+The easiest way is to [otio-plugin-template repo](https://github.com/OpenTimelineIO/otio-plugin-template) and click "Use this template". This will get you started with plugin boilerplate and allow you to develop the adapter in your own GitHub account.
 
 If you'd like to work from scratch, we recommend you organize your project like so:
 ```
@@ -240,4 +240,5 @@ def export_timeline(timeline):
 
 ## Examples
 
-OTIO includes a number of "core" (supported by the core team) adapters in `opentimelineio/adapters` as well as a number of community supported adapters in `opentimelineio_contrib/adapters`.
+OTIO includes "core" adapters for `.otio`, `.otiod` and `otioz` files found in in `opentimelineio/adapters`.  
+In addition to these you'll find many more adapters in the various repositories under the [OpenTimelineIO Organization](https://github.com/OpenTimelineIO)

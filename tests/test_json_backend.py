@@ -47,6 +47,10 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tt = otio.opentime.TimeTransform()
         self.check_against_baseline(tt, "empty_timetransform")
 
+    def test_color(self):
+        tt = otio.core.Color()
+        self.check_against_baseline(tt, "empty_color")
+
     def test_track(self):
         st = otio.schema.Track(
             name="test_track",
@@ -103,6 +107,10 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_marker(self):
         mr = otio.schema.Marker()
         self.check_against_baseline(mr, "empty_marker")
+
+    def test_effect(self):
+        mr = otio.schema.Effect()
+        self.check_against_baseline(mr, "empty_effect")
 
     def test_transition(self):
         trx = otio.schema.Transition()

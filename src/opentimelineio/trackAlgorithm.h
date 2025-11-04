@@ -8,7 +8,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-Track* track_trimmed_to_range(
+/// @brief Trim the track to the given range.
+OTIO_API Track* track_trimmed_to_range(
     Track*       in_track,
     TimeRange    trim_range,
     ErrorStatus* error_status = nullptr);

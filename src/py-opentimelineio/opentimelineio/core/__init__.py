@@ -8,6 +8,7 @@ from .. _otio import ( # noqa
     CannotComputeAvailableRangeError,
 
     # classes
+    Color,
     Composable,
     Composition,
     Item,
@@ -40,12 +41,14 @@ from . _core_utils import ( # noqa
 )
 from . import ( # noqa
     mediaReference,
+    color,
     composition,
     composable,
     item,
 )
 
 __all__ = [
+    'Color',
     'Composable',
     'Composition',
     'Item',
@@ -276,7 +279,7 @@ def serializable_field(name, required_type=None, doc=None, default_value=None):
     :param str doc: field documentation
     :param Any default_value: default value to return if no field value is set yet
 
-    :return: property object
+    :returns: property object
     :rtype: :py:class:`property`
     """
 

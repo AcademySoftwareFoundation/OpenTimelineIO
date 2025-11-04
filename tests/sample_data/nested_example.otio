@@ -287,7 +287,7 @@
                 "effects": [], 
                 "kind": "Video",
                 "markers": [], 
-                "eabled": true,
+                "enabled": true,
                 "metadata": {}, 
                 "name": "Top Level Track", 
                 "source_range": null

@@ -4,6 +4,7 @@
 set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
+    color.h
     clip.h
     composable.h
     composition.h
@@ -11,6 +12,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     algo/editAlgorithm.h
     effect.h
     errorStatus.h
+    export.h
     externalReference.h
     freezeFrame.h
     gap.h
@@ -35,10 +37,10 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    vectorIndexing.h
-    version.h)
+    vectorIndexing.h)
 
-add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
+add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    color.cpp
     clip.cpp
     composable.cpp
     composition.cpp
@@ -77,21 +79,44 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-target_include_directories(opentimelineio
-    PRIVATE       "${IMATH_INCLUDES}"
-                  "${PROJECT_SOURCE_DIR}/src"
-                  "${PROJECT_SOURCE_DIR}/src/deps"
-                  "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include"
-                  "${IMATH_INCLUDES}")
+target_include_directories(
+    opentimelineio
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_BINARY_DIR}/.."
+)
+
+if(OTIO_FIND_RAPIDJSON)
+    target_include_directories(opentimelineio
+        PRIVATE "${RapidJSON_INCLUDE_DIRS}")
+else()
+    target_include_directories(opentimelineio
+        PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
+endif()
+
 
 target_link_libraries(opentimelineio 
-    PUBLIC opentime ${OTIO_IMATH_TARGETS})
+    PUBLIC opentime Imath::Imath)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentimelineio"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
+
+if(OTIO_SHARED_LIBS)
+    set_target_properties(opentimelineio PROPERTIES
+        SOVERSION ${OTIO_SOVERSION}
+        VERSION ${OTIO_VERSION})
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_EXPORTS)
+else()
+    target_compile_definitions(
+        opentimelineio
+        PUBLIC
+        OTIO_STATIC)
+endif()
 
 if(APPLE)
     set_target_properties(opentimelineio PROPERTIES 
@@ -107,14 +132,16 @@ target_compile_options(opentimelineio PRIVATE
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
 )
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
+)
+
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} 
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
-    if(OTIO_DEPENDENCIES_INSTALL)
-        list(APPEND OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps)
-    endif()
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOTargets
@@ -142,5 +169,12 @@ if(OTIO_CXX_INSTALL)
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
+    )
+
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/version.h
+        DESTINATION
+            "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio"
     )
 endif()

@@ -23,7 +23,7 @@
                 "source_range": null,
                 "effects": [],
                 "markers": [],
-                "enabeld": true,
+                "enabled": true,
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.1",

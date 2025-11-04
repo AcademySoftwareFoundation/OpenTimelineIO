@@ -13,30 +13,15 @@
 namespace opentime { namespace OPENTIME_VERSION {
 
 /// @brief This enumeration provides options for drop frame timecode.
-enum IsDropFrameRate : int
+enum OPENTIME_API_TYPE IsDropFrameRate : int
 {
     InferFromRate = -1,
     ForceNo       = 0,
     ForceYes      = 1,
 };
 
-/// @brief Returns the absolute value.
-///
-/// \todo Document why this function is used instead of "std::fabs()".
-constexpr double
-fabs(double val) noexcept
-{
-    union
-    {
-        double   f;
-        uint64_t i;
-    } bits = { val };
-    bits.i &= std::numeric_limits<uint64_t>::max() / 2;
-    return bits.f;
-}
-
 /// @brief This class represents a measure of time defined by a value and rate.
-class RationalTime
+class OPENTIME_API_TYPE RationalTime
 {
 public:
     /// @brief Construct a new time with an optional value and rate.
@@ -52,6 +37,15 @@ public:
     bool is_invalid_time() const noexcept
     {
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
+    }
+
+    /// @brief Returns true if the time is valid.
+    ///
+    /// The time is considered valid if the value and rate are not NaN values,
+    /// and the rate is greater than zero.
+    bool is_valid_time() const noexcept
+    {
+        return !std::isnan(_rate) && !std::isnan(_value) && (_rate > 0);
     }
 
     /// @brief Returns the time value.
@@ -84,7 +78,7 @@ public:
         return value_rescaled_to(rt._rate);
     }
 
-    /// @brief Returns whether time is almost equal to another time.
+    /// @brief Returns whether this time is almost equal to another time.
     ///
     /// @param other The other time for comparison.
     /// @param delta The tolerance used for the comparison.
@@ -94,10 +88,10 @@ public:
         return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
-    /// @brief Returns whether the value and rate are equal to another time.
+    /// @brief Returns whether this value and rate are exactly equal to another time.
     ///
-    /// This is different from the operator "==" that rescales the time before
-    /// comparison.
+    /// Note that this is different from the equality operator that rescales the time
+    /// before comparison.
     constexpr bool strictly_equal(RationalTime other) const noexcept
     {
         return _value == other._value && _rate == other._rate;
@@ -171,12 +165,19 @@ public:
                                    start_time._rate };
     }
 
-    /// @brief Returns true if the rate is valid for use with timecode.
-    static bool is_valid_timecode_rate(double rate);
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
+    [[deprecated("Use is_smpte_timecode_rate() instead")]]
+    static OPENTIME_API bool is_valid_timecode_rate(double rate);
 
-    /// @brief Returns the first valid timecode rate that has the least
-    /// difference from rate.
-    static double nearest_valid_timecode_rate(double rate);
+    /// @brief Returns true is the rate is supported by SMPTE timecode.
+    static OPENTIME_API bool is_smpte_timecode_rate(double rate);
+
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
+    [[deprecated("Use nearest_smpte_timecode_rate() instead")]]
+    static OPENTIME_API double nearest_valid_timecode_rate(double rate);
+
+    /// @brief Returns the SMPTE timecode rate nearest to the given rate.
+    static OPENTIME_API double nearest_smpte_timecode_rate(double rate);
 
     /// @brief Convert a frame number and rate into a time.
     static constexpr RationalTime
@@ -203,7 +204,7 @@ public:
     /// @param timecode The timecode string.
     /// @param rate The timecode rate.
     /// @param error_status Optional error status.
-    static RationalTime from_timecode(
+    static OPENTIME_API RationalTime from_timecode(
         std::string const& timecode,
         double             rate,
         ErrorStatus*       error_status = nullptr);
@@ -217,7 +218,7 @@ public:
     /// @param time_string The time string.
     /// @param rate The time rate.
     /// @param error_status Optional error status.
-    static RationalTime from_time_string(
+    static OPENTIME_API RationalTime from_time_string(
         std::string const& time_string,
         double             rate,
         ErrorStatus*       error_status = nullptr);
@@ -242,7 +243,7 @@ public:
     /// @param rate The timecode rate.
     /// @param drop_frame Whether to use drop frame timecode.
     /// @param error_status Optional error status.
-    std::string to_timecode(
+    OPENTIME_API std::string to_timecode(
         double          rate,
         IsDropFrameRate drop_frame,
         ErrorStatus*    error_status = nullptr) const;
@@ -258,7 +259,7 @@ public:
     /// @param rate The timecode rate.
     /// @param drop_frame Whether to use drop frame timecode.
     /// @param error_status Optional error status.
-    std::string to_nearest_timecode(
+    OPENTIME_API std::string to_nearest_timecode(
         double          rate,
         IsDropFrameRate drop_frame,
         ErrorStatus*    error_status = nullptr) const;
@@ -266,7 +267,10 @@ public:
     /// @brief Convert to the nearest timecode (e.g., "HH:MM:SS;FRAME").
     std::string to_nearest_timecode(ErrorStatus* error_status = nullptr) const
     {
-        return to_nearest_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
+        return to_nearest_timecode(
+            _rate,
+            IsDropFrameRate::InferFromRate,
+            error_status);
     }
 
     /// @brief Return a string in the form "hours:minutes:seconds".
@@ -274,7 +278,7 @@ public:
     /// Seconds may have up to microsecond precision.
     ///
     /// @return The time string, which may have a leading negative sign.
-    std::string to_time_string() const;
+    OPENTIME_API std::string to_time_string() const;
 
     /// @brief Add a time to this time.
     constexpr RationalTime const& operator+=(RationalTime other) noexcept
@@ -400,6 +404,23 @@ private:
     friend class TimeRange;
 
     double _value, _rate;
+
+    /// @brief Returns the absolute value.
+    ///
+    /// \todo This function is used instead of "std::fabs()" so we can mark it as
+    /// constexpr. We can remove this and replace it with the std version when we
+    /// upgrade to C++23. Note that there are two copies of this function, in both
+    /// RationalTime and TimeRange.
+    static constexpr double fabs(double val) noexcept
+    {
+        union
+        {
+            double   f;
+            uint64_t i;
+        } bits = { val };
+        bits.i &= std::numeric_limits<uint64_t>::max() / 2;
+        return bits.f;
+    }
 };
 
 }} // namespace opentime::OPENTIME_VERSION

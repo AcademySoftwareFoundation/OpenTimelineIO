@@ -79,6 +79,26 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
     return result;
 }
 
+std::vector<SerializableObject::Retainer<Composable>>
+Stack::children_in_range(
+    TimeRange const& search_range,
+    ErrorStatus* error_status) const
+{
+    std::vector<SerializableObject::Retainer<Composable>> children;
+    for (const auto& child : this->children())
+    {
+        if (const auto& item = dynamic_retainer_cast<Item>(child))
+        {
+            const auto range = item->trimmed_range_in_parent(error_status);
+            if (range.has_value() && range.value().intersects(search_range))
+            {
+                children.push_back(child);
+            }
+        }
+    }
+    return children;
+}
+
 TimeRange
 Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status)
     const
@@ -111,15 +131,6 @@ Stack::available_range(ErrorStatus* error_status) const
     }
 
     return TimeRange(RationalTime(0, duration.rate()), duration);
-}
-
-std::vector<SerializableObject::Retainer<Clip>>
-Stack::find_clips(
-    ErrorStatus*                    error_status,
-    std::optional<TimeRange> const& search_range,
-    bool                            shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
 std::optional<IMATH_NAMESPACE::Box2d>

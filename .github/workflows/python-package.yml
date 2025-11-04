@@ -11,9 +11,9 @@ env:
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,18 +24,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
-        - os: ubuntu-latest
-          OTIO_TEST_TARGET: test
-        - os: windows-latest
-          OTIO_TEST_TARGET: RUN_TESTS
-        - os: macos-latest
-          OTIO_TEST_TARGET: test
-        - os: macos-13
-          OTIO_TEST_TARGET: test
+          - os: ubuntu-latest
+            OTIO_TEST_TARGET: test
+          - os: windows-latest
+            OTIO_TEST_TARGET: RUN_TESTS
+          - os: macos-latest
+            OTIO_TEST_TARGET: test
+          - os: macos-14
+            OTIO_TEST_TARGET: test
 
     env:
       OTIO_BUILD_CONFIG: Release
@@ -44,176 +44,182 @@ jobs:
       OTIO_CONSUMER_TEST_BUILD_DIR: ${{ github.workspace }}/consumertest
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    - name: Install coverage dependency
-      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: |
-        sudo apt-get install lcov
-    - name: Build
-      run: |
-        cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
-        cd ${{ env.OTIO_BUILD_DIR }}
-        cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON
-        cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
-    - name: Run tests
-      run: |
-        cd ${{ env.OTIO_BUILD_DIR }}
-        cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
-    - name: Collect code coverage
-      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: |
-        cd ${{ env.OTIO_BUILD_DIR }}
-        lcov --capture -b . --directory . --output-file=coverage.info -q
-        cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
-        lcov --remove coverage.filtered.info '*/usr/*' --output-file=coverage.filtered.info -q
-        lcov --remove coverage.filtered.info '*/deps/*' --output-file=coverage.filtered.info -q
-        lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
-        lcov --list coverage.filtered.info
-# \todo Should the Codecov web pages show the results of the C++ or Python tests?
-#    - name: Upload coverage to Codecov
-#      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-#      uses: codecov/codecov-action@v3.1.4
-#      with:
-#        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
-#        flags: unittests
-#        name: opentimelineio-codecov
-#        fail_ci_if_error: true
-    - name: Install
-      run: |
-        cd ${{ env.OTIO_BUILD_DIR }}
-        cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
-    - name: Consumer tests
-      run: |
-        cmake -E make_directory ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
-        cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
-        cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Install coverage dependency
+        if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        run: |
+          sudo apt-get install lcov
+      - name: Build
+        run: |
+          cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
+          cd ${{ env.OTIO_BUILD_DIR }}
+          cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON -DOTIO_CXX_EXAMPLES=ON
+          cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
+      - name: Run tests
+        run: |
+          cd ${{ env.OTIO_BUILD_DIR }}
+          cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
+      - name: Collect code coverage
+        if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        run: |
+          cd ${{ env.OTIO_BUILD_DIR }}
+          lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory . --output-file=coverage.info -q
+          cat coverage.info | sed "s/SF:.*src/SF:src/g" > coverage.filtered.info
+          lcov --remove coverage.filtered.info '*/tests/*' --output-file=coverage.filtered.info -q
+          lcov --list coverage.filtered.info
+      # \todo Should the Codecov web pages show the results of the C++ or Python tests?
+      #    - name: Upload coverage to Codecov
+      #      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      #      uses: codecov/codecov-action@v3.1.4
+      #      with:
+      #        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
+      #        flags: unittests
+      #        name: opentimelineio-codecov
+      #        fail_ci_if_error: true
+      - name: Install
+        run: |
+          cd ${{ env.OTIO_BUILD_DIR }}
+          cmake --build . --target install --config ${{ env.OTIO_BUILD_CONFIG }}
+      - name: Consumer tests
+        run: |
+          cmake -E make_directory ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+          cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
+          cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
   py_build_test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-latest, shell: bash }
-          - { os: macos-13, shell: bash }
+          - { os: macos-14, shell: bash }
           - { os: windows-latest, shell: pwsh }
-          - { os: windows-latest, shell: msys2, python-version: 'mingw64' }
+          - { os: windows-latest, shell: msys2, python-version: "mingw64" }
         exclude:
-          - { os: macos-latest, python-version: 3.7 }
-          - { os: macos-latest, python-version: 3.8 }
           - { os: macos-latest, python-version: 3.9 }
 
     defaults:
       run:
-        shell: '${{ matrix.shell }} {0}'
+        shell: "${{ matrix.shell }} {0}"
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
-    - name: Set up MSYS2
-      if: matrix.python-version == 'mingw64'
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: mingw64
-        install: >-
-          mingw-w64-x86_64-python
-          mingw-w64-x86_64-python-pip
-          mingw-w64-x86_64-gcc
-          mingw-w64-x86_64-cmake
-          make
-          git
-    - name: Ensure MSYS2 pip is updated
-      if: matrix.python-version == 'mingw64'
-      run: curl -sS https://bootstrap.pypa.io/get-pip.py | python
-    - name: Set up Python ${{ matrix.python-version }}
-      if: matrix.python-version != 'mingw64'
-      uses: actions/setup-python@v4.3.0
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install coverage dependency
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: |
-        echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
-        sudo apt-get install lcov
-    - name: Install python build dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
-    - name: Run check-manifest and lint check
-      run: make ci-prebuild
-    - name: Build and Install
-      run: |
-        # compile and install into virtualenv/virtual machine (verbosely)
-        pip install .[dev] -v
-    - name: Run tests w/ python coverage
-      run: make ci-postbuild
-    # (only on ubuntu/pyhton3.7)
-    - name: Generate C++ coverage report
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      run: make lcov
-    - name: Upload coverage to Codecov
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      uses: codecov/codecov-action@v4
-      with:
-        flags: py-unittests
-        name: py-opentimelineio-codecov
-        fail_ci_if_error: false
-      env:
-        # based on: https://github.com/codecov/codecov-action?tab=readme-ov-file#usage
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Set up MSYS2
+        if: matrix.python-version == 'mingw64'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          install: >-
+            mingw-w64-x86_64-python
+            mingw-w64-x86_64-python-pip
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            make
+            git
+      - name: Set up Python ${{ matrix.python-version }}
+        if: matrix.python-version != 'mingw64'
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install coverage dependency
+        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        run: |
+          echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
+          sudo apt-get install lcov
+      - name: Install python build dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
+      # \todo Temporarily disable check-manifest on MinGW, it is failing
+      # intermittently with this error:
+      # ModuleNotFoundError: No module named 'pip._vendor.distlib'
+      - name: Run check-manifest and lint check
+        if: matrix.python-version != 'mingw64'
+        run: make ci-prebuild
+      - name: Build and Install
+        run: |
+          pip install .[dev] -v --break-system-packages
+      - name: Run tests w/ python coverage
+        run: make ci-postbuild
+      # (only on GH_COV_OS and GH_COV_PY)
+      - name: Generate C++ coverage report
+        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        run: make lcov
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        uses: codecov/codecov-action@v4
+        with:
+          flags: py-unittests
+          name: py-opentimelineio-codecov
+          fail_ci_if_error: false
+        env:
+          # based on: https://github.com/codecov/codecov-action?tab=readme-ov-file#usage
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   package_wheels:
     needs: py_build_test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-        python-build: ['cp37*', 'cp38*', 'cp39*', 'cp310*', 'cp311*', 'cp312*']
-        exclude:
-          - { os: macos-latest, python-build: 'cp37*' }
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            windows-latest,
+            macos-14,
+            macos-latest,
+          ]
+        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
+        #exclude:
+        #   none currently
+        #   - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.22.0
         with:
           output-dir: wheelhouse
         env:
-          CIBW_BUILD: ${{ matrix.python-build }}
-          CIBW_SKIP: '*musllinux*'
+          CIBW_BUILD: ${{ matrix.python-build }}*
+          CIBW_SKIP: "*musllinux*"
+          CIBW_ARCHS_LINUX: native
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_I686_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          MACOSX_DEPLOYMENT_TARGET: 10.15
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheel-${{ matrix.os }}-${{ matrix.python-build }}
           path: ./wheelhouse/*.whl
 
   package_sdist:
     needs: py_build_test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
 
-    - uses: actions/setup-python@v4.3.0
+      - uses: actions/setup-python@v5.4.0
 
-    - name: Install pypa/build
-      run: python -m pip install build --user
+      - name: Install pypa/build
+        run: python -m pip install build --user
 
-    - name: Generate sdist
-      run: python -m build -s .
+      - name: Generate sdist
+        run: python -m build -s .
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: sdist
-        path: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist

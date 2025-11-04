@@ -28,7 +28,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Timeline> tl =
             new otio::Timeline();
         tl->tracks()->append_child(tr);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tl->find_children<otio::Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
@@ -54,7 +54,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Timeline> tl =
             new otio::Timeline();
         tl->tracks()->append_child(tr);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tl->find_children<otio::Clip>(&err, range);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
@@ -70,7 +70,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Timeline> tl =
             new otio::Timeline();
         tl->tracks()->append_child(tr);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tl->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 0);
         result = tl->find_children<otio::Clip>(&err, std::nullopt, false);

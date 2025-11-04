@@ -14,6 +14,8 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/stackAlgorithm.h"
 
+#include <Imath/ImathBox.h>
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
@@ -270,6 +272,9 @@ PYBIND11_MODULE(_otio, m) {
         .def(py::init([](RationalTime rt) { return new PyAny(rt); }))
         .def(py::init([](TimeRange tr) { return new PyAny(tr); }))
         .def(py::init([](TimeTransform tt) { return new PyAny(tt); }))
+        .def(py::init([](Color c) { return new PyAny(c); }))
+        .def(py::init([](IMATH_NAMESPACE::V2d v2d) { return new PyAny(v2d); }))
+        .def(py::init([](IMATH_NAMESPACE::Box2d box2d) { return new PyAny(box2d); }))
         .def(py::init([](AnyVectorProxy* p) { return new PyAny(p->fetch_any_vector()); }))
         .def(py::init([](AnyDictionaryProxy* p) { return new PyAny(p->fetch_any_dictionary()); }))
         ;

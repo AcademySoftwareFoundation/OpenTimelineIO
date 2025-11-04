@@ -8,11 +8,12 @@
 #include "opentime/timeTransform.h"
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/anyVector.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/version.h"
 
-#include "ImathBox.h"
+#include "Imath/ImathBox.h"
 #include "serialization.h"
 
 #include <list>
@@ -23,62 +24,91 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class CloningEncoder;
 
-class SerializableObject
+/// @brief A serializable object.
+class OTIO_API_TYPE SerializableObject
 {
 public:
+    /// @brief This struct provides the SerializableObject schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableObject";
         static int constexpr version = 1;
     };
 
-    SerializableObject();
+    /// @brief Create a new serializable object.
+    OTIO_API SerializableObject();
 
-    /**
-     * You cannot directly delete a SerializableObject* (or, hopefully, anything
-     * derived from it, as all derivations are required to protect the destructor).
-     *
-     * Instead, call the member function possibly_delete(), which deletes the object
-     * (and, recursively, the objects owned by this object), provided the objects
-     * are not under external management (e.g. prevented from being deleted because an
-     * external scripting system is holding a reference to them).
-     */
-    bool possibly_delete();
+    /// @brief Delete a serializable object.
+    ///
+    /// You cannot directly delete a SerializableObject* (or, hopefully, anything
+    /// derived from it, as all derivations are required to protect the destructor).
+    ///
+    /// Instead, call the member function possibly_delete(), which deletes the object
+    /// (and, recursively, the objects owned by this object), provided the objects
+    /// are not under external management (e.g. prevented from being deleted because an
+    /// external scripting system is holding a reference to them).
+    OTIO_API bool possibly_delete();
 
-    bool to_json_file(
+    /// @brief Serialize this object to a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
+    OTIO_API bool to_json_file(
         std::string const&        file_name,
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
-    std::string to_json_string(
+    /// @brief Serialize this object to a JSON string.
+    ///
+    /// @param error_status The return status.
+    /// @param target_family_label_spec @todo Add comment.
+    /// @param indent The number of spaces to use for indentation.
+    OTIO_API std::string to_json_string(
         ErrorStatus*              error_status             = nullptr,
         const schema_version_map* target_family_label_spec = nullptr,
         int                       indent                   = 4) const;
 
-    static SerializableObject* from_json_file(
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param file_name The file name.
+    /// @param error_status The return status.
+    static OTIO_API SerializableObject* from_json_file(
         std::string const& file_name,
         ErrorStatus*       error_status = nullptr);
-    static SerializableObject* from_json_string(
+
+    /// @brief Deserialize this object from a JSON file.
+    ///
+    /// @param input The input string.
+    /// @param error_status The return status.
+    static OTIO_API SerializableObject* from_json_string(
         std::string const& input,
         ErrorStatus*       error_status = nullptr);
 
-    bool is_equivalent_to(SerializableObject const& other) const;
+    /// @brief Return whether this object is equivalent to another.
+    OTIO_API bool is_equivalent_to(SerializableObject const& other) const;
 
-    // Makes a (deep) clone of this instance.
-    //
-    // Descendent SerializableObjects are cloned as well.
-    // If the operation fails, nullptr is returned and error_status
-    // is set appropriately.
-    SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
+    /// @brief Makes a (deep) clone of this instance.
+    ///
+    /// Descendent objects are cloned as well.
+    ///
+    /// If the operation fails, nullptr is returned and error_status
+    /// is set appropriately.
+    OTIO_API SerializableObject*
+    clone(ErrorStatus* error_status = nullptr) const;
 
-    // Allow external system (e.g. Python, Swift) to add serializable fields
-    // on the fly.  C++ implementations should have no need for this functionality.
+    /// @brief Allow external system (e.g. Python, Swift) to add serializable
+    /// fields on the fly.
+    ///
+    /// C++ implementations should have no need for this functionality.
     AnyDictionary& dynamic_fields() { return _dynamic_fields; }
 
     template <typename T = SerializableObject>
     struct Retainer;
 
+    /// @brief This class provides reading functionality.
     class Reader
     {
     public:
@@ -97,6 +127,7 @@ public:
         bool read(std::string const& key, RationalTime* dest);
         bool read(std::string const& key, TimeRange* dest);
         bool read(std::string const& key, class TimeTransform* dest);
+        bool read(std::string const& key, Color* dest);
         bool read(std::string const& key, IMATH_NAMESPACE::V2d* value);
         bool read(std::string const& key, IMATH_NAMESPACE::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
@@ -109,6 +140,7 @@ public:
         bool read(std::string const& key, std::optional<RationalTime>* dest);
         bool read(std::string const& key, std::optional<TimeRange>* dest);
         bool read(std::string const& key, std::optional<TimeTransform>* dest);
+        bool read(std::string const& key, std::optional<Color>* dest);
         bool read(
             std::string const&                     key,
             std::optional<IMATH_NAMESPACE::Box2d>* value);
@@ -403,6 +435,7 @@ public:
         friend class TypeRegistry;
     };
 
+    /// @brief This class provides writing functionality.
     class Writer
     {
     public:
@@ -420,12 +453,14 @@ public:
         void write(std::string const& key, TimeRange value);
         void write(std::string const& key, IMATH_NAMESPACE::V2d value);
         void write(std::string const& key, IMATH_NAMESPACE::Box2d value);
+        void write(std::string const& key, std::optional<Color> value);
         void write(std::string const& key, std::optional<RationalTime> value);
         void write(std::string const& key, std::optional<TimeRange> value);
         void write(
             std::string const&                    key,
             std::optional<IMATH_NAMESPACE::Box2d> value);
         void write(std::string const& key, class TimeTransform value);
+        void write(std::string const& key, Color value);
         void write(std::string const& key, SerializableObject const* value);
         void write(std::string const& key, SerializableObject* value)
         {
@@ -448,9 +483,9 @@ public:
         }
 
     private:
+        /// Convenience routines for converting various STL structures of specific
+        /// types to a parallel hierarchy holding std::any.
         ///@{
-        /** Convience routines for converting various STL structures of specific
-          types to a parallel hierarchy holding std::anys!. */
 
         template <typename T>
         static std::any _to_any(std::vector<T> const& value)
@@ -518,6 +553,7 @@ public:
         {
             return std::any(value);
         }
+
         ///@}
 
         Writer(
@@ -567,15 +603,22 @@ public:
         friend class SerializableObject;
     };
 
+    /// @brief Deserialize from the given reader.
     virtual bool read_from(Reader&);
+
+    /// @brief Serialize to the given writer.
     virtual void write_to(Writer&) const;
 
+    /// @brief Return whether this schema is unknown.
     virtual bool is_unknown_schema() const;
 
+    /// @brief Return the schema name.
     std::string schema_name() const { return _type_record()->schema_name; }
 
+    /// @brief Return the schema version.
     int schema_version() const { return _type_record()->schema_version; }
 
+    /// @brief This struct provides similar functionality to a smart pointer.
     template <typename T>
     struct Retainer
     {
@@ -642,10 +685,11 @@ private:
     template <typename T>
     friend struct Retainer;
 
-    void _managed_retain();
-    void _managed_release();
+    OTIO_API void _managed_retain();
+    OTIO_API void _managed_release();
 
 public:
+    /// @brief This struct provides a reference ID.
     struct ReferenceId
     {
         std::string id;
@@ -655,12 +699,15 @@ public:
         }
     };
 
+    /// @todo Add comment.
     void install_external_keepalive_monitor(
         std::function<void()> monitor,
         bool                  apply_now);
 
+    /// @brief Return the current reference count.
     int current_ref_count() const;
 
+    /// @brief This struct provides an unknown type.
     struct UnknownType
     {
         std::string type_name;

@@ -26,7 +26,7 @@ import opentimelineio as otio
 
 def main():
     """otiotool main program.
-    This function is resposible for executing the steps specified
+    This function is responsible for executing the steps specified
     by all of the command line arguments in the right order.
     """
 
@@ -64,6 +64,9 @@ def main():
 
     if args.remove_transitions:
         timelines = filter_transitions(timelines)
+
+    if args.remove_effects:
+        timelines = filter_effects(timelines)
 
     if args.only_tracks_with_name or args.only_tracks_with_index:
         timelines = filter_tracks(
@@ -137,7 +140,8 @@ def main():
                         args.list_media or
                         args.verify_media or
                         args.list_tracks or
-                        args.list_markers)
+                        args.list_markers or
+                        args.verify_ranges)
     if should_summarize:
         for timeline in timelines:
             summarize_timeline(
@@ -146,6 +150,7 @@ def main():
                 args.list_media,
                 args.verify_media,
                 args.list_markers,
+                args.verify_ranges,
                 timeline)
 
     # Final Phase: Output
@@ -182,35 +187,37 @@ This tool works in phases, as follows:
 
 2. Filtering
     Options such as --video-only, --audio-only, --only-tracks-with-name,
-    -only-tracks-with-index, --only-clips-with-name,
-    --only-clips-with-name-regex, --remove-transitions, and --trim will remove
-    content. Only the tracks, clips, etc. that pass all of the filtering options
-    provided are passed to the next phase.
+    --only-tracks-with-index, --only-clips-with-name,
+    --only-clips-with-name-regex, --remove-transitions, --remove-effects and
+    --trim will remove content. Only the tracks, clips, etc. that pass all of
+    the filtering options provided are passed to the next phase.
 
 3. Combine
-    If specified, the --stack, --concat, and --flatten operations are
+    If specified, the --stack, or --concat operations are
     performed (in that order) to combine all of the input timeline(s) into one.
 
-4. Relink
+4. Flatten
+    If --flatten is specified, then multiple tracks are flattened into one.
+
+5. Relink
     The --relink-by-name option, will scan the specified folder(s) looking for
     files which match the name of each clip in the input timeline(s).
     If matching files are found, clips will be relinked to those files (using
     file:// URLs). Clip names are matched to filenames ignoring file extension.
     If specified, the --copy-media-to-folder option, will copy or download
     all linked media, and relink the OTIO to reference the local copies.
-
-5. Remove/Redact
+6. Remove/Redact
     The --remove-metadata-key option allows you to remove a specific piece of
     metadata from all objects.
     If specified, the --redact option, will remove ALL metadata and rename all
     objects in the OTIO with generic names (e.g. "Track 1", "Clip 17", etc.)
 
-6. Inspect
+7. Inspect
     Options such as --stats, --list-clips, --list-tracks, --list-media,
-    --verify-media, --list-markers, and --inspect will examine the OTIO and
-    print information to standard output.
+    --verify-media, --list-markers, --verify-ranges, and --inspect
+    will examine the OTIO and print information to standard output.
 
-7. Output
+8. Output
     Finally, if the "--output <filename>" option is specified, the resulting
     OTIO will be written to the specified file. The extension of the output
     filename is used to determine the format of the output (e.g. OTIO or any
@@ -246,18 +253,20 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Filter...
-    parser.add_argument(
+    track_type_group = parser.add_mutually_exclusive_group()
+    track_type_group.add_argument(
         "--video-only",
         "-v",
         action='store_true',
         help="Output only video tracks"
     )
-    parser.add_argument(
+    track_type_group.add_argument(
         "--audio-only",
         "-a",
         action='store_true',
         help="Output only audio tracks"
     )
+
     parser.add_argument(
         "--only-tracks-with-name",
         type=str,
@@ -294,6 +303,11 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="Remove all transitions"
     )
     parser.add_argument(
+        "--remove-effects",
+        action='store_true',
+        help="Remove all effects"
+    )
+    parser.add_argument(
         "--trim",
         "-t",
         type=str,
@@ -318,13 +332,15 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="""When used with --flatten, the new flat track is added above the
         others instead of replacing them."""
     )
-    parser.add_argument(
+
+    combine_group = parser.add_mutually_exclusive_group()
+    combine_group.add_argument(
         "--stack",
         "-s",
         action='store_true',
         help="Stack multiple input files into one timeline"
     )
-    parser.add_argument(
+    combine_group.add_argument(
         "--concat",
         "-c",
         action='store_true',
@@ -332,7 +348,8 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     )
 
     # Relink
-    parser.add_argument(
+    relink_group = parser.add_mutually_exclusive_group()
+    relink_group.add_argument(
         "--relink-by-name",
         type=str,
         nargs='+',
@@ -340,7 +357,7 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="""Scan the specified folder looking for filenames which match
         each clip's name. If found, clips are relinked to those files."""
     )
-    parser.add_argument(
+    relink_group.add_argument(
         "--copy-media-to-folder",
         type=str,
         metavar='FOLDER',
@@ -398,6 +415,13 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         help="List summary of all markers"
     )
     parser.add_argument(
+        "--verify-ranges",
+        action='store_true',
+        help="""Verify that each clip in a timeline has a source range
+        within the available range of media
+        (acceptable in some use cases, not in others)"""
+    )
+    parser.add_argument(
         "--inspect",
         type=str,
         nargs='+',
@@ -440,19 +464,9 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     if not any([args.input, args.list_versions]):
         parser.error("Must specify at least one of --input or --list-versions.")
 
-    # Some options cannot be combined.
-
-    if args.video_only and args.audio_only:
-        parser.error("Cannot use --video-only and --audio-only at the same time.")
-
-    if args.stack and args.concat:
-        parser.error("Cannot use --stack and --concat at the same time.")
-
+    # Check some options combination.
     if args.keep_flattened_tracks and not args.flatten:
         parser.error("Cannot use --keep-flattened-tracks without also using --flatten.")
-
-    if args.input and args.list_versions:
-        parser.error("Cannot combine --input and --list-versions.")
 
     return args
 
@@ -490,6 +504,18 @@ def filter_transitions(timelines):
             return None
         return item
     return [otio.algorithms.filtered_composition(t, _f) for t in timelines]
+
+
+def filter_effects(timelines):
+    """Remove all effects from the input timelines. The inputs are modified
+    in place, and also returned."""
+    for timeline in timelines:
+        # Items have an effects attribute, but other Composables do not.
+        # (e.g. Transitions) so we need to find only Items.
+        for item in timeline.find_children(descended_from_type=otio.core.Item):
+            # Clear the effects list contents
+            item.effects[:] = []
+    return timelines
 
 
 def _filter(item, names, patterns):
@@ -852,7 +878,7 @@ def inspect_timelines(name_regex, timeline):
 
 
 def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
-                       list_markers, timeline):
+                       list_markers, verify_ranges, timeline):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -861,8 +887,30 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
             if list_tracks:
                 print(f"TRACK: {child.name} ({child.kind})")
         if isinstance(child, otio.schema.Clip):
-            if list_clips:
-                print("  CLIP:", child.name)
+            if list_clips or verify_ranges:
+                if verify_ranges:
+                    range_msg = ""
+                    try:
+                        source = child.source_range
+                        available = child.available_range()
+
+                        # contains() uses end_time_exclusive(),
+                        # does not handle case when
+                        # the end of the source range
+                        # meets available range exactly
+                        available_start = available.start_time
+                        available_end = available.end_time_inclusive()
+                        src_start = source.start_time
+                        src_end = source.end_time_inclusive()
+                        if src_start < available_start or available_end < src_end:
+                            range_msg = "SOURCE MEDIA OUT OF BOUNDS"
+                        else:
+                            range_msg = "IN BOUNDS"
+                    except Exception:  # available range is, well, unavailable
+                        pass
+                    print("  CLIP:", child.name, range_msg)
+                else:
+                    print("  CLIP:", child.name)
             if list_media or verify_media:
                 try:
                     url = child.media_reference.target_url

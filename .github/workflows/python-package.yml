@@ -55,7 +55,7 @@ jobs:
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
           cd ${{ env.OTIO_BUILD_DIR }}
-          cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON
+          cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON -DOTIO_CXX_EXAMPLES=ON
           cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
       - name: Run tests
         run: |

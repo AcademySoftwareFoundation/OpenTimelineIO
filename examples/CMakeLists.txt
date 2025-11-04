@@ -1,8 +1,7 @@
 find_package(PythonLibs REQUIRED)
 
 include_directories(${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_SOURCE_DIR}/src/deps
-    ${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include
+    ${CMAKE_CURRENT_BINARY_DIR}/../src
     ${PYTHON_INCLUDE_DIRS})
 
 list(APPEND examples conform)

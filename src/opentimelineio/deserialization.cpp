@@ -590,13 +590,10 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
     }
     else if (schema_name_and_version == "Color.1")
     {
-        double       r, g, b, a;
+        double      r, g, b, a;
         std::string name;
-        return _fetch("name", &name)
-                       && _fetch("r", &r)
-                       && _fetch("g", &g)
-                       && _fetch("b", &b)
-                       && _fetch("a", &a)
+        return _fetch("name", &name) && _fetch("r", &r) && _fetch("g", &g)
+                       && _fetch("b", &b) && _fetch("a", &a)
                    ? std::any(Color(r, g, b, a, name))
                    : std::any();
     }
@@ -837,8 +834,8 @@ SerializableObject::Reader::read(
 
 bool
 SerializableObject::Reader::read(
-    std::string const&        key,
-    std::optional<Color>*     value)
+    std::string const&    key,
+    std::optional<Color>* value)
 {
     return _read_optional(key, value);
 }

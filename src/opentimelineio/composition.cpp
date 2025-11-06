@@ -17,7 +17,14 @@ Composition::Composition(
     std::vector<Effect*> const&     effects,
     std::vector<Marker*> const&     markers,
     std::optional<Color> const&     color)
-    : Parent(name, source_range, metadata, effects, markers, /*enabled*/ true, color)
+    : Parent(
+          name,
+          source_range,
+          metadata,
+          effects,
+          markers,
+          /*enabled*/ true,
+          color)
 {}
 
 Composition::~Composition()

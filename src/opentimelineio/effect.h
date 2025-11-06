@@ -46,7 +46,7 @@ public:
     bool enabled() const { return _enabled; };
 
     /// @brief Set whether the effect is enabled.
-    void set_enabled(bool enabled) { _enabled = enabled; }  
+    void set_enabled(bool enabled) { _enabled = enabled; }
 
 protected:
     virtual ~Effect();

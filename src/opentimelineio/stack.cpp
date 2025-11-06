@@ -82,10 +82,10 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
 std::vector<SerializableObject::Retainer<Composable>>
 Stack::children_in_range(
     TimeRange const& search_range,
-    ErrorStatus* error_status) const
+    ErrorStatus*     error_status) const
 {
     std::vector<SerializableObject::Retainer<Composable>> children;
-    for (const auto& child : this->children())
+    for (const auto& child: this->children())
     {
         if (const auto& item = dynamic_retainer_cast<Item>(child))
         {

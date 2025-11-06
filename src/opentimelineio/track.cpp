@@ -15,7 +15,13 @@ Track::Track(
     std::string const&              kind,
     AnyDictionary const&            metadata,
     std::optional<Color> const&     color)
-    : Parent(name, source_range, metadata, std::vector<Effect*>(), std::vector<Marker*>(), color)
+    : Parent(
+          name,
+          source_range,
+          metadata,
+          std::vector<Effect*>(),
+          std::vector<Marker*>(),
+          color)
     , _kind(kind)
 {}
 

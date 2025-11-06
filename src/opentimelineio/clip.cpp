@@ -17,7 +17,8 @@ Clip::Clip(
     std::vector<Marker*> const&     markers,
     std::string const&              active_media_reference_key,
     std::optional<Color> const&     color)
-    : Parent{ name, source_range, metadata, effects, markers, /*enabled*/ true, color }
+    : Parent{ name,    source_range,     metadata, effects,
+              markers, /*enabled*/ true, color }
     , _active_media_reference_key(active_media_reference_key)
 {
     set_media_reference(media_reference);
@@ -191,12 +192,12 @@ std::optional<IMATH_NAMESPACE::Box2d>
 Clip::available_image_bounds(ErrorStatus* error_status) const
 {
     auto active_media = media_reference();
-    
+
     //this code path most likely never runs since a null or empty media_reference gets
     //replaced with a placeholder value when instantiated
     if (!active_media)
     {
-        if(error_status)
+        if (error_status)
         {
             *error_status = ErrorStatus(
                 ErrorStatus::CANNOT_COMPUTE_BOUNDS,
@@ -209,7 +210,7 @@ Clip::available_image_bounds(ErrorStatus* error_status) const
 
     if (!active_media->available_image_bounds())
     {
-        if(error_status)
+        if (error_status)
         {
             *error_status = ErrorStatus(
                 ErrorStatus::CANNOT_COMPUTE_BOUNDS,

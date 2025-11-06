@@ -11,7 +11,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-
 /// @brief Color consists of red, green, blue,
 /// and alpha double floating point values,
 /// allowing conversion between different formats.
@@ -32,11 +31,11 @@ public:
     };
 
     OTIO_API Color(
-        double const         r        = 1.f,
-        double const         g        = 1.f,
-        double const         b        = 1.f,
-        double const         a        = 1.f,
-        std::string const&   name     = "");
+        double const       r    = 1.f,
+        double const       g    = 1.f,
+        double const       b    = 1.f,
+        double const       a    = 1.f,
+        std::string const& name = "");
 
     OTIO_API Color(Color const& other);
 
@@ -58,10 +57,10 @@ public:
     static Color* from_agbr_int(unsigned int agbr) noexcept;
     static Color* from_float_list(std::vector<double> const& color);
 
-    friend bool
-    operator==(Color lhs, Color rhs) noexcept
+    friend bool operator==(Color lhs, Color rhs) noexcept
     {
-        return lhs.to_hex() == rhs.to_hex() && lhs.to_agbr_integer() == rhs.to_agbr_integer();
+        return lhs.to_hex() == rhs.to_hex()
+               && lhs.to_agbr_integer() == rhs.to_agbr_integer();
     }
 
     OTIO_API std::string to_hex();
@@ -69,10 +68,10 @@ public:
     OTIO_API unsigned int     to_agbr_integer();
     OTIO_API std::vector<double> to_rgba_float_list();
 
-    double r() const { return _r; }
-    double g() const { return _g; }
-    double b() const { return _b; }
-    double a() const { return _a; }
+    double      r() const { return _r; }
+    double      g() const { return _g; }
+    double      b() const { return _b; }
+    double      a() const { return _a; }
     std::string name() const { return _name; }
 
     void set_r(double r) { _r = r; }
@@ -82,10 +81,10 @@ public:
     void set_name(std::string const& name) { _name = name; }
 
 private:
-    double _r;
-    double _g;
-    double _b;
-    double _a;
+    double      _r;
+    double      _g;
+    double      _b;
+    double      _a;
     std::string _name;
 };
 

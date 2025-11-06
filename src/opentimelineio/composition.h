@@ -161,7 +161,7 @@ public:
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;
-   
+
     /// @brief Find child clips.
     ///
     /// @param error_status The return status.

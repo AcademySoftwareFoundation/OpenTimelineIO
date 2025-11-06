@@ -260,12 +260,9 @@ public:
         if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
         {
             AnyDictionary result{
-                { "OTIO_SCHEMA", "Color.1" },
-                { "r", value.r() },
-                { "g", value.g() },
-                { "b", value.b() },
-                { "a", value.a() },
-                { "name", value.name() },
+                { "OTIO_SCHEMA", "Color.1" }, { "r", value.r() },
+                { "g", value.g() },           { "b", value.b() },
+                { "a", value.a() },           { "name", value.name() },
             };
             _store(std::any(std::move(result)));
         }
@@ -983,7 +980,7 @@ SerializableObject::Writer::write(std::string const& key, TimeTransform value)
 
 void
 SerializableObject::Writer::write(
-    std::string const&       key,
+    std::string const&   key,
     std::optional<Color> value)
 {
     _encoder_write_key(key);

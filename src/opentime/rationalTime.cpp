@@ -32,8 +32,7 @@ static constexpr std::array<double, 11> smpte_timecode_rates{
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0
-    }
+      60.0 }
 };
 
 // deprecated in favor of `is_smpte_timecode_rate`

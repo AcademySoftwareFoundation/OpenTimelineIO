@@ -9,22 +9,25 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 Color::Color(
-    double const         r,
-    double const         g,
-    double const         b,
-    double const         a,
-    std::string const&   name)
-    : _r(r),
-    _g(g),
-    _b(b),
-    _a(a),
-    _name(name) {}
+    double const       r,
+    double const       g,
+    double const       b,
+    double const       a,
+    std::string const& name)
+    : _r(r)
+    , _g(g)
+    , _b(b)
+    , _a(a)
+    , _name(name)
+{}
 
-Color::Color(Color const& other) : _r(other.r()),
-                                   _g(other.g()),
-                                   _b(other.b()),
-                                   _a(other.a()),
-                                   _name(other.name()) {}
+Color::Color(Color const& other)
+    : _r(other.r())
+    , _g(other.g())
+    , _b(other.b())
+    , _a(other.a())
+    , _name(other.name())
+{}
 
 const Color Color::pink(1.0, 0.0, 1.0, 1.0, "Pink");
 const Color Color::red(1.0, 0.0, 0.0, 1.0, "Red");
@@ -54,9 +57,9 @@ Color::from_hex(std::string const& color)
 
     double _r, _g, _b, _a;
     // 0xFFFFFFFF (rgba, 255)
-    int BASE_16 = 16;
+    int    BASE_16     = 16;
     double BASE_16_DIV = 255.0;
-    double BASE_8_DIV = 15.0;
+    double BASE_8_DIV  = 15.0;
     if (temp.length() == 8)
     {
         _r = std::stoi(temp.substr(0, 2), nullptr, BASE_16) / BASE_16_DIV;
@@ -88,7 +91,8 @@ Color::from_hex(std::string const& color)
         _b = std::stoi(temp.substr(2, 1), nullptr, BASE_16) / BASE_8_DIV;
         _a = std::stoi(temp.substr(3, 1), nullptr, BASE_16) / BASE_8_DIV;
     }
-    else {
+    else
+    {
         throw std::invalid_argument("Invalid hex format");
     }
     return new Color(_r, _g, _b, _a);
@@ -97,11 +101,19 @@ Color::from_hex(std::string const& color)
 Color*
 Color::from_int_list(std::vector<int> const& color, int bit_depth)
 {
-    double depth = pow(2, bit_depth) - 1.0;  // e.g. 8 = 255.0
+    double depth = pow(2, bit_depth) - 1.0; // e.g. 8 = 255.0
     if (color.size() == 3)
-        return new Color(color[0] / depth, color[1] / depth, color[2] / depth, 1.0);
+        return new Color(
+            color[0] / depth,
+            color[1] / depth,
+            color[2] / depth,
+            1.0);
     else if (color.size() == 4)
-        return new Color(color[0] / depth, color[1] / depth, color[2] / depth, color[3] / depth);
+        return new Color(
+            color[0] / depth,
+            color[1] / depth,
+            color[2] / depth,
+            color[3] / depth);
 
     throw std::invalid_argument("List must have exactly 3 or 4 elements");
 }
@@ -130,7 +142,7 @@ Color::from_float_list(std::vector<double> const& color)
 std::string
 Color::to_hex()
 {
-    auto rgba = to_rgba_int_list(8);
+    auto              rgba = to_rgba_int_list(8);
     std::stringstream ss;
     ss << "#";
 
@@ -146,7 +158,10 @@ std::vector<int>
 Color::to_rgba_int_list(int base)
 {
     double math_base = pow(2, base) - 1.0;
-    return {int(_r * math_base), int(_g * math_base), int(_b * math_base), int(_a * math_base)};
+    return { int(_r * math_base),
+             int(_g * math_base),
+             int(_b * math_base),
+             int(_a * math_base) };
 }
 
 unsigned int
@@ -159,7 +174,7 @@ Color::to_agbr_integer()
 std::vector<double>
 Color::to_rgba_float_list()
 {
-    return {_r, _g, _b, _a};
+    return { _r, _g, _b, _a };
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

@@ -10,7 +10,7 @@ Effect::Effect(
     std::string const&   name,
     std::string const&   effect_name,
     AnyDictionary const& metadata,
-    bool enabled)
+    bool                 enabled)
     : Parent(name, metadata)
     , _effect_name(effect_name)
     , _enabled(enabled)

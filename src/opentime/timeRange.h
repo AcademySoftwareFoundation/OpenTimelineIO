@@ -43,9 +43,7 @@ public:
     {}
 
     /// @brief Construct a new time range with the given start time and duration.
-    constexpr TimeRange(
-        RationalTime start_time,
-        RationalTime duration) noexcept
+    constexpr TimeRange(RationalTime start_time, RationalTime duration) noexcept
         : _start_time{ start_time }
         , _duration{ duration }
     {}
@@ -65,7 +63,8 @@ public:
     /// duration is invalid, or if the duration is less than zero.
     bool is_invalid_range() const noexcept
     {
-        return _start_time.is_invalid_time() || _duration.is_invalid_time() || _duration.value() < 0.0;
+        return _start_time.is_invalid_time() || _duration.is_invalid_time()
+               || _duration.value() < 0.0;
     }
 
     /// @brief Returns true if the time range is valid.
@@ -75,7 +74,8 @@ public:
     /// zero.
     bool is_valid_range() const noexcept
     {
-        return _start_time.is_valid_time() && _duration.is_valid_time() && _duration.value() >= 0.0;
+        return _start_time.is_valid_time() && _duration.is_valid_time()
+               && _duration.value() >= 0.0;
     }
 
     /// @brief Returns the start time.

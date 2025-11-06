@@ -102,7 +102,7 @@ public:
 
     /// @brief Return the trimmed range of the item in the parent's time.
     OTIO_API std::optional<TimeRange>
-    trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
+             trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the range of the item in the parent's time.
     OTIO_API TimeRange
@@ -120,16 +120,10 @@ public:
         Item const*  to_item,
         ErrorStatus* error_status = nullptr) const;
 
-    std::optional<Color> color() const noexcept
-    {
-        return _color;
-    }
+    std::optional<Color> color() const noexcept { return _color; }
 
     /// @brief Set the color of the item.
-    void set_color(std::optional<Color> const& color)
-    {
-        _color = color;
-    }
+    void set_color(std::optional<Color> const& color) { _color = color; }
 
 protected:
     virtual ~Item();

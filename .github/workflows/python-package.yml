@@ -180,9 +180,6 @@ jobs:
             macos-latest,
           ]
         python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
-        #exclude:
-        #   none currently
-        #   - { os: macos-latest, python-build: 'cp37' }
     steps:
       - uses: actions/checkout@v4
 

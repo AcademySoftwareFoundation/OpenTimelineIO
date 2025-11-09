@@ -121,9 +121,12 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
       - name: Run check-manifest and lint check
         run: make ci-prebuild
-      - name: Build and Install
+      - name: Install test dependencies
         run: |
-          python -m pip install -r tests/requirements.txt -v --break-system-packages
+          python -m pip install --upgrade -r tests/requirements.txt
+      - name: Build and Install OpenTimelineIO
+        run: |
+          python -m pip install . -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)

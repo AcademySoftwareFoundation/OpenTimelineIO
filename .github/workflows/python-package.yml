@@ -227,7 +227,7 @@ jobs:
           path: 'wheelhouse'
           merge-multiple: true
       - name: Install wheel for environment
-        run: pip install  --no-index --find-links wheelhouse opentimelineio
+        run: pip install --no-cache-dir --break-system-packages --no-index --find-links wheelhouse opentimelineio
       - name: Run tests w/ python coverage
         run: make ci-postbuild
 

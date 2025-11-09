@@ -89,7 +89,8 @@ jobs:
           cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
   py_smoketest_build:
-    runs-on: ${{ env.GH_COV_OS }}
+    # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
@@ -99,7 +100,7 @@ jobs:
         shell: "bash {0}"
 
     env:
-      OTIO_CXX_COVERAGE_BUILD: ON
+      OTIO_CXX_COVERAGE_BUILD: 'ON'
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
@@ -155,6 +156,8 @@ jobs:
         python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
 
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@v3.2.1
@@ -194,13 +197,11 @@ jobs:
         shell: "${{ matrix.shell }} {0}"
 
     env:
-      OTIO_CXX_COVERAGE_BUILD: ON
+      OTIO_CXX_COVERAGE_BUILD: 'ON'
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
       - name: Set up MSYS2
         if: matrix.python-version == 'mingw64'
         uses: msys2/setup-msys2@v2

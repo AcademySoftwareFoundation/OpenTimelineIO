@@ -5,7 +5,7 @@ name: OpenTimelineIO
 
 # for configuring which build will be a C++ coverage build / coverage report
 env:
-  GH_COV_PY: "3.10"
+  GH_COV_PY: "3.13"
   GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 
@@ -88,7 +88,93 @@ jobs:
           cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
           cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
-  py_build_test:
+  py_smoketest_build:
+    runs-on: ${{ env.GH_COV_OS }}
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    defaults:
+      run:
+        shell: "bash {0}"
+
+    env:
+      OTIO_CXX_COVERAGE_BUILD: ON
+      OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install coverage dependency
+        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        run: |
+          echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
+          sudo apt-get install lcov
+      - name: Install python build dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
+      - name: Run check-manifest and lint check
+        run: make ci-prebuild
+      - name: Build and Install
+        run: |
+          python -m pip install tests/requirements.txt -v --break-system-packages
+      - name: Run tests w/ python coverage
+        run: make ci-postbuild
+      # (only on GH_COV_OS and GH_COV_PY)
+      - name: Generate C++ coverage report
+        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        run: make lcov
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        uses: codecov/codecov-action@v5
+        with:
+          flags: py-unittests
+          name: py-opentimelineio-codecov
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true
+
+  package_wheels:
+    needs: py_smoketest_build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            windows-latest,
+            macos-14,
+            macos-latest,
+          ]
+        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels (Python 3)
+        uses: pypa/cibuildwheel@v3.2.1
+        with:
+          output-dir: wheelhouse
+        env:
+          CIBW_BUILD: ${{ matrix.python-build }}*
+          CIBW_SKIP: "*musllinux*"
+          CIBW_ARCHS_LINUX: native
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
+          MACOSX_DEPLOYMENT_TARGET: 10.15
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel-${{ matrix.os }}-${{ matrix.python-build }}
+          path: ./wheelhouse/*.whl
+
+  test_wheels:
+    needs: package_wheels
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -132,76 +218,27 @@ jobs:
         uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install coverage dependency
-        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-        run: |
-          echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
-          sudo apt-get install lcov
       - name: Install python build dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
+          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest && python -m pip install -r tests/requirements.txt
       # \todo Temporarily disable check-manifest on MinGW, it is failing
       # intermittently with this error:
       # ModuleNotFoundError: No module named 'pip._vendor.distlib'
       - name: Run check-manifest and lint check
         if: matrix.python-version != 'mingw64'
         run: make ci-prebuild
-      - name: Build and Install
-        run: |
-          pip install .[dev] -v --break-system-packages
+      - uses: actions/download-artifact@v5
+          with:
+            pattern: 'wheel-.*'
+            path: 'wheelhouse'
+            merge-multiple: true
+      - name: Install wheel for environment
+        run: pip install  --no-index --find-links wheelhouse opentimelineio
       - name: Run tests w/ python coverage
         run: make ci-postbuild
-      # (only on GH_COV_OS and GH_COV_PY)
-      - name: Generate C++ coverage report
-        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-        run: make lcov
-      - name: Upload coverage to Codecov
-        if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-        uses: codecov/codecov-action@v4
-        with:
-          flags: py-unittests
-          name: py-opentimelineio-codecov
-          fail_ci_if_error: false
-        env:
-          # based on: https://github.com/codecov/codecov-action?tab=readme-ov-file#usage
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-  package_wheels:
-    needs: py_build_test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            windows-latest,
-            macos-14,
-            macos-latest,
-          ]
-        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@v3.2.1
-        with:
-          output-dir: wheelhouse
-        env:
-          CIBW_BUILD: ${{ matrix.python-build }}*
-          CIBW_SKIP: "*musllinux*"
-          CIBW_ARCHS_LINUX: native
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014
-          MACOSX_DEPLOYMENT_TARGET: 10.15
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheel-${{ matrix.os }}-${{ matrix.python-build }}
-          path: ./wheelhouse/*.whl
 
   package_sdist:
-    needs: py_build_test
+    needs: py_smoketest_build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

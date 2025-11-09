@@ -123,7 +123,7 @@ jobs:
         run: make ci-prebuild
       - name: Build and Install
         run: |
-          python -m pip install tests/requirements.txt -v --break-system-packages
+          python -m pip install -r tests/requirements.txt -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)

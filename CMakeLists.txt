@@ -7,8 +7,8 @@ cmake_minimum_required(VERSION 3.18.2)
 # TODO: read this information from a configuration file, here, and in setup.py
 
 set(OTIO_VERSION_MAJOR "0")
-set(OTIO_VERSION_MINOR "18")
-set(OTIO_VERSION_PATCH "1")
+set(OTIO_VERSION_MINOR "19")
+set(OTIO_VERSION_PATCH "0")
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")

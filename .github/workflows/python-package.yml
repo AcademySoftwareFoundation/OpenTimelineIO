@@ -227,7 +227,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest && python -m pip install -r tests/requirements.txt
       - uses: actions/download-artifact@v5
         with:
-          pattern: 'wheel-.*'
+          pattern: 'wheel-*'
           path: 'wheelhouse'
           merge-multiple: true
       - name: Install wheel for environment

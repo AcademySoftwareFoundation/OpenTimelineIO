@@ -147,9 +147,9 @@ jobs:
   py_testonly_build:
     # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
     runs-on: ${{ matrix.os }}
-    os: [windows-latest]
     strategy:
       matrix:
+        os: [windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - { os: windows-latest, shell: msys2, python-version: "mingw64" }

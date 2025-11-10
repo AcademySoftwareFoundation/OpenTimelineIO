@@ -89,6 +89,7 @@ jobs:
           cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
   py_smoketest_build:
+    needs: package_sdist
     # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
     runs-on: ubuntu-latest
     strategy:
@@ -104,9 +105,13 @@ jobs:
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Get tests and requirements from source
+        uses: actions/checkout@v4
+      - name: Get sdist source
+        uses: actions/download-artifact@v5
         with:
-          submodules: "recursive"
+          name: sdist
+          path: 'sdist'
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5.4.0
         with:
@@ -126,7 +131,7 @@ jobs:
           python -m pip install --upgrade -r tests/requirements.txt
       - name: Build and Install OpenTimelineIO
         run: |
-          python -m pip install . -v --break-system-packages
+          python -m pip install sdist/opentimelineio-*.tar.gz -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)
@@ -145,6 +150,7 @@ jobs:
 
   # This is for platforms where we build and test, but don't make wheels
   py_testonly_build:
+    needs: package_sdist
     # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
     runs-on: ${{ matrix.os }}
     strategy:
@@ -163,9 +169,11 @@ jobs:
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Get sdist source
+        uses: actions/download-artifact@v5
         with:
-          submodules: "recursive"
+          name: sdist
+          path: 'sdist'
       - name: Set up MSYS2
         if: matrix.python-version == 'mingw64'
         uses: msys2/setup-msys2@v2
@@ -186,12 +194,14 @@ jobs:
       - name: Install python build dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
+      - name: Get source
+        uses: actions/checkout@v4
       - name: Install test dependencies
         run: |
           python -m pip install --break-system-packages --upgrade -r tests/requirements.txt
       - name: Build and Install OpenTimelineIO
         run: |
-          python -m pip install . -v --break-system-packages
+          python -m pip install sdist/opentimelineio-*.tar.gz -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
 
@@ -275,7 +285,6 @@ jobs:
         run: make ci-postbuild
 
   package_sdist:
-    needs: py_smoketest_build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

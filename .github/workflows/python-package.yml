@@ -89,7 +89,6 @@ jobs:
           cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
   py_smoketest_build:
-    needs: package_sdist
     # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
     runs-on: ubuntu-latest
     strategy:
@@ -107,11 +106,8 @@ jobs:
     steps:
       - name: Get tests and requirements from source
         uses: actions/checkout@v4
-      - name: Get sdist source
-        uses: actions/download-artifact@v5
         with:
-          name: sdist
-          path: 'sdist'
+          submodules: "recursive"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5.4.0
         with:
@@ -131,7 +127,7 @@ jobs:
           python -m pip install --upgrade -r tests/requirements.txt
       - name: Build and Install OpenTimelineIO
         run: |
-          python -m pip install sdist/opentimelineio-*.tar.gz -v --break-system-packages
+          python -m pip install . -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)
@@ -201,12 +197,11 @@ jobs:
           python -m pip install --break-system-packages --upgrade -r tests/requirements.txt
       - name: Build and Install OpenTimelineIO
         run: |
-          python -m pip install sdist/opentimelineio-*.tar.gz -v --break-system-packages
+          python -m pip install --no-cache-dir --find-links sdist opentimelineio -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
 
   package_wheels:
-    needs: py_smoketest_build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

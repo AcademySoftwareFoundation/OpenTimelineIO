@@ -17,8 +17,8 @@
 
 #include <iostream>
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
-namespace otime = opentime::OPENTIME_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+namespace otime = opentime::OPENTIME_VERSION_NS;
 
 void summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& item)
 {

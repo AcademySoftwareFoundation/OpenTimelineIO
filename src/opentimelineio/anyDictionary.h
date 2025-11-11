@@ -11,7 +11,7 @@
 #include <map>
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief This class provides a replacement for "std::map<std::string, std::any>".
 ///
@@ -290,4 +290,4 @@ private:
     }
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

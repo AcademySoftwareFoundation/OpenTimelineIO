@@ -7,7 +7,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A clip is a segment of editable media (usually audio or video).
 ///
@@ -106,4 +106,4 @@ private:
     std::string                                     _active_media_reference_key;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

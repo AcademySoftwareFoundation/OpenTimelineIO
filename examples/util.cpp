@@ -29,7 +29,7 @@
 #include <unistd.h>
 #endif // _WINDOWS
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 namespace examples {
 

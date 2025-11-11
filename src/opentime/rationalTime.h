@@ -10,7 +10,7 @@
 #include <limits>
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This enumeration provides options for drop frame timecode.
 enum OPENTIME_API_TYPE IsDropFrameRate : int
@@ -423,4 +423,4 @@ private:
     }
 };
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

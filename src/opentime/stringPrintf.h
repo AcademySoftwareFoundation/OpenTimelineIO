@@ -8,7 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This provides printf style functionality for std::string.
 template <typename... Args>
@@ -27,4 +27,4 @@ string_printf(char const* format, Args... args)
     return std::string(buf.get());
 }
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

@@ -8,7 +8,7 @@
 
 #include <Imath/ImathBox.h>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 using namespace opentime;
 
@@ -77,4 +77,4 @@ private:
     std::optional<IMATH_NAMESPACE::Box2d> _available_image_bounds;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

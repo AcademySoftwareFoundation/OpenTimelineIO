@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief An effect that can be applied to an item, such as an image or audio filter.
 class OTIO_API_TYPE Effect : public SerializableObjectWithMetadata
@@ -59,4 +59,4 @@ private:
     bool        _enabled;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

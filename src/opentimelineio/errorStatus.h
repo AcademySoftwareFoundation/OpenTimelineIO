@@ -7,7 +7,7 @@
 #include "opentimelineio/version.h"
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class SerializableObject;
 
@@ -110,4 +110,4 @@ is_error(const ErrorStatus* es) noexcept
     return es && ErrorStatus::Outcome::OK != es->outcome;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

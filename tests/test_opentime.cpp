@@ -6,7 +6,7 @@
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 
-namespace otime = opentime::OPENTIME_VERSION;
+namespace otime = opentime::OPENTIME_VERSION_NS;
 
 int
 main(int argc, char** argv)

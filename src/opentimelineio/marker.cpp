@@ -4,7 +4,7 @@
 #include "opentimelineio/marker.h"
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Marker::Marker(
     std::string const&   name,
@@ -39,4 +39,4 @@ Marker::write_to(Writer& writer) const
     writer.write("comment", _comment);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

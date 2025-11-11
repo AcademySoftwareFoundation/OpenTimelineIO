@@ -12,7 +12,7 @@
 // version of an older library.
 #include "opentimelineio/typeRegistry.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 const label_to_schema_version_map CORE_VERSION_MAP{
     { "0.14.0",
@@ -241,4 +241,4 @@ const label_to_schema_version_map CORE_VERSION_MAP{
     // {next}
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

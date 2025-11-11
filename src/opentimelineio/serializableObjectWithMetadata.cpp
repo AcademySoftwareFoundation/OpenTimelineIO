@@ -3,7 +3,7 @@
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 SerializableObjectWithMetadata::SerializableObjectWithMetadata(
     std::string const&   name,
@@ -31,4 +31,4 @@ SerializableObjectWithMetadata::write_to(Writer& writer) const
     writer.write("name", _name);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

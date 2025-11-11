@@ -11,12 +11,12 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/transition.h"
 
-namespace otime = opentime::OPENTIME_VERSION;
+namespace otime = opentime::OPENTIME_VERSION_NS;
 
 using otime::RationalTime;
 using otime::TimeRange;
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS { namespace algo {
 
 
 #include <iostream>
@@ -883,4 +883,4 @@ void remove(
     }
 }
             
-}}} // namespace opentimelineio::OPENTIMELINEIO_VERSION::algo
+}}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS::algo

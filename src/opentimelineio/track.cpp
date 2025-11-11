@@ -7,7 +7,7 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Track::Track(
     std::string const&              name,
@@ -303,4 +303,4 @@ Track::available_image_bounds(ErrorStatus* error_status) const
     return box;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A serializable object with metadata.
 class OTIO_API_TYPE SerializableObjectWithMetadata : public SerializableObject
@@ -52,4 +52,4 @@ private:
     AnyDictionary _metadata;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

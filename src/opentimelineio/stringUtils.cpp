@@ -6,7 +6,7 @@
 #include <memory>
 #include <typeinfo>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 std::string
 type_name_for_error_message(std::type_info const& t)
@@ -66,4 +66,4 @@ split_schema_string(
     }
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

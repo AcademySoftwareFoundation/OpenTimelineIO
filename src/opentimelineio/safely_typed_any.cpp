@@ -3,7 +3,7 @@
 
 #include "opentimelineio/safely_typed_any.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 std::any
 create_safely_typed_any(bool&& value)
@@ -197,4 +197,4 @@ temp_safely_cast_any_dictionary_any(std::any const& a)
     return const_cast<AnyDictionary&>(std::any_cast<AnyDictionary const&>(a));
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

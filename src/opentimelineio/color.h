@@ -9,7 +9,7 @@
 #include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Color consists of red, green, blue,
 /// and alpha double floating point values,
@@ -88,4 +88,4 @@ private:
     std::string _name;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

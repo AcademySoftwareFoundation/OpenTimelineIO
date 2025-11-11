@@ -6,7 +6,7 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Base class for all effects that alter the timing of an item.
 class OTIO_API_TYPE TimeEffect : public Effect
@@ -35,4 +35,4 @@ protected:
     virtual ~TimeEffect();
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

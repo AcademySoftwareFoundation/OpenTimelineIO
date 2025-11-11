@@ -3,7 +3,7 @@
 
 #include "opentimelineio/unknownSchema.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 UnknownSchema::UnknownSchema(
     std::string const& original_schema_name,
@@ -44,4 +44,4 @@ UnknownSchema::is_unknown_schema() const
     return true;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

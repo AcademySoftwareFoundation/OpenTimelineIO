@@ -3,7 +3,7 @@
 
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 MissingReference::MissingReference(
     std::string const&                           name,
@@ -34,4 +34,4 @@ MissingReference::write_to(Writer& writer) const
     Parent::write_to(writer);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -26,7 +26,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @name Any Create
 ///@{
@@ -76,4 +76,4 @@ AnyVector&     temp_safely_cast_any_vector_any(std::any const& a);
 
 ///@}
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

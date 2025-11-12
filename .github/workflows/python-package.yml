@@ -197,7 +197,7 @@ jobs:
           python -m pip install --break-system-packages --upgrade -r tests/requirements.txt
       - name: Build and Install OpenTimelineIO
         run: |
-          python -m pip install ./sdist/opentimelineio-*.tar.gz -v --break-system-packages
+          pkg=`ls -1 sdist/opentimelineio-*.tar.gz` python -m pip install $pkg -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
 

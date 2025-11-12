@@ -371,14 +371,6 @@ setup(
             ),
         ],
     },
-    extras_require={
-        'dev': [
-            'check-manifest',
-            'flake8>=3.5',
-            'coverage>=4.5',
-            'urllib3>=1.24.3'
-        ],
-    },
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

@@ -86,9 +86,15 @@ if(OTIO_CXX_INSTALL)
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )
 
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfigVersion.cmake
+        COMPATIBILITY AnyNewerVersion
+    )
+
     install(
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfigVersion.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
     )

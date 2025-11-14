@@ -164,9 +164,15 @@ if(OTIO_CXX_INSTALL)
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )
 
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfigVersion.cmake
+        COMPATIBILITY AnyNewerVersion
+    )
+
     install(
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfigVersion.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
     )

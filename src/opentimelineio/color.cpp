@@ -6,7 +6,7 @@
 
 #include "opentimelineio/color.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Color::Color(
     double const       r,
@@ -177,4 +177,4 @@ Color::to_rgba_float_list()
     return { _r, _g, _b, _a };
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

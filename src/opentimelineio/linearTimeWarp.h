@@ -6,7 +6,7 @@
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A time warp that applies a linear speed up or slow down across the entire clip.
 class OTIO_API_TYPE LinearTimeWarp : public TimeEffect
@@ -52,4 +52,4 @@ private:
     double _time_scalar;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

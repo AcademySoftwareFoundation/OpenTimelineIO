@@ -11,7 +11,7 @@
 
 #include "util.h"
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 using chrono_time_point = std::chrono::steady_clock::time_point;
 

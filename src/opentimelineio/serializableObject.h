@@ -20,7 +20,7 @@
 #include <optional>
 #include <unordered_map>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class CloningEncoder;
 
@@ -738,4 +738,4 @@ dynamic_retainer_cast(SerializableObject::Retainer<U> const& retainer)
     return dynamic_cast<T*>(retainer.value);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

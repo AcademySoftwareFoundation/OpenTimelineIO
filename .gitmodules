@@ -10,3 +10,6 @@
 [submodule "src/deps/minizip-ng"]
 	path = src/deps/minizip-ng
 	url = https://github.com/zlib-ng/minizip-ng.git
+[submodule "src/deps/zlib-ng"]
+	path = src/deps/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng.git

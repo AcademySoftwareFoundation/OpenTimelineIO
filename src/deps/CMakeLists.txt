@@ -29,8 +29,16 @@ if(OTIO_PYTHON_INSTALL)
 endif()
 
 if(NOT OTIO_FIND_IMATH)
+    # preserve BUILD_SHARED_LIBS options for this project, but set it off for Imath
+    option(BUILD_SHARED_LIBS "Build shared libraries" ON)
     set(BUILD_SHARED_LIBS OFF)
-    add_subdirectory(Imath)
+
+    # If we do not want Imath to install headers and CMake files use the EXCLUDE_FROM_ALL option
+    if(OTIO_CXX_INSTALL AND OTIO_DEPENDENCIES_INSTALL)
+        add_subdirectory(Imath)
+    else()
+        add_subdirectory(Imath EXCLUDE_FROM_ALL)
+    endif()
 endif()
 
 if(NOT OTIO_FIND_ZLIB)

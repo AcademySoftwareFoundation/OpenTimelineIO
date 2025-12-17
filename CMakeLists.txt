@@ -32,7 +32,7 @@ option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" O
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
-option(OTIO_FIND_MINIZIP_NG           "Find minizip-ng using find_package" OFF)
+option(OTIO_FIND_ZLIB                 "Find zlib using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -257,14 +257,14 @@ else()
     message(STATUS "Using src/deps/rapidjson by default")
 endif()
 
-#----- minizip-ng
-if(OTIO_FIND_MINIZIP_NG)
-    find_package(minizip-ng CONFIG REQUIRED)
-    if (minizip-ng_FOUND)
-        message(STATUS "Found minizip-ng at ${minizip-ng_CONFIG}")
+#----- zlib
+if(OTIO_FIND_ZLIB)
+    find_package(zlib CONFIG REQUIRED)
+    if (zlib_FOUND)
+        message(STATUS "Found zlib at ${zlib_CONFIG}")
     endif()
 else()
-    message(STATUS "Using src/deps/minizip-ng by default")
+    message(STATUS "Using src/deps/zlib by default")
 endif()
 
 # set up the internally hosted dependencies

@@ -10,12 +10,9 @@ list(APPEND tests_opentime test_opentime)
 foreach(test ${tests_opentime})
 	add_executable(${test} utils.h utils.cpp ${test}.cpp)
 	target_link_libraries(${test} opentime)
+    target_compile_definitions(${test} PUBLIC OTIO_TESTS_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 	set_target_properties(${test} PROPERTIES FOLDER tests)
-	add_test(NAME ${test} 
-           COMMAND ${test}
-           # Set the pwd to the source directory so we can load the samples
-           # like the python tests do
-           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	add_test(NAME ${test} COMMAND ${test})
 endforeach()
 
 list(APPEND tests_opentimelineio
@@ -32,12 +29,8 @@ list(APPEND tests_opentimelineio
     test_otioz)
 foreach(test ${tests_opentimelineio})
     add_executable(${test} utils.h utils.cpp ${test}.cpp)
-
     target_link_libraries(${test} opentimelineio)
+    target_compile_definitions(${test} PUBLIC OTIO_TESTS_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     set_target_properties(${test} PROPERTIES FOLDER tests)
-    add_test(NAME ${test} 
-           COMMAND ${test}
-           # Set the pwd to the source directory so we can load the samples
-           # like the python tests do
-           WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME ${test} COMMAND ${test})
 endforeach()

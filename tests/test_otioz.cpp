@@ -27,7 +27,7 @@ main(int argc, char** argv)
 
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
-        std::filesystem::current_path() / "sample_data";
+        std::filesystem::u8path(OTIO_TESTS_DIR) / "sample_data";
     std::string const screening_example_path = otio::to_unix_separators(
         (sample_data_dir / "screening_example.otio").u8string());
 

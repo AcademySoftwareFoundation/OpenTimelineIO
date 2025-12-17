@@ -264,11 +264,15 @@ else()
     message(STATUS "Using src/deps/rapidjson by default")
 endif()
 
-#----- zlib
+#----- zlib and minizip
 if(OTIO_FIND_ZLIB)
     find_package(ZLIB CONFIG REQUIRED)
+    find_package(minizip CONFIG REQUIRED)
     if (ZLIB_FOUND)
         message(STATUS "Found zlib at ${ZLIB_CONFIG}")
+    endif()
+    if (minizip_FOUND)
+        message(STATUS "Found minizip at ${minizip_CONFIG}")
     endif()
 else()
     message(STATUS "Using src/deps/zlib by default")

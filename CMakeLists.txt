@@ -266,9 +266,9 @@ endif()
 
 #----- zlib
 if(OTIO_FIND_ZLIB)
-    find_package(zlib CONFIG REQUIRED)
-    if (zlib_FOUND)
-        message(STATUS "Found zlib at ${zlib_CONFIG}")
+    find_package(ZLIB CONFIG REQUIRED)
+    if (ZLIB_FOUND)
+        message(STATUS "Found zlib at ${ZLIB_CONFIG}")
     endif()
 else()
     message(STATUS "Using src/deps/zlib by default")

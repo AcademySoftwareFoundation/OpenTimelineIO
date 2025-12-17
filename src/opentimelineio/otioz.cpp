@@ -16,6 +16,8 @@
 #include <unzip.h>
 #include <zip.h>
 
+#include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <sstream>
 

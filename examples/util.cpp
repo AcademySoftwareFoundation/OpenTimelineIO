@@ -21,7 +21,6 @@
 #undef min
 #endif // min
 #else // _WINDOWS
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <fnmatch.h>

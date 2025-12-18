@@ -3,19 +3,20 @@
 
 #pragma once
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @name URL Utilities
-/// @todo Should we use a thrid party library for handling URLs?
+/// @todo Should we use a third party library for handling URLs?
 ///@{
 
 /// @brief Get the scheme from a URL.
-std::string scheme_from_url(std::string const&);
+OTIO_API std::string scheme_from_url(std::string const&);
 
 /// @brief Encode a URL (i.e., replace " " characters with "%20").
-std::string url_encode(std::string const& url);
+OTIO_API std::string url_encode(std::string const& url);
 
 /// @brief Decode a URL (i.e., replace "%20" strings with " ").
 std::string url_decode(std::string const& url);
@@ -28,7 +29,7 @@ std::string url_decode(std::string const& url);
 ///
 /// @todo Hopefully this can be replaced by functionality from the C++
 /// standard library at some point.
-std::string url_from_filepath(std::string const&);
+OTIO_API std::string url_from_filepath(std::string const&);
 
 /// @brief Convert a file URL to a filesystem path.
 ///
@@ -40,7 +41,7 @@ std::string url_from_filepath(std::string const&);
 ///
 /// @todo Hopefully this can be replaced by functionality from the C++
 /// standard library at some point.
-std::string filepath_from_url(std::string const&);
+OTIO_API std::string filepath_from_url(std::string const&);
 
 ///@}
 

@@ -5,7 +5,8 @@
 
 #include "opentimelineio/bundleUtils.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace bundle {
 
 size_t
 get_media_size(
@@ -42,4 +43,4 @@ get_media_size(
 }
 
 } // namespace bundle
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace bundle::opentimelineio::OPENTIMELINEIO_VERSION

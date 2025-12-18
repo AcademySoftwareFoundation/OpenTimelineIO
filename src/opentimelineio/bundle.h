@@ -6,7 +6,6 @@
 #include "opentimelineio/timeline.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
-
 namespace bundle {
 
 /// @brief The current otioz version.
@@ -25,7 +24,7 @@ static std::string const otio_file = "content.otio";
 static std::string const media_dir = "media";
 
 /// @brief This enumeration provides the bundle media reference policy.
-enum class MediaReferencePolicy
+enum class OTIO_API_TYPE MediaReferencePolicy
 {
     ErrorIfNotFile,   ///< Return an error if there are any non-file media references.
     MissingIfNotFile, ///< Replace non-file media references with missing references.
@@ -33,7 +32,7 @@ enum class MediaReferencePolicy
 };
 
 /// @brief Options for writing bundles.
-struct WriteOptions
+struct OTIO_API_TYPE WriteOptions
 {
     /// @brief The parent path is used to locate media with relative paths. If
     /// parent path is empty, paths are relative to the current working directory.
@@ -50,7 +49,7 @@ struct WriteOptions
 };
 
 /// @brief Options for reading .otioz bundles.
-struct OtiozReadOptions
+struct OTIO_API_TYPE OtiozReadOptions
 {
     /// @brief Extract the contents of the bundle to the given path. If the
     /// path is empty, the contents are not extracted, and only the timeline
@@ -59,7 +58,7 @@ struct OtiozReadOptions
 };
 
 /// @brief Options for reading .otiod bundles.
-struct OtiodReadOptions
+struct OTIO_API_TYPE OtiodReadOptions
 {
     /// @brief Use absolute paths for media references.
     bool absolute_media_reference_paths = false;
@@ -67,7 +66,7 @@ struct OtiodReadOptions
 
 /// @brief Get the total size (in bytes) of the media files that will be
 /// put into the bundle.
-size_t get_media_size(
+OTIO_API size_t get_media_size(
     Timeline const*     timeline,
     WriteOptions const& options      = WriteOptions(),
     ErrorStatus*        error_status = nullptr);
@@ -94,7 +93,7 @@ size_t get_media_size(
 /// @param file_name The bundle file name.
 /// @param options The bundle options.
 /// @param error_status The error status.
-bool to_otioz(
+OTIO_API bool to_otioz(
     Timeline const*     timeline,
     std::string const&  file_name,
     WriteOptions const& options      = WriteOptions(),
@@ -105,7 +104,7 @@ bool to_otioz(
 /// @param file_name The bundle file name.
 /// @param output_dir The directory where the bundle will be extracted.
 /// @param error_status The error status.
-Timeline* from_otioz(
+OTIO_API Timeline* from_otioz(
     std::string const&      file_name,
     OtiozReadOptions const& options      = OtiozReadOptions(),
     ErrorStatus*            error_status = nullptr);
@@ -122,7 +121,7 @@ Timeline* from_otioz(
 /// @param file_name The bundle file name.
 /// @param options The bundle options.
 /// @param error_status The error status.
-bool to_otiod(
+OTIO_API bool to_otiod(
     Timeline const*     timeline,
     std::string const&  file_name,
     WriteOptions const& options      = WriteOptions(),
@@ -133,10 +132,10 @@ bool to_otiod(
 /// @param file_name The bundle file name.
 /// @param timeline_file_name Returns the timeline file name.
 /// @param error_status The error status.
-Timeline* from_otiod(
+OTIO_API Timeline* from_otiod(
     std::string const&      file_name,
     OtiodReadOptions const& options      = OtiodReadOptions(),
     ErrorStatus*            error_status = nullptr);
 
 } // namespace bundle
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION::bundle

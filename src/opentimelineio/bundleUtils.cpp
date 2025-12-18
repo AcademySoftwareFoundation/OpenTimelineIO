@@ -12,7 +12,8 @@
 
 #include <sstream>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace bundle {
 
 std::string
 to_string(MediaReferencePolicy media_referenece_policy)

@@ -1,7 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
-// Example OTIO script that can create and extract bundles.
+// Example OTIO program that can create and extract bundles.
+//
+// Usage:
+// * bundle (input.otio) (output.otioz)
+//   Create an .otioz bundle from an .otio file.
+//
+// * bundle (input.otio) (output.otiod)
+//   Create an .otiod bundle from an .otio file.
+//
+// * bundle (input.otioz) (output)
+//   Extract an .otioz bundle.
 
 #include "util.h"
 
@@ -10,9 +20,6 @@
 #include "opentimelineio/timeline.h"
 
 #include <filesystem>
-
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
-namespace bundle = opentimelineio::OPENTIMELINEIO_VERSION::bundle;
 
 bool
 ends_with(std::string const& s, std::string const& find)
@@ -27,6 +34,7 @@ ends_with(std::string const& s, std::string const& find)
 int
 main(int argc, char** argv)
 {
+    // Command line arguments.
     if (argc != 3)
     {
         std::cout << "Usage:\n";
@@ -38,27 +46,29 @@ main(int argc, char** argv)
                   << "Extract an .otioz bundle.\n";
         return 1;
     }
-    const std::string input = otio::to_unix_separators(argv[1]);
-    const std::string output = otio::to_unix_separators(argv[2]);
+    const std::string input = OTIO_NS::to_unix_separators(argv[1]);
+    const std::string output = OTIO_NS::to_unix_separators(argv[2]);
 
     if (ends_with(input, ".otio") && ends_with(output, ".otioz"))
     {
+        // Create an .otioz bundle from an .otio file.
+
         // Open timeline.
-        otio::ErrorStatus                                  error_status;
-        otio::SerializableObject::Retainer<otio::Timeline> timeline(
-            dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file(input, &error_status)));
-        if (!timeline || otio::is_error(error_status))
+        OTIO_NS::ErrorStatus                                     error_status;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline(
+            dynamic_cast<OTIO_NS::Timeline*>(
+                OTIO_NS::Timeline::from_json_file(input, &error_status)));
+        if (!timeline || OTIO_NS::is_error(error_status))
         {
             examples::print_error(error_status);
             return 1;
         }
 
         // Create .otioz bundle.
-        bundle::WriteOptions options;
+        OTIO_NS::bundle::WriteOptions options;
         options.parent_path =
             std::filesystem::u8path(input).parent_path().u8string();
-        if (!bundle::to_otioz(
+        if (!OTIO_NS::bundle::to_otioz(
             timeline.value,
             output,
             options,
@@ -71,11 +81,11 @@ main(int argc, char** argv)
     else if (ends_with(input, ".otioz"))
     {
         // Extract .otioz bundle.
-        bundle::OtiozReadOptions options;
+        OTIO_NS::bundle::OtiozReadOptions options;
         options.extract_path = output;
-        otio::ErrorStatus error_status;
-        auto result = bundle::from_otioz(input, options, &error_status);
-        if (otio::is_error(error_status))
+        OTIO_NS::ErrorStatus error_status;
+        auto result = OTIO_NS::bundle::from_otioz(input, options, &error_status);
+        if (OTIO_NS::is_error(error_status))
         {
             examples::print_error(error_status);
             return 1;
@@ -83,22 +93,24 @@ main(int argc, char** argv)
     }
     else if (ends_with(input, ".otio") && ends_with(output, ".otiod"))
     {
+        // Create an .otiod bundle from an .otio file.
+
         // Open timeline.
-        otio::ErrorStatus                                  error_status;
-        otio::SerializableObject::Retainer<otio::Timeline> timeline(
-            dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file(input, &error_status)));
-        if (!timeline || otio::is_error(error_status))
+        OTIO_NS::ErrorStatus                                     error_status;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> timeline(
+            dynamic_cast<OTIO_NS::Timeline*>(
+                OTIO_NS::Timeline::from_json_file(input, &error_status)));
+        if (!timeline || OTIO_NS::is_error(error_status))
         {
             examples::print_error(error_status);
             return 1;
         }
 
         // Create .otiod bundle.
-        bundle::WriteOptions options;
+        OTIO_NS::bundle::WriteOptions options;
         options.parent_path =
             std::filesystem::u8path(input).parent_path().u8string();
-        if (!bundle::to_otiod(
+        if (!OTIO_NS::bundle::to_otiod(
             timeline.value,
             output,
             options,

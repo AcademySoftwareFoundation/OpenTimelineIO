@@ -13,7 +13,8 @@
 #include <fstream>
 #include <sstream>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace bundle {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace bundle {
 
 bool
 to_otiod(

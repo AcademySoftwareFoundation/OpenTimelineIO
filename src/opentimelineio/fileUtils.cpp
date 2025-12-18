@@ -5,6 +5,12 @@
 
 #include <cstdio>
 #include <filesystem>
+#include <iostream>
+
+#if !defined(_WINDOWS)
+#include <stdlib.h>
+#include <unistd.h>
+#endif // _WINDOWS
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -18,11 +24,18 @@ to_unix_separators(std::string const& path)
 
 std::string create_temp_dir()
 {
-    // \todo Replace std::tmpnam(), since it is potentially unsafe. A possible
-    // replacement might be mkdtemp(), but that does not seem to be available
-    // on Cygwin.
+    std::string out;
+#if defined(_WINDOWS)
+    // \todo Replace std::tmpnam() since it is potentially unsafe.
     std::string const out(std::tmpnam(nullptr));
     std::filesystem::create_directory(out);
+#else // _WINDOWS
+    std::string dir = std::filesystem::temp_directory_path() / "XXXXXX";
+    if (mkdtemp(dir.data()))
+    {
+        out = dir;
+    }
+#endif // _WINDOWS
     return out;
 }
 

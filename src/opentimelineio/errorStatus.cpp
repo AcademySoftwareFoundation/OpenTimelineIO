@@ -67,7 +67,7 @@ ErrorStatus::outcome_to_string(Outcome o)
         case NOT_A_GAP:
             return "object is not descendent of Gap type";
         case BUNDLE_SIZE_ERROR:
-            return "error compiting the size of the bundle";
+            return "error computing the size of the bundle";
         case BUNDLE_WRITE_ERROR:
             return "error writing bundle";
         case BUNDLE_READ_ERROR:

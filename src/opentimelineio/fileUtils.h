@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
@@ -11,10 +12,12 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 ///@{
 
 /// @brief Convert Windows path separators to UNIX path separators.
-std::string to_unix_separators(std::string const&);
+OTIO_API std::string to_unix_separators(std::string const&);
 
-// Create a temporary directory.
-std::string create_temp_dir();
+/// @brief Create a temporary directory.
+///
+/// This function is only used for the tests and examples.
+OTIO_API std::string create_temp_dir();
 
 ///@}
 

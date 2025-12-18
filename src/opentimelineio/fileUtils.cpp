@@ -27,7 +27,7 @@ std::string create_temp_dir()
     std::string out;
 #if defined(_WINDOWS)
     // \todo Replace std::tmpnam() since it is potentially unsafe.
-    std::string const out(std::tmpnam(nullptr));
+    out = std::tmpnam(nullptr);
     std::filesystem::create_directory(out);
 #else // _WINDOWS
     std::string dir = std::filesystem::temp_directory_path() / "XXXXXX";

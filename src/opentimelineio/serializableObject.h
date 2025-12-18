@@ -53,7 +53,7 @@ public:
     ///
     /// @param file_name The file name.
     /// @param error_status The return status.
-    /// @param target_family_label_spec @todo Add comment.
+    /// @param target_family_label_spec todo: Add comment.
     /// @param indent The number of spaces to use for indentation.
     OTIO_API bool to_json_file(
         std::string const&        file_name,
@@ -64,7 +64,7 @@ public:
     /// @brief Serialize this object to a JSON string.
     ///
     /// @param error_status The return status.
-    /// @param target_family_label_spec @todo Add comment.
+    /// @param target_family_label_spec todo: Add comment.
     /// @param indent The number of spaces to use for indentation.
     OTIO_API std::string to_json_string(
         ErrorStatus*              error_status             = nullptr,

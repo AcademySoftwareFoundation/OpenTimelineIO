@@ -150,7 +150,7 @@ public:
     /// frames. Result will be in the rate of start time.
     ///
     /// @param start_time The start time.
-    /// @param end_time_exclusive The inclusive end time.
+    /// @param end_time_inclusive The inclusive end time.
     static constexpr RationalTime duration_from_start_end_time_inclusive(
         RationalTime start_time,
         RationalTime end_time_inclusive) noexcept
@@ -375,7 +375,7 @@ public:
     /// strictly_equal().
     ///
     /// @param lhs Left hand side time.
-    /// @param lhs Right hand side time.
+    /// @param rhs Right hand side time.
     friend constexpr bool
     operator==(RationalTime lhs, RationalTime rhs) noexcept
     {
@@ -389,7 +389,7 @@ public:
     /// strictly_equal().
     ///
     /// @param lhs Left hand side time.
-    /// @param lhs Right hand side time.
+    /// @param rhs Right hand side time.
     friend constexpr bool
     operator!=(RationalTime lhs, RationalTime rhs) noexcept
     {

@@ -3,7 +3,7 @@
 
 #include "opentimelineio/linearTimeWarp.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 LinearTimeWarp::LinearTimeWarp(
     std::string const&   name,
@@ -31,4 +31,4 @@ LinearTimeWarp::write_to(Writer& writer) const
     writer.write("time_scalar", _time_scalar);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

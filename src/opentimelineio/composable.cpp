@@ -4,7 +4,7 @@
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Composable::Composable(std::string const& name, AnyDictionary const& metadata)
     : Parent(name, metadata)
@@ -81,4 +81,4 @@ Composable::available_image_bounds(ErrorStatus* error_status) const
     return std::optional<IMATH_NAMESPACE::Box2d>();
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

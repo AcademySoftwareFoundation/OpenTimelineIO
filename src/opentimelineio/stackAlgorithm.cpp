@@ -7,7 +7,7 @@
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
 typedef std::vector<SerializableObject::Retainer<Track>>   TrackRetainerVector;
@@ -256,4 +256,4 @@ flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status)
         error_status);
     return flat_track;
 }
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

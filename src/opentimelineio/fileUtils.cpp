@@ -7,10 +7,10 @@
 #include <filesystem>
 #include <iostream>
 
-#if !defined(_WINDOWS)
+#if !defined(_WIN32)
 #include <stdlib.h>
 #include <unistd.h>
-#endif // _WINDOWS
+#endif // _WIN32
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
@@ -25,17 +25,17 @@ to_unix_separators(std::string const& path)
 std::string create_temp_dir()
 {
     std::string out;
-#if defined(_WINDOWS)
+#if defined(_WIN32)
     // \todo Replace std::tmpnam() since it is potentially unsafe.
     out = std::tmpnam(nullptr);
     std::filesystem::create_directory(out);
-#else // _WINDOWS
-    std::string dir = std::filesystem::temp_directory_path() / "XXXXXX";
+#else // _WIN32
+    std::string dir = (std::filesystem::temp_directory_path() / "XXXXXX").u8string();
     if (mkdtemp(dir.data()))
     {
         out = dir;
     }
-#endif // _WINDOWS
+#endif // _WIN32
     return out;
 }
 

@@ -16,3 +16,6 @@
 [submodule "src/deps/zlib"]
 	path = src/deps/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "src/deps/uriparser"]
+	path = src/deps/uriparser
+	url = https://github.com/uriparser/uriparser.git

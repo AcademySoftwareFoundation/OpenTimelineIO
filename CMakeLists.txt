@@ -33,6 +33,7 @@ option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" O
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
+option(OTIO_FIND_URIPARSER            "Find uriparser using find_package" OFF)
 option(OTIO_FIND_BUNDLE_LIBS          "Find minizip and zlib using find_package" OFF)
 set(OTIO_BUNDLE_LIBS
     MINIZIP::minizipstatic ZLIB::ZLIBSTATIC
@@ -265,6 +266,16 @@ if(OTIO_FIND_RAPIDJSON)
     endif()
 else()
     message(STATUS "Using src/deps/rapidjson by default")
+endif()
+
+#----- uriparser
+if(OTIO_FIND_URIPARSER)
+    find_package(uriparser CONFIG REQUIRED)
+    if (uriparser_FOUND)
+        message(STATUS "Found uriparser at ${uriparser_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/uriparser by default")
 endif()
 
 #----- minizip and zlib

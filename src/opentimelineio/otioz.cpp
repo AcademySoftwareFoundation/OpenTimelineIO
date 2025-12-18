@@ -442,10 +442,17 @@ ZipReader::extract_all(std::string const& output_dir)
                 throw std::runtime_error(ss.str());
             }
 
-            // Write the output file.
+            // Create the output directory if necessary.
             const std::filesystem::path path =
                 std::filesystem::u8path(output_dir)
                 / std::filesystem::u8path(file_name);
+            const std::filesystem::path parent_path = path.parent_path();
+            if (!std::filesystem::exists(parent_path))
+            {
+                std::filesystem::create_directory(parent_path);
+            }
+
+            // Write the output file.
             FileWrapper f(path.u8string(), "wb");
             size_t count = fwrite(buf.data(), buf.size(), 1, f());
             if (count != 1)
@@ -488,7 +495,6 @@ from_otioz(
 
             // Create the directories.
             std::filesystem::create_directory(extract_path);
-            std::filesystem::create_directory(extract_path / media_dir);
 
             // Extract the archive.
             zip.extract_all(extract_path.u8string());

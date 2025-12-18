@@ -45,8 +45,10 @@ if(NOT OTIO_FIND_IMATH)
 endif()
 
 if(NOT OTIO_FIND_URIPARSER)
-    set(BUILD_SHARED_LIBS OFF)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+    set(URIPARSER_BUILD_DOCS OFF)
+    set(URIPARSER_BUILD_TOOLS OFF)
+    set(URIPARSER_SHARED_LIBS OFF)
     add_subdirectory(uriparser)
 endif()
 

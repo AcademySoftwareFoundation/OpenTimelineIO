@@ -8,11 +8,6 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/urlUtils.h"
 
-/*#include <mz.h>
-#include <mz_os.h>
-#include <mz_strm.h>
-#include <mz_zip.h>
-#include <mz_zip_rw.h>*/
 #include <unzip.h>
 #include <zip.h>
 
@@ -26,11 +21,37 @@ namespace bundle {
 
 namespace {
 
+// This class opens and closes a file for I/O.
+class FileWrapper
+{
+public:
+    FileWrapper(std::string const& fileName, std::string const& mode)
+    {
+        _f = fopen(fileName.c_str(), mode.c_str());
+    }
+
+    ~FileWrapper()
+    {
+        if (_f)
+        {
+            fclose(_f);
+            _f = nullptr;
+        }
+    }
+
+    FILE* operator()() { return _f; }
+
+private:
+    FILE* _f = nullptr;
+};
+
+// This class writes ZIP files.
 class ZipWriter
 {
 public:
     ZipWriter(std::string const& zip_file_name);
-    ~ZipWriter();
+
+    ~ZipWriter() noexcept(false);
 
     void add_compressed(
         std::string const& string,
@@ -40,37 +61,17 @@ public:
         std::filesystem::path const& path,
         std::string const& file_name_in_zip);
 
- private:
-    //void* _zip = nullptr;
-    //uint32_t _attributes = 0;
-     zipFile _zip = nullptr;
+    void close();
+
+private:
+    std::string _zip_file_name;
+    zipFile _zip = nullptr;
 };
 
-ZipWriter::ZipWriter(std::string const& zip_file_name)
+ZipWriter::ZipWriter(std::string const& zip_file_name) :
+    _zip_file_name(zip_file_name)
 {
-    /*_zip = mz_zip_writer_create();
-    if (!_zip)
-    {
-        std::stringstream ss;
-        ss << "Cannot create ZIP writer: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }
-
-    int32_t err = mz_zip_writer_open_file(_zip, zip_file_name.c_str(), 0, 0);
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }
-
-    err = mz_os_get_file_attribs(zip_file_name.c_str(), &_attributes);
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot get file attributes: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }*/
+    // Open the ZIP file.
     _zip = zipOpen64(zip_file_name.c_str(), 0);
     if (!_zip)
     {
@@ -80,13 +81,19 @@ ZipWriter::ZipWriter(std::string const& zip_file_name)
     }
 }
 
-ZipWriter::~ZipWriter()
+ZipWriter::~ZipWriter() noexcept(false)
 {
     if (_zip)
     {
-        //mz_zip_writer_close(_zip);
-        //mz_zip_writer_delete(&_zip);
-        zipClose(_zip, nullptr);
+        // Close the ZIP file.
+        int r = zipClose(_zip, nullptr);
+        if (r != ZIP_OK)
+        {
+            std::stringstream ss;
+            ss << "Error closing ZIP file '" << _zip_file_name << "'.";
+            throw std::runtime_error(ss.str());
+        }
+        _zip = nullptr;
     }
 }
 
@@ -95,31 +102,10 @@ ZipWriter::add_compressed(
     std::string const& content,
     std::string const& file_name_in_zip)
 {
-    /*mz_zip_file file_info;
-    memset(&file_info, 0, sizeof(mz_zip_file));
-    mz_zip_writer_set_compress_level(_zip, MZ_COMPRESS_LEVEL_NORMAL);
-    file_info.version_madeby     = MZ_VERSION_MADEBY;
-    file_info.flag               = MZ_ZIP_FLAG_UTF8;
-    file_info.modified_date      = std::time(nullptr);
-    file_info.compression_method = MZ_COMPRESS_METHOD_DEFLATE;
-    file_info.uncompressed_size  = content.size();
-    file_info.filename           = file_name_in_zip.c_str();
-    file_info.external_fa        = _attributes;
-    int32_t err                  = mz_zip_writer_add_buffer(
-        _zip,
-        (void*)(content.c_str()),
-        (int32_t)(content.size()),
-        &file_info);
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot add file '" << file_name_in_zip << "' to ZIP.";
-        throw std::runtime_error(ss.str());
-    }*/
-
+    // Add the file to the ZIP.
     zip_fileinfo zfi;
     memset(&zfi, 0, sizeof(zip_fileinfo));
-    zipOpenNewFileInZip64(
+    int r = zipOpenNewFileInZip64(
         _zip,
         file_name_in_zip.c_str(),
         &zfi,
@@ -131,8 +117,30 @@ ZipWriter::add_compressed(
         Z_DEFLATED,
         Z_DEFAULT_COMPRESSION,
         1);
-    zipWriteInFileInZip(_zip, content.c_str(), (unsigned int)content.size());
-    zipCloseFileInZip(_zip);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot add file '" << file_name_in_zip << "' to ZIP.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Write the file data to the ZIP.
+    r = zipWriteInFileInZip(_zip, content.c_str(), (unsigned int)content.size());
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot write file '" << file_name_in_zip << "' to ZIP.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Close the file.
+    r = zipCloseFileInZip(_zip);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Error closing file '" << file_name_in_zip << "' in ZIP.";
+        throw std::runtime_error(ss.str());
+    }
 }
 
 void
@@ -140,21 +148,10 @@ ZipWriter::add_uncompressed(
     std::filesystem::path const& path,
     std::string const& file_name_in_zip)
 {
-    /*mz_zip_writer_set_compress_method(_zip, MZ_COMPRESS_METHOD_STORE);
-    int32_t err = mz_zip_writer_add_file(
-        _zip,
-        path.u8string().c_str(),
-        file_name_in_zip.c_str());
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot add file '" << path.u8string() << "' to ZIP.";
-        throw std::runtime_error(ss.str());
-    }*/
-
+    // Add the file to the ZIP.
     zip_fileinfo zfi;
     memset(&zfi, 0, sizeof(zip_fileinfo));
-    zipOpenNewFileInZip64(
+    int r = zipOpenNewFileInZip64(
         _zip,
         file_name_in_zip.c_str(),
         &zfi,
@@ -166,16 +163,67 @@ ZipWriter::add_uncompressed(
         0,
         0,
         1);
-    FILE* f = fopen(path.u8string().c_str(), "rb");
-    fseek(f, 0, SEEK_END);
-    long size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot add file '" << file_name_in_zip << "' to ZIP.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Open the source file.
+    FileWrapper f(path.u8string(), "rb");
+    if (!f())
+    {
+        std::stringstream ss;
+        ss << "Cannot open file '" << path.u8string() << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Get the source file size.
+    fseek(f(), 0, SEEK_END);
+    if (ferror(f()))
+    {
+        std::stringstream ss;
+        ss << "Cannot seek file '" << path.u8string() << "'.";
+        throw std::runtime_error(ss.str());
+    }
+    const long size = ftell(f());
+    fseek(f(), 0, SEEK_SET);
+    if (ferror(f()))
+    {
+        std::stringstream ss;
+        ss << "Cannot seek file '" << path.u8string() << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Read the source file.
     std::vector<uint8_t> buffer;
     buffer.resize(size);
-    fread(buffer.data(), size, 1, f);
-    fclose(f);
-    zipWriteInFileInZip(_zip, buffer.data(), (unsigned int) buffer.size());
-    zipCloseFileInZip(_zip);
+    size_t count = fread(buffer.data(), size, 1, f());
+    if (count != 1)
+    {
+        std::stringstream ss;
+        ss << "Cannot read file '" << path.u8string() << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Write the file data to the ZIP.
+    r = zipWriteInFileInZip(_zip, buffer.data(), (unsigned int) buffer.size());
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot write file '" << file_name_in_zip << "' to ZIP.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Close the file.
+    r = zipCloseFileInZip(_zip);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Error closing file '" << file_name_in_zip << "' in ZIP.";
+        throw std::runtime_error(ss.str());
+    }
 }
 
 } // namespace
@@ -243,11 +291,13 @@ to_otioz(
 
 namespace {
 
+// This class reads ZIP files.
 class ZipReader
 {
 public:
     ZipReader(std::string const& zip_file_name);
-    ~ZipReader();
+
+    ~ZipReader() noexcept(false);
 
     void extract(std::string const& file_name, std::string&);
 
@@ -255,119 +305,155 @@ public:
 
 private:
     std::string _zip_file_name;
-    //void* _zip = nullptr;
     unzFile _zip = nullptr;
 };
 
 ZipReader::ZipReader(std::string const& zip_file_name)
     : _zip_file_name(zip_file_name)
 {
-    /*_zip = mz_zip_reader_create();
+    // Open the ZIP file.
+    _zip = unzOpen64(zip_file_name.c_str());
     if (!_zip)
     {
         std::stringstream ss;
         ss << "Cannot create ZIP reader: '" << zip_file_name << "'.";
         throw std::runtime_error(ss.str());
     }
-
-    int32_t err = mz_zip_reader_open_file(_zip, zip_file_name.c_str());
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot open ZIP file: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }*/
-
-    _zip = unzOpen64(zip_file_name.c_str());
-    if (!_zip)
-    {
-        std::stringstream ss;
-        ss << "Cannot create ZIP writer: '" << zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }
 }
 
-ZipReader::~ZipReader()
+ZipReader::~ZipReader() noexcept(false)
 {
     if (_zip)
     {
-        //mz_zip_reader_close(_zip);
-        //mz_zip_reader_delete(&_zip);
-        unzClose(_zip);
+        // Close the ZIP file.
+        int r = unzClose(_zip);
+        if (r != ZIP_OK)
+        {
+            std::stringstream ss;
+            ss << "Error closing ZIP reader: '" << _zip_file_name << "'.";
+            throw std::runtime_error(ss.str());
+        }
+        _zip = nullptr;
     }
 }
 
 void ZipReader::extract(std::string const& file_name, std::string& text)
 {
-    /*int32_t err = mz_zip_reader_locate_entry(_zip, file_name.c_str(), 0);
-    if (err != MZ_OK)
+    // Locate the file in the ZIP.
+    int r = unzLocateFile(_zip, file_name.c_str(), 0);
+    if (r != ZIP_OK)
     {
         std::stringstream ss;
         ss << "Cannot locate file in ZIP: '" << file_name << "'.";
         throw std::runtime_error(ss.str());
     }
 
-    int32_t const size = mz_zip_reader_entry_save_buffer_length(_zip);
-    text.resize(size);
-    err = mz_zip_reader_entry_save_buffer(_zip, text.data(), size);
-    if (err != MZ_OK)
+    // Get information about the file in the ZIP.
+    unz_file_info64 ufi;
+    r = unzGetCurrentFileInfo64(_zip, &ufi, nullptr, 0, nullptr, 0, nullptr, 0);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot get information for file in ZIP: '" << file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Open the file in the ZIP.
+    r = unzOpenCurrentFile(_zip);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Cannot open file in ZIP: '" << file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
+
+    // Read the file in the ZIP.
+    text.resize(ufi.uncompressed_size);
+    r = unzReadCurrentFile(_zip, text.data(), ufi.uncompressed_size);
+    if (r != ufi.uncompressed_size || r < 0)
     {
         std::stringstream ss;
         ss << "Cannot read file in ZIP: '" << file_name << "'.";
         throw std::runtime_error(ss.str());
-    }*/
+    }
 
-    unzLocateFile(_zip, file_name.c_str(), 0);
-    unz_file_info64 ufi; 
-    unzGetCurrentFileInfo64(_zip, &ufi, nullptr, 0, nullptr, 0, nullptr, 0);
-    unzOpenCurrentFile(_zip);
-    text.resize(ufi.uncompressed_size);
-    unzReadCurrentFile(_zip, text.data(), ufi.uncompressed_size);
-    unzCloseCurrentFile(_zip);
+    // Close the file.
+    r = unzCloseCurrentFile(_zip);
+    if (r != ZIP_OK)
+    {
+        std::stringstream ss;
+        ss << "Error closing file in ZIP: '" << file_name << "'.";
+        throw std::runtime_error(ss.str());
+    }
 }
 
 void
 ZipReader::extract_all(std::string const& output_dir)
 {
-    /*int32_t err = mz_zip_reader_save_all(_zip, output_dir.c_str());
-    if (err != MZ_OK)
-    {
-        std::stringstream ss;
-        ss << "Cannot extract ZIP file: '" << _zip_file_name << "'.";
-        throw std::runtime_error(ss.str());
-    }*/
-
     if (unzGoToFirstFile(_zip) == UNZ_OK)
     {
         do
         {
+            // Get information about the file in the ZIP.
             unz_file_info64 ufi;
-            std::string     fileName;
-            fileName.resize(1024);
-            unzGetCurrentFileInfo64(
+            std::string     file_name;
+            file_name.resize(4096); // \todo Is this enough space for paths?
+            int r = unzGetCurrentFileInfo64(
                 _zip,
                 &ufi,
-                fileName.data(),
-                fileName.size(),
+                file_name.data(),
+                file_name.size(),
                 nullptr,
                 0,
                 nullptr,
                 0);
-            unzOpenCurrentFile(_zip);
+            if (r != ZIP_OK)
+            {
+                std::stringstream ss;
+                ss << "Cannot get information for file in ZIP: '" << file_name << "'.";
+                throw std::runtime_error(ss.str());
+            }
+
+            // Open the file in the ZIP.
+            r = unzOpenCurrentFile(_zip);
+            if (r != ZIP_OK)
+            {
+                std::stringstream ss;
+                ss << "Cannot open file in ZIP: '" << file_name << "'.";
+                throw std::runtime_error(ss.str());
+            }
+
+            // Read the file in the ZIP.
             std::vector<uint8_t> buf(ufi.uncompressed_size);
-            unzReadCurrentFile(_zip, buf.data(), ufi.uncompressed_size);
-            unzCloseCurrentFile(_zip);
+            r = unzReadCurrentFile(_zip, buf.data(), ufi.uncompressed_size);
+            if (r != ufi.uncompressed_size || r < 0)
+            {
+                std::stringstream ss;
+                ss << "Cannot read file in ZIP: '" << file_name << "'.";
+                throw std::runtime_error(ss.str());
+            }
+
+            // Close the file.
+            r = unzCloseCurrentFile(_zip);
+            if (r != ZIP_OK)
+            {
+                std::stringstream ss;
+                ss << "Error closing file in ZIP: '" << file_name << "'.";
+                throw std::runtime_error(ss.str());
+            }
+
+            // Write the output file.
             const std::filesystem::path path =
                 std::filesystem::u8path(output_dir)
-                / std::filesystem::u8path(fileName);
-            const std::filesystem::path parentPath = path.parent_path();
-            if (!std::filesystem::exists(parentPath))
+                / std::filesystem::u8path(file_name);
+            FileWrapper f(path.u8string(), "wb");
+            size_t count = fwrite(buf.data(), buf.size(), 1, f());
+            if (count != 1)
             {
-                std::filesystem::create_directory(parentPath);
+                std::stringstream ss;
+                ss << "Error writing file: '" << path.u8string() << "'.";
+                throw std::runtime_error(ss.str());
             }
-            FILE* f = fopen(path.u8string().c_str(), "wb");
-            fwrite(buf.data(), buf.size(), 1, f);
-            fclose(f);
 
         } while (unzGoToNextFile(_zip) == UNZ_OK);
     }
@@ -399,7 +485,10 @@ from_otioz(
                    << "' exists, will not overwrite.";
                 throw std::runtime_error(ss.str());
             }
+
+            // Create the directories.
             std::filesystem::create_directory(extract_path);
+            std::filesystem::create_directory(extract_path / media_dir);
 
             // Extract the archive.
             zip.extract_all(extract_path.u8string());

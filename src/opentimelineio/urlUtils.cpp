@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <vector>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 

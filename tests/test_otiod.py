@@ -62,6 +62,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = otio.adapters.read_from_file(tmp_path)
 
         clips = result.find_clips()
+        self.assertTrue(clips)
         # \todo
         # self.assertTrue(
         #     clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
@@ -105,6 +106,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         clips = result.find_clips()
+        self.assertTrue(clips)
         # \todo
         # self.assertTrue(
         #     clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)

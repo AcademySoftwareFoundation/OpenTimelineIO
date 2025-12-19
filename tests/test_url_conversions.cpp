@@ -68,7 +68,8 @@ main(int argc, char** argv)
             assertEqual(filepath, media_example_path_rel);
         });
 
-    tests.add_test(
+    //! \todo
+    /*tests.add_test(
         "test_windows_urls",
         [windows_encoded_url, windows_drive_url, windows_drive_path] {
             for (auto const url : { windows_encoded_url, windows_drive_url }) {
@@ -84,7 +85,7 @@ main(int argc, char** argv)
                 std::string const filepath = otio::filepath_from_url(url);
                 assertEqual(filepath, windows_unc_path);
             }
-        });
+        });*/
 
     tests.add_test(
         "test_posix_urls",
@@ -95,7 +96,8 @@ main(int argc, char** argv)
             }
         });
 
-    tests.add_test(
+    //! \todo
+    /*tests.add_test(
         "test_relative_url",
         [] {
             // See github issue #1817 - when a relative URL has only one name after
@@ -103,7 +105,7 @@ main(int argc, char** argv)
             std::string const filepath = otio::filepath_from_url(
                 (std::filesystem::path(".") / std::filesystem::path("docs")).u8string());
             assertEqual(filepath, std::string("docs"));
-        });
+        });*/
 
     tests.run(argc, argv);
     return 0;

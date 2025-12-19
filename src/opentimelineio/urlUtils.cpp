@@ -33,8 +33,8 @@ scheme_from_url(std::string const& url)
 std::string
 url_from_filepath(std::string const& filepath)
 {
-    std::cout << "url_from_filepath()" << std::endl;
-    std::cout << "  filepath: " << filepath << std::endl;
+    //std::cout << "url_from_filepath()" << std::endl;
+    //std::cout << "  filepath: " << filepath << std::endl;
     std::string out;
     //std::string tmp(8 + 3 * filepath.size() + 1, 0);
     //if (uriWindowsFilenameToUriStringA(filepath.c_str(), tmp.data()) == URI_SUCCESS)
@@ -44,15 +44,15 @@ url_from_filepath(std::string const& filepath)
     {
         out = std::string(tmp.data());
     }
-    std::cout << "  out: " << out.c_str() << std::endl;
+    //std::cout << "  out: " << out.c_str() << std::endl;
     return out;
 }
 
 std::string
 filepath_from_url(std::string const& url)
 {
-    std::cout << "filepath_from_url()" << std::endl;
-    std::cout << "  url: " << url << std::endl;
+    //std::cout << "filepath_from_url()" << std::endl;
+    //std::cout << "  url: " << url << std::endl;
     std::string out;
     //std::string tmp(url.size() + 1, 0);
     //if (uriUriStringToWindowsFilenameA(url.c_str(), tmp.data()) == URI_SUCCESS)
@@ -62,7 +62,7 @@ filepath_from_url(std::string const& url)
     {
         out = std::string(tmp.data());
     }
-    std::cout << "  out: " << out.c_str() << std::endl;
+    //std::cout << "  out: " << out.c_str() << std::endl;
     return out;
 }
 

@@ -49,9 +49,10 @@ jobs:
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@v6
         id: draft-release
         with:
+          version: $TAG
           publish: false
           commitish: ${{needs.release-branch.outputs.branch-name || github.ref_name}}
         env:

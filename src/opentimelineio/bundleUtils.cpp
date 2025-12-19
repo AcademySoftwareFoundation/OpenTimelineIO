@@ -118,7 +118,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             std::string const url    = er ? er->target_url()
                                           : isr->target_url_base();
             std::string const scheme = scheme_from_url(url);
-            if (!(scheme == "file://" || scheme.empty()))
+            if (!(scheme == "file" || scheme.empty()))
             {
                 if (MediaReferencePolicy::ErrorIfNotFile == media_policy)
                 {

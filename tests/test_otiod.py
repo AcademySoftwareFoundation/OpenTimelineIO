@@ -63,12 +63,12 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         clips = result.find_clips()
         # \todo
-        #self.assertTrue(
-        #    clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
-        #)
-        #self.assertTrue(
-        #    clips[1].media_reference.target_url.endswith(IMAGE1_EXAMPLE)
-        #)
+        # self.assertTrue(
+        #     clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
+        # )
+        # self.assertTrue(
+        #     clips[1].media_reference.target_url.endswith(IMAGE1_EXAMPLE)
+        # )
 
     def test_round_trip_all_missing_references(self):
 
@@ -106,12 +106,12 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         clips = result.find_clips()
         # \todo
-        #self.assertTrue(
-        #    clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
-        #)
-        #self.assertTrue(
-        #    clips[1].media_reference.target_url.endswith(IMAGE1_EXAMPLE)
-        #)
+        # self.assertTrue(
+        #     clips[0].media_reference.target_url.endswith(IMAGE0_EXAMPLE)
+        # )
+        # self.assertTrue(
+        #     clips[1].media_reference.target_url.endswith(IMAGE1_EXAMPLE)
+        # )
 
 
 if __name__ == "__main__":

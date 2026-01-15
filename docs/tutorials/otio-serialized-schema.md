@@ -29,24 +29,23 @@ changes.  If it needs to be updated and this file regenerated, run:
 ```
 Adapters convert between OTIO and other formats.
 
-    Note that this class is not subclassed by adapters. Rather, an adapter is
-    a python module that implements at least one of the following functions:
+Note that this class is not subclassed by adapters. Rather, an adapter is
+a python module that implements at least one of the following functions:
 
-    .. code-block:: python
+.. code-block:: python
 
-        write_to_string(input_otio)
-        write_to_file(input_otio, filepath) (optionally inferred)
-        read_from_string(input_str)
-        read_from_file(filepath) (optionally inferred)
+    write_to_string(input_otio)
+    write_to_file(input_otio, filepath) (optionally inferred)
+    read_from_string(input_str)
+    read_from_file(filepath) (optionally inferred)
 
-    ...as well as a small json file that advertises the features of the adapter
-    to OTIO.  This class serves as the wrapper around these modules internal
-    to OTIO.  You should not need to extend this class to create new adapters
-    for OTIO.
+...as well as a small json file that advertises the features of the adapter
+to OTIO.  This class serves as the wrapper around these modules internal
+to OTIO.  You should not need to extend this class to create new adapters
+for OTIO.
 
-    For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-
+For more information: https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-
 adapter.html. # noqa
-    
 ```
 
 parameters:
@@ -56,6 +55,27 @@ parameters:
 
 ## Module: opentimelineio.core
 
+### Color.1
+
+*full module path*: `opentimelineio.core.Color`
+
+*documentation*:
+
+```
+:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing
+ conversion between different formats. To be considered interoperable, the sRGB transfer function 
+encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the 
+intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant
+ for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
+```
+
+parameters:
+- *a*: 
+- *b*: 
+- *g*: 
+- *name*: 
+- *r*: 
+
 ### Composable.1
 
 *full module path*: `opentimelineio.core.Composable`
@@ -63,10 +83,8 @@ parameters:
 *documentation*:
 
 ```
-
 An object that can be composed within a :class:`~Composition` (such as :class:`~Track` or 
 :class:`.Stack`).
-
 ```
 
 parameters:
@@ -80,14 +98,13 @@ parameters:
 *documentation*:
 
 ```
-
 Base class for an :class:`~Item` that contains :class:`~Composable`\s.
 
 Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not used directly.
-
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -106,6 +123,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -184,10 +202,8 @@ parameters:
 *documentation*:
 
 ```
-
 The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
 It can be rescaled into another :class:`~RationalTime`'s rate.
-
 ```
 
 parameters:
@@ -201,11 +217,9 @@ parameters:
 *documentation*:
 
 ```
-
 The TimeRange class represents a range in time. It encodes the start time and the duration,
 meaning that :meth:`end_time_inclusive` (last portion of a sample in the time range) and
 :meth:`end_time_exclusive` can be computed.
-
 ```
 
 parameters:
@@ -238,14 +252,13 @@ parameters:
 ```
 Defines an OTIO plugin Manifest.
 
-    This is considered an internal OTIO implementation detail.
+This is considered an internal OTIO implementation detail.
 
-    A manifest tracks a collection of plugins and enables finding them by name
-    or other features (in the case of adapters, what file suffixes they
-    advertise support for).
+A manifest tracks a collection of plugins and enables finding them by name
+or other features (in the case of adapters, what file suffixes they
+advertise support for).
 
-    For more information, consult the documenation.
-    
+For more information, consult the documentation.
 ```
 
 parameters:
@@ -264,8 +277,7 @@ parameters:
 
 ```
 A class of plugin that is encoded in a python module, exposed via a
-    manifest.
-    
+manifest.
 ```
 
 parameters:
@@ -281,15 +293,14 @@ parameters:
 *documentation*:
 
 ```
-
 A :class:`~Clip` is a segment of editable media (usually audio or video).
 
 Contains a :class:`.MediaReference` and a trim on that media reference.
-
 ```
 
 parameters:
 - *active_media_reference_key*: 
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -310,6 +321,7 @@ None
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 
@@ -342,6 +354,7 @@ Hold the first frame of the clip for the duration of the clip.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -361,6 +374,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -393,7 +407,6 @@ parameters:
 *documentation*:
 
 ```
-
 An ImageSequenceReference refers to a numbered series of single-frame image files. Each file can be 
 referred to by a URL generated by the :class:`~ImageSequenceReference`.
 
@@ -469,7 +482,6 @@ yield the first three target urls as:
 - ``file:///show/sequence/shot/sample_image_sequence.-0001.exr``
 - ``file:///show/sequence/shot/sample_image_sequence.0000.exr``
 - ``file:///show/sequence/shot/sample_image_sequence.0001.exr``
-
 ```
 
 parameters:
@@ -493,13 +505,12 @@ parameters:
 *documentation*:
 
 ```
-
 A time warp that applies a linear speed up or slow down across the entire clip.
-
 ```
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 - *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
@@ -515,13 +526,11 @@ Instead it affects the speed of the media displayed within that item.
 *documentation*:
 
 ```
-
 A marker indicates a marked range of time on an item in a timeline, usually with a name, color or 
 other metadata.
 
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate 
 system.
-
 ```
 
 parameters:
@@ -538,12 +547,10 @@ parameters:
 *documentation*:
 
 ```
-
 Represents media for which a concrete reference is missing.
 
 Note that a :class:`~MissingReference` may have useful metadata, even if the location of the media 
 is not known.
-
 ```
 
 parameters:
@@ -559,7 +566,6 @@ parameters:
 *documentation*:
 
 ```
-
 A container which can hold an ordered list of any serializable objects. Note that this is not a 
 :class:`.Composition` nor is it :class:`.Composable`.
 
@@ -570,7 +576,6 @@ a named collection.
 
 A :class:`~SerializableCollection` is useful for serializing multiple timelines, clips, or media 
 references to a single file.
-
 ```
 
 parameters:
@@ -588,6 +593,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers*: 
@@ -607,6 +613,7 @@ Base class for all effects that alter the timing of an item.
 
 parameters:
 - *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
 - *metadata*: 
 - *name*: 
 
@@ -637,6 +644,7 @@ None
 ```
 
 parameters:
+- *color*: 
 - *effects*: 
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *kind*: 

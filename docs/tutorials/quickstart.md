@@ -1,15 +1,6 @@
 # Quickstart
 
-This is for users who wish to get started using the "OTIOView" application to inspect the contents of editorial timelines.
-
 **Note** This guide assumes that you are working inside a [virtualenv](https://virtualenv.pypa.io/en/latest/).
-
-## Install Prerequisites
-
-OTIOView has an additional prerequisite to OTIO:
-
-- Try `python -m pip install PySide2` or `python -m pip install PySide6`
-- If difficulties are encountered, please file an issue on OpenTimelineIO's github for assistance.
 
 ## Install OTIO
 
@@ -21,14 +12,19 @@ A default OTIO installation includes only the "Core" adapters, which include the
 
 A curated list of adapters for popular file formats like EDL, AAF, ALE, and FCP XML can be installed using the [OpenTimelineIO Plugins package in PyPI](https://pypi.org/project/OpenTimelineIO-Plugins/). These plugins can also be individually installed from their PyPI packages.
 
-For mor information, see the [Adapters](./adapters) section.
+For more information, see the [Adapters](./adapters) section.
 
 
-## Run OTIOView
+## Timeline Viewers
+OpenTimelineIO provides applications to view timelines in a graphical interface.
 
-Once you have pip installed OpenTimelineIO, you should be able to run:
+### Raven
+[Raven](https://github.com/OpenTimelineIO/raven) is the preferred application and replaces OTIOView as the main 
+application for viewing timelines.
 
-+ `otioview path/to/your/file.edl`
+### OTIOView
+[OTIOView](https://github.com/OpenTimelineIO/otioview) has been moved to its own repository so those who rely on it 
+still have access to it.
 
 # Developer Quickstart
 

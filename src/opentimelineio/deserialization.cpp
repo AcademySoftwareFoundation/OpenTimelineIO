@@ -4,6 +4,7 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "stringUtils.h"
@@ -587,6 +588,15 @@ SerializableObject::Reader::_decode(_Resolver& resolver)
                    ? std::any(TimeRange(start_time, duration))
                    : std::any();
     }
+    else if (schema_name_and_version == "Color.1")
+    {
+        double      r, g, b, a;
+        std::string name;
+        return _fetch("name", &name) && _fetch("r", &r) && _fetch("g", &g)
+                       && _fetch("b", &b) && _fetch("a", &a)
+                   ? std::any(Color(r, g, b, a, name))
+                   : std::any();
+    }
     else if (schema_name_and_version == "TimeTransform.1")
     {
         RationalTime offset;
@@ -727,6 +737,12 @@ SerializableObject::Reader::read(std::string const& key, TimeRange* value)
 }
 
 bool
+SerializableObject::Reader::read(std::string const& key, Color* value)
+{
+    return _fetch(key, value);
+}
+
+bool
 SerializableObject::Reader::read(std::string const& key, TimeTransform* value)
 {
     return _fetch(key, value);
@@ -812,6 +828,14 @@ bool
 SerializableObject::Reader::read(
     std::string const&        key,
     std::optional<TimeRange>* value)
+{
+    return _read_optional(key, value);
+}
+
+bool
+SerializableObject::Reader::read(
+    std::string const&    key,
+    std::optional<Color>* value)
 {
     return _read_optional(key, value);
 }

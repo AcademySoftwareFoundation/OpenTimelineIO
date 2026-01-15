@@ -3,13 +3,16 @@
 
 #pragma once
 
+#include "opentime/export.h"
 #include "opentime/version.h"
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION {
 
-struct ErrorStatus
+/// @brief This struct represents the return status of a function.
+struct OPENTIME_API_TYPE ErrorStatus
 {
+    /// @brief This enumeration represents the possible outcomes.
     enum Outcome
     {
         OK = 0,
@@ -21,34 +24,41 @@ struct ErrorStatus
         INVALID_RATE_FOR_DROP_FRAME_TIMECODE,
     };
 
+    /// @brief Construct a new status with no error.
     ErrorStatus()
         : outcome{ OK }
     {}
 
+    /// @brief Construct a new status with the given outcome.
     ErrorStatus(Outcome in_outcome)
         : outcome{ in_outcome }
         , details{ outcome_to_string(in_outcome) }
     {}
 
+    /// @brief Construct a new status with the given outcome and details.
     ErrorStatus(Outcome in_outcome, std::string const& in_details)
         : outcome{ in_outcome }
         , details{ in_details }
     {}
 
-    Outcome     outcome;
+    /// @brief The outcome of the function.
+    Outcome outcome;
+
+    /// @brief A human readable string that provides details about the outcome.
     std::string details;
 
-    static std::string outcome_to_string(Outcome);
+    ///! @brief Return a human readable string for the given outcome.
+    static OPENTIME_API std::string outcome_to_string(Outcome);
 };
 
-// Check whether the given ErrorStatus is an error.
+///! @brief Check whether the given ErrorStatus is an error.
 constexpr bool
 is_error(const ErrorStatus& es) noexcept
 {
     return ErrorStatus::Outcome::OK != es.outcome;
 }
 
-// Check whether the given ErrorStatus is non-null and an error.
+///! @brief Check whether the given ErrorStatus is non-null and an error.
 constexpr bool
 is_error(const ErrorStatus* es) noexcept
 {

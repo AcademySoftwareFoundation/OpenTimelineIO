@@ -3,11 +3,11 @@
 
 set(OPENTIME_HEADER_FILES
     errorStatus.h
+    export.h
     rationalTime.h
     stringPrintf.h
     timeRange.h
-    timeTransform.h
-    version.h)
+    timeTransform.h)
 
 add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB} 
             errorStatus.cpp
@@ -16,13 +16,32 @@ add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentime ALIAS opentime)
 
-target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_include_directories(
+    opentime
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/src"
+        "${CMAKE_CURRENT_BINARY_DIR}/.."
+)
 
 set_target_properties(opentime PROPERTIES 
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "opentime"
-    POSITION_INDEPENDENT_CODE TRUE
-    WINDOWS_EXPORT_ALL_SYMBOLS true)
+    POSITION_INDEPENDENT_CODE TRUE)
+
+if(OTIO_SHARED_LIBS)
+    set_target_properties(opentime PROPERTIES
+        SOVERSION ${OTIO_SOVERSION}
+        VERSION ${OTIO_VERSION})
+    target_compile_definitions(
+        opentime
+        PUBLIC
+        OPENTIME_EXPORTS)
+else()
+    target_compile_definitions(
+        opentime
+        PUBLIC
+        OPENTIME_STATIC)
+endif()
 
 if(APPLE)
     set_target_properties(opentime PROPERTIES 
@@ -35,6 +54,11 @@ target_compile_options(opentime PRIVATE
      -Wall>
      $<$<CXX_COMPILER_ID:MSVC>: /W4>
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/version.h
 )
 
 if(OTIO_CXX_INSTALL)
@@ -62,11 +86,24 @@ if(OTIO_CXX_INSTALL)
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )
 
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfigVersion.cmake
+        COMPATIBILITY AnyNewerVersion
+    )
+
     install(
         FILES
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfigVersion.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+    )
+
+    install(
+        FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/version.h
+        DESTINATION
+            "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime"
     )
 endif()
 

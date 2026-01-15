@@ -9,8 +9,12 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status = nullptr);
-Track* flatten_stack(
+/// @brief Flatten a stack down to a single track.
+OTIO_API Track*
+flatten_stack(Stack* in_stack, ErrorStatus* error_status = nullptr);
+
+/// @brief Flatten a list of tracks down to a single track.
+OTIO_API Track* flatten_stack(
     std::vector<Track*> const& tracks,
     ErrorStatus*               error_status = nullptr);
 

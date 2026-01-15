@@ -17,6 +17,7 @@ GITHUB_README_URL = (
     "https://raw.githubusercontent.com/actions/runner-images/main/README.md"
 )
 PLATFORMS = ["ubuntu", "macos", "windows"]
+NOT_DASH_RE_SUFFIX = r"(?!-)"
 
 
 def _parsed_args():
@@ -150,7 +151,8 @@ def unfreeze_ci(plat_map, dryrun=False):
 
     for plat, plat_current in plat_map.items():
         plat_latest = plat + "-latest"
-        if plat_current not in output_content:
+        plat_latest_re = re.compile(plat_latest + NOT_DASH_RE_SUFFIX)
+        if plat_latest_re.search(output_content) is not None:
             print(
                 "Platform {} appears to already be set to -latest.".format(
                     plat
@@ -158,7 +160,8 @@ def unfreeze_ci(plat_map, dryrun=False):
             )
             continue
 
-        output_content = output_content.replace(plat_current, plat_latest)
+        plat_current_re = re.compile(plat_current + NOT_DASH_RE_SUFFIX)
+        output_content = plat_current_re.sub(plat_latest, output_content)
         modified = True
         print(f"Platform {plat} unfrozen back to: {plat_latest}")
 

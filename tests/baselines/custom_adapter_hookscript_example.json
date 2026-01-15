@@ -1,0 +1,5 @@
+{
+    "OTIO_SCHEMA" : "HookScript.1",
+    "name" : "custom adapter hook",
+    "filepath" : "custom_adapter_hookscript_example.py"
+}

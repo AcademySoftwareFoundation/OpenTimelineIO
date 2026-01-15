@@ -3,7 +3,10 @@
 
 #pragma once
 
-#define OPENTIMELINEIO_VERSION v1_0
+#define OPENTIMELINEIO_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define OPENTIMELINEIO_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define OPENTIMELINEIO_VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define OPENTIMELINEIO_VERSION v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@_@PROJECT_VERSION_PATCH@
 
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
@@ -16,9 +19,11 @@ using opentime::TimeRange;
 using opentime::TimeTransform;
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION
 
-/// Convenience macro for the full namespace of OpenTimelineIO API.
+/// @brief Convenience macro for the full namespace of OpenTimelineIO API.
 ///
 /// This can be used in place of the full namespace, e.g.:
+/// <code>
 ///     OTIO_NS::Track* track = new OTIO_NS::Track;
+/// </code>
 ///
 #define OTIO_NS opentimelineio::OPENTIMELINEIO_VERSION

@@ -23,6 +23,7 @@ def __repr__(self):
         "name={}, "
         "children={}, "
         "source_range={}, "
+        "color={}, "
         "metadata={}"
         ")".format(
             "core" if self.__class__ is _otio.Composition else "schema",
@@ -30,6 +31,7 @@ def __repr__(self):
             repr(self.name),
             repr(list(self)),
             repr(self.source_range),
+            repr(self.color),
             repr(self.metadata)
         )
     )

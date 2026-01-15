@@ -113,7 +113,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
             # turn off the C++ tests during a Python build
             '-DBUILD_TESTING:BOOL=OFF',
-            # Python modules wil be installed by setuptools.
+            # Python modules will be installed by setuptools.
             '-DOTIO_INSTALL_PYTHON_MODULES:BOOL=OFF',
         ]
         if self.is_windows():
@@ -205,10 +205,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
 # check the python version first
 if (
     sys.version_info[0] < 3 or
-    (sys.version_info[0] == 3 and sys.version_info[1] < 7)
+    (sys.version_info[0] == 3 and sys.version_info[1] < 9)
 ):
     sys.exit(
-        'OpenTimelineIO requires python3.7 or greater, detected version:'
+        'OpenTimelineIO requires python3.9 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -218,7 +218,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.18.0.dev1",
+    "version": "0.19.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'otio-discussion@lists.aswf.io',
     "license": 'Apache 2.0 License',
@@ -237,7 +237,6 @@ def _append_version_info_to_init_scripts(build_lib):
 
     for module, parentdir in [
             ("opentimelineio", "src/py-opentimelineio"),
-            ("opentimelineview", "src")
     ]:
         target_file = os.path.join(build_lib, module, "__init__.py")
         source_file = os.path.join(
@@ -317,11 +316,11 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -337,8 +336,7 @@ setup(
     },
 
     packages=(
-        find_packages(where="src/py-opentimelineio") +  # opentimelineio
-        find_packages(where="src")  # opentimelineview
+        find_packages(where="src/py-opentimelineio")  # opentimelineio
     ),
 
     ext_modules=[
@@ -353,14 +351,12 @@ setup(
 
     package_dir={
         'opentimelineio': 'src/py-opentimelineio/opentimelineio',
-        'opentimelineview': 'src/opentimelineview',
     },
 
     # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
-    python_requires='>=3.7, !=3.9.0',  # noqa: E501
+    python_requires='>3.9.0',  # noqa: E501
 
     install_requires=[
-        'importlib_metadata>=1.4; python_version < "3.8"',
     ],
     entry_points={
         'console_scripts': [
@@ -369,7 +365,6 @@ setup(
             'otiopluginfo = opentimelineio.console.otiopluginfo:main',
             'otiostat = opentimelineio.console.otiostat:main',
             'otiotool = opentimelineio.console.otiotool:main',
-            'otioview = opentimelineview.console:main',
             (
                 'otioautogen_serialized_schema_docs = '
                 'opentimelineio.console.autogen_serialized_datamodel:main'
@@ -383,10 +378,6 @@ setup(
             'coverage>=4.5',
             'urllib3>=1.24.3'
         ],
-        'view': [
-            'PySide2~=5.11; platform.machine=="x86_64"',
-            'PySide6~=6.2; platform.machine=="aarch64"'
-        ]
     },
 
     # because we need to open() the adapters manifest, we aren't zip-safe

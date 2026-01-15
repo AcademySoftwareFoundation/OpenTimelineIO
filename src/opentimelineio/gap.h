@@ -9,9 +9,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-class Gap : public Item
+/// @brief An empty item within a timeline.
+class OTIO_API_TYPE Gap : public Item
 {
 public:
+    /// @brief This struct provides the Gap schema.
     struct Schema
     {
         static auto constexpr name   = "Gap";
@@ -20,12 +22,31 @@ public:
 
     using Parent = Item;
 
+    /// @brief Create a new gap.
+    ///
+    /// @param source_range The source range of the gap.
+    /// @param name The name of the gap.
+    /// @param effects The list of effects for the gap. Note that the
+    /// the gap keeps a retainer to each effect.
+    /// @param markers The list of markers for the gap. Note that the
+    /// the gap keeps a retainer to each marker.
+    /// @param metadata The metadata for the gap.
+    OTIO_API
     Gap(TimeRange const&            source_range = TimeRange(),
         std::string const&          name         = std::string(),
         std::vector<Effect*> const& effects      = std::vector<Effect*>(),
         std::vector<Marker*> const& markers      = std::vector<Marker*>(),
         AnyDictionary const&        metadata     = AnyDictionary());
 
+    /// @brief Create a new gap.
+    ///
+    /// @param duration The duration of the gap.
+    /// @param name The name of the gap.
+    /// @param effects The list of effects for the gap. Note that the
+    /// the gap keeps a retainer to each effect.
+    /// @param markers The list of markers for the gap. Note that the
+    /// the gap keeps a retainer to each marker.
+    /// @param metadata The metadata for the gap.
     Gap(RationalTime                duration,
         std::string const&          name     = std::string(),
         std::vector<Effect*> const& effects  = std::vector<Effect*>(),

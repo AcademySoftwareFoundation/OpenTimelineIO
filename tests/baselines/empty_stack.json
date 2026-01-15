@@ -9,5 +9,6 @@
     "children" : [],
     "markers" : [],
     "enabled" : true,
+    "color": null,
     "effects" : []
 }

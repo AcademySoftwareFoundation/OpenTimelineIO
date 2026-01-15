@@ -13,9 +13,9 @@ ErrorStatus::outcome_to_string(Outcome o)
         case OK:
             return std::string();
         case INVALID_TIMECODE_RATE:
-            return "invalid timecode rate";
+            return "SMPTE timecode does not support this rate";
         case INVALID_TIMECODE_STRING:
-            return "string is not a valid timecode string";
+            return "string is not a SMPTE timecode string";
         case TIMECODE_RATE_MISMATCH:
             return "timecode specifies a frame higher than its rate";
         case INVALID_TIME_STRING:

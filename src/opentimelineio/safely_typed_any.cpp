@@ -60,6 +60,12 @@ create_safely_typed_any(TimeTransform&& value)
 }
 
 std::any
+create_safely_typed_any(Color&& value)
+{
+    return std::any(value);
+}
+
+std::any
 create_safely_typed_any(IMATH_NAMESPACE::V2d&& value)
 {
     return std::any(value);
@@ -141,6 +147,12 @@ TimeTransform
 safely_cast_time_transform_any(std::any const& a)
 {
     return std::any_cast<TimeTransform>(a);
+}
+
+Color
+safely_cast_color_any(std::any const& a)
+{
+    return std::any_cast<Color>(a);
 }
 
 IMATH_NAMESPACE::V2d

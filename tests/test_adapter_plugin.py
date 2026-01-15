@@ -82,13 +82,14 @@ class TestPluginAdapters(unittest.TestCase):
         # call through the module accessor
         self.assertEqual(self.adp.module().read_from_file("foo").name, "foo")
 
-        # call through the convienence wrapper
+        # call through the convenience wrapper
         self.assertEqual(self.adp.read_from_file("foo").name, "foo")
 
     def test_has_feature(self):
         self.assertTrue(self.adp.has_feature("read"))
         self.assertTrue(self.adp.has_feature("read_from_file"))
         self.assertFalse(self.adp.has_feature("write"))
+        self.assertTrue(self.adp.has_feature("hooks"))
 
     def test_pass_arguments_to_adapter(self):
         self.assertEqual(self.adp.read_from_file("foo", suffix=3).name, "foo3")

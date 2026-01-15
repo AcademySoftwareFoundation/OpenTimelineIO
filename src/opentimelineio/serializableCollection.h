@@ -12,9 +12,21 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 class Clip;
 
-class SerializableCollection : public SerializableObjectWithMetadata
+/// @brief A container which can hold an ordered list of any serializable objects.
+///
+/// Note that this is not a Composition nor is it Composable.
+///
+/// This container approximates the concept of a bin - a collection of
+/// SerializableObjects that do not have any compositional meaning, but can
+/// serialize to/from OTIO correctly, with metadata and a named collection.
+///
+/// A SerializableCollection is useful for serializing multiple timelines,
+/// clips, or media references to a single file.
+class OTIO_API_TYPE SerializableCollection
+    : public SerializableObjectWithMetadata
 {
 public:
+    /// @brief This struct provides the SerializableCollection schema.
     struct Schema
     {
         static auto constexpr name   = "SerializableCollection";
@@ -23,52 +35,70 @@ public:
 
     using Parent = SerializableObjectWithMetadata;
 
-    SerializableCollection(
+    /// @brief Create a new serializable collection.
+    ///
+    /// @param name The name of the collection.
+    /// @param child The list of children in the collection. Note that the
+    /// collection keeps a retainer to each child.
+    /// @param metadata The metadata for the collection.
+    OTIO_API SerializableCollection(
         std::string const&               name = std::string(),
         std::vector<SerializableObject*> children =
             std::vector<SerializableObject*>(),
         AnyDictionary const& metadata = AnyDictionary());
 
+    /// @brief Return the list of children.
     std::vector<Retainer<SerializableObject>> const& children() const noexcept
     {
         return _children;
     }
 
+    /// @brief Modify the list of children.
     std::vector<Retainer<SerializableObject>>& children() noexcept
     {
         return _children;
     }
 
-    void set_children(std::vector<SerializableObject*> const& children);
+    /// @brief Set the list of children.
+    OTIO_API void
+    set_children(std::vector<SerializableObject*> const& children);
 
-    void clear_children();
+    /// @brief Clear the children.
+    OTIO_API void clear_children();
 
-    void insert_child(int index, SerializableObject* child);
+    /// @brief Insert a child at the given index. Note that the collection
+    /// keeps a retainer to the child.
+    OTIO_API void insert_child(int index, SerializableObject* child);
 
-    bool set_child(
+    /// @brief Set the child at the given index. Note that the collection
+    /// keeps a retainer to the child.
+    OTIO_API bool set_child(
         int                 index,
         SerializableObject* child,
         ErrorStatus*        error_status = nullptr);
 
-    bool remove_child(int index, ErrorStatus* error_status = nullptr);
+    /// @brief Remove the child at the given index.
+    OTIO_API bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
+    /// @brief Find child clips.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
+    OTIO_API std::vector<Retainer<Clip>> find_clips(
         ErrorStatus*                    error_status   = nullptr,
         std::optional<TimeRange> const& search_range   = std::nullopt,
         bool                            shallow_search = false) const;
 
-    // Find child objects that match the given template type.
-    //
-    // An optional search_time may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
+    /// @brief Find child objects that match the given template type.
+    ///
+    /// @param error_status The return status.
+    /// @param search_range An optional range to limit the search.
+    /// @param shallow_search The search is recursive unless shallow_search is
+    /// set to true.
     template <typename T = Composable>
-    std::vector<Retainer<T>> find_children(
+    OTIO_API std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "opentimelineio/clip.h"
+#include "opentimelineio/fileUtils.h"
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/serialization.h"
 #include "opentimelineio/deserialization.h"
@@ -93,7 +94,7 @@ main(
     const std::string tmp_dir_path = (
         RUN_STRUCT.FIXED_TMP 
         ? "/var/tmp/ioperftest" 
-        : examples::create_temp_dir()
+        : otio::create_temp_dir()
     );
 
     otio::ErrorStatus err;
@@ -123,7 +124,7 @@ main(
         cl->metadata()["example thing"] = "banana";
         chrono_time_point begin = std::chrono::steady_clock::now();
         cl->to_json_file(
-                examples::normalize_path(tmp_dir_path + "/clip.otio"),
+                otio::to_unix_separators(tmp_dir_path + "/clip.otio"),
                 &err,
                 &downgrade_manifest
         );
@@ -140,7 +141,7 @@ main(
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
             dynamic_cast<otio::Timeline*>(
                 otio::Timeline::from_json_file(
-                    examples::normalize_path(argv[1]),
+                    otio::to_unix_separators(argv[1]),
                     &err
                 )
             )
@@ -205,7 +206,7 @@ main(
     {
         begin = std::chrono::steady_clock::now();
         timeline.value->to_json_file(
-                examples::normalize_path(tmp_dir_path + "/io_perf_test.otio"),
+                otio::to_unix_separators(tmp_dir_path + "/io_perf_test.otio"),
                 &err,
                 &downgrade_manifest
         );
@@ -218,7 +219,7 @@ main(
     {
         begin = std::chrono::steady_clock::now();
         timeline.value->to_json_file(
-                examples::normalize_path(
+                otio::to_unix_separators(
                     tmp_dir_path 
                     + "/io_perf_test.nodowngrade.otio"
                 ),

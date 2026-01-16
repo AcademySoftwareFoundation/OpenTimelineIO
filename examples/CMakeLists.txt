@@ -4,6 +4,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_BINARY_DIR}/../src
     ${PYTHON_INCLUDE_DIRS})
 
+list(APPEND examples bundle)
 list(APPEND examples conform)
 list(APPEND examples flatten_video_tracks)
 list(APPEND examples summarize_timing)

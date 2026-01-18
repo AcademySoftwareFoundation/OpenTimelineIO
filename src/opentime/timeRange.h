@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This default epsilon_s value is used in comparison between floating numbers.
 ///
@@ -460,4 +460,4 @@ private:
     }
 };
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <vector>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief This class provides a replacement for "std::vector<std::any>".
 ///
@@ -176,4 +176,4 @@ private:
     MutationStamp* _mutation_stamp = nullptr;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

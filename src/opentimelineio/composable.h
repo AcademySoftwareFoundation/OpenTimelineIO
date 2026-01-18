@@ -8,7 +8,7 @@
 
 #include <Imath/ImathBox.h>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Composition;
 
@@ -68,4 +68,4 @@ private:
     friend class Composition;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

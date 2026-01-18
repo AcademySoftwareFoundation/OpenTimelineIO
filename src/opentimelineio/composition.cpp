@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <set>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Composition::Composition(
     std::string const&              name,
@@ -726,4 +726,4 @@ Composition::find_clips(
     return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

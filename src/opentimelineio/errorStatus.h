@@ -49,13 +49,13 @@ struct OTIO_API_TYPE ErrorStatus
     };
 
     /// @brief Construct a new status with no error.
-    ErrorStatus()
+    OTIO_API ErrorStatus()
         : outcome(OK)
         , object_details(nullptr)
     {}
 
     /// @brief Construct a new status with the given outcome.
-    ErrorStatus(Outcome in_outcome)
+    OTIO_API ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome)
         , details(outcome_to_string(in_outcome))
         , full_description(details)
@@ -63,7 +63,7 @@ struct OTIO_API_TYPE ErrorStatus
     {}
 
     /// @brief Construct a new status with the given outcome, details, and object.
-    ErrorStatus(
+    OTIO_API ErrorStatus(
         Outcome                   in_outcome,
         std::string const&        in_details,
         SerializableObject const* object = nullptr)
@@ -74,7 +74,7 @@ struct OTIO_API_TYPE ErrorStatus
     {}
 
     /// @brief Copy operator.
-    ErrorStatus& operator=(Outcome in_outcome)
+    OTIO_API ErrorStatus& operator=(Outcome in_outcome)
     {
         *this = ErrorStatus(in_outcome);
         return *this;

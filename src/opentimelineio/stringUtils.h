@@ -10,7 +10,7 @@ using opentime::string_printf;
 #include <any>
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @name String Utilities
 ///@{
@@ -35,4 +35,4 @@ bool split_schema_string(
 
 ///@}
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

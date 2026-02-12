@@ -6,7 +6,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A reference to a media file.
 class OTIO_API_TYPE ExternalReference final : public MediaReference
@@ -53,4 +53,4 @@ private:
     std::string _target_url;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

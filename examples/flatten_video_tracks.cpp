@@ -9,7 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 int main(int argc, char** argv)
 {

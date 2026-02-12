@@ -5,7 +5,7 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 SerializableCollection::SerializableCollection(
     std::string const&               name,
@@ -113,4 +113,4 @@ SerializableCollection::find_clips(
     return find_children<Clip>(error_status, search_range, shallow_search);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

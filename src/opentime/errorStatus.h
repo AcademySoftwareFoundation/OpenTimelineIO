@@ -7,7 +7,7 @@
 #include "opentime/version.h"
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This struct represents the return status of a function.
 struct OPENTIME_API_TYPE ErrorStatus
@@ -65,4 +65,4 @@ is_error(const ErrorStatus* es) noexcept
     return es && ErrorStatus::Outcome::OK != es->outcome;
 }
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

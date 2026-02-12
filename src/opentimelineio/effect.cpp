@@ -4,7 +4,7 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Effect::Effect(
     std::string const&   name,
@@ -35,4 +35,4 @@ Effect::write_to(Writer& writer) const
     writer.write("enabled", _enabled);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

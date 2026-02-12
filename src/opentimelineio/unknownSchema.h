@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief An unknown schema.
 class OTIO_API_TYPE UnknownSchema : public SerializableObject
@@ -59,4 +59,4 @@ private:
     friend class SerializableObject::Writer;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

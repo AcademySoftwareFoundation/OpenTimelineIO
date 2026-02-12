@@ -9,7 +9,7 @@
 #include <any>
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Deserialize JSON data from a string.
 OTIO_API bool deserialize_json_from_string(
@@ -23,4 +23,4 @@ OTIO_API bool deserialize_json_from_file(
     std::any*          destination,
     ErrorStatus*       error_status = nullptr);
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

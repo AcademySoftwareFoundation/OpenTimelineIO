@@ -11,7 +11,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Serialize JSON data to a string.
 OTIO_API std::string serialize_json_to_string(
@@ -28,4 +28,4 @@ OTIO_API bool serialize_json_to_file(
     ErrorStatus*              error_status           = nullptr,
     int                       indent                 = 4);
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

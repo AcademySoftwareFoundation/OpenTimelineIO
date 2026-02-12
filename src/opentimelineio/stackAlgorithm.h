@@ -7,7 +7,7 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Flatten a stack down to a single track.
 OTIO_API Track*
@@ -18,4 +18,4 @@ OTIO_API Track* flatten_stack(
     std::vector<Track*> const& tracks,
     ErrorStatus*               error_status = nullptr);
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

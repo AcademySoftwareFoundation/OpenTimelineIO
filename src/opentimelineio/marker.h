@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A marker indicates a marked range of time on an item in a timeline,
 /// usually with a name, color or other metadata.
@@ -88,4 +88,4 @@ private:
     std::string _comment;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

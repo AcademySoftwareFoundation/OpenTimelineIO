@@ -11,7 +11,7 @@
 #include "opentimelineio/vectorIndexing.h"
 #include "opentimelineio/safely_typed_any.h"
 
-using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+using namespace opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 

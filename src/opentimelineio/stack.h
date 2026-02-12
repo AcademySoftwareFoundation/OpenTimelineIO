@@ -6,7 +6,7 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Clip;
 
@@ -67,4 +67,4 @@ protected:
     void write_to(Writer&) const override;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

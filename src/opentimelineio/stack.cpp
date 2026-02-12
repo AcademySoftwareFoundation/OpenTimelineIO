@@ -5,7 +5,7 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Stack::Stack(
     std::string const&              name,
@@ -165,4 +165,4 @@ Stack::available_image_bounds(ErrorStatus* error_status) const
     return box;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

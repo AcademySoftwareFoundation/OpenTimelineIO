@@ -9,7 +9,7 @@
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Effect;
 class Marker;
@@ -139,4 +139,4 @@ private:
     bool                          _enabled;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

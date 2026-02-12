@@ -5,7 +5,7 @@
 
 #include "opentimelineio/composition.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION { namespace algo {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS { namespace algo {
 
 //! Enum used by 3/4 Point Edit (aka. as fill)
 enum class ReferencePoint
@@ -214,4 +214,4 @@ OTIO_API void remove(
     Item*               fill_template = nullptr,
     ErrorStatus*        error_status = nullptr);
 
-}}} // namespace opentimelineio::OPENTIMELINEIO_VERSION::algo
+}}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS::algo

@@ -8,7 +8,7 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Clip;
 
@@ -133,4 +133,4 @@ Timeline::find_children(
         shallow_search);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -28,7 +28,7 @@
 
 #include <iostream>
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 // Look for media with this name in this folder.
 std::string find_matching_media(std::string const& name, std::string const& folder)

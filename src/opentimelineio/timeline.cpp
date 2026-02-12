@@ -4,7 +4,7 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/clip.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Timeline::Timeline(
     std::string const&          name,
@@ -86,4 +86,4 @@ Timeline::find_clips(
         shallow_search);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

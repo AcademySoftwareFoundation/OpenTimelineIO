@@ -11,8 +11,8 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otime = opentime::OPENTIME_VERSION_NS;
+namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 int
 main(int argc, char** argv)

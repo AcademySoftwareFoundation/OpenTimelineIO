@@ -6,7 +6,7 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Trim the track to the given range.
 OTIO_API Track* track_trimmed_to_range(
@@ -14,4 +14,4 @@ OTIO_API Track* track_trimmed_to_range(
     TimeRange    trim_range,
     ErrorStatus* error_status = nullptr);
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -50,7 +50,7 @@ public:
     /// @param available_range The available range of the image sequence.
     /// @param metadata The metadata for the image sequence.
     /// @param available_image_bounds The spatial bounds of the image sequence.
-    ImageSequenceReference(
+    OTIO_API ImageSequenceReference(
         std::string const&       target_url_base    = std::string(),
         std::string const&       name_prefix        = std::string(),
         std::string const&       name_suffix        = std::string(),

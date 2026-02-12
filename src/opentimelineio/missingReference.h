@@ -30,7 +30,7 @@ public:
     /// @param available_range The available range of the missing reference.
     /// @param metadata The metadata for the missing reference.
     /// @param available_image_bounds The spatial bounds for the missing reference.
-    MissingReference(
+    OTIO_API MissingReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),

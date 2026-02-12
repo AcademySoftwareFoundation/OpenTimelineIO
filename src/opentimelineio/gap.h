@@ -47,6 +47,7 @@ public:
     /// @param markers The list of markers for the gap. Note that the
     /// the gap keeps a retainer to each marker.
     /// @param metadata The metadata for the gap.
+    OTIO_API
     Gap(RationalTime                duration,
         std::string const&          name     = std::string(),
         std::vector<Effect*> const& effects  = std::vector<Effect*>(),

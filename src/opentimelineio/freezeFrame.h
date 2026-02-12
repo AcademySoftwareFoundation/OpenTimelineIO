@@ -25,7 +25,7 @@ public:
     ///
     /// @param name The name of the time effect.
     /// @param metadata The metadata for the time effect.
-    FreezeFrame(
+    OTIO_API FreezeFrame(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 

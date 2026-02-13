@@ -16,7 +16,7 @@ ccend = $(shell echo "\033[0m")
 # Helpful link to install development dependencies declared in setup.py
 define dev_deps_message
 $(ccred)You can install this and other development dependencies with$(newline)$(ccend)\
-$(ccblue)	pip install -e .[dev]$(newline)$(ccend)
+$(ccblue)	pip install -e . && pip install -r tests/requirements.txt$(newline)$(ccend)
 endef
 
 # variables

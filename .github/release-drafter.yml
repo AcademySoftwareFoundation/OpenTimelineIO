@@ -10,9 +10,9 @@ change-template: '* $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&' # You can add #
 
 # The template for the name of the draft release
-name-template: 'v$RESOLVED_VERSION 🌈'
+name-template: '$RESOLVED_VERSION 🌈'
 # The template for the tag of the draft release
-tag-template: 'v$RESOLVED_VERSION'
+tag-template: '$RESOLVED_VERSION'
 
 # # Template used calculating the next version number for the release
 # version-template: '$MAJOR.$MINOR'
@@ -24,13 +24,13 @@ tag-template: 'v$RESOLVED_VERSION'
 #     labels:
 #       - 'feature'
 #       - 'feat'
-#       - 'perf'
 #   minor:
 #     labels:
+#       - 'build'
 #       - 'bug'
 #       - 'bugfix'
 #       - 'fix'
-#       - 'build'
+#       - 'perf'
 #       - 'refactor'
 #       - 'revert'
 #       - 'test'

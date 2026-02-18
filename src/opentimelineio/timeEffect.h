@@ -26,7 +26,7 @@ public:
     /// @param name The name of the object.
     /// @param effect_name The time effect name.
     /// @param metadata The metadata for the time effect.
-    TimeEffect(
+    OTIO_API TimeEffect(
         std::string const&   name        = std::string(),
         std::string const&   effect_name = std::string(),
         AnyDictionary const& metadata    = AnyDictionary());

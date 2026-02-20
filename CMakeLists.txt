@@ -6,9 +6,13 @@ cmake_minimum_required(VERSION 3.18.2)
 # Project Metadata
 # TODO: read this information from a configuration file, here, and in setup.py
 
-set(OTIO_VERSION_MAJOR "0")
-set(OTIO_VERSION_MINOR "19")
-set(OTIO_VERSION_PATCH "0")
+file(READ "src/opentimelineio/version.h" VERSION_H)
+string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${VERSION_H})
+set(OTIO_VERSION_MAJOR ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_MINOR ([0-9]*)" _ ${VERSION_H})
+set(OTIO_VERSION_MINOR ${CMAKE_MATCH_1})
+string(REGEX MATCH "VERSION_PATCH ([0-9]*)" _ ${VERSION_H})
+set(OTIO_VERSION_PATCH ${CMAKE_MATCH_1})
 set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
 set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")

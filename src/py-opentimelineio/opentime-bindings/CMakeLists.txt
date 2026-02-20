@@ -13,7 +13,6 @@ target_include_directories(_opentime
     PRIVATE "${PROJECT_SOURCE_DIR}/src"
     PRIVATE "${PROJECT_SOURCE_DIR}/src/deps"
     PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
-    PRIVATE "${CMAKE_BINARY_DIR}/src"
 )
 
 target_link_libraries(_opentime PUBLIC opentimelineio opentime)

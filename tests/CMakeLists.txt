@@ -3,7 +3,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/src/deps
     ${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include
     ${PROJECT_SOURCE_DIR}/src/tests
-    ${CMAKE_BINARY_DIR}/src
 )
 
 list(APPEND tests_opentime test_opentime)

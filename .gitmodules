@@ -7,3 +7,15 @@
 [submodule "src/deps/Imath"]
 	path = src/deps/Imath
 	url = https://github.com/AcademySoftwareFoundation/Imath
+[submodule "src/deps/minizip-ng"]
+	path = src/deps/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng.git
+[submodule "src/deps/zlib-ng"]
+	path = src/deps/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng.git
+[submodule "src/deps/zlib"]
+	path = src/deps/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "src/deps/uriparser"]
+	path = src/deps/uriparser
+	url = https://github.com/uriparser/uriparser.git

@@ -33,12 +33,17 @@ option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" O
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
+option(OTIO_FIND_URIPARSER            "Find uriparser using find_package" OFF)
+option(OTIO_FIND_BUNDLE_LIBS          "Find minizip and zlib using find_package" OFF)
+set(OTIO_BUNDLE_LIBS
+    MINIZIP::minizipstatic ZLIB::ZLIBSTATIC
+    CACHE STRING "Bundle libraries to link against (minizip and zlib)")
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
 #
 # If you are building OpenTimelineIO as a static library you will need to
-# defined OPENTIME_STATIC and OTIO_STATIC. If you use the provided CMake
+# define OPENTIME_STATIC and OTIO_STATIC. If you use the provided CMake
 # config files these will be automatically defined for you. To use the
 # provided config files add `find_package(OpenTimelineIO)` to your
 # CMakeLists.txt file.
@@ -261,6 +266,30 @@ if(OTIO_FIND_RAPIDJSON)
     endif()
 else()
     message(STATUS "Using src/deps/rapidjson by default")
+endif()
+
+#----- uriparser
+if(OTIO_FIND_URIPARSER)
+    find_package(uriparser CONFIG REQUIRED)
+    if (uriparser_FOUND)
+        message(STATUS "Found uriparser at ${uriparser_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/uriparser by default")
+endif()
+
+#----- minizip and zlib
+if(OTIO_FIND_BUNDLE_LIBS)
+    find_package(ZLIB CONFIG REQUIRED)
+    find_package(minizip CONFIG REQUIRED)
+    if (ZLIB_FOUND)
+        message(STATUS "Found zlib at ${ZLIB_CONFIG}")
+    endif()
+    if (minizip_FOUND)
+        message(STATUS "Found minizip at ${minizip_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/zlib by default")
 endif()
 
 # set up the internally hosted dependencies

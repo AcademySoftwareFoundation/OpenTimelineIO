@@ -24,6 +24,7 @@
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
+#include <opentimelineio/fileUtils.h>
 #include <opentimelineio/timeline.h>
 
 #include <iostream>
@@ -111,9 +112,9 @@ int main(int argc, char** argv)
         std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
         return 1;
     }
-    const std::string input = examples::normalize_path(argv[1]);
-    const std::string folder = examples::normalize_path(argv[2]);
-    const std::string output = examples::normalize_path(argv[3]);
+    const std::string input = otio::to_unix_separators(argv[1]);
+    const std::string folder = otio::to_unix_separators(argv[2]);
+    const std::string output = otio::to_unix_separators(argv[3]);
     
     otio::ErrorStatus error_status;
     otio::SerializableObject::Retainer<otio::Timeline> timeline(

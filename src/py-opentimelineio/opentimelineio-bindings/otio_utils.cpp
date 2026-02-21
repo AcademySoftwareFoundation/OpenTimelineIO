@@ -98,10 +98,13 @@ void _build_any_to_py_dispatch_table() {
     }
 }
 
-static py::object _value_to_any = py::none();
+// Initialized lazily after the interpreter is ready.
+// constructing py::none() at static init time triggers 
+// pybind11 GIL assertions in Debug builds.
+static py::object _value_to_any;
 
 static void py_to_any(py::object const& o, std::any* result) {
-    if (_value_to_any.is_none()) {
+    if (!_value_to_any || _value_to_any.is_none()) {
         py::object core = py::module::import("opentimelineio.core");
         _value_to_any = core.attr("_value_to_any");
     }

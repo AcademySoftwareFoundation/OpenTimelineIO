@@ -2,10 +2,13 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 import copy
+import json
 import unittest
 
 import opentimelineio._otio
 import opentimelineio.core._core_utils
+import opentimelineio.core
+import opentimelineio.opentime
 
 
 class AnyDictionaryTests(unittest.TestCase):
@@ -242,3 +245,52 @@ class AnyVectorTests(unittest.TestCase):
         deepcopied = copy.deepcopy(v)
         self.assertIsNot(v, deepcopied)
         self.assertIsNot(v[2], deepcopied[2])
+
+
+class ConvertToPython(unittest.TestCase):
+    def test_SerializableObject(self):
+        so = opentimelineio.core.SerializableObjectWithMetadata(name="asd")
+        so.metadata["key1"] = opentimelineio.core.Composition()
+
+        converted = so.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
+
+    def test_AnyDictionary(self):
+        ad = opentimelineio._otio.AnyDictionary()
+        ad["my key"] = opentimelineio.core.Composable()
+
+        converted = ad.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
+
+    def test_AnyVector(self):
+        av = opentimelineio._otio.AnyVector()
+        av.append(1)
+        av.append(opentimelineio._otio.AnyDictionary())
+
+        converted = av.to_list()
+        self.assertTrue(isinstance(converted, list))
+        self.assertEqual(converted, [1, {}])
+        json.dumps(converted)
+
+    def test_RationalTime(self):
+        rt = opentimelineio.opentime.RationalTime()
+
+        converted = rt.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
+
+    def test_TimeRange(self):
+        tr = opentimelineio.opentime.TimeRange()
+
+        converted = tr.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)
+
+    def test_TimeTransform(self):
+        tt = opentimelineio.opentime.TimeTransform()
+
+        converted = tt.to_dict()
+        self.assertTrue(isinstance(converted, dict))
+        json.dumps(converted)

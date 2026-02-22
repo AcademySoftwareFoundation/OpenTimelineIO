@@ -157,7 +157,7 @@ jobs:
         run: make lcov
       - name: Upload coverage to Codecov
         if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           flags: py-unittests
           name: py-opentimelineio-codecov

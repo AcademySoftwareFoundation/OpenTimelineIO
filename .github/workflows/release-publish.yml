@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Convert markdown to slack markdown
         # https://github.com/LoveToKnow/slackify-markdown-action
-        uses: LoveToKnow/slackify-markdown-action@v1.0.0
+        uses: LoveToKnow/slackify-markdown-action@v1.1.1
         id: slack-markdown
         with:
           text: |

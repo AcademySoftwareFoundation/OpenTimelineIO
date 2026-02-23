@@ -25,6 +25,7 @@ exclude OTIO_VERSION.json
 global-exclude *.pyc
 global-exclude *.so
 global-exclude *.pyd
+global-include *.pyi
 
 prune maintainers
 prune tsc

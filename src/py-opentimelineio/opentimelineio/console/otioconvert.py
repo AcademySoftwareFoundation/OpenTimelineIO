@@ -9,12 +9,6 @@ import copy
 
 import opentimelineio as otio
 
-# on some python interpreters, pkg_resources is not available
-try:
-    import pkg_resources
-except ImportError:
-    pkg_resources = None
-
 __doc__ = """ Python wrapper around OTIO to convert timeline files between \
 formats.
 

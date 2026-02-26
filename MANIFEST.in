@@ -17,6 +17,7 @@ exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
 exclude CONTRIBUTORS.md
 exclude GOVERNANCE.md
+exclude VERSIONS.md
 exclude Makefile
 exclude */.DS_Store
 exclude .clang-format

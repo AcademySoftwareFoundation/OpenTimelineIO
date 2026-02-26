@@ -3,7 +3,7 @@
 
 #include "opentimelineio/safely_typed_any.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 std::any
 create_safely_typed_any(bool&& value)
@@ -55,6 +55,12 @@ create_safely_typed_any(TimeRange&& value)
 
 std::any
 create_safely_typed_any(TimeTransform&& value)
+{
+    return std::any(value);
+}
+
+std::any
+create_safely_typed_any(Color&& value)
 {
     return std::any(value);
 }
@@ -143,6 +149,12 @@ safely_cast_time_transform_any(std::any const& a)
     return std::any_cast<TimeTransform>(a);
 }
 
+Color
+safely_cast_color_any(std::any const& a)
+{
+    return std::any_cast<Color>(a);
+}
+
 IMATH_NAMESPACE::V2d
 safely_cast_point_any(std::any const& a)
 {
@@ -185,4 +197,4 @@ temp_safely_cast_any_dictionary_any(std::any const& a)
     return const_cast<AnyDictionary&>(std::any_cast<AnyDictionary const&>(a));
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

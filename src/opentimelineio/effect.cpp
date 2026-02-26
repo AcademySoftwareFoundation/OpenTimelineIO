@@ -4,13 +4,13 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/missingReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Effect::Effect(
     std::string const&   name,
     std::string const&   effect_name,
     AnyDictionary const& metadata,
-    bool enabled)
+    bool                 enabled)
     : Parent(name, metadata)
     , _effect_name(effect_name)
     , _enabled(enabled)
@@ -35,4 +35,4 @@ Effect::write_to(Writer& writer) const
     writer.write("enabled", _enabled);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -4,6 +4,7 @@
 #include "opentimelineio/serialization.h"
 #include "errorStatus.h"
 #include "opentimelineio/anyDictionary.h"
+#include "opentimelineio/color.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
@@ -28,7 +29,7 @@
 #    include <windows.h>
 #endif
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /**
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
@@ -75,6 +76,7 @@ public:
     virtual void write_value(class RationalTime const& value)        = 0;
     virtual void write_value(class TimeRange const& value)           = 0;
     virtual void write_value(class TimeTransform const& value)       = 0;
+    virtual void write_value(class Color const& value)               = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
     virtual void write_value(IMATH_NAMESPACE::Box2d const&)          = 0;
     virtual void write_value(IMATH_NAMESPACE::V2d const&)            = 0;
@@ -245,6 +247,22 @@ public:
                 { "offset", value.offset() },
                 { "rate", value.rate() },
                 { "scale", value.scale() },
+            };
+            _store(std::any(std::move(result)));
+        }
+        else
+        {
+            _store(std::any(value));
+        }
+    }
+    void write_value(Color const& value) override
+    {
+        if (_result_object_policy == ResultObjectPolicy::OnlyAnyDictionary)
+        {
+            AnyDictionary result{
+                { "OTIO_SCHEMA", "Color.1" }, { "r", value.r() },
+                { "g", value.g() },           { "b", value.b() },
+                { "a", value.a() },           { "name", value.name() },
             };
             _store(std::any(std::move(result)));
         }
@@ -582,6 +600,31 @@ public:
         _writer.EndObject();
     }
 
+    void write_value(Color const& value)
+    {
+        _writer.StartObject();
+
+        _writer.Key("OTIO_SCHEMA");
+        _writer.String("Color.1");
+
+        _writer.Key("r");
+        _writer.Double(value.r());
+
+        _writer.Key("g");
+        _writer.Double(value.g());
+
+        _writer.Key("b");
+        _writer.Double(value.b());
+
+        _writer.Key("a");
+        _writer.Double(value.a());
+
+        _writer.Key("name");
+        _writer.String(value.name().c_str());
+
+        _writer.EndObject();
+    }
+
     void write_value(SerializableObject::ReferenceId value)
     {
         _writer.StartObject();
@@ -697,6 +740,9 @@ SerializableObject::Writer::_build_dispatch_tables()
     wt[&typeid(TimeTransform)] = [this](std::any const& value) {
         _encoder.write_value(std::any_cast<TimeTransform const&>(value));
     };
+    wt[&typeid(Color)] = [this](std::any const& value) {
+        _encoder.write_value(std::any_cast<Color const&>(value));
+    };
     wt[&typeid(IMATH_NAMESPACE::V2d)] = [this](std::any const& value) {
         _encoder.write_value(std::any_cast<IMATH_NAMESPACE::V2d const&>(value));
     };
@@ -742,6 +788,7 @@ SerializableObject::Writer::_build_dispatch_tables()
     et[&typeid(RationalTime)]  = &_simple_any_comparison<RationalTime>;
     et[&typeid(TimeRange)]     = &_simple_any_comparison<TimeRange>;
     et[&typeid(TimeTransform)] = &_simple_any_comparison<TimeTransform>;
+    et[&typeid(Color)]         = &_simple_any_comparison<Color>;
     et[&typeid(SerializableObject::ReferenceId)] =
         &_simple_any_comparison<SerializableObject::ReferenceId>;
     et[&typeid(IMATH_NAMESPACE::V2d)] =
@@ -929,6 +976,15 @@ SerializableObject::Writer::write(std::string const& key, TimeTransform value)
 {
     _encoder_write_key(key);
     _encoder.write_value(value);
+}
+
+void
+SerializableObject::Writer::write(
+    std::string const&   key,
+    std::optional<Color> value)
+{
+    _encoder_write_key(key);
+    value ? _encoder.write_value(*value) : _encoder.write_null_value();
 }
 
 void
@@ -1394,4 +1450,4 @@ SerializableObject::Writer::~Writer()
     }
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

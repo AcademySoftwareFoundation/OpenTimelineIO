@@ -3,8 +3,8 @@ OpenTimelineIO
 [![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2020--2023-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-3.7%2C%203.8%2C%203.9%2C%203.10%2C%203.11-blue)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2022--2025-lightgrey.svg)](http://www.vfxplatform.com/)
+![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11%2C%203.12-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -22,13 +22,21 @@ Links
   * To join, create an account here first: https://slack.aswf.io/
 * [Presentations](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/wiki/Presentations)
 
-PUBLIC BETA NOTICE
+DEVELOPMENT STATUS
 ------------------
 
-OpenTimelineIO is currently in Public Beta. That means that it may be missing
-some essential features and there are large changes planned. During this phase
-we actively encourage you to provide feedback, requests, comments, and/or
-contributions.
+OpenTimelineIO is a mature framework widely deployed across the film and
+television industries. It is natively supported in most non-linear editing
+applications, and has deep integration in game engines, digital content creation
+tools and adjacent industries as well.
+
+The API for OpenTimelineIO is considered stable, but is still undergoing
+active development, refinement and bug fixes. Work is underway to strengthen
+the mathematical and theoretical underpinnings of OpenTimelineIO. The current
+version of OpenTimelineIO may be confidently deployed in your domain.
+
+We encourage all developers and end users to provide feedback, requests, 
+comments, and/or code contributions.
 
 Overview
 --------
@@ -55,8 +63,10 @@ Documentation, including quick start, architecture, use cases, API docs, and muc
 Supported VFX Platforms
 -----------------
 The current release supports:
-- VFX platform 2023, 2022, 2021, 2020
-- Python 3.7 - 3.10
+- VFX platform 2025, 2024, 2023, 2022
+- Python 3.9 - 3.12
+
+See also [OpenTimelineIO VFX Reference Platform Support Matrix](VERSIONS.md) for details of which versions of OTIO support which VFX Reference Platform years.
 
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)
@@ -135,10 +145,6 @@ There are more code examples here: https://github.com/AcademySoftwareFoundation/
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/AcademySoftwareFoundation/OpenTimelineIO/tree/main/tests
 
-OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
-
-![OTIO View Screenshot](docs/_static/otioview.png)
-
 Developing
 ----------
 
@@ -154,7 +160,7 @@ You can also install the PySide2 dependency with `python -m pip install .[view]`
 
 You may need to escape the `[` depending on your shell, `\[view\]` .
 
-Currently the code base is written against python 3.7, 3.8, 3.9, 3.10 and 3.11,
+Currently the code base is written against python 3.9-3.12,
 in keeping with the pep8 style.  We ask that before developers submit pull
 request, they:
 
@@ -197,4 +203,3 @@ Contact
 For more information, please visit http://opentimeline.io/
 or https://github.com/AcademySoftwareFoundation/OpenTimelineIO
 or join our discussion forum: https://lists.aswf.io/g/otio-discussion
-

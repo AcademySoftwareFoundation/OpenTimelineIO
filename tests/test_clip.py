@@ -72,6 +72,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name='test_clip', "
             'media_reference={}, '
             'source_range=None, '
+            'color=None, '
             'metadata={{}}, '
             'effects=[], '
             'markers=[]'
@@ -102,6 +103,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "target_url='/var/tmp/foo.mov'"
             "), "
             'source_range=None, '
+            'color=None, '
             'metadata={}, '
             'effects=[], '
             'markers=[]'

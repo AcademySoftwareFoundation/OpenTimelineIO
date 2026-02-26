@@ -5,7 +5,7 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Stack::Stack(
     std::string const&              name,
@@ -82,10 +82,10 @@ Stack::range_of_all_children(ErrorStatus* error_status) const
 std::vector<SerializableObject::Retainer<Composable>>
 Stack::children_in_range(
     TimeRange const& search_range,
-    ErrorStatus* error_status) const
+    ErrorStatus*     error_status) const
 {
     std::vector<SerializableObject::Retainer<Composable>> children;
-    for (const auto& child : this->children())
+    for (const auto& child: this->children())
     {
         if (const auto& item = dynamic_retainer_cast<Item>(child))
         {
@@ -133,15 +133,6 @@ Stack::available_range(ErrorStatus* error_status) const
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
-std::vector<SerializableObject::Retainer<Clip>>
-Stack::find_clips(
-    ErrorStatus*                    error_status,
-    std::optional<TimeRange> const& search_range,
-    bool                            shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
-}
-
 std::optional<IMATH_NAMESPACE::Box2d>
 Stack::available_image_bounds(ErrorStatus* error_status) const
 {
@@ -174,4 +165,4 @@ Stack::available_image_bounds(ErrorStatus* error_status) const
     return box;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

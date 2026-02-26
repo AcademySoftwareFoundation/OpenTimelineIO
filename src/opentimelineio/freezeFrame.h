@@ -6,11 +6,13 @@
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
-class FreezeFrame : public LinearTimeWarp
+/// @brief Hold the first frame of the clip for the duration of the clip.
+class OTIO_API_TYPE FreezeFrame : public LinearTimeWarp
 {
 public:
+    /// @brief This struct provides the FreezeFrame schema.
     struct Schema
     {
         static auto constexpr name   = "FreezeFrame";
@@ -19,7 +21,11 @@ public:
 
     using Parent = LinearTimeWarp;
 
-    FreezeFrame(
+    /// @brief Create a new freeze frame time effect.
+    ///
+    /// @param name The name of the time effect.
+    /// @param metadata The metadata for the time effect.
+    OTIO_API FreezeFrame(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
@@ -27,4 +33,4 @@ protected:
     virtual ~FreezeFrame();
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

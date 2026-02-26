@@ -12,11 +12,7 @@ from unittest import mock
 
 from importlib import reload as import_reload
 
-try:
-    import importlib.metadata as metadata
-except ImportError:
-    # For python 3.7
-    import importlib_metadata as metadata
+import importlib.metadata as metadata
 
 import opentimelineio as otio
 from tests import baseline_reader

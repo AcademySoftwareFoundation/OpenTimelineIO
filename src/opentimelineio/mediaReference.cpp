@@ -3,7 +3,7 @@
 
 #include "opentimelineio/mediaReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 MediaReference::MediaReference(
     std::string const&                           name,
@@ -42,4 +42,4 @@ MediaReference::write_to(Writer& writer) const
     writer.write("available_image_bounds", _available_image_bounds);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

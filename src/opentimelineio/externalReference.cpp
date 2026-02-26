@@ -3,7 +3,7 @@
 
 #include "opentimelineio/externalReference.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 ExternalReference::ExternalReference(
     std::string const&                           target_url,
@@ -30,4 +30,4 @@ ExternalReference::write_to(Writer& writer) const
     writer.write("target_url", _target_url);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

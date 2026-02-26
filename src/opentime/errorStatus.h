@@ -3,13 +3,14 @@
 
 #pragma once
 
+#include "opentime/export.h"
 #include "opentime/version.h"
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This struct represents the return status of a function.
-struct ErrorStatus
+struct OPENTIME_API_TYPE ErrorStatus
 {
     /// @brief This enumeration represents the possible outcomes.
     enum Outcome
@@ -47,7 +48,7 @@ struct ErrorStatus
     std::string details;
 
     ///! @brief Return a human readable string for the given outcome.
-    static std::string outcome_to_string(Outcome);
+    static OPENTIME_API std::string outcome_to_string(Outcome);
 };
 
 ///! @brief Check whether the given ErrorStatus is an error.
@@ -64,4 +65,4 @@ is_error(const ErrorStatus* es) noexcept
     return es && ErrorStatus::Outcome::OK != es->outcome;
 }
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

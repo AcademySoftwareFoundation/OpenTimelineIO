@@ -10,7 +10,10 @@ using opentime::string_printf;
 #include <any>
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
+
+/// @name String Utilities
+///@{
 
 void fatal_error(std::string const& errMsg);
 
@@ -30,4 +33,6 @@ bool split_schema_string(
     std::string*       schema_name,
     int*               schema_version);
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+///@}
+
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

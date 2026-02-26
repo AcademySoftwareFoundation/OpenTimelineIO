@@ -9,8 +9,8 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otime = opentime::OPENTIME_VERSION_NS;
+namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 int
 main(int argc, char** argv)
@@ -25,7 +25,7 @@ main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Track> tr =
             new otio::Track();
         tr->append_child(cl);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tr->find_children<otio::Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
@@ -48,7 +48,7 @@ main(int argc, char** argv)
         tr->append_child(cl0);
         tr->append_child(cl1);
         tr->append_child(cl2);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tr->find_children<otio::Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
@@ -98,7 +98,7 @@ main(int argc, char** argv)
             new otio::Track();
         tr->append_child(cl0);
         tr->append_child(st);
-        opentimelineio::v1_0::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto result = tr->find_children<otio::Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);

@@ -21,8 +21,5 @@ opentime:
 'time calculations':
 - any: ['src/opentime/**']
 
-otioview:
-- any: ['src/opentimelineview/**']
-
 python-bindings:
 - any: ['src/py-opentimelineio/**']

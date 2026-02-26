@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief This default epsilon_s value is used in comparison between floating numbers.
 ///
@@ -16,7 +16,7 @@ namespace opentime { namespace OPENTIME_VERSION {
 /// a resolution of half a frame at 192kHz. The value can be changed in the future if
 /// necessary, due to higher sampling rates or some other kind of numeric tolerance
 /// detected in the library.
-constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
+OPENTIME_API constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 /// @brief This class represents a time range defined by a start time and duration.
 ///
@@ -27,7 +27,7 @@ constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 /// The duration on a TimeRange indicates a time range that is inclusive of the
 /// start time, and exclusive of the end time. All of the predicates are
 /// computed accordingly.
-class TimeRange
+class OPENTIME_API_TYPE TimeRange
 {
 public:
     /// @brief Construct a new time range with a zero start time and duration.
@@ -43,9 +43,7 @@ public:
     {}
 
     /// @brief Construct a new time range with the given start time and duration.
-    constexpr TimeRange(
-        RationalTime start_time,
-        RationalTime duration) noexcept
+    constexpr TimeRange(RationalTime start_time, RationalTime duration) noexcept
         : _start_time{ start_time }
         , _duration{ duration }
     {}
@@ -65,7 +63,8 @@ public:
     /// duration is invalid, or if the duration is less than zero.
     bool is_invalid_range() const noexcept
     {
-        return _start_time.is_invalid_time() || _duration.is_invalid_time() || _duration.value() < 0.0;
+        return _start_time.is_invalid_time() || _duration.is_invalid_time()
+               || _duration.value() < 0.0;
     }
 
     /// @brief Returns true if the time range is valid.
@@ -75,7 +74,8 @@ public:
     /// zero.
     bool is_valid_range() const noexcept
     {
-        return _start_time.is_valid_time() && _duration.is_valid_time() && _duration.value() >= 0.0;
+        return _start_time.is_valid_time() && _duration.is_valid_time()
+               && _duration.value() >= 0.0;
     }
 
     /// @brief Returns the start time.
@@ -441,6 +441,23 @@ private:
     {
         return rhs - lhs >= epsilon;
     }
+
+    /// @brief Returns the absolute value.
+    ///
+    /// \todo This function is used instead of "std::fabs()" so we can mark it as
+    /// constexpr. We can remove this and replace it with the std version when we
+    /// upgrade to C++23. Note that there are two copies of this function, in both
+    /// RationalTime and TimeRange.
+    static constexpr double fabs(double val) noexcept
+    {
+        union
+        {
+            double   f;
+            uint64_t i;
+        } bits = { val };
+        bits.i &= std::numeric_limits<uint64_t>::max() / 2;
+        return bits.f;
+    }
 };
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

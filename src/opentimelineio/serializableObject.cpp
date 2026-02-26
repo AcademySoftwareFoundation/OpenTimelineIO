@@ -7,7 +7,7 @@
 #include "stringUtils.h"
 #include "typeRegistry.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 SerializableObject::SerializableObject()
     : _cached_type_record(nullptr)
@@ -267,4 +267,4 @@ SerializableObject::current_ref_count() const
     return _managed_ref_count;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

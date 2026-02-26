@@ -8,10 +8,10 @@
 #include "opentime/version.h"
 #include <string>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 /// @brief One-dimensional time transform.
-class TimeTransform
+class OPENTIME_API_TYPE TimeTransform
 {
 public:
     /// @brief Construct a new transform with an optional offset, scale, and rate.
@@ -82,4 +82,4 @@ private:
     double       _rate;
 };
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

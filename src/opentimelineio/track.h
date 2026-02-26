@@ -6,25 +6,29 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Clip;
 
-class Track : public Composition
+/// @brief A track is a composition of a certain kind, like video or audio.
+class OTIO_API_TYPE Track : public Composition
 {
 public:
+    /// @brief This struct provides the base set of kinds of tracks.
     struct Kind
     {
         static auto constexpr video = "Video";
         static auto constexpr audio = "Audio";
     };
 
+    /// @brief This enumeration provides the neighbor gap policy.
     enum NeighborGapPolicy
     {
         never              = 0,
         around_transitions = 1
     };
 
+    /// @brief This struct provides the Track schema.
     struct Schema
     {
         static auto constexpr name   = "Track";
@@ -33,14 +37,23 @@ public:
 
     using Parent = Composition;
 
-    Track(
+    /// @brief Create a new track.
+    ///
+    /// @param name The track name.
+    /// @param source_range The source range of the track.
+    /// @param kind The kind of track.
+    /// @param metadata The metadata for the track.
+    OTIO_API Track(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
-        AnyDictionary const&            metadata     = AnyDictionary());
+        AnyDictionary const&            metadata     = AnyDictionary(),
+        std::optional<Color> const&     color        = std::nullopt);
 
+    /// @brief Return this kind of track.
     std::string kind() const noexcept { return _kind; }
 
+    /// @brief Set this kind of track.
     void set_kind(std::string const& kind) { _kind = kind; }
 
     TimeRange range_of_child_at_index(
@@ -57,7 +70,8 @@ public:
         Composable const* child,
         ErrorStatus*      error_status = nullptr) const override;
 
-    std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
+    /// @brief Return the neighbors of the given item.
+    OTIO_API std::pair<Retainer<Composable>, Retainer<Composable>> neighbors_of(
         Composable const* item,
         ErrorStatus*      error_status = nullptr,
         NeighborGapPolicy insert_gap   = NeighborGapPolicy::never) const;
@@ -67,16 +81,6 @@ public:
 
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
-
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*                    error_status   = nullptr,
-        std::optional<TimeRange> const& search_range   = std::nullopt,
-        bool                            shallow_search = false) const;
 
 protected:
     virtual ~Track();
@@ -90,4 +94,4 @@ private:
     std::string _kind;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

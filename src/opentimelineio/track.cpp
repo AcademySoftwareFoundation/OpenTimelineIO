@@ -7,14 +7,21 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/vectorIndexing.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Track::Track(
     std::string const&              name,
     std::optional<TimeRange> const& source_range,
     std::string const&              kind,
-    AnyDictionary const&            metadata)
-    : Parent(name, source_range, metadata)
+    AnyDictionary const&            metadata,
+    std::optional<Color> const&     color)
+    : Parent(
+          name,
+          source_range,
+          metadata,
+          std::vector<Effect*>(),
+          std::vector<Marker*>(),
+          color)
     , _kind(kind)
 {}
 
@@ -263,15 +270,6 @@ Track::range_of_all_children(ErrorStatus* error_status) const
     return result;
 }
 
-std::vector<SerializableObject::Retainer<Clip>>
-Track::find_clips(
-    ErrorStatus*                    error_status,
-    std::optional<TimeRange> const& search_range,
-    bool                            shallow_search) const
-{
-    return find_children<Clip>(error_status, search_range, shallow_search);
-}
-
 std::optional<IMATH_NAMESPACE::Box2d>
 Track::available_image_bounds(ErrorStatus* error_status) const
 {
@@ -305,4 +303,4 @@ Track::available_image_bounds(ErrorStatus* error_status) const
     return box;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

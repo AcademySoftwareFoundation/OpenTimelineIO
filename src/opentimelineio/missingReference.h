@@ -6,11 +6,16 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
-class MissingReference final : public MediaReference
+/// @brief Represents media for which a concrete reference is missing.
+///
+/// Note that a missing reference may have useful metadata, even if the
+/// location of the media is not known.
+class OTIO_API_TYPE MissingReference final : public MediaReference
 {
 public:
+    /// @brief This struct provides the MissingReference schema.
     struct Schema
     {
         static auto constexpr name   = "MissingReference";
@@ -19,7 +24,13 @@ public:
 
     using Parent = MediaReference;
 
-    MissingReference(
+    /// @brief Create a new missing reference.
+    ///
+    /// @param name The name of the missing reference.
+    /// @param available_range The available range of the missing reference.
+    /// @param metadata The metadata for the missing reference.
+    /// @param available_image_bounds The spatial bounds for the missing reference.
+    OTIO_API MissingReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),
@@ -35,4 +46,4 @@ protected:
     void write_to(Writer&) const override;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

@@ -6,11 +6,13 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
-class ExternalReference final : public MediaReference
+/// @brief A reference to a media file.
+class OTIO_API_TYPE ExternalReference final : public MediaReference
 {
 public:
+    /// @brief This struct provides the ExternalReference schema.
     struct Schema
     {
         static auto constexpr name   = "ExternalReference";
@@ -19,15 +21,23 @@ public:
 
     using Parent = MediaReference;
 
-    ExternalReference(
+    /// @brief Create a new external reference.
+    ///
+    /// @param target_url The URL to the media.
+    /// @param available_range The available range of the media.
+    /// @param metadata The metadata for the media.
+    /// @param available_image_bounds The spatial bounds of the media.
+    OTIO_API ExternalReference(
         std::string const&              target_url      = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),
         std::optional<IMATH_NAMESPACE::Box2d> const& available_image_bounds =
             std::nullopt);
 
+    /// @brief Return the media file URL.
     std::string target_url() const noexcept { return _target_url; }
 
+    /// @brief Set the media file URL.
     void set_target_url(std::string const& target_url)
     {
         _target_url = target_url;
@@ -43,4 +53,4 @@ private:
     std::string _target_url;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

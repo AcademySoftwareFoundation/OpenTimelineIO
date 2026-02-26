@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <vector>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 TypeRegistry&
 TypeRegistry::TypeRegistry::instance()
@@ -397,4 +397,4 @@ TypeRegistry::type_version_map(schema_version_map& result)
     }
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

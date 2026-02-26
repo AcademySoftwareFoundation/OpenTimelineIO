@@ -3,7 +3,7 @@
 
 #include "opentimelineio/errorStatus.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 std::string
 ErrorStatus::outcome_to_string(Outcome o)
@@ -71,4 +71,4 @@ ErrorStatus::outcome_to_string(Outcome o)
     };
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

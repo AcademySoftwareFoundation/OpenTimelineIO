@@ -13,29 +13,38 @@
 #include <string>
 #include <unordered_map>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class SerializableObject;
 class Encoder;
 class AnyDictionary;
 
-// typedefs for the schema downgrading system
-// @TODO: should we make version an int64_t?  That would match what we can
-//        serialize natively, since we only serialize 64 bit signed ints.
+/// @name Schema Typedefs
+///
+/// typedefs for the schema downgrading system.
+///
+/// @todo Should we make version an int64_t? That would match what we can
+/// serialize natively, since we only serialize 64 bit signed ints.
+///@{
+
 using schema_version_map = std::unordered_map<std::string, int64_t>;
 using label_to_schema_version_map =
     std::unordered_map<std::string, schema_version_map>;
 
+///@}
+
 extern const label_to_schema_version_map CORE_VERSION_MAP;
 
-class TypeRegistry
+/// @brief Type registry.
+class OTIO_API_TYPE TypeRegistry
 {
 public:
-    /// TypeRegistry is a singleton.
-    /// Accesses to its functions are thread-safe.
+    /// @brief Get the type registry singleton.
+    ///
+    /// Access to functions are thread-safe.
     static TypeRegistry& instance();
 
-    /// Register a new schema.
+    /// @brief Register a new schema.
     ///
     /// This API call should only be needed by developers who are creating a bridge
     /// to another language (e.g. Python, Swift).  In a C++ environment, prefer
@@ -49,7 +58,7 @@ public:
         std::function<SerializableObject*()> create,
         std::string const&                   class_name = "");
 
-    /// Register a new SerializableObject class
+    /// @brief Register a new SerializableObject class
     ///
     /// If the specified schema_name has already been registered, this function does nothing and returns false.
     /// If you need to provide an alias for a schema name, se register_type_from_existing_type().
@@ -64,7 +73,7 @@ public:
             CLASS::Schema::name);
     }
 
-    /// Register a new schema.
+    /// @brief Register a new schema.
     ///
     /// This API call can be used to register an alternate schema name for a class, in
     /// case a schema name is changed and the old name needs to be allowed as well.
@@ -80,7 +89,8 @@ public:
     /// to another language (e.g. Python, Swift).  In a C++ environment, prefer
     /// the templated form of this call.
 
-    /// Register a function that will upgrade the given schema to version_to_upgrade_to.
+    /// @brief Register a function that will upgrade the given schema to version_to_upgrade_to.
+    ///
     /// Note that as a schema is upgraded, older upgrade functions should be kept around;
     /// the intent is that each upgrade function upgrades the schema from the version
     /// just before version_to_upgrade_to.  (I.e. all registered upgrade functions are
@@ -93,8 +103,9 @@ public:
         int                                 version_to_upgrade_to,
         std::function<void(AnyDictionary*)> upgrade_function);
 
-    /// Convenience API for C++ developers.  See the documentation of the non-templated
-    /// register_upgrade_function() for details.
+    /// @brief Convenience API for C++ developers.
+    ///
+    /// See the documentation of the non-templated register_upgrade_function() for details.
     template <typename CLASS>
     bool register_upgrade_function(
         int                                 version_to_upgrade_to,
@@ -106,15 +117,16 @@ public:
             upgrade_function);
     }
 
-    /// Downgrade function from version_to_downgrade_from to
+    /// @brief Downgrade function from version_to_downgrade_from to
     /// version_to_downgrade_from - 1
     bool register_downgrade_function(
         std::string const&                  schema_name,
         int                                 version_to_downgrade_from,
         std::function<void(AnyDictionary*)> downgrade_function);
 
-    /// Convenience API for C++ developers.  See the documentation of the
-    /// non-templated register_downgrade_function() for details.
+    /// @brief Convenience API for C++ developers.
+    ///
+    /// See the documentation of the non-templated register_downgrade_function() for details.
     template <typename CLASS>
     bool register_downgrade_function(
         int                                 version_to_upgrade_to,
@@ -126,6 +138,7 @@ public:
             upgrade_function);
     }
 
+    /// @brief Return the instance from the given schema.
     SerializableObject* instance_from_schema(
         std::string const& schema_name,
         int                schema_version,
@@ -140,13 +153,13 @@ public:
             error_status);
     }
 
-    // For use by external bridging systems.
+    /// @brief For use by external bridging systems.
     bool set_type_record(
         SerializableObject*,
         std::string const& schema_name,
         ErrorStatus*       error_status = nullptr);
 
-    // for inspecting the type registry, build a map of schema name to version
+    /// @brief For inspecting the type registry, build a map of schema name to version.
     void type_version_map(schema_version_map& result);
 
 private:
@@ -211,4 +224,4 @@ private:
     friend class CloningEncoder;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

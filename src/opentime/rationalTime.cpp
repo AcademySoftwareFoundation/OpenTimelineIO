@@ -9,7 +9,7 @@
 #include <cmath>
 #include <vector>
 
-namespace opentime { namespace OPENTIME_VERSION {
+namespace opentime { namespace OPENTIME_VERSION_NS {
 
 RationalTime RationalTime::_invalid_time{ 0, RationalTime::_invalid_rate };
 
@@ -32,8 +32,7 @@ static constexpr std::array<double, 11> smpte_timecode_rates{
       48.0,
       50.0,
       60000.0 / 1001.0,
-      60.0
-    }
+      60.0 }
 };
 
 // deprecated in favor of `is_smpte_timecode_rate`
@@ -662,4 +661,4 @@ RationalTime::to_time_string() const
         microseconds_str.c_str());
 }
 
-}} // namespace opentime::OPENTIME_VERSION
+}} // namespace opentime::OPENTIME_VERSION_NS

@@ -60,9 +60,9 @@ The `media` directory contains all the media files that the `ExternalReference`s
 
 When a bundle is read from disk using the OpenTimelineIO Python API (using the adapters.read_from_* functions), only the `content.otio` file is read and parsed.
 
-For example, to view the timeline (not the media) of an otioz file in `otioview`, you can run:
+For example, to get some stats of the timeline (not the media) of an otioz file in `otiostat`, you can run:
 
-`otioview something.otioz`
+`otiostat something.otioz`
 
 Because this will _only_ read the `content.otio` from the bundle, it is usually a fast operation to run. None of the media is decoded or unzipped during this process.
 

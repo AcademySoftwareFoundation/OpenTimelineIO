@@ -6,13 +6,15 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class Clip;
 
-class Stack : public Composition
+/// @brief A stack of items in a timeline, for example a stack of tracks in a timelime.
+class OTIO_API_TYPE Stack : public Composition
 {
 public:
+    /// @brief This struct provides the Stack schema.
     struct Schema
     {
         static auto constexpr name   = "Stack";
@@ -21,7 +23,16 @@ public:
 
     using Parent = Composition;
 
-    Stack(
+    /// @brief Create a new stack.
+    ///
+    /// @param name The name of the stack.
+    /// @param source_range The source range of the stack.
+    /// @param metadata The metadata for the stack.
+    /// @param effects The list of effects for the stack. Note that the
+    /// the stack keeps a retainer to each effect.
+    /// @param markers The list of markers for the stack. Note that the
+    /// the stack keeps a retainer to each marker.
+    OTIO_API Stack(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         AnyDictionary const&            metadata     = AnyDictionary(),
@@ -47,16 +58,6 @@ public:
     std::optional<IMATH_NAMESPACE::Box2d>
     available_image_bounds(ErrorStatus* error_status) const override;
 
-    // Find child clips.
-    //
-    // An optional search_range may be provided to limit the search.
-    //
-    // The search is recursive unless shallow_search is set to true.
-    std::vector<Retainer<Clip>> find_clips(
-        ErrorStatus*                    error_status   = nullptr,
-        std::optional<TimeRange> const& search_range   = std::nullopt,
-        bool                            shallow_search = false) const;
-
 protected:
     virtual ~Stack();
 
@@ -66,4 +67,4 @@ protected:
     void write_to(Writer&) const override;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

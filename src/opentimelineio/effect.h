@@ -27,7 +27,7 @@ public:
     /// @param name The name of the effect.
     /// @param metadata The metadata for the clip.
     /// @param enabled Whether the effect is enabled.
-    Effect(
+    OTIO_API Effect(
         std::string const&   name        = std::string(),
         std::string const&   effect_name = std::string(),
         AnyDictionary const& metadata    = AnyDictionary(),

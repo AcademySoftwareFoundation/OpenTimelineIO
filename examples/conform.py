@@ -80,15 +80,14 @@ def _find_matching_media(name, folder):
         return None
     if len(matches) == 1:
         return matches[0]
-    else:
-        print(
-            "WARNING: {} matches found for clip '{}', using '{}'".format(
-                len(matches),
-                name,
-                matches[0]
-            )
+    print(
+        "WARNING: {} matches found for clip '{}', using '{}'".format(
+            len(matches),
+            name,
+            matches[0]
         )
-        return matches[0]
+    )
+    return matches[0]
 
 
 def _conform_timeline(timeline, folder):

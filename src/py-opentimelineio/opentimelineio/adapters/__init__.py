@@ -78,8 +78,7 @@ def available_adapter_names():
 def _from_filepath_or_name(filepath, adapter_name):
     if adapter_name is not None:
         return plugins.ActiveManifest().from_name(adapter_name)
-    else:
-        return from_filepath(filepath)
+    return from_filepath(filepath)
 
 
 def from_filepath(filepath):

@@ -60,7 +60,7 @@ def _value_to_any(value, ids=None):
             d[k] = _value_to_any(v, ids)
             ids.discard(id(v))
         return PyAny(d)
-    elif _is_nonstring_sequence(value):
+    if _is_nonstring_sequence(value):
         if ids is None:
             ids = set()
         vec = AnyVector()
@@ -73,45 +73,44 @@ def _value_to_any(value, ids=None):
             vec.append(_value_to_any(v, ids))
             ids.discard(id(v))
         return PyAny(vec)
-    else:
-        try:
-            return PyAny(value)
-        except TypeError:
-            # raise an OTIO-specific error
-            raise TypeError(
-                "A value of type '{}' is incompatible with OpenTimelineIO. "
-                "OpenTimelineIO only supports the following value types in "
-                "AnyDictionary containers (like the .metadata dictionary): "
-                "{}.".format(
-                    type(value),
-                    SUPPORTED_VALUE_TYPES,
-                )
+    try:
+        return PyAny(value)
+    except TypeError:
+        # raise an OTIO-specific error
+        raise TypeError(
+            "A value of type '{}' is incompatible with OpenTimelineIO. "
+            "OpenTimelineIO only supports the following value types in "
+            "AnyDictionary containers (like the .metadata dictionary): "
+            "{}.".format(
+                type(value),
+                SUPPORTED_VALUE_TYPES,
             )
-        except RuntimeError:
-            # communicate about integer range first
-            biginttype = int
-            if isinstance(value, biginttype):
-                raise ValueError(
-                    "A value of {} is outside of the range of integers that "
-                    "OpenTimelineIO supports, [{}, {}], which is the range of "
-                    "C++ int64_t.".format(
-                        value,
-                        -9223372036854775808,
-                        9223372036854775807,
-                    )
-                )
-
-            # general catch all for invalid type
+        )
+    except RuntimeError:
+        # communicate about integer range first
+        biginttype = int
+        if isinstance(value, biginttype):
             raise ValueError(
-                "The value '{}' of type '{}' is incompatible with OpenTimelineIO. "
-                "OpenTimelineIO only supports the following value types in "
-                "AnyDictionary containers (like the .metadata dictionary): "
-                "{}.".format(
+                "A value of {} is outside of the range of integers that "
+                "OpenTimelineIO supports, [{}, {}], which is the range of "
+                "C++ int64_t.".format(
                     value,
-                    type(value),
-                    SUPPORTED_VALUE_TYPES,
+                    -9223372036854775808,
+                    9223372036854775807,
                 )
             )
+
+        # general catch all for invalid type
+        raise ValueError(
+            "The value '{}' of type '{}' is incompatible with OpenTimelineIO. "
+            "OpenTimelineIO only supports the following value types in "
+            "AnyDictionary containers (like the .metadata dictionary): "
+            "{}.".format(
+                value,
+                type(value),
+                SUPPORTED_VALUE_TYPES,
+            )
+        )
 
 
 _marker_ = object()
@@ -130,9 +129,8 @@ def _add_mutable_mapping_methods(mapClass):
     def setdefault(self, key, default_value):
         if key in self:
             return self[key]
-        else:
-            self[key] = default_value
-            return self[key]
+        self[key] = default_value
+        return self[key]
 
     def pop(self, key, default=_marker_):
         try:
@@ -141,9 +139,8 @@ def _add_mutable_mapping_methods(mapClass):
             if default is _marker_:
                 raise
             return default
-        else:
-            del self[key]
-            return value
+        del self[key]
+        return value
 
     def __copy__(self):
         m = mapClass()
@@ -203,12 +200,11 @@ def _add_mutable_sequence_methods(
     def __add__(self, other):
         if isinstance(other, list):
             return list(self) + other
-        elif _is_nonstring_sequence(other):
+        if _is_nonstring_sequence(other):
             return list(self) + list(other)
-        else:
-            raise TypeError(
-                f"Cannot add types '{type(self)}' and '{type(other)}'"
-            )
+        raise TypeError(
+            f"Cannot add types '{type(self)}' and '{type(other)}'"
+        )
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -223,10 +219,8 @@ def _add_mutable_sequence_methods(
         if isinstance(index, slice):
             indices = index.indices(len(self))
             return [self.__internal_getitem__(i) for i in range(*indices)]
-        else:
-            return self.__internal_getitem__(index)
+        return self.__internal_getitem__(index)
 
-    # This has to handle slicing
     def __setitem__(self, index, item):
         if not isinstance(index, slice):
             self.__internal_setitem__(index, conversion_func(item))

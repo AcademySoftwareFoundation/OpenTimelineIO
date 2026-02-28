@@ -640,8 +640,7 @@ def time_from_string(text, rate):
     specifies the rate for the returned RationalTime."""
     if ":" in text:
         return otio.opentime.from_timecode(text, rate)
-    else:
-        return otio.opentime.from_seconds(float(text), rate)
+    return otio.opentime.from_seconds(float(text), rate)
 
 
 def trim_timeline(start, end, timeline):
@@ -751,9 +750,8 @@ def relink_by_name(timeline, path):
         # Turn absolute paths into file:// URIs
         if os.path.isabs(p):
             return pathlib.Path(p).as_uri()
-        else:
-            # Leave relative paths as-is
-            return p
+        # Leave relative paths as-is
+        return p
 
     count = 0
     if os.path.isdir(path):
@@ -768,9 +766,8 @@ def relink_by_name(timeline, path):
         print((f"ERROR: Cannot relink to '{path}':"
                " Please specify a folder instead of a file."))
         return
-    else:
-        print(f"ERROR: Cannot relink to '{path}': No such file or folder.")
-        return
+    print(f"ERROR: Cannot relink to '{path}': No such file or folder.")
+    return
 
     for clip in timeline.find_clips():
         url = name_to_url.get(clip.name)

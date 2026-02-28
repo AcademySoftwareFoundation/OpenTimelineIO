@@ -84,8 +84,7 @@ def _deepest_nesting(input):
         return d
     if isinstance(input, otio.schema.Timeline):
         return depth(input.tracks) + 1
-    else:
-        return depth(input)
+    return depth(input)
 
 
 @stat_check("number of clips")

@@ -111,19 +111,17 @@ C++:
 
 #include "opentimelineio/timeline.h"
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
-
 void
 main()
 {
-    otio::SerializableObject::Retainer<otio::Timeline> tl(
-            dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file("taco.otio")
+    OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> tl(
+            dynamic_cast<OTIO_NS::Timeline*>(
+                OTIO_NS::Timeline::from_json_file("taco.otio")
         )
     );
     for (const auto& cl : tl->find_clips())
     {
-        otio::RationalTime dur = cl->duration();
+        OTIO_NS::RationalTime dur = cl->duration();
         std::cout << "Name: " << cl->name() << " [";
         std::cout << dur.value() << "/" << dur.rate() << "]" << std::endl;
     }

@@ -28,10 +28,10 @@
 #       pull-requests: write
 #     steps:
 #       - name: Checkout Repo
-#         uses: actions/checkout@v4 # https://github.com/actions/checkout/tree/main#usage
+#         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # https://github.com/actions/checkout/tree/main#usage
 
 #       # https://github.com/actions/labeler#usage
-#       - uses: actions/labeler@v4
+#       - uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594
 #         with:
 #           # https://github.com/actions/labeler#inputs
 #           configuration-path: .github/labeler.yml

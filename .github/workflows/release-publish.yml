@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       
   announce-release:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: Convert markdown to slack markdown
         # https://github.com/LoveToKnow/slackify-markdown-action
-        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38
+        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
         id: slack-markdown
         with:
           text: |
@@ -35,7 +35,7 @@ jobs:
 
       - name: 'Slack Notification to #opentimelineio'
         # https://github.com/rtCamp/action-slack-notify
-        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES_URL }}
           SLACK_ICON: https://avatars.githubusercontent.com/u/40807682?s=512&v=4

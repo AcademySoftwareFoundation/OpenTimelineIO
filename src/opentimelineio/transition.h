@@ -6,7 +6,7 @@
 #include "opentimelineio/composable.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 /// @brief Represents a transition between the two adjacent items in a Track.
 ///
 /// For example, a cross dissolve or wipe.
@@ -93,4 +93,4 @@ private:
     RationalTime _in_offset, _out_offset;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

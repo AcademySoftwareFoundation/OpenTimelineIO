@@ -7,7 +7,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief An empty item within a timeline.
 class OTIO_API_TYPE Gap : public Item
@@ -47,6 +47,7 @@ public:
     /// @param markers The list of markers for the gap. Note that the
     /// the gap keeps a retainer to each marker.
     /// @param metadata The metadata for the gap.
+    OTIO_API
     Gap(RationalTime                duration,
         std::string const&          name     = std::string(),
         std::vector<Effect*> const& effects  = std::vector<Effect*>(),
@@ -62,4 +63,4 @@ protected:
     void write_to(Writer&) const override;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

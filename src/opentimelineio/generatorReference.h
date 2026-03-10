@@ -6,7 +6,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief A reference to dynamically generated media.
 class OTIO_API_TYPE GeneratorReference final : public MediaReference
@@ -29,7 +29,7 @@ public:
     /// @param parameters The parameters used to configure the generator.
     /// @param metadata The metadata for the generator.
     /// @param available_image_bounds The spatial bounds of the generator.
-    GeneratorReference(
+    OTIO_API GeneratorReference(
         std::string const&              name            = std::string(),
         std::string const&              generator_kind  = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
@@ -64,4 +64,4 @@ private:
     AnyDictionary _parameters;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

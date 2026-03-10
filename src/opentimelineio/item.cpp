@@ -8,7 +8,7 @@
 
 #include <assert.h>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Item::Item(
     std::string const&              name,
@@ -193,4 +193,4 @@ Item::write_to(Writer& writer) const
     writer.write("color", _color);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

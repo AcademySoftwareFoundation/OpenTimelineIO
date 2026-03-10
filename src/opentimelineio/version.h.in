@@ -7,17 +7,18 @@
 #define OPENTIMELINEIO_VERSION_MINOR @PROJECT_VERSION_MINOR@
 #define OPENTIMELINEIO_VERSION_PATCH @PROJECT_VERSION_PATCH@
 #define OPENTIMELINEIO_VERSION v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@_@PROJECT_VERSION_PATCH@
+#define OPENTIMELINEIO_VERSION_NS v@PROJECT_VERSION_MAJOR@_@PROJECT_VERSION_MINOR@
 
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
 #include "opentime/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 using opentime::RationalTime;
 using opentime::TimeRange;
 using opentime::TimeTransform;
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS
 
 /// @brief Convenience macro for the full namespace of OpenTimelineIO API.
 ///
@@ -26,4 +27,4 @@ using opentime::TimeTransform;
 ///     OTIO_NS::Track* track = new OTIO_NS::Track;
 /// </code>
 ///
-#define OTIO_NS opentimelineio::OPENTIMELINEIO_VERSION
+#define OTIO_NS opentimelineio::OPENTIMELINEIO_VERSION_NS

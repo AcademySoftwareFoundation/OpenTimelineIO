@@ -6,7 +6,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief An effect that can be applied to an item, such as an image or audio filter.
 class OTIO_API_TYPE Effect : public SerializableObjectWithMetadata
@@ -27,7 +27,7 @@ public:
     /// @param name The name of the effect.
     /// @param metadata The metadata for the clip.
     /// @param enabled Whether the effect is enabled.
-    Effect(
+    OTIO_API Effect(
         std::string const&   name        = std::string(),
         std::string const&   effect_name = std::string(),
         AnyDictionary const& metadata    = AnyDictionary(),
@@ -59,4 +59,4 @@ private:
     bool        _enabled;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

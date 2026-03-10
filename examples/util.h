@@ -22,6 +22,6 @@ std::string create_temp_dir();
 std::vector<std::string> glob(std::string const& path, std::string const& pattern);
 
 // Print an error to std::cerr.
-void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
+void print_error(opentimelineio::OPENTIMELINEIO_VERSION_NS::ErrorStatus const&);
 
 }

@@ -32,7 +32,8 @@ security vulnerabilities.
 | Version / branch | Supported                                                                                                                          |
 |------------------|------------------------------------------------------------------------------------------------------------------------------------|
 | main             | :white_check_mark: :construction: ALL fixes immediately, but this is a branch under development and may be unstable in other ways. |
-| 0.17.0           | :white_check_mark: All fixes that can be backported without breaking compatibility.                                            |
+| 0.18.x           | :white_check_mark: All fixes that can be backported without breaking compatibility.                                            |
+| 0.17.x           | :white_check_mark: All fixes that can be backported without breaking compatibility.                                            |
 | 0.16.x           | :warning: Only the most critical fixes, only if they can be easily backported.                                                     |
 | <= 0.15.x        | :x: No longer receiving patches of any kind.                                                                                       |
 

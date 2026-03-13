@@ -16,20 +16,9 @@ ensures that regardless of which platform a bundle was created on, it can be
 read on unix and windows platforms.
 """
 
-import os
-import zipfile
-
 from .. import (
-    exceptions,
-    url_utils,
+    _otio
 )
-
-from . import (
-    file_bundle_utils as utils,
-    otio_json,
-)
-
-import pathlib
 
 
 def read_from_file(
@@ -37,121 +26,24 @@ def read_from_file(
     # if provided, will extract contents of zip to this directory
     extract_to_directory=None,
 ):
-    if not zipfile.is_zipfile(filepath):
-        raise exceptions.OTIOError(f"Not a zipfile: {filepath}")
-
-    if extract_to_directory:
-        output_media_directory = os.path.join(
-            extract_to_directory,
-            utils.BUNDLE_DIR_NAME
-        )
-
-        if not os.path.exists(extract_to_directory):
-            raise exceptions.OTIOError(
-                f"Directory '{extract_to_directory}' does not exist, cannot"
-                f" unpack otioz there."
-            )
-
-        if os.path.exists(output_media_directory):
-            raise exceptions.OTIOError(
-                f"Error: '{output_media_directory}' already exists on disk, "
-                f"cannot overwrite while unpacking OTIOZ file '{filepath}'."
-            )
-
-    with zipfile.ZipFile(filepath, 'r') as zi:
-        result = otio_json.read_from_string(
-            zi.read(utils.BUNDLE_PLAYLIST_PATH)
-        )
-
-        if extract_to_directory:
-            zi.extractall(extract_to_directory)
-
-    return result
+    options = _otio.bundle.OtiozReadOptions()
+    if extract_to_directory is not None:
+        options.extract_path = extract_to_directory
+    return _otio.bundle.from_otioz(filepath, options)
 
 
 def write_to_file(
     input_otio,
     filepath,
-    # see documentation in file_bundle_utils for more information on the
-    # media_policy
-    media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
+    # see documentation in bundle.h for more information on the media_policy
+    media_policy=_otio.bundle.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    if os.path.exists(filepath):
-        raise exceptions.OTIOError(
-            f"'{filepath}' exists, will not overwrite."
-        )
+    options = _otio.bundle.WriteOptions()
+    options.media_policy = media_policy
 
-    # general algorithm for the file bundle adapters:
-    # -------------------------------------------------------------------------
-    # - build file manifest (list of paths to files on disk that will be put
-    #   into the archive)
-    # - build a mapping of path to file on disk to url to put into the media
-    #   reference in the result
-    # - relink the media references to point at the final location inside the
-    #   archive
-    # - build the resulting structure (zip file, directory)
-    # -------------------------------------------------------------------------
-
-    result_otio, path_to_mr_map = utils._prepped_otio_for_bundle_and_manifest(
-        input_otio,
-        media_policy,
-        "OTIOZ"
-    )
-
-    # dryrun reports the total size of files
     if dryrun:
-        return utils._total_file_size_of(path_to_mr_map.keys())
+        return _otio.bundle.get_media_size(input_otio, options)
 
-    abspath_to_output_path_map = {}
-
-    # relink all the media references to their target paths
-    for abspath, references in path_to_mr_map.items():
-        target = os.path.join(utils.BUNDLE_DIR_NAME, os.path.basename(abspath))
-
-        # conform to posix style paths inside the bundle, so that they are
-        # portable between windows and *nix style environments
-        final_path = str(pathlib.Path(target).as_posix())
-
-        # cache the output path
-        abspath_to_output_path_map[abspath] = final_path
-
-        for mr in references:
-            # author the final_path in url form into the target_url
-            mr.target_url = url_utils.url_from_filepath(final_path)
-
-    # write the otioz file to the temp directory
-    otio_str = otio_json.write_to_string(result_otio)
-
-    with zipfile.ZipFile(filepath, mode='w') as target:
-        # write the version file (compressed)
-        target.writestr(
-            utils.BUNDLE_VERSION_FILE,
-            utils.BUNDLE_VERSION,
-            # XXX: OTIOZ was introduced when python 2.7 was still a supported
-            #      platform. The newer algorithms, like BZIP2 and LZMA, are not
-            #      available in python2, so it uses the zlib based
-            #      ZIP_DEFLATED.  Now that OTIO is Python3+, this could switch
-            #      to using BZIP2 or LZMA instead... with the caveat that this
-            #      would make OTIOZ files incompatible with python 2 based OTIO
-            #      installs.
-            #
-            #      For example, if we used ZIP_LZMA, then otio release v0.15
-            #      would still be able to open these files as long as the
-            #      python interpreter was version 3+.
-            compress_type=zipfile.ZIP_DEFLATED
-        )
-
-        # write the OTIO (compressed)
-        target.writestr(
-            utils.BUNDLE_PLAYLIST_PATH,
-            otio_str,
-            # XXX: See comment above about ZIP_DEFLATED vs other algorithms
-            compress_type=zipfile.ZIP_DEFLATED
-        )
-
-        # write the media (uncompressed)
-        for src, dst in abspath_to_output_path_map.items():
-            target.write(src, dst, compress_type=zipfile.ZIP_STORED)
-
+    _otio.bundle.to_otioz(input_otio, filepath, options)
     return

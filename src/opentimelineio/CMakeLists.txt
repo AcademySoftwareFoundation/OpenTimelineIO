@@ -37,7 +37,8 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    vectorIndexing.h)
+    vectorIndexing.h
+    version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     color.cpp
@@ -79,12 +80,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
 
 add_library(OTIO::opentimelineio ALIAS opentimelineio)
 
-target_include_directories(
-    opentimelineio
-    PRIVATE
-        "${PROJECT_SOURCE_DIR}/src"
-        "${CMAKE_CURRENT_BINARY_DIR}/.."
-)
+target_include_directories(opentimelineio PRIVATE "${PROJECT_SOURCE_DIR}/src")
 
 if(OTIO_FIND_RAPIDJSON)
     target_include_directories(opentimelineio
@@ -132,11 +128,6 @@ target_compile_options(opentimelineio PRIVATE
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
 )
 
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
-    ${CMAKE_CURRENT_BINARY_DIR}/version.h
-)
-
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} 
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
@@ -175,12 +166,5 @@ if(OTIO_CXX_INSTALL)
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfigVersion.cmake
         DESTINATION
             ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio
-    )
-
-    install(
-        FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/version.h
-        DESTINATION
-            "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio"
     )
 endif()

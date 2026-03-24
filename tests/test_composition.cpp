@@ -12,8 +12,7 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION_NS;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace OTIO_NS;
 
 int
 main(int argc, char** argv)
@@ -23,7 +22,6 @@ main(int argc, char** argv)
     // test a basic case of find_children
     tests.add_test(
         "test_find_children", [] {
-        using namespace otio;
         SerializableObject::Retainer<Composition>  comp  = new Composition;
         SerializableObject::Retainer<Item>  item  = new Item;
 
@@ -37,7 +35,6 @@ main(int argc, char** argv)
     // test stack and track correctly calls find_clips from composition parent class
     tests.add_test(
         "test_find_clips", [] {
-        using namespace otio;
         SerializableObject::Retainer<Stack> stack = new Stack();
         SerializableObject::Retainer<Track> track = new Track;
         SerializableObject::Retainer<Clip>  clip  = new Clip;

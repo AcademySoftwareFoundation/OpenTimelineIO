@@ -11,8 +11,7 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION_NS;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace OTIO_NS;
 
 int
 main(int argc, char** argv)
@@ -21,11 +20,10 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_flatten_stack_01", [] {
-        using namespace otio;
 
-        otio::RationalTime rt_0_24{0, 24};
-        otio::RationalTime rt_150_24{150, 24};
-        otio::TimeRange tr_0_150_24{rt_0_24, rt_150_24};
+        RationalTime rt_0_24{0, 24};
+        RationalTime rt_150_24{150, 24};
+        TimeRange tr_0_150_24{rt_0_24, rt_150_24};
 
         // all three clips are identical, but placed such that A is over B and
         // has no gap or end over C
@@ -36,24 +34,21 @@ main(int argc, char** argv)
         // should flatten to:
         // [    A     |     C     ]
 
-        otio::SerializableObject::Retainer<otio::Clip> cl_A =
-            new otio::Clip("track1_A", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_B =
-            new otio::Clip("track1_B", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_C =
-            new otio::Clip("track1_C", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_A =
+            new Clip("track1_A", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_B =
+            new Clip("track1_B", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_C =
+            new Clip("track1_C", nullptr, tr_0_150_24);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_over =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_over = new Track();
         tr_over->append_child(cl_A);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_under =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_under = new Track();
         tr_under->append_child(cl_B);
         tr_under->append_child(cl_C);
 
-        otio::SerializableObject::Retainer<otio::Stack> st =
-            new otio::Stack();
+        SerializableObject::Retainer<Stack> st = new Stack();
         st->append_child(tr_under);
         st->append_child(tr_over);
 
@@ -66,11 +61,10 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_flatten_stack_02", [] {
-        using namespace otio;
 
-        otio::RationalTime rt_0_24{0, 24};
-        otio::RationalTime rt_150_24{150, 24};
-        otio::TimeRange tr_0_150_24{rt_0_24, rt_150_24};
+        RationalTime rt_0_24{0, 24};
+        RationalTime rt_150_24{150, 24};
+        TimeRange tr_0_150_24{rt_0_24, rt_150_24};
 
         // all four clips are identical, but placed such that A is over B and
         // has no gap or end over C. The bottom track is also shorter.
@@ -82,31 +76,27 @@ main(int argc, char** argv)
         // should flatten to:
         // [    A     |     C     ]
 
-        otio::SerializableObject::Retainer<otio::Clip> cl_A =
-            new otio::Clip("track1_A", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_B =
-            new otio::Clip("track1_B", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_C =
-            new otio::Clip("track1_C", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_D =
-            new otio::Clip("track1_D", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_A =
+            new Clip("track1_A", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_B =
+            new Clip("track1_B", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_C =
+            new Clip("track1_C", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_D =
+            new Clip("track1_D", nullptr, tr_0_150_24);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_top =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_top = new Track();
         tr_top->append_child(cl_A);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_middle =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_middle = new Track();
         tr_middle->append_child(cl_B);
         tr_middle->append_child(cl_C);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_bottom =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_bottom = new Track();
 
         tr_bottom->append_child(cl_D);
 
-        otio::SerializableObject::Retainer<otio::Stack> st =
-            new otio::Stack();
+        SerializableObject::Retainer<Stack> st = new Stack();
         st->append_child(tr_bottom);
         st->append_child(tr_middle);
         st->append_child(tr_top);
@@ -120,11 +110,10 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_flatten_stack_03", [] {
-        using namespace otio;
 
-        otio::RationalTime rt_0_24{0, 24};
-        otio::RationalTime rt_150_24{150, 24};
-        otio::TimeRange tr_0_150_24{rt_0_24, rt_150_24};
+        RationalTime rt_0_24{0, 24};
+        RationalTime rt_150_24{150, 24};
+        TimeRange tr_0_150_24{rt_0_24, rt_150_24};
 
         // all three clips are identical but the middle track is empty
         // 0         150          300
@@ -135,29 +124,25 @@ main(int argc, char** argv)
         // should flatten to:
         // [    A     |     C     ]
 
-        otio::SerializableObject::Retainer<otio::Clip> cl_A =
-            new otio::Clip("track1_A", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_B =
-            new otio::Clip("track1_B", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_C =
-            new otio::Clip("track1_C", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_A =
+            new Clip("track1_A", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_B =
+            new Clip("track1_B", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_C =
+            new Clip("track1_C", nullptr, tr_0_150_24);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_top =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_top = new Track();
         tr_top->append_child(cl_A);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_middle =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_middle = new Track();
 
-        otio::SerializableObject::Retainer<otio::Track> tr_bottom =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_bottom = new Track();
 
         tr_bottom->append_child(cl_B);
         tr_bottom->append_child(cl_C);
 
 
-        otio::SerializableObject::Retainer<otio::Stack> st =
-            new otio::Stack();
+        SerializableObject::Retainer<Stack> st = new Stack();
         st->append_child(tr_bottom);
         st->append_child(tr_middle);
         st->append_child(tr_top);
@@ -171,11 +156,10 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_flatten_vector_01", [] {
-        using namespace otio;
 
-        otio::RationalTime rt_0_24{0, 24};
-        otio::RationalTime rt_150_24{150, 24};
-        otio::TimeRange tr_0_150_24{rt_0_24, rt_150_24};
+        RationalTime rt_0_24{0, 24};
+        RationalTime rt_150_24{150, 24};
+        TimeRange tr_0_150_24{rt_0_24, rt_150_24};
 
         // all three clips are identical, but placed such that A is over B and
         // has no gap or end over C, tests vector version
@@ -186,19 +170,17 @@ main(int argc, char** argv)
         // should flatten to:
         // [    A     |     C     ]
 
-        otio::SerializableObject::Retainer<otio::Clip> cl_A =
-            new otio::Clip("track1_A", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_B =
-            new otio::Clip("track1_B", nullptr, tr_0_150_24);
-        otio::SerializableObject::Retainer<otio::Clip> cl_C =
-            new otio::Clip("track1_C", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_A =
+            new Clip("track1_A", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_B =
+            new Clip("track1_B", nullptr, tr_0_150_24);
+        SerializableObject::Retainer<Clip> cl_C =
+            new Clip("track1_C", nullptr, tr_0_150_24);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_over =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_over = new Track();
         tr_over->append_child(cl_A);
 
-        otio::SerializableObject::Retainer<otio::Track> tr_under =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr_under = new Track();
         tr_under->append_child(cl_B);
         tr_under->append_child(cl_C);
 

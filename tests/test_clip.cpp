@@ -15,8 +15,7 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION_NS;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace OTIO_NS;
 
 int
 main(int argc, char** argv)
@@ -24,17 +23,16 @@ main(int argc, char** argv)
     Tests tests;
 
     tests.add_test("test_cons", [] {
-        std::string         name = "test";
-        otime::RationalTime rt(5, 24);
-        otime::TimeRange    tr(rt, rt);
+        std::string  name = "test";
+        RationalTime rt(5, 24);
+        TimeRange    tr(rt, rt);
 
-        otio::SerializableObject::Retainer<otio::ExternalReference> mr(
-            new otio::ExternalReference);
-        mr->set_available_range(
-            otime::TimeRange(rt, otime::RationalTime(10, 24)));
+        SerializableObject::Retainer<ExternalReference> mr(
+            new ExternalReference);
+        mr->set_available_range(TimeRange(rt, RationalTime(10, 24)));
         mr->set_target_url("/var/tmp/test.mov");
 
-        otio::SerializableObject::Retainer<otio::Clip> cl(new otio::Clip);
+        SerializableObject::Retainer<Clip> cl(new Clip);
         cl->set_name(name);
         cl->set_media_reference(mr);
         cl->set_source_range(tr);
@@ -42,21 +40,20 @@ main(int argc, char** argv)
         assertEqual(cl->source_range().value(), tr);
 
         std::string encoded = cl->to_json_string();
-        otio::SerializableObject::Retainer<otio::SerializableObject> decoded(
-            otio::SerializableObject::from_json_string(encoded));
+        SerializableObject::Retainer<SerializableObject> decoded(
+            SerializableObject::from_json_string(encoded));
         assertTrue(cl->is_equivalent_to(*decoded));
     });
 
     tests.add_test("test_ranges", [] {
-        otime::TimeRange tr(
+        TimeRange tr(
             // 1 hour in at 24 fps
-            otime::RationalTime(86400, 24),
-            otime::RationalTime(200, 24));
+            RationalTime(86400, 24),
+            RationalTime(200, 24));
 
-        otio::SerializableObject::Retainer<otio::Clip> cl(
-            new otio::Clip("test_clip"));
-        otio::SerializableObject::Retainer<otio::ExternalReference> mr(
-            new otio::ExternalReference);
+        SerializableObject::Retainer<Clip> cl(new Clip("test_clip"));
+        SerializableObject::Retainer<ExternalReference> mr(
+            new ExternalReference);
         mr->set_target_url("/var/tmp/test.mov");
         mr->set_available_range(tr);
         cl->set_media_reference(mr);
@@ -65,10 +62,10 @@ main(int argc, char** argv)
         assertEqual(cl->trimmed_range(), tr);
         assertEqual(cl->available_range(), tr);
 
-        cl->set_source_range(otime::TimeRange(
+        cl->set_source_range(TimeRange(
             // 1 hour + 100 frames
-            otime::RationalTime(86500, 24),
-            otime::RationalTime(50, 24)));
+            RationalTime(86500, 24),
+            RationalTime(50, 24)));
         assertNotEqual(cl->duration(), tr.duration());
         assertNotEqual(cl->trimmed_range(), tr);
         assertEqual(cl->duration(), cl->source_range()->duration());
@@ -76,9 +73,8 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_v1_to_v2_null", [] {
-        using namespace otio;
 
-        otio::ErrorStatus              status;
+        OTIO_NS::ErrorStatus           status;
         SerializableObject::Retainer<> so =
             SerializableObject::from_json_string(
                 R"(
@@ -99,9 +95,8 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_v1_to_v2", [] {
-        using namespace otio;
 
-        otio::ErrorStatus              status;
+        OTIO_NS::ErrorStatus           status;
         SerializableObject::Retainer<> so =
             SerializableObject::from_json_string(
                 R"(
@@ -151,7 +146,6 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_media_representation", [] {
-        using namespace otio;
 
         static constexpr auto time_scalar = 1.5;
 
@@ -173,7 +167,7 @@ main(int argc, char** argv)
         static constexpr auto proxy_quality = "proxy_quality";
 
         SerializableObject::Retainer<MediaReference> media(
-            new otio::ExternalReference());
+            new ExternalReference());
 
         SerializableObject::Retainer<Clip> clip(new Clip(
             "unit_clip",
@@ -189,11 +183,11 @@ main(int argc, char** argv)
         assertEqual(clip->active_media_reference_key().c_str(), high_quality);
 
         SerializableObject::Retainer<MediaReference> ref1(
-            new otio::ExternalReference());
+            new ExternalReference());
         SerializableObject::Retainer<MediaReference> ref2(
-            new otio::ExternalReference());
+            new ExternalReference());
         SerializableObject::Retainer<MediaReference> ref3(
-            new otio::ExternalReference());
+            new ExternalReference());
 
         clip->set_media_references(
             { { Clip::default_media_key, ref1 },
@@ -211,36 +205,36 @@ main(int argc, char** argv)
 
         // setting the active reference to a key that does not exist
         // should return an error
-        otio::ErrorStatus error;
+        OTIO_NS::ErrorStatus error;
         clip->set_active_media_reference_key("cloud", &error);
-        assertTrue(otio::is_error(error));
+        assertTrue(is_error(error));
         assertEqual(
             error.outcome,
-            otio::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
+            OTIO_NS::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
         assertEqual(clip->media_reference(), ref1.value);
 
         // setting the references that doesn't have the active key should
         // also generate an error
         SerializableObject::Retainer<MediaReference> ref4(
-            new otio::ExternalReference());
+            new ExternalReference());
 
-        otio::ErrorStatus error2;
+        OTIO_NS::ErrorStatus error2;
         clip->set_media_references(
             { { "cloud", ref4 } }, high_quality, &error2);
-        assertTrue(otio::is_error(error2));
+        assertTrue(is_error(error2));
         assertEqual(
             error2.outcome,
-            otio::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
+            OTIO_NS::ErrorStatus::MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY);
 
         assertEqual(clip->media_reference(), ref1.value);
 
         // setting an empty should also generate an error
-        otio::ErrorStatus error3;
+        OTIO_NS::ErrorStatus error3;
         clip->set_media_references({ { "", ref4 } }, "", &error3);
-        assertTrue(otio::is_error(error3));
+        assertTrue(is_error(error3));
         assertEqual(
             error3.outcome,
-            otio::ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY);
+            OTIO_NS::ErrorStatus::MEDIA_REFERENCES_CONTAIN_EMPTY_KEY);
 
         // setting the references and the active key at the same time
         // should work
@@ -263,21 +257,19 @@ main(int argc, char** argv)
     // test to ensure null error_status pointers are correctly handled
     tests.add_test("test_error_ptr_null", [] {
 
-        using namespace otio;
-
         // tests for no image bounds on media reference on clip
         SerializableObject::Retainer<Clip> clip(new Clip);
 
         // check that there is an error, and that it's the correct error
-        otio::ErrorStatus mr_bounds_error;
+        OTIO_NS::ErrorStatus mr_bounds_error;
         clip->available_image_bounds(&mr_bounds_error);
-        assertTrue(otio::is_error(mr_bounds_error));
+        assertTrue(is_error(mr_bounds_error));
         assertEqual(
             mr_bounds_error.outcome,
-            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+            OTIO_NS::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
 
         // check that if null ptr, nothing happens
-        otio::ErrorStatus* null_test = nullptr;
+        OTIO_NS::ErrorStatus* null_test = nullptr;
 
         assertEqual(
             clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
@@ -287,7 +279,6 @@ main(int argc, char** argv)
     // test to ensure null error_status pointers are correctly handled
     // when there's no media reference
     tests.add_test("test_error_ptr_null_no_media", [] {
-        using namespace otio;
 
         SerializableObject::Retainer<Clip> clip(new Clip);
 
@@ -296,17 +287,17 @@ main(int argc, char** argv)
         empty_mrs["empty"] = nullptr;
         clip->set_media_references(empty_mrs, "empty");
 
-        otio::ErrorStatus bounds_error_no_mr;
+        OTIO_NS::ErrorStatus bounds_error_no_mr;
         clip->available_image_bounds(&bounds_error_no_mr);
-        assertTrue(otio::is_error(bounds_error_no_mr));
+        assertTrue(is_error(bounds_error_no_mr));
 
         assertEqual(
             bounds_error_no_mr.outcome,
-            otio::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
+            OTIO_NS::ErrorStatus::CANNOT_COMPUTE_BOUNDS);
 
         // std::cout<< "bounds error details: " << bounds_error_no_mr.details << std::endl;
 
-        otio::ErrorStatus* null_test_no_mr = nullptr;
+        OTIO_NS::ErrorStatus* null_test_no_mr = nullptr;
 
         assertEqual(
             clip->available_image_bounds(null_test_no_mr), std::optional<IMATH_NAMESPACE::Box2d>()

@@ -162,7 +162,7 @@ public:
         template <typename T>
         bool read(std::string const& key, Retainer<T>* dest)
         {
-            SerializableObject* so;
+            SerializableObject* so = nullptr;
             if (!read(key, &so))
             {
                 return false;

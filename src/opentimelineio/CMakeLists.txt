@@ -40,7 +40,8 @@ set(OPENTIMELINEIO_HEADER_FILES
     typeRegistry.h
     unknownSchema.h
     urlUtils.h
-    vectorIndexing.h)
+    vectorIndexing.h
+    version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     bundle.cpp

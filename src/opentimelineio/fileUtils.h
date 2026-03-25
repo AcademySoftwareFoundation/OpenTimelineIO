@@ -6,7 +6,7 @@
 #include "opentimelineio/export.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @name File Utilities
 ///@{

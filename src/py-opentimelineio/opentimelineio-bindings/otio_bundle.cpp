@@ -9,8 +9,8 @@
 
 #include <opentimelineio/bundle.h>
 
-using namespace opentimelineio::OPENTIMELINEIO_VERSION;
-using namespace opentimelineio::OPENTIMELINEIO_VERSION::bundle;
+using namespace opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace opentimelineio::OPENTIMELINEIO_VERSION_NS::bundle;
 
 namespace py = pybind11;
 

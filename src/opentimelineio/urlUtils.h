@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Interface for URL utilities.
 class OTIO_API_TYPE IURLUtils : public std::enable_shared_from_this<IURLUtils>

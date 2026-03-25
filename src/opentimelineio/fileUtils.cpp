@@ -12,7 +12,7 @@
 #include <unistd.h>
 #endif // _WIN32
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 std::string
 to_unix_separators(std::string const& path)

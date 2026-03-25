@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class IURLUtils;
 

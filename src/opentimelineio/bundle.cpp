@@ -6,7 +6,7 @@
 #include "opentimelineio/bundlePrivate.h"
 #include "opentimelineio/urlUtils.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
 
 size_t

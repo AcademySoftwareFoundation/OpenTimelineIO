@@ -7,7 +7,7 @@
 
 #include <filesystem>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
 
 /// @brief Convert a media reference policy to a string.

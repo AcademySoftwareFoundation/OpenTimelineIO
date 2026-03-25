@@ -12,7 +12,7 @@
 
 #include <sstream>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
 
 std::string

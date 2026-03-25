@@ -8,7 +8,7 @@
 // demonstrates a minimal custom SerializableObject written in C++ with upgrade
 // and downgrade functions
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 // define the custom class
 class SimpleClass : public otio::SerializableObject

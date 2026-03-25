@@ -3,7 +3,7 @@
 
 #include "opentimelineio/gap.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Gap::Gap(
     TimeRange const&            source_range,
@@ -49,4 +49,4 @@ Gap::write_to(Writer& writer) const
     Parent::write_to(writer);
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

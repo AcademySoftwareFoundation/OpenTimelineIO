@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include "opentimelineio/errorStatus.h"
 
-using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+using namespace opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 struct ErrorStatusHandler {
     operator ErrorStatus* () {

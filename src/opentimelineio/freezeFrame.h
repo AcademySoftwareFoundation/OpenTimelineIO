@@ -6,7 +6,7 @@
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Hold the first frame of the clip for the duration of the clip.
 class OTIO_API_TYPE FreezeFrame : public LinearTimeWarp
@@ -25,7 +25,7 @@ public:
     ///
     /// @param name The name of the time effect.
     /// @param metadata The metadata for the time effect.
-    FreezeFrame(
+    OTIO_API FreezeFrame(
         std::string const&   name     = std::string(),
         AnyDictionary const& metadata = AnyDictionary());
 
@@ -33,4 +33,4 @@ protected:
     virtual ~FreezeFrame();
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

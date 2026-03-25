@@ -25,7 +25,7 @@
 #    include <windows.h>
 #endif
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 class JSONDecoder : public OTIO_rapidjson::
                         BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder>
@@ -983,4 +983,4 @@ deserialize_json_from_file(
     return true;
 }
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

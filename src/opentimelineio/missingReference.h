@@ -6,7 +6,7 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/version.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Represents media for which a concrete reference is missing.
 ///
@@ -30,7 +30,7 @@ public:
     /// @param available_range The available range of the missing reference.
     /// @param metadata The metadata for the missing reference.
     /// @param available_image_bounds The spatial bounds for the missing reference.
-    MissingReference(
+    OTIO_API MissingReference(
         std::string const&              name            = std::string(),
         std::optional<TimeRange> const& available_range = std::nullopt,
         AnyDictionary const&            metadata        = AnyDictionary(),
@@ -46,4 +46,4 @@ protected:
     void write_to(Writer&) const override;
 };
 
-}} // namespace opentimelineio::OPENTIMELINEIO_VERSION
+}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

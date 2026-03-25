@@ -66,6 +66,8 @@ The current release supports:
 - VFX platform 2025, 2024, 2023, 2022
 - Python 3.9 - 3.12
 
+See also [OpenTimelineIO VFX Reference Platform Support Matrix](VERSIONS.md) for details of which versions of OTIO support which VFX Reference Platform years.
+
 For more information on our vfxplatform support policy: [Contribution Guidelines Documentation Page](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html)
 For more information on the vfxplatform: [VFX Platform Homepage](https://vfxplatform.com)
 
@@ -109,19 +111,17 @@ C++:
 
 #include "opentimelineio/timeline.h"
 
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
-
 void
 main()
 {
-    otio::SerializableObject::Retainer<otio::Timeline> tl(
-            dynamic_cast<otio::Timeline*>(
-                otio::Timeline::from_json_file("taco.otio")
+    OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> tl(
+            dynamic_cast<OTIO_NS::Timeline*>(
+                OTIO_NS::Timeline::from_json_file("taco.otio")
         )
     );
     for (const auto& cl : tl->find_clips())
     {
-        otio::RationalTime dur = cl->duration();
+        OTIO_NS::RationalTime dur = cl->duration();
         std::cout << "Name: " << cl->name() << " [";
         std::cout << dur.value() << "/" << dur.rate() << "]" << std::endl;
     }

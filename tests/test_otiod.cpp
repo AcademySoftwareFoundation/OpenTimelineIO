@@ -9,7 +9,7 @@
 #include "opentimelineio/fileUtils.h"
 #include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/missingReference.h"
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <filesystem>
 #include <iomanip>
@@ -24,7 +24,7 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    auto url_util = std::make_shared<DefaultURLUtil>();
+    auto url_utils = std::make_shared<DefaultURLUtils>();
 
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
@@ -35,11 +35,11 @@ main(int argc, char** argv)
     // Sample media paths.
     std::string const media_example_path_rel     = "OpenTimelineIO@3xDark.png";
     std::string const media_example_path_url_rel = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_rel));
+        url_utils->url_from_filepath(media_example_path_rel));
     std::string const media_example_path_abs = to_unix_separators(
         (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string());
     std::string const media_example_path_url_abs = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_abs));
+        url_utils->url_from_filepath(media_example_path_abs));
 
     // Test timeline.
     SerializableObject::Retainer<Timeline> timeline(
@@ -59,18 +59,18 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip",
-        [url_util, sample_data_dir, media_example_path_url_rel, timeline]
+        [url_utils, sample_data_dir, media_example_path_url_rel, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otiod(timeline, temp_file.u8string(), write_options));
 
             // By default will provide relative paths.
             OtiodReadOptions read_options;
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otiod(temp_file.u8string(), read_options);
             for (auto cl: result->find_clips())
             {
@@ -78,7 +78,7 @@ main(int argc, char** argv)
                     cl->media_reference()))
                 {
                     assertTrue(std::filesystem::u8path(
-                                   url_util->filepath_from_url(er->target_url()))
+                                   url_utils->filepath_from_url(er->target_url()))
                                    .is_relative());
                 }
             }
@@ -93,8 +93,8 @@ main(int argc, char** argv)
                     cl->media_reference()))
                 {
                     std::filesystem::path const path =
-                        url_util->filepath_from_url(er->target_url());
-                    er->set_target_url(url_util->url_from_filepath(
+                        url_utils->filepath_from_url(er->target_url());
+                    er->set_target_url(url_utils->url_from_filepath(
                         (media_dir / path.filename()).u8string()));
                 }
             }
@@ -106,21 +106,21 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_all_missing_references",
-        [url_util, sample_data_dir, timeline]
+        [url_utils, sample_data_dir, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
             write_options.media_policy = MediaReferencePolicy::AllMissing;
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otiod(
                 timeline,
                 temp_file.u8string(),
                 write_options));
 
             OtiodReadOptions read_options;
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otiod(temp_file.u8string(), read_options);
 
             for (auto clip: result->find_clips())
@@ -132,13 +132,13 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_absolute_paths",
-        [url_util, sample_data_dir, media_example_path_url_rel, timeline]
+        [url_utils, sample_data_dir, media_example_path_url_rel, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otiod(
                 timeline,
                 temp_file.u8string(),
@@ -147,7 +147,7 @@ main(int argc, char** argv)
             // Can optionally generate absolute paths.
             OtiodReadOptions read_options;
             read_options.absolute_media_reference_paths = true;
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otiod(temp_file.u8string(), read_options);
 
             for (auto clip: result->find_clips())
@@ -156,7 +156,7 @@ main(int argc, char** argv)
                     clip->media_reference()))
                 {
                     assertTrue(std::filesystem::u8path(
-                                   url_util->filepath_from_url(er->target_url()))
+                                   url_utils->filepath_from_url(er->target_url()))
                                    .is_absolute());
                 }
             }
@@ -171,8 +171,8 @@ main(int argc, char** argv)
                         cl->media_reference()))
                 {
                     std::filesystem::path const path =
-                        url_util->filepath_from_url(er->target_url());
-                    er->set_target_url(url_util->url_from_filepath(
+                        url_utils->filepath_from_url(er->target_url());
+                    er->set_target_url(url_utils->url_from_filepath(
                         (temp_file / media_dir / path.filename()).u8string()));
                 }
             }
@@ -184,7 +184,7 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_with_sequence",
-        [url_util, sample_data_dir, media_example_path_rel]
+        [url_utils, sample_data_dir, media_example_path_rel]
         {
             // Create an image sequence.
             std::filesystem::path const temp_dir = create_temp_dir();
@@ -225,7 +225,7 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otiod";
             WriteOptions                write_options;
             write_options.parent_path = temp_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otiod(
                 timeline,
                 temp_file.u8string(),

@@ -8,7 +8,7 @@
 #include "opentimelineio/fileUtils.h"
 #include "opentimelineio/missingReference.h"
 #include "opentimelineio/imageSequenceReference.h"
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <sstream>
 
@@ -85,7 +85,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     std::filesystem::path const&                  parent_path,
     MediaReferencePolicy                          media_policy,
     Manifest&                                     output_manifest,
-    std::shared_ptr<IURLUtil> const&              url_util)
+    std::shared_ptr<IURLUtils> const&             url_utils)
 {
     output_manifest.clear();
     std::map<std::filesystem::path, std::filesystem::path>
@@ -118,7 +118,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             // relative to the source .otio file.
             std::string const url    = er ? er->target_url()
                                           : isr->target_url_base();
-            std::string const scheme = url_util->scheme_from_url(url);
+            std::string const scheme = url_utils->scheme_from_url(url);
             if (!(scheme == "file://" || scheme.empty()))
             {
                 if (MediaReferencePolicy::ErrorIfNotFile == media_policy)
@@ -142,7 +142,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             std::vector<std::string> target_files;
             if (er)
             {
-                target_files.push_back(url_util->filepath_from_url(er->target_url()));
+                target_files.push_back(url_utils->filepath_from_url(er->target_url()));
             }
             else if (isr)
             {
@@ -156,7 +156,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
                     ss << std::setfill('0')
                        << std::setw(isr->frame_zero_padding()) << frame;
                     ss << isr->name_suffix();
-                    target_files.push_back(url_util->filepath_from_url(
+                    target_files.push_back(url_utils->filepath_from_url(
                         isr->target_url_base() + ss.str()));
                 }
             }
@@ -227,13 +227,13 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
             if (er)
             {
                 std::string const new_url =
-                    url_util->url_from_filepath(bundle_path.u8string());
+                    url_utils->url_from_filepath(bundle_path.u8string());
                 er->set_target_url(new_url);
             }
             else if (isr)
             {
                 std::string const new_url =
-                    url_util->url_from_filepath(bundle_path.parent_path().u8string())
+                    url_utils->url_from_filepath(bundle_path.parent_path().u8string())
                     + "/";
                 isr->set_target_url_base(new_url);
             }

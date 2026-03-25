@@ -4,7 +4,7 @@
 #include "utils.h"
 
 #include <opentimelineio/fileUtils.h>
-#include <opentimelineio/urlUtil.h>
+#include <opentimelineio/urlUtils.h>
 
 #include <filesystem>
 #include <iostream>
@@ -16,7 +16,7 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    auto url_util = std::make_shared<DefaultURLUtil>();
+    auto url_utils = std::make_shared<DefaultURLUtils>();
 
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
@@ -27,11 +27,11 @@ main(int argc, char** argv)
     // Sample media paths.
     std::string const media_example_path_rel = "OpenTimelineIO@3xDark.png";
     std::string const media_example_path_url_rel = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_rel));
+        url_utils->url_from_filepath(media_example_path_rel));
     std::string const media_example_path_abs = to_unix_separators(
         (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string());
     std::string const media_example_path_url_abs = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_abs));
+        url_utils->url_from_filepath(media_example_path_abs));
 
     // Windows test paths.
     std::string const windows_encoded_url = "file://host/S%3a/path/file.ext";
@@ -53,55 +53,55 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_roundtrip_abs",
-        [url_util, media_example_path_abs, media_example_path_url_abs] {
+        [url_utils, media_example_path_abs, media_example_path_url_abs] {
             assertEqual(media_example_path_url_abs.substr(0, 7), std::string("file://"));
             std::string const filepath =
-                url_util->filepath_from_url(media_example_path_url_abs);
+                url_utils->filepath_from_url(media_example_path_url_abs);
             assertEqual(filepath, media_example_path_abs);
         });
 
     tests.add_test(
         "test_roundtrip_rel",
-        [url_util, media_example_path_rel, media_example_path_url_rel] {
+        [url_utils, media_example_path_rel, media_example_path_url_rel] {
             assertNotEqual(media_example_path_url_rel.substr(0, 7), std::string("file://"));
             std::string const filepath =
-                url_util->filepath_from_url(media_example_path_url_rel);
+                url_utils->filepath_from_url(media_example_path_url_rel);
             assertEqual(filepath, media_example_path_rel);
         });
 
     tests.add_test(
         "test_windows_urls",
-        [url_util, windows_encoded_url, windows_drive_url, windows_drive_path] {
+        [url_utils, windows_encoded_url, windows_drive_url, windows_drive_path] {
             for (auto const url : { windows_encoded_url, windows_drive_url }) {
-                std::string const filepath = url_util->filepath_from_url(url);
+                std::string const filepath = url_utils->filepath_from_url(url);
                 assertEqual(filepath, windows_drive_path);
             }
         });
 
     tests.add_test(
         "test_windows_unc_urls",
-        [url_util, windows_encoded_unc_url, windows_unc_url, windows_unc_path] {
+        [url_utils, windows_encoded_unc_url, windows_unc_url, windows_unc_path] {
             for (auto const url : { windows_encoded_unc_url, windows_unc_url }) {
-                std::string const filepath = url_util->filepath_from_url(url);
+                std::string const filepath = url_utils->filepath_from_url(url);
                 assertEqual(filepath, windows_unc_path);
             }
         });
 
     tests.add_test(
         "test_posix_urls",
-        [url_util, posix_encoded_url, posix_url, posix_localhost_url, posix_path] {
+        [url_utils, posix_encoded_url, posix_url, posix_localhost_url, posix_path] {
             for (auto const url : { posix_encoded_url, posix_url }) {
-                std::string const filepath = url_util->filepath_from_url(url);
+                std::string const filepath = url_utils->filepath_from_url(url);
                 assertEqual(filepath, posix_path);
             }
         });
 
     tests.add_test(
         "test_relative_url",
-        [url_util] {
+        [url_utils] {
             // See github issue #1817 - when a relative URL has only one name after
             // the "." (ie ./blah but not ./blah/blah)
-            std::string const filepath = url_util->filepath_from_url(
+            std::string const filepath = url_utils->filepath_from_url(
                 (std::filesystem::path(".") / std::filesystem::path("docs")).u8string());
             assertEqual(filepath, std::string("docs"));
         });

@@ -8,9 +8,6 @@
 #include <filesystem>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
-
-class IURLUtil;
-
 namespace bundle {
 
 /// @brief Convert a media reference policy to a string.
@@ -38,7 +35,7 @@ SerializableObject::Retainer<Timeline> timeline_for_bundle_and_manifest(
     std::filesystem::path const& timeline_dir,
     MediaReferencePolicy media_reference_policy,
     Manifest& output_manifest,
-    std::shared_ptr<IURLUtil> const& url_util);
+    std::shared_ptr<IURLUtils> const& url_utils);
 
 } // namespace bundle
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION

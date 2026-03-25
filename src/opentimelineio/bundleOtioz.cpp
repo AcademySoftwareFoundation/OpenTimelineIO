@@ -6,7 +6,7 @@
 #include "opentimelineio/bundlePrivate.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/timeline.h"
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <unzip.h>
 #include <zip.h>
@@ -247,10 +247,10 @@ to_otioz(
         }
 
         // Get the URL utilities.
-        std::shared_ptr<IURLUtil> url_util = options.url_util;
-        if (!url_util)
+        std::shared_ptr<IURLUtils> url_utils = options.url_utils;
+        if (!url_utils)
         {
-            url_util = std::make_shared<DefaultURLUtil>();
+            url_utils = std::make_shared<DefaultURLUtils>();
         }
 
         // Create the new timeline and file manifest.
@@ -260,7 +260,7 @@ to_otioz(
             std::filesystem::u8path(options.parent_path),
             options.media_policy,
             manifest,
-            url_util);
+            url_utils);
 
         // Write the archive.
         ZipWriter zip(file_name);

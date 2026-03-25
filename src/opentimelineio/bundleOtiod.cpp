@@ -8,7 +8,7 @@
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/externalReference.h"
 #include "opentimelineio/timeline.h"
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <fstream>
 #include <sstream>
@@ -56,10 +56,10 @@ to_otiod(
         }
 
         // Get the URL utilities.
-        std::shared_ptr<IURLUtil> url_util = options.url_util;
-        if (!url_util)
+        std::shared_ptr<IURLUtils> url_utils = options.url_utils;
+        if (!url_utils)
         {
-            url_util = std::make_shared<DefaultURLUtil>();
+            url_utils = std::make_shared<DefaultURLUtils>();
         }
 
         // Create the new timeline and file manifest.
@@ -69,7 +69,7 @@ to_otiod(
             std::filesystem::u8path(options.parent_path),
             options.media_policy,
             manifest,
-            url_util);
+            url_utils);
 
         // Create the output directory.
         std::filesystem::create_directory(path);
@@ -132,10 +132,10 @@ from_otiod(
     try
     {
         // Get the URL utilities.
-        std::shared_ptr<IURLUtil> url_util = options.url_util;
-        if (!url_util)
+        std::shared_ptr<IURLUtils> url_utils = options.url_utils;
+        if (!url_utils)
         {
-            url_util = std::make_shared<DefaultURLUtil>();
+            url_utils = std::make_shared<DefaultURLUtils>();
         }
 
         // Read the timeline.
@@ -153,8 +153,8 @@ from_otiod(
                     std::filesystem::path const path =
                         timeline_path.parent_path()
                         / std::filesystem::u8path(
-                            url_util->filepath_from_url(er->target_url()));
-                    er->set_target_url(url_util->url_from_filepath(path.u8string()));
+                            url_utils->filepath_from_url(er->target_url()));
+                    er->set_target_url(url_utils->url_from_filepath(path.u8string()));
                 }
             }
         }

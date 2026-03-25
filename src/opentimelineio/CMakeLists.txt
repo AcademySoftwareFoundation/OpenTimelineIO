@@ -39,7 +39,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    urlUtil.h
+    urlUtils.h
     vectorIndexing.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
@@ -82,7 +82,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     transition.cpp
     typeRegistry.cpp
     unknownSchema.cpp 
-    urlUtil.cpp
+    urlUtils.cpp
     CORE_VERSION_MAP.cpp
     ${OPENTIMELINEIO_HEADER_FILES})
 

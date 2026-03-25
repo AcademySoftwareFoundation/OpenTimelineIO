@@ -9,7 +9,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-class IURLUtil;
+class IURLUtils;
 
 namespace bundle {
 
@@ -53,7 +53,7 @@ struct OTIO_API_TYPE WriteOptions
     int indent = 4;
 
     /// @brief URL utilities. If this is empty the default URL utilites are used.
-    std::shared_ptr<IURLUtil> url_util;
+    std::shared_ptr<IURLUtils> url_utils;
 };
 
 /// @brief Options for reading .otioz bundles.
@@ -65,7 +65,7 @@ struct OTIO_API_TYPE OtiozReadOptions
     std::string extract_path;
 
     /// @brief URL utilities. If this is empty the default URL utilites are used.
-    std::shared_ptr<IURLUtil> url_util;
+    std::shared_ptr<IURLUtils> url_utils;
 };
 
 /// @brief Options for reading .otiod bundles.
@@ -75,7 +75,7 @@ struct OTIO_API_TYPE OtiodReadOptions
     bool absolute_media_reference_paths = false;
 
     /// @brief URL utilities. If this is empty the default URL utilites are used.
-    std::shared_ptr<IURLUtil> url_util;
+    std::shared_ptr<IURLUtils> url_utils;
 };
 
 /// @brief Get the total size (in bytes) of the media files that will be

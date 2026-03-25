@@ -11,10 +11,10 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
 /// @brief Interface for URL utilities.
-class OTIO_API_TYPE IURLUtil : public std::enable_shared_from_this<IURLUtil>
+class OTIO_API_TYPE IURLUtils : public std::enable_shared_from_this<IURLUtils>
 {
 public:
-    OTIO_API virtual ~IURLUtil() = 0;
+    OTIO_API virtual ~IURLUtils() = 0;
 
     /// @brief Get the scheme from a URL (i.e., "file" or "https").
     OTIO_API virtual std::string scheme_from_url(std::string const&) = 0;
@@ -43,7 +43,7 @@ public:
 };
 
 /// @brief Default URL utilities.
-class OTIO_API_TYPE DefaultURLUtil : public IURLUtil
+class OTIO_API_TYPE DefaultURLUtils : public IURLUtils
 {
 public:
     OTIO_API std::string scheme_from_url(std::string const&) override;

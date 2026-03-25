@@ -9,7 +9,7 @@
 #include "opentimelineio/fileUtils.h"
 #include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/missingReference.h"
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include <filesystem>
 #include <iomanip>
@@ -24,7 +24,7 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    auto url_util = std::make_shared<DefaultURLUtil>();
+    auto url_utils = std::make_shared<DefaultURLUtils>();
 
     // Sample data paths.
     std::filesystem::path const sample_data_dir =
@@ -35,11 +35,11 @@ main(int argc, char** argv)
     // Sample media paths.
     std::string const media_example_path_rel     = "OpenTimelineIO@3xDark.png";
     std::string const media_example_path_url_rel = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_rel));
+        url_utils->url_from_filepath(media_example_path_rel));
     std::string const media_example_path_abs = to_unix_separators(
         (sample_data_dir / "OpenTimelineIO@3xLight.png").u8string());
     std::string const media_example_path_url_abs = to_unix_separators(
-        url_util->url_from_filepath(media_example_path_abs));
+        url_utils->url_from_filepath(media_example_path_abs));
 
     // Test timeline.
     SerializableObject::Retainer<Timeline> timeline(
@@ -59,7 +59,7 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_media_size",
-        [url_util,
+        [url_utils,
          sample_data_dir,
          media_example_path_rel,
          media_example_path_abs,
@@ -67,7 +67,7 @@ main(int argc, char** argv)
         {
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util    = url_util;
+            write_options.url_utils   = url_utils;
             size_t const size         = get_media_size(timeline, write_options);
             size_t const size_compare =
                 std::filesystem::file_size(
@@ -78,7 +78,7 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_not_a_file_error",
-        [url_util,
+        [url_utils,
          sample_data_dir,
          timeline]
         {
@@ -98,7 +98,7 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
 
             WriteOptions write_options;
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             OTIO_NS::ErrorStatus error;
             assertFalse(to_otioz(
                 clone,
@@ -111,7 +111,7 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_colliding_basename",
-        [url_util, sample_data_dir, media_example_path_abs, timeline]
+        [url_utils, sample_data_dir, media_example_path_abs, timeline]
         {
             std::filesystem::path const temp_dir = create_temp_dir();
 
@@ -125,13 +125,13 @@ main(int argc, char** argv)
             if (auto er = dynamic_cast<ExternalReference*>(
                     clone->find_clips()[0]->media_reference()))
             {
-                er->set_target_url(url_util->url_from_filepath(colliding_file.u8string()));
+                er->set_target_url(url_utils->url_from_filepath(colliding_file.u8string()));
             }
 
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             OTIO_NS::ErrorStatus error;
             assertFalse(to_otioz(
                 clone,
@@ -144,20 +144,20 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip",
-        [url_util, sample_data_dir, timeline]
+        [url_utils, sample_data_dir, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             WriteOptions write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otioz(
                 timeline,
                 temp_file.u8string(),
                 write_options));
 
             OtiozReadOptions readOptions;
-            readOptions.url_util = url_util;
+            readOptions.url_utils = url_utils;
             auto result = from_otioz(temp_file.u8string(), readOptions);
 
             for (auto cl : result->find_clips())
@@ -169,7 +169,7 @@ main(int argc, char** argv)
                     // created on Windows are compatible with ones created on UNIX.
                     std::string const windows("media\\");
                     assertNotEqual(
-                        url_util->filepath_from_url(er->target_url())
+                        url_utils->filepath_from_url(er->target_url())
                             .substr(windows.size()),
                         windows);
                 }
@@ -186,10 +186,10 @@ main(int argc, char** argv)
                 {
                     std::string const file =
                         std::filesystem::path(
-                            url_util->filepath_from_url(er->target_url()))
+                            url_utils->filepath_from_url(er->target_url()))
                             .filename()
                             .u8string();
-                    std::string const url = url_util->url_from_filepath(
+                    std::string const url = url_utils->url_from_filepath(
                         (std::filesystem::u8path(media_dir) / file)
                             .u8string());
                     er->set_target_url(url);
@@ -201,13 +201,13 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_with_extraction",
-        [url_util, sample_data_dir, timeline]
+        [url_utils, sample_data_dir, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             WriteOptions                write_options;
             write_options.parent_path = sample_data_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otioz(
                 timeline,
                 temp_file.u8string(),
@@ -216,7 +216,7 @@ main(int argc, char** argv)
             OtiozReadOptions            read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otioz(temp_file.u8string(), read_options);
 
             // Make sure that all the references are ExternalReference.
@@ -237,10 +237,10 @@ main(int argc, char** argv)
                 {
                     std::string const file =
                         std::filesystem::path(
-                            url_util->filepath_from_url(er->target_url()))
+                            url_utils->filepath_from_url(er->target_url()))
                             .filename()
                             .u8string();
-                    std::string const url = url_util->url_from_filepath(
+                    std::string const url = url_utils->url_from_filepath(
                         (std::filesystem::u8path(media_dir) / file)
                             .u8string());
                     er->set_target_url(url);
@@ -267,7 +267,7 @@ main(int argc, char** argv)
                     cl->media_reference()))
                 {
                     std::string const file =
-                        url_util->filepath_from_url(er->target_url());
+                        url_utils->filepath_from_url(er->target_url());
                     assertTrue(std::filesystem::exists(output_path / file));
                 }
             }
@@ -275,14 +275,14 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_with_extraction_no_media",
-        [url_util, sample_data_dir, timeline]
+        [url_utils, sample_data_dir, timeline]
         {
             std::filesystem::path const temp_dir  = create_temp_dir();
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             WriteOptions                write_options;
             write_options.parent_path = sample_data_dir.u8string();
             write_options.media_policy = MediaReferencePolicy::AllMissing;
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otioz(
                 timeline,
                 temp_file.u8string(),
@@ -291,7 +291,7 @@ main(int argc, char** argv)
             OtiozReadOptions            read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otioz(temp_file.u8string(), read_options);
 
             // Check the version file exists.
@@ -316,7 +316,7 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_round_trip_with_sequence",
-        [url_util, sample_data_dir, media_example_path_rel]
+        [url_utils, sample_data_dir, media_example_path_rel]
         {
             // Create an image sequence.
             std::filesystem::path const temp_dir = create_temp_dir();
@@ -357,7 +357,7 @@ main(int argc, char** argv)
             std::filesystem::path const temp_file = temp_dir / "test.otioz";
             WriteOptions                write_options;
             write_options.parent_path = temp_dir.u8string();
-            write_options.url_util = url_util;
+            write_options.url_utils = url_utils;
             assertTrue(to_otioz(
                 timeline,
                 temp_file.u8string(),
@@ -367,7 +367,7 @@ main(int argc, char** argv)
             OtiozReadOptions            read_options;
             std::filesystem::path const output_path = temp_dir / "extract";
             read_options.extract_path = output_path.u8string();
-            read_options.url_util = url_util;
+            read_options.url_utils = url_utils;
             auto result = from_otioz(temp_file.u8string(), read_options);
             
             // Check the media exists.

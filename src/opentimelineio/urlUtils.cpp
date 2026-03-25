@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
 
-#include "opentimelineio/urlUtil.h"
+#include "opentimelineio/urlUtils.h"
 
 #include "opentimelineio/fileUtils.h"
 
@@ -13,11 +13,11 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 
-IURLUtil::~IURLUtil()
+IURLUtils::~IURLUtils()
 {}
 
 std::string
-DefaultURLUtil::scheme_from_url(std::string const& url)
+DefaultURLUtils::scheme_from_url(std::string const& url)
 {
     std::regex const rx("^([A-Za-z0-9+-\\.]+://)");
     auto const       rxi = std::sregex_iterator(url.begin(), url.end(), rx);
@@ -25,7 +25,7 @@ DefaultURLUtil::scheme_from_url(std::string const& url)
 }
 
 std::string
-DefaultURLUtil::url_encode(std::string const& url)
+DefaultURLUtils::url_encode(std::string const& url)
 {
     // Don't encode these characters.
     std::vector<char> const chars = { '-', '.', '_', '~', ':', '/', '?',  '#',
@@ -52,7 +52,7 @@ DefaultURLUtil::url_encode(std::string const& url)
 }
 
 std::string
-DefaultURLUtil::url_decode(std::string const& url)
+DefaultURLUtils::url_decode(std::string const& url)
 {
     std::string result;
 
@@ -89,7 +89,7 @@ DefaultURLUtil::url_decode(std::string const& url)
 }
 
 std::string
-DefaultURLUtil::url_from_filepath(std::string const& filepath)
+DefaultURLUtils::url_from_filepath(std::string const& filepath)
 {
     std::string const encoded = url_encode(to_unix_separators(filepath));
     std::string const url = std::filesystem::u8path(filepath).is_relative()
@@ -99,7 +99,7 @@ DefaultURLUtil::url_from_filepath(std::string const& filepath)
 }
 
 std::string
-DefaultURLUtil::filepath_from_url(std::string const& url)
+DefaultURLUtils::filepath_from_url(std::string const& url)
 {
     // Skip over the URL scheme.
     bool              has_scheme = false;

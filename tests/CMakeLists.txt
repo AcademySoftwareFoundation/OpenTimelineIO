@@ -24,7 +24,7 @@ list(APPEND tests_opentimelineio
     test_track
     test_editAlgorithm
     test_composition
-    test_url_conversions
+    test_url_util
     test_otiod
     test_otioz)
 foreach(test ${tests_opentimelineio})

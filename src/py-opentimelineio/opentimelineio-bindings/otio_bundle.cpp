@@ -8,7 +8,6 @@
 #include "otio_errorStatusHandler.h"
 
 #include <opentimelineio/bundle.h>
-#include <opentimelineio/bundleUtils.h>
 
 using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 using namespace opentimelineio::OPENTIMELINEIO_VERSION::bundle;

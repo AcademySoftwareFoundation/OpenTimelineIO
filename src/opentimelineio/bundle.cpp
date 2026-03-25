@@ -3,7 +3,8 @@
 
 #include "opentimelineio/bundle.h"
 
-#include "opentimelineio/bundleUtils.h"
+#include "opentimelineio/bundlePrivate.h"
+#include "opentimelineio/urlUtil.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
 namespace bundle {
@@ -17,13 +18,21 @@ get_media_size(
     size_t byte_count = 0;
     try
     {
+        // Get the URL utilites.
+        std::shared_ptr<IURLUtil> url_util = options.url_util;
+        if (!url_util)
+        {
+            url_util = std::make_shared<DefaultURLUtil>();
+        }
+
         // Get the file manifest.
         std::map<std::filesystem::path, std::filesystem::path> manifest;
         timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
             options.media_policy,
-            manifest);
+            manifest,
+            url_util);
 
         // Count the bytes in each file.
         for (auto const& file: manifest)

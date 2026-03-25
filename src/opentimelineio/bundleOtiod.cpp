@@ -3,12 +3,12 @@
 
 #include "opentimelineio/bundle.h"
 
-#include "opentimelineio/bundleUtils.h"
+#include "opentimelineio/bundlePrivate.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/externalReference.h"
 #include "opentimelineio/timeline.h"
-#include "opentimelineio/urlUtils.h"
+#include "opentimelineio/urlUtil.h"
 
 #include <fstream>
 #include <sstream>
@@ -55,13 +55,21 @@ to_otiod(
             throw std::runtime_error(ss.str());
         }
 
+        // Get the URL utilities.
+        std::shared_ptr<IURLUtil> url_util = options.url_util;
+        if (!url_util)
+        {
+            url_util = std::make_shared<DefaultURLUtil>();
+        }
+
         // Create the new timeline and file manifest.
         Manifest manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
             options.media_policy,
-            manifest);
+            manifest,
+            url_util);
 
         // Create the output directory.
         std::filesystem::create_directory(path);
@@ -123,6 +131,13 @@ from_otiod(
     Timeline* timeline = nullptr;
     try
     {
+        // Get the URL utilities.
+        std::shared_ptr<IURLUtil> url_util = options.url_util;
+        if (!url_util)
+        {
+            url_util = std::make_shared<DefaultURLUtil>();
+        }
+
         // Read the timeline.
         std::filesystem::path const timeline_path =
             std::filesystem::u8path(file_name) / otio_file;
@@ -138,8 +153,8 @@ from_otiod(
                     std::filesystem::path const path =
                         timeline_path.parent_path()
                         / std::filesystem::u8path(
-                            filepath_from_url(er->target_url()));
-                    er->set_target_url(url_from_filepath(path.u8string()));
+                            url_util->filepath_from_url(er->target_url()));
+                    er->set_target_url(url_util->url_from_filepath(path.u8string()));
                 }
             }
         }

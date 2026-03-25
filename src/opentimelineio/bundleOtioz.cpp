@@ -3,10 +3,10 @@
 
 #include "opentimelineio/bundle.h"
 
-#include "opentimelineio/bundleUtils.h"
+#include "opentimelineio/bundlePrivate.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/timeline.h"
-#include "opentimelineio/urlUtils.h"
+#include "opentimelineio/urlUtil.h"
 
 #include <unzip.h>
 #include <zip.h>
@@ -246,13 +246,21 @@ to_otioz(
             throw std::runtime_error(ss.str());
         }
 
+        // Get the URL utilities.
+        std::shared_ptr<IURLUtil> url_util = options.url_util;
+        if (!url_util)
+        {
+            url_util = std::make_shared<DefaultURLUtil>();
+        }
+
         // Create the new timeline and file manifest.
         Manifest manifest;
         auto result_timeline = timeline_for_bundle_and_manifest(
             timeline,
             std::filesystem::u8path(options.parent_path),
             options.media_policy,
-            manifest);
+            manifest,
+            url_util);
 
         // Write the archive.
         ZipWriter zip(file_name);
@@ -370,7 +378,7 @@ void ZipReader::extract(std::string const& file_name, std::string& text)
     // Read the file in the ZIP.
     text.resize(ufi.uncompressed_size);
     r = unzReadCurrentFile(_zip, text.data(), ufi.uncompressed_size);
-    if (r != ufi.uncompressed_size || r < 0)
+    if (static_cast<ZPOS64_T>(r) != ufi.uncompressed_size || r < 0)
     {
         std::stringstream ss;
         ss << "Cannot read file in ZIP: '" << file_name << "'.";
@@ -426,7 +434,7 @@ ZipReader::extract_all(std::string const& output_dir)
             // Read the file in the ZIP.
             std::vector<uint8_t> buf(ufi.uncompressed_size);
             r = unzReadCurrentFile(_zip, buf.data(), ufi.uncompressed_size);
-            if (r != ufi.uncompressed_size || r < 0)
+            if (static_cast<ZPOS64_T>(r) != ufi.uncompressed_size || r < 0)
             {
                 std::stringstream ss;
                 ss << "Cannot read file in ZIP: '" << file_name << "'.";

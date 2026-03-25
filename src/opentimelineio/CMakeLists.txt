@@ -5,7 +5,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
     bundle.h
-    bundleUtils.h
     color.h
     clip.h
     composable.h
@@ -40,12 +39,14 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    urlUtils.h
+    urlUtil.h
     vectorIndexing.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     bundle.cpp
-    bundleUtils.cpp
+    bundlePrivate.cpp
+    bundleOtiod.cpp
+    bundleOtioz.cpp
     color.cpp
     clip.cpp
     composable.cpp
@@ -65,8 +66,6 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     marker.cpp
     mediaReference.cpp
     missingReference.cpp
-    otiod.cpp
-    otioz.cpp
     safely_typed_any.cpp
     serializableCollection.cpp
     serializableObject.cpp
@@ -83,7 +82,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     transition.cpp
     typeRegistry.cpp
     unknownSchema.cpp 
-    urlUtils.cpp
+    urlUtil.cpp
     CORE_VERSION_MAP.cpp
     ${OPENTIMELINEIO_HEADER_FILES})
 

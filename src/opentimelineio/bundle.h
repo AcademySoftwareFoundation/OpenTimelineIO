@@ -5,23 +5,28 @@
 
 #include "opentimelineio/timeline.h"
 
+#include <memory>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION {
+
+class IURLUtil;
+
 namespace bundle {
 
 /// @brief The current otioz version.
-static std::string const otioz_version = "1.0.0";
+std::string const otioz_version = "1.0.0";
 
 /// @brief The current otiod version.
-static std::string const otiod_version = "1.0.0";
+std::string const otiod_version = "1.0.0";
 
 /// @brief The version file name in the bundle.
-static std::string const version_file = "version.txt";
+std::string const version_file = "version.txt";
 
 /// @brief The OTIO file name in the bundle.
-static std::string const otio_file = "content.otio";
+std::string const otio_file = "content.otio";
 
 /// @brief The media directory name in the bundle.
-static std::string const media_dir = "media";
+std::string const media_dir = "media";
 
 /// @brief This enumeration provides the bundle media reference policy.
 enum class OTIO_API_TYPE MediaReferencePolicy
@@ -46,6 +51,9 @@ struct OTIO_API_TYPE WriteOptions
 
     /// @brief The number of spaces to use for JSON indentation.
     int indent = 4;
+
+    /// @brief URL utilities. If this is empty the default URL utilites are used.
+    std::shared_ptr<IURLUtil> url_util;
 };
 
 /// @brief Options for reading .otioz bundles.
@@ -55,6 +63,9 @@ struct OTIO_API_TYPE OtiozReadOptions
     /// path is empty, the contents are not extracted, and only the timeline
     /// is read from the bundle.
     std::string extract_path;
+
+    /// @brief URL utilities. If this is empty the default URL utilites are used.
+    std::shared_ptr<IURLUtil> url_util;
 };
 
 /// @brief Options for reading .otiod bundles.
@@ -62,6 +73,9 @@ struct OTIO_API_TYPE OtiodReadOptions
 {
     /// @brief Use absolute paths for media references.
     bool absolute_media_reference_paths = false;
+
+    /// @brief URL utilities. If this is empty the default URL utilites are used.
+    std::shared_ptr<IURLUtil> url_util;
 };
 
 /// @brief Get the total size (in bytes) of the media files that will be

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "opentimelineio/timeline.h"
+#include "opentimelineio/typeRegistry.h"
 
 #include <memory>
 

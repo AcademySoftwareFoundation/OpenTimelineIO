@@ -28,7 +28,7 @@ jobs:
     outputs:
       branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Create Branch
         shell: bash
@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@09c613e259eb8d4e7c81c2cb00618eb5fc4575a7 # v5
         id: draft-release
         with:
           publish: false
@@ -59,7 +59,7 @@ jobs:
 
       - name: Convert Github markdown to Slack markdown syntax
         # https://github.com/LoveToKnow/slackify-markdown-action
-        uses: LoveToKnow/slackify-markdown-action@v1.0.0
+        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
         if: ${{ github.event.inputs.notify == 'true' }}
         id: slack-markdown
         with:
@@ -70,7 +70,7 @@ jobs:
 
       - name: 'Slack Notification to ##opentimelineio'
         # https://github.com/rtCamp/action-slack-notify
-        uses: rtCamp/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2
         if: ${{ github.event.inputs.notify == 'true' }}
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_RELEASES_URL }}

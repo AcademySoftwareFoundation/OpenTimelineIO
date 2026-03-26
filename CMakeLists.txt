@@ -1,6 +1,8 @@
 # FindPython's Development.Module component was added in 3.18.
 # Require 3.18.2+ because pybind11 recommends it.
 cmake_minimum_required(VERSION 3.18.2)
+# This policy CMP0177 can be removed when we upgrade to CMake >= 3.31.
+cmake_policy(SET CMP0177 NEW)
 
 #------------------------------------------------------------------------------
 # Project Metadata

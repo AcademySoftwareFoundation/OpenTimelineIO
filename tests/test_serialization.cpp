@@ -14,8 +14,7 @@
 #include <iostream>
 #include <string>
 
-namespace otime = opentime::OPENTIME_VERSION_NS;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace OTIO_NS;
 
 int
 main(int argc, char** argv)
@@ -24,18 +23,15 @@ main(int argc, char** argv)
 
     tests.add_test(
         "success with default indent", [] {
-        otio::SerializableObject::Retainer<otio::Clip> cl =
-            new otio::Clip();
-        otio::SerializableObject::Retainer<otio::Track> tr =
-            new otio::Track();
+        SerializableObject::Retainer<Clip> cl = new Clip();
+        SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
-        otio::SerializableObject::Retainer<otio::Timeline> tl =
-            new otio::Timeline();
+        SerializableObject::Retainer<Timeline> tl = new Timeline();
         tl->tracks()->append_child(tr);
 
-        otio::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto output = tl.value->to_json_string(&err, {});
-        assertFalse(otio::is_error(err));
+        assertFalse(is_error(err));
         assertEqual(output.c_str(), R"CONTENT({
     "OTIO_SCHEMA": "Timeline.1",
     "metadata": {},
@@ -91,23 +87,23 @@ main(int argc, char** argv)
 
     tests.add_test(
         "success with indent set to 0", [] {
-        otio::SerializableObject::Retainer<otio::SerializableObjectWithMetadata> so =
-            new otio::SerializableObjectWithMetadata();
+        SerializableObject::Retainer<SerializableObjectWithMetadata> so =
+            new SerializableObjectWithMetadata();
 
-        otio::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto output = so.value->to_json_string(&err, {}, 0);
-        assertFalse(otio::is_error(err));
+        assertFalse(is_error(err));
         assertEqual(output.c_str(), R"CONTENT({"OTIO_SCHEMA":"SerializableObjectWithMetadata.1","metadata":{},"name":""})CONTENT");
     });
 
     tests.add_test(
         "success with indent set to 2", [] {
-        otio::SerializableObject::Retainer<otio::SerializableObjectWithMetadata> so =
-            new otio::SerializableObjectWithMetadata();
+        SerializableObject::Retainer<SerializableObjectWithMetadata> so =
+            new SerializableObjectWithMetadata();
 
-        otio::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto output = so.value->to_json_string(&err, {}, 2);
-        assertFalse(otio::is_error(err));
+        assertFalse(is_error(err));
         assertEqual(output.c_str(), R"CONTENT({
   "OTIO_SCHEMA": "SerializableObjectWithMetadata.1",
   "metadata": {},

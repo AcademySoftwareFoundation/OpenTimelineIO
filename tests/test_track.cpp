@@ -9,8 +9,7 @@
 
 #include <iostream>
 
-namespace otime = opentime::OPENTIME_VERSION_NS;
-namespace otio  = opentimelineio::OPENTIMELINEIO_VERSION_NS;
+using namespace OTIO_NS;
 
 int
 main(int argc, char** argv)
@@ -19,64 +18,56 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_find_children", [] {
-        using namespace otio;
-        otio::SerializableObject::Retainer<otio::Clip> cl =
-            new otio::Clip();
-        otio::SerializableObject::Retainer<otio::Track> tr =
-            new otio::Track();
+        SerializableObject::Retainer<Clip> cl = new Clip();
+        SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
         OTIO_NS::ErrorStatus err;
-        auto result = tr->find_children<otio::Clip>(&err);
+        auto result = tr->find_children<Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });
     tests.add_test(
         "test_find_children_search_range", [] {
-        using namespace otio;
         const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
-        otio::SerializableObject::Retainer<otio::Clip> cl0 =
-            new otio::Clip();
+        SerializableObject::Retainer<Clip> cl0 = new Clip();
         cl0->set_source_range(range);
-        otio::SerializableObject::Retainer<otio::Clip> cl1 =
-            new otio::Clip();
+        SerializableObject::Retainer<Clip> cl1 = new Clip();
         cl1->set_source_range(range);
-        otio::SerializableObject::Retainer<otio::Clip> cl2 =
-            new otio::Clip();
+        SerializableObject::Retainer<Clip> cl2 = new Clip();
         cl2->set_source_range(range);
-        otio::SerializableObject::Retainer<otio::Track> tr =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl0);
         tr->append_child(cl1);
         tr->append_child(cl2);
         OTIO_NS::ErrorStatus err;
-        auto result = tr->find_children<otio::Clip>(
+        auto result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->find_children<otio::Clip>(
+        result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(24.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl1.value);
-        result = tr->find_children<otio::Clip>(
+        result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(48.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl2.value);
-        result = tr->find_children<otio::Clip>(
+        result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(48.0, 24.0)));
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);
-        result = tr->find_children<otio::Clip>(
+        result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(24.0, 24.0), RationalTime(48.0, 24.0)));
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl1.value);
         assertEqual(result[1].value, cl2.value);
-        result = tr->find_children<otio::Clip>(
+        result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(72.0, 24.0)));
         assertEqual(result.size(), 3);
@@ -86,23 +77,18 @@ main(int argc, char** argv)
     });
     tests.add_test(
         "test_find_children_shallow_search", [] {
-        using namespace otio;
-        otio::SerializableObject::Retainer<otio::Clip> cl0 =
-            new otio::Clip();
-        otio::SerializableObject::Retainer<otio::Clip> cl1 =
-            new otio::Clip();
-        otio::SerializableObject::Retainer<otio::Stack> st =
-            new otio::Stack();
+        SerializableObject::Retainer<Clip> cl0 = new Clip();
+        SerializableObject::Retainer<Clip> cl1 = new Clip();
+        SerializableObject::Retainer<Stack> st = new Stack();
         st->append_child(cl1);
-        otio::SerializableObject::Retainer<otio::Track> tr =
-            new otio::Track();
+        SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl0);
         tr->append_child(st);
         OTIO_NS::ErrorStatus err;
-        auto result = tr->find_children<otio::Clip>(&err, std::nullopt, true);
+        auto result = tr->find_children<Clip>(&err, std::nullopt, true);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
-        result = tr->find_children<otio::Clip>(&err, std::nullopt, false);
+        result = tr->find_children<Clip>(&err, std::nullopt, false);
         assertEqual(result.size(), 2);
         assertEqual(result[0].value, cl0.value);
         assertEqual(result[1].value, cl1.value);
@@ -110,7 +96,6 @@ main(int argc, char** argv)
 
     tests.add_test(
         "test_find_children_stack", [] {
-        using namespace otio;
 
         SerializableObject::Retainer<Stack> stack = new Stack();
         SerializableObject::Retainer<Track> track = new Track;
@@ -121,7 +106,7 @@ main(int argc, char** argv)
         // Simple find.
         clip->set_source_range(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(3.0, 24.0)));
-        otio::ErrorStatus err;
+        OTIO_NS::ErrorStatus err;
         auto items = stack->find_children(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(1.0, 24.0)));

@@ -9,21 +9,9 @@ accessible through the file system and bundles those files and the otio file
 into a single directory named with a suffix of .otiod.
 """
 
-import os
-import shutil
-
-from . import (
-    file_bundle_utils as utils,
-    otio_json,
-)
-
 from .. import (
-    exceptions,
-    url_utils,
+    _otio
 )
-
-import pathlib
-import urllib.parse as urlparse
 
 
 def read_from_file(
@@ -31,110 +19,23 @@ def read_from_file(
     # convert the media_reference paths to absolute paths
     absolute_media_reference_paths=False,
 ):
-    result = otio_json.read_from_file(
-        os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
-    )
-
-    if not absolute_media_reference_paths:
-        return result
-
-    for cl in result.find_clips():
-        try:
-            source_fpath = cl.media_reference.target_url
-        except AttributeError:
-            continue
-
-        rel_path = urlparse.urlparse(source_fpath).path
-        new_fpath = url_utils.url_from_filepath(
-            os.path.join(filepath, rel_path)
-        )
-
-        cl.media_reference.target_url = new_fpath
-
-    return result
+    options = _otio.bundle.OtiodReadOptions()
+    options.absolute_media_reference_paths = absolute_media_reference_paths
+    return _otio.bundle.from_otiod(filepath, options)
 
 
 def write_to_file(
     input_otio,
     filepath,
-    # see documentation in file_bundle_utils for more information on the
-    # media_policy
-    media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
+    # see documentation in bundle.h for more information on the media_policy
+    media_policy=_otio.bundle.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
+    options = _otio.bundle.WriteOptions()
+    options.media_policy = media_policy
 
-    if os.path.exists(filepath):
-        raise exceptions.OTIOError(
-            f"'{filepath}' exists, will not overwrite."
-        )
-
-    if not os.path.exists(os.path.dirname(filepath)):
-        raise exceptions.OTIOError(
-            f"Directory '{os.path.dirname(filepath)}' does not exist, cannot"
-            f" create '{filepath}'."
-        )
-
-    if not os.path.isdir(os.path.dirname(filepath)):
-        raise exceptions.OTIOError(
-            f"'{os.path.dirname(filepath)}' is not a directory, cannot create"
-            f" '{filepath}'."
-        )
-
-    # general algorithm for the file bundle adapters:
-    # -------------------------------------------------------------------------
-    # - build file manifest (list of paths to files on disk that will be put
-    #   into the archive)
-    # - build a mapping of path to file on disk to url to put into the media
-    #   reference in the result
-    # - relink the media references to point at the final location inside the
-    #   archive
-    # - build the resulting structure (zip file, directory)
-    # -------------------------------------------------------------------------
-
-    result_otio, path_to_mr_map = utils._prepped_otio_for_bundle_and_manifest(
-        input_otio,
-        media_policy,
-        "OTIOD"
-    )
-
-    # dryrun reports the total size of files
     if dryrun:
-        return utils._total_file_size_of(path_to_mr_map.keys())
+        return _otio.bundle.get_media_size(input_otio, options)
 
-    abspath_to_output_path_map = {}
-
-    # relink all the media references to their target paths
-    for abspath, references in path_to_mr_map.items():
-        target = os.path.join(
-            filepath,
-            utils.BUNDLE_DIR_NAME,
-            os.path.basename(abspath)
-        )
-
-        # conform to posix style paths inside the bundle, so that they are
-        # portable between windows and *nix style environments
-        final_path = str(pathlib.Path(target).as_posix())
-
-        # cache the output path
-        abspath_to_output_path_map[abspath] = final_path
-
-        for mr in references:
-            # author the relative path from the root of the bundle in url
-            # form into the target_url
-            mr.target_url = url_utils.url_from_filepath(
-                os.path.relpath(final_path, filepath)
-            )
-
-    os.mkdir(filepath)
-
-    otio_json.write_to_file(
-        result_otio,
-        os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
-    )
-
-    # write the media files
-    os.mkdir(os.path.join(filepath, utils.BUNDLE_DIR_NAME))
-    for src, dst in abspath_to_output_path_map.items():
-        shutil.copyfile(src, dst)
-
+    _otio.bundle.to_otiod(input_otio, filepath, options)
     return

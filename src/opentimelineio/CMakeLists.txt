@@ -4,6 +4,7 @@
 set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
+    bundle.h
     color.h
     clip.h
     composable.h
@@ -14,6 +15,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     errorStatus.h
     export.h
     externalReference.h
+    fileUtils.h
     freezeFrame.h
     gap.h
     generatorReference.h
@@ -37,10 +39,15 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
+    urlUtils.h
     vectorIndexing.h
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    bundle.cpp
+    bundlePrivate.cpp
+    bundleOtiod.cpp
+    bundleOtioz.cpp
     color.cpp
     clip.cpp
     composable.cpp
@@ -50,6 +57,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     effect.cpp
     errorStatus.cpp
     externalReference.cpp
+    fileUtils.cpp
     freezeFrame.cpp
     gap.cpp
     generatorReference.cpp
@@ -75,6 +83,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     transition.cpp
     typeRegistry.cpp
     unknownSchema.cpp 
+    urlUtils.cpp
     CORE_VERSION_MAP.cpp
     ${OPENTIMELINEIO_HEADER_FILES})
 
@@ -92,7 +101,8 @@ endif()
 
 
 target_link_libraries(opentimelineio 
-    PUBLIC opentime Imath::Imath)
+    PUBLIC opentime Imath::Imath
+    PRIVATE ${OTIO_BUNDLE_LIBS})
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"

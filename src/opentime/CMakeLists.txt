@@ -13,6 +13,7 @@ set(OPENTIME_HEADER_FILES
 add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB} 
             errorStatus.cpp
             rationalTime.cpp
+            timeRange.cpp
             ${OPENTIME_HEADER_FILES})
 
 add_library(OTIO::opentime ALIAS opentime)

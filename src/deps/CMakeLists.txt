@@ -33,7 +33,7 @@ if(NOT OTIO_FIND_PYBIND11 AND OTIO_PYTHON_INSTALL)
     add_subdirectory(pybind11)
 endif()
 
-# Don't try to build rapidjson, it won't, and since it's header-only, we don't need to built id.
+# Don't try to build rapidjson, it won't, and since it's header-only, we don't need to built it.
 
 if(NOT OTIO_FIND_IMATH)
     # preserve BUILD_SHARED_LIBS options for this project, but set it off for Imath

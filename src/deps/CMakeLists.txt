@@ -4,14 +4,21 @@
 #----- Other dependencies
 
 # detect if the submodules haven't been updated
-set(DEPS_SUBMODULES pybind11)
+if(NOT OTIO_FIND_PYBIND11 AND OTIO_PYTHON_INSTALL)
+    # pybind11 only needed when building Python bindings
+    set(DEPS_SUBMODULES ${DEPS_SUBMODULES} pybind11)
+endif()
+
+if(NOT OTIO_FIND_IMATH)
+    set(DEPS_SUBMODULES ${DEPS_SUBMODULES} Imath)
+endif()
 
 if(NOT OTIO_FIND_RAPIDJSON)
     set(DEPS_SUBMODULES ${DEPS_SUBMODULES} rapidjson)
 endif()
 
 foreach(submodule IN LISTS DEPS_SUBMODULES)
-    file(GLOB SUBMOD_CONTENTS ${submodule})
+    file(GLOB SUBMOD_CONTENTS "${submodule}/*")
     list(LENGTH SUBMOD_CONTENTS SUBMOD_CONTENT_LEN)
     if(SUBMOD_CONTENT_LEN EQUAL 0)
         message(
@@ -21,8 +28,13 @@ foreach(submodule IN LISTS DEPS_SUBMODULES)
     endif()
 endforeach()
 
-if(OTIO_PYTHON_INSTALL)
+if(NOT OTIO_FIND_PYBIND11 AND OTIO_PYTHON_INSTALL)
+    # pybind11 only needed when building Python bindings
     add_subdirectory(pybind11)
+endif()
+
+if(NOT OTIO_FIND_RAPIDJSON)
+    add_subdirectory(rapidjson)
 endif()
 
 if(NOT OTIO_FIND_IMATH)

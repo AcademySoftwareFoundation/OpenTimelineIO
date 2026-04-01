@@ -33,7 +33,7 @@ if(NOT OTIO_FIND_PYBIND11 AND OTIO_PYTHON_INSTALL)
     add_subdirectory(pybind11)
 endif()
 
-# Calling add_subdirectory(rapidjson) will try to build
+# Calling add_subdirectory(rapidjson) will try to build subcomponents
 # such as example/CMakeLists.txt which has not been updated for CMake
 # 4.0 compatibility and will break our builds. rapidjson is a header
 # only library, code in src/opentimelineio/ only needs it to be present

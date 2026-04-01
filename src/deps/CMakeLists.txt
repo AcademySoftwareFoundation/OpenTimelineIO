@@ -33,7 +33,19 @@ if(NOT OTIO_FIND_PYBIND11 AND OTIO_PYTHON_INSTALL)
     add_subdirectory(pybind11)
 endif()
 
-# Don't try to build rapidjson, it won't, and since it's header-only, we don't need to built it.
+# Calling add_subdirectory(rapidjson) will try to build
+# such as example/CMakeLists.txt which has not been updated for CMake
+# 4.0 compatibility and will break our builds. rapidjson is a header
+# only library, code in src/opentimelineio/ only needs it to be present
+# to pick up the headers.
+# If building rapidjson ends up required, the CMake variables:
+#
+# RAPIDJSON_BUILD_DOC
+# RAPIDJSON_BUILD_EXAMPLES
+# RAPIDJSON_BUILD_TESTS
+#
+# coud be overriden from ON to OFF to avoid trying to build
+# subcomponents we don't need.
 
 if(NOT OTIO_FIND_IMATH)
     # preserve BUILD_SHARED_LIBS options for this project, but set it off for Imath

@@ -35,6 +35,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     streamChannelIndexStreamAddress.h
     streamInfo.h
     stringStreamAddress.h
+    streamMapper.h
     streamSelector.h
     audioMixMatrix.h
     timeEffect.h
@@ -78,6 +79,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     streamChannelIndexStreamAddress.cpp
     streamInfo.cpp
     stringStreamAddress.cpp
+    streamMapper.cpp
     streamSelector.cpp
     audioMixMatrix.cpp
     stringUtils.cpp

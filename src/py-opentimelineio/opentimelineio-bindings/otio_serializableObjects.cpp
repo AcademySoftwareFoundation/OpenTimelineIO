@@ -28,6 +28,7 @@
 #include "opentimelineio/streamChannelIndexStreamAddress.h"
 #include "opentimelineio/streamInfo.h"
 #include "opentimelineio/stringStreamAddress.h"
+#include "opentimelineio/streamMapper.h"
 #include "opentimelineio/streamSelector.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
@@ -815,6 +816,32 @@ static void define_stream_effects(py::module m) {
             &StreamSelector::output_streams,
             &StreamSelector::set_output_streams,
             "List of stream identifier strings to select.");
+
+    py::class_<StreamMapper, Effect,
+               managing_ptr<StreamMapper>>(m, "StreamMapper", py::dynamic_attr(),
+        "An effect that remaps stream identifiers to new names. "
+        "Each entry in stream_map maps an output stream name (the key as it will "
+        "appear downstream) to an input stream name (the key as it appears in the "
+        "upstream MediaReference available_streams). "
+        "A typical use is to normalize a source-specific identifier into a "
+        "well-known StreamInfo.Identifier value -- for example, to expose the "
+        "left eye of a stereo source as the conventional monocular stream.")
+        .def(py::init([](std::string name,
+                         std::string effect_name,
+                         StreamMapper::StreamMap stream_map,
+                         py::object metadata) {
+                return new StreamMapper(name, effect_name, stream_map,
+                                        py_to_any_dictionary(metadata)); }),
+             py::arg_v("name"_a = std::string()),
+             "effect_name"_a = std::string(),
+             "stream_map"_a = StreamMapper::StreamMap(),
+             py::arg_v("metadata"_a = py::none()))
+        .def_property("stream_map",
+            &StreamMapper::stream_map,
+            &StreamMapper::set_stream_map,
+            "Mapping of output stream name to input stream name. "
+            "Keys SHOULD use StreamInfo.Identifier values where applicable; "
+            "values SHOULD match keys in the upstream available_streams map.");
 
     py::class_<AudioMixMatrix, Effect,
                managing_ptr<AudioMixMatrix>>(m, "AudioMixMatrix", py::dynamic_attr(),

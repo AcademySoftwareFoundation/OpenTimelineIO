@@ -338,5 +338,94 @@ class TestStreamIdentifier(unittest.TestCase):
         self.assertIn(StreamInfo.Identifier.stereo_left, streams)
 
 
+class TestStreamMapper(unittest.TestCase):
+    def test_create_default(self):
+        mapper = otio.schema.StreamMapper()
+        self.assertEqual(mapper.stream_map, {})
+        self.assertEqual(mapper.schema_name(), "StreamMapper")
+        self.assertEqual(mapper.schema_version(), 1)
+
+    def test_create_with_map(self):
+        stream_map = {
+            StreamInfo.Identifier.monocular: StreamInfo.Identifier.left_eye
+        }
+        mapper = otio.schema.StreamMapper(stream_map=stream_map)
+        self.assertEqual(mapper.stream_map, stream_map)
+
+    def test_set_map(self):
+        mapper = otio.schema.StreamMapper()
+        stream_map = {
+            StreamInfo.Identifier.stereo_left: StreamInfo.Identifier.surround_left_front,
+            StreamInfo.Identifier.stereo_right: StreamInfo.Identifier.surround_right_front,
+        }
+        mapper.stream_map = stream_map
+        self.assertEqual(mapper.stream_map, stream_map)
+
+    def test_round_trip_serialization(self):
+        stream_map = {
+            StreamInfo.Identifier.monocular: StreamInfo.Identifier.left_eye
+        }
+        mapper = otio.schema.StreamMapper(
+            name="remap_to_mono",
+            stream_map=stream_map,
+        )
+        json_str = mapper.to_json_string()
+        restored = otio.adapters.read_from_string(json_str, "otio_json")
+        self.assertIsInstance(restored, otio.schema.StreamMapper)
+        self.assertEqual(restored.name, "remap_to_mono")
+        self.assertEqual(restored.stream_map, stream_map)
+
+    def test_left_eye_to_monocular_use_case(self):
+        """StreamMapper can remap left_eye to monocular for downstream consumers."""
+        clip = otio.schema.Clip(
+            name="stereo_shot",
+            media_reference=otio.schema.ExternalReference(
+                target_url="/path/to/stereo.mov"
+            ),
+            effects=[
+                otio.schema.StreamMapper(
+                    stream_map={
+                        StreamInfo.Identifier.monocular: StreamInfo.Identifier.left_eye
+                    }
+                )
+            ]
+        )
+        mapper = clip.effects[0]
+        self.assertIsInstance(mapper, otio.schema.StreamMapper)
+        self.assertEqual(
+            mapper.stream_map[StreamInfo.Identifier.monocular],
+            StreamInfo.Identifier.left_eye
+        )
+
+    def test_use_as_clip_effect(self):
+        """StreamMapper round-trips correctly when embedded in a clip."""
+        clip = otio.schema.Clip(
+            name="remapped_clip",
+            media_reference=otio.schema.ExternalReference(
+                target_url="/path/to/source.mov"
+            ),
+            effects=[
+                otio.schema.StreamMapper(
+                    name="a very bad stereo downmix",
+                    stream_map={
+                        StreamInfo.Identifier.stereo_left: StreamInfo.Identifier.surround_left_front,
+                        StreamInfo.Identifier.stereo_right: StreamInfo.Identifier.surround_right_front,
+                    }
+                )
+            ]
+        )
+        json_str = clip.to_json_string()
+        restored = otio.adapters.read_from_string(json_str, "otio_json")
+        self.assertIsInstance(restored, otio.schema.Clip)
+        self.assertEqual(len(restored.effects), 1)
+        mapper = restored.effects[0]
+        self.assertIsInstance(mapper, otio.schema.StreamMapper)
+        self.assertEqual(mapper.name, "A very bad stereo downmix")
+        self.assertEqual(
+            mapper.stream_map[StreamInfo.Identifier.stereo_left],
+            StreamInfo.Identifier.surround_left_front
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

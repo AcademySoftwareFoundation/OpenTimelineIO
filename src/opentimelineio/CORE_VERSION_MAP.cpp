@@ -236,6 +236,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "Stack", 1 },
           { "StreamAddress", 1 },
           { "StreamInfo", 1 },
+          { "StreamMapper", 1 },
           { "StreamSelector", 1 },
           { "StringStreamAddress", 1 },
           { "Test", 1 },

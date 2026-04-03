@@ -28,6 +28,7 @@
 #include "opentimelineio/streamChannelIndexStreamAddress.h"
 #include "opentimelineio/streamInfo.h"
 #include "opentimelineio/stringStreamAddress.h"
+#include "opentimelineio/streamMapper.h"
 #include "opentimelineio/streamSelector.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
@@ -94,6 +95,7 @@ TypeRegistry::TypeRegistry()
     register_type<StreamChannelIndexStreamAddress>();
     register_type<StringStreamAddress>();
     register_type<StreamInfo>();
+    register_type<StreamMapper>();
     register_type<StreamSelector>();
     register_type<AudioMixMatrix>();
     register_type<TimeEffect>();

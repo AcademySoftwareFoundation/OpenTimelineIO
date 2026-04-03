@@ -803,13 +803,11 @@ static void define_stream_effects(py::module m) {
         "Use this to select a stereo view, specific audio channels, etc. "
         "The item will expose these streams downstream with the same naming.")
         .def(py::init([](std::string name,
-                         std::string effect_name,
                          std::vector<std::string> output_streams,
                          py::object metadata) {
-                return new StreamSelector(name, effect_name, output_streams,
+                return new StreamSelector(name, "StreamSelector", output_streams,
                                          py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
-             "effect_name"_a = std::string(),
              "output_streams"_a = std::vector<std::string>(),
              py::arg_v("metadata"_a = py::none()))
         .def_property("output_streams",
@@ -827,13 +825,11 @@ static void define_stream_effects(py::module m) {
         "well-known StreamInfo.Identifier value -- for example, to expose the "
         "left eye of a stereo source as the conventional monocular stream.")
         .def(py::init([](std::string name,
-                         std::string effect_name,
                          StreamMapper::StreamMap stream_map,
                          py::object metadata) {
-                return new StreamMapper(name, effect_name, stream_map,
+                return new StreamMapper(name, "StreamMapper", stream_map,
                                         py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
-             "effect_name"_a = std::string(),
              "stream_map"_a = StreamMapper::StreamMap(),
              py::arg_v("metadata"_a = py::none()))
         .def_property("stream_map",

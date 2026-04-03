@@ -7,9 +7,25 @@ from .. import _otio
 
 @add_method(_otio.StreamMapper)
 def __str__(self):
-    return "StreamMapper({})".format(str(self.name))
+    return (
+        "StreamMapper("
+        "{}, "
+        "{}"
+        ")".format(
+            str(self.name),
+            str(self.stream_map),
+        )
+    )
 
 
 @add_method(_otio.StreamMapper)
 def __repr__(self):
-    return "otio.schema.StreamMapper(name={})".format(repr(self.name))
+    return (
+        "otio.schema.StreamMapper("
+        "name={}, "
+        "stream_map={}"
+        ")".format(
+            repr(self.name),
+            repr(self.stream_map),
+        )
+    )

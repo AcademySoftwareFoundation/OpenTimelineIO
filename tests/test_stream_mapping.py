@@ -159,13 +159,12 @@ class TestStreamSelector(unittest.TestCase):
     def test_create_default(self):
         sel = otio.schema.StreamSelector()
         self.assertEqual(sel.name, "")
-        self.assertEqual(sel.effect_name, "")
+        self.assertEqual(sel.effect_name, "StreamSelector")
         self.assertEqual(sel.output_streams, [])
 
     def test_create_with_streams(self):
         sel = otio.schema.StreamSelector(
             name="stereo_select",
-            effect_name="StreamSelector",
             output_streams=[
                 StreamInfo.Identifier.stereo_left,
                 StreamInfo.Identifier.stereo_right,
@@ -420,7 +419,7 @@ class TestStreamMapper(unittest.TestCase):
         self.assertEqual(len(restored.effects), 1)
         mapper = restored.effects[0]
         self.assertIsInstance(mapper, otio.schema.StreamMapper)
-        self.assertEqual(mapper.name, "A very bad stereo downmix")
+        self.assertEqual(mapper.name, "a very bad stereo downmix")
         self.assertEqual(
             mapper.stream_map[StreamInfo.Identifier.stereo_left],
             StreamInfo.Identifier.surround_left_front

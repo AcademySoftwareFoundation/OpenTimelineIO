@@ -221,6 +221,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "HookScript", 1 },
           { "ImageSequenceReference", 1 },
           { "IndexStreamAddress", 1 },
+          { "StreamChannelIndexStreamAddress", 1 },
           { "Item", 1 },
           { "LinearTimeWarp", 1 },
           { "Marker", 2 },

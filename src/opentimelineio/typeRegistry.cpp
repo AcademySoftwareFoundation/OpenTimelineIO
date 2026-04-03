@@ -25,6 +25,7 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/indexStreamAddress.h"
 #include "opentimelineio/streamAddress.h"
+#include "opentimelineio/streamChannelIndexStreamAddress.h"
 #include "opentimelineio/streamInfo.h"
 #include "opentimelineio/stringStreamAddress.h"
 #include "opentimelineio/streamSelector.h"
@@ -90,6 +91,7 @@ TypeRegistry::TypeRegistry()
     register_type<Stack>();
     register_type<StreamAddress>();
     register_type<IndexStreamAddress>();
+    register_type<StreamChannelIndexStreamAddress>();
     register_type<StringStreamAddress>();
     register_type<StreamInfo>();
     register_type<StreamSelector>();

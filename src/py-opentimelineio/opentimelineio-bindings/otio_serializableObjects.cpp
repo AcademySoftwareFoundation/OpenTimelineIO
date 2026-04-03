@@ -25,6 +25,7 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/indexStreamAddress.h"
 #include "opentimelineio/streamAddress.h"
+#include "opentimelineio/streamChannelIndexStreamAddress.h"
 #include "opentimelineio/streamInfo.h"
 #include "opentimelineio/stringStreamAddress.h"
 #include "opentimelineio/streamSelector.h"
@@ -722,6 +723,25 @@ static void define_stream_address_and_info(py::module m) {
              "index"_a = 0LL)
         .def_property("index", &IndexStreamAddress::index, &IndexStreamAddress::set_index,
             "Integer index identifying the stream within its container.");
+
+    py::class_<StreamChannelIndexStreamAddress, StreamAddress,
+               managing_ptr<StreamChannelIndexStreamAddress>>(
+            m, "StreamChannelIndexStreamAddress", py::dynamic_attr(),
+        "Addresses a stream by track index and channel index within that track. "
+        "Use this for container formats that organise media into discrete tracks "
+        "each of which may contain one or more channels, such as MP4/MOV and MXF.")
+        .def(py::init([](int64_t stream_index, int64_t channel_index) {
+                return new StreamChannelIndexStreamAddress(stream_index, channel_index); }),
+             "stream_index"_a  = 0LL,
+             "channel_index"_a = 0LL)
+        .def_property("stream_index",
+            &StreamChannelIndexStreamAddress::stream_index,
+            &StreamChannelIndexStreamAddress::set_stream_index,
+            "Integer index of the media track within its container.")
+        .def_property("channel_index",
+            &StreamChannelIndexStreamAddress::channel_index,
+            &StreamChannelIndexStreamAddress::set_channel_index,
+            "Integer index of the channel within the stream.");
 
     py::class_<StringStreamAddress, StreamAddress,
                managing_ptr<StringStreamAddress>>(m, "StringStreamAddress", py::dynamic_attr(),

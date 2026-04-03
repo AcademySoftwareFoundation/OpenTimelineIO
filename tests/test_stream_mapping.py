@@ -32,6 +32,56 @@ class TestIndexStreamAddress(unittest.TestCase):
         self.assertEqual(restored.index, 5)
 
 
+class TestStreamChannelIndexStreamAddress(unittest.TestCase):
+    def test_create_default(self):
+        addr = otio.schema.StreamChannelIndexStreamAddress()
+        self.assertEqual(addr.stream_index, 0)
+        self.assertEqual(addr.channel_index, 0)
+        self.assertEqual(addr.schema_name(), "StreamChannelIndexStreamAddress")
+        self.assertEqual(addr.schema_version(), 1)
+
+    def test_create_with_indices(self):
+        addr = otio.schema.StreamChannelIndexStreamAddress(
+            stream_index=1, channel_index=2
+        )
+        self.assertEqual(addr.stream_index, 1)
+        self.assertEqual(addr.channel_index, 2)
+
+    def test_set_indices(self):
+        addr = otio.schema.StreamChannelIndexStreamAddress()
+        addr.stream_index = 3
+        addr.channel_index = 5
+        self.assertEqual(addr.stream_index, 3)
+        self.assertEqual(addr.channel_index, 5)
+
+    def test_round_trip_serialization(self):
+        addr = otio.schema.StreamChannelIndexStreamAddress(
+            stream_index=1, channel_index=2
+        )
+        json_str = addr.to_json_string()
+        restored = otio.adapters.read_from_string(json_str, "otio_json")
+        self.assertIsInstance(restored, otio.schema.StreamChannelIndexStreamAddress)
+        self.assertEqual(restored.stream_index, 1)
+        self.assertEqual(restored.channel_index, 2)
+
+    def test_use_in_stream_info(self):
+        addr = otio.schema.StreamChannelIndexStreamAddress(
+            stream_index=1, channel_index=2
+        )
+        info = StreamInfo(
+            name="right surround",
+            address=addr,
+            kind=otio.schema.TrackKind.Audio,
+        )
+        json_str = info.to_json_string()
+        restored = otio.adapters.read_from_string(json_str, "otio_json")
+        self.assertIsInstance(
+            restored.address, otio.schema.StreamChannelIndexStreamAddress
+        )
+        self.assertEqual(restored.address.stream_index, 1)
+        self.assertEqual(restored.address.channel_index, 2)
+
+
 class TestStringStreamAddress(unittest.TestCase):
     def test_create_default(self):
         addr = otio.schema.StringStreamAddress()

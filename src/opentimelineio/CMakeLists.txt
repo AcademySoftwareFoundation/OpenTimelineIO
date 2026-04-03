@@ -32,6 +32,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     stackAlgorithm.h
     indexStreamAddress.h
     streamAddress.h
+    streamChannelIndexStreamAddress.h
     streamInfo.h
     stringStreamAddress.h
     streamSelector.h
@@ -74,6 +75,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     stackAlgorithm.cpp
     indexStreamAddress.cpp
     streamAddress.cpp
+    streamChannelIndexStreamAddress.cpp
     streamInfo.cpp
     stringStreamAddress.cpp
     streamSelector.cpp

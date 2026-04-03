@@ -30,6 +30,12 @@ set(OPENTIMELINEIO_HEADER_FILES
     serialization.h
     stack.h
     stackAlgorithm.h
+    indexStreamAddress.h
+    streamAddress.h
+    streamInfo.h
+    stringStreamAddress.h
+    streamSelector.h
+    audioMixMatrix.h
     timeEffect.h
     timeline.h
     track.h
@@ -66,6 +72,12 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
     serialization.cpp
     stack.cpp
     stackAlgorithm.cpp
+    indexStreamAddress.cpp
+    streamAddress.cpp
+    streamInfo.cpp
+    stringStreamAddress.cpp
+    streamSelector.cpp
+    audioMixMatrix.cpp
     stringUtils.cpp
     stringUtils.h # stringUtils.h is a private header
     timeEffect.cpp

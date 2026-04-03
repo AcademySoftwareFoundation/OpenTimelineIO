@@ -6,6 +6,7 @@
 """User facing classes."""
 
 from .. _otio import (
+    AudioMixMatrix,
     Box2d,
     Clip,
     Effect,
@@ -16,10 +17,15 @@ from .. _otio import (
     Gap,
     GeneratorReference,
     ImageSequenceReference,
+    IndexStreamAddress,
     Marker,
     MissingReference,
     SerializableCollection,
     Stack,
+    StreamAddress,
+    StreamInfo,
+    StreamSelector,
+    StringStreamAddress,
     Timeline,
     Track,
     Transition,
@@ -27,6 +33,7 @@ from .. _otio import (
 )
 
 MarkerColor = Marker.Color
+StreamIdentifier = StreamInfo.Identifier
 TrackKind = Track.Kind
 TransitionTypes = Transition.Type
 NeighborGapPolicy = Track.NeighborGapPolicy
@@ -36,14 +43,20 @@ from . schemadef import (
 )
 
 from . import (
+    audio_mix_matrix,
     box2d,
     clip,
     effect,
     external_reference,
     generator_reference,
     image_sequence_reference,
+    index_stream_address,
     marker,
     serializable_collection,
+    stream_address,
+    stream_info,
+    stream_selector,
+    string_stream_address,
     timeline,
     transition,
     v2d,
@@ -56,6 +69,7 @@ def timeline_from_clips(clips):
     return Timeline(tracks=[trck])
 
 __all__ = [
+    'AudioMixMatrix',
     'Box2d',
     'Clip',
     'Effect',
@@ -66,13 +80,20 @@ __all__ = [
     'Gap',
     'GeneratorReference',
     'ImageSequenceReference',
+    'IndexStreamAddress',
     'Marker',
     'MissingReference',
     'SerializableCollection',
+    'SchemaDef',
     'Stack',
+    'StreamAddress',
+    'StreamIdentifier',
+    'StreamInfo',
+    'StreamSelector',
+    'StringStreamAddress',
     'Timeline',
     'Transition',
-    'SchemaDef',
     'timeline_from_clips',
-    'V2d'
+    'V2d',
+    'Track',
 ]

@@ -6,6 +6,7 @@
 #include <pybind11/stl.h>
 #include "otio_errorStatusHandler.h"
 
+#include "opentimelineio/audioMixMatrix.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/color.h"
 #include "opentimelineio/composable.h"
@@ -22,6 +23,11 @@
 #include "opentimelineio/mediaReference.h"
 #include "opentimelineio/missingReference.h"
 #include "opentimelineio/stack.h"
+#include "opentimelineio/indexStreamAddress.h"
+#include "opentimelineio/streamAddress.h"
+#include "opentimelineio/streamInfo.h"
+#include "opentimelineio/stringStreamAddress.h"
+#include "opentimelineio/streamSelector.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
@@ -702,6 +708,149 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             }, "descended_from_type"_a = py::none(), "search_range"_a = std::nullopt, "shallow_search"_a = false);
 }
 
+static void define_stream_address_and_info(py::module m) {
+    py::class_<StreamAddress, SerializableObject,
+               managing_ptr<StreamAddress>>(m, "StreamAddress", py::dynamic_attr(),
+        "Base class for addressing a specific stream within a media reference.")
+        .def(py::init([]() { return new StreamAddress(); }));
+
+    py::class_<IndexStreamAddress, StreamAddress,
+               managing_ptr<IndexStreamAddress>>(m, "IndexStreamAddress", py::dynamic_attr(),
+        "Addresses a stream by integer index (e.g. ffmpeg stream index).")
+        .def(py::init([](int64_t index) {
+                return new IndexStreamAddress(index); }),
+             "index"_a = 0LL)
+        .def_property("index", &IndexStreamAddress::index, &IndexStreamAddress::set_index,
+            "Integer index identifying the stream within its container.");
+
+    py::class_<StringStreamAddress, StreamAddress,
+               managing_ptr<StringStreamAddress>>(m, "StringStreamAddress", py::dynamic_attr(),
+        "Addresses a stream by string identifier (e.g. channel label).")
+        .def(py::init([](std::string address) {
+                return new StringStreamAddress(address); }),
+             "address"_a = std::string())
+        .def_property("address", &StringStreamAddress::address, &StringStreamAddress::set_address,
+            "String identifier for the stream.");
+
+    auto stream_info_class =
+    py::class_<StreamInfo, SOWithMetadata,
+               managing_ptr<StreamInfo>>(m, "StreamInfo", py::dynamic_attr(),
+        "Describes a single media stream provided within a source media. "
+        "A media stream is the smallest unit of temporal media, such as a single eye's video, "
+        "an isolated audio channel, or a camera view within a 3D scene. "
+        "StreamAddress provides a mechanism for addressing a specific stream within a media container.")
+        .def(py::init([](std::string name,
+                         StreamAddress* address,
+                         std::string kind,
+                         py::object metadata) {
+                return new StreamInfo(name, address, kind, py_to_any_dictionary(metadata)); }),
+             py::arg_v("name"_a = std::string()),
+             "address"_a = py::none(),
+             "kind"_a = std::string(),
+             py::arg_v("metadata"_a = py::none()))
+        .def_property("address", &StreamInfo::address, &StreamInfo::set_address,
+            "The address used to identify the stream within its media.")
+        .def_property("kind", &StreamInfo::kind, &StreamInfo::set_kind,
+            "A string identifying the kind of stream (e.g. \"Video\", \"Audio\").");
+
+    py::class_<StreamInfo::Identifier>(stream_info_class, "Identifier",
+        "Well-known strings identifying common semantic roles of media streams. "
+        "These generally map to presentation devices (e.g. a specific speaker or one eye's view). "
+        "Keys SHOULD use these values to signal primary streams "
+        "(e.g. Identifier.monocular for a traditional video stream); "
+        "additional streams SHOULD prefix one of these values to form a unique key "
+        "(e.g. \"surround_left_front_atmos_obj_42\"). "
+        "Keys MAY be any unique string when no well-known identifier applies.")
+        .def_property_readonly_static("left_eye",  [](py::object) { return StreamInfo::Identifier::left_eye; })
+        .def_property_readonly_static("right_eye", [](py::object) { return StreamInfo::Identifier::right_eye; })
+        .def_property_readonly_static("monocular", [](py::object) { return StreamInfo::Identifier::monocular; })
+        .def_property_readonly_static("monaural",  [](py::object) { return StreamInfo::Identifier::monaural; })
+        .def_property_readonly_static("stereo_left",      [](py::object) { return StreamInfo::Identifier::stereo_left; })
+        .def_property_readonly_static("stereo_right",     [](py::object) { return StreamInfo::Identifier::stereo_right; })
+        .def_property_readonly_static("surround_left_front",  [](py::object) { return StreamInfo::Identifier::surround_left_front; })
+        .def_property_readonly_static("surround_right_front", [](py::object) { return StreamInfo::Identifier::surround_right_front; })
+        .def_property_readonly_static("surround_center_front", [](py::object) { return StreamInfo::Identifier::surround_center_front; })
+        .def_property_readonly_static("surround_left_rear",   [](py::object) { return StreamInfo::Identifier::surround_left_rear; })
+        .def_property_readonly_static("surround_right_rear",  [](py::object) { return StreamInfo::Identifier::surround_right_rear; })
+        .def_property_readonly_static("surround_low_frequency_effects", [](py::object) { return StreamInfo::Identifier::surround_low_frequency_effects; });
+}
+
+static void define_stream_effects(py::module m) {
+    py::class_<StreamSelector, Effect,
+               managing_ptr<StreamSelector>>(m, "StreamSelector", py::dynamic_attr(),
+        "An effect that selects specific named output streams from an item. "
+        "Use this to select a stereo view, specific audio channels, etc. "
+        "The item will expose these streams downstream with the same naming.")
+        .def(py::init([](std::string name,
+                         std::string effect_name,
+                         std::vector<std::string> output_streams,
+                         py::object metadata) {
+                return new StreamSelector(name, effect_name, output_streams,
+                                         py_to_any_dictionary(metadata)); }),
+             py::arg_v("name"_a = std::string()),
+             "effect_name"_a = std::string(),
+             "output_streams"_a = std::vector<std::string>(),
+             py::arg_v("metadata"_a = py::none()))
+        .def_property("output_streams",
+            &StreamSelector::output_streams,
+            &StreamSelector::set_output_streams,
+            "List of stream identifier strings to select.");
+
+    py::class_<AudioMixMatrix, Effect,
+               managing_ptr<AudioMixMatrix>>(m, "AudioMixMatrix", py::dynamic_attr(),
+        "An effect that mixes audio streams using a coefficient matrix. "
+        "The matrix maps output stream names to a dict of input stream names and their mix coefficients. "
+        "Output keys SHOULD use StreamInfo.Identifier values (e.g. stereo_left, stereo_right) where applicable; "
+        "they correspond to the keys that will appear in the downstream available_streams map after mixing. "
+        "Input keys identify source streams and SHOULD match keys in the upstream available_streams map.")
+        .def(py::init([](std::string name,
+                         py::object matrix,
+                         py::object metadata) {
+                AudioMixMatrix::MixMatrix m;
+                if (!matrix.is_none()) {
+                    for (auto& outer : matrix.cast<py::dict>()) {
+                        AudioMixMatrix::MixMatrix::mapped_type row;
+                        for (auto& inner : outer.second.cast<py::dict>()) {
+                            row[inner.first.cast<std::string>()] =
+                                inner.second.cast<double>();
+                        }
+                        m[outer.first.cast<std::string>()] = std::move(row);
+                    }
+                }
+                return new AudioMixMatrix(name, "AudioMixMatrix", m,
+                                         py_to_any_dictionary(metadata)); }),
+             py::arg_v("name"_a = std::string()),
+             py::arg_v("matrix"_a = py::none()),
+             py::arg_v("metadata"_a = py::none()))
+        .def_property("matrix",
+            [](AudioMixMatrix const* a) {
+                py::dict outer;
+                for (auto const& row : a->matrix()) {
+                    py::dict inner;
+                    for (auto const& col : row.second) {
+                        inner[py::str(col.first)] = col.second;
+                    }
+                    outer[py::str(row.first)] = inner;
+                }
+                return outer;
+            },
+            [](AudioMixMatrix* a, py::dict d) {
+                AudioMixMatrix::MixMatrix m;
+                for (auto& outer : d) {
+                    AudioMixMatrix::MixMatrix::mapped_type row;
+                    for (auto& inner : outer.second.cast<py::dict>()) {
+                        row[inner.first.cast<std::string>()] =
+                            inner.second.cast<double>();
+                    }
+                    m[outer.first.cast<std::string>()] = std::move(row);
+                }
+                a->set_matrix(m);
+            },
+            "Output-keyed mixing matrix (output_name -> {input_name -> coefficient}). "
+            "Output keys SHOULD use StreamInfo.Identifier values where applicable; "
+            "input keys SHOULD match keys in the upstream available_streams map.");
+}
+
 static void define_effects(py::module m) {
     py::class_<Effect, SOWithMetadata, managing_ptr<Effect>>(m, "Effect", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -765,8 +914,19 @@ static void define_media_references(py::module m) {
              "available_image_bounds"_a = std::nullopt)
 
         .def_property("available_range", &MediaReference::available_range, &MediaReference::set_available_range)
-        .def_property("available_image_bounds", &MediaReference::available_image_bounds, &MediaReference::set_available_image_bounds) 
-        .def_property_readonly("is_missing_reference", &MediaReference::is_missing_reference);
+        .def_property("available_image_bounds", &MediaReference::available_image_bounds, &MediaReference::set_available_image_bounds)
+        .def_property_readonly("is_missing_reference", &MediaReference::is_missing_reference)
+        .def("available_streams", &MediaReference::available_streams,
+            "Return a dict mapping stream identifier keys to StreamInfo objects. "
+            "Keys SHOULD use StreamInfo.Identifier values to signal primary streams "
+            "(e.g. Identifier.monocular for a traditional video). "
+            "Additional streams SHOULD prefix an Identifier value to form a unique key "
+            "(e.g. \"music_stereo_right\" for a music stem alongside the primary audio). "
+            "Keys MAY be any unique string — for example, spatial audio object IDs or "
+            "production audio tracks identified by character lavalier or boom mic.")
+        .def("set_available_streams", &MediaReference::set_available_streams,
+            "available_streams"_a,
+            "Set the available streams map. See available_streams() for key conventions.");
 
     py::class_<GeneratorReference, MediaReference,
                managing_ptr<GeneratorReference>>(m, "GeneratorReference", py::dynamic_attr())
@@ -977,7 +1137,9 @@ This is roughly equivalent to:
 void otio_serializable_object_bindings(py::module m) {
     define_bases1(m);
     define_bases2(m);
+    define_stream_address_and_info(m);
     define_effects(m);
+    define_stream_effects(m);
     define_media_references(m);
     define_items_and_compositions(m);
 }

@@ -276,6 +276,12 @@ parameters:
 
 parameters:
 
+### StreamChannelIndexStreamAddress.1
+
+parameters:
+- *channel_index*
+- *stream_index*
+
 ### StreamInfo.1
 
 parameters:
@@ -283,6 +289,15 @@ parameters:
 - *kind*
 - *metadata*
 - *name*
+
+### StreamMapper.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *stream_map*
 
 ### StreamSelector.1
 

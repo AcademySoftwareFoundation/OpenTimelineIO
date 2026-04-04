@@ -293,15 +293,17 @@ parameters:
 *documentation*:
 
 ```
-An effect that mixes audio streams using a coefficient matrix. Output keys SHOULD use 
-StreamInfo.Identifier values (e.g. left, right). Input keys identify source streams and SHOULD match
- keys in the upstream available_streams map.
+An effect that mixes audio streams using a coefficient matrix. The matrix maps output stream names 
+to a dict of input stream names and their mix coefficients. Output keys SHOULD use 
+StreamInfo.Identifier values (e.g. stereo_left, stereo_right) where applicable; they correspond to 
+the keys that will appear in the downstream available_streams map after mixing. Input keys identify 
+source streams and SHOULD match keys in the upstream available_streams map.
 ```
 
 parameters:
 - *effect_name*: 
 - *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *matrix*: Output-keyed mixing matrix (output_name -> {input_name -> coefficient}). Output keys SHOULD be StreamInfo.Identifier values; input keys SHOULD match keys in the upstream available_streams map.
+- *matrix*: Output-keyed mixing matrix (output_name -> {input_name -> coefficient}). Output keys SHOULD use StreamInfo.Identifier values where applicable; input keys SHOULD match keys in the upstream available_streams map.
 - *metadata*: 
 - *name*: 
 
@@ -645,6 +647,22 @@ Base class for addressing a specific stream within a media reference.
 
 parameters:
 
+### StreamChannelIndexStreamAddress.1
+
+*full module path*: `opentimelineio.schema.StreamChannelIndexStreamAddress`
+
+*documentation*:
+
+```
+Addresses a stream by track index and channel index within that track. Use this for container 
+formats that organise media into discrete tracks each of which may contain one or more channels, 
+such as MP4/MOV and MXF.
+```
+
+parameters:
+- *channel_index*: Integer index of the channel within the stream.
+- *stream_index*: Integer index of the media track within its container.
+
 ### StreamInfo.1
 
 *full module path*: `opentimelineio.schema.StreamInfo`
@@ -652,9 +670,10 @@ parameters:
 *documentation*:
 
 ```
-Describes a single stream available within a media reference, such as a video track, audio channel, 
-or camera view. The name field MAY be any descriptive string intended for human consumption, 
-analogous to the name on a Clip or Marker.
+Describes a single media stream provided within a source media. A media stream is the smallest unit 
+of temporal media, such as a single eye's video, an isolated audio channel, or a camera view within 
+a 3D scene. StreamAddress provides a mechanism for addressing a specific stream within a media 
+container.
 ```
 
 parameters:
@@ -663,6 +682,27 @@ parameters:
 - *metadata*: 
 - *name*: 
 
+### StreamMapper.1
+
+*full module path*: `opentimelineio.schema.StreamMapper`
+
+*documentation*:
+
+```
+An effect that remaps stream identifiers to new names. Each entry in stream_map maps an output 
+stream name (the key as it will appear downstream) to an input stream name (the key as it appears in
+ the upstream MediaReference available_streams). A typical use is to normalize a source-specific 
+identifier into a well-known StreamInfo.Identifier value -- for example, to expose the left eye of a
+ stereo source as the conventional monocular stream.
+```
+
+parameters:
+- *effect_name*: 
+- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata*: 
+- *name*: 
+- *stream_map*: Mapping of output stream name to input stream name. Keys SHOULD use StreamInfo.Identifier values where applicable; values SHOULD match keys in the upstream available_streams map.
+
 ### StreamSelector.1
 
 *full module path*: `opentimelineio.schema.StreamSelector`
@@ -670,7 +710,8 @@ parameters:
 *documentation*:
 
 ```
-An effect that selects specific named output streams from an item.
+An effect that selects specific named output streams from an item. Use this to select a stereo view,
+ specific audio channels, etc. The item will expose these streams downstream with the same naming.
 ```
 
 parameters:

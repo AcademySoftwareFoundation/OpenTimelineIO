@@ -42,6 +42,7 @@ Tutorials
    tutorials/feature-matrix
    tutorials/otio-timeline-structure
    tutorials/time-ranges
+   tutorials/channel-mapping
    tutorials/otio-filebundles
    tutorials/write-an-adapter
    tutorials/write-a-media-linker

@@ -21,13 +21,13 @@ def track_trimmed_to_range(in_track, trim_range):
     .. note:: The track is never expanded, only shortened.
 
     Please note that you could do nearly the same thing non-destructively by
-    just setting the :py:class:`.Track`\'s source_range but sometimes you want
+    just setting the :py:class:`opentimelineio.schema.Track`\'s source_range but sometimes you want
     to really cut away the stuff outside and that's what this function is meant for.
 
-    :param Track in_track: Track to trim
+    :param opentimelineio.schema.Track in_track: Track to trim
     :param TimeRange trim_range:
     :returns: New trimmed track
-    :rtype: Track
+    :rtype: opentimelineio.schema.Track
     """
     new_track = copy.deepcopy(in_track)
 
@@ -94,9 +94,9 @@ def track_with_expanded_transitions(in_track):
 
     .. note:: The items used in a transition are encapsulated in tuples.
 
-    :param Track in_track: Track to expand
+    :param opentimelineio.schema.Track in_track: Track to expand
     :returns: Track
-    :rtype: list[Track]
+    :rtype: list[opentimelineio.schema.Track]
     """
 
     result_track = []

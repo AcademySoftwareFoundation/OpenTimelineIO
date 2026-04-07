@@ -38,6 +38,7 @@ option(OTIO_DEPENDENCIES_INSTALL      "Install OTIO's C++ header dependencies (I
 option(OTIO_INSTALL_PYTHON_MODULES    "Install OTIO pure Python modules/files" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
+option(OTIO_FIND_PYBIND11             "Find pybind11 using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
@@ -256,6 +257,16 @@ if(OTIO_FIND_IMATH)
 else()
     message(STATUS "Using src/deps/Imath by default")
     include_directories("${PROJECT_SOURCE_DIR}/src/deps/Imath/src")
+endif()
+
+#----- pybind11
+if(OTIO_FIND_PYBIND11)
+    find_package(pybind11 REQUIRED)
+    if (pybind11_FOUND)
+        message(STATUS "Found pybind11 at ${pybind11_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/pybind11 by default")
 endif()
 
 #----- RapidJSON

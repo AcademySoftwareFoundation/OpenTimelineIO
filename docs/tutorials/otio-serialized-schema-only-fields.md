@@ -139,6 +139,15 @@ parameters:
 
 ## Module: opentimelineio.schema
 
+### AudioMixMatrix.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *matrix*
+- *metadata*
+- *name*
+
 ### Clip.2
 
 parameters:
@@ -215,6 +224,11 @@ parameters:
 - *start_frame*
 - *target_url_base*
 
+### IndexStreamAddress.1
+
+parameters:
+- *index*
+
 ### LinearTimeWarp.1
 
 parameters:
@@ -257,6 +271,47 @@ parameters:
 - *metadata*
 - *name*
 - *source_range*
+
+### StreamAddress.1
+
+parameters:
+
+### StreamChannelIndexStreamAddress.1
+
+parameters:
+- *channel_index*
+- *stream_index*
+
+### StreamInfo.1
+
+parameters:
+- *address*
+- *kind*
+- *metadata*
+- *name*
+
+### StreamMapper.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *stream_map*
+
+### StreamSelector.1
+
+parameters:
+- *effect_name*
+- *enabled*
+- *metadata*
+- *name*
+- *output_streams*
+
+### StringStreamAddress.1
+
+parameters:
+- *address*
 
 ### TimeEffect.1
 

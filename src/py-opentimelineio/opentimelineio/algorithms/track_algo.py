@@ -21,13 +21,14 @@ def track_trimmed_to_range(in_track, trim_range):
     .. note:: The track is never expanded, only shortened.
 
     Please note that you could do nearly the same thing non-destructively by
-    just setting the :py:class:`.Track`\'s source_range but sometimes you want
-    to really cut away the stuff outside and that's what this function is meant for.
+    just setting the :py:class:`opentimelineio.schema.Track`\'s source_range but
+    sometimes you want to really cut away the stuff outside and that's what this
+    function is meant for.
 
-    :param Track in_track: Track to trim
+    :param opentimelineio.schema.Track in_track: Track to trim
     :param TimeRange trim_range:
     :returns: New trimmed track
-    :rtype: Track
+    :rtype: opentimelineio.schema.Track
     """
     new_track = copy.deepcopy(in_track)
 
@@ -56,8 +57,7 @@ def track_trimmed_to_range(in_track, trim_range):
                 trim_amount = trim_range.start_time - child_range.start_time
                 child_source_range = opentime.TimeRange(
                     start_time=child_source_range.start_time + trim_amount,
-                    duration=child_source_range.duration - trim_amount
-
+                    duration=child_source_range.duration - trim_amount,
                 )
 
             # should we trim the end?
@@ -67,8 +67,7 @@ def track_trimmed_to_range(in_track, trim_range):
                 trim_amount = child_end - trim_end
                 child_source_range = opentime.TimeRange(
                     start_time=child_source_range.start_time,
-                    duration=child_source_range.duration - trim_amount
-
+                    duration=child_source_range.duration - trim_amount,
                 )
 
             # set the new child's trims
@@ -94,9 +93,9 @@ def track_with_expanded_transitions(in_track):
 
     .. note:: The items used in a transition are encapsulated in tuples.
 
-    :param Track in_track: Track to expand
+    :param opentimelineio.schema.Track in_track: Track to expand
     :returns: Track
-    :rtype: list[Track]
+    :rtype: list[opentimelineio.schema.Track]
     """
 
     result_track = []
@@ -122,11 +121,7 @@ def track_with_expanded_transitions(in_track):
                 next_transition = next_thing
 
             result_track.append(
-                _trim_from_transitions(
-                    thing,
-                    pre=pre_transition,
-                    post=next_transition
-                )
+                _trim_from_transitions(thing, pre=pre_transition, post=next_transition)
             )
 
         # loop
@@ -138,13 +133,12 @@ def track_with_expanded_transitions(in_track):
 
 
 def _expand_transition(target_transition, from_track):
-    """ Expand transitions into the portions of pre-and-post clips that
+    """Expand transitions into the portions of pre-and-post clips that
     overlap with the transition.
     """
 
     result = from_track.neighbors_of(
-        target_transition,
-        schema.NeighborGapPolicy.around_transitions
+        target_transition, schema.NeighborGapPolicy.around_transitions
     )
 
     trx_duration = target_transition.in_offset + target_transition.out_offset
@@ -154,21 +148,15 @@ def _expand_transition(target_transition, from_track):
 
     if isinstance(pre, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
-            "cannot put two transitions next to each other in a  track: "
-            "{}, {}".format(
-                pre,
-                target_transition
+            "cannot put two transitions next to each other in a  track: {}, {}".format(
+                pre, target_transition
             )
         )
     if target_transition.in_offset is None:
-        raise RuntimeError(
-            f"in_offset is None on: {target_transition}"
-        )
+        raise RuntimeError(f"in_offset is None on: {target_transition}")
 
     if target_transition.out_offset is None:
-        raise RuntimeError(
-            f"out_offset is None on: {target_transition}"
-        )
+        raise RuntimeError(f"out_offset is None on: {target_transition}")
 
     pre.name = (pre.name or "") + "_transition_pre"
 
@@ -176,21 +164,15 @@ def _expand_transition(target_transition, from_track):
     tr = pre.trimmed_range()
 
     pre.source_range = opentime.TimeRange(
-        start_time=(
-            tr.end_time_exclusive() - target_transition.in_offset
-        ),
-        duration=trx_duration.rescaled_to(
-            tr.start_time
-        )
+        start_time=(tr.end_time_exclusive() - target_transition.in_offset),
+        duration=trx_duration.rescaled_to(tr.start_time),
     )
 
     post = copy.deepcopy(result[1])
     if isinstance(post, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
-            "cannot put two transitions next to each other in a  track: "
-            "{}, {}".format(
-                target_transition,
-                post
+            "cannot put two transitions next to each other in a  track: {}, {}".format(
+                target_transition, post
             )
         )
 
@@ -200,17 +182,17 @@ def _expand_transition(target_transition, from_track):
     tr = post.trimmed_range()
 
     post.source_range = opentime.TimeRange(
-        start_time=(
-            tr.start_time - target_transition.in_offset
-        ).rescaled_to(tr.start_time),
-        duration=trx_duration.rescaled_to(tr.start_time)
+        start_time=(tr.start_time - target_transition.in_offset).rescaled_to(
+            tr.start_time
+        ),
+        duration=trx_duration.rescaled_to(tr.start_time),
     )
 
     return pre, target_transition, post
 
 
 def _trim_from_transitions(thing, pre=None, post=None):
-    """ Trim clips next to transitions. """
+    """Trim clips next to transitions."""
 
     result = copy.deepcopy(thing)
 

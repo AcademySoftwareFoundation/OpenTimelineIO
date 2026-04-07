@@ -24,6 +24,29 @@ MediaReference::is_missing_reference() const
     return false;
 }
 
+MediaReference::AvailableStreams
+MediaReference::available_streams() const noexcept
+{
+    AvailableStreams result;
+    for (auto const& s: _available_streams)
+    {
+        result.insert(
+            { s.first, dynamic_retainer_cast<StreamInfo>(s.second) });
+    }
+    return result;
+}
+
+void
+MediaReference::set_available_streams(AvailableStreams const& available_streams)
+{
+    _available_streams.clear();
+    for (auto const& s: available_streams)
+    {
+        _available_streams[s.first] = s.second;
+    }
+}
+
+
 bool
 MediaReference::read_from(Reader& reader)
 {
@@ -31,6 +54,7 @@ MediaReference::read_from(Reader& reader)
            && reader.read_if_present(
                "available_image_bounds",
                &_available_image_bounds)
+           && reader.read_if_present("available_streams", &_available_streams)
            && Parent::read_from(reader);
 }
 
@@ -40,6 +64,10 @@ MediaReference::write_to(Writer& writer) const
     Parent::write_to(writer);
     writer.write("available_range", _available_range);
     writer.write("available_image_bounds", _available_image_bounds);
+    if (!_available_streams.empty())
+    {
+        writer.write("available_streams", _available_streams);
+    }
 }
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

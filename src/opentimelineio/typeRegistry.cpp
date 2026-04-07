@@ -4,6 +4,7 @@
 #include "opentimelineio/typeRegistry.h"
 
 #include "anyDictionary.h"
+#include "opentimelineio/audioMixMatrix.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
@@ -22,6 +23,13 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/stack.h"
+#include "opentimelineio/indexStreamAddress.h"
+#include "opentimelineio/streamAddress.h"
+#include "opentimelineio/streamChannelIndexStreamAddress.h"
+#include "opentimelineio/streamInfo.h"
+#include "opentimelineio/stringStreamAddress.h"
+#include "opentimelineio/streamMapper.h"
+#include "opentimelineio/streamSelector.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
@@ -82,6 +90,14 @@ TypeRegistry::TypeRegistry()
         nullptr);
 
     register_type<Stack>();
+    register_type<StreamAddress>();
+    register_type<IndexStreamAddress>();
+    register_type<StreamChannelIndexStreamAddress>();
+    register_type<StringStreamAddress>();
+    register_type<StreamInfo>();
+    register_type<StreamMapper>();
+    register_type<StreamSelector>();
+    register_type<AudioMixMatrix>();
     register_type<TimeEffect>();
     register_type<Timeline>();
     register_type<Track>();

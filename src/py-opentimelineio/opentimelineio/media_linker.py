@@ -19,6 +19,7 @@ track if metadata is stored there.
 
 import os
 import inspect
+from typing import Any, Optional, Dict
 
 from . import (
     exceptions,
@@ -64,7 +65,7 @@ def from_name(name):
         )
 
 
-def default_media_linker():
+def default_media_linker() -> str:
     try:
         return os.environ['OTIO_DEFAULT_MEDIA_LINKER']
     except KeyError:
@@ -74,10 +75,10 @@ def default_media_linker():
 
 
 def linked_media_reference(
-    target_clip,
-    media_linker_name=MediaLinkingPolicy.ForceDefaultLinker,
-    media_linker_argument_map=None
-):
+    target_clip: Any,
+    media_linker_name: Any = MediaLinkingPolicy.ForceDefaultLinker,
+    media_linker_argument_map: Optional[Dict[str, Any]] = None
+) -> Any:
     media_linker = from_name(media_linker_name)
 
     if not media_linker:
@@ -100,12 +101,12 @@ class MediaLinker(plugins.PythonPlugin):
 
     def __init__(
         self,
-        name=None,
-        filepath=None,
-    ):
+        name: Optional[str] = None,
+        filepath: Optional[str] = None,
+    ) -> None:
         super().__init__(name, filepath)
 
-    def link_media_reference(self, in_clip, media_linker_argument_map=None):
+    def link_media_reference(self, in_clip: Any, media_linker_argument_map: Optional[Dict[str, Any]] = None) -> Any:
         media_linker_argument_map = media_linker_argument_map or {}
 
         return self._execute_function(
@@ -114,10 +115,10 @@ class MediaLinker(plugins.PythonPlugin):
             media_linker_argument_map=media_linker_argument_map
         )
 
-    def is_default_linker(self):
+    def is_default_linker(self) -> bool:
         return os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", "") == self.name
 
-    def plugin_info_map(self):
+    def plugin_info_map(self) -> Dict[str, Any]:
         """Adds extra adapter-specific information to call to the parent fn."""
 
         result = super().plugin_info_map()
@@ -133,13 +134,13 @@ class MediaLinker(plugins.PythonPlugin):
 
         return result
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "MediaLinker({}, {})".format(
             repr(self.name),
             repr(self.filepath)
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             "otio.media_linker.MediaLinker("
             "name={}, "

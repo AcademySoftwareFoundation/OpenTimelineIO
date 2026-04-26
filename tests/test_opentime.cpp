@@ -32,6 +32,18 @@ main(int argc, char** argv)
         assertFalse(t2.is_invalid_time());
     });
 
+    tests.add_test("test_rescale", [] {
+        RationalTime t1(1.0, 1.0);
+        RationalTime t2 = t1.rescaled_to(24);
+        assertEqual(t2.value(), 24);
+        assertEqual(t2.rate(), 24);
+
+        // Try rescaling an invalid time:
+        t2 = RationalTime(1.0, 0.0).rescaled_to(24);
+        assertEqual(t2.value(), 0);
+        assertEqual(t2.rate(), 24);
+    });
+
     tests.add_test("test_equality", [] {
         RationalTime t1(30.2);
         assertEqual(t1, t1);

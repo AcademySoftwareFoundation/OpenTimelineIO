@@ -69,7 +69,9 @@ public:
     /// @brief Returns the time value converted to a new rate.
     constexpr double value_rescaled_to(double new_rate) const noexcept
     {
-        return new_rate == _rate ? _value : (_value * new_rate) / _rate;
+        return new_rate == _rate
+                   ? _value
+                   : (_rate > 0 ? (_value * new_rate) / _rate : 0);
     }
 
     /// @brief Returns the time value converted to a new rate.

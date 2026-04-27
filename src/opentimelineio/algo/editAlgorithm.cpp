@@ -182,8 +182,18 @@ overwrite(
             if (!isEqual(second_duration.value(), 0.0))
             {
                 auto second_item = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range    = second_item->trimmed_range();
-                source_range     = TimeRange(
+                if (!second_item)
+                {
+                    // clone() failed or returned an object that is not an Item.
+                    // Bail out before dereferencing nullptr (CWE-476).
+                    if (error_status)
+                        *error_status = ErrorStatus(
+                            ErrorStatus::INTERNAL_ERROR,
+                            "failed to clone item for overwrite split");
+                    return;
+                }
+                trimmed_range = second_item->trimmed_range();
+                source_range  = TimeRange(
                     trimmed_range.start_time() + first_duration
                         + range.duration(),
                     second_duration);
@@ -363,6 +373,16 @@ insert(
         if (!isEqual(second_source_range.duration().value(), 0.0))
         {
             auto second_item = dynamic_cast<Item*>(item->clone());
+            if (!second_item)
+            {
+                // clone() failed or returned an object that is not an Item.
+                // Bail out before dereferencing nullptr (CWE-476).
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "failed to clone item for insert split");
+                return;
+            }
             second_item->set_source_range(second_source_range);
             composition->insert_child(insert_index + 1, second_item);
         }
@@ -530,7 +550,17 @@ slice(
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
-    auto            second_item = dynamic_cast<Item*>(item->clone());
+    auto second_item = dynamic_cast<Item*>(item->clone());
+    if (!second_item)
+    {
+        // clone() failed or returned an object that is not an Item.
+        // Bail out before dereferencing nullptr (CWE-476).
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "failed to clone item for slice");
+        return;
+    }
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());
@@ -794,6 +824,16 @@ fill(
             RationalTime       start_time     = clip_range.start_time();
             const RationalTime gap_start_time = gap_range.start_time();
             auto               track_item = dynamic_cast<Item*>(item->clone());
+            if (!track_item)
+            {
+                // clone() failed or did not return an Item; bail out safely
+                // instead of dereferencing nullptr (CWE-476).
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "failed to clone item for fill");
+                return;
+            }
 
             // Check if start time is less than gap's start time (trim it if so)
             if (start_time < gap_start_time)

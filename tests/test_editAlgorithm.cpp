@@ -2131,6 +2131,125 @@ main(int argc, char** argv)
               TimeRange(RationalTime(0.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
+    // Null Pointer Dereference from Unchecked dynamic_cast
+    //
+    // The editAlgorithm functions call dynamic_cast<Item*>(item->clone()) and
+    // immediately dereference the result. SerializableObject::clone() can
+    // return nullptr (for example, when the object's metadata contains a
+    // cycle, which causes the cloning encoder to error out). When that
+    // happens, the dynamic_cast also yields nullptr and the next member call
+    // is a null pointer dereference (denial of service / crash).
+    //
+    // The tests below construct Items whose metadata contains a cycle (the
+    // clip references itself) and exercise each of the four affected call
+    // sites. After the fix, the algorithms must not crash and must report a
+    // non-OK error status rather than dereferencing nullptr.
+    //
+    // Helper: make a clip whose clone() will fail because of a metadata cycle.
+    auto make_clip_with_cyclic_metadata = [](std::string const& name,
+                                             TimeRange const&   source_range)
+        -> SerializableObject::Retainer<Clip> {
+        SerializableObject::Retainer<Clip> clip =
+            new Clip(name, nullptr, source_range);
+        // Insert a self-reference in the metadata so that clone() (which
+        // round-trips through serialization) detects an OBJECT_CYCLE and
+        // returns nullptr.
+        clip->metadata()["self"] = SerializableObject::Retainer<>(clip.value);
+        // Sanity check: cloning this clip should fail.
+        OTIO_NS::ErrorStatus err;
+        SerializableObject*  cloned = clip->clone(&err);
+        assertTrue(cloned == nullptr);
+        assertTrue(is_error(err));
+        return clip;
+    };
+
+    // Line 185: overwrite() splits a single clip whose middle is overwritten.
+    tests.add_test("test_edit_overwrite_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        SerializableObject::Retainer<Clip> insert_clip = new Clip(
+            "insert",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(4.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        // Overwrite a 4-frame range in the middle of the cyclic clip. This
+        // forces the code path that clones items.front() to produce the
+        // trailing slice (line 185).
+        algo::overwrite(
+            insert_clip,
+            track,
+            TimeRange(RationalTime(8.0, 24.0), RationalTime(4.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+        // Must not crash; must report an error.
+        assertTrue(is_error(error_status));
+    });
+
+    // Line 367: insert() splits an existing clip and clones it for the tail.
+    tests.add_test("test_edit_insert_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        SerializableObject::Retainer<Clip> insert_clip = new Clip(
+            "insert",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(4.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::insert(
+            insert_clip,
+            track,
+            RationalTime(12.0, 24.0),
+            true,
+            nullptr,
+            &error_status);
+        assertTrue(is_error(error_status));
+    });
+
+    // Line 534: slice() clones an item to create the second slice.
+    tests.add_test("test_edit_slice_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::slice(track, RationalTime(12.0, 24.0), true, &error_status);
+        assertTrue(is_error(error_status));
+    });
+
+    // Line 795: fill() clones the source item before placing it on the track.
+    tests.add_test("test_edit_fill_null_clone_safe", [&] {
+        // Track with a gap so that fill() can find a slot to fill.
+        SerializableObject::Retainer<Gap> gap = new Gap(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(gap);
+
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::fill(
+            clip,
+            track,
+            RationalTime(0.0, 24.0),
+            ReferencePoint::Sequence,
+            &error_status);
+        assertTrue(is_error(error_status));
+    });
+
     tests.run(argc, argv);
     return 0;
 }

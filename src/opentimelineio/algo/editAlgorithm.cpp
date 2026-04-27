@@ -56,7 +56,7 @@ isEqual(double a, double b)
 {
     return (std::abs(a - b) <= double_epsilon);
 }
-    
+
 } // namespace
 
 void
@@ -139,7 +139,7 @@ overwrite(
         if (1 == items.size() && item_range.contains(range, 0.0))
         {
             auto first_item = items.front();
-            
+
             bool is_fill_fit = false;
 
             // We check if we are replacing a gap with a clip with timewarp,
@@ -156,7 +156,7 @@ overwrite(
                     }
                 }
             }
-            
+
             // The item overwrites a portion inside an item.
             const RationalTime first_duration =
                 range.start_time() - item_range.start_time();
@@ -183,6 +183,16 @@ overwrite(
             if (!isEqual(second_duration.value(), 0.0))
             {
                 auto second_item = dynamic_cast<Item*>(items.front()->clone());
+                if (!second_item)
+                {
+                    // clone() failed or returned an object that is not an Item.
+                    // Bail out before dereferencing nullptr (CWE-476).
+                    if (error_status)
+                        *error_status = ErrorStatus(
+                            ErrorStatus::INTERNAL_ERROR,
+                            "failed to clone item for overwrite split");
+                    return;
+                }
                 trimmed_range    = second_item->trimmed_range();
                 source_range     = TimeRange(
                     trimmed_range.start_time() + first_duration
@@ -300,7 +310,7 @@ insert(
     }
 
     const TimeRange composition_range = composition->trimmed_range();
-        
+
     // Find the item to insert into.
     auto item = dynamic_retainer_cast<Item>(
         composition->child_at_time(time, error_status));
@@ -333,7 +343,7 @@ insert(
         }
         return;
     }
-    
+
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
     int insert_index = index;
@@ -365,6 +375,16 @@ insert(
         if (!isEqual(second_source_range.duration().value(), 0.0))
         {
             auto            second_item = dynamic_cast<Item*>(item->clone());
+            if (!second_item)
+            {
+                // clone() failed or returned an object that is not an Item.
+                // Bail out before dereferencing nullptr (CWE-476).
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "failed to clone item for insert split");
+                return;
+            }
             second_item->set_source_range(second_source_range);
             composition->insert_child(insert_index + 1, second_item);
         }
@@ -388,12 +408,12 @@ void trim(
     auto children = composition->children();
     const int       index = composition->index_of_child(item);
     if (index < 0)
-    {   
+    {
         if (error_status)
             *error_status = ErrorStatus::NOT_AN_ITEM;
         return;
     }
-    
+
     const TimeRange range = item->trimmed_range();
     RationalTime start_time = range.start_time();
     RationalTime end_time_exclusive = range.end_time_exclusive();
@@ -469,16 +489,16 @@ slice(
             *error_status = ErrorStatus::NOT_AN_ITEM;
         return;
     }
-    
+
     const int       index = composition->index_of_child(item);
     const TimeRange range = composition->trimmed_range_of_child_at_index(index);
 
-    
+
     // Check for slice at start of clip (invalid slice)
     const RationalTime duration = time - range.start_time();
     if (isEqual(duration.value(), 0.0))
         return;
-    
+
     // Accumulate intersecting transitions
     std::vector<Transition*> transitions;
     if (auto track = dynamic_cast<Track*>(composition))
@@ -503,7 +523,7 @@ slice(
             }
         }
     }
-    
+
     // Remove transitions
     if (!transitions.empty())
     {
@@ -522,16 +542,26 @@ slice(
             return;
         }
     }
-    
+
     // Adjust the source range for the first slice.
     const TimeRange first_source_range(
         item->trimmed_range().start_time(),
         duration);
-    
+
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
     auto            second_item = dynamic_cast<Item*>(item->clone());
+    if (!second_item)
+    {
+        // clone() failed or returned an object that is not an Item.
+        // Bail out before dereferencing nullptr (CWE-476).
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "failed to clone item for slice");
+        return;
+    }
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());
@@ -541,7 +571,7 @@ slice(
         composition->insert_child(static_cast<int>(index) + 1, second_item);
     }
 }
-            
+
 void slip(
     Item*            item,
     RationalTime const& delta)
@@ -568,7 +598,7 @@ void slip(
             start_time -= end_diff;
         }
     }
-        
+
     const TimeRange new_range(start_time, range.duration());
     item->set_source_range(new_range);
 }
@@ -583,7 +613,7 @@ void slide(
     {
         return;
     }
-    
+
     const int       index = composition->index_of_child(item);
 
     // Exit early if we are at the first clip or if the delta is 0.
@@ -591,7 +621,7 @@ void slide(
     {
         return;
     }
-    
+
     auto children = composition->children();
     auto previous = dynamic_retainer_cast<Item>(children[index - 1]);
     const TimeRange range = previous->trimmed_range();
@@ -616,7 +646,7 @@ void slide(
             offset = available_range.duration() - range.duration();
         }
     }
-    
+
     const otime::TimeRange new_range(range.start_time(),
                                      range.duration() + offset);
     previous->set_source_range(new_range);
@@ -629,7 +659,7 @@ void ripple(
     ErrorStatus*     error_status)
 {
     if (error_status) *error_status = ErrorStatus::OK;
-    
+
     const TimeRange range = item->trimmed_range();
     RationalTime start_time = range.start_time();
     RationalTime end_time_exclusive = range.end_time_exclusive();
@@ -691,7 +721,7 @@ roll(
             *error_status = ErrorStatus::NOT_AN_ITEM;
         return;
     }
-    
+
     const TimeRange range = item->trimmed_range();
     const TimeRange available_range = item->available_range();
     RationalTime start_time = range.start_time();
@@ -712,7 +742,7 @@ roll(
             if (duration < -in_offset)
             {
                 duration -= RationalTime(1.0, duration.rate());
-                in_offset -= duration; 
+                in_offset -= duration;
             }
             previous_range = TimeRange(previous_range.start_time(),
                                        previous_range.duration() + in_offset);
@@ -751,7 +781,7 @@ roll(
                 if (-out_offset > next_start_time)
                     out_offset = -next_start_time;
             }
-        
+
             end_time_exclusive += out_offset;
             next_start_time    += out_offset;
             next_range = TimeRange(next_start_time,
@@ -793,6 +823,16 @@ fill(
             RationalTime start_time = clip_range.start_time();
             const RationalTime gap_start_time = gap_range.start_time();
             auto         track_item = dynamic_cast<Item*>(item->clone());
+            if (!track_item)
+            {
+                // clone() failed or did not return an Item; bail out safely
+                // instead of dereferencing nullptr (CWE-476).
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "failed to clone item for fill");
+                return;
+            }
 
             // Check if start time is less than gap's start time (trim it if so)
             if (start_time < gap_start_time)
@@ -800,7 +840,7 @@ fill(
                 duration -= gap_start_time - start_time;
                 start_time = gap_start_time;
             }
-            
+
             // Check if end time is longer (trim it if it is)
             if (clip_range.end_time_exclusive()
                 > gap_range.end_time_exclusive())
@@ -816,7 +856,7 @@ fill(
                 duration =
                     gap_track_range.end_time_exclusive() - track_time;
             }
-            
+
             const TimeRange time_range(track_time, duration);
             overwrite(
                 track_item,
@@ -882,5 +922,5 @@ void remove(
         composition->insert_child(index, fill_template);
     }
 }
-            
+
 }}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS::algo

@@ -164,10 +164,10 @@ test_edit_slice(
     SerializableObject::Retainer<Clip> clip_0 =
         new Clip("clip_0", nullptr, clip_range);
     SerializableObject::Retainer<Track> track = new Track();
-    track->append_child(clip_0); 
+    track->append_child(clip_0);
 
     debug_track_ranges("START", track);
-    
+
     // Slice.
     algo::slice(track, slice_time);
 
@@ -211,7 +211,7 @@ test_edit_slice_transitions(
             RationalTime(5.0, 24.0),
             RationalTime(3.0, 24.0));
     SerializableObject::Retainer<Track> track = new Track();
-    track->append_child(clip_0); 
+    track->append_child(clip_0);
     track->append_child(clip_1);
     track->insert_child(1, transition_0);
     track->append_child(clip_2);
@@ -219,7 +219,7 @@ test_edit_slice_transitions(
     track->append_child(transition_1);
 
     debug_track_ranges("START", track);
-    
+
     // Slice.
     algo::slice(track, slice_time);
 
@@ -241,7 +241,7 @@ test_edit_slip(
             media_range);
     SerializableObject::Retainer<Clip> clip_0 =
         new Clip("clip_0", media_0, clip_range);
-    
+
     // Slip.
     algo::slip(clip_0, slip_time);
 
@@ -250,7 +250,7 @@ test_edit_slip(
     assertEqual(slip_range, range);
 }
 
-    
+
 void
 test_edit_slide(
     const TimeRange&              media_range,
@@ -405,7 +405,7 @@ void test_edit_fill(
         TimeRange(
             RationalTime(5.0, 24.0),
             RationalTime(20.0, 24.0)));
-    
+
     SerializableObject::Retainer<Clip> clip_3 = new Clip(
         "fill_0",
         nullptr,
@@ -427,7 +427,7 @@ void test_edit_fill(
         &error_status);
 
     auto new_duration = track->duration();
-    
+
     // Asserts.
     if (reference_point == ReferencePoint::Sequence)
     {
@@ -444,7 +444,7 @@ int
 main(int argc, char** argv)
 {
     Tests tests;
-    
+
     tests.add_test("test_edit_slice_1", [] {
         // Slice in the middle.
         test_edit_slice(
@@ -478,7 +478,7 @@ main(int argc, char** argv)
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
             RationalTime(24.0, 24.0),
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)) });
-        
+
     });
 
     tests.add_test("test_edit_slice_2", [] {
@@ -508,7 +508,7 @@ main(int argc, char** argv)
         track->append_child(clip_0);
         track->append_child(clip_1);
         track->append_child(clip_2);
-        
+
         // Slice.
         OTIO_NS::ErrorStatus error_status;
         algo::slice(
@@ -596,7 +596,7 @@ main(int argc, char** argv)
                             });
 
         track->remove_child(2); // Delete the 1 frame item
-        
+
         // Asserts.
         assert_clip_ranges(track,
                             {
@@ -613,7 +613,7 @@ main(int argc, char** argv)
                                     RationalTime(90.0, 30.0),
                                     RationalTime(90.0, 30.0))
                             });
-        
+
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -655,7 +655,7 @@ main(int argc, char** argv)
                                     RationalTime(90.0, 30.0),
                                     RationalTime(90.0, 30.0))
                             });
-        
+
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -717,7 +717,7 @@ main(int argc, char** argv)
                                     RationalTime(179.0, 30.0),
                                     RationalTime(90.0, 30.0))
                             });
-        
+
         // Slice again for one frame
         algo::slice(
             track,
@@ -765,9 +765,9 @@ main(int argc, char** argv)
                             });
     });
 
-    
+
     tests.add_test("test_edit_slice_transitions_1", [] {
-        
+
         // Four clips with two transitions.
         test_edit_slice_transitions(
             RationalTime(24.0, 24.0),
@@ -775,7 +775,7 @@ main(int argc, char** argv)
               TimeRange(RationalTime(24.0, 24.0), RationalTime(50.0, 24.0)),
               TimeRange(RationalTime(74.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(104.0, 24.0), RationalTime(25.0, 24.0)) });
-        
+
        test_edit_slice_transitions(
             RationalTime(23.0, 24.0),
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(23.0, 24.0)),
@@ -783,9 +783,9 @@ main(int argc, char** argv)
               TimeRange(RationalTime(24.0, 24.0), RationalTime(50.0, 24.0)),
               TimeRange(RationalTime(74.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(104.0, 24.0), RationalTime(25.0, 24.0)) });
-        
+
     });
-    
+
     tests.add_test("test_edit_overwrite_0", [] {
         // Create a track with one clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -982,7 +982,7 @@ main(int argc, char** argv)
                             });
     });
 
-    
+
     tests.add_test("test_edit_overwrite_4", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -1107,7 +1107,7 @@ main(int argc, char** argv)
             TimeRange(
                 RationalTime(0.0, 30.0),
                 RationalTime(1.0, 30.0)));
-        
+
         algo::overwrite(
             over_2,
             track,
@@ -1115,7 +1115,7 @@ main(int argc, char** argv)
             true,
             nullptr,
             &error_status);
-        
+
         // Asserts.
         assert(!is_error(error_status));
         {
@@ -1166,7 +1166,7 @@ main(int argc, char** argv)
             TimeRange(
                 RationalTime(0.0, 30.0),
                 RationalTime(1.0, 30.0)));
-        
+
         algo::overwrite(
             over_3,
             track,
@@ -1174,7 +1174,7 @@ main(int argc, char** argv)
             true,
             nullptr,
             &error_status);
-        
+
         // Asserts.
         assert(!is_error(error_status));
         {
@@ -1252,7 +1252,7 @@ main(int argc, char** argv)
             TimeRange(
                 RationalTime(0.0, 30.0),
                 RationalTime(1.0, 30.0)));
-        
+
         const RationalTime duration = track->duration();
         OTIO_NS::ErrorStatus error_status;
         algo::overwrite(
@@ -1304,7 +1304,7 @@ main(int argc, char** argv)
                             });
     });
 
-    
+
     tests.add_test("test_edit_overwrite_7", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -1364,7 +1364,7 @@ main(int argc, char** argv)
                             });
     });
 
-    
+
     tests.add_test("test_edit_overwrite_8", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -1424,8 +1424,8 @@ main(int argc, char** argv)
                             });
     });
 
-    
-    
+
+
     tests.add_test("test_edit_overwrite_9", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -1478,7 +1478,7 @@ main(int argc, char** argv)
                                     RationalTime(634.0, 24.0))
                             });
     });
- 
+
     tests.add_test("test_edit_overwrite_10", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
@@ -1538,7 +1538,7 @@ main(int argc, char** argv)
                             });
     });
 
-    
+
     // Insert at middle of clip_0
     tests.add_test("test_edit_insert_1", [] {
         // Create a track with two clips.
@@ -1636,7 +1636,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!is_error(error_status));
         assertEqual(track->children().size(), 3);
-        
+
         const RationalTime duration = track->duration();
         assert_duration(duration, RationalTime(60.0,24.0));
         assert_track_ranges(track,
@@ -1652,7 +1652,7 @@ main(int argc, char** argv)
                                     RationalTime(24.0, 24.0))
                             });
     });
-    
+
     // Insert at start of clip_1 (insert at 0 index).
     tests.add_test("test_edit_insert_3", [] {
         // Create a track with two clips.
@@ -1692,7 +1692,7 @@ main(int argc, char** argv)
         // Asserts.
         assert(!is_error(error_status));
         assertEqual(track->children().size(), 3);
-        
+
         const RationalTime duration = track->duration();
         assertEqual(duration, RationalTime(60.0,24.0));
         auto range = clip_0->trimmed_range_in_parent().value();
@@ -1714,7 +1714,7 @@ main(int argc, char** argv)
                 RationalTime(0.0, 24.0),
                 RationalTime(12.0, 24.0)));
     });
-    
+
     // Insert at start of clip_1.
     tests.add_test("test_edit_insert_4", [] {
         // Create a track with two clips.
@@ -1768,7 +1768,7 @@ main(int argc, char** argv)
                                     RationalTime(24.0, 24.0))
                             });
     });
-    
+
     // Insert at end of clip_1 (append at end).
     tests.add_test("test_edit_insert_4", [] {
         // Create a track with two clips.
@@ -1822,7 +1822,7 @@ main(int argc, char** argv)
                                     RationalTime(12.0, 24.0))
                             });
     });
-    
+
     // Insert near the beginning of clip_0.
     tests.add_test("test_edit_insert_5", [] {
         // Create a track with two clips.
@@ -1879,7 +1879,7 @@ main(int argc, char** argv)
                                     RationalTime(24.0, 24.0))
                             });
     });
-    
+
     // Insert near the end of clip_1.
     tests.add_test("test_edit_insert_6", [] {
         // Create a track with two clips.
@@ -1936,11 +1936,11 @@ main(int argc, char** argv)
                                     RationalTime(1.0, 24.0)),
                             });
     });
-    
+
     // Insert at the end of clip_1.
     tests.add_test("test_edit_insert_7", [] {
         OTIO_NS::ErrorStatus error_status;
-        
+
         // Create a track with three clips.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
             "PSR63_2012-06-02",
@@ -1966,12 +1966,12 @@ main(int argc, char** argv)
         track->append_child(clip_1);
         track->append_child(clip_2);
         const RationalTime duration = track->duration();
-        
+
         track->remove_child(1);
-        
+
         const RationalTime new_duration = track->duration();
         assert_duration(new_duration, RationalTime(180.0, 30.0));
-        
+
         assert_clip_ranges(track,
                             {
                                 TimeRange(
@@ -1982,8 +1982,8 @@ main(int argc, char** argv)
                                     RationalTime(90.0, 30.0)),
                             });
 
-        
-        
+
+
         // Insert at end of clip 2.
         algo::insert(
             clip_1,
@@ -2018,7 +2018,7 @@ main(int argc, char** argv)
             const RationalTime new_duration = track->duration();
             assert_duration(new_duration, RationalTime(180.0, 30.0));
         }
-        
+
         assert_clip_ranges(track,
                             {
                                 TimeRange(
@@ -2028,7 +2028,7 @@ main(int argc, char** argv)
                                     RationalTime(90.0, 30.0),
                                     RationalTime(90.0, 30.0)),
                             });
-        
+
         // Insert at end of clip 1.
         algo::insert(
             clip_1,
@@ -2054,13 +2054,13 @@ main(int argc, char** argv)
                                     RationalTime(90.0, 30.0),
                                     RationalTime(90.0, 30.0)),
                             });
-        
+
     });
-    
+
     // Insert at the middle of clip 0
     tests.add_test("test_edit_insert_8", [] {
         OTIO_NS::ErrorStatus error_status;
-        
+
         // Create a track with three clips.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(
             "spiderman",
@@ -2077,9 +2077,9 @@ main(int argc, char** argv)
         SerializableObject::Retainer<Track> track =
             new Track();
         track->append_child(clip_0);
-        
+
         debug_track_ranges("START", track);
-    
+
         // Insert at end of clip 2.
         algo::insert(
             clip_1,
@@ -2107,7 +2107,7 @@ main(int argc, char** argv)
                                     RationalTime(1575502.0, 23.976024),
                                     RationalTime(3668.0, 23.976024)),
                             });
-        
+
         assert_track_ranges(track,
                             {
                                 TimeRange(
@@ -2120,10 +2120,10 @@ main(int argc, char** argv)
                                     RationalTime(142.0, 23.976024),
                                     RationalTime(3668.0, 23.976024)),
                             });
-        
+
     });
 
-    
+
     tests.add_test("test_edit_slip", [] {
         const TimeRange media_range(
             RationalTime(-15.0, 24.0),
@@ -2138,14 +2138,14 @@ main(int argc, char** argv)
             clip_range,
             RationalTime(5.0, 24.0),
             TimeRange(RationalTime(5.0, 24.0), RationalTime(36.0, 24.0)));
-        
+
         // Slip +12 frames.
         test_edit_slip(
             media_range,
             clip_range,
             RationalTime(12.0, 24.0),
             TimeRange(RationalTime(12.0, 24.0), RationalTime(36.0, 24.0)));
-        
+
         // Slip +20 frames.
         test_edit_slip(
             media_range,
@@ -2159,14 +2159,14 @@ main(int argc, char** argv)
             clip_range,
             RationalTime(-5.0, 24.0),
             TimeRange(RationalTime(-5.0, 24.0), RationalTime(36.0, 24.0)));
-        
+
         // Slip -15 frames
         test_edit_slip(
             media_range,
             clip_range,
             RationalTime(-15.0, 24.0),
             TimeRange(RationalTime(-15.0, 24.0), RationalTime(36.0, 24.0)));
-        
+
         // Slip -30 frames
         test_edit_slip(
             media_range,
@@ -2174,12 +2174,12 @@ main(int argc, char** argv)
             RationalTime(-30.0, 24.0),
             TimeRange(RationalTime(-15.0, 24.0), RationalTime(36.0, 24.0)));
     });
-        
+
     tests.add_test("test_edit_slide", [] {
         TimeRange media_range(
             RationalTime(0.0, 24.0),
             RationalTime(48.0, 24.0));
-        
+
         // Slide 0.  No change.
         test_edit_slide(
             media_range,
@@ -2187,7 +2187,7 @@ main(int argc, char** argv)
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
               TimeRange(RationalTime(24.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(54.0, 24.0), RationalTime(40.0, 24.0)) });
-        
+
         // Slide right +12.
         test_edit_slide(
             media_range,
@@ -2195,7 +2195,7 @@ main(int argc, char** argv)
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(36.0, 24.0)),
               TimeRange(RationalTime(36.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(66.0, 24.0), RationalTime(40.0, 24.0)) });
-        
+
         // Slide right +48, which will clamp.
         test_edit_slide(
             media_range,
@@ -2203,7 +2203,7 @@ main(int argc, char** argv)
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(48.0, 24.0)),
               TimeRange(RationalTime(48.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(78.0, 24.0), RationalTime(40.0, 24.0)) });
-        
+
         // Slide left -10.
         test_edit_slide(
             media_range,
@@ -2211,7 +2211,7 @@ main(int argc, char** argv)
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(14.0, 24.0)),
               TimeRange(RationalTime(14.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(44.0, 24.0), RationalTime(40.0, 24.0)) });
-        
+
         // Slide left -24, which is invalid.  No change.
         test_edit_slide(
             media_range,
@@ -2219,11 +2219,11 @@ main(int argc, char** argv)
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
               TimeRange(RationalTime(24.0, 24.0), RationalTime(30.0, 24.0)),
               TimeRange(RationalTime(54.0, 24.0), RationalTime(40.0, 24.0)) });
-        
+
     });
 
     tests.add_test("test_edit_trim_1", [] {
-        
+
         // Create a track with one gap and two clips.
         SerializableObject::Retainer<Gap> clip_0 = new Gap(
             TimeRange(
@@ -2274,7 +2274,7 @@ main(int argc, char** argv)
                                     RationalTime(10.0, 24.0))
                             });
     });
-    
+
     // Test trim delta_out right (no change due to clip).
     tests.add_test("test_edit_trim_2", [] {
         // Create a track with one gap and two clips.
@@ -2300,7 +2300,7 @@ main(int argc, char** argv)
         track->append_child(clip_0);
         track->append_child(clip_1);
         track->append_child(clip_2);
-        
+
         const RationalTime duration = track->duration();
 
         OTIO_NS::ErrorStatus error_status;
@@ -2340,7 +2340,7 @@ main(int argc, char** argv)
                                    RationalTime(10.0, 24.0))
                            });
     });
-        
+
     // Test trim delta_out left (create a gap)
     tests.add_test("test_edit_trim_3", [] {
         // Create a track with one gap and two clips.
@@ -2366,7 +2366,7 @@ main(int argc, char** argv)
         track->append_child(clip_0);
         track->append_child(clip_1);
         track->append_child(clip_2);
-        
+
         const RationalTime duration = track->duration();
 
         OTIO_NS::ErrorStatus error_status;
@@ -2412,7 +2412,7 @@ main(int argc, char** argv)
                                   RationalTime(10.0, 24.0))
                           });
     });
-    
+
     // Test ripple
     tests.add_test("test_edit_ripple_1", [] {
         test_edit_ripple(
@@ -2442,7 +2442,7 @@ main(int argc, char** argv)
                     RationalTime(20.0, 24.0))
             });
     });
-    
+
     tests.add_test("test_edit_ripple_2", [] {
         test_edit_ripple(
             RationalTime(-10.0, 24.0),
@@ -2473,7 +2473,7 @@ main(int argc, char** argv)
             });
     });
 
-    
+
     tests.add_test("test_edit_ripple_3", [] {
         test_edit_ripple(
             RationalTime(0.0, 24.0),
@@ -2501,10 +2501,10 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
-    
+
     tests.add_test("test_edit_ripple_4", [] {
         test_edit_ripple(
             RationalTime(0.0, 24.0),
@@ -2532,9 +2532,9 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
-    
+
     tests.add_test("test_edit_roll_1", [] {
         test_edit_roll(
             RationalTime(10.0, 24.0),
@@ -2562,7 +2562,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     tests.add_test("test_edit_roll_2", [] {
@@ -2592,7 +2592,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     tests.add_test("test_edit_roll_3", [] {
@@ -2622,7 +2622,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(15.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     tests.add_test("test_edit_roll_4", [] {
@@ -2652,7 +2652,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(0.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     // Add longer clip in gap as Fit reference point
@@ -2663,7 +2663,7 @@ main(int argc, char** argv)
                 RationalTime(0.0, 24.0),
                 RationalTime(35.0, 24.0)),
             RationalTime(20.0, 24.0),
-            ReferencePoint::Fit, 
+            ReferencePoint::Fit,
             // Clip in Track Ranges
             {
                 TimeRange(
@@ -2687,7 +2687,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     // Add longer clip at gap as Source reference point.
@@ -2722,7 +2722,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(20.0, 24.0),
                     RationalTime(5.0, 24.0)),
-            }); 
+            });
     });
 
 
@@ -2757,7 +2757,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     // Add shorter clip in gap as Source reference point
@@ -2797,7 +2797,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
     // Add an equal clip (after trim) in gap as
@@ -2833,9 +2833,9 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
-    
+
     // Add a longer clip in gap as Sequence reference point
     tests.add_test("test_edit_fill_6", [] {
 
@@ -2874,7 +2874,7 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
 
@@ -2916,9 +2916,9 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
-    
+
     // Add a shorter clip in gap as Sequence reference point
     tests.add_test("test_edit_fill_8", [] {
 
@@ -2957,10 +2957,10 @@ main(int argc, char** argv)
                 TimeRange(
                     RationalTime(5.0, 24.0),
                     RationalTime(20.0, 24.0))
-            }); 
+            });
     });
 
-    
+
     // Test remove middle clip
     tests.add_test("test_edit_remove_0", [] {
         // Create a track with three clips.
@@ -2982,7 +2982,7 @@ main(int argc, char** argv)
             TimeRange(
                 RationalTime(0.0, 24.0),
                 RationalTime(10.0, 24.0)));
-        
+
         SerializableObject::Retainer<Clip> fill_0 = new Clip(
             "fill_0",
             nullptr,
@@ -2994,7 +2994,7 @@ main(int argc, char** argv)
         track->append_child(clip_0);
         track->append_child(clip_1);
         track->append_child(clip_2);
-        
+
         const RationalTime duration = track->duration();
 
         OTIO_NS::ErrorStatus error_status;
@@ -3037,7 +3037,7 @@ main(int argc, char** argv)
                                   RationalTime(0.0, 24.0),
                                   RationalTime(10.0, 24.0))
                           });
-        
+
         // Remove second clip (which is now a gap, replacing it with fill_0)
         algo::remove(
             track,
@@ -3077,7 +3077,132 @@ main(int argc, char** argv)
                                   RationalTime(10.0, 24.0))
                           });
     });
-    
+
+    // Regression Test: Null Pointer Dereference from Unchecked dynamic_cast
+    //
+    // The editAlgorithm functions call dynamic_cast<Item*>(item->clone()) and
+    // _used to_ immediately dereference the result.
+    // SerializableObject::clone() can
+    // return nullptr (for example, when the object's metadata contains a
+    // cycle, which causes the cloning encoder to error out). When that
+    // happens, the dynamic_cast also yields nullptr and the next member call
+    // _used to_ dereference the null pointer (denial of service / crash).
+    //
+    // The tests below construct Items whose metadata contains a cycle (the
+    // clip references itself) and exercise each of the four affected call
+    // sites. After the fix, the algorithms does not crash and reports a
+    // non-OK error status rather than dereferencing nullptr.
+    //
+    // Helper: make a clip whose clone() will fail because of a metadata cycle.
+    auto make_clip_with_cyclic_metadata =
+        [](std::string const& name, TimeRange const& source_range)
+            -> SerializableObject::Retainer<Clip> {
+        SerializableObject::Retainer<Clip> clip =
+            new Clip(name, nullptr, source_range);
+        // Insert a self-reference in the metadata so that clone() (which
+        // round-trips through serialization) detects an OBJECT_CYCLE and
+        // returns nullptr.
+        clip->metadata()["self"] =
+            SerializableObject::Retainer<>(clip.value);
+        // Sanity check: cloning this clip should fail.
+        OTIO_NS::ErrorStatus err;
+        SerializableObject* cloned = clip->clone(&err);
+        assertTrue(cloned == nullptr);
+        assertTrue(is_error(err));
+        return clip;
+    };
+
+    // overwrite() splits a single clip whose middle is overwritten.
+    tests.add_test("test_edit_overwrite_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        SerializableObject::Retainer<Clip> insert_clip = new Clip(
+            "insert",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(4.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        // Overwrite a 4-frame range in the middle of the cyclic clip. This
+        // forces the code path that clones items.front() to produce the
+        // trailing slice.
+        algo::overwrite(
+            insert_clip,
+            track,
+            TimeRange(RationalTime(8.0, 24.0), RationalTime(4.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+        // Must not crash; must report an error.
+        assertTrue(is_error(error_status));
+    });
+
+    // insert() splits an existing clip and clones it for the tail.
+    tests.add_test("test_edit_insert_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        SerializableObject::Retainer<Clip> insert_clip = new Clip(
+            "insert",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(4.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::insert(
+            insert_clip,
+            track,
+            RationalTime(12.0, 24.0),
+            true,
+            nullptr,
+            &error_status);
+        assertTrue(is_error(error_status));
+    });
+
+    // slice() clones an item to create the second slice.
+    tests.add_test("test_edit_slice_null_clone_safe", [&] {
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::slice(
+            track,
+            RationalTime(12.0, 24.0),
+            true,
+            &error_status);
+        assertTrue(is_error(error_status));
+    });
+
+    // fill() clones the source item before placing it on the track.
+    tests.add_test("test_edit_fill_null_clone_safe", [&] {
+        // Track with a gap so that fill() can find a slot to fill.
+        SerializableObject::Retainer<Gap> gap = new Gap(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(gap);
+
+        auto clip = make_clip_with_cyclic_metadata(
+            "cyclic",
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+
+        OTIO_NS::ErrorStatus error_status;
+        algo::fill(
+            clip,
+            track,
+            RationalTime(0.0, 24.0),
+            ReferencePoint::Sequence,
+            &error_status);
+        assertTrue(is_error(error_status));
+    });
+
     tests.run(argc, argv);
     return 0;
 }

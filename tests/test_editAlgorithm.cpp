@@ -2131,18 +2131,19 @@ main(int argc, char** argv)
               TimeRange(RationalTime(0.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
-    // Null Pointer Dereference from Unchecked dynamic_cast
+    // Regression Test: Null Pointer Dereference from Unchecked dynamic_cast
     //
     // The editAlgorithm functions call dynamic_cast<Item*>(item->clone()) and
-    // immediately dereference the result. SerializableObject::clone() can
+    // _used to_ immediately dereference the result.
+    // SerializableObject::clone() can
     // return nullptr (for example, when the object's metadata contains a
     // cycle, which causes the cloning encoder to error out). When that
     // happens, the dynamic_cast also yields nullptr and the next member call
-    // is a null pointer dereference (denial of service / crash).
+    // _used to_ dereference the null pointer (denial of service / crash).
     //
     // The tests below construct Items whose metadata contains a cycle (the
     // clip references itself) and exercise each of the four affected call
-    // sites. After the fix, the algorithms must not crash and must report a
+    // sites. After the fix, the algorithms does not crash and reports a
     // non-OK error status rather than dereferencing nullptr.
     //
     // Helper: make a clip whose clone() will fail because of a metadata cycle.
@@ -2163,7 +2164,7 @@ main(int argc, char** argv)
         return clip;
     };
 
-    // Line 185: overwrite() splits a single clip whose middle is overwritten.
+    // overwrite() splits a single clip whose middle is overwritten.
     tests.add_test("test_edit_overwrite_null_clone_safe", [&] {
         auto clip = make_clip_with_cyclic_metadata(
             "cyclic",
@@ -2179,7 +2180,7 @@ main(int argc, char** argv)
         OTIO_NS::ErrorStatus error_status;
         // Overwrite a 4-frame range in the middle of the cyclic clip. This
         // forces the code path that clones items.front() to produce the
-        // trailing slice (line 185).
+        // trailing slice.
         algo::overwrite(
             insert_clip,
             track,
@@ -2191,7 +2192,7 @@ main(int argc, char** argv)
         assertTrue(is_error(error_status));
     });
 
-    // Line 367: insert() splits an existing clip and clones it for the tail.
+    // insert() splits an existing clip and clones it for the tail.
     tests.add_test("test_edit_insert_null_clone_safe", [&] {
         auto clip = make_clip_with_cyclic_metadata(
             "cyclic",
@@ -2215,7 +2216,7 @@ main(int argc, char** argv)
         assertTrue(is_error(error_status));
     });
 
-    // Line 534: slice() clones an item to create the second slice.
+    // slice() clones an item to create the second slice.
     tests.add_test("test_edit_slice_null_clone_safe", [&] {
         auto clip = make_clip_with_cyclic_metadata(
             "cyclic",
@@ -2228,7 +2229,7 @@ main(int argc, char** argv)
         assertTrue(is_error(error_status));
     });
 
-    // Line 795: fill() clones the source item before placing it on the track.
+    // fill() clones the source item before placing it on the track.
     tests.add_test("test_edit_fill_null_clone_safe", [&] {
         // Track with a gap so that fill() can find a slot to fill.
         SerializableObject::Retainer<Gap> gap = new Gap(

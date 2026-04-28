@@ -16,21 +16,21 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    tests.add_test(
-        "test_find_children", [] {
-        SerializableObject::Retainer<Clip> cl = new Clip();
+    tests.add_test("test_find_children", [] {
+        SerializableObject::Retainer<Clip>  cl = new Clip();
         SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
         SerializableObject::Retainer<Timeline> tl = new Timeline();
         tl->tracks()->append_child(tr);
         OTIO_NS::ErrorStatus err;
-        auto result = tl->find_children<Clip>(&err);
+        auto                 result = tl->find_children<Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });
-    tests.add_test(
-        "test_find_children_search_range", [] {
-        const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
+    tests.add_test("test_find_children_search_range", [] {
+        const TimeRange range(
+            RationalTime(0.0, 24.0),
+            RationalTime(24.0, 24.0));
         SerializableObject::Retainer<Clip> cl0 = new Clip();
         cl0->set_source_range(range);
         SerializableObject::Retainer<Clip> cl1 = new Clip();
@@ -44,13 +44,12 @@ main(int argc, char** argv)
         SerializableObject::Retainer<Timeline> tl = new Timeline();
         tl->tracks()->append_child(tr);
         OTIO_NS::ErrorStatus err;
-        auto result = tl->find_children<Clip>(&err, range);
+        auto                 result = tl->find_children<Clip>(&err, range);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl0.value);
     });
-    tests.add_test(
-        "test_find_children_shallow_search", [] {
-        SerializableObject::Retainer<Clip> cl = new Clip();
+    tests.add_test("test_find_children_shallow_search", [] {
+        SerializableObject::Retainer<Clip>  cl = new Clip();
         SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
         SerializableObject::Retainer<Timeline> tl = new Timeline();

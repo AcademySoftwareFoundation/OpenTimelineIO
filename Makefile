@@ -155,11 +155,14 @@ format:
 ifndef CLANG_FORMAT_PROG
 	$(error $(newline)$(ccred)clang-format is not available on $$PATH$(ccend))
 endif
-	$(eval DIRS = src/opentime src/opentimelineio src/opentimelineio/algo)
+	$(eval DIRS = src/opentime)
+	$(eval DIRS += src/opentimelineio)
+	$(eval DIRS += src/opentimelineio/algo)
+	$(eval DIRS += tests)
+	$(eval DIRS += examples)
 	$(eval DIRS += src/py-opentimelineio/opentime-bindings)
 	$(eval DIRS += src/py-opentimelineio/opentimelineio-bindings)
 	$(eval FILES_TO_FORMAT = $(wildcard $(addsuffix /*.h, $(DIRS)) $(addsuffix /*.cpp, $(DIRS))))
-	echo "formatting..." $(FILES_TO_FORMAT)
 	$(shell clang-format -i -style=file $(FILES_TO_FORMAT))
 
 manifest:

@@ -20,11 +20,11 @@
 #include <sstream>
 
 #if defined(_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif // WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <combaseapi.h>
+#    ifndef WIN32_LEAN_AND_MEAN
+#        define WIN32_LEAN_AND_MEAN
+#    endif // WIN32_LEAN_AND_MEAN
+#    include <combaseapi.h>
+#    include <windows.h>
 #endif // _WINDOWS
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
@@ -35,9 +35,8 @@ public:
     PythonAdapters();
     ~PythonAdapters();
 
-    otio::SerializableObject::Retainer<otio::Timeline> read_from_file(
-        std::string const&,
-        otio::ErrorStatus*);
+    otio::SerializableObject::Retainer<otio::Timeline>
+    read_from_file(std::string const&, otio::ErrorStatus*);
 
     bool write_to_file(
         otio::SerializableObject::Retainer<otio::Timeline> const&,
@@ -58,8 +57,8 @@ PythonAdapters::~PythonAdapters()
 class PyObjectRef
 {
 public:
-    PyObjectRef(PyObject* o) :
-        o(o)
+    PyObjectRef(PyObject* o)
+        : o(o)
     {
         if (!o)
         {
@@ -67,17 +66,15 @@ public:
         }
     }
 
-    ~PyObjectRef()
-    {
-        Py_XDECREF(o);
-    }
+    ~PyObjectRef() { Py_XDECREF(o); }
 
     PyObject* o = nullptr;
 
-    operator PyObject* () const { return o; }
+    operator PyObject*() const { return o; }
 };
 
-otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_file(
+otio::SerializableObject::Retainer<otio::Timeline>
+PythonAdapters::read_from_file(
     std::string const& file_name,
     otio::ErrorStatus* error_status)
 {
@@ -85,23 +82,31 @@ otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_fil
     try
     {
         // Import the OTIO Python module.
-        auto p_module = PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
-        
+        auto p_module =
+            PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
+
         // Read the timeline into Python.
-        auto p_read_from_file = PyObjectRef(PyObject_GetAttrString(p_module, "read_from_file"));
-        auto p_read_from_file_args = PyObjectRef(PyTuple_New(1));
-        const std::string file_name_normalized = examples::normalize_path(file_name);
-        auto p_read_from_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
+        auto p_read_from_file =
+            PyObjectRef(PyObject_GetAttrString(p_module, "read_from_file"));
+        auto              p_read_from_file_args = PyObjectRef(PyTuple_New(1));
+        const std::string file_name_normalized =
+            examples::normalize_path(file_name);
+        auto p_read_from_file_arg = PyUnicode_FromStringAndSize(
+            file_name_normalized.c_str(),
+            file_name_normalized.size());
         if (!p_read_from_file_arg)
         {
             throw std::runtime_error("cannot create arg");
         }
         PyTuple_SetItem(p_read_from_file_args, 0, p_read_from_file_arg);
-        auto p_timeline = PyObjectRef(PyObject_CallObject(p_read_from_file, p_read_from_file_args));
+        auto p_timeline = PyObjectRef(
+            PyObject_CallObject(p_read_from_file, p_read_from_file_args));
 
         // Convert the Python timeline into a string and use that to create a C++ timeline.
-        auto p_to_json_string = PyObjectRef(PyObject_GetAttrString(p_timeline, "to_json_string"));
-        auto p_json_string = PyObjectRef(PyObject_CallObject(p_to_json_string, NULL));
+        auto p_to_json_string =
+            PyObjectRef(PyObject_GetAttrString(p_timeline, "to_json_string"));
+        auto p_json_string =
+            PyObjectRef(PyObject_CallObject(p_to_json_string, NULL));
         timeline = otio::SerializableObject::Retainer<otio::Timeline>(
             dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_string(
                 PyUnicode_AsUTF8AndSize(p_json_string, NULL),
@@ -119,16 +124,18 @@ otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_fil
     return timeline;
 }
 
-bool PythonAdapters::write_to_file(
+bool
+PythonAdapters::write_to_file(
     otio::SerializableObject::Retainer<otio::Timeline> const& timeline,
-    std::string const& file_name,
-    otio::ErrorStatus* error_status)
+    std::string const&                                        file_name,
+    otio::ErrorStatus*                                        error_status)
 {
     bool r = false;
     try
     {
         // Import the OTIO Python module.
-        auto p_module = PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
+        auto p_module =
+            PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
 
         // Convert the C++ timeline to a string and pass that to Python.
         const auto string = timeline.value->to_json_string(error_status);
@@ -136,21 +143,28 @@ bool PythonAdapters::write_to_file(
         {
             throw std::runtime_error("cannot convert to string");
         }
-        auto p_read_from_string = PyObjectRef(PyObject_GetAttrString(p_module, "read_from_string"));
+        auto p_read_from_string =
+            PyObjectRef(PyObject_GetAttrString(p_module, "read_from_string"));
         auto p_read_from_string_args = PyObjectRef(PyTuple_New(1));
-        auto p_read_from_string_arg = PyUnicode_FromStringAndSize(string.c_str(), string.size());
+        auto p_read_from_string_arg =
+            PyUnicode_FromStringAndSize(string.c_str(), string.size());
         if (!p_read_from_string_arg)
         {
             throw std::runtime_error("cannot create arg");
         }
         PyTuple_SetItem(p_read_from_string_args, 0, p_read_from_string_arg);
-        auto p_timeline = PyObjectRef(PyObject_CallObject(p_read_from_string, p_read_from_string_args));
+        auto p_timeline = PyObjectRef(
+            PyObject_CallObject(p_read_from_string, p_read_from_string_args));
 
         // Write the Python timeline.
-        auto p_write_to_file = PyObjectRef(PyObject_GetAttrString(p_module, "write_to_file"));
-        auto p_write_to_file_args = PyObjectRef(PyTuple_New(2));
-        const std::string file_name_normalized = examples::normalize_path(file_name);
-        auto p_write_to_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
+        auto p_write_to_file =
+            PyObjectRef(PyObject_GetAttrString(p_module, "write_to_file"));
+        auto              p_write_to_file_args = PyObjectRef(PyTuple_New(2));
+        const std::string file_name_normalized =
+            examples::normalize_path(file_name);
+        auto p_write_to_file_arg = PyUnicode_FromStringAndSize(
+            file_name_normalized.c_str(),
+            file_name_normalized.size());
         if (!p_write_to_file_arg)
         {
             throw std::runtime_error("cannot create arg");
@@ -173,15 +187,17 @@ bool PythonAdapters::write_to_file(
     return r;
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cout << "Usage: python_adapters_embed (inputpath) (outputpath)" << std::endl;
+        std::cout << "Usage: python_adapters_embed (inputpath) (outputpath)"
+                  << std::endl;
         return 1;
     }
 
-    PythonAdapters adapters;
+    PythonAdapters    adapters;
     otio::ErrorStatus error_status;
     auto timeline = adapters.read_from_file(argv[1], &error_status);
     if (!timeline)
@@ -190,8 +206,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    std::cout << "Video tracks: " << timeline.value->video_tracks().size() << std::endl;
-    std::cout << "Audio tracks: " << timeline.value->audio_tracks().size() << std::endl;
+    std::cout << "Video tracks: " << timeline.value->video_tracks().size()
+              << std::endl;
+    std::cout << "Audio tracks: " << timeline.value->audio_tracks().size()
+              << std::endl;
 
     if (!adapters.write_to_file(timeline, argv[2], &error_status))
     {

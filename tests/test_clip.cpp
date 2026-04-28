@@ -6,12 +6,12 @@
 #include <opentimelineio/clip.h>
 #include <opentimelineio/deserialization.h>
 #include <opentimelineio/externalReference.h>
-#include <opentimelineio/missingReference.h>
-#include <opentimelineio/serializableCollection.h>
-#include <opentimelineio/timeline.h>
 #include <opentimelineio/freezeFrame.h>
 #include <opentimelineio/linearTimeWarp.h>
 #include <opentimelineio/marker.h>
+#include <opentimelineio/missingReference.h>
+#include <opentimelineio/serializableCollection.h>
+#include <opentimelineio/timeline.h>
 
 #include <iostream>
 
@@ -73,7 +73,6 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_v1_to_v2_null", [] {
-
         OTIO_NS::ErrorStatus           status;
         SerializableObject::Retainer<> so =
             SerializableObject::from_json_string(
@@ -95,7 +94,6 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_v1_to_v2", [] {
-
         OTIO_NS::ErrorStatus           status;
         SerializableObject::Retainer<> so =
             SerializableObject::from_json_string(
@@ -146,21 +144,18 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_clip_media_representation", [] {
-
         static constexpr auto time_scalar = 1.5;
 
         SerializableObject::Retainer<LinearTimeWarp> ltw(new LinearTimeWarp(
             LinearTimeWarp::Schema::name,
             LinearTimeWarp::Schema::name,
             time_scalar));
-        std::vector<Effect*> effects = { ltw };
+        std::vector<Effect*>                         effects = { ltw };
 
         static constexpr auto red = Marker::Color::red;
 
-        SerializableObject::Retainer<Marker> m(new Marker(
-            LinearTimeWarp::Schema::name,
-            TimeRange(),
-            red));
+        SerializableObject::Retainer<Marker> m(
+            new Marker(LinearTimeWarp::Schema::name, TimeRange(), red));
         std::vector<Marker*> markers = { m };
 
         static constexpr auto high_quality  = "high_quality";
@@ -220,7 +215,9 @@ main(int argc, char** argv)
 
         OTIO_NS::ErrorStatus error2;
         clip->set_media_references(
-            { { "cloud", ref4 } }, high_quality, &error2);
+            { { "cloud", ref4 } },
+            high_quality,
+            &error2);
         assertTrue(is_error(error2));
         assertEqual(
             error2.outcome,
@@ -249,14 +246,13 @@ main(int argc, char** argv)
 
         // basic test for a marker
         assertEqual(clip->markers().size(), markers.size());
-        auto marker = dynamic_cast<OTIO_NS::Marker*>(
-            clip->markers().front().value);
+        auto marker =
+            dynamic_cast<OTIO_NS::Marker*>(clip->markers().front().value);
         assertEqual(marker->color().c_str(), red);
     });
 
     // test to ensure null error_status pointers are correctly handled
     tests.add_test("test_error_ptr_null", [] {
-
         // tests for no image bounds on media reference on clip
         SerializableObject::Retainer<Clip> clip(new Clip);
 
@@ -272,14 +268,13 @@ main(int argc, char** argv)
         OTIO_NS::ErrorStatus* null_test = nullptr;
 
         assertEqual(
-            clip->available_image_bounds(null_test), std::optional<IMATH_NAMESPACE::Box2d>()
-        );
+            clip->available_image_bounds(null_test),
+            std::optional<IMATH_NAMESPACE::Box2d>());
     });
 
     // test to ensure null error_status pointers are correctly handled
     // when there's no media reference
     tests.add_test("test_error_ptr_null_no_media", [] {
-
         SerializableObject::Retainer<Clip> clip(new Clip);
 
         // set media reference to empty
@@ -300,8 +295,8 @@ main(int argc, char** argv)
         OTIO_NS::ErrorStatus* null_test_no_mr = nullptr;
 
         assertEqual(
-            clip->available_image_bounds(null_test_no_mr), std::optional<IMATH_NAMESPACE::Box2d>()
-        );
+            clip->available_image_bounds(null_test_no_mr),
+            std::optional<IMATH_NAMESPACE::Box2d>());
     });
 
     tests.run(argc, argv);

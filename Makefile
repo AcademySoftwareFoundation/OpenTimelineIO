@@ -169,7 +169,7 @@ ifndef CHECK_MANIFEST_PROG
 endif
 	@check-manifest
 	@echo "check-manifest succeeded"
-	
+
 
 doc-model:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py --dryrun
@@ -196,10 +196,10 @@ doc-html:
 	@# if you just want to build the docs yourself outside of RTD
 	@cd docs; ${MAKE_PROG} html
 
-doc-cpp: 
-	@cd doxygen ; doxygen config/dox_config ; cd .. 
+doc-cpp:
+	@cd doxygen ; doxygen config/dox_config ; cd ..
 	@echo "wrote doxygen output to: doxygen/output/html/index.html"
-	
+
 # release related targets
 confirm-release-intent:
 ifndef OTIO_DO_RELEASE
@@ -231,7 +231,7 @@ unfreeze-ci-versions:
 	@echo "unfreezing CI versions..."
 	@python maintainers/freeze_ci_versions.py -u
 
-# needs to happen _before_ version-map-update so that version in 
+# needs to happen _before_ version-map-update so that version in
 # CORE_VERSION_MAP does not have the .dev1 suffix at release time
 remove-dev-suffix:
 	@echo "Removing .dev1 suffix"
@@ -252,7 +252,7 @@ update-contributors: check-github-token
 dev-python-install:
 	@python setup.py install
 
-# make target for preparing a release candidate 
+# make target for preparing a release candidate
 release: \
 	confirm-release-intent \
 	check-git-status \
@@ -264,7 +264,7 @@ release: \
 	dev-python-install \
 	version-map-update \
 	test-core \
-	update-contributors 
+	update-contributors
 	@echo "Release is ready.  Commit, push and open a PR!"
 
 # targets for creating a new version (after making a release, to start the next

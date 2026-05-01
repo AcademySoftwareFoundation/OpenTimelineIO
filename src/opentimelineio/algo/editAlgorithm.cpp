@@ -181,9 +181,22 @@ overwrite(
             composition->insert_child(insert_index, item);
             if (!isEqual(second_duration.value(), 0.0))
             {
-                auto second_item = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range    = second_item->trimmed_range();
-                source_range     = TimeRange(
+                auto cloned_item = items.front()->clone();
+                if (!cloned_item)
+                {
+                    if (error_status)
+                        *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                    return;
+                }
+                auto second_item = dynamic_cast<Item*>(cloned_item);
+                if (!second_item)
+                {
+                    if (error_status)
+                        *error_status = ErrorStatus::TYPE_MISMATCH;
+                    return;
+                }
+                trimmed_range = second_item->trimmed_range();
+                source_range  = TimeRange(
                     trimmed_range.start_time() + first_duration
                         + range.duration(),
                     second_duration);
@@ -362,7 +375,20 @@ insert(
         // Clone the item for the second partially overwritten item.
         if (!isEqual(second_source_range.duration().value(), 0.0))
         {
-            auto second_item = dynamic_cast<Item*>(item->clone());
+            auto cloned_item = item->clone();
+            if (!cloned_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                return;
+            }
+            auto second_item = dynamic_cast<Item*>(cloned_item);
+            if (!second_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus::TYPE_MISMATCH;
+                return;
+            }
             second_item->set_source_range(second_source_range);
             composition->insert_child(insert_index + 1, second_item);
         }
@@ -530,7 +556,20 @@ slice(
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
-    auto            second_item = dynamic_cast<Item*>(item->clone());
+    auto cloned_item = item->clone();
+    if (!cloned_item)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+        return;
+    }
+    auto second_item = dynamic_cast<Item*>(cloned_item);
+    if (!second_item)
+    {
+        if (error_status)
+            *error_status = ErrorStatus::TYPE_MISMATCH;
+        return;
+    }
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());
@@ -793,7 +832,20 @@ fill(
         case ReferencePoint::Sequence: {
             RationalTime       start_time     = clip_range.start_time();
             const RationalTime gap_start_time = gap_range.start_time();
-            auto               track_item = dynamic_cast<Item*>(item->clone());
+            auto               cloned_item    = item->clone();
+            if (!cloned_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                return;
+            }
+            auto track_item = dynamic_cast<Item*>(cloned_item);
+            if (!track_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus::TYPE_MISMATCH;
+                return;
+            }
 
             // Check if start time is less than gap's start time (trim it if so)
             if (start_time < gap_start_time)

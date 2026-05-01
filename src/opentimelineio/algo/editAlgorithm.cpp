@@ -362,7 +362,24 @@ insert(
         // Clone the item for the second partially overwritten item.
         if (!isEqual(second_source_range.duration().value(), 0.0))
         {
-            auto second_item = dynamic_cast<Item*>(item->clone());
+            auto cloned_item = item->clone();
+            if (!cloned_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "clone failed");
+                return;
+            }
+            auto second_item = dynamic_cast<Item*>(cloned_item);
+            if (!second_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "clone was unexpected type");
+                return;
+            }
             second_item->set_source_range(second_source_range);
             composition->insert_child(insert_index + 1, second_item);
         }

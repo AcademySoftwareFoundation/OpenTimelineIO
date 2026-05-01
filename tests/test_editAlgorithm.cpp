@@ -2132,13 +2132,20 @@ main(int argc, char** argv)
     });
 
     tests.add_test("crash in overwrite, insert, slice, fill", [] {
-        SerializableObject::Retainer<Clip> clip = new Clip(
-            "clip",
+        SerializableObject::Retainer<Clip> big_clip = new Clip(
+            "big clip",
             nullptr,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
-        clip->metadata()["cycle"]                 = clip;
+        big_clip->metadata()["cycle"] = big_clip;
+
+        SerializableObject::Retainer<Clip> small_clip = new Clip(
+            "small clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
+        small_clip->metadata()["cycle"] = small_clip;
+
         SerializableObject::Retainer<Track> track = new Track();
-        track->append_child(clip);
+        track->append_child(big_clip);
 
         OTIO_NS::ErrorStatus error_status;
 
@@ -2151,14 +2158,14 @@ main(int argc, char** argv)
         //     &error_status);
         // assert(is_error(error_status));
 
-        // algo::insert(
-        //     clip,
-        //     track,
-        //     RationalTime(12.0, 24.0),
-        //     true,
-        //     nullptr,
-        //     &error_status);
-        // assert(is_error(error_status));
+        algo::insert(
+            small_clip,
+            track,
+            RationalTime(12.0, 24.0),
+            true,
+            nullptr,
+            &error_status);
+        assert(is_error(error_status));
 
         algo::slice(track, RationalTime(12.0, 24.0), false, &error_status);
         assert(is_error(error_status));

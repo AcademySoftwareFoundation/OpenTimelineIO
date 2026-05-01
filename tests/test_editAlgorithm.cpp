@@ -2152,7 +2152,7 @@ main(int argc, char** argv)
         algo::slice(track, RationalTime(12.0, 24.0), false, &error_status);
 
         assert(is_error(error_status));
-        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::CANNOT_CLONE_ITEM);
     });
 
     tests.add_test("regression: crash in overwrite", [] {
@@ -2180,8 +2180,9 @@ main(int argc, char** argv)
             true,
             nullptr,
             &error_status);
+
         assert(is_error(error_status));
-        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::CANNOT_CLONE_ITEM);
     });
 
     tests.add_test("regression: crash in insert", [] {
@@ -2209,8 +2210,9 @@ main(int argc, char** argv)
             true,
             nullptr,
             &error_status);
+
         assert(is_error(error_status));
-        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::CANNOT_CLONE_ITEM);
     });
 
     tests.add_test("regression: crash in fill", [] {
@@ -2243,14 +2245,9 @@ main(int argc, char** argv)
             RationalTime(12.0, 24.0),
             ReferencePoint::Sequence,
             &error_status);
+
         assert(is_error(error_status));
-        fprintf(
-            stderr,
-            "error_status: %s %s\n",
-            OTIO_NS::ErrorStatus::outcome_to_string(error_status.outcome)
-                .c_str(),
-            error_status.details.c_str());
-        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::CANNOT_CLONE_ITEM);
     });
 
     tests.run(argc, argv);

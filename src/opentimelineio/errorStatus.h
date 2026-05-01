@@ -45,7 +45,8 @@ struct OTIO_API_TYPE ErrorStatus
         CANNOT_COMPUTE_BOUNDS,
         MEDIA_REFERENCES_DO_NOT_CONTAIN_ACTIVE_KEY,
         MEDIA_REFERENCES_CONTAIN_EMPTY_KEY,
-        NOT_A_GAP
+        NOT_A_GAP,
+        CANNOT_CLONE_ITEM
     };
 
     /// @brief Construct a new status with no error.

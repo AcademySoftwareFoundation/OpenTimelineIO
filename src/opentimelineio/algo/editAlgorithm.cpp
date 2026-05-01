@@ -185,18 +185,14 @@ overwrite(
                 if (!cloned_item)
                 {
                     if (error_status)
-                        *error_status = ErrorStatus(
-                            ErrorStatus::INTERNAL_ERROR,
-                            "clone failed");
+                        *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
                     return;
                 }
                 auto second_item = dynamic_cast<Item*>(cloned_item);
                 if (!second_item)
                 {
                     if (error_status)
-                        *error_status = ErrorStatus(
-                            ErrorStatus::TYPE_MISMATCH,
-                            "clone was unexpected type");
+                        *error_status = ErrorStatus::TYPE_MISMATCH;
                     return;
                 }
                 trimmed_range = second_item->trimmed_range();
@@ -383,18 +379,14 @@ insert(
             if (!cloned_item)
             {
                 if (error_status)
-                    *error_status = ErrorStatus(
-                        ErrorStatus::INTERNAL_ERROR,
-                        "clone failed");
+                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
                 return;
             }
             auto second_item = dynamic_cast<Item*>(cloned_item);
             if (!second_item)
             {
                 if (error_status)
-                    *error_status = ErrorStatus(
-                        ErrorStatus::TYPE_MISMATCH,
-                        "clone was unexpected type");
+                    *error_status = ErrorStatus::TYPE_MISMATCH;
                 return;
             }
             second_item->set_source_range(second_source_range);
@@ -568,17 +560,14 @@ slice(
     if (!cloned_item)
     {
         if (error_status)
-            *error_status =
-                ErrorStatus(ErrorStatus::INTERNAL_ERROR, "clone failed");
+            *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
         return;
     }
     auto second_item = dynamic_cast<Item*>(cloned_item);
     if (!second_item)
     {
         if (error_status)
-            *error_status = ErrorStatus(
-                ErrorStatus::TYPE_MISMATCH,
-                "clone was unexpected type");
+            *error_status = ErrorStatus::TYPE_MISMATCH;
         return;
     }
     const TimeRange second_source_range(
@@ -847,18 +836,14 @@ fill(
             if (!cloned_item)
             {
                 if (error_status)
-                    *error_status = ErrorStatus(
-                        ErrorStatus::INTERNAL_ERROR,
-                        "clone failed");
+                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
                 return;
             }
             auto track_item = dynamic_cast<Item*>(cloned_item);
             if (!track_item)
             {
                 if (error_status)
-                    *error_status = ErrorStatus(
-                        ErrorStatus::TYPE_MISMATCH,
-                        "clone was unexpected type");
+                    *error_status = ErrorStatus::TYPE_MISMATCH;
                 return;
             }
 

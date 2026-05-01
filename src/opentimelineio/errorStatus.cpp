@@ -66,6 +66,8 @@ ErrorStatus::outcome_to_string(Outcome o)
             return "the media references cannot contain an empty key";
         case NOT_A_GAP:
             return "object is not descendent of Gap type";
+        case CANNOT_CLONE_ITEM:
+            return "cannot clone item";
         default:
             return "unknown/illegal ErrorStatus::Outcome code";
     };

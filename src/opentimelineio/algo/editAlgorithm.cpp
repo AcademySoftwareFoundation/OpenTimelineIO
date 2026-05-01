@@ -530,7 +530,23 @@ slice(
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
-    auto            second_item = dynamic_cast<Item*>(item->clone());
+    auto cloned_item = item->clone();
+    if (!cloned_item)
+    {
+        if (error_status)
+            *error_status =
+                ErrorStatus(ErrorStatus::INTERNAL_ERROR, "clone failed");
+        return;
+    }
+    auto second_item = dynamic_cast<Item*>(cloned_item);
+    if (!second_item)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::INTERNAL_ERROR,
+                "clone was unexpected type");
+        return;
+    }
     const TimeRange second_source_range(
         first_source_range.start_time() + first_source_range.duration(),
         range.duration() - first_source_range.duration());

@@ -2131,6 +2131,47 @@ main(int argc, char** argv)
               TimeRange(RationalTime(0.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
+    tests.add_test("crash in overwrite, insert, slice, fill", [] {
+        SerializableObject::Retainer<Clip> clip = new Clip(
+            "clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        clip->metadata()["cycle"]                 = clip;
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip);
+
+        OTIO_NS::ErrorStatus error_status;
+
+        // algo::overwrite(
+        //     clip,
+        //     track,
+        //     TimeRange(RationalTime(0.0, 24.0), RationalTime(12.0, 24.0)),
+        //     true,
+        //     nullptr,
+        //     &error_status);
+        // assert(is_error(error_status));
+
+        // algo::insert(
+        //     clip,
+        //     track,
+        //     RationalTime(12.0, 24.0),
+        //     true,
+        //     nullptr,
+        //     &error_status);
+        // assert(is_error(error_status));
+
+        algo::slice(track, RationalTime(12.0, 24.0), false, &error_status);
+        assert(is_error(error_status));
+
+        // algo::fill(
+        //     clip,
+        //     track,
+        //     RationalTime(12.0, 24.0),
+        //     ReferencePoint::Fit,
+        //     &error_status);
+        // assert(is_error(error_status));
+    });
+
     tests.run(argc, argv);
     return 0;
 }

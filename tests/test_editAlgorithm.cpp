@@ -2131,7 +2131,31 @@ main(int argc, char** argv)
               TimeRange(RationalTime(0.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
-    tests.add_test("crash in overwrite, insert, slice, fill", [] {
+    tests.add_test("regression: crash in slice", [] {
+        SerializableObject::Retainer<Clip> big_clip = new Clip(
+            "big clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        big_clip->metadata()["cycle"] = big_clip;
+
+        SerializableObject::Retainer<Clip> small_clip = new Clip(
+            "small clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
+        small_clip->metadata()["cycle"] = small_clip;
+
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(big_clip);
+
+        OTIO_NS::ErrorStatus error_status;
+
+        algo::slice(track, RationalTime(12.0, 24.0), false, &error_status);
+
+        assert(is_error(error_status));
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+    });
+
+    tests.add_test("regression: crash in overwrite", [] {
         SerializableObject::Retainer<Clip> big_clip = new Clip(
             "big clip",
             nullptr,
@@ -2157,6 +2181,26 @@ main(int argc, char** argv)
             nullptr,
             &error_status);
         assert(is_error(error_status));
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+    });
+
+    tests.add_test("regression: crash in insert", [] {
+        SerializableObject::Retainer<Clip> big_clip = new Clip(
+            "big clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        big_clip->metadata()["cycle"] = big_clip;
+
+        SerializableObject::Retainer<Clip> small_clip = new Clip(
+            "small clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
+        small_clip->metadata()["cycle"] = small_clip;
+
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(big_clip);
+
+        OTIO_NS::ErrorStatus error_status;
 
         algo::insert(
             small_clip,
@@ -2166,17 +2210,47 @@ main(int argc, char** argv)
             nullptr,
             &error_status);
         assert(is_error(error_status));
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
+    });
 
-        algo::slice(track, RationalTime(12.0, 24.0), false, &error_status);
+    tests.add_test("regression: crash in fill", [] {
+        SerializableObject::Retainer<Clip> big_clip = new Clip(
+            "big clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        big_clip->metadata()["cycle"] = big_clip;
+
+        SerializableObject::Retainer<Clip> small_clip = new Clip(
+            "small clip",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
+        small_clip->metadata()["cycle"] = small_clip;
+
+        SerializableObject::Retainer<Gap> gap = new Gap(
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
+            "gap");
+
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(small_clip);
+        track->append_child(gap);
+        track->append_child(small_clip);
+
+        OTIO_NS::ErrorStatus error_status;
+
+        algo::fill(
+            big_clip,
+            track,
+            RationalTime(12.0, 24.0),
+            ReferencePoint::Sequence,
+            &error_status);
         assert(is_error(error_status));
-
-        // algo::fill(
-        //     clip,
-        //     track,
-        //     RationalTime(12.0, 24.0),
-        //     ReferencePoint::Fit,
-        //     &error_status);
-        // assert(is_error(error_status));
+        fprintf(
+            stderr,
+            "error_status: %s %s\n",
+            OTIO_NS::ErrorStatus::outcome_to_string(error_status.outcome)
+                .c_str(),
+            error_status.details.c_str());
+        assert(error_status.outcome == OTIO_NS::ErrorStatus::INTERNAL_ERROR);
     });
 
     tests.run(argc, argv);

@@ -195,7 +195,7 @@ overwrite(
                 {
                     if (error_status)
                         *error_status = ErrorStatus(
-                            ErrorStatus::INTERNAL_ERROR,
+                            ErrorStatus::TYPE_MISMATCH,
                             "clone was unexpected type");
                     return;
                 }
@@ -393,7 +393,7 @@ insert(
             {
                 if (error_status)
                     *error_status = ErrorStatus(
-                        ErrorStatus::INTERNAL_ERROR,
+                        ErrorStatus::TYPE_MISMATCH,
                         "clone was unexpected type");
                 return;
             }
@@ -577,7 +577,7 @@ slice(
     {
         if (error_status)
             *error_status = ErrorStatus(
-                ErrorStatus::INTERNAL_ERROR,
+                ErrorStatus::TYPE_MISMATCH,
                 "clone was unexpected type");
         return;
     }
@@ -843,7 +843,24 @@ fill(
         case ReferencePoint::Sequence: {
             RationalTime       start_time     = clip_range.start_time();
             const RationalTime gap_start_time = gap_range.start_time();
-            auto               track_item = dynamic_cast<Item*>(item->clone());
+            auto               cloned_item    = item->clone();
+            if (!cloned_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::INTERNAL_ERROR,
+                        "clone failed");
+                return;
+            }
+            auto track_item = dynamic_cast<Item*>(cloned_item);
+            if (!track_item)
+            {
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::TYPE_MISMATCH,
+                        "clone was unexpected type");
+                return;
+            }
 
             // Check if start time is less than gap's start time (trim it if so)
             if (start_time < gap_start_time)

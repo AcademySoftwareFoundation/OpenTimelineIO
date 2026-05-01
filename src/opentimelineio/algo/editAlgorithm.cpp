@@ -181,9 +181,26 @@ overwrite(
             composition->insert_child(insert_index, item);
             if (!isEqual(second_duration.value(), 0.0))
             {
-                auto second_item = dynamic_cast<Item*>(items.front()->clone());
-                trimmed_range    = second_item->trimmed_range();
-                source_range     = TimeRange(
+                auto cloned_item = items.front()->clone();
+                if (!cloned_item)
+                {
+                    if (error_status)
+                        *error_status = ErrorStatus(
+                            ErrorStatus::INTERNAL_ERROR,
+                            "clone failed");
+                    return;
+                }
+                auto second_item = dynamic_cast<Item*>(cloned_item);
+                if (!second_item)
+                {
+                    if (error_status)
+                        *error_status = ErrorStatus(
+                            ErrorStatus::INTERNAL_ERROR,
+                            "clone was unexpected type");
+                    return;
+                }
+                trimmed_range = second_item->trimmed_range();
+                source_range  = TimeRange(
                     trimmed_range.start_time() + first_duration
                         + range.duration(),
                     second_duration);

@@ -2149,14 +2149,14 @@ main(int argc, char** argv)
 
         OTIO_NS::ErrorStatus error_status;
 
-        // algo::overwrite(
-        //     clip,
-        //     track,
-        //     TimeRange(RationalTime(0.0, 24.0), RationalTime(12.0, 24.0)),
-        //     true,
-        //     nullptr,
-        //     &error_status);
-        // assert(is_error(error_status));
+        algo::overwrite(
+            small_clip,
+            track,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(12.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+        assert(is_error(error_status));
 
         algo::insert(
             small_clip,

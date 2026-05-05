@@ -4,6 +4,7 @@
 set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
+    bundle.h
     color.h
     clip.h
     composable.h
@@ -41,6 +42,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    bundle.cpp
     color.cpp
     clip.cpp
     composable.cpp
@@ -90,9 +92,23 @@ else()
         PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 endif()
 
+set(OTIO_LIBS_PRIVATE)
+if(NOT OTIO_FIND_MINIZ)
+    # If we are using miniz as a git submodule, include the sources directly
+    # instead of building it as a separate library.
+    target_sources(opentimelineio PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/deps/miniz/miniz.c)
+    target_include_directories(opentimelineio PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/deps/miniz)
+    target_compile_definitions(opentimelineio PRIVATE
+        MINIZ_NO_ZLIB_COMPATIBLE_NAMES)
+else()
+    set(OTIO_LIBS_PRIVATE miniz::miniz)
+endif()
 
-target_link_libraries(opentimelineio 
-    PUBLIC opentime Imath::Imath)
+target_link_libraries(opentimelineio
+    PUBLIC opentime Imath::Imath
+    PRIVATE ${OTIO_LIBS_PRIVATE})
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"

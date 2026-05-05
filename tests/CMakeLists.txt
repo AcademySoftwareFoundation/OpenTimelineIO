@@ -17,7 +17,17 @@ foreach(test ${tests_opentime})
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
-list(APPEND tests_opentimelineio test_clip test_serialization test_serializableCollection test_stack_algo test_timeline test_track test_editAlgorithm test_composition)
+list(APPEND
+    tests_opentimelineio
+    test_bundle
+    test_clip
+    test_composition
+    test_editAlgorithm
+    test_serialization
+    test_serializableCollection
+    test_stack_algo
+    test_timeline
+    test_track)
 foreach(test ${tests_opentimelineio})
     add_executable(${test} utils.h utils.cpp ${test}.cpp)
 

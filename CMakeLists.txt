@@ -40,6 +40,7 @@ option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_PYBIND11             "Find pybind11 using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
+option(OTIO_FIND_MINIZ                "Find miniz using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
@@ -270,7 +271,6 @@ else()
 endif()
 
 #----- RapidJSON
-
 if(OTIO_FIND_RAPIDJSON)
     find_package(RapidJSON CONFIG REQUIRED)
     if (RapidJSON_FOUND)
@@ -278,6 +278,16 @@ if(OTIO_FIND_RAPIDJSON)
     endif()
 else()
     message(STATUS "Using src/deps/rapidjson by default")
+endif()
+
+#----- miniz
+if(OTIO_FIND_MINIZ)
+    find_package(miniz REQUIRED)
+    if (miniz_FOUND)
+        message(STATUS "Found miniz at ${miniz_CONFIG}")
+    endif()
+else()
+    message(STATUS "Using src/deps/miniz by default")
 endif()
 
 # set up the internally hosted dependencies

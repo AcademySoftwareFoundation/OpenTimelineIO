@@ -59,4 +59,3 @@ if(NOT OTIO_FIND_IMATH)
         add_subdirectory(Imath EXCLUDE_FROM_ALL)
     endif()
 endif()
-

@@ -4,14 +4,17 @@ include_directories(${PROJECT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_BINARY_DIR}/../src
     ${PYTHON_INCLUDE_DIRS})
 
-list(APPEND examples conform)
-list(APPEND examples flatten_video_tracks)
-list(APPEND examples summarize_timing)
-list(APPEND examples io_perf_test)
-list(APPEND examples upgrade_downgrade_example)
+set(examples
+    bundle
+    conform
+    flatten_video_tracks
+    summarize_timing
+    io_perf_test
+    upgrade_downgrade_example)
 if(OTIO_PYTHON_INSTALL)
-    list(APPEND examples python_adapters_child_process)
-    list(APPEND examples python_adapters_embed)
+    list(APPEND examples
+        python_adapters_child_process
+        python_adapters_embed)
 endif()
 foreach(example ${examples})
     add_executable(${example} ${example}.cpp util.h util.cpp)

@@ -67,45 +67,6 @@ namespace bundle {
             return out;
         }
 
-        // Get a file from a URL
-        std::optional<std::string> file_from_url(std::string const& url)
-        {
-            std::optional<std::string> file;
-
-            constexpr std::string_view file_prefix = "file://";
-            if (starts_with(url, file_prefix))
-            {
-                file = url.substr(file_prefix.size());
-
-                constexpr std::string_view localhost = "localhost/";
-                if (starts_with(*file, localhost))
-                {
-                    file->erase(0, localhost.size() - 1);  // keep leading '/'
-                }
-            }
-            else if (url.find("://") != std::string::npos)
-            {
-                // Other scheme — not a local file
-            }
-            else
-            {
-                file = url;
-            }
-            
-            if (file)
-            {
-                // Strip query string and fragment
-                if (auto pos = file->find('?'); pos != std::string::npos) file->resize(pos);
-                if (auto pos = file->find('#'); pos != std::string::npos) file->resize(pos);
-                
-                // Decode and normalize separators
-                *file = percent_decode(*file);
-                std::replace(file->begin(), file->end(), '\\', '/');
-            }
-            
-            return file;
-        }
-
         // This struct contains the source path and archive name for each
         // file to be added to the bundle
         struct BundleFile
@@ -182,7 +143,7 @@ namespace bundle {
 
                 // Iterate over the media references
                 bool modified = false;
-                for (auto ref : refs)
+                for (auto& ref : refs)
                 {
                     std::optional<std::string> file;
                     if (auto ext = dynamic_retainer_cast<ExternalReference>(ref.second))
@@ -233,28 +194,36 @@ namespace bundle {
                     }
                     
                     // Handle the policy for this reference
-                    switch (policy)
+                    if (ref.second &&
+                        !dynamic_retainer_cast<MissingReference>(ref.second))
                     {
-                    case MediaReferencePolicy::error_if_not_file:
-                        if (!file.has_value())
+                        switch (policy)
                         {
-                            if (error_status)
-                                *error_status = ErrorStatus(
-                                    ErrorStatus::FILE_WRITE_FAILED,
-                                    "media reference is not a file");
-                            return false;
-                        }
-                        break;
-                    case MediaReferencePolicy::missing_if_not_file:
-                    case MediaReferencePolicy::all_missing:
-                        if (!file.has_value())
-                        {
+                        case MediaReferencePolicy::error_if_not_file:
+                            if (!file.has_value())
+                            {
+                                if (error_status)
+                                    *error_status = ErrorStatus(
+                                        ErrorStatus::FILE_WRITE_FAILED,
+                                        "media reference is not a file");
+                                return false;
+                            }
+                            break;
+                        case MediaReferencePolicy::missing_if_not_file:
+                            if (!file.has_value())
+                            {
+                                // \todo Add missing reference metadata
+                                ref.second = new MissingReference(ref.second->name());
+                                modified = true;
+                            }
+                            break;
+                        case MediaReferencePolicy::all_missing:
                             // \todo Add missing reference metadata
-                            ref.second = new MissingReference;
+                            ref.second = new MissingReference(ref.second->name());
                             modified = true;
+                            break;
+                        default: break;
                         }
-                        break;
-                    default: break;
                     }
                 }
 
@@ -509,6 +478,44 @@ namespace bundle {
             auto const first = rel.begin()->u8string();
             return first != "..";
         }
+    }
+
+    std::optional<std::string> file_from_url(std::string const& url)
+    {
+        std::optional<std::string> file;
+
+        constexpr std::string_view file_prefix = "file://";
+        if (starts_with(url, file_prefix))
+        {
+            file = url.substr(file_prefix.size());
+
+            constexpr std::string_view localhost = "localhost/";
+            if (starts_with(*file, localhost))
+            {
+                file->erase(0, localhost.size() - 1);  // keep leading '/'
+            }
+        }
+        else if (url.find("://") != std::string::npos)
+        {
+            // Other scheme — not a local file
+        }
+        else
+        {
+            file = url;
+        }
+
+        if (file)
+        {
+            // Strip query string and fragment
+            if (auto pos = file->find('?'); pos != std::string::npos) file->resize(pos);
+            if (auto pos = file->find('#'); pos != std::string::npos) file->resize(pos);
+
+            // Decode and normalize separators
+            *file = percent_decode(*file);
+            std::replace(file->begin(), file->end(), '\\', '/');
+        }
+
+        return file;
     }
 
     std::optional<uint64_t> dry_run(

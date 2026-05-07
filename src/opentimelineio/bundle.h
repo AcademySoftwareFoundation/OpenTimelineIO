@@ -7,10 +7,10 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
-/// @brief Utilities for working with OTIO bundles (.otioz and .otiod)
+/// @brief Utilities for working with OTIO bundles (otioz and otiod)
 ///
-/// @todo Add .otioz description
-/// @todo Add .otiod description
+/// @todo Add otioz description
+/// @todo Add otiod description
 namespace bundle {
 
     /// @brief This constant provides the bundle file version.
@@ -33,7 +33,7 @@ namespace bundle {
         all_missing
     };
 
-    /// @brief This struct provides options for writing bundles.
+    /// @brief Options for writing bundles.
     struct OTIO_API_TYPE WriteOptions
     {
         /// @brief Base directory for resolving relative media reference paths.
@@ -41,35 +41,58 @@ namespace bundle {
         /// against this directory before being added to the bundle.
         std::optional<std::string> relative_media_path;
         
+        /// @brief Media reference policy.
         MediaReferencePolicy policy = MediaReferencePolicy::error_if_not_file;
+        
+        /// @brief Number of spaces for JSON indentation.
+        int indent = 4;
     };
 
-    /// @brief Write a timeline to an .otioz bundle.
+    /// @brief Options for reading bundles.
+    struct OTIO_API_TYPE ReadOptions
+    {
+        /// @brief Extract the contents of the otioz bundle to this directory,
+        /// which must not already exist.
+        std::optional<std::string> extract_path;
+        
+        /// @brief Convert the media reference paths to absolute paths.
+        ///
+        /// If this is set to true for otioz files, an extract_path must also be set.
+        bool absolute_media_reference_paths = false;
+    };
+
+    /// @brief Calculate the total uncompressed size of the files that would be
+    /// written to a bundle, without actually writing it. This is useful for
+    /// estimating the disk space required.
+    OTIO_API std::optional<uint64_t> dry_run(
+        Timeline const*     timeline,
+        WriteOptions const& options      = WriteOptions(),
+        ErrorStatus*        error_status = nullptr);
+
+    /// @brief Write a timeline and it's referenced media to an otioz bundle.
     OTIO_API bool write_otioz(
         Timeline const*     timeline,
         std::string const&  path,
         WriteOptions const& options      = WriteOptions(),
         ErrorStatus*        error_status = nullptr);
 
-    /// @brief Read an .otioz bundle.
-    ///
-    /// The archive contents are extracted into output_dir, which must not
-    /// already exist.
+    /// @brief Read a timeline from an otioz bundle.
     OTIO_API SerializableObject* read_otioz(
         std::string const& path,
-        std::string const& output_dir,
+        ReadOptions const& options      = ReadOptions(),
         ErrorStatus*       error_status = nullptr);
 
-    /// @brief Write a timeline to an .otiod bundle.
+    /// @brief Write a timeline and it's referenced media to an otiod bundle.
     OTIO_API bool write_otiod(
         Timeline const*     timeline,
         std::string const&  path,
         WriteOptions const& options      = WriteOptions(),
         ErrorStatus*        error_status = nullptr);
 
-    /// @brief Read an .otiod bundle.
+    /// @brief Read a timeline from an otiod bundle.
     OTIO_API SerializableObject* read_otiod(
         std::string const& path,
+        ReadOptions const& options      = ReadOptions(),
         ErrorStatus*       error_status = nullptr);
 }
 }

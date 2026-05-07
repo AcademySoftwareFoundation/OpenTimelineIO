@@ -65,9 +65,10 @@ main(int argc, char** argv)
         TempDir temp;
         create_file(temp.path() / ref->target_url());
         
-        auto const otiod_path = temp.path() / "round_trip.otiod";
+        std::string const otiod_path =
+            (temp.path() / "round_trip.otiod").u8string();
         WriteOptions options;
-        options.relative_media_path = temp.path();
+        options.relative_media_path = temp.path().u8string();
         assertTrue(write_otiod(tl, otiod_path, options));
         
         auto result = dynamic_cast<Timeline*>(read_otiod(otiod_path));

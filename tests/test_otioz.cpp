@@ -65,9 +65,10 @@ main(int argc, char** argv)
         TempDir temp;
         create_file(temp.path() / ref->target_url());
         
-        auto const otioz_path = temp.path() / "round_trip.otioz";
+        std::string const otioz_path =
+            (temp.path() / "round_trip.otioz").u8string();
         WriteOptions options;
-        options.relative_media_path = temp.path();
+        options.relative_media_path = temp.path().u8string();
         assertTrue(write_otioz(tl, otioz_path, options));
         
         auto result = dynamic_cast<Timeline*>(read_otioz(otioz_path));

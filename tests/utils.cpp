@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 
 #if defined(_WIN32)
 #    if !defined(WIN32_LEAN_AND_MEAN)

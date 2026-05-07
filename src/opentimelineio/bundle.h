@@ -26,12 +26,19 @@ namespace bundle {
     static char constexpr media_dir[] = "media";
 
     /// @brief This enumeration provides the media reference policy.
+    ///
+    /// Note that the policy is not applied to missing references. For
+    /// example, if you have a timeline with missing references, those do not
+    /// count as errors when the policy is set to error_if_not_file.
     enum MediaReferencePolicy
     {
         error_if_not_file,
         missing_if_not_file,
         all_missing
     };
+
+    /// @brief Get a file from a URL.
+    std::optional<std::string> file_from_url(std::string const& url);
 
     /// @brief Options for writing bundles.
     struct OTIO_API_TYPE WriteOptions

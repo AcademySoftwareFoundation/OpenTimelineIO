@@ -19,10 +19,11 @@ endforeach()
 
 list(APPEND
     tests_opentimelineio
-    test_bundle
     test_clip
     test_composition
     test_editAlgorithm
+    test_otiod
+    test_otioz
     test_serialization
     test_serializableCollection
     test_stack_algo

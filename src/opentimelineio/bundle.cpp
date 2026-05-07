@@ -18,6 +18,12 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
 
+    // File contents:
+    // - URL parsing utilities (percent_decode, starts_with, to_lower, file_from_url)
+    // - BundleFile and bundle file processing
+    // - ZipWriter and ZipReader
+    // - Public API (dry_run, write_otioz, read_otioz, write_otiod, read_otiod)
+
     namespace {
 
         // Utility to decode a URL (ie, %20 -> ' ')
@@ -101,7 +107,7 @@ namespace bundle {
         }
 
         // This struct contains the source path and archive name for each
-        // file to be added to the bundle.
+        // file to be added to the bundle
         struct BundleFile
         {
             std::string source_path;
@@ -115,8 +121,44 @@ namespace bundle {
         };
         using BundleFiles = std::set<BundleFile>;
 
+        // Check and add files to the bundle. This is a convenience function
+        // used by process_media_references().
+        bool register_bundle_file(
+            std::filesystem::path const& source_path,
+            std::filesystem::path const& relative_media_path,
+            std::map<std::string, std::filesystem::path>& paths,
+            BundleFiles& out,
+            ErrorStatus* error_status)
+        {
+            // Check if this file would overwrite any others
+            auto const paths_key = to_lower(source_path.filename().u8string());
+            auto const i = paths.find(paths_key);
+            if (i != paths.end() &&
+                source_path.parent_path() != i->second.parent_path())
+            {
+                if (error_status) {
+                    std::stringstream ss;
+                    ss << "media file " << source_path
+                        << " would overwrite " << i->second;
+                    *error_status = ErrorStatus(
+                        ErrorStatus::FILE_WRITE_FAILED, ss.str());
+                }
+                return false;
+            }
+            paths[paths_key] = source_path;
+           
+            // Add the file to the bundle list
+            auto resolved = source_path;
+            if (resolved.is_relative() && !relative_media_path.empty())
+                resolved = relative_media_path / resolved;
+            auto const bundle_path = (std::filesystem::u8path(media_dir) /
+                source_path.filename()).u8string();
+            out.insert({ resolved.u8string(), bundle_path });
+            return true;
+        }
+
         // Process all media references according to the policy. The list of
-        // paths to be added to the bundle is returned.
+        // files to be added to the bundle is returned.
         bool process_media_references(
             Timeline*                    timeline,
             std::filesystem::path const& relative_media_path,
@@ -125,58 +167,114 @@ namespace bundle {
             BundleFiles&                 out)
         {
             // Store a map of the processed paths to check we are not
-            // overwriting any media in the bundle.
+            // overwriting any media in the bundle
             std::map<std::string, std::filesystem::path> paths;
             
-            for (auto& clip : timeline->find_clips())
+            // Iterate over all the clips
+            for (auto clip : timeline->find_clips())
             {
-                for (auto& ref : clip->media_references())
+                // Get the media reference retainers
+                std::map<std::string, SerializableObject::Retainer<MediaReference>> refs;
+                for (auto i : clip->media_references())
                 {
-                    if (auto ext = dynamic_cast<ExternalReference*>(ref.second))
+                    refs[i.first] = i.second;
+                }
+
+                // Iterate over the media references
+                bool modified = false;
+                for (auto ref : refs)
+                {
+                    std::optional<std::string> file;
+                    if (auto ext = dynamic_retainer_cast<ExternalReference>(ref.second))
                     {
-                        auto const file = file_from_url(ext->target_url());
-                        if (file.has_value())
+                        // Handle external references
+                        file = file_from_url(ext->target_url());
+                        if (file.has_value() &&
+                            policy != MediaReferencePolicy::all_missing)
                         {
-                            auto path = std::filesystem::u8path(*file);
-                            
-                            // Check for overwrites.
-                            auto const paths_key = to_lower(path.filename().u8string());
-                            auto const i = paths.find(paths_key);
-                            if (i != paths.end() &&
-                                path.parent_path() != i->second.parent_path())
-                            {
-                                if (error_status)
-                                {
-                                    std::stringstream ss;
-                                    ss << "media file " << *file <<
-                                        " would overwrite " << i->second;
-                                    *error_status = ErrorStatus(
-                                        ErrorStatus::FILE_WRITE_FAILED,
-                                        ss.str());
-                                }
+                            auto const path = std::filesystem::u8path(*file);
+                            if (!register_bundle_file(
+                                path,
+                                relative_media_path,
+                                paths,
+                                out,
+                                error_status))
                                 return false;
-                            }
-                            paths[paths_key] = path;
                             
                             // Set the URL to the bundle location
-                            auto const bundle_path = (std::filesystem::u8path(media_dir) /
-                                path.filename()).u8string();
-                            ext->set_target_url(bundle_path);
-
-                            // Add the file to be bundled.
-                            if (path.is_relative() && !relative_media_path.empty())
-                            {
-                                path = relative_media_path / path;
-                            }
-                            out.insert({ path.u8string(), bundle_path });
+                            ext->set_target_url((std::filesystem::u8path(media_dir) /
+                                path.filename()).u8string());
                         }
                     }
+                    else if (auto seq = dynamic_retainer_cast<ImageSequenceReference>(ref.second))
+                    {
+                        // Handle image sequence references
+                        file = file_from_url(seq->target_url_base());
+                        if (file.has_value() &&
+                            policy != MediaReferencePolicy::all_missing)
+                        {
+                            for (int frame = seq->start_frame();
+                                frame <= seq->end_frame();
+                                frame += seq->frame_step())
+                            {
+                                if (!register_bundle_file(
+                                    std::filesystem::u8path(
+                                        seq->target_url_for_image_number(frame)),
+                                    relative_media_path,
+                                    paths,
+                                    out,
+                                    error_status))
+                                    return false;
+                            }
+                            
+                            // Set the URL to the bundle location
+                            seq->set_target_url_base(std::string(media_dir) + "/");
+                        }
+                    }
+                    
+                    // Handle the policy for this reference
+                    switch (policy)
+                    {
+                    case MediaReferencePolicy::error_if_not_file:
+                        if (!file.has_value())
+                        {
+                            if (error_status)
+                                *error_status = ErrorStatus(
+                                    ErrorStatus::FILE_WRITE_FAILED,
+                                    "media reference is not a file");
+                            return false;
+                        }
+                        break;
+                    case MediaReferencePolicy::missing_if_not_file:
+                    case MediaReferencePolicy::all_missing:
+                        if (!file.has_value())
+                        {
+                            // \todo Add missing reference metadata
+                            ref.second = new MissingReference;
+                            modified = true;
+                        }
+                        break;
+                    default: break;
+                    }
+                }
+
+                if (modified)
+                {
+                    // Set the new media references on the clip
+                    Clip::MediaReferences ref_ptrs;
+                    for (auto i : refs)
+                    {
+                        ref_ptrs[i.first] = i.second;
+                    }
+                    clip->set_media_references(
+                        ref_ptrs,
+                        clip->active_media_reference_key());
                 }
             }
             return true;
         }
         
-        // Common code for preparing the bundle.
+        // Common code for preparing the bundle
         bool prepare_bundle(
             Timeline const*                         timeline,
             WriteOptions const&                     options,
@@ -185,15 +283,19 @@ namespace bundle {
             std::string&                            out_json,
             BundleFiles&                            out_files)
         {
+            // Clone the timeline so we can make modifications
             out_clone = SerializableObject::Retainer<Timeline>(
                 dynamic_cast<Timeline*>(timeline->clone(error_status)));
             if (!out_clone || is_error(error_status))
                 return false;
            
+            // Get the relative media path
             std::filesystem::path relative_media_path;
             if (options.relative_media_path.has_value())
                 relative_media_path = std::filesystem::u8path(*options.relative_media_path);
            
+            // Process the media references and get the list of files to add
+            // to the bundle
             if (!process_media_references(
                 out_clone,
                 relative_media_path,
@@ -202,9 +304,46 @@ namespace bundle {
                 out_files))
                 return false;
            
-           out_json = out_clone->to_json_string(error_status);
-           return !is_error(error_status);
-       }
+            // Convert the new timeline to json for writing
+            out_json = out_clone->to_json_string(
+                error_status,
+                nullptr,
+                options.indent);
+            return !is_error(error_status);
+        }
+
+        // Change relative paths to absolute
+        void rewrite_media_to_absolute(
+            Timeline* timeline,
+            std::filesystem::path const& bundle_root)
+        {
+            for (auto clip : timeline->find_clips())
+            {
+                for (auto ref : clip->media_references())
+                {
+                    if (auto ext = dynamic_cast<ExternalReference*>(ref.second))
+                    {
+                        auto const current = std::filesystem::u8path(ext->target_url());
+                        if (current.is_relative())
+                        {
+                            ext->set_target_url(
+                                (bundle_root / current).lexically_normal().u8string());
+                        }
+                    }
+                    else if (auto seq = dynamic_cast<ImageSequenceReference*>(ref.second))
+                    {
+                        auto const base = std::filesystem::u8path(seq->target_url_base());
+                        if (base.is_relative())
+                        {
+                            auto absolute = (bundle_root / base).lexically_normal().u8string();
+                            if (!absolute.empty() && absolute.back() != '/')
+                                absolute += '/';
+                            seq->set_target_url_base(absolute);
+                        }
+                    }
+                }
+            }
+        }
 
         // This class writes a ZIP file using miniz
         class ZipWriter
@@ -300,6 +439,13 @@ namespace bundle {
                 return mz_zip_reader_get_num_files(const_cast<mz_zip_archive*>(&_zip));
             }
             
+            std::optional<mz_uint> find(std::string const& name)
+            {
+                int idx = mz_zip_reader_locate_file(&_zip, name.c_str(), nullptr, 0);
+                if (idx < 0) return std::nullopt;
+                return static_cast<mz_uint>(idx);
+            }
+
             mz_zip_archive_file_stat stat(mz_uint i)
             {
                 mz_zip_archive_file_stat s;
@@ -308,6 +454,28 @@ namespace bundle {
                     throw std::runtime_error("cannot stat zip entry");
                 }
                 return s;
+            }
+
+            std::string read_to_string(mz_uint i)
+            {
+                mz_zip_archive_file_stat s;
+                if (!mz_zip_reader_file_stat(&_zip, i, &s))
+                {
+                    throw std::runtime_error("cannot stat zip entry");
+                }
+                
+                std::string out;
+                out.resize(s.m_uncomp_size);
+                if (!mz_zip_reader_extract_to_mem(
+                    &_zip,
+                    i,
+                    out.data(),
+                    out.size(),
+                    0))
+                {
+                    throw std::runtime_error("cannot extract zip entry to memory");
+                }
+                return out;
             }
             
             bool is_directory(mz_uint i)
@@ -322,7 +490,7 @@ namespace bundle {
                     throw std::runtime_error("cannot extract zip entry");
                 }
             }
-            
+
         private:
             mz_zip_archive _zip = {};
         };
@@ -343,12 +511,57 @@ namespace bundle {
         }
     }
 
+    std::optional<uint64_t> dry_run(
+        Timeline const*     timeline,
+        WriteOptions const& options,
+        ErrorStatus*        error_status)
+    {
+        // Prepare the bundle
+        SerializableObject::Retainer<Timeline> clone;
+        std::string                            json;
+        BundleFiles                            files;
+        if (!prepare_bundle(
+            timeline,
+            options,
+            error_status,
+            clone,
+            json,
+            files))
+            return std::nullopt;
+        
+        // Add the version file and timeline file sizes
+        uint64_t total = 0;
+        total += std::string_view(version).size();
+        total += json.size();
+        
+        // Add the media file sizes
+        try
+        {
+            for (auto const& f : files)
+            {
+                total += std::filesystem::file_size(
+                    std::filesystem::u8path(f.source_path));
+            }
+        }
+        catch (std::exception const& e)
+        {
+            if (error_status)
+                *error_status = ErrorStatus(
+                    ErrorStatus::FILE_OPEN_FAILED,
+                    e.what());
+            return std::nullopt;
+        }
+        
+        return total;
+    }
+
     bool write_otioz(
         Timeline const*     timeline,
         std::string const&  path,
         WriteOptions const& options,
         ErrorStatus*        error_status)
     {
+        // Validate the path
         if (std::filesystem::exists(std::filesystem::u8path(path)))
         {
             if (error_status)
@@ -398,9 +611,10 @@ namespace bundle {
 
     SerializableObject* read_otioz(
         std::string const& path,
-        std::string const& output_dir,
+        ReadOptions const& options,
         ErrorStatus*       error_status)
     {
+        // Validate the paths
         auto const input_path = std::filesystem::u8path(path);
         if (!std::filesystem::is_regular_file(input_path))
         {
@@ -410,43 +624,59 @@ namespace bundle {
                     "input path is not a file");
             return nullptr;
         }
-        auto const output_path = std::filesystem::u8path(output_dir);
-        if (std::filesystem::exists(output_path))
+        std::filesystem::path output_path;
+        if (options.extract_path.has_value())
         {
-            if (error_status)
-                *error_status = ErrorStatus(
-                    ErrorStatus::FILE_WRITE_FAILED,
-                    "output directory already exists");
-            return nullptr;
+            output_path = options.extract_path.value();
+            if (std::filesystem::exists(output_path))
+            {
+                if (error_status)
+                    *error_status = ErrorStatus(
+                        ErrorStatus::FILE_WRITE_FAILED,
+                        "output directory already exists");
+                return nullptr;
+            }
         }
 
-        // Extract the archive
+        // Read the archive
+        std::string json;
         try
         {
-            std::filesystem::create_directories(output_path);
-            
             ZipReader zr(path);
-            mz_uint const n = zr.num_files();
-            for (mz_uint i = 0; i < n; ++i)
+
+            // Read the timeline
+            auto timeline_idx = zr.find(timeline_file);
+            if (!timeline_idx)
+                throw std::runtime_error("bundle is missing content.otio");
+            json = zr.read_to_string(*timeline_idx);
+
+            // Extract the archive
+            if (options.extract_path.has_value())
             {
-                auto const stat = zr.stat(i);
-                auto const file_path = output_path / std::filesystem::u8path(stat.m_filename);
-                
-                // Guard against zip slip
-                if (!is_path_safe(output_path, file_path))
+                std::filesystem::create_directories(output_path);
+            
+                mz_uint const n = zr.num_files();
+                for (mz_uint i = 0; i < n; ++i)
                 {
-                    throw std::runtime_error(
-                        std::string("unsafe path in archive: ") + stat.m_filename);
-                }
-                
-                if (zr.is_directory(i))
-                {
-                    std::filesystem::create_directories(file_path);
-                }
-                else
-                {
-                    std::filesystem::create_directories(file_path.parent_path());
-                    zr.extract_to_file(i, file_path.u8string());
+                    auto const stat = zr.stat(i);
+                    auto const file_path = output_path / std::filesystem::u8path(stat.m_filename);
+                    
+                    // Guard against zip slip
+                    if (!is_path_safe(output_path, file_path))
+                    {
+                        throw std::runtime_error(
+                            std::string("unsafe path in archive: ") + stat.m_filename);
+                    }
+                    
+                    if (zr.is_directory(i))
+                    {
+                        std::filesystem::create_directories(file_path);
+                    }
+                    else
+                    {
+                        std::filesystem::create_directories(file_path.parent_path());
+                        zr.extract_to_file(i, file_path.u8string());
+                    }
                 }
             }
         }
@@ -457,13 +687,34 @@ namespace bundle {
                     ErrorStatus::FILE_OPEN_FAILED,
                     e.what());
 
-            // Try and remove the directory if it was partially written
-            std::error_code ec;
-            std::filesystem::remove_all(output_path, ec);
+            if (options.extract_path.has_value())
+            {
+                // Try and remove the directory if it was partially written
+                std::error_code ec;
+                std::filesystem::remove_all(output_path, ec);
+            }
+
             return nullptr;
         }
 
-        return Timeline::from_json_file(output_path.u8string(), error_status);
+        // Create the timeline
+        auto result = Timeline::from_json_string(json, error_status);
+        if (!result || is_error(error_status))
+            return nullptr;
+
+        // Optionally make the media reference paths absolute
+        if (options.absolute_media_reference_paths &&
+            options.extract_path)
+        {
+            if (auto timeline = dynamic_cast<Timeline*>(result))
+            {
+                rewrite_media_to_absolute(
+                    timeline,
+                    std::filesystem::u8path(options.extract_path.value()));
+            }
+        }
+
+        return result;
     }
 
     bool write_otiod(
@@ -472,6 +723,7 @@ namespace bundle {
         WriteOptions const& options,
         ErrorStatus*        error_status)
     {
+        // Validate the path
         auto const output_path = std::filesystem::u8path(path);
         if (std::filesystem::exists(output_path))
         {
@@ -539,9 +791,10 @@ namespace bundle {
 
     SerializableObject* read_otiod(
         std::string const& path,
+        ReadOptions const& options,
         ErrorStatus*       error_status)
     {
-        // Validate the directory structure
+        // Validate the paths
         auto const input_path = std::filesystem::u8path(path);
         if (!std::filesystem::is_directory(input_path))
         {
@@ -563,8 +816,25 @@ namespace bundle {
             return nullptr;
         }
         
-        // Read and parse the timeline
-        return Timeline::from_json_file(timeline_path.u8string(), error_status);
+        // Read the timeline
+        auto result = Timeline::from_json_file(
+            timeline_path.u8string(),
+            error_status);
+        if (!result || is_error(error_status))
+            return nullptr;
+        
+        // Optionally make the media reference paths absolute
+        if (options.absolute_media_reference_paths)
+        {
+            if (auto timeline = dynamic_cast<Timeline*>(result))
+            {
+                rewrite_media_to_absolute(
+                    timeline,
+                    timeline_path.parent_path());
+            }
+        }
+
+        return result;
     }
 }
 }

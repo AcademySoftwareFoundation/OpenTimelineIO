@@ -13,6 +13,7 @@
 #include <opentimelineio/track.h>
 
 #include <fstream>
+#include <sstream>
 
 using namespace OTIO_NS;
 using namespace OTIO_NS::bundle;
@@ -121,21 +122,27 @@ void compare_filenames(Timeline* a, Timeline* b)
     const auto a_clips = a->find_clips();
     const auto b_clips = b->find_clips();
     assertEqual(a_clips.size(), b_clips.size());
-
     for (size_t i = 0; i < a_clips.size(); ++i)
     {
-        auto a_ref = dynamic_cast<ExternalReference*>(a_clips[i]->media_reference());
-        auto b_ref = dynamic_cast<ExternalReference*>(b_clips[i]->media_reference());
-        if (a_ref && b_ref)
+        auto a_ext = dynamic_cast<ExternalReference*>(a_clips[i]->media_reference());
+        auto b_ext = dynamic_cast<ExternalReference*>(b_clips[i]->media_reference());
+        if (a_ext && b_ext)
         {
-            auto const a_file = file_from_url(a_ref->target_url());
-            auto const b_file = file_from_url(b_ref->target_url());
+            auto const a_file = file_from_url(a_ext->target_url());
+            auto const b_file = file_from_url(b_ext->target_url());
             if (a_file && b_file)
             {
                 assertEqual(
                     std::filesystem::u8path(*a_file).filename(),
                     std::filesystem::u8path(*b_file).filename());
             }
+        }
+        auto a_seq = dynamic_cast<ImageSequenceReference*>(a_clips[i]->media_reference());
+        auto b_seq = dynamic_cast<ImageSequenceReference*>(b_clips[i]->media_reference());
+        if (a_seq && b_seq)
+        {
+            assertEqual(a_seq->name_prefix(), b_seq->name_prefix());
+            assertEqual(a_seq->name_suffix(), b_seq->name_suffix());
         }
     }
 }
@@ -159,7 +166,7 @@ main(int argc, char** argv)
                 "",
                 "render.",
                 ".exr",
-                0, 1, 24, 4,
+                0, 1, 24, 0,
                 ImageSequenceReference::MissingFramePolicy::error,
                 TimeRange(0, 24, 24)));
         find_clip_by_name(tl, "audio clip 1")->set_media_references(
@@ -174,18 +181,32 @@ main(int argc, char** argv)
         // Write the otioz
         std::string const otioz_path =
             (temp.path() / "round_trip.otioz").u8string();
-        WriteOptions options;
-        options.relative_media_path = temp.path().u8string();
+        WriteOptions write_options;
+        write_options.relative_media_path = temp.path().u8string();
         OTIO_NS::ErrorStatus error;
-        assertTrue(write_otioz(tl, otioz_path, options, &error));
+        assertTrue(write_otioz(tl, otioz_path, write_options, &error));
         
         // Read the otioz and compare with the original
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = extract_path.u8string();
         auto result = dynamic_cast<Timeline*>(read_otioz(
             otioz_path,
-            ReadOptions(),
+            read_options,
             &error));
         assertNotNull(result);
         compare_filenames(tl, result);
+        auto const media_path = extract_path / media_dir;
+        assertTrue(std::filesystem::exists(media_path / "video1.mov"));
+        for (int i = 0; i < 24; ++i)
+        {
+            std::stringstream ss;
+            ss << "render." << i << ".exr";
+            assertTrue(std::filesystem::exists(media_path / ss.str()));
+        }
+        assertTrue(std::filesystem::exists(media_path / "audio.wav"));
+        assertTrue(std::filesystem::exists(media_path / "audio.mp3"));
+        assertTrue(std::filesystem::exists(media_path / "audio.ogg"));
     });
 
     tests.add_test("test_otiod_round_trip", [] {
@@ -202,7 +223,7 @@ main(int argc, char** argv)
                 "",
                 "render.",
                 ".exr",
-                0, 1, 24, 4,
+                0, 1, 24, 0,
                 ImageSequenceReference::MissingFramePolicy::error,
                 TimeRange(0, 24, 24)));
         find_clip_by_name(tl, "audio clip 1")->set_media_references(
@@ -306,6 +327,80 @@ main(int argc, char** argv)
             assertNotNull(dynamic_cast<MissingReference*>(
                 find_clip_by_name(result, "video clip 2")->media_reference()));
         }
+    });
+
+    tests.add_test("test_otioz_error", [] {
+
+        // Create a temp directory
+        TempDir temp;
+
+        // Create a timeline
+        auto tl = create_simple_timeline();
+
+        // Write the otioz
+        std::string otioz_path =
+            (temp.path() / "error.otioz").u8string();
+        OTIO_NS::ErrorStatus error;
+        assertTrue(write_otioz(tl, otioz_path, WriteOptions(), &error));
+
+        // Write the otioz (error on overwrite)
+        assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
+        std::filesystem::remove(otioz_path);
+
+        // Write the otioz (error on missing media)
+        find_clip_by_name(tl, "video clip 1")->set_media_reference(
+            new ExternalReference("video1.mov"));
+        assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
+        std::filesystem::remove(otioz_path);
+
+        // Write the otioz (error on overwrite media)
+        find_clip_by_name(tl, "video clip 2")->set_media_reference(
+            new ExternalReference("video2.mov"));
+        create_refs(tl, temp.path());
+        assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
+        std::filesystem::remove(otioz_path);
+
+        // Write the otioz (error on input path)
+        otioz_path = (temp.path() / "subdir" / "error.otioz").u8string();
+        assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
+        std::filesystem::remove(otioz_path);
+    });
+
+    tests.add_test("test_otiod_error", [] {
+
+        // Create a temp directory
+        TempDir temp;
+
+        // Create a timeline
+        auto tl = create_simple_timeline();
+
+        // Write the otiod
+        std::string otiod_path =
+            (temp.path() / "error.otiod").u8string();
+        OTIO_NS::ErrorStatus error;
+        assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
+
+        // Write the otiod (error on overwrite)
+        assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
+        std::filesystem::remove_all(otiod_path);
+
+        // Write the otiod (missing media)
+        find_clip_by_name(tl, "video clip 1")->set_media_reference(
+            new ExternalReference("video1.mov"));
+        assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
+        std::filesystem::remove_all(otiod_path);
+
+        // Write the otiod (error on overwrite media)
+        find_clip_by_name(tl, "video clip 2")->set_media_reference(
+            new ExternalReference("video2.mov"));
+        create_refs(tl, temp.path());
+        assertFalse(write_otioz(tl, otiod_path, WriteOptions(), &error));
+        std::filesystem::remove(otiod_path);
+
+        // Write the otiod (error on input path)
+        otiod_path = (temp.path() / "subdir" / "error.otiod").u8string();
+        assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
+        std::filesystem::remove_all(otiod_path);
     });
 
     tests.run(argc, argv);

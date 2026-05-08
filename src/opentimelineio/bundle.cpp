@@ -482,40 +482,58 @@ namespace bundle {
 
     std::optional<std::string> file_from_url(std::string const& url)
     {
-        std::optional<std::string> file;
-
         constexpr std::string_view file_prefix = "file://";
-        if (starts_with(url, file_prefix))
+        if (!starts_with(url, file_prefix))
         {
-            file = url.substr(file_prefix.size());
-
-            constexpr std::string_view localhost = "localhost/";
-            if (starts_with(*file, localhost))
-            {
-                file->erase(0, localhost.size() - 1);  // keep leading '/'
-            }
+            if (url.find("://") != std::string::npos) return std::nullopt;
+            return url;  // bare path
         }
-        else if (url.find("://") != std::string::npos)
+
+        // Split "file://" + authority + path
+        std::string rest = std::string(url.substr(file_prefix.size()));
+        auto const slash = rest.find('/');
+        std::string netloc = (slash == std::string::npos) ? rest : rest.substr(0, slash);
+        std::string path   = (slash == std::string::npos) ? "" : rest.substr(slash);
+
+        // Strip query/fragment from path
+        if (auto pos = path.find('?'); pos != std::string::npos) path.resize(pos);
+        if (auto pos = path.find('#'); pos != std::string::npos) path.resize(pos);
+
+        // Decode the path
+        path = percent_decode(path);
+
+        auto is_drive = [](std::string const& s) {
+            return s.size() == 2 &&
+                   std::isalpha(static_cast<unsigned char>(s[0])) &&
+                   s[1] == ':';
+        };
+
+        std::string result;
+
+        if (is_drive(netloc))
         {
-            // Other scheme — not a local file
+            // file://X:/path → X:/path
+            result = netloc + path;
+        }
+        else if (path.size() >= 3 && path[0] == '/' && is_drive(path.substr(1, 2)))
+        {
+            // file://host/X:/path → X:/path (strip leading '/' and host)
+            result = path.substr(1);
+        }
+        else if (!netloc.empty() && to_lower(netloc) != "localhost")
+        {
+            // file://host/path → //host/path (UNC)
+            result = "//" + netloc + path;
         }
         else
         {
-            file = url;
+            // file:///path or file://localhost/path → /path
+            result = path;
         }
 
-        if (file)
-        {
-            // Strip query string and fragment
-            if (auto pos = file->find('?'); pos != std::string::npos) file->resize(pos);
-            if (auto pos = file->find('#'); pos != std::string::npos) file->resize(pos);
-
-            // Decode and normalize separators
-            *file = percent_decode(*file);
-            std::replace(file->begin(), file->end(), '\\', '/');
-        }
-
-        return file;
+        // Normalize separators
+        std::replace(result.begin(), result.end(), '\\', '/');
+        return result;
     }
 
     std::optional<uint64_t> dry_run(

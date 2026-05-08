@@ -61,12 +61,12 @@ Options for reading bundles.
 )docstring")
         .def(py::init<>())
         .def_readwrite(
-            "relative_media_path",
+            "extract_path",
             &ReadOptions::extract_path,
             "Extract the contents of the otioz bundle to this directory, "
             "which must not already exist.")
         .def_readwrite(
-            "policy",
+            "absolute_media_reference_paths",
             &ReadOptions::absolute_media_reference_paths,
             "Convert the media reference paths to absolute paths. "
             "If this is set to true for otioz files, an extract_path must also be set.");

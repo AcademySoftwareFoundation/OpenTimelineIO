@@ -8,7 +8,6 @@
 import unittest
 import os
 import pathlib
-import shutil
 import tempfile
 
 import opentimelineio as otio
@@ -33,8 +32,9 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 tl,
                 otioz_path,
                 relative_media_path=temp_dir)
-            
-            result = otio.adapters.read_from_file(otioz_path)
+
+            otio.adapters.read_from_file(otioz_path)
+
 
 if __name__ == "__main__":
     unittest.main()

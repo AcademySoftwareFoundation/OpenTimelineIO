@@ -157,6 +157,52 @@ main(int argc, char** argv)
 {
     Tests tests;
 
+    tests.add_test("test_file_from_url", [] {
+        std::map<std::string, std::string> const urls =
+        {
+            {
+                // windows encoded url
+                "file://host/S%3a/path/file.ext",
+                "S:/path/file.ext"
+            },
+            {
+                // windows drive url
+                "file://S:/path/file.ext",
+                "S:/path/file.ext"
+            },
+            {
+                // windows encoded_unc url
+                "file://unc/path/sub%20dir/file.ext",
+                "//unc/path/sub dir/file.ext"
+            },
+            {
+                // windows unc url
+                "file://unc/path/sub dir/file.ext",
+                "//unc/path/sub dir/file.ext"
+            },
+            {
+                // posix localhost url
+                "file://localhost/path/sub dir/file.ext",
+                "/path/sub dir/file.ext"
+            },
+            {
+                // posix encoded url
+                "file:///path/sub%20dir/file.ext",
+                "/path/sub dir/file.ext"
+            },
+            {
+                // posix url
+                "file:///path/sub dir/file.ext",
+                "/path/sub dir/file.ext"
+            },
+        };
+        for (auto i : urls)
+        {
+            std::string const file = file_from_url(i.first).value();
+            assertEqual(file, i.second);
+        }
+    });
+
     tests.add_test("test_otioz_round_trip", [] {
         TempDir temp;
 

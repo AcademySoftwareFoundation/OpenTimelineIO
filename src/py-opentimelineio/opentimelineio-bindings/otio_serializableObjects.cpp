@@ -355,6 +355,8 @@ define_bases2(py::module m)
             "b"_a = 1.0,
             "a"_a = 1.0,
             py::arg_v("name"_a = std::string()))
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def_property("r", &Color::r, &Color::set_r)
         .def_property("g", &Color::g, &Color::set_g)
         .def_property("b", &Color::b, &Color::set_b)

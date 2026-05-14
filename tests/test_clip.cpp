@@ -3,6 +3,7 @@
 
 #include "utils.h"
 
+#include <opentimelineio/color.h>
 #include <opentimelineio/clip.h>
 #include <opentimelineio/deserialization.h>
 #include <opentimelineio/externalReference.h>
@@ -152,7 +153,7 @@ main(int argc, char** argv)
             time_scalar));
         std::vector<Effect*>                         effects = { ltw };
 
-        static constexpr auto red = Marker::Color::red;
+        static const auto red = Color::red;
 
         SerializableObject::Retainer<Marker> m(
             new Marker(LinearTimeWarp::Schema::name, TimeRange(), red));
@@ -248,7 +249,7 @@ main(int argc, char** argv)
         assertEqual(clip->markers().size(), markers.size());
         auto marker =
             dynamic_cast<OTIO_NS::Marker*>(clip->markers().front().value);
-        assertEqual(marker->color().c_str(), red);
+        assertEqual(marker->color()->name(), red.name());
     });
 
     // test to ensure null error_status pointers are correctly handled

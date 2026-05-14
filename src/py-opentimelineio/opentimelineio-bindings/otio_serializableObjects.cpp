@@ -301,6 +301,10 @@ define_bases1(py::module m)
     py::class_<UnknownSchema, SerializableObject, managing_ptr<UnknownSchema>>(
         m,
         "UnknownSchema")
+        .def_property_readonly("data", [](UnknownSchema* schema) {
+                AnyDictionary copy = schema->data();
+                return any_to_py(copy, true /*top_level*/);
+            })
         .def_property_readonly(
             "original_schema_name",
             &UnknownSchema::original_schema_name)

@@ -78,7 +78,7 @@ class UnknownSchemaTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 "howlongami": otio.opentime.RationalTime(rate=30, value=100)
             }
         )
-        
+
         # Mutation of unkown_data should not mutate the unknown object.
         unknown_data["some_data"] = 0
         self.assertEqual(

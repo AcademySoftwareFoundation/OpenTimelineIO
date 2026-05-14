@@ -63,6 +63,11 @@ public:
                && lhs.to_agbr_integer() == rhs.to_agbr_integer();
     }
 
+    friend bool operator!=(Color lhs, Color rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
     OTIO_API std::string to_hex();
     OTIO_API std::vector<int> to_rgba_int_list(int base);
     OTIO_API unsigned int     to_agbr_integer();

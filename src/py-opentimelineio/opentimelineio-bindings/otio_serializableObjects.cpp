@@ -302,8 +302,9 @@ define_bases1(py::module m)
         m,
         "UnknownSchema")
         .def_property_readonly("data", [](UnknownSchema* schema) {
-                auto ptr = schema->data().get_or_create_mutation_stamp();
-            return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
+                AnyDictionary copy = schema->data();
+                return any_to_py(copy, true /*top_level*/);
+            })
         .def_property_readonly(
             "original_schema_name",
             &UnknownSchema::original_schema_name)

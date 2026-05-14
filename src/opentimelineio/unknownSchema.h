@@ -39,6 +39,7 @@ public:
         return _original_schema_version;
     }
 
+    /// @brief Return a copy of the data.
     AnyDictionary data() const noexcept
     {
         return _data;

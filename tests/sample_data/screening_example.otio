@@ -174,14 +174,21 @@
                         "effects": [],
                         "markers": [
                             {
-                                "OTIO_SCHEMA": "Marker.2",
+                                "OTIO_SCHEMA": "Marker.3",
                                 "metadata": {
                                     "cmx_3600": {
                                         "color": "RED"
                                     }
                                 },
                                 "name": "ANIM FIX NEEDED",
-                                "color": "RED",
+                                "color": {
+                                    "OTIO_SCHEMA" : "Color.1",
+                                    "r" : 1.0,
+                                    "g" : 0.0,
+                                    "b" : 0.0,
+                                    "a" : 1.0,
+                                    "name" : "RED"
+                                },
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {
@@ -197,14 +204,21 @@
                                 }
                             },
                             {
-                                "OTIO_SCHEMA": "Marker.2",
+                                "OTIO_SCHEMA": "Marker.3",
                                 "metadata": {
                                     "cmx_3600": {
                                         "color": "PINK"
                                     }
                                 },
                                 "name": "ANIM FIX NEEDED",
-                                "color": "PINK",
+                                "color": {
+                                    "OTIO_SCHEMA" : "Color.1",
+                                    "r" : 1.0,
+                                    "g" : 0.0,
+                                    "b" : 1.0,
+                                    "a" : 1.0,
+                                    "name" : "PINK"
+                                },
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {
@@ -335,14 +349,21 @@
                         "effects": [],
                         "markers": [
                             {
-                                "OTIO_SCHEMA": "Marker.2",
+                                "OTIO_SCHEMA": "Marker.3",
                                 "metadata": {
                                     "cmx_3600": {
                                         "color": "GREEN"
                                     }
                                 },
                                 "name": "",
-                                "color": "GREEN",
+                                "color": {
+                                    "OTIO_SCHEMA" : "Color.1",
+                                    "r" : 0.0,
+                                    "g" : 1.0,
+                                    "b" : 0.0,
+                                    "a" : 1.0,
+                                    "name" : "GREEN"
+                                },
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {

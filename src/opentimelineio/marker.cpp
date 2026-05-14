@@ -7,11 +7,11 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 Marker::Marker(
-    std::string const&   name,
-    TimeRange const&     marked_range,
-    std::string const&   color,
-    AnyDictionary const& metadata,
-    std::string const&   comment)
+    std::string const&          name,
+    TimeRange const&            marked_range,
+    std::optional<Color> const& color,
+    AnyDictionary const&        metadata,
+    std::string const&          comment)
     : Parent(name, metadata)
     , _color(color)
     , _marked_range(marked_range)

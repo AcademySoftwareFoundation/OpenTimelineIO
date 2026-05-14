@@ -16,11 +16,13 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             transition_type="SMPTE.Dissolve",
             metadata={
                 "foo": "bar"
-            }
+            },
+            enabled=False
         )
         self.assertEqual(trx.transition_type, "SMPTE.Dissolve")
         self.assertEqual(trx.name, "AtoB")
         self.assertEqual(trx.metadata, {"foo": "bar"})
+        self.assertEqual(trx.enabled, False)
 
     def test_serialize(self):
         trx = otio.schema.Transition(
@@ -28,7 +30,8 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             transition_type="SMPTE.Dissolve",
             metadata={
                 "foo": "bar"
-            }
+            },
+            enabled=False
         )
         encoded = otio.adapters.otio_json.write_to_string(trx)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
@@ -47,6 +50,7 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             '"{}", '
             '{}, '
             "{}, "
+            "{}, "
             "{}"
             ")".format(
                 str(trx.name),
@@ -54,6 +58,7 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 str(trx.in_offset),
                 str(trx.out_offset),
                 str(trx.metadata),
+                str(trx.enabled)
             )
         )
 
@@ -64,13 +69,15 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "transition_type={}, "
             "in_offset={}, "
             "out_offset={}, "
-            "metadata={}"
+            "metadata={}, "
+            "enabled={}"
             ")".format(
                 repr(trx.name),
                 repr(trx.transition_type),
                 repr(trx.in_offset),
                 repr(trx.out_offset),
                 repr(trx.metadata),
+                repr(trx.enabled)
             )
         )
 
@@ -85,6 +92,9 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(trx.transition_type, "SMPTE.Dissolve")
         trx.transition_type = "EdgeWipe"
         self.assertEqual(trx.transition_type, "EdgeWipe")
+        self.assertTrue(trx.enabled)
+        trx.enabled = False
+        self.assertFalse(trx.enabled)
 
     def test_parent_range(self):
         timeline = otio.schema.Timeline(

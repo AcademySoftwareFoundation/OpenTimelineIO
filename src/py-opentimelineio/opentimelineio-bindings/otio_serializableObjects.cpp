@@ -721,19 +721,22 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
                             std::string const& transition_type,
                             RationalTime       in_offset,
                             RationalTime       out_offset,
-                            py::object         metadata) {
+                            py::object         metadata,
+                            py::bool_            enabled) {
                     return new Transition(
                         name,
                         transition_type,
                         in_offset,
                         out_offset,
-                        py_to_any_dictionary(metadata));
+                        py_to_any_dictionary(metadata),
+                        enabled);
                 }),
                 py::arg_v("name"_a = std::string()),
                 "transition_type"_a = std::string(),
                 "in_offset"_a       = RationalTime(),
                 "out_offset"_a      = RationalTime(),
-                py::arg_v("metadata"_a = py::none()))
+                py::arg_v("metadata"_a = py::none()),
+                "enabled"_a = true)
             .def_property(
                 "transition_type",
                 &Transition::transition_type,
@@ -749,6 +752,11 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
                 &Transition::out_offset,
                 &Transition::set_out_offset,
                 "Amount of the next clip this transition overlaps, exclusive.")
+            .def_property(
+                "enabled",
+                &Transition::enabled,
+                &Transition::set_enabled,
+                "If true, a Transition contributes to compositions. For example, when a transition is ``enabled=false`` the transition is ignored and the adjacent clips are cut together with no transition.")
             .def(
                 "duration",
                 [](Transition* t) { return t->duration(ErrorStatusHandler()); })

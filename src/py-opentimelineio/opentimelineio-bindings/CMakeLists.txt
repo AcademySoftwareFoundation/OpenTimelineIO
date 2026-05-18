@@ -15,7 +15,8 @@ pybind11_add_module(_otio
                     otio_imath.cpp
                     otio_tests.cpp
                     otio_serializableObjects.cpp
-                    otio_utils.cpp 
+                    otio_utils.cpp
+                    otio_bundle.cpp
                     ${_OTIO_HEADER_FILES})
 
 target_include_directories(_otio 

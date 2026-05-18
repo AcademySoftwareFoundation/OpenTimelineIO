@@ -146,6 +146,7 @@ into a single directory named with a suffix of .otiod.
 - write_to_file:
   - input_otio
   - filepath
+  - relative_media_path
   - media_policy
   - dryrun
 
@@ -182,6 +183,7 @@ read on unix and windows platforms.
 - write_to_file:
   - input_otio
   - filepath
+  - relative_media_path
   - media_policy
   - dryrun
 

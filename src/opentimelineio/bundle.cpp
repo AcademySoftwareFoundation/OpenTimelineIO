@@ -13,7 +13,18 @@
 #include <fstream>
 #include <sstream>
 
-#include "miniz.h"
+#if defined(OTIO_MINIZ_SRC)
+namespace {
+extern "C"
+{
+// Wrap miniz in an anonymous namespace so it's symbols don't conflict
+// with other libraries (e.g., minizip-ng)
+#include "miniz.c"
+}
+}
+#else // OTIO_MINIZ_SRC
+#include <miniz.h>
+#endif // OTIO_MINIZ_SRC
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
@@ -170,22 +181,24 @@ namespace bundle {
                     else if (auto seq = dynamic_retainer_cast<ImageSequenceReference>(ref.second))
                     {
                         // Handle image sequence references
-                        file = file_from_url(seq->target_url_base());
-                        if (file.has_value() &&
-                            policy != MediaReferencePolicy::all_missing)
+                        if (policy != MediaReferencePolicy::all_missing)
                         {
-                            for (int frame = seq->start_frame();
-                                frame <= seq->end_frame();
+                            for (int frame = 0;
+                                frame < seq->number_of_images_in_sequence();
                                 frame += seq->frame_step())
                             {
-                                if (!register_bundle_file(
-                                    std::filesystem::u8path(
-                                        seq->target_url_for_image_number(frame)),
-                                    relative_media_path,
-                                    paths,
-                                    out,
-                                    error_status))
-                                    return false;
+                                file = file_from_url(seq->target_url_for_image_number(frame));
+                                if (file.has_value())
+                                {
+                                    const auto path = std::filesystem::u8path(*file);
+                                    if (!register_bundle_file(
+                                        path,
+                                        relative_media_path,
+                                        paths,
+                                        out,
+                                        error_status))
+                                        return false;
+                                }
                             }
                             
                             // Set the URL to the bundle location

@@ -355,6 +355,8 @@ define_bases2(py::module m)
             "b"_a = 1.0,
             "a"_a = 1.0,
             py::arg_v("name"_a = std::string()))
+        .def(py::self == py::self)
+        .def(py::self != py::self)
         .def_property("r", &Color::r, &Color::set_r)
         .def_property("g", &Color::g, &Color::set_g)
         .def_property("b", &Color::b, &Color::set_b)
@@ -431,11 +433,11 @@ A marker indicates a marked range of time on an item in a timeline, usually with
 The marked range may have a zero duration. The marked range is in the owning item's time coordinate system.
 )docstring")
             .def(
-                py::init([](std::string        name,
-                            TimeRange          marked_range,
-                            std::string const& color,
-                            py::object         metadata,
-                            std::string const& comment) {
+                py::init([](std::string          name,
+                            TimeRange            marked_range,
+                            std::optional<Color> color,
+                            py::object           metadata,
+                            std::string const&   comment) {
                     return new Marker(
                         name,
                         marked_range,
@@ -445,14 +447,14 @@ The marked range may have a zero duration. The marked range is in the owning ite
                 }),
                 py::arg_v("name"_a = std::string()),
                 "marked_range"_a = TimeRange(),
-                "color"_a        = std::string(Marker::Color::red),
+                "color"_a        = Color::red,
                 py::arg_v("metadata"_a = py::none()),
                 "comment"_a = std::string())
             .def_property(
                 "color",
                 &Marker::color,
                 &Marker::set_color,
-                "Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.")
+                "Color object assigned to this marker")
             .def_property(
                 "marked_range",
                 &Marker::marked_range,
@@ -463,41 +465,6 @@ The marked range may have a zero duration. The marked range is in the owning ite
                 &Marker::comment,
                 &Marker::set_comment,
                 "Optional comment for this marker.");
-
-    py::class_<Marker::Color>(marker_class, "Color")
-        .def_property_readonly_static(
-            "PINK",
-            [](py::object /* self */) { return Marker::Color::pink; })
-        .def_property_readonly_static(
-            "RED",
-            [](py::object /* self */) { return Marker::Color::red; })
-        .def_property_readonly_static(
-            "ORANGE",
-            [](py::object /* self */) { return Marker::Color::orange; })
-        .def_property_readonly_static(
-            "YELLOW",
-            [](py::object /* self */) { return Marker::Color::yellow; })
-        .def_property_readonly_static(
-            "GREEN",
-            [](py::object /* self */) { return Marker::Color::green; })
-        .def_property_readonly_static(
-            "CYAN",
-            [](py::object /* self */) { return Marker::Color::cyan; })
-        .def_property_readonly_static(
-            "BLUE",
-            [](py::object /* self */) { return Marker::Color::blue; })
-        .def_property_readonly_static(
-            "PURPLE",
-            [](py::object /* self */) { return Marker::Color::purple; })
-        .def_property_readonly_static(
-            "MAGENTA",
-            [](py::object /* self */) { return Marker::Color::magenta; })
-        .def_property_readonly_static(
-            "BLACK",
-            [](py::object /* self */) { return Marker::Color::black; })
-        .def_property_readonly_static("WHITE", [](py::object /* self */) {
-            return Marker::Color::white;
-        });
 
     using SerializableCollectionIterator =
         ContainerIterator<SerializableCollection, SerializableObject*>;

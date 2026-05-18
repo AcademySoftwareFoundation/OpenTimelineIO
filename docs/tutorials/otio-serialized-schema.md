@@ -55,27 +55,6 @@ parameters:
 
 ## Module: opentimelineio.core
 
-### Color.1
-
-*full module path*: `opentimelineio.core.Color`
-
-*documentation*:
-
-```
-:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing
- conversion between different formats. To be considered interoperable, the sRGB transfer function 
-encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the 
-intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant
- for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
-```
-
-parameters:
-- *a*: 
-- *b*: 
-- *g*: 
-- *name*: 
-- *r*: 
-
 ### Composable.1
 
 *full module path*: `opentimelineio.core.Composable`
@@ -309,6 +288,27 @@ parameters:
 - *name*: 
 - *source_range*: 
 
+### Color.1
+
+*full module path*: `opentimelineio.schema.Color`
+
+*documentation*:
+
+```
+:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing
+ conversion between different formats. To be considered interoperable, the sRGB transfer function 
+encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the 
+intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant
+ for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
+```
+
+parameters:
+- *a*: 
+- *b*: 
+- *g*: 
+- *name*: 
+- *r*: 
+
 ### Effect.1
 
 *full module path*: `opentimelineio.schema.Effect`
@@ -519,7 +519,7 @@ parameters:
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
 Instead it affects the speed of the media displayed within that item.
 
-### Marker.2
+### Marker.3
 
 *full module path*: `opentimelineio.schema.Marker`
 
@@ -534,7 +534,7 @@ system.
 ```
 
 parameters:
-- *color*: Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.
+- *color*: Color object assigned to this marker
 - *comment*: Optional comment for this marker.
 - *marked_range*: Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
 - *metadata*: 

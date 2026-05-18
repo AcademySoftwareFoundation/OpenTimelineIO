@@ -96,12 +96,10 @@ set(OTIO_LIBS_PRIVATE)
 if(NOT OTIO_FIND_MINIZ)
     # If we are using miniz as a git submodule, include the sources directly
     # instead of building it as a separate library.
-    target_sources(opentimelineio PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/deps/miniz/miniz.c)
     target_include_directories(opentimelineio PRIVATE
         ${CMAKE_SOURCE_DIR}/src/deps/miniz)
     target_compile_definitions(opentimelineio PRIVATE
-        MINIZ_NO_ZLIB_COMPATIBLE_NAMES)
+        OTIO_MINIZ_SRC)
 else()
     set(OTIO_LIBS_PRIVATE miniz::miniz)
 endif()

@@ -14,13 +14,34 @@
 #include <sstream>
 
 #if defined(OTIO_MINIZ_SRC)
+// miniz is included directly into this translation unit, wrapped in an
+// anonymous namespace, so that all of miniz's symbols are local to this
+// .cpp file. This prevents link-time conflicts with other zip libraries
+// (e.g. minizip-ng) that downstream OTIO consumers may already be linking.
+// The Windows headers below must be pre-included at global scope because
+// the Win32 Interlocked intrinsics are defined as inline functions in
+// <winbase.h> and don't tolerate being placed inside a namespace.
+#ifdef _WIN32
+  #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+  #endif
+  #include <windows.h>
+  #include <io.h>
+  #include <sys/stat.h>
+#endif
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 namespace {
-extern "C"
-{
-// Wrap miniz in an anonymous namespace so it's symbols don't conflict
-// with other libraries (e.g., minizip-ng)
-#include "miniz.c"
-}
+    #ifdef __GNUC__
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic ignored "-Wunused-function"
+    #endif
+    #include "miniz.c"
+    #ifdef __GNUC__
+      #pragma GCC diagnostic pop
+    #endif
 }
 #else // OTIO_MINIZ_SRC
 #include <miniz.h>

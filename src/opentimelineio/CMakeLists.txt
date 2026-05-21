@@ -98,8 +98,7 @@ if(NOT OTIO_FIND_MINIZ)
     # instead of building it as a separate library.
     target_include_directories(opentimelineio PRIVATE
         ${CMAKE_SOURCE_DIR}/src/deps/miniz)
-    target_compile_definitions(opentimelineio PRIVATE
-        OTIO_MINIZ_SRC)
+    target_compile_definitions(opentimelineio PRIVATE OTIO_MINIZ_SRC)
 else()
     set(OTIO_LIBS_PRIVATE miniz::miniz)
 endif()

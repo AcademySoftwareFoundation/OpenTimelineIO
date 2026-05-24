@@ -13,39 +13,11 @@
 #include <fstream>
 #include <sstream>
 
-#if defined(OTIO_MINIZ_SRC)
-// miniz is included directly into this translation unit, wrapped in an
-// anonymous namespace, so that all of miniz's symbols are local to this
-// .cpp file. This prevents link-time conflicts with other zip libraries
-// (e.g. minizip-ng) that downstream OTIO consumers may already be linking.
-// The Windows headers below must be pre-included at global scope because
-// the Win32 Interlocked intrinsics are defined as inline functions in
-// <winbase.h> and don't tolerate being placed inside a namespace.
-#ifdef _WIN32
-  #ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-  #endif
-  #include <windows.h>
-  #include <io.h>
-  #include <sys/stat.h>
-#endif
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-namespace {
-    #ifdef __GNUC__
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wunused-function"
-    #endif
-    #include "miniz.c"
-    #ifdef __GNUC__
-      #pragma GCC diagnostic pop
-    #endif
-}
-#else // OTIO_MINIZ_SRC
-#include <miniz.h>
-#endif // OTIO_MINIZ_SRC
+#include <mz.h>
+#include <mz_os.h>
+#include <mz_strm.h>
+#include <mz_zip.h>
+#include <mz_zip_rw.h>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {
@@ -348,154 +320,175 @@ namespace bundle {
             }
         }
 
-        // This class writes a ZIP file using miniz
+        // This class writes a ZIP file using minizip-ng
         class ZipWriter
         {
         public:
             ZipWriter(std::string const& path) :
                 _path(path)
             {
-                if (!mz_zip_writer_init_file_v2(&_zip, path.c_str(), 0, MZ_ZIP_FLAG_WRITE_ZIP64))
+                _writer = mz_zip_writer_create();
+                if (!_writer)
+                    throw std::runtime_error("cannot create zip writer");
+                if (mz_zip_writer_open_file(_writer, path.c_str(), 0, 0) != MZ_OK)
                 {
+                    mz_zip_writer_delete(&_writer);
                     throw std::runtime_error("cannot initialize zip writer");
                 }
             }
 
             ~ZipWriter()
             {
-                mz_zip_writer_end(&_zip);
+                if (_writer)
+                {
+                    if (!_finalized)
+                        mz_zip_writer_close(_writer);
+                    mz_zip_writer_delete(&_writer);
+                }
                 if (!_finalized)
                 {
-                    // Try and remove the file if it was partially written
                     std::error_code ec;
                     std::filesystem::remove(_path, ec);
                 }
             }
-            
+
             ZipWriter(ZipWriter const&) = delete;
             ZipWriter& operator=(ZipWriter const&) = delete;
-            
+
             void add_text(std::string const& name, std::string const& text)
             {
-                if (!mz_zip_writer_add_mem(
-                    &_zip,
-                    name.c_str(),
-                    text.c_str(),
-                    text.size(),
-                    MZ_DEFAULT_LEVEL | MZ_ZIP_FLAG_WRITE_ZIP64))
+                if (text.size() > static_cast<size_t>(INT32_MAX))
+                    throw std::runtime_error("text entry too large: " + name);
+
+                mz_zip_file file_info = {};
+                file_info.filename = name.c_str();
+                file_info.modified_date = time(nullptr);
+                file_info.version_madeby = MZ_VERSION_MADEBY;
+                file_info.compression_method = MZ_COMPRESS_METHOD_DEFLATE;
+                file_info.flag = MZ_ZIP_FLAG_UTF8;
+
+                if (mz_zip_writer_add_buffer(
+                        _writer,
+                        const_cast<char*>(text.data()),
+                        static_cast<int32_t>(text.size()),
+                        &file_info) != MZ_OK)
                 {
                     throw std::runtime_error("cannot add " + name + " to zip");
                 }
             }
-            
+
             void add_file_uncompressed(std::string const& name, std::string const& path)
             {
-                if (!mz_zip_writer_add_file(
-                    &_zip,
-                    name.c_str(),
-                    path.c_str(),
-                    nullptr,
-                    0,
-                    MZ_NO_COMPRESSION | MZ_ZIP_FLAG_WRITE_ZIP64))
-                {
+                mz_zip_writer_set_compress_method(_writer, MZ_COMPRESS_METHOD_STORE);
+                int32_t const err = mz_zip_writer_add_file(_writer, path.c_str(), name.c_str());
+                mz_zip_writer_set_compress_method(_writer, MZ_COMPRESS_METHOD_DEFLATE);
+                if (err != MZ_OK)
                     throw std::runtime_error("cannot add " + path + " to zip");
-                }
             }
 
             void finalize()
             {
-                if (!mz_zip_writer_finalize_archive(&_zip))
-                {
+                if (_finalized) return;
+                if (mz_zip_writer_close(_writer) != MZ_OK)
                     throw std::runtime_error("cannot finalize zip writer");
-                }
                 _finalized = true;
             }
 
         private:
             std::string _path;
-            mz_zip_archive _zip = {};
+            void* _writer = nullptr;
             bool _finalized = false;
         };
         
-        // This class reads a ZIP file using miniz
+        // This class reads a ZIP file using minizip-ng
         class ZipReader
         {
         public:
             ZipReader(std::string const& path)
             {
-                if (!mz_zip_reader_init_file(&_zip, path.c_str(), 0))
+                _reader = mz_zip_reader_create();
+                if (!_reader)
+                    throw std::runtime_error("cannot create zip reader");
+                if (mz_zip_reader_open_file(_reader, path.c_str()) != MZ_OK)
                 {
+                    mz_zip_reader_delete(&_reader);
                     throw std::runtime_error("cannot open zip file");
                 }
             }
-            
+
             ~ZipReader()
             {
-                mz_zip_reader_end(&_zip);
+                if (_reader)
+                    mz_zip_reader_delete(&_reader);
             }
-            
+
             ZipReader(ZipReader const&) = delete;
             ZipReader& operator=(ZipReader const&) = delete;
-            
-            mz_uint num_files() const
-            {
-                return mz_zip_reader_get_num_files(const_cast<mz_zip_archive*>(&_zip));
-            }
-            
-            std::optional<mz_uint> find(std::string const& name)
-            {
-                int idx = mz_zip_reader_locate_file(&_zip, name.c_str(), nullptr, 0);
-                if (idx < 0) return std::nullopt;
-                return static_cast<mz_uint>(idx);
-            }
 
-            mz_zip_archive_file_stat stat(mz_uint i)
+            // Read a named entry to a string (used for content.otio). Returns nullopt
+            // if the entry is not present.
+            std::optional<std::string> read_to_string(std::string const& name)
             {
-                mz_zip_archive_file_stat s;
-                if (!mz_zip_reader_file_stat(&_zip, i, &s))
-                {
-                    throw std::runtime_error("cannot stat zip entry");
-                }
-                return s;
-            }
+                if (mz_zip_reader_locate_entry(_reader, name.c_str(), 0) != MZ_OK)
+                    return std::nullopt;
+                if (mz_zip_reader_entry_open(_reader) != MZ_OK)
+                    throw std::runtime_error("cannot open zip entry");
 
-            std::string read_to_string(mz_uint i)
-            {
-                mz_zip_archive_file_stat s;
-                if (!mz_zip_reader_file_stat(&_zip, i, &s))
-                {
+                // Close the entry on any exit path.
+                struct EntryScope {
+                    void* r; ~EntryScope() { mz_zip_reader_entry_close(r); }
+                } scope{ _reader };
+
+                mz_zip_file* info = nullptr;
+                if (mz_zip_reader_entry_get_info(_reader, &info) != MZ_OK || !info)
                     throw std::runtime_error("cannot stat zip entry");
-                }
-                
-                std::string out;
-                out.resize(s.m_uncomp_size);
-                if (!mz_zip_reader_extract_to_mem(
-                    &_zip,
-                    i,
-                    out.data(),
-                    out.size(),
-                    0))
-                {
+                if (info->uncompressed_size < 0 ||
+                    info->uncompressed_size > static_cast<int64_t>(INT32_MAX))
+                    throw std::runtime_error("zip entry too large: " + name);
+
+                std::string out(static_cast<size_t>(info->uncompressed_size), '\0');
+                int32_t const n = mz_zip_reader_entry_read(
+                    _reader, out.data(), static_cast<int32_t>(out.size()));
+                if (n != static_cast<int32_t>(out.size()))
                     throw std::runtime_error("cannot extract zip entry to memory");
-                }
                 return out;
             }
-            
-            bool is_directory(mz_uint i)
+
+            // Iterate every entry, invoking fn(filename, is_dir) for each. fn may call
+            // extract_current() to save the current entry to disk.
+            template<typename Fn>
+            void for_each_entry(Fn&& fn)
             {
-                return mz_zip_reader_is_file_a_directory(&_zip, i);
-            }
-            
-            void extract_to_file(mz_uint i, std::string const& path)
-            {
-                if (!mz_zip_reader_extract_to_file(&_zip, i, path.c_str(), 0))
+                int32_t err = mz_zip_reader_goto_first_entry(_reader);
+                if (err == MZ_END_OF_LIST)
+                    return;  // empty archive
+                if (err != MZ_OK)
+                    throw std::runtime_error("cannot read zip entries");
+                while (err == MZ_OK)
                 {
-                    throw std::runtime_error("cannot extract zip entry");
+                    mz_zip_file* info = nullptr;
+                    if (mz_zip_reader_entry_get_info(_reader, &info) != MZ_OK || !info)
+                        throw std::runtime_error("cannot stat zip entry");
+
+                    bool const is_dir = (mz_zip_reader_entry_is_dir(_reader) == MZ_OK);
+                    fn(std::string(info->filename ? info->filename : ""), is_dir);
+
+                    err = mz_zip_reader_goto_next_entry(_reader);
+                    if (err != MZ_OK && err != MZ_END_OF_LIST)
+                        throw std::runtime_error("cannot advance zip entry");
                 }
+            }
+
+            // Save the entry the cursor is currently on to a file. Call only from
+            // within a for_each_entry callback.
+            void extract_current_to_file(std::string const& path)
+            {
+                if (mz_zip_reader_entry_save_file(_reader, path.c_str()) != MZ_OK)
+                    throw std::runtime_error("cannot extract zip entry");
             }
 
         private:
-            mz_zip_archive _zip = {};
+            void* _reader = nullptr;
         };
     
         // Validate that an extraction path is contained within the destination
@@ -520,7 +513,7 @@ namespace bundle {
         if (!starts_with(url, file_prefix))
         {
             if (url.find("://") != std::string::npos) return std::nullopt;
-            return url;  // bare path
+            return url; // bare path
         }
 
         // Split "file://" + authority + path
@@ -704,39 +697,34 @@ namespace bundle {
             ZipReader zr(path);
 
             // Read the timeline
-            auto timeline_idx = zr.find(timeline_file);
-            if (!timeline_idx)
+            auto json_opt = zr.read_to_string(timeline_file);
+            if (!json_opt)
                 throw std::runtime_error("bundle is missing content.otio");
-            json = zr.read_to_string(*timeline_idx);
+            json = *json_opt;
 
             // Extract the archive
             if (options.extract_path.has_value())
             {
                 std::filesystem::create_directories(output_path);
-            
-                mz_uint const n = zr.num_files();
-                for (mz_uint i = 0; i < n; ++i)
+
+                zr.for_each_entry([&](std::string const& filename, bool is_dir)
                 {
-                    auto const stat = zr.stat(i);
-                    auto const file_path = output_path / std::filesystem::u8path(stat.m_filename);
-                    
+                    auto const file_path = output_path / std::filesystem::u8path(filename);
+
                     // Guard against zip slip
                     if (!is_path_safe(output_path, file_path))
-                    {
-                        throw std::runtime_error(
-                            std::string("unsafe path in archive: ") + stat.m_filename);
-                    }
-                    
-                    if (zr.is_directory(i))
+                        throw std::runtime_error("unsafe path in archive: " + filename);
+
+                    if (is_dir)
                     {
                         std::filesystem::create_directories(file_path);
                     }
                     else
                     {
                         std::filesystem::create_directories(file_path.parent_path());
-                        zr.extract_to_file(i, file_path.u8string());
+                        zr.extract_current_to_file(file_path.u8string());
                     }
-                }
+                });
             }
         }
         catch (const std::exception& e)

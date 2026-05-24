@@ -92,20 +92,9 @@ else()
         PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 endif()
 
-set(OTIO_LIBS_PRIVATE)
-if(NOT OTIO_FIND_MINIZ)
-    # If we are using miniz as a git submodule, include the sources directly
-    # instead of building it as a separate library.
-    target_include_directories(opentimelineio PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/deps/miniz)
-    target_compile_definitions(opentimelineio PRIVATE OTIO_MINIZ_SRC)
-else()
-    set(OTIO_LIBS_PRIVATE miniz::miniz)
-endif()
-
 target_link_libraries(opentimelineio
     PUBLIC opentime Imath::Imath
-    PRIVATE ${OTIO_LIBS_PRIVATE})
+    PRIVATE MINIZIP::minizip)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
@@ -146,6 +135,19 @@ if(OTIO_CXX_INSTALL)
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
+
+    if(NOT OTIO_FIND_MINIZIP_NG)
+        install(TARGETS minizip
+            EXPORT OpenTimelineIOTargets
+            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+    endif()
+
+    set(OTIO_CONFIG_DEPENDENCIES "")
+    if(OTIO_FIND_MINIZIP_NG)
+        string(APPEND OTIO_CONFIG_DEPENDENCIES "find_dependency(minizip-ng)\n")
+    endif()
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOTargets

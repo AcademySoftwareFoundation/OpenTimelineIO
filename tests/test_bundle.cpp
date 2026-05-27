@@ -347,11 +347,12 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "missing.otioz").u8string();
+                (temp.path() / "error_if_not_file.otioz").u8string();
             WriteOptions write_options;
             write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::error_if_not_file;
             OTIO_NS::ErrorStatus error;
+            assertFalse(dry_run(tl, write_options, &error).has_value());
             assertFalse(write_otioz(tl, otioz_path, write_options, &error));
         }
 
@@ -361,11 +362,12 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "missing.otioz").u8string();
+                (temp.path() / "missing_if_not_file.otioz").u8string();
             WriteOptions write_options;
             write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::missing_if_not_file;
             OTIO_NS::ErrorStatus error;
+            assertTrue(dry_run(tl, write_options, &error).has_value());
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
             
             auto result = dynamic_cast<Timeline*>(read_otioz(
@@ -383,11 +385,12 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "missing.otioz").u8string();
+                (temp.path() / "all_missing.otioz").u8string();
             WriteOptions write_options;
             write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::all_missing;
             OTIO_NS::ErrorStatus error;
+            assertTrue(dry_run(tl, write_options, &error).has_value());
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
             
             auto result = dynamic_cast<Timeline*>(read_otioz(

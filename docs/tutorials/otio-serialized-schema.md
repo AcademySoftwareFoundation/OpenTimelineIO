@@ -665,6 +665,7 @@ dissolve or wipe.
 ```
 
 parameters:
+- *enabled*: If true, a Transition contributes to compositions. For example, when a transition is ``enabled=false`` the transition is ignored and the adjacent clips are cut together with no transition.
 - *in_offset*: Amount of the previous clip this transition overlaps, exclusive.
 - *metadata*: 
 - *name*: 

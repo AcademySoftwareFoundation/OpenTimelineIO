@@ -506,12 +506,13 @@ main(int argc, char** argv)
         // Create a timeline and media references
         //
         // To test 64-bit ZIP functionality:
-        // * Resize a media file to be > 4GB
-        // * Set the number of sequence images > max 16-bit
+        // * Resize multiple media files > 4GB
+        // * Set the number of sequence images > max 16-bit value
+        // * Note that these tests need ~24GB disk space
         auto tl = create_simple_timeline();
-        SerializableObject::Retainer<ExternalReference> er(
-            new ExternalReference("video1.mov"));
-        find_clip_by_name(tl, "video clip 1")->set_media_reference(er);
+        std::string const large_file = "video1.mov";
+        find_clip_by_name(tl, "video clip 1")->set_media_reference(
+            new ExternalReference(large_file));
         find_clip_by_name(tl, "video clip 2")->set_media_reference(
             new ImageSequenceReference(
                 "",
@@ -520,27 +521,29 @@ main(int argc, char** argv)
                 0, 1, 24, 0,
                 ImageSequenceReference::MissingFramePolicy::error,
                 TimeRange(0, std::numeric_limits<uint16_t>::max() + 1, 24)));
+        std::string const large_file_2 = "audio.wav";
         find_clip_by_name(tl, "audio clip 1")->set_media_reference(
-            new ExternalReference("audio.wav"));
+            new ExternalReference(large_file_2));
         create_refs(tl, temp.path());
 
-        // Resize media file > 4GB
-        auto const file_path = temp.path() / er->target_url();
-        const size_t gigabyte = 1024 * 1024 * 1024;
-        size_t const file_size = 5 * gigabyte;
-        std::filesystem::resize_file(file_path, file_size);
+        // Resize media files > 4GB
+        const std::uintmax_t gigabyte = 1024 * 1024 * 1024;
+        std::uintmax_t const large_file_size = 4 * gigabyte;
+        std::filesystem::resize_file(temp.path() / large_file, large_file_size);
+        std::filesystem::resize_file(temp.path() / large_file_2, large_file_size);
 
         // Dry run
         std::string const otioz_path = (temp.path() / "zip64.otioz").u8string();
         WriteOptions write_options;
         write_options.relative_media_path = temp.path().u8string();
         OTIO_NS::ErrorStatus error;
-        auto const size = dry_run(tl, write_options, &error);
-        assertTrue(size.has_value());
-        assertTrue(*size > 4 * gigabyte);
+        auto const dry_run_size = dry_run(tl, write_options, &error);
+        assertTrue(dry_run_size.has_value());
+        assertTrue(*dry_run_size > large_file_size * 2);
 
         // Write the otioz
         assertTrue(write_otioz(tl, otioz_path, write_options, &error));
+        assertTrue(std::filesystem::file_size(otioz_path) >= *dry_run_size);
 
         // Read the otioz and extract the contents
         ReadOptions read_options;
@@ -552,8 +555,11 @@ main(int argc, char** argv)
             &error));
         assertNotNull(result);
         assertEqual(
-            std::filesystem::file_size(extract_path / "media" / er->target_url()),
-            file_size);
+            std::filesystem::file_size(extract_path / "media" / large_file),
+            large_file_size);
+        assertEqual(
+            std::filesystem::file_size(extract_path / "media" / large_file_2),
+            large_file_size);
     });
 
     // \todo Add a test case for "zip slip", where ZIP files have malicious

@@ -67,9 +67,10 @@ namespace bundle {
         bool absolute_media_reference_paths = false;
     };
 
-    /// @brief Calculate the total uncompressed size of the files that would be
-    /// written to a bundle, without actually writing it. This is useful for
-    /// estimating the disk space required.
+    /// @brief Check the timeline against the error policy to see if a bundle 
+    /// can be made correctly.  If so, return the total uncompressed size of 
+    /// the files that would be written to a bundle, without actually writing it. 
+    /// This is useful for estimating the disk space required.
     OTIO_API std::optional<uint64_t> dry_run(
         Timeline const*     timeline,
         WriteOptions const& options      = WriteOptions(),

@@ -500,6 +500,62 @@ main(int argc, char** argv)
         std::filesystem::remove_all(otiod_path);
     });
 
+    tests.add_test("test_otioz_zip64", [] {
+        TempDir temp;
+
+        // Create a timeline and media references
+        //
+        // To test 64-bit ZIP functionality:
+        // * Resize a media file to be > 4GB
+        // * Set the number of sequence images > max 16-bit
+        auto tl = create_simple_timeline();
+        SerializableObject::Retainer<ExternalReference> er(
+            new ExternalReference("video1.mov"));
+        find_clip_by_name(tl, "video clip 1")->set_media_reference(er);
+        find_clip_by_name(tl, "video clip 2")->set_media_reference(
+            new ImageSequenceReference(
+                "",
+                "render.",
+                ".exr",
+                0, 1, 24, 0,
+                ImageSequenceReference::MissingFramePolicy::error,
+                TimeRange(0, std::numeric_limits<uint16_t>::max() + 1, 24)));
+        find_clip_by_name(tl, "audio clip 1")->set_media_reference(
+            new ExternalReference("audio.wav"));
+        create_refs(tl, temp.path());
+
+        // Resize media file > 4GB
+        auto const file_path = temp.path() / er->target_url();
+        const size_t gigabyte = 1024 * 1024 * 1024;
+        size_t const file_size = 5 * gigabyte;
+        std::filesystem::resize_file(file_path, file_size);
+
+        // Dry run
+        std::string const otioz_path = (temp.path() / "zip64.otioz").u8string();
+        WriteOptions write_options;
+        write_options.relative_media_path = temp.path().u8string();
+        OTIO_NS::ErrorStatus error;
+        auto const size = dry_run(tl, write_options, &error);
+        assertTrue(size.has_value());
+        assertTrue(*size > 4 * gigabyte);
+
+        // Write the otioz
+        assertTrue(write_otioz(tl, otioz_path, write_options, &error));
+
+        // Read the otioz and extract the contents
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = extract_path.u8string();
+        auto result = dynamic_cast<Timeline*>(read_otioz(
+            otioz_path,
+            read_options,
+            &error));
+        assertNotNull(result);
+        assertEqual(
+            std::filesystem::file_size(extract_path / "media" / er->target_url()),
+            file_size);
+    });
+
     // \todo Add a test case for "zip slip", where ZIP files have malicious
     // entries. This requires manually creating a ZIP file with entries
     // outside of the ZIP directory (eg., "../../../passwd"). The read_otioz

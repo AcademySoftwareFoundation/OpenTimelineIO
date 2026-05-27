@@ -9,8 +9,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 /// @brief Utilities for working with OTIO bundles (otioz and otiod)
 ///
-/// @todo Add otioz description
-/// @todo Add otiod description
+/// https://opentimelineio.readthedocs.io/en/stable/tutorials/otio-filebundles.html#otioz-d-file-bundle-format-details
 namespace bundle {
 
     /// @brief This constant provides the bundle file version.

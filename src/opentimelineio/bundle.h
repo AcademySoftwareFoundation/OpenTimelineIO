@@ -85,6 +85,9 @@ namespace bundle {
         ErrorStatus*        error_status = nullptr);
 
     /// @brief Read a timeline from an otioz bundle.
+    ///
+    /// The default behavior is to only read the timeline from the bundle.
+    /// To also extract the contents, set extract_path in the read options.
     OTIO_API SerializableObject* read_otioz(
         std::string const& path,
         ReadOptions const& options      = ReadOptions(),

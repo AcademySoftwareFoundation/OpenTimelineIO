@@ -90,7 +90,7 @@ namespace bundle {
         // used by process_media_references().
         bool register_bundle_file(
             std::filesystem::path const& source_path,
-            std::filesystem::path const& relative_media_path,
+            std::filesystem::path const& relative_media_base_dir,
             std::map<std::string, std::filesystem::path>& paths,
             BundleFiles& out,
             ErrorStatus* error_status)
@@ -114,8 +114,8 @@ namespace bundle {
            
             // Add the file to the bundle list
             auto resolved = source_path;
-            if (resolved.is_relative() && !relative_media_path.empty())
-                resolved = relative_media_path / resolved;
+            if (resolved.is_relative() && !relative_media_base_dir.empty())
+                resolved = relative_media_base_dir / resolved;
             auto const bundle_path = (std::filesystem::u8path(media_dir) /
                 source_path.filename()).u8string();
             out.insert({ resolved.u8string(), bundle_path });
@@ -126,7 +126,7 @@ namespace bundle {
         // files to be added to the bundle is returned.
         bool process_media_references(
             Timeline*                    timeline,
-            std::filesystem::path const& relative_media_path,
+            std::filesystem::path const& relative_media_base_dir,
             MediaReferencePolicy         policy,
             ErrorStatus*                 error_status,
             BundleFiles&                 out)
@@ -160,7 +160,7 @@ namespace bundle {
                             auto const path = std::filesystem::u8path(*file);
                             if (!register_bundle_file(
                                 path,
-                                relative_media_path,
+                                relative_media_base_dir,
                                 paths,
                                 out,
                                 error_status))
@@ -186,7 +186,7 @@ namespace bundle {
                                     const auto path = std::filesystem::u8path(*file);
                                     if (!register_bundle_file(
                                         path,
-                                        relative_media_path,
+                                        relative_media_base_dir,
                                         paths,
                                         out,
                                         error_status))
@@ -265,15 +265,16 @@ namespace bundle {
                 return false;
            
             // Get the relative media path
-            std::filesystem::path relative_media_path;
-            if (options.relative_media_path.has_value())
-                relative_media_path = std::filesystem::u8path(*options.relative_media_path);
+            std::filesystem::path relative_media_base_dir;
+            if (options.relative_media_base_dir.has_value())
+                relative_media_base_dir = std::filesystem::u8path(
+                    *options.relative_media_base_dir);
            
             // Process the media references and get the list of files to add
             // to the bundle
             if (!process_media_references(
                 out_clone,
-                relative_media_path,
+                relative_media_base_dir,
                 options.policy,
                 error_status,
                 out_files))

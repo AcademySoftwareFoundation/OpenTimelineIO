@@ -231,7 +231,7 @@ main(int argc, char** argv)
         std::string const otioz_path =
             (temp.path() / "round_trip.otioz").u8string();
         WriteOptions write_options;
-        write_options.relative_media_path = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().u8string();
         OTIO_NS::ErrorStatus error;
         auto const size = dry_run(tl, write_options, &error);
         assertTrue(size.has_value());
@@ -298,7 +298,7 @@ main(int argc, char** argv)
         std::string const otiod_path =
             (temp.path() / "round_trip.otiod").u8string();
         WriteOptions write_options;
-        write_options.relative_media_path = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().u8string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, write_options, &error));
         
@@ -349,7 +349,7 @@ main(int argc, char** argv)
             std::string const otioz_path =
                 (temp.path() / "missing.otioz").u8string();
             WriteOptions write_options;
-            write_options.relative_media_path = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::error_if_not_file;
             OTIO_NS::ErrorStatus error;
             assertFalse(write_otioz(tl, otioz_path, write_options, &error));
@@ -363,7 +363,7 @@ main(int argc, char** argv)
             std::string const otioz_path =
                 (temp.path() / "missing.otioz").u8string();
             WriteOptions write_options;
-            write_options.relative_media_path = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::missing_if_not_file;
             OTIO_NS::ErrorStatus error;
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
@@ -385,7 +385,7 @@ main(int argc, char** argv)
             std::string const otioz_path =
                 (temp.path() / "missing.otioz").u8string();
             WriteOptions write_options;
-            write_options.relative_media_path = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().u8string();
             write_options.policy = MediaReferencePolicy::all_missing;
             OTIO_NS::ErrorStatus error;
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
@@ -535,7 +535,7 @@ main(int argc, char** argv)
         // Dry run
         std::string const otioz_path = (temp.path() / "zip64.otioz").u8string();
         WriteOptions write_options;
-        write_options.relative_media_path = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().u8string();
         OTIO_NS::ErrorStatus error;
         auto const dry_run_size = dry_run(tl, write_options, &error);
         assertTrue(dry_run_size.has_value());

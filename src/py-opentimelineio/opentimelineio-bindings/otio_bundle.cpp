@@ -41,8 +41,8 @@ Options for writing bundles.
 )docstring")
         .def(py::init<>())
         .def_readwrite(
-            "relative_media_path",
-            &WriteOptions::relative_media_path,
+            "relative_media_base_dir",
+            &WriteOptions::relative_media_base_dir,
             "Base directory for resolving relative media reference paths. "
             "If a media reference URL resolves to a relative path, it is resolved "
             "against this directory before being added to the bundle.")

@@ -58,7 +58,8 @@ namespace bundle {
     struct OTIO_API_TYPE ReadOptions
     {
         /// @brief Extract the contents of the otioz bundle to this directory,
-        /// which must not already exist.
+        /// which must not already exist. If this is not set then only the timeline
+        /// is read from the bundle.
         std::optional<std::string> extract_path;
         
         /// @brief Convert the media reference paths to absolute paths.

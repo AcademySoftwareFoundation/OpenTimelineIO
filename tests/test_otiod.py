@@ -35,7 +35,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.adapters.write_to_file(
                 tl,
                 otiod_path,
-                relative_media_path=temp_dir)
+                relative_media_base_dir=temp_dir)
 
             # Read from otiod
             result = otio.adapters.read_from_file(otiod_path)

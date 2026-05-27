@@ -35,13 +35,13 @@ def read_from_file(
 def write_to_file(
     input_otio,
     filepath,
-    relative_media_path=None,
+    relative_media_base_dir=None,
     # see documentation in bundle. for more information on the media_policy
     media_policy=_otio.bundle.MediaReferencePolicy.error_if_not_file,
     dryrun=False
 ):
     options = _otio.bundle.WriteOptions()
-    options.relative_media_path = relative_media_path
+    options.relative_media_base_dir = relative_media_base_dir
     options.policy = media_policy
 
     if dryrun:

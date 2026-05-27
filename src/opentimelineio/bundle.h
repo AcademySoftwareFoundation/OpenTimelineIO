@@ -45,7 +45,7 @@ namespace bundle {
         /// @brief Base directory for resolving relative media reference paths.
         /// If a media reference URL resolves to a relative path, it is resolved
         /// against this directory before being added to the bundle.
-        std::optional<std::string> relative_media_path;
+        std::optional<std::string> relative_media_base_dir;
         
         /// @brief Media reference policy.
         MediaReferencePolicy policy = MediaReferencePolicy::error_if_not_file;

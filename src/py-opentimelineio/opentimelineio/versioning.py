@@ -4,6 +4,7 @@
 """Tools for fetching the family->label->schema:version maps"""
 
 import copy
+from typing import Dict
 
 from . import (
     core,
@@ -11,7 +12,7 @@ from . import (
 )
 
 
-def full_map():
+def full_map() -> Dict[str, Dict[str, Dict[str, int]]]:
     """Return the full map of schema version sets, including core and plugins.
     Organized as follows:
 
@@ -57,7 +58,7 @@ def full_map():
     return result
 
 
-def fetch_map(family, label):
+def fetch_map(family: str, label: str) -> Dict[str, int]:
     """Fetch the version map for the given family and label.  OpenTimelineIO
     includes a built in family called "OTIO_CORE", this is compiled into the
     C++ core and represents the core interchange schemas of OpenTimelineIO.

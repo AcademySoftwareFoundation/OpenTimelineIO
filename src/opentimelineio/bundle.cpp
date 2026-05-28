@@ -103,8 +103,8 @@ namespace bundle {
             {
                 if (error_status) {
                     std::stringstream ss;
-                    ss << "media file " << source_path
-                        << " would overwrite " << i->second;
+                    ss << "media file '" << source_path <<
+                        "' would overwrite '" <<i->second << "'";
                     *error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED, ss.str());
                 }
@@ -234,9 +234,12 @@ namespace bundle {
                             if (!file.has_value())
                             {
                                 if (error_status)
+                                {
                                     *error_status = ErrorStatus(
                                         ErrorStatus::FILE_WRITE_FAILED,
-                                        "media reference is not a file");
+                                        "media reference '" +
+                                        ref.second->name() + "' is not a file");
+                                }
                                 return false;
                             }
                             break;
@@ -884,14 +887,21 @@ namespace bundle {
             return nullptr;
         }
         auto const version_path = input_path / version_file;
-        auto const timeline_path = input_path / timeline_file;
-        if (!std::filesystem::is_regular_file(version_path) ||
-            !std::filesystem::is_regular_file(timeline_path))
+        if (!std::filesystem::is_regular_file(version_path))
         {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    "bundle is missing required files");
+                    "bundle is missing a version file");
+            return nullptr;
+        }
+        auto const timeline_path = input_path / timeline_file;
+        if (!std::filesystem::is_regular_file(timeline_path))
+        {
+            if (error_status)
+                *error_status = ErrorStatus(
+                    ErrorStatus::FILE_OPEN_FAILED,
+                    "bundle is missing a timeline file");
             return nullptr;
         }
         

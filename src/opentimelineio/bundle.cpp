@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 
 #include <mz.h>
 #include <mz_os.h>
@@ -101,13 +100,11 @@ namespace bundle {
             if (i != paths.end() &&
                 source_path.parent_path() != i->second.parent_path())
             {
-                if (error_status) {
-                    std::stringstream ss;
-                    ss << "media file '" << source_path <<
-                        "' would overwrite '" <<i->second << "'";
+                if (error_status)
                     *error_status = ErrorStatus(
-                        ErrorStatus::FILE_WRITE_FAILED, ss.str());
-                }
+                        ErrorStatus::FILE_WRITE_FAILED,
+                        "media file '" + source_path.u8string() +
+                        "' would overwrite '" + i->second.u8string() + "'");
                 return false;
             }
             paths[paths_key] = source_path;
@@ -234,12 +231,10 @@ namespace bundle {
                             if (!file.has_value())
                             {
                                 if (error_status)
-                                {
                                     *error_status = ErrorStatus(
                                         ErrorStatus::FILE_WRITE_FAILED,
                                         "media reference '" +
                                         ref.second->name() + "' is not a file");
-                                }
                                 return false;
                             }
                             break;
@@ -364,11 +359,13 @@ namespace bundle {
             {
                 _writer = mz_zip_writer_create();
                 if (!_writer)
-                    throw std::runtime_error("cannot create zip writer");
+                    throw std::runtime_error(
+                        "cannot create zip writer for '" + path + "'");
                 if (mz_zip_writer_open_file(_writer, path.c_str(), 0, 0) != MZ_OK)
                 {
                     mz_zip_writer_delete(&_writer);
-                    throw std::runtime_error("cannot initialize zip writer");
+                    throw std::runtime_error(
+                        "cannot initialize zip writer for '" + path + "'");
                 }
             }
 
@@ -393,7 +390,9 @@ namespace bundle {
             void add_text(std::string const& name, std::string const& text)
             {
                 if (text.size() > static_cast<size_t>(INT32_MAX))
-                    throw std::runtime_error("text entry too large: " + name);
+                    throw std::runtime_error(
+                        "text entry '" + name + "' too large for zip '" +
+                        _path + "'");
 
                 mz_zip_file file_info = {};
                 file_info.filename = name.c_str();
@@ -408,7 +407,8 @@ namespace bundle {
                         static_cast<int32_t>(text.size()),
                         &file_info) != MZ_OK)
                 {
-                    throw std::runtime_error("cannot add " + name + " to zip");
+                    throw std::runtime_error(
+                        "cannot add '" + name + "' to zip '" + _path + "'");
                 }
             }
 
@@ -418,14 +418,16 @@ namespace bundle {
                 int32_t const err = mz_zip_writer_add_file(_writer, path.c_str(), name.c_str());
                 mz_zip_writer_set_compress_method(_writer, MZ_COMPRESS_METHOD_DEFLATE);
                 if (err != MZ_OK)
-                    throw std::runtime_error("cannot add " + path + " to zip");
+                    throw std::runtime_error(
+                        "cannot add '" + path + "' to zip '" + _path + "'");
             }
 
             void finalize()
             {
                 if (_finalized) return;
                 if (mz_zip_writer_close(_writer) != MZ_OK)
-                    throw std::runtime_error("cannot finalize zip writer");
+                    throw std::runtime_error(
+                        "cannot finalize zip writer for '" + _path + "'");
                 _finalized = true;
             }
 
@@ -441,13 +443,16 @@ namespace bundle {
         public:
             ZipReader(std::string const& path)
             {
+                _path = path;
                 _reader = mz_zip_reader_create();
                 if (!_reader)
-                    throw std::runtime_error("cannot create zip reader");
+                    throw std::runtime_error(
+                        "cannot create zip reader for '" + path + "'");
                 if (mz_zip_reader_open_file(_reader, path.c_str()) != MZ_OK)
                 {
                     mz_zip_reader_delete(&_reader);
-                    throw std::runtime_error("cannot open zip file");
+                    throw std::runtime_error(
+                        "cannot open zip file '" + path + "'");
                 }
             }
 
@@ -467,7 +472,9 @@ namespace bundle {
                 if (mz_zip_reader_locate_entry(_reader, name.c_str(), 0) != MZ_OK)
                     return std::nullopt;
                 if (mz_zip_reader_entry_open(_reader) != MZ_OK)
-                    throw std::runtime_error("cannot open zip entry");
+                    throw std::runtime_error(
+                        "cannot open zip entry '" + name + "' in '" +
+                        _path + "'");
 
                 // Close the entry on any exit path.
                 struct EntryScope {
@@ -476,16 +483,22 @@ namespace bundle {
 
                 mz_zip_file* info = nullptr;
                 if (mz_zip_reader_entry_get_info(_reader, &info) != MZ_OK || !info)
-                    throw std::runtime_error("cannot stat zip entry");
+                    throw std::runtime_error(
+                        "cannot stat zip entry '" + name + "' in '" +
+                        _path + "'");
                 if (info->uncompressed_size < 0 ||
                     info->uncompressed_size > static_cast<int64_t>(INT32_MAX))
-                    throw std::runtime_error("zip entry too large: " + name);
+                    throw std::runtime_error(
+                        "zip entry '" + name + "' too large in '" +
+                        _path + "'");
 
                 std::string out(static_cast<size_t>(info->uncompressed_size), '\0');
                 int32_t const n = mz_zip_reader_entry_read(
                     _reader, out.data(), static_cast<int32_t>(out.size()));
                 if (n != static_cast<int32_t>(out.size()))
-                    throw std::runtime_error("cannot extract zip entry to memory");
+                    throw std::runtime_error(
+                        "cannot extract zip '" + name +
+                        "' entry to memory in '" + _path + "'");
                 return out;
             }
 
@@ -498,19 +511,22 @@ namespace bundle {
                 if (err == MZ_END_OF_LIST)
                     return;  // empty archive
                 if (err != MZ_OK)
-                    throw std::runtime_error("cannot read zip entries");
+                    throw std::runtime_error(
+                        "cannot read zip entry in '" + _path + "'");
                 while (err == MZ_OK)
                 {
                     mz_zip_file* info = nullptr;
                     if (mz_zip_reader_entry_get_info(_reader, &info) != MZ_OK || !info)
-                        throw std::runtime_error("cannot stat zip entry");
+                        throw std::runtime_error(
+                            "cannot stat zip entry in '" + _path + "'");
 
                     bool const is_dir = (mz_zip_reader_entry_is_dir(_reader) == MZ_OK);
                     fn(std::string(info->filename ? info->filename : ""), is_dir);
 
                     err = mz_zip_reader_goto_next_entry(_reader);
                     if (err != MZ_OK && err != MZ_END_OF_LIST)
-                        throw std::runtime_error("cannot advance zip entry");
+                        throw std::runtime_error(
+                            "cannot advance zip entry in '" + _path + "'");
                 }
             }
 
@@ -519,10 +535,12 @@ namespace bundle {
             void extract_current_to_file(std::string const& path)
             {
                 if (mz_zip_reader_entry_save_file(_reader, path.c_str()) != MZ_OK)
-                    throw std::runtime_error("cannot extract zip entry");
+                    throw std::runtime_error("cannot extract zip entry in '" +
+                        _path + "' to '" + path + "'");
             }
 
         private:
+            std::string _path;
             void* _reader = nullptr;
         };
     
@@ -654,7 +672,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_WRITE_FAILED,
-                    "output path already exists");
+                    "output path '" + path + "' already exists");
             return false;
         }
 
@@ -689,7 +707,7 @@ namespace bundle {
             {
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_WRITE_FAILED,
-                    e.what());
+                    "error writing '" + path + "': " + e.what());
             }
             return false;
         }
@@ -708,7 +726,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    "input path is not a file");
+                    "input '" + path  + "' is not a file");
             return nullptr;
         }
         std::filesystem::path output_path;
@@ -720,7 +738,8 @@ namespace bundle {
                 if (error_status)
                     *error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED,
-                        "output directory already exists");
+                        "output directory '" + output_path.u8string() +
+                        "' already exists");
                 return nullptr;
             }
         }
@@ -734,7 +753,8 @@ namespace bundle {
             // Read the timeline
             auto json_opt = zr.read_to_string(timeline_file);
             if (!json_opt)
-                throw std::runtime_error("bundle is missing content.otio");
+                throw std::runtime_error(
+                    "'" + path + "' is missing content.otio");
             json = *json_opt;
 
             // Extract the archive
@@ -748,7 +768,9 @@ namespace bundle {
 
                     // Guard against zip slip
                     if (!is_path_safe(output_path, file_path))
-                        throw std::runtime_error("unsafe path in archive: " + filename);
+                        throw std::runtime_error(
+                            "unsafe path '" + filename + "' in '" +
+                            path + "'");
 
                     if (is_dir)
                     {
@@ -767,7 +789,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    e.what());
+                    "error reading '" + path + "': " + e.what());
 
             if (options.extract_path.has_value())
             {
@@ -812,7 +834,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_WRITE_FAILED,
-                    "output path already exists");
+                    "output path '" + path + "' already exists");
             return false;
         }
 
@@ -864,7 +886,7 @@ namespace bundle {
             {
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_WRITE_FAILED,
-                    e.what());
+                    "error writing '" + path + "': " + e.what());
             }
             return false;
         }
@@ -883,7 +905,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    "input path is not a directory");
+                    "input '" + path  + "' is not a directory");
             return nullptr;
         }
         auto const version_path = input_path / version_file;
@@ -892,7 +914,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    "bundle is missing a version file");
+                    "'" + path  + "' is missing a version file");
             return nullptr;
         }
         auto const timeline_path = input_path / timeline_file;
@@ -901,7 +923,7 @@ namespace bundle {
             if (error_status)
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
-                    "bundle is missing a timeline file");
+                    "'" + path  + "' is missing a timeline file");
             return nullptr;
         }
         

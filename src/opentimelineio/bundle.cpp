@@ -122,6 +122,24 @@ namespace bundle {
             return true;
         }
 
+        // Utility to create a missing reference
+        MissingReference* create_missing_reference(
+            MediaReference* ref,
+            std::string const& reason,
+            std::optional<std::string> const& original_target_url)
+        {
+            auto out = new MissingReference(
+                ref->name(),
+                std::nullopt,
+                ref->metadata());
+            out->metadata()["missing_reference_because"] = reason;
+            if (original_target_url.has_value())
+            {
+                out->metadata()["original_target_url"] = *original_target_url;
+            }
+            return out;
+        }
+
         // Process all media references according to the policy. The list of
         // files to be added to the bundle is returned.
         bool process_media_references(
@@ -150,6 +168,7 @@ namespace bundle {
                 for (auto& ref : refs)
                 {
                     std::optional<std::string> file;
+                    std::optional<std::string> original_target_url;
                     if (auto ext = dynamic_retainer_cast<ExternalReference>(ref.second))
                     {
                         // Handle external references
@@ -170,6 +189,9 @@ namespace bundle {
                             ext->set_target_url((std::filesystem::u8path(media_dir) /
                                 path.filename()).u8string());
                         }
+
+                        // Save the URL for the missing reference metadata
+                        original_target_url = ext->target_url();
                     }
                     else if (auto seq = dynamic_retainer_cast<ImageSequenceReference>(ref.second))
                     {
@@ -197,6 +219,9 @@ namespace bundle {
                             // Set the URL to the bundle location
                             seq->set_target_url_base(std::string(media_dir) + "/");
                         }
+
+                        // Save the URL for the missing reference metadata
+                        original_target_url = file_from_url(seq->target_url_for_image_number(0));
                     }
                     
                     // Handle the policy for this reference
@@ -218,16 +243,22 @@ namespace bundle {
                         case MediaReferencePolicy::missing_if_not_file:
                             if (!file.has_value())
                             {
-                                // \todo Add missing reference metadata
-                                ref.second = new MissingReference(ref.second->name());
+                                ref.second = create_missing_reference(
+                                    ref.second,
+                                    "'missing_if_not_file' specified as the MediaReferencePolicy",
+                                    original_target_url);
                                 modified = true;
                             }
                             break;
                         case MediaReferencePolicy::all_missing:
-                            // \todo Add missing reference metadata
-                            ref.second = new MissingReference(ref.second->name());
+                        {
+                            ref.second = create_missing_reference(
+                                ref.second,
+                                "'all_missing' specified as the MediaReferencePolicy",
+                                original_target_url);
                             modified = true;
                             break;
+                        }
                         default: break;
                         }
                     }

@@ -3,22 +3,9 @@
 
 #include "utils.h"
 
+#include <charconv>
 #include <iostream>
-#include <memory>
-#include <sstream>
-
-#if defined(_WIN32)
-#    if !defined(WIN32_LEAN_AND_MEAN)
-#        define WIN32_LEAN_AND_MEAN
-#    endif // WIN32_LEAN_AND_MEAN
-#    include <combaseapi.h>
-#    include <windows.h>
-#    if defined(min)
-#        undef min
-#    endif // min
-#else // _WIN32
-#    include <unistd.h>
-#endif // _WIN32
+#include <random>
 
 void
 assertTrue(bool value)
@@ -32,39 +19,53 @@ assertFalse(bool value)
     assert(!value);
 }
 
-#if defined(_WIN32)
-
 TempDir::TempDir()
 {
-    // Create a unique name from a GUID.
-    GUID guid;
-    CoCreateGuid(&guid);
-    const uint8_t* guidP = reinterpret_cast<const uint8_t*>(&guid);
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int i = 0; i < 16; ++i)
-        ss << std::setw(2) << static_cast<int>(guidP[i]);
+    // Generate a unique temporary directory name without platform-specific
+    // routines. A 64-bit random value rendered as hex is plenty of entropy
+    // to avoid collisions between concurrent tests; the generator is
+    // thread_local so concurrent tests draw from independent streams.
+    static thread_local std::mt19937_64 generator(std::random_device{}());
 
-    auto path = std::filesystem::temp_directory_path() / ss.str();
-    std::error_code ec;
-    if (!std::filesystem::create_directory(path, ec))
-        throw std::runtime_error("cannot create temp directory");
-    _path = path;
+    auto const temp_root = std::filesystem::temp_directory_path();
+
+    // Retry on the (extremely unlikely) chance the name already exists.
+    for (int attempt = 0; attempt < 16; ++attempt)
+    {
+        uint64_t const rand_num = generator();
+
+        // 16 hex digits max for a 64-bit value; size the buffer generously.
+        char buf[32];
+        auto const result =
+            std::to_chars(buf, buf + sizeof(buf), rand_num, 16);
+        std::string const name =
+            "otio_tmp_" + std::string(buf, result.ptr);
+
+        auto candidate = temp_root / name;
+
+        // create_directory returns true only if it created the directory,
+        // false (without setting ec) if it already existed, and sets ec on
+        // a real error. This gives a race-free "did I create it" check.
+        std::error_code ec;
+        if (std::filesystem::create_directory(candidate, ec))
+        {
+            _path = std::move(candidate);
+            return;
+        }
+        if (ec)
+        {
+            throw std::runtime_error(
+                "cannot create temp directory in '" +
+                temp_root.u8string() + "': " + ec.message());
+        }
+
+        // Name collided; loop and try another.
+    }
+
+    throw std::runtime_error(
+        "cannot create a unique temp directory in '" +
+        temp_root.u8string() + "'");
 }
-
-#else // _WIN32
-
-TempDir::TempDir()
-{
-    auto const path = (std::filesystem::temp_directory_path() / "XXXXXX").u8string();
-    std::vector<char> buf(path.begin(), path.end());
-    buf.push_back('\0');
-    if (!mkdtemp(buf.data()))
-        throw std::runtime_error("cannot create temp directory");
-    _path = std::filesystem::u8path(buf.data());
-}
-
-#endif // _WIN32
 
 TempDir::~TempDir()
 {

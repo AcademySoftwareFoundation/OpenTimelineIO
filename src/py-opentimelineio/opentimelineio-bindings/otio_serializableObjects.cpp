@@ -327,11 +327,13 @@ define_bases1(py::module m)
                 auto ptr = s->metadata().get_or_create_mutation_stamp();
                 return (AnyDictionaryProxy*) (ptr);
             },
-            py::return_value_policy::take_ownership)
+            py::return_value_policy::take_ownership,
+            "Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.")
         .def_property(
             "name",
             [](SOWithMetadata* so) { return plain_string(so->name()); },
-            &SOWithMetadata::set_name);
+            &SOWithMetadata::set_name,
+            "Human-readable name for this object.");
 }
 
 static void
@@ -355,11 +357,16 @@ define_bases2(py::module m)
             "b"_a = 1.0,
             "a"_a = 1.0,
             py::arg_v("name"_a = std::string()))
-        .def_property("r", &Color::r, &Color::set_r)
-        .def_property("g", &Color::g, &Color::set_g)
-        .def_property("b", &Color::b, &Color::set_b)
-        .def_property("a", &Color::a, &Color::set_a)
-        .def_property("name", &Color::name, &Color::set_name)
+        .def_property("r", &Color::r, &Color::set_r,
+            "Red component, nominally in the range 0 to 1.")
+        .def_property("g", &Color::g, &Color::set_g,
+            "Green component, nominally in the range 0 to 1.")
+        .def_property("b", &Color::b, &Color::set_b,
+            "Blue component, nominally in the range 0 to 1.")
+        .def_property("a", &Color::a, &Color::set_a,
+            "Alpha component, nominally in the range 0 to 1 (1 is fully opaque).")
+        .def_property("name", &Color::name, &Color::set_name,
+            "Optional name for this color.")
 
         .def("to_hex", &Color::to_hex)
         .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8)
@@ -653,8 +660,13 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
         .def_property(
             "source_range",
             &Item::source_range,
-            &Item::set_source_range)
-        .def_property("color", &Item::color, &Item::set_color)
+            &Item::set_source_range,
+            "The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.")
+        .def_property(
+            "color",
+            &Item::color,
+            &Item::set_color,
+            "Optional color used to display this item in a user interface.")
         .def(
             "available_range",
             [](Item* item) {
@@ -667,10 +679,12 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
             })
         .def_property_readonly(
             "markers",
-            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); })
+            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); },
+            "Markers attached to this item, positioned in the item's local time coordinates.")
         .def_property_readonly(
             "effects",
-            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); })
+            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); },
+            "Effects applied to this item's media, applied in the order they appear in the list.")
         .def(
             "duration",
             [](Item* item) { return item->duration(ErrorStatusHandler()); })
@@ -869,7 +883,8 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
             .def_property(
                 "media_reference",
                 &Clip::media_reference,
-                &Clip::set_media_reference)
+                &Clip::set_media_reference,
+                "The active media reference for this clip -- how to locate the media the clip composes.")
             .def_property(
                 "active_media_reference_key",
                 &Clip::active_media_reference_key,
@@ -877,8 +892,13 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
                     clip->set_active_media_reference_key(
                         new_active_key,
                         ErrorStatusHandler());
-                })
-            .def_property("color", &Clip::color, &Clip::set_color)
+                },
+                "Key, in ``media_references``, of the media reference currently active for this clip.")
+            .def_property(
+                "color",
+                &Clip::color,
+                &Clip::set_color,
+                "Optional color used to display this clip in a user interface.")
             .def("media_references", &Clip::media_references)
             .def(
                 "set_media_references",
@@ -1120,8 +1140,16 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             "kind"_a         = std::string(Track::Kind::video),
             py::arg_v("metadata"_a = py::none()),
             "color"_a = std::nullopt)
-        .def_property("kind", &Track::kind, &Track::set_kind)
-        .def_property("color", &Track::color, &Track::set_color)
+        .def_property(
+            "kind",
+            &Track::kind,
+            &Track::set_kind,
+            "The kind of media this track composes (for example the ``Audio`` or ``Video`` constants). A free-form string; applications are expected to ignore tracks of a kind they do not understand.")
+        .def_property(
+            "color",
+            &Track::color,
+            &Track::set_color,
+            "Optional color used to display this track in a user interface.")
         .def(
             "neighbors_of",
             [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
@@ -1202,8 +1230,13 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
         .def_property(
             "global_start_time",
             &Timeline::global_start_time,
-            &Timeline::set_global_start_time)
-        .def_property("tracks", &Timeline::tracks, &Timeline::set_tracks)
+            &Timeline::set_global_start_time,
+            "Global offset for the start of the timeline, used to express a sequence's start timecode (for example ``01:00:00:00``).")
+        .def_property(
+            "tracks",
+            &Timeline::tracks,
+            &Timeline::set_tracks,
+            "The :class:`~Stack` holding the timeline's tracks (its audio, video, and other :class:`~Track`\\s).")
         .def(
             "duration",
             [](Timeline* t) { return t->duration(ErrorStatusHandler()); })
@@ -1265,7 +1298,8 @@ define_effects(py::module m)
         .def_property(
             "effect_name",
             &Effect::effect_name,
-            &Effect::set_effect_name)
+            &Effect::set_effect_name,
+            "Key identifying the specific effect applied; configuration of the effect is stored in ``metadata``.")
         .def_property(
             "enabled",
             &Effect::enabled,
@@ -1361,11 +1395,13 @@ define_media_references(py::module m)
         .def_property(
             "available_range",
             &MediaReference::available_range,
-            &MediaReference::set_available_range)
+            &MediaReference::set_available_range,
+            "The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.")
         .def_property(
             "available_image_bounds",
             &MediaReference::available_image_bounds,
-            &MediaReference::set_available_image_bounds)
+            &MediaReference::set_available_image_bounds,
+            "Optional spatial bounds of the image content of this media.")
         .def_property_readonly(
             "is_missing_reference",
             &MediaReference::is_missing_reference);
@@ -1402,7 +1438,8 @@ define_media_references(py::module m)
         .def_property(
             "generator_kind",
             &GeneratorReference::generator_kind,
-            &GeneratorReference::set_generator_kind)
+            &GeneratorReference::set_generator_kind,
+            "Key identifying the kind of media to generate (for example a solid color, color bars, or tone). The generator's configuration is stored in ``parameters``.")
         .def_property_readonly(
             "parameters",
             [](GeneratorReference* g) {
@@ -1466,7 +1503,8 @@ Note that a :class:`~MissingReference` may have useful metadata, even if the loc
         .def_property(
             "target_url",
             &ExternalReference::target_url,
-            &ExternalReference::set_target_url);
+            &ExternalReference::set_target_url,
+            "URL locating the referenced media. Local files use ``file://`` URLs.");
 
     auto imagesequencereference_class = py::class_<
         ImageSequenceReference,

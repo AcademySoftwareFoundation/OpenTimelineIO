@@ -181,6 +181,12 @@ doc-model:
 doc-model-update:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py -o docs/tutorials/otio-serialized-schema.md
 
+spec:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_core_specification.py --dryrun
+
+spec-update:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_core_specification.py -o docs/spec/otio-core-specification.md
+
 doc-plugins:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_plugin_documentation.py --dryrun
 

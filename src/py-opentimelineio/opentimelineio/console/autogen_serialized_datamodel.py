@@ -9,6 +9,7 @@
 import argparse
 import inspect
 import json
+import re
 import tempfile
 import sys
 import textwrap
@@ -66,7 +67,7 @@ CLASS_HEADER_WITH_DOCS = """
 ### {classname}
 
 *full module path*: `{modpath}`
-
+{inheritance}
 *documentation*:
 
 ```
@@ -86,11 +87,10 @@ MODULE_HEADER = """
 ## Module: {modname}
 """
 
-PROP_HEADER = """- *{propkey}*: {prophelp}
+PROP_HEADER = """- *{propkey}*{typeinfo}: {prophelp}
 """
 
-# @TODO: having type information here would be awesome
-PROP_HEADER_NO_HELP = """- *{propkey}*
+PROP_HEADER_NO_HELP = """- *{propkey}*{typeinfo}
 """
 
 # three ways to try and get the property + docstring
@@ -99,6 +99,176 @@ PROP_FETCHERS = (
     lambda cl, k: inspect.getdoc(getattr(cl, "_" + k)),
     lambda cl, k: inspect.getdoc(getattr(cl(), k)) and "" or "",
 )
+
+# pybind11 prefixes the C++ module onto every type it reports; strip them so the
+# documentation reads in terms of the public python schema.
+_TYPE_MODULE_PREFIXES = (
+    "opentimelineio._opentime.",
+    "opentimelineio._otio.",
+    "_opentime.",
+    "_otio.",
+    "opentimelineio.",
+)
+
+# map pybind11/python primitive spellings onto the vocabulary used by the OTIO
+# Core Specification.
+_PRIMITIVE_REMAP = {
+    "str": "String",
+    "float": "Double",
+    "int": "Integer",
+    "bool": "Boolean",
+    "object": None,  # the `any`-backed fields report `object`; infer from value
+}
+
+
+def _clean_type(type_str):
+    """Strip the internal C++ module prefixes off a pybind11 type string."""
+    for prefix in _TYPE_MODULE_PREFIXES:
+        type_str = type_str.replace(prefix, "")
+    return type_str.strip()
+
+
+def _type_from_value(value):
+    """Infer a spec-style type name from a serialized default value.
+
+    Used as a fallback when the property's signature does not advertise a usable
+    return type (e.g. the metadata-backed `any` fields, which report `object`).
+    """
+    # bool must be checked before int, since bool is a subclass of int
+    if isinstance(value, bool):
+        return "Boolean"
+    if isinstance(value, int):
+        return "Integer"
+    if isinstance(value, float):
+        return "Double"
+    if isinstance(value, str):
+        return "String"
+    if isinstance(value, list):
+        return "Array"
+    if isinstance(value, dict):
+        if "OTIO_SCHEMA" in value:
+            return value["OTIO_SCHEMA"].rsplit(".", 1)[0]
+        return "Map"
+    return None
+
+
+def _normalize_type(raw):
+    """Turn a raw pybind11 return-type string into a (type, optional) pair.
+
+    Examples:
+        ``Optional[...TimeRange]``      -> ("TimeRange", True)
+        ``...EffectVector``             -> ("Array[Effect]", False)
+        ``dict[str, ...MediaReference]``-> ("Map[String, MediaReference]", False)
+        ``AnyDictionary``               -> ("Map[String, Any]", False)
+        ``float``                       -> ("Double", False)
+    """
+    type_str = _clean_type(raw)
+
+    optional = False
+    opt = re.match(r"Optional\[(.*)\]$", type_str)
+    if opt:
+        optional = True
+        type_str = opt.group(1).strip()
+
+    vec = re.match(r"(.+)Vector$", type_str)
+    dct = re.match(r"[Dd]ict\[\s*str\s*,\s*(.+)\]$", type_str)
+    if vec:
+        inner = vec.group(1)
+        type_str = "Array[{}]".format(_PRIMITIVE_REMAP.get(inner, inner) or inner)
+    elif type_str == "AnyDictionary":
+        type_str = "Map[String, Any]"
+    elif dct:
+        inner = dct.group(1).strip()
+        type_str = "Map[String, {}]".format(
+            _PRIMITIVE_REMAP.get(inner, inner) or inner
+        )
+    elif type_str in _PRIMITIVE_REMAP:
+        type_str = _PRIMITIVE_REMAP[type_str]
+
+    return type_str, optional
+
+
+def _signature_return_type(cl, key):
+    """Return the raw pybind11 return-type annotation for a field, if any.
+
+    pybind11 records the C++ type signature in the docstring of a property's
+    getter (``fget``) or of a plain method (e.g. ``media_references``).
+    """
+    try:
+        attr = getattr(cl, key)
+    except AttributeError:
+        return None
+
+    doc = None
+    fget = getattr(attr, "fget", None)
+    if fget is not None:
+        doc = inspect.getdoc(fget)
+    elif callable(attr):
+        doc = inspect.getdoc(attr)
+
+    if doc and "->" in doc:
+        return doc.rsplit("->", 1)[-1].strip()
+    return None
+
+
+def _type_for_property(cl, key, value):
+    """Resolve the (type, optional) pair for a serialized field.
+
+    Prefers the type advertised by the pybind11 signature, falling back to
+    inferring from the serialized default value when the signature is missing or
+    opaque (``object``).
+    """
+    raw = _signature_return_type(cl, key)
+    if raw is not None:
+        type_str, optional = _normalize_type(raw)
+        if type_str:
+            return type_str, optional
+
+    # fall back to inferring from the serialized default value
+    return _type_from_value(value), value is None
+
+
+def _inheritance_chain(cl):
+    """The list of schema base-class names a class derives from, most-derived
+    first. Empty for types outside the SerializableObject hierarchy (e.g.
+    RationalTime, TimeRange, Color)."""
+    return [
+        base.__name__
+        for base in inspect.getmro(cl)[1:]
+        if base.__name__ not in ("object", "pybind11_object")
+    ]
+
+
+def _default_repr(value):
+    """A compact JSON rendering of a default value, or None when it should be
+    omitted (null values and large/composite defaults that would add noise)."""
+    if value is None:
+        return None
+    try:
+        rendered = json.dumps(value)
+    except (TypeError, ValueError):
+        return None
+    if len(rendered) > 40:
+        return None
+    return rendered
+
+
+def _format_typeinfo(entry, include_default):
+    """Render the parenthetical ``(`Type`, optional, default: `x`)`` annotation
+    for a property, or "" when the type could not be resolved (e.g. plugin
+    fields with no signature and a null default)."""
+    if not entry["type"]:
+        return ""
+    parts = ["`{}`".format(entry["type"])]
+    if entry["optional"]:
+        parts.append("optional")
+    if include_default:
+        default = _default_repr(entry["default"])
+        if default is not None:
+            parts.append("default: `{}`".format(default))
+    if not parts:
+        return ""
+    return " ({})".format(", ".join(parts))
 
 
 def _parsed_args():
@@ -176,17 +346,27 @@ def _generate_model_for_module(mod, classes, modules):
             if k in SKIP_KEYS:
                 continue
 
+            value = field_dict[k]
+            helpstr = ""
             for fetcher in PROP_FETCHERS:
                 try:
                     # Serialized fields are almost always properties, but skip
                     # over those that are not
-                    model[cl][k] = fetcher(cl, k) if isinstance(
+                    helpstr = fetcher(cl, k) if isinstance(
                         getattr(cl, k), property) else ""
                     break
                 except AttributeError:
                     pass
             else:
                 sys.stderr.write(f"ERROR: could not fetch property: {k}")
+
+            type_str, optional = _type_for_property(cl, k, value)
+            model[cl][k] = {
+                "help": helpstr or "",
+                "type": type_str,
+                "optional": optional,
+                "default": value,
+            }
 
         # Stashing the OTIO_SCHEMA back into the dictionary since the
         # documentation uses this information in its header.
@@ -313,10 +493,19 @@ def _write_documentation(model):
             else:
                 new_docstring = cl.__doc__
 
+            chain = _inheritance_chain(cl)
+            if chain:
+                inheritance = "\n*inherits from*: {}\n".format(
+                    " -> ".join("`{}`".format(name) for name in chain)
+                )
+            else:
+                inheritance = ""
+
             md_with_helpstrings.write(
                 CLASS_HEADER_WITH_DOCS.format(
                     classname=label,
                     modpath=modname + "." + cl.__name__,
+                    inheritance=inheritance,
                     docstring=new_docstring
                 )
             )
@@ -326,14 +515,21 @@ def _write_documentation(model):
                 )
             )
 
-            for key, helpstr in sorted(model[cl].items()):
+            for key, entry in sorted(model[cl].items()):
                 if key in SKIP_KEYS:
                     continue
                 md_with_helpstrings.write(
-                    PROP_HEADER.format(propkey=key, prophelp=helpstr)
+                    PROP_HEADER.format(
+                        propkey=key,
+                        typeinfo=_format_typeinfo(entry, include_default=True),
+                        prophelp=entry["help"],
+                    )
                 )
                 md_only_fields.write(
-                    PROP_HEADER_NO_HELP.format(propkey=key)
+                    PROP_HEADER_NO_HELP.format(
+                        propkey=key,
+                        typeinfo=_format_typeinfo(entry, include_default=False),
+                    )
                 )
 
     return md_with_helpstrings.getvalue(), md_only_fields.getvalue()

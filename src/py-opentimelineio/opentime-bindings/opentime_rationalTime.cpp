@@ -98,8 +98,10 @@ or if the rate is less than or equal to zero.
 Returns true if the time is valid. The time is considered valid if the value and rate are not NaN values
 and the rate is greater than zero.
 )docstring")
-        .def_property_readonly("value", &RationalTime::value)
-        .def_property_readonly("rate", &RationalTime::rate)
+        .def_property_readonly("value", &RationalTime::value,
+            "The number of units of ``1/rate`` seconds represented by this time.")
+        .def_property_readonly("rate", &RationalTime::rate,
+            "The rate, in units per second, in which ``value`` is measured (for example a frame rate).")
         .def(
             "rescaled_to",
             (RationalTime (RationalTime::*)(double) const)

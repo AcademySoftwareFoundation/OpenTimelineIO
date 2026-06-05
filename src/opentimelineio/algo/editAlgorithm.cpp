@@ -181,11 +181,10 @@ overwrite(
             composition->insert_child(insert_index, item);
             if (!isEqual(second_duration.value(), 0.0))
             {
-                auto cloned_item = items.front()->clone();
+                auto cloned_item = items.front()->clone(error_status);
                 if (!cloned_item)
                 {
-                    if (error_status)
-                        *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                    // error_status was already set within clone()
                     return;
                 }
                 auto second_item = dynamic_cast<Item*>(cloned_item);
@@ -375,11 +374,10 @@ insert(
         // Clone the item for the second partially overwritten item.
         if (!isEqual(second_source_range.duration().value(), 0.0))
         {
-            auto cloned_item = item->clone();
+            auto cloned_item = item->clone(error_status);
             if (!cloned_item)
             {
-                if (error_status)
-                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                // error_status was already set within clone()
                 return;
             }
             auto second_item = dynamic_cast<Item*>(cloned_item);
@@ -556,11 +554,10 @@ slice(
     item->set_source_range(first_source_range);
 
     // Clone the item for the second slice.
-    auto cloned_item = item->clone();
+    auto cloned_item = item->clone(error_status);
     if (!cloned_item)
     {
-        if (error_status)
-            *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+        // error_status was already set within clone()
         return;
     }
     auto second_item = dynamic_cast<Item*>(cloned_item);
@@ -832,11 +829,10 @@ fill(
         case ReferencePoint::Sequence: {
             RationalTime       start_time     = clip_range.start_time();
             const RationalTime gap_start_time = gap_range.start_time();
-            auto               cloned_item    = item->clone();
+            auto               cloned_item    = item->clone(error_status);
             if (!cloned_item)
             {
-                if (error_status)
-                    *error_status = ErrorStatus::CANNOT_CLONE_ITEM;
+                // error_status was already set within clone()
                 return;
             }
             auto track_item = dynamic_cast<Item*>(cloned_item);

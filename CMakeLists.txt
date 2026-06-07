@@ -40,6 +40,7 @@ option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_FIND_IMATH                "Find Imath using find_package" OFF)
 option(OTIO_FIND_PYBIND11             "Find pybind11 using find_package" OFF)
 option(OTIO_FIND_RAPIDJSON            "Find RapidJSON using find_package" OFF)
+# Note that minizip-ng also requires zlib or zlib-ng.
 option(OTIO_FIND_MINIZIP_NG           "Find minizip-ng using find_package" OFF)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 

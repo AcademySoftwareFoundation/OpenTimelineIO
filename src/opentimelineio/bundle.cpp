@@ -8,15 +8,15 @@
 #include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/missingReference.h"
 
-#include <algorithm>
-#include <filesystem>
-#include <fstream>
-
 #include <mz.h>
 #include <mz_os.h>
 #include <mz_strm.h>
 #include <mz_zip.h>
 #include <mz_zip_rw.h>
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 namespace bundle {

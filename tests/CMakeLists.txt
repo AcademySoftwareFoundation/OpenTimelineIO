@@ -39,3 +39,5 @@ foreach(test ${tests_opentimelineio})
            # like the python tests do
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
+
+target_link_libraries(test_bundle MINIZIP::minizip)

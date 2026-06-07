@@ -57,6 +57,7 @@ jobs:
       - name: Install ZLIB (Windows)
         if: runner.os == 'Windows'
         run: vcpkg install zlib:x64-windows
+        echo "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
       - name: Build
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}

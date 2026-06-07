@@ -12,6 +12,12 @@
 #include <opentimelineio/timeline.h>
 #include <opentimelineio/track.h>
 
+#include <mz.h>
+#include <mz_os.h>
+#include <mz_strm.h>
+#include <mz_zip.h>
+#include <mz_zip_rw.h>
+
 #include <fstream>
 #include <sstream>
 
@@ -151,6 +157,46 @@ void compare_filenames(Timeline* a, Timeline* b)
         }
     }
 }
+
+// This is a minimal ZIP writer for testing "zip slip"
+class ZipWriter
+{
+public:
+    ZipWriter(std::string const& path) :
+        _path(path)
+    {
+        _writer = mz_zip_writer_create();
+        mz_zip_writer_open_file(_writer, path.c_str(), 0, 0);
+    }
+
+    ~ZipWriter()
+    {
+        mz_zip_writer_close(_writer);
+        mz_zip_writer_delete(&_writer);
+    }
+
+    ZipWriter(ZipWriter const&) = delete;
+    ZipWriter& operator=(ZipWriter const&) = delete;
+
+    void add_text(std::string const& name, std::string const& text)
+    {
+        mz_zip_file file_info = {};
+        file_info.filename = name.c_str();
+        file_info.modified_date = time(nullptr);
+        file_info.version_madeby = MZ_VERSION_MADEBY;
+        file_info.compression_method = MZ_COMPRESS_METHOD_DEFLATE;
+        file_info.flag = MZ_ZIP_FLAG_UTF8;
+        mz_zip_writer_add_buffer(
+            _writer,
+            const_cast<char*>(text.data()),
+            static_cast<int32_t>(text.size()),
+            &file_info);
+    }
+
+private:
+    std::string _path;
+    void* _writer = nullptr;
+};
 
 int
 main(int argc, char** argv)
@@ -565,10 +611,34 @@ main(int argc, char** argv)
             large_file_size);
     });
 
-    // \todo Add a test case for "zip slip", where ZIP files have malicious
-    // entries. This requires manually creating a ZIP file with entries
-    // outside of the ZIP directory (eg., "../../../passwd"). The read_otioz
-    // should catch these and cause an error.
+    tests.add_test("test_otioz_zip_slip", [] {
+        for (auto bad_path : { "../.ssh", "/etc/passwd" })
+        {
+            TempDir temp;
+
+            // Write an otioz file with malicious entries ("zip slip")
+            std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
+            {
+                ZipWriter zip(otioz_path);
+                zip.add_text("content.otio", "{}");
+                zip.add_text("version.otio", bundle::version);
+                zip.add_text(bad_path, "");
+            }
+
+            // Read the otioz
+            ReadOptions read_options;
+            auto const extract_path = temp.path() / "extract";
+            read_options.extract_path = extract_path.u8string();
+            OTIO_NS::ErrorStatus error;
+            auto result = dynamic_cast<Timeline*>(read_otioz(
+                otioz_path,
+                read_options,
+                &error));
+            std::cout << "zip slip: " << error.details << std::endl;
+            assert(!result);
+            assert(is_error(error));
+        }
+    });
 
     tests.run(argc, argv);
     return 0;

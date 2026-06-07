@@ -145,6 +145,7 @@ if(OTIO_CXX_INSTALL)
     endif()
 
     set(OTIO_CONFIG_DEPENDENCIES "")
+    string(APPEND OTIO_CONFIG_DEPENDENCIES "find_dependency(ZLIB)\n")
     if(OTIO_FIND_MINIZIP_NG)
         string(APPEND OTIO_CONFIG_DEPENDENCIES "find_dependency(minizip-ng)\n")
     endif()

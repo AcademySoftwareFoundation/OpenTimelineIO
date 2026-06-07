@@ -158,7 +158,10 @@ void compare_filenames(Timeline* a, Timeline* b)
     }
 }
 
-// This is a minimal ZIP writer for testing "zip slip"
+// Minimal ZIP writer used only for constructing malicious archives in
+// test_otioz_zip_slip. The bundle library has its own ZIP writer; this
+// helper exists because the test needs to write entries with names the
+// real writer would reject ("../.ssh", "/etc/passwd").
 class ZipWriter
 {
 public:
@@ -611,33 +614,56 @@ main(int argc, char** argv)
             large_file_size);
     });
 
-    tests.add_test("test_otioz_zip_slip", [] {
-        for (auto bad_path : { "../.ssh", "/etc/passwd" })
+    tests.add_test("test_otioz_zip_slip_relative", [] {
+        TempDir temp;
+
+        // Write an otioz file with a malicious entry ("zip slip")
+        std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
         {
-            TempDir temp;
-
-            // Write an otioz file with malicious entries ("zip slip")
-            std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
-            {
-                ZipWriter zip(otioz_path);
-                zip.add_text("content.otio", "{}");
-                zip.add_text("version.otio", bundle::version);
-                zip.add_text(bad_path, "");
-            }
-
-            // Read the otioz
-            ReadOptions read_options;
-            auto const extract_path = temp.path() / "extract";
-            read_options.extract_path = extract_path.u8string();
-            OTIO_NS::ErrorStatus error;
-            auto result = dynamic_cast<Timeline*>(read_otioz(
-                otioz_path,
-                read_options,
-                &error));
-            std::cout << "zip slip: " << error.details << std::endl;
-            assert(!result);
-            assert(is_error(error));
+            ZipWriter zip(otioz_path);
+            zip.add_text(bundle::version_file, bundle::version);
+            zip.add_text(bundle::timeline_file, "{}");
+            zip.add_text("../relative", "");
         }
+
+        // Read the otioz
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = extract_path.u8string();
+        OTIO_NS::ErrorStatus error;
+        auto result = dynamic_cast<Timeline*>(read_otioz(
+            otioz_path,
+            read_options,
+            &error));
+        assertEqual(result, nullptr);
+        assertTrue(is_error(error));
+        assertFalse(std::filesystem::exists(temp.path() / "relative"));
+    });
+
+    tests.add_test("test_otioz_zip_slip_absolute", [] {
+        TempDir temp;
+
+        // Write an otioz file with a malicious entry ("zip slip")
+        std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
+        {
+            ZipWriter zip(otioz_path);
+            zip.add_text(bundle::version_file, bundle::version);
+            zip.add_text(bundle::timeline_file, "{}");
+            zip.add_text((temp.path() / "absolute").u8string(), "");
+        }
+
+        // Read the otioz
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = extract_path.u8string();
+        OTIO_NS::ErrorStatus error;
+        auto result = dynamic_cast<Timeline*>(read_otioz(
+            otioz_path,
+            read_options,
+            &error));
+        assertEqual(result, nullptr);
+        assertTrue(is_error(error));
+        assertFalse(std::filesystem::exists(temp.path() / "absolute"));
     });
 
     tests.run(argc, argv);

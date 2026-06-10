@@ -2131,18 +2131,12 @@ main(int argc, char** argv)
               TimeRange(RationalTime(0.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
-    tests.add_test("regression: crash in slice", [] {
+    tests.add_test("regression: slice fails gracefully", [] {
         SerializableObject::Retainer<Clip> big_clip = new Clip(
             "big clip",
             nullptr,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
         big_clip->metadata()["cycle"] = big_clip;
-
-        SerializableObject::Retainer<Clip> small_clip = new Clip(
-            "small clip",
-            nullptr,
-            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
-        small_clip->metadata()["cycle"] = small_clip;
 
         SerializableObject::Retainer<Track> track = new Track();
         track->append_child(big_clip);
@@ -2155,7 +2149,7 @@ main(int argc, char** argv)
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
     });
 
-    tests.add_test("regression: crash in overwrite", [] {
+    tests.add_test("regression: overwrite fails gracefully", [] {
         SerializableObject::Retainer<Clip> big_clip = new Clip(
             "big clip",
             nullptr,
@@ -2185,7 +2179,7 @@ main(int argc, char** argv)
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
     });
 
-    tests.add_test("regression: crash in insert", [] {
+    tests.add_test("regression: insert fails gracefully", [] {
         SerializableObject::Retainer<Clip> big_clip = new Clip(
             "big clip",
             nullptr,
@@ -2215,7 +2209,7 @@ main(int argc, char** argv)
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
     });
 
-    tests.add_test("regression: crash in fill", [] {
+    tests.add_test("regression: fill fails gracefully", [] {
         SerializableObject::Retainer<Clip> big_clip = new Clip(
             "big clip",
             nullptr,
@@ -2228,14 +2222,21 @@ main(int argc, char** argv)
             TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
         small_clip->metadata()["cycle"] = small_clip;
 
+        SerializableObject::Retainer<Clip> small_clip2 = new Clip(
+            "small clip 2",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(5.0, 24.0)));
+        small_clip2->metadata()["cycle"] = small_clip2;
+
         SerializableObject::Retainer<Gap> gap = new Gap(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
             "gap");
 
         SerializableObject::Retainer<Track> track = new Track();
+        // two small clips with a gap between them
         track->append_child(small_clip);
         track->append_child(gap);
-        track->append_child(small_clip);
+        track->append_child(small_clip2);
 
         OTIO_NS::ErrorStatus error_status;
 

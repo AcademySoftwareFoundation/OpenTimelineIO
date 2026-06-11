@@ -110,6 +110,39 @@ main(int argc, char** argv)
 })CONTENT");
     });
 
+    tests.add_test("clone", [] {
+        auto json     = R"CONTENT({
+  "OTIO_SCHEMA": "SerializableObjectWithMetadata.1",
+  "metadata": {
+    "a": 1,
+    "b": "two",
+    "c": [
+      3,
+      4,
+      5
+    ],
+    "d": {
+      "hello": "nested"
+    }
+  },
+  "name": ""
+})CONTENT";
+        auto original = SerializableObjectWithMetadata::from_json_string(json);
+        auto cloned   = original->clone();
+        assert(cloned != nullptr);
+        OTIO_NS::ErrorStatus err;
+        auto                 cloned_json = cloned->to_json_string(&err, {}, 2);
+        assertFalse(is_error(err));
+        assertEqual(json, cloned_json.c_str());
+    });
+
+    tests.add_test("clone with cycle returns nullptr", [] {
+        auto original                 = new SerializableObjectWithMetadata();
+        original->metadata()["cycle"] = original;
+        auto cloned                   = original->clone();
+        assert(cloned == nullptr);
+    });
+
     tests.run(argc, argv);
     return 0;
 }

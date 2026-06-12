@@ -27,60 +27,60 @@ changes.  If it needs to be updated and this file regenerated, run:
 parameters:
 - *filepath*
 - *name*
-- *suffixes*
+- *suffixes* (`Array`)
 
 ## Module: opentimelineio.core
 
 ### Color.1
 
 parameters:
-- *a*
-- *b*
-- *g*
-- *name*
-- *r*
+- *a* (`Double`)
+- *b* (`Double`)
+- *g* (`Double`)
+- *name* (`String`)
+- *r* (`Double`)
 
 ### Composable.1
 
 parameters:
-- *metadata*
-- *name*
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### Composition.1
 
 parameters:
-- *color*
-- *effects*
-- *enabled*
-- *markers*
-- *metadata*
-- *name*
-- *source_range*
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *markers* (`Array[Marker]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### Item.1
 
 parameters:
-- *color*
-- *effects*
-- *enabled*
-- *markers*
-- *metadata*
-- *name*
-- *source_range*
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *markers* (`Array[Marker]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### MediaReference.1
 
 parameters:
-- *available_image_bounds*
-- *available_range*
-- *metadata*
-- *name*
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### SerializableObjectWithMetadata.1
 
 parameters:
-- *metadata*
-- *name*
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ## Module: opentimelineio.hooks
 
@@ -103,33 +103,33 @@ parameters:
 ### RationalTime.1
 
 parameters:
-- *rate*
-- *value*
+- *rate* (`Double`)
+- *value* (`Double`)
 
 ### TimeRange.1
 
 parameters:
-- *duration*
-- *start_time*
+- *duration* (`RationalTime`)
+- *start_time* (`RationalTime`)
 
 ### TimeTransform.1
 
 parameters:
-- *offset*
-- *rate*
-- *scale*
+- *offset* (`RationalTime`)
+- *rate* (`Double`)
+- *scale* (`Double`)
 
 ## Module: opentimelineio.plugins
 
 ### PluginManifest.1
 
 parameters:
-- *adapters*
-- *hook_scripts*
-- *hooks*
-- *media_linkers*
-- *schemadefs*
-- *version_manifests*
+- *adapters* (`Array`)
+- *hook_scripts* (`Array`)
+- *hooks* (`Map`)
+- *media_linkers* (`Array`)
+- *schemadefs* (`Array`)
+- *version_manifests* (`Map`)
 
 ### SerializableObject.1
 
@@ -142,159 +142,159 @@ parameters:
 ### Clip.2
 
 parameters:
-- *active_media_reference_key*
-- *color*
-- *effects*
-- *enabled*
-- *markers*
-- *media_references*
-- *metadata*
-- *name*
-- *source_range*
+- *active_media_reference_key* (`String`)
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *markers* (`Array[Marker]`)
+- *media_references* (`Map[String, MediaReference]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### Effect.1
 
 parameters:
-- *effect_name*
-- *enabled*
-- *metadata*
-- *name*
+- *effect_name* (`String`)
+- *enabled* (`Boolean`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### ExternalReference.1
 
 parameters:
-- *available_image_bounds*
-- *available_range*
-- *metadata*
-- *name*
-- *target_url*
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *target_url* (`String`)
 
 ### FreezeFrame.1
 
 parameters:
-- *effect_name*
-- *enabled*
-- *metadata*
-- *name*
-- *time_scalar*
+- *effect_name* (`String`)
+- *enabled* (`Boolean`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *time_scalar* (`Double`)
 
 ### Gap.1
 
 parameters:
-- *color*
-- *effects*
-- *enabled*
-- *markers*
-- *metadata*
-- *name*
-- *source_range*
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *markers* (`Array[Marker]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### GeneratorReference.1
 
 parameters:
-- *available_image_bounds*
-- *available_range*
-- *generator_kind*
-- *metadata*
-- *name*
-- *parameters*
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
+- *generator_kind* (`String`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *parameters* (`Map[String, Any]`)
 
 ### ImageSequenceReference.1
 
 parameters:
-- *available_image_bounds*
-- *available_range*
-- *frame_step*
-- *frame_zero_padding*
-- *metadata*
-- *missing_frame_policy*
-- *name*
-- *name_prefix*
-- *name_suffix*
-- *rate*
-- *start_frame*
-- *target_url_base*
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
+- *frame_step* (`Integer`)
+- *frame_zero_padding* (`Integer`)
+- *metadata* (`Map[String, Any]`)
+- *missing_frame_policy* (`ImageSequenceReference.MissingFramePolicy`)
+- *name* (`String`)
+- *name_prefix* (`String`)
+- *name_suffix* (`String`)
+- *rate* (`Double`)
+- *start_frame* (`Integer`)
+- *target_url_base* (`String`)
 
 ### LinearTimeWarp.1
 
 parameters:
-- *effect_name*
-- *enabled*
-- *metadata*
-- *name*
-- *time_scalar*
+- *effect_name* (`String`)
+- *enabled* (`Boolean`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *time_scalar* (`Double`)
 
 ### Marker.2
 
 parameters:
-- *color*
-- *comment*
-- *marked_range*
-- *metadata*
-- *name*
+- *color* (`String`)
+- *comment* (`String`)
+- *marked_range* (`TimeRange`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### MissingReference.1
 
 parameters:
-- *available_image_bounds*
-- *available_range*
-- *metadata*
-- *name*
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### SerializableCollection.1
 
 parameters:
-- *metadata*
-- *name*
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### Stack.1
 
 parameters:
-- *color*
-- *effects*
-- *enabled*
-- *markers*
-- *metadata*
-- *name*
-- *source_range*
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *markers* (`Array[Marker]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### TimeEffect.1
 
 parameters:
-- *effect_name*
-- *enabled*
-- *metadata*
-- *name*
+- *effect_name* (`String`)
+- *enabled* (`Boolean`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
 
 ### Timeline.1
 
 parameters:
-- *global_start_time*
-- *metadata*
-- *name*
-- *tracks*
+- *global_start_time* (`RationalTime`, optional)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *tracks* (`Stack`)
 
 ### Track.1
 
 parameters:
-- *color*
-- *effects*
-- *enabled*
-- *kind*
-- *markers*
-- *metadata*
-- *name*
-- *source_range*
+- *color* (`Color`, optional)
+- *effects* (`Array[Effect]`)
+- *enabled* (`Boolean`)
+- *kind* (`String`)
+- *markers* (`Array[Marker]`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *source_range* (`TimeRange`, optional)
 
 ### Transition.1
 
 parameters:
-- *enabled*
-- *in_offset*
-- *metadata*
-- *name*
-- *out_offset*
-- *transition_type*
+- *enabled* (`Boolean`)
+- *in_offset* (`RationalTime`)
+- *metadata* (`Map[String, Any]`)
+- *name* (`String`)
+- *out_offset* (`RationalTime`)
+- *transition_type* (`String`)
 
 ### SchemaDef.1
 

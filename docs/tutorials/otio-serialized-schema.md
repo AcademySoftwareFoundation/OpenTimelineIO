@@ -24,6 +24,8 @@ changes.  If it needs to be updated and this file regenerated, run:
 
 *full module path*: `opentimelineio.adapters.Adapter`
 
+*inherits from*: `PythonPlugin` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -51,7 +53,7 @@ adapter.html. # noqa
 parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
-- *suffixes*: File suffixes associated with this adapter.
+- *suffixes* (`Array`, default: `[]`): File suffixes associated with this adapter.
 
 ## Module: opentimelineio.core
 
@@ -70,15 +72,17 @@ intended value. Round-trip conversions may not be guaranteed outside that. This 
 ```
 
 parameters:
-- *a*: 
-- *b*: 
-- *g*: 
-- *name*: 
-- *r*: 
+- *a* (`Double`, default: `1.0`): Alpha component, nominally in the range 0 to 1 (1 is fully opaque).
+- *b* (`Double`, default: `1.0`): Blue component, nominally in the range 0 to 1.
+- *g* (`Double`, default: `1.0`): Green component, nominally in the range 0 to 1.
+- *name* (`String`, default: `""`): Optional name for this color.
+- *r* (`Double`, default: `1.0`): Red component, nominally in the range 0 to 1.
 
 ### Composable.1
 
 *full module path*: `opentimelineio.core.Composable`
+
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -88,12 +92,14 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
 ```
 
 parameters:
-- *metadata*: 
-- *name*: 
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### Composition.1
 
 *full module path*: `opentimelineio.core.Composition`
+
+*inherits from*: `Item` -> `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -104,18 +110,20 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Item.1
 
 *full module path*: `opentimelineio.core.Item`
 
+*inherits from*: `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -123,18 +131,20 @@ None
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### MediaReference.1
 
 *full module path*: `opentimelineio.core.MediaReference`
 
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -142,15 +152,17 @@ None
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
-- *metadata*: 
-- *name*: 
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### SerializableObjectWithMetadata.1
 
 *full module path*: `opentimelineio.core.SerializableObjectWithMetadata`
 
+*inherits from*: `SerializableObject`
+
 *documentation*:
 
 ```
@@ -158,14 +170,16 @@ None
 ```
 
 parameters:
-- *metadata*: 
-- *name*: 
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ## Module: opentimelineio.hooks
 
 ### HookScript.1
 
 *full module path*: `opentimelineio.hooks.HookScript`
+
+*inherits from*: `PythonPlugin` -> `SerializableObject`
 
 *documentation*:
 
@@ -182,6 +196,8 @@ parameters:
 ### MediaLinker.1
 
 *full module path*: `opentimelineio.media_linker.MediaLinker`
+
+*inherits from*: `PythonPlugin` -> `SerializableObject`
 
 *documentation*:
 
@@ -207,8 +223,8 @@ It can be rescaled into another :class:`~RationalTime`'s rate.
 ```
 
 parameters:
-- *rate*: 
-- *value*: 
+- *rate* (`Double`, default: `1.0`): The rate, in units per second, in which ``value`` is measured (for example a frame rate).
+- *value* (`Double`, default: `0.0`): The number of units of ``1/rate`` seconds represented by this time.
 
 ### TimeRange.1
 
@@ -223,8 +239,8 @@ meaning that :meth:`end_time_inclusive` (last portion of a sample in the time ra
 ```
 
 parameters:
-- *duration*: 
-- *start_time*: 
+- *duration* (`RationalTime`): The length of the range. The range excludes ``start_time + duration``.
+- *start_time* (`RationalTime`): The beginning of the range. The range is half-open: it includes ``start_time``.
 
 ### TimeTransform.1
 
@@ -237,15 +253,17 @@ parameters:
 ```
 
 parameters:
-- *offset*: 
-- *rate*: 
-- *scale*: 
+- *offset* (`RationalTime`): The time added when applying this transform.
+- *rate* (`Double`, default: `-1.0`): If greater than zero, the rate the result is rescaled to after applying offset and scale.
+- *scale* (`Double`, default: `1.0`): The factor applied to time when applying this transform.
 
 ## Module: opentimelineio.plugins
 
 ### PluginManifest.1
 
 *full module path*: `opentimelineio.plugins.Manifest`
+
+*inherits from*: `SerializableObject`
 
 *documentation*:
 
@@ -262,16 +280,18 @@ For more information, consult the documentation.
 ```
 
 parameters:
-- *adapters*: Adapters this manifest describes.
-- *hook_scripts*: Scripts that can be attached to hooks.
-- *hooks*: Hooks that hooks scripts can be attached to.
-- *media_linkers*: Media Linkers this manifest describes.
-- *schemadefs*: Schemadefs this manifest describes.
-- *version_manifests*: Sets of versions to downgrade schemas to.
+- *adapters* (`Array`, default: `[]`): Adapters this manifest describes.
+- *hook_scripts* (`Array`, default: `[]`): Scripts that can be attached to hooks.
+- *hooks* (`Map`, default: `{}`): Hooks that hooks scripts can be attached to.
+- *media_linkers* (`Array`, default: `[]`): Media Linkers this manifest describes.
+- *schemadefs* (`Array`, default: `[]`): Schemadefs this manifest describes.
+- *version_manifests* (`Map`, default: `{}`): Sets of versions to downgrade schemas to.
 
 ### SerializableObject.1
 
 *full module path*: `opentimelineio.plugins.PythonPlugin`
+
+*inherits from*: `SerializableObject`
 
 *documentation*:
 
@@ -290,6 +310,8 @@ parameters:
 
 *full module path*: `opentimelineio.schema.Clip`
 
+*inherits from*: `Item` -> `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -299,20 +321,22 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 ```
 
 parameters:
-- *active_media_reference_key*: 
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
-- *media_references*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *active_media_reference_key* (`String`, default: `"DEFAULT_MEDIA"`): Key, in ``media_references``, of the media reference currently active for this clip.
+- *color* (`Color`, optional): Optional color used to display this clip in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *media_references* (`Map[String, MediaReference]`): 
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Effect.1
 
 *full module path*: `opentimelineio.schema.Effect`
 
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -320,15 +344,17 @@ None
 ```
 
 parameters:
-- *effect_name*: 
-- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*: 
-- *name*: 
+- *effect_name* (`String`, default: `""`): Key identifying the specific effect applied; configuration of the effect is stored in ``metadata``.
+- *enabled* (`Boolean`, default: `true`): If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### ExternalReference.1
 
 *full module path*: `opentimelineio.schema.ExternalReference`
 
+*inherits from*: `MediaReference` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -336,15 +362,17 @@ None
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
-- *metadata*: 
-- *name*: 
-- *target_url*: 
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *target_url* (`String`, default: `""`): URL locating the referenced media. Local files use ``file://`` URLs.
 
 ### FreezeFrame.1
 
 *full module path*: `opentimelineio.schema.FreezeFrame`
+
+*inherits from*: `LinearTimeWarp` -> `TimeEffect` -> `Effect` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -353,11 +381,11 @@ Hold the first frame of the clip for the duration of the clip.
 ```
 
 parameters:
-- *effect_name*: 
-- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*: 
-- *name*: 
-- *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
+- *effect_name* (`String`, default: `"FreezeFrame"`): Key identifying the specific effect applied; configuration of the effect is stored in ``metadata``.
+- *enabled* (`Boolean`, default: `true`): If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *time_scalar* (`Double`, default: `0.0`): Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
 0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
@@ -367,6 +395,8 @@ Instead it affects the speed of the media displayed within that item.
 
 *full module path*: `opentimelineio.schema.Gap`
 
+*inherits from*: `Item` -> `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -374,18 +404,20 @@ None
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### GeneratorReference.1
 
 *full module path*: `opentimelineio.schema.GeneratorReference`
 
+*inherits from*: `MediaReference` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -393,16 +425,18 @@ None
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
-- *generator_kind*: 
-- *metadata*: 
-- *name*: 
-- *parameters*: 
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *generator_kind* (`String`, default: `""`): Key identifying the kind of media to generate (for example a solid color, color bars, or tone). The generator's configuration is stored in ``parameters``.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *parameters* (`Map[String, Any]`, default: `{}`): 
 
 ### ImageSequenceReference.1
 
 *full module path*: `opentimelineio.schema.ImageSequenceReference`
+
+*inherits from*: `MediaReference` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -485,22 +519,24 @@ yield the first three target urls as:
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
-- *frame_step*: Step between frame numbers in file names.
-- *frame_zero_padding*: Number of digits to pad zeros out to in frame numbers.
-- *metadata*: 
-- *missing_frame_policy*: Directive for how frames in sequence not found during playback or rendering should be handled.
-- *name*: 
-- *name_prefix*: Everything in the file name leading up to the frame number.
-- *name_suffix*: Everything after the frame number in the file name.
-- *rate*: Frame rate if every frame in the sequence were played back.
-- *start_frame*: The first frame number used in file names.
-- *target_url_base*: Everything leading up to the file name in the ``target_url``.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *frame_step* (`Integer`, default: `1`): Step between frame numbers in file names.
+- *frame_zero_padding* (`Integer`, default: `0`): Number of digits to pad zeros out to in frame numbers.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *missing_frame_policy* (`ImageSequenceReference.MissingFramePolicy`, default: `"error"`): Directive for how frames in sequence not found during playback or rendering should be handled.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *name_prefix* (`String`, default: `""`): Everything in the file name leading up to the frame number.
+- *name_suffix* (`String`, default: `""`): Everything after the frame number in the file name.
+- *rate* (`Double`, default: `1.0`): Frame rate if every frame in the sequence were played back.
+- *start_frame* (`Integer`, default: `1`): The first frame number used in file names.
+- *target_url_base* (`String`, default: `""`): Everything leading up to the file name in the ``target_url``.
 
 ### LinearTimeWarp.1
 
 *full module path*: `opentimelineio.schema.LinearTimeWarp`
+
+*inherits from*: `TimeEffect` -> `Effect` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -509,11 +545,11 @@ A time warp that applies a linear speed up or slow down across the entire clip.
 ```
 
 parameters:
-- *effect_name*: 
-- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*: 
-- *name*: 
-- *time_scalar*: Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
+- *effect_name* (`String`, default: `"LinearTimeWarp"`): Key identifying the specific effect applied; configuration of the effect is stored in ``metadata``.
+- *enabled* (`Boolean`, default: `true`): If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *time_scalar* (`Double`, default: `1.0`): Linear time scalar applied to clip. 2.0 means the clip occupies half the time in the parent item, i.e. plays at double speed,
 0.5 means the clip occupies twice the time in the parent item, i.e. plays at half speed.
 
 Note that adjusting the time_scalar of a :class:`~LinearTimeWarp` does not affect the duration of the item this effect is attached to.
@@ -522,6 +558,8 @@ Instead it affects the speed of the media displayed within that item.
 ### Marker.2
 
 *full module path*: `opentimelineio.schema.Marker`
+
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -534,15 +572,17 @@ system.
 ```
 
 parameters:
-- *color*: Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.
-- *comment*: Optional comment for this marker.
-- *marked_range*: Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
-- *metadata*: 
-- *name*: 
+- *color* (`String`, default: `"RED"`): Color string for this marker (for example: 'RED'), based on the :class:`~Color` enum.
+- *comment* (`String`, default: `""`): Optional comment for this marker.
+- *marked_range* (`TimeRange`): Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### MissingReference.1
 
 *full module path*: `opentimelineio.schema.MissingReference`
+
+*inherits from*: `MediaReference` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -554,14 +594,16 @@ is not known.
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
-- *metadata*: 
-- *name*: 
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### SerializableCollection.1
 
 *full module path*: `opentimelineio.schema.SerializableCollection`
+
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -579,12 +621,14 @@ references to a single file.
 ```
 
 parameters:
-- *metadata*: 
-- *name*: 
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### Stack.1
 
 *full module path*: `opentimelineio.schema.Stack`
+
+*inherits from*: `Composition` -> `Item` -> `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -593,17 +637,19 @@ None
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### TimeEffect.1
 
 *full module path*: `opentimelineio.schema.TimeEffect`
+
+*inherits from*: `Effect` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -612,15 +658,17 @@ Base class for all effects that alter the timing of an item.
 ```
 
 parameters:
-- *effect_name*: 
-- *enabled*: If true, the Effect is applied. If false, the Effect is omitted.
-- *metadata*: 
-- *name*: 
+- *effect_name* (`String`, default: `""`): Key identifying the specific effect applied; configuration of the effect is stored in ``metadata``.
+- *enabled* (`Boolean`, default: `true`): If true, the Effect is applied. If false, the Effect is omitted.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
 
 ### Timeline.1
 
 *full module path*: `opentimelineio.schema.Timeline`
 
+*inherits from*: `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -628,15 +676,17 @@ None
 ```
 
 parameters:
-- *global_start_time*: 
-- *metadata*: 
-- *name*: 
-- *tracks*: 
+- *global_start_time* (`RationalTime`, optional): Global offset for the start of the timeline, used to express a sequence's start timecode (for example ``01:00:00:00``).
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *tracks* (`Stack`): The :class:`~Stack` holding the timeline's tracks (its audio, video, and other :class:`~Track`\s).
 
 ### Track.1
 
 *full module path*: `opentimelineio.schema.Track`
 
+*inherits from*: `Composition` -> `Item` -> `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
+
 *documentation*:
 
 ```
@@ -644,18 +694,20 @@ None
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
-- *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *kind*: 
-- *markers*: 
-- *metadata*: 
-- *name*: 
-- *source_range*: 
+- *color* (`Color`, optional): Optional color used to display this track in a user interface.
+- *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
+- *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
+- *kind* (`String`, default: `"Video"`): The kind of media this track composes (for example the ``Audio`` or ``Video`` constants). A free-form string; applications are expected to ignore tracks of a kind they do not understand.
+- *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Transition.1
 
 *full module path*: `opentimelineio.schema.Transition`
+
+*inherits from*: `Composable` -> `SerializableObjectWithMetadata` -> `SerializableObject`
 
 *documentation*:
 
@@ -665,16 +717,18 @@ dissolve or wipe.
 ```
 
 parameters:
-- *enabled*: If true, a Transition contributes to compositions. For example, when a transition is ``enabled=false`` the transition is ignored and the adjacent clips are cut together with no transition.
-- *in_offset*: Amount of the previous clip this transition overlaps, exclusive.
-- *metadata*: 
-- *name*: 
-- *out_offset*: Amount of the next clip this transition overlaps, exclusive.
-- *transition_type*: Kind of transition, as defined by the :class:`Type` enum.
+- *enabled* (`Boolean`, default: `true`): If true, a Transition contributes to compositions. For example, when a transition is ``enabled=false`` the transition is ignored and the adjacent clips are cut together with no transition.
+- *in_offset* (`RationalTime`): Amount of the previous clip this transition overlaps, exclusive.
+- *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
+- *name* (`String`, default: `""`): Human-readable name for this object.
+- *out_offset* (`RationalTime`): Amount of the next clip this transition overlaps, exclusive.
+- *transition_type* (`String`, default: `""`): Kind of transition, as defined by the :class:`Type` enum.
 
 ### SchemaDef.1
 
 *full module path*: `opentimelineio.schema.SchemaDef`
+
+*inherits from*: `PythonPlugin` -> `SerializableObject`
 
 *documentation*:
 

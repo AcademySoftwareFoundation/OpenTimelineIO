@@ -119,7 +119,7 @@ overwrite(
                         || static_cast<size_t>(index)
                                >= composition->children().size())
                         continue;
-                    composition->remove_child(transition);
+                    composition->remove_child(index);
                 }
             }
         }
@@ -266,7 +266,8 @@ overwrite(
             // Remove the completely overwritten items.
             while (!items.empty())
             {
-                composition->remove_child(items.back());
+                composition->remove_child(
+                    composition->index_of_child(items.back()));
                 items.pop_back();
             }
 
@@ -303,7 +304,7 @@ insert(
                     || static_cast<size_t>(index)
                            >= composition->children().size())
                     continue;
-                composition->remove_child(transition);
+                composition->remove_child(index);
             }
         }
     }

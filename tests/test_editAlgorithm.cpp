@@ -734,6 +734,58 @@ main(int argc, char** argv)
               TimeRange(RationalTime(36.0, 24.0), RationalTime(12.0, 24.0)) });
     });
 
+    tests.add_test("test_edit_overwrite_partial_first_full_last", [] {
+        // Overwrite that partially covers one clip and fully covers the next,
+        // ending exactly at the composition end. Regression test: the loop that
+        // removes the fully-overwritten items called remove_child() with a
+        // pointer, but Composition only declares remove_child(int), so the
+        // pointer decayed to bool->int(1) and the WRONG child was deleted (the
+        // partially-overwritten clip survived in place of the fully-covered one).
+        SerializableObject::Retainer<Clip> clip_0 = new Clip(
+            "clip_0",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Clip> clip_1 = new Clip(
+            "clip_1",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Clip> clip_2 = new Clip(
+            "clip_2",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
+        SerializableObject::Retainer<Track> track = new Track();
+        track->append_child(clip_0);
+        track->append_child(clip_1);
+        track->append_child(clip_2);
+
+        SerializableObject::Retainer<Clip> over = new Clip(
+            "over",
+            nullptr,
+            TimeRange(RationalTime(0.0, 24.0), RationalTime(100.0, 24.0)));
+        OTIO_NS::ErrorStatus error_status;
+        algo::overwrite(
+            over,
+            track,
+            TimeRange(RationalTime(36.0, 24.0), RationalTime(36.0, 24.0)),
+            true,
+            nullptr,
+            &error_status);
+
+        // clip_0 unchanged, clip_1 trimmed to its first half, clip_2 fully
+        // overwritten (removed), over inserted last.
+        assert(!is_error(error_status));
+        assert(track->children().size() == 3);
+        assert(dynamic_cast<Clip*>(track->children()[1].value)->name()
+               == "clip_1");
+        assert(dynamic_cast<Clip*>(track->children()[2].value)->name()
+               == "over");
+        assert_track_ranges(
+            track,
+            { TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)),
+              TimeRange(RationalTime(24.0, 24.0), RationalTime(12.0, 24.0)),
+              TimeRange(RationalTime(36.0, 24.0), RationalTime(36.0, 24.0)) });
+    });
+
     tests.add_test("test_edit_overwrite_4", [] {
         // Create a track with one long clip.
         SerializableObject::Retainer<Clip> clip_0 = new Clip(

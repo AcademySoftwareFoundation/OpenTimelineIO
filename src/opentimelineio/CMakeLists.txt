@@ -4,6 +4,7 @@
 set(OPENTIMELINEIO_HEADER_FILES
     anyDictionary.h
     anyVector.h
+    bundle.h
     color.h
     clip.h
     composable.h
@@ -41,6 +42,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
+    bundle.cpp
     color.cpp
     clip.cpp
     composable.cpp
@@ -90,9 +92,9 @@ else()
         PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 endif()
 
-
-target_link_libraries(opentimelineio 
-    PUBLIC opentime Imath::Imath)
+target_link_libraries(opentimelineio
+    PUBLIC opentime Imath::Imath
+    PRIVATE MINIZIP::minizip)
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
@@ -133,6 +135,20 @@ if(OTIO_CXX_INSTALL)
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
+
+    if(NOT OTIO_FIND_MINIZIP_NG)
+        install(TARGETS minizip
+            EXPORT OpenTimelineIOTargets
+            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+    endif()
+
+    set(OTIO_CONFIG_DEPENDENCIES "")
+    string(APPEND OTIO_CONFIG_DEPENDENCIES "find_dependency(ZLIB)\n")
+    if(OTIO_FIND_MINIZIP_NG)
+        string(APPEND OTIO_CONFIG_DEPENDENCIES "find_dependency(minizip-ng)\n")
+    endif()
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOTargets

@@ -51,6 +51,13 @@ jobs:
         if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
         run: |
           sudo apt-get install lcov
+      - name: Install ZLIB (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y zlib1g-dev
+      - name: Install ZLIB (Windows)
+        if: runner.os == 'Windows'
+        run: vcpkg install zlib:x64-windows
+        echo "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
       - name: Build
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}

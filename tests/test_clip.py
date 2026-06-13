@@ -27,7 +27,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         effects = []
         effects.append(ltw)
 
-        red = otio.schema.MarkerColor.RED
+        red = otio.core.Color.RED
         m = otio.schema.Marker(
             name="red_marker", color=red)
         markers = []

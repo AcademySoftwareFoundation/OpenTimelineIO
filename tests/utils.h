@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <string>
 #include <vector>
@@ -71,6 +72,22 @@ assertNotNull(const void* a)
 {
     assert(a != nullptr);
 }
+
+class TempDir
+{
+public:
+    TempDir();
+    
+    ~TempDir();
+    
+    TempDir(TempDir const&) = delete;
+    TempDir& operator=(TempDir const&) = delete;
+    
+    std::filesystem::path const& path() const { return _path; }
+    
+private:
+    std::filesystem::path _path;
+};
 
 class Tests
 {

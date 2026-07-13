@@ -41,7 +41,8 @@ public:
         std::string const&   transition_type = std::string(),
         RationalTime         in_offset       = RationalTime(),
         RationalTime         out_offset      = RationalTime(),
-        AnyDictionary const& metadata        = AnyDictionary());
+        AnyDictionary const& metadata        = AnyDictionary(),
+        bool                 enabled         = true);
 
     bool overlapping() const override;
 
@@ -72,6 +73,12 @@ public:
         _out_offset = out_offset;
     }
 
+    /// @brief  Return whether the transition is enabled.
+    bool enabled() const { return _enabled; }
+
+    /// @brief Set whether the transition is enabled.
+    void set_enabled(bool enabled) { _enabled = enabled; }
+
     RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
     /// @brief Return the range in the parent's time.
@@ -91,6 +98,7 @@ protected:
 private:
     std::string  _transition_type;
     RationalTime _in_offset, _out_offset;
+    bool _enabled;
 };
 
 }} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS

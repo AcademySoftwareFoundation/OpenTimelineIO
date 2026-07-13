@@ -17,7 +17,7 @@ jobs:
     # happen for this actual commit (the commit that the tag points to).
     # It also restores the files timestamps.
     - name: Download wheels from commit ${{ github.sha }}
-      uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927 # v19
       with:
         workflow: python-package.yml
         workflow_conclusion: success
@@ -28,7 +28,7 @@ jobs:
         merge_multiple: true
 
     - name: Download sdist from commit ${{ github.sha }}
-      uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+      uses: dawidd6/action-download-artifact@8a338493df3d275e4a7a63bcff3b8fe97e51a927 # v19
       with:
         workflow: python-package.yml
         workflow_conclusion: success

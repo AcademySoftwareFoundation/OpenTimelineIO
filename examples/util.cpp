@@ -12,21 +12,21 @@
 #include <locale>
 
 #if defined(_WINDOWS)
-#if !defined(WIN32_LEAN_AND_MEAN)
-#define WIN32_LEAN_AND_MEAN
-#endif // WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <combaseapi.h>
-#if defined(min)
-#undef min
-#endif // min
-#else // _WINDOWS
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <fnmatch.h>
-#include <stdlib.h>
-#include <unistd.h>
+#    if !defined(WIN32_LEAN_AND_MEAN)
+#        define WIN32_LEAN_AND_MEAN
+#    endif // WIN32_LEAN_AND_MEAN
+#    include <combaseapi.h>
+#    include <windows.h>
+#    if defined(min)
+#        undef min
+#    endif // min
+#else      // _WINDOWS
+#    include <dirent.h>
+#    include <fnmatch.h>
+#    include <stdlib.h>
+#    include <sys/stat.h>
+#    include <sys/types.h>
+#    include <unistd.h>
 #endif // _WINDOWS
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
@@ -35,17 +35,19 @@ namespace examples {
 
 #if defined(_WINDOWS)
 
-std::string normalize_path(std::string const& in)
+std::string
+normalize_path(std::string const& in)
 {
     std::string out;
-    for (auto i : in)
+    for (auto i: in)
     {
         out.push_back('\\' == i ? '/' : i);
     }
     return out;
 }
 
-std::string absolute(std::string const& in)
+std::string
+absolute(std::string const& in)
 {
     wchar_t buf[MAX_PATH];
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> utf16;
@@ -56,12 +58,13 @@ std::string absolute(std::string const& in)
     return normalize_path(utf16.to_bytes(buf));
 }
 
-std::string create_temp_dir()
+std::string
+create_temp_dir()
 {
     std::string out;
 
     // Get the temporary directory.
-    char path[MAX_PATH];
+    char  path[MAX_PATH];
     DWORD r = GetTempPath(MAX_PATH, path);
     if (r)
     {
@@ -94,22 +97,23 @@ std::string create_temp_dir()
     return out;
 }
 
-std::vector<std::string> glob(std::string const& path, std::string const& pattern)
+std::vector<std::string>
+glob(std::string const& path, std::string const& pattern)
 {
     std::vector<std::string> out;
 
     // Prepare the path.
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> utf16;
     std::wstring wpath = utf16.from_bytes(path + '/' + pattern);
-    WCHAR wbuf[MAX_PATH];
+    WCHAR        wbuf[MAX_PATH];
     size_t size = std::min(wpath.size(), static_cast<size_t>(MAX_PATH - 1));
     memcpy(wbuf, wpath.c_str(), size * sizeof(WCHAR));
     wbuf[size++] = 0;
 
     // List the directory contents.
     std::string const absolutePath = absolute(path);
-    WIN32_FIND_DATAW ffd;
-    HANDLE hFind = FindFirstFileW(wbuf, &ffd);
+    WIN32_FIND_DATAW  ffd;
+    HANDLE            hFind = FindFirstFileW(wbuf, &ffd);
     if (hFind != INVALID_HANDLE_VALUE)
     {
         do
@@ -124,12 +128,14 @@ std::vector<std::string> glob(std::string const& path, std::string const& patter
 
 #else // _WINDOWS
 
-std::string normalize_path(std::string const& in)
+std::string
+normalize_path(std::string const& in)
 {
     return in;
 }
 
-std::string absolute(std::string const& in)
+std::string
+absolute(std::string const& in)
 {
     char buf[PATH_MAX];
     if (NULL == realpath(in.c_str(), buf))
@@ -139,19 +145,23 @@ std::string absolute(std::string const& in)
     return buf;
 }
 
-std::string create_temp_dir()
+std::string
+create_temp_dir()
 {
     // Find the temporary directory.
     std::string path;
-    char* env = nullptr;
-    if ((env = getenv("TEMP"))) path = env;
-    else if ((env = getenv("TMP"))) path = env;
-    else if ((env = getenv("TMPDIR"))) path = env;
+    char*       env = nullptr;
+    if ((env = getenv("TEMP")))
+        path = env;
+    else if ((env = getenv("TMP")))
+        path = env;
+    else if ((env = getenv("TMPDIR")))
+        path = env;
     else
     {
-        for (const auto& i : { "/tmp", "/var/tmp", "/usr/tmp" })
+        for (const auto& i: { "/tmp", "/var/tmp", "/usr/tmp" })
         {
-            struct stat buffer;   
+            struct stat buffer;
             if (0 == stat(i, &buffer))
             {
                 path = i;
@@ -161,19 +171,20 @@ std::string create_temp_dir()
     }
 
     // Create a unique directory.
-    path = path + "/XXXXXX";
-    const size_t size = path.size();
+    path                   = path + "/XXXXXX";
+    const size_t      size = path.size();
     std::vector<char> buf(size + 1);
     memcpy(buf.data(), path.c_str(), size);
     buf[size] = 0;
     return mkdtemp(buf.data());
 }
 
-std::vector<std::string> glob(std::string const& path, std::string const& pattern)
+std::vector<std::string>
+glob(std::string const& path, std::string const& pattern)
 {
     std::vector<std::string> out;
-    std::string const absolutePath = absolute(path);
-    DIR* dir = opendir(path.c_str());
+    std::string const        absolutePath = absolute(path);
+    DIR*                     dir          = opendir(path.c_str());
     if (dir)
     {
         struct dirent* e = nullptr;
@@ -191,12 +202,12 @@ std::vector<std::string> glob(std::string const& path, std::string const& patter
 
 #endif // _WINDOWS
 
-void print_error(otio::ErrorStatus const& error_status)
+void
+print_error(otio::ErrorStatus const& error_status)
 {
-    std::cout << "ERROR: " <<
-        otio::ErrorStatus::outcome_to_string(error_status.outcome) << ": " <<
-        error_status.details << std::endl;
+    std::cout << "ERROR: "
+              << otio::ErrorStatus::outcome_to_string(error_status.outcome)
+              << ": " << error_status.details << std::endl;
 }
 
-}
-
+} // namespace examples

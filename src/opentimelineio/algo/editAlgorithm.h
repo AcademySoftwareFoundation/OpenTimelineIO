@@ -5,7 +5,8 @@
 
 #include "opentimelineio/composition.h"
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS { namespace algo {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
+namespace algo {
 
 //! Enum used by 3/4 Point Edit (aka. as fill)
 enum class ReferencePoint
@@ -35,7 +36,7 @@ enum class ReferencePoint
 //
 // If overwrite range starts before A and partially overlaps it, C is
 // added at the beginning and A is partitioned.
-//            
+//
 // If overwrite range starts and ends before A, a gap hole is filled with
 // fill_template.
 OTIO_API void overwrite(
@@ -75,7 +76,7 @@ OTIO_API void insert(
 //
 // |    A    | B | C |  ->  |  A  |FILL| B | C |
 //        <--*
-//            
+//
 //          item = Item to apply trim to (usually a clip)
 //      delta_in = RationalTime that the item's source_range().start_time()
 //                 will be adjusted by
@@ -83,11 +84,11 @@ OTIO_API void insert(
 //                 source_range().end_time_exclusive() will be adjusted by
 // fill_template = item to fill in (usually a gap),
 //                 when time > composition's time.
-//            
+//
 // Do not affect other clips.
 // Fill now-"empty" time with gap or template
 // Unless item is meeting a Gap, then, existing Gap's duration will be augmented
-//    
+//
 OTIO_API void trim(
     Item*               item,
     RationalTime const& delta_in,
@@ -115,7 +116,7 @@ OTIO_API void slice(
 //
 //          item = item to slip (usually a clip)
 //         delta = +/- rational time to slip the item by.
-//            
+//
 // Do not affect item duration.
 // Do not affect surrounding items.
 // Clamp to available_range of media (if available)
@@ -140,7 +141,7 @@ OTIO_API void slide(Item* item, RationalTime const& delta);
 //
 // |   A   |   B   |  ->  | A |  B  |FILL|
 //      <--*
-//            
+//
 //      item = Item to apply ripple to (usually a clip)
 //  delta_in = RationalTime that the item's source_range().start_time()
 //             will be adjusted by
@@ -162,7 +163,7 @@ OTIO_API void ripple(
 //
 // |   A   |   B   |  ->  | A |  B      |
 //      <--*
-//            
+//
 //      item = Item to apply roll to (usually a clip)
 //  delta_in = RationalTime that the item's source_range().start_time()
 //             will be adjusted by
@@ -191,11 +192,11 @@ OTIO_API void fill(
     Composition*         track,
     RationalTime const&  track_time,
     ReferencePoint const reference_point = ReferencePoint::Source,
-    ErrorStatus*         error_status = nullptr);
+    ErrorStatus*         error_status    = nullptr);
 
 //
 // Remove item(s) at a time and fill them, optionally with a gap.
-//            
+//
 // | A | C | B |  ->  | A |GAP| B |
 //       ^
 //       |
@@ -210,8 +211,8 @@ OTIO_API void fill(
 OTIO_API void remove(
     Composition*        composition,
     RationalTime const& time,
-    bool         const  fill = true,
+    bool const          fill          = true,
     Item*               fill_template = nullptr,
-    ErrorStatus*        error_status = nullptr);
+    ErrorStatus*        error_status  = nullptr);
 
 }}} // namespace opentimelineio::OPENTIMELINEIO_VERSION_NS::algo

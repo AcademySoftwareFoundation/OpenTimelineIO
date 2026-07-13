@@ -124,14 +124,21 @@
         "effects": [],
         "markers": [
             {
-                "OTIO_SCHEMA": "Marker.2",
+                "OTIO_SCHEMA": "Marker.3",
                 "metadata": {
                     "fcp_xml": {
                         "comment": "so, this happened"
                     }
                 },
                 "name": "My MArker 1",
-                "color": "RED",
+                "color": {
+                    "OTIO_SCHEMA" : "Color.1",
+                    "r" : 1.0,
+                    "g" : 0.0,
+                    "b" : 0.0,
+                    "a" : 1.0,
+                    "name" : "RED"
+                },
                 "marked_range": {
                     "OTIO_SCHEMA": "TimeRange.1",
                     "duration": {
@@ -147,14 +154,21 @@
                 }
             },
             {
-                "OTIO_SCHEMA": "Marker.2",
+                "OTIO_SCHEMA": "Marker.3",
                 "metadata": {
                     "fcp_xml": {
                         "comment": "fsfsfs"
                     }
                 },
                 "name": "dsf",
-                "color": "RED",
+                "color": {
+                    "OTIO_SCHEMA" : "Color.1",
+                    "r" : 1.0,
+                    "g" : 0.0,
+                    "b" : 0.0,
+                    "a" : 1.0,
+                    "name" : "RED"
+                },
                 "marked_range": {
                     "OTIO_SCHEMA": "TimeRange.1",
                     "duration": {
@@ -170,14 +184,21 @@
                 }
             },
             {
-                "OTIO_SCHEMA": "Marker.2",
+                "OTIO_SCHEMA": "Marker.3",
                 "metadata": {
                     "fcp_xml": {
                         "comment": null
                     }
                 },
                 "name": "",
-                "color": "RED",
+                "color": {
+                    "OTIO_SCHEMA" : "Color.1",
+                    "r" : 1.0,
+                    "g" : 0.0,
+                    "b" : 0.0,
+                    "a" : 1.0,
+                    "name" : "RED"
+                },
                 "marked_range": {
                     "OTIO_SCHEMA": "TimeRange.1",
                     "duration": {
@@ -699,14 +720,21 @@
                         "effects": [],
                         "markers": [
                             {
-                                "OTIO_SCHEMA": "Marker.2",
+                                "OTIO_SCHEMA": "Marker.3",
                                 "metadata": {
                                     "fcp_xml": {
                                         "comment": null
                                     }
                                 },
                                 "name": "",
-                                "color": "RED",
+                                "color": {
+                                    "OTIO_SCHEMA" : "Color.1",
+                                    "r" : 1.0,
+                                    "g" : 0.0,
+                                    "b" : 0.0,
+                                    "a" : 1.0,
+                                    "name" : "RED"
+                                },
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {

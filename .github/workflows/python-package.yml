@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-15]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
@@ -32,9 +32,7 @@ jobs:
             OTIO_TEST_TARGET: test
           - os: windows-latest
             OTIO_TEST_TARGET: RUN_TESTS
-          - os: macos-latest
-            OTIO_TEST_TARGET: test
-          - os: macos-14
+          - os: macos-15
             OTIO_TEST_TARGET: test
 
     env:
@@ -72,7 +70,7 @@ jobs:
       # \todo Should the Codecov web pages show the results of the C++ or Python tests?
       #    - name: Upload coverage to Codecov
       #      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      #      uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+      #      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       #      with:
       #        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info
       #        flags: unittests
@@ -92,16 +90,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-15]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - { os: ubuntu-latest, shell: bash }
-          - { os: macos-latest, shell: bash }
-          - { os: macos-14, shell: bash }
+          - { os: macos-15, shell: bash }
           - { os: windows-latest, shell: pwsh }
           - { os: windows-latest, shell: msys2, python-version: "mingw64" }
         exclude:
-          - { os: macos-latest, python-version: 3.9 }
+          - { os: macos-15, python-version: 3.9 }
 
     defaults:
       run:
@@ -129,7 +126,7 @@ jobs:
             git
       - name: Set up Python ${{ matrix.python-version }}
         if: matrix.python-version != 'mingw64'
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install coverage dependency
@@ -157,7 +154,7 @@ jobs:
         run: make lcov
       - name: Upload coverage to Codecov
         if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
+        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           flags: py-unittests
           name: py-opentimelineio-codecov
@@ -176,8 +173,7 @@ jobs:
             ubuntu-latest,
             ubuntu-24.04-arm,
             windows-latest,
-            macos-14,
-            macos-latest,
+            macos-15,
           ]
         python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
     steps:
@@ -208,7 +204,7 @@ jobs:
         with:
           submodules: "recursive"
 
-      - uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
 
       - name: Install pypa/build
         run: python -m pip install build --user

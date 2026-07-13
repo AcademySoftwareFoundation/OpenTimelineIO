@@ -16,19 +16,19 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    tests.add_test(
-        "test_find_children", [] {
-        SerializableObject::Retainer<Clip> cl = new Clip();
+    tests.add_test("test_find_children", [] {
+        SerializableObject::Retainer<Clip>  cl = new Clip();
         SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
         OTIO_NS::ErrorStatus err;
-        auto result = tr->find_children<Clip>(&err);
+        auto                 result = tr->find_children<Clip>(&err);
         assertEqual(result.size(), 1);
         assertEqual(result[0].value, cl.value);
     });
-    tests.add_test(
-        "test_find_children_search_range", [] {
-        const TimeRange range(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0));
+    tests.add_test("test_find_children_search_range", [] {
+        const TimeRange range(
+            RationalTime(0.0, 24.0),
+            RationalTime(24.0, 24.0));
         SerializableObject::Retainer<Clip> cl0 = new Clip();
         cl0->set_source_range(range);
         SerializableObject::Retainer<Clip> cl1 = new Clip();
@@ -40,7 +40,7 @@ main(int argc, char** argv)
         tr->append_child(cl1);
         tr->append_child(cl2);
         OTIO_NS::ErrorStatus err;
-        auto result = tr->find_children<Clip>(
+        auto                 result = tr->find_children<Clip>(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(24.0, 24.0)));
         assertEqual(result.size(), 1);
@@ -75,11 +75,10 @@ main(int argc, char** argv)
         assertEqual(result[1].value, cl1.value);
         assertEqual(result[2].value, cl2.value);
     });
-    tests.add_test(
-        "test_find_children_shallow_search", [] {
-        SerializableObject::Retainer<Clip> cl0 = new Clip();
-        SerializableObject::Retainer<Clip> cl1 = new Clip();
-        SerializableObject::Retainer<Stack> st = new Stack();
+    tests.add_test("test_find_children_shallow_search", [] {
+        SerializableObject::Retainer<Clip>  cl0 = new Clip();
+        SerializableObject::Retainer<Clip>  cl1 = new Clip();
+        SerializableObject::Retainer<Stack> st  = new Stack();
         st->append_child(cl1);
         SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl0);
@@ -94,9 +93,7 @@ main(int argc, char** argv)
         assertEqual(result[1].value, cl1.value);
     });
 
-    tests.add_test(
-        "test_find_children_stack", [] {
-
+    tests.add_test("test_find_children_stack", [] {
         SerializableObject::Retainer<Stack> stack = new Stack();
         SerializableObject::Retainer<Track> track = new Track;
         SerializableObject::Retainer<Clip>  clip  = new Clip;
@@ -107,7 +104,7 @@ main(int argc, char** argv)
         clip->set_source_range(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(3.0, 24.0)));
         OTIO_NS::ErrorStatus err;
-        auto items = stack->find_children(
+        auto                 items = stack->find_children(
             &err,
             TimeRange(RationalTime(0.0, 24.0), RationalTime(1.0, 24.0)));
         assertFalse(is_error(err));

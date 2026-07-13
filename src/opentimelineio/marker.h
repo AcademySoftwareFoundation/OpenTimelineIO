@@ -5,6 +5,7 @@
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/version.h"
+#include "opentimelineio/color.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
@@ -16,27 +17,12 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 class OTIO_API_TYPE Marker : public SerializableObjectWithMetadata
 {
 public:
-    /// @brief This struct provides the base set of colors.
-    struct Color
-    {
-        static auto constexpr pink    = "PINK";
-        static auto constexpr red     = "RED";
-        static auto constexpr orange  = "ORANGE";
-        static auto constexpr yellow  = "YELLOW";
-        static auto constexpr green   = "GREEN";
-        static auto constexpr cyan    = "CYAN";
-        static auto constexpr blue    = "BLUE";
-        static auto constexpr purple  = "PURPLE";
-        static auto constexpr magenta = "MAGENTA";
-        static auto constexpr black   = "BLACK";
-        static auto constexpr white   = "WHITE";
-    };
 
     /// @brief This struct provides the Marker schema.
     struct Schema
     {
         static auto constexpr name   = "Marker";
-        static int constexpr version = 2;
+        static int constexpr version = 3;
     };
 
     using Parent = SerializableObjectWithMetadata;
@@ -51,15 +37,15 @@ public:
     OTIO_API Marker(
         std::string const&   name         = std::string(),
         TimeRange const&     marked_range = TimeRange(),
-        std::string const&   color        = Color::green,
+        std::optional<Color> const& color = Color::green,
         AnyDictionary const& metadata     = AnyDictionary(),
         std::string const&   comment      = std::string());
 
     /// @brief Return the marker color.
-    std::string color() const noexcept { return _color; }
+    std::optional<Color> color() const noexcept { return _color; }
 
     /// @brief Set the marker color.
-    void set_color(std::string const& color) { _color = color; }
+    void set_color(std::optional<Color> const& color) { _color = color; }
 
     /// @brief Return the marker time range.
     TimeRange marked_range() const noexcept { return _marked_range; }
@@ -83,7 +69,7 @@ protected:
     void write_to(Writer&) const override;
 
 private:
-    std::string _color;
+    std::optional<Color> _color;
     TimeRange   _marked_range;
     std::string _comment;
 };

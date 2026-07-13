@@ -2,39 +2,44 @@
 // Copyright Contributors to the OpenTimelineIO project
 
 #pragma once
-#include <pybind11/pybind11.h>
 #include "opentimelineio/anyVector.h"
 #include "opentimelineio/vectorIndexing.h"
 #include "otio_bindings.h"
 #include "otio_utils.h"
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-struct AnyVectorProxy : public AnyVector::MutationStamp {
+struct AnyVectorProxy : public AnyVector::MutationStamp
+{
     using MutationStamp = AnyVector::MutationStamp;
 
-    static void throw_array_was_deleted() {
-        throw py::value_error("Underlying C++ AnyVector object has been destroyed");
+    static void throw_array_was_deleted()
+    {
+        throw py::value_error(
+            "Underlying C++ AnyVector object has been destroyed");
     }
 
-    struct Iterator {
+    struct Iterator
+    {
         Iterator(MutationStamp& s)
-            : mutation_stamp(s),
-              it(0) {
-        }
+            : mutation_stamp(s)
+            , it(0)
+        {}
 
         MutationStamp& mutation_stamp;
-        size_t it;
-    
-        Iterator* iter() {
-            return this;
-        }
-        
-        py::object next() {
-            if (!mutation_stamp.any_vector) {
+        size_t         it;
+
+        Iterator* iter() { return this; }
+
+        py::object next()
+        {
+            if (!mutation_stamp.any_vector)
+            {
                 throw_array_was_deleted();
             }
-            else if (it == mutation_stamp.any_vector->size()) {
+            else if (it == mutation_stamp.any_vector->size())
+            {
                 throw py::stop_iteration();
             }
 
@@ -42,66 +47,77 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
         }
     };
 
-    py::object get_item(int index) {
+    py::object get_item(int index)
+    {
         AnyVector& v = fetch_any_vector();
-        index = adjusted_vector_index(index, v);
-        if (index < 0 || index >= int(v.size())) {
+        index        = adjusted_vector_index(index, v);
+        if (index < 0 || index >= int(v.size()))
+        {
             throw py::index_error("list index out of range");
         }
         return any_to_py(v[index]);
     }
 
-    void set_item(int index, PyAny* pyAny) {
+    void set_item(int index, PyAny* pyAny)
+    {
         AnyVector& v = fetch_any_vector();
-        index = adjusted_vector_index(index, v);
-        if (index < 0 || index >= int(v.size())) {
+        index        = adjusted_vector_index(index, v);
+        if (index < 0 || index >= int(v.size()))
+        {
             throw py::index_error("list assignment index out of range");
         }
         std::swap(v[index], pyAny->a);
     }
-    
-    void insert(int index, PyAny* pyAny) {
-        AnyVector& v = fetch_any_vector();
-        index = adjusted_vector_index(index, v);
 
-        if (size_t(index) >= v.size()) {
+    void insert(int index, PyAny* pyAny)
+    {
+        AnyVector& v = fetch_any_vector();
+        index        = adjusted_vector_index(index, v);
+
+        if (size_t(index) >= v.size())
+        {
             v.emplace_back(std::move(pyAny->a));
         }
-        else {
+        else
+        {
             v.insert(v.begin() + std::max(index, 0), std::move(pyAny->a));
         }
     }
 
-    void del_item(int index) {
+    void del_item(int index)
+    {
         AnyVector& v = fetch_any_vector();
-        if (v.empty()) {
+        if (v.empty())
+        {
             throw py::index_error("list index out of range");
         }
 
         index = adjusted_vector_index(index, v);
 
-        if (size_t(index) >= v.size()) {
+        if (size_t(index) >= v.size())
+        {
             v.pop_back();
         }
-        else {
+        else
+        {
             v.erase(v.begin() + std::max(index, 0));
         }
     }
 
-    int len() {
-        return int(fetch_any_vector().size());
-    }
+    int len() { return int(fetch_any_vector().size()); }
 
-    Iterator* iter() {
+    Iterator* iter()
+    {
         (void) fetch_any_vector();
         return new Iterator(*this);
     }
 
-    AnyVector& fetch_any_vector() {
-        if (!any_vector) {
+    AnyVector& fetch_any_vector()
+    {
+        if (!any_vector)
+        {
             throw_array_was_deleted();
         }
         return *any_vector;
     }
 };
-

@@ -56,7 +56,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           vcpkg install zlib:x64-windows
-          echo "CMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake" >> $env:GITHUB_ENV
+          echo "CMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows" >> $env:GITHUB_ENV
       - name: Build
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}

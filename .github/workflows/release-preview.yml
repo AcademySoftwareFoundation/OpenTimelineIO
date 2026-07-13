@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter
-        uses: release-drafter/release-drafter@09c613e259eb8d4e7c81c2cb00618eb5fc4575a7 # v5
+        uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v7.1.1
         id: draft-release
         with:
           publish: false
@@ -59,7 +59,7 @@ jobs:
 
       - name: Convert Github markdown to Slack markdown syntax
         # https://github.com/LoveToKnow/slackify-markdown-action
-        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
+        uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         if: ${{ github.event.inputs.notify == 'true' }}
         id: slack-markdown
         with:

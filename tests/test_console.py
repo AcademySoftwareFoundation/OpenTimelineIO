@@ -351,10 +351,10 @@ TRACK: Sequence 3 (Video)
         out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: sc01_sh010_layerA\n"
-             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa: E501 line too long
-             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: RED name: dsf\n"  # noqa: E501 line too long
-             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: RED name: \n"  # noqa: E501 line too long
-             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: RED name: \n"),  # noqa: E501 line too long
+             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: My MArker 1\n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: dsf\n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: \n"  # noqa: E501 line too long
+             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: \n"),  # noqa: E501 line too long
             out)
 
     def test_list_tracks_and_clips(self):
@@ -413,9 +413,9 @@ TRACK: Sequence 3 (Video)
         out, err = self.run_test()
         self.assertEqual(
             ("TIMELINE: sc01_sh010_layerA\n"
-             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: RED name: My MArker 1\n"  # noqa E501 line too long
-             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: RED name: dsf\n"  # noqa E501 line too long
-             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: RED name: \n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:03:23 local: 00:00:03:23 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: My MArker 1\n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:16:12 local: 00:00:16:12 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: dsf\n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:09:28 local: 00:00:09:28 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: \n"  # noqa E501 line too long
              "TRACK:  (Video)\n"
              "  CLIP: sc01_sh010_anim.mov\n"
              "    MEDIA: file://localhost/D%3a/media/sc01_sh010_anim.mov\n"
@@ -426,7 +426,7 @@ TRACK: Sequence 3 (Video)
              "    MEDIA: file://localhost/D%3a/media/sc01_sh020_anim.mov\n"
              "  CLIP: sc01_sh030_anim.mov\n"
              "    MEDIA: file://localhost/D%3a/media/sc01_sh030_anim.mov\n"
-             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: RED name: \n"  # noqa E501 line too long
+             "  MARKER: global: 00:00:13:05 local: 00:00:02:13 duration: 0.0 color: Color('RED', (1.0, 0.0, 0.0, 1.0)) name: \n"  # noqa E501 line too long
              "TRACK:  (Video)\n"
              "  CLIP: test_title\n"
              "    MEDIA: None\n"

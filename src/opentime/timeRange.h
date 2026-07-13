@@ -16,7 +16,7 @@ namespace opentime { namespace OPENTIME_VERSION_NS {
 /// a resolution of half a frame at 192kHz. The value can be changed in the future if
 /// necessary, due to higher sampling rates or some other kind of numeric tolerance
 /// detected in the library.
-OPENTIME_API constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
+inline constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 /// @brief This class represents a time range defined by a start time and duration.
 ///

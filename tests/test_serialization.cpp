@@ -4,12 +4,12 @@
 #include "utils.h"
 
 #include <opentimelineio/clip.h>
-#include <opentimelineio/timeline.h>
-#include <opentimelineio/track.h>
-#include <opentimelineio/serialization.h>
+#include <opentimelineio/safely_typed_any.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/serializableObjectWithMetadata.h>
-#include <opentimelineio/safely_typed_any.h>
+#include <opentimelineio/serialization.h>
+#include <opentimelineio/timeline.h>
+#include <opentimelineio/track.h>
 
 #include <iostream>
 #include <string>
@@ -21,16 +21,15 @@ main(int argc, char** argv)
 {
     Tests tests;
 
-    tests.add_test(
-        "success with default indent", [] {
-        SerializableObject::Retainer<Clip> cl = new Clip();
+    tests.add_test("success with default indent", [] {
+        SerializableObject::Retainer<Clip>  cl = new Clip();
         SerializableObject::Retainer<Track> tr = new Track();
         tr->append_child(cl);
         SerializableObject::Retainer<Timeline> tl = new Timeline();
         tl->tracks()->append_child(tr);
 
         OTIO_NS::ErrorStatus err;
-        auto output = tl.value->to_json_string(&err, {});
+        auto                 output = tl.value->to_json_string(&err, {});
         assertFalse(is_error(err));
         assertEqual(output.c_str(), R"CONTENT({
     "OTIO_SCHEMA": "Timeline.1",
@@ -85,30 +84,63 @@ main(int argc, char** argv)
 })CONTENT");
     });
 
-    tests.add_test(
-        "success with indent set to 0", [] {
+    tests.add_test("success with indent set to 0", [] {
         SerializableObject::Retainer<SerializableObjectWithMetadata> so =
             new SerializableObjectWithMetadata();
 
         OTIO_NS::ErrorStatus err;
-        auto output = so.value->to_json_string(&err, {}, 0);
+        auto                 output = so.value->to_json_string(&err, {}, 0);
         assertFalse(is_error(err));
-        assertEqual(output.c_str(), R"CONTENT({"OTIO_SCHEMA":"SerializableObjectWithMetadata.1","metadata":{},"name":""})CONTENT");
+        assertEqual(
+            output.c_str(),
+            R"CONTENT({"OTIO_SCHEMA":"SerializableObjectWithMetadata.1","metadata":{},"name":""})CONTENT");
     });
 
-    tests.add_test(
-        "success with indent set to 2", [] {
+    tests.add_test("success with indent set to 2", [] {
         SerializableObject::Retainer<SerializableObjectWithMetadata> so =
             new SerializableObjectWithMetadata();
 
         OTIO_NS::ErrorStatus err;
-        auto output = so.value->to_json_string(&err, {}, 2);
+        auto                 output = so.value->to_json_string(&err, {}, 2);
         assertFalse(is_error(err));
         assertEqual(output.c_str(), R"CONTENT({
   "OTIO_SCHEMA": "SerializableObjectWithMetadata.1",
   "metadata": {},
   "name": ""
 })CONTENT");
+    });
+
+    tests.add_test("clone", [] {
+        auto json     = R"CONTENT({
+  "OTIO_SCHEMA": "SerializableObjectWithMetadata.1",
+  "metadata": {
+    "a": 1,
+    "b": "two",
+    "c": [
+      3,
+      4,
+      5
+    ],
+    "d": {
+      "hello": "nested"
+    }
+  },
+  "name": ""
+})CONTENT";
+        auto original = SerializableObjectWithMetadata::from_json_string(json);
+        auto cloned   = original->clone();
+        assert(cloned != nullptr);
+        OTIO_NS::ErrorStatus err;
+        auto                 cloned_json = cloned->to_json_string(&err, {}, 2);
+        assertFalse(is_error(err));
+        assertEqual(json, cloned_json.c_str());
+    });
+
+    tests.add_test("clone with cycle returns nullptr", [] {
+        auto original                 = new SerializableObjectWithMetadata();
+        original->metadata()["cycle"] = original;
+        auto cloned                   = original->clone();
+        assert(cloned == nullptr);
     });
 
     tests.run(argc, argv);

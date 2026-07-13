@@ -8,6 +8,7 @@
 from .. _otio import (
     Box2d,
     Clip,
+    Color,
     Effect,
     TimeEffect,
     LinearTimeWarp,
@@ -26,7 +27,7 @@ from .. _otio import (
     V2d,
 )
 
-MarkerColor = Marker.Color
+MarkerColor = Color  # for backwards compatibility
 TrackKind = Track.Kind
 TransitionTypes = Transition.Type
 NeighborGapPolicy = Track.NeighborGapPolicy

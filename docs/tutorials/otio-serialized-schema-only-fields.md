@@ -31,15 +31,6 @@ parameters:
 
 ## Module: opentimelineio.core
 
-### Color.1
-
-parameters:
-- *a*
-- *b*
-- *g*
-- *name*
-- *r*
-
 ### Composable.1
 
 parameters:
@@ -152,6 +143,15 @@ parameters:
 - *name*
 - *source_range*
 
+### Color.1
+
+parameters:
+- *a*
+- *b*
+- *g*
+- *name*
+- *r*
+
 ### Effect.1
 
 parameters:
@@ -224,7 +224,7 @@ parameters:
 - *name*
 - *time_scalar*
 
-### Marker.2
+### Marker.3
 
 parameters:
 - *color*
@@ -289,6 +289,7 @@ parameters:
 ### Transition.1
 
 parameters:
+- *enabled*
 - *in_offset*
 - *metadata*
 - *name*

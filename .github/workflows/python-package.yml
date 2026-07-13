@@ -171,18 +171,23 @@ jobs:
         run: |
           pip install .[dev] -v --break-system-packages
       # Python 3.8+ ignores PATH when resolving DLL dependencies of .pyd
-      # files, so zlib1.dll from vcpkg's bin is not findable at import
-      # time even though it is on PATH for the C++ tests. Copy it next
-      # to the installed _otio.pyd, which IS a directory Python's
-      # restricted DLL search checks.
+      # files, so vcpkg's zlib DLL is not findable at import time even
+      # though it is on PATH for the C++ tests. Copy any DLLs from vcpkg's
+      # bin next to the installed _otio.pyd; that directory IS on Python's
+      # restricted DLL search list. vcpkg's zlib port renames the Windows
+      # DLL to z.dll (not zlib1.dll), so use a wildcard.
       # (In package_wheels, cibuildwheel does this via delvewheel.)
       - name: Copy ZLIB DLL next to _otio.pyd (Windows)
         if: runner.os == 'Windows' && matrix.python-version != 'mingw64'
         run: |
           $sitePackages = python -c "import site; print(site.getsitepackages()[0])"
           $target = Join-Path $sitePackages "opentimelineio"
-          Copy-Item "C:/vcpkg/installed/x64-windows/bin/zlib1.dll" "$target/"
-          Write-Host "Copied zlib1.dll to $target"
+          $sourceDir = "C:/vcpkg/installed/x64-windows/bin"
+          Write-Host "Contents of ${sourceDir}:"
+          Get-ChildItem $sourceDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.Name)" }
+          Copy-Item "$sourceDir/*.dll" "$target/" -ErrorAction Stop
+          Write-Host "DLLs now in ${target}:"
+          Get-ChildItem "$target/*.dll" | ForEach-Object { Write-Host "  $($_.Name)" }
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)

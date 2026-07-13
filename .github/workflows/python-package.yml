@@ -228,7 +228,7 @@ jobs:
             windows-2022,
             macos-15,
           ]
-        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
+        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313", "cp314"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 

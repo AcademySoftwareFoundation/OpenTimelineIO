@@ -31,7 +31,8 @@
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION_NS;
 
 // Look for media with this name in this folder.
-std::string find_matching_media(std::string const& name, std::string const& folder)
+std::string
+find_matching_media(std::string const& name, std::string const& folder)
 {
     // This function is an example which searches the file system for matching media.
     // A real world studio implementation would likely look in an asset management system
@@ -41,9 +42,9 @@ std::string find_matching_media(std::string const& name, std::string const& fold
     // shot = asset_database->find_shot(
     //    otio::any_cast<std::map<std::string, std::string> >(clip->metadata()["mystudio"])["shotID"]);
     // new_media = shot->latest_render("mov");
-    
+
     const auto matches = examples::glob(folder, name + ".*");
-    
+
     if (matches.size() == 0)
     {
         //std::cout << "DEBUG: No match for clip '" << name << "'" << std::endl;
@@ -55,8 +56,9 @@ std::string find_matching_media(std::string const& name, std::string const& fold
     }
     else
     {
-        std::cout << "WARNING: " << matches.size() << " matches found for clip '" <<
-            name << "', using '" << matches[0] << "'";
+        std::cout << "WARNING: " << matches.size()
+                  << " matches found for clip '" << name << "', using '"
+                  << matches[0] << "'";
         return matches[0];
     }
 }
@@ -70,21 +72,22 @@ std::string find_matching_media(std::string const& name, std::string const& fold
 // internal reference count. For more details on the usage of Retainers see
 // the C++ documentation:
 // https://opentimelineio.readthedocs.io/en/latest/cxx/cxx.html
-int conform_timeline(
+int
+conform_timeline(
     otio::SerializableObject::Retainer<otio::Timeline> const& timeline,
-    std::string const& folder)
+    std::string const&                                        folder)
 {
     int count = 0;
-    
+
     otio::ErrorStatus error_status;
-    const auto clips = timeline->find_clips(&error_status);
+    const auto        clips = timeline->find_clips(&error_status);
     if (otio::is_error(error_status))
     {
         examples::print_error(error_status);
         exit(1);
     }
-    
-    for (const otio::SerializableObject::Retainer<otio::Clip>& clip : clips)
+
+    for (const otio::SerializableObject::Retainer<otio::Clip>& clip: clips)
     {
         // look for a media file that matches the clip's name
         const std::string new_path = find_matching_media(clip->name(), folder);
@@ -96,28 +99,31 @@ int conform_timeline(
         // relink to the found path
         clip->set_media_reference(new otio::ExternalReference(
             "file://" + new_path,
-            std::nullopt // the available range is unknown without opening the file
-        ));
+            std::
+                nullopt // the available range is unknown without opening the file
+            ));
         count += 1;
     }
-    
+
     return count;
 }
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     if (argc != 4)
     {
         std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
         return 1;
     }
-    const std::string input = examples::normalize_path(argv[1]);
+    const std::string input  = examples::normalize_path(argv[1]);
     const std::string folder = examples::normalize_path(argv[2]);
     const std::string output = examples::normalize_path(argv[3]);
-    
-    otio::ErrorStatus error_status;
+
+    otio::ErrorStatus                                  error_status;
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
-        dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
+        dynamic_cast<otio::Timeline*>(
+            otio::Timeline::from_json_file(input, &error_status)));
     if (!timeline || otio::is_error(error_status))
     {
         examples::print_error(error_status);
@@ -136,7 +142,8 @@ int main(int argc, char** argv)
         examples::print_error(error_status);
         exit(1);
     }
-    std::cout << "Saved " << output << " with " << clips.size() << " clips." << std::endl;
-    
+    std::cout << "Saved " << output << " with " << clips.size() << " clips."
+              << std::endl;
+
     return 0;
 }

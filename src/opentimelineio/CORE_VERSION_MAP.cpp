@@ -221,7 +221,7 @@ const label_to_schema_version_map CORE_VERSION_MAP{
           { "ImageSequenceReference", 1 },
           { "Item", 1 },
           { "LinearTimeWarp", 1 },
-          { "Marker", 2 },
+          { "Marker", 3 },
           { "MediaLinker", 1 },
           { "MediaReference", 1 },
           { "MissingReference", 1 },

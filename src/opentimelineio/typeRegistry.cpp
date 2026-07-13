@@ -29,7 +29,11 @@
 #include "opentimelineio/unknownSchema.h"
 #include "stringUtils.h"
 
+#include <algorithm>
 #include <assert.h>
+#include <cctype>
+#include <map>
+#include <set>
 #include <vector>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
@@ -96,6 +100,62 @@ TypeRegistry::TypeRegistry()
         d->erase("range");
     });
 
+    // 2 - 3
+    register_upgrade_function(Marker::Schema::name, 3, [](AnyDictionary* d) {
+        // get color name
+        std::string color_name_v2;
+        if (d->get_if_set("color", &color_name_v2))
+        {
+            static const std::map<std::string, Color> color_map = {
+                { "PINK", Color::pink },
+                { "RED", Color::red },
+                { "ORANGE", Color::orange },
+                { "YELLOW", Color::yellow },
+                { "GREEN", Color::green },
+                { "CYAN", Color::cyan },
+                { "BLUE", Color::blue },
+                { "MAGENTA", Color::magenta },
+                { "PURPLE", Color::purple },
+                { "BLACK", Color::black },
+                { "WHITE", Color::white },
+                { "TRANSPARENT", Color::transparent }
+            };
+
+            // make copy of color_name_v2, for uppercase change to be separate
+            std::string color_name_v2_upper = color_name_v2;
+
+            // force color name to uppercase for lookup
+            // since v2 color names were case-insensitive
+            std::transform(
+                color_name_v2_upper.begin(),
+                color_name_v2_upper.end(),
+                color_name_v2_upper.begin(),
+                [](unsigned char c) { return std::toupper(c); }
+            );
+
+            // if all-caps name matches a known color, convert to color with r,g,b,a, and name fields
+            auto it = color_map.find(color_name_v2_upper);
+            Color color_match = Color::white;
+            std::string color_match_name = "";
+            if (it != color_map.end()) {  // match found
+                color_match = it->second;
+                color_match_name = color_match.name();
+            }
+            else {  // no match, default to white but keep original name
+                color_match = Color::white;
+                color_match_name = color_name_v2;
+            }
+
+            (*d)["color"] = Color(
+                color_match.r(),
+                color_match.g(),
+                color_match.b(),
+                color_match.a(),
+                color_match_name
+            );
+        }
+    });
+
     register_upgrade_function(Clip::Schema::name, 2, [](AnyDictionary* d) {
         auto media_ref = (*d)["media_reference"];
 
@@ -114,6 +174,46 @@ TypeRegistry::TypeRegistry()
             std::string(Clip::default_media_key);
 
         d->erase("media_reference");
+    });
+
+    // 3->2
+    register_downgrade_function(Marker::Schema::name, 3, [](AnyDictionary* d) {
+        AnyDictionary color_dict;
+
+        if (d->get_if_set("color", &color_dict))
+        {
+            std::string color_name = "";
+            color_dict.get_if_set("name", &color_name);
+
+            // if the name matches case-insensitive to a known color, 
+            // set the color an all-caps version of that name
+            if (!color_name.empty())
+            {
+                // Convert to uppercase for comparison and storage
+                std::string upper_name = color_name;
+                std::transform(
+                    upper_name.begin(),
+                    upper_name.end(),
+                    upper_name.begin(),
+                    [](unsigned char c) { return std::toupper(c); }
+                );
+
+                // Known color names - these are the valid color enum values
+                static const std::set<std::string> known_colors = {
+                    "RED", "GREEN", "BLUE", "YELLOW", "CYAN", "MAGENTA",
+                    "PINK", "ORANGE", "PURPLE", "BLACK", "WHITE", "TRANSPARENT"
+                };
+
+                if (known_colors.find(upper_name) != known_colors.end())
+                {
+                    // remove color object and replace with color name string
+                    (*d)["color"] = upper_name;
+                }
+                else {  // otherwise, keep name as-is
+                    (*d)["color"] = color_name;
+                }
+            }
+        }
     });
 
     // 2->1

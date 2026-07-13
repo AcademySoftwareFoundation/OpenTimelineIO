@@ -109,7 +109,7 @@ def _conform_timeline(timeline, folder):
 
         # relink to the found path
         clip.media_reference = otio.schema.ExternalReference(
-            target_url="file://" + new_path,
+            target_url=otio.url_utils.url_from_filepath(new_path),
             available_range=None  # the available range is unknown without
                                   # opening the file
         )

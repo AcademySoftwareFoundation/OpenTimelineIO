@@ -59,7 +59,7 @@ jobs:
 
       - name: Convert Github markdown to Slack markdown syntax
         # https://github.com/LoveToKnow/slackify-markdown-action
-        uses: LoveToKnow/slackify-markdown-action@444d1c5cb9c46a046c29bb88cc032e9c27d31f38 # v1.0.0
+        uses: LoveToKnow/slackify-markdown-action@698a1d4d0ff1794152a93c03ee8ca5e03a310d4e # v1.1.1
         if: ${{ github.event.inputs.notify == 'true' }}
         id: slack-markdown
         with:

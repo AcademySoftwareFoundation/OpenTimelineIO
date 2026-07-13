@@ -64,7 +64,7 @@ if(OTIO_CXX_INSTALL)
             RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
     install(EXPORT OpenTimeTargets
-            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime"
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib/cmake/opentime"
             NAMESPACE OTIO:: )
 
     include(CMakePackageConfigHelpers)
@@ -72,7 +72,7 @@ if(OTIO_CXX_INSTALL)
         ${CMAKE_CURRENT_SOURCE_DIR}/OpenTimeConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
         INSTALL_DESTINATION
-            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib/cmake/opentime
         NO_SET_AND_CHECK_MACRO
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )
@@ -87,7 +87,7 @@ if(OTIO_CXX_INSTALL)
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake
             ${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfigVersion.cmake
         DESTINATION
-            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime
+            ${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib/cmake/opentime
     )
 endif()
 

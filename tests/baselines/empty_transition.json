@@ -1,5 +1,6 @@
 {
     "OTIO_SCHEMA": "Transition.1",
+    "enabled": true,
     "metadata": {},
     "name": "",
     "transition_type": "",

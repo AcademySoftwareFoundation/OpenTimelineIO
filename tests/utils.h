@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <functional>
 #include <string>
-#include <cstring>
 #include <vector>
 
 void assertTrue(bool value);

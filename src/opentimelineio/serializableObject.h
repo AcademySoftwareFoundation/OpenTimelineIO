@@ -626,7 +626,7 @@ public:
 
         T* operator->() const noexcept { return value; }
 
-        operator bool() const noexcept { return value != nullptr; }
+        explicit operator bool() const noexcept { return value != nullptr; }
 
         Retainer(T const* so = nullptr)
             : value((T*) so)

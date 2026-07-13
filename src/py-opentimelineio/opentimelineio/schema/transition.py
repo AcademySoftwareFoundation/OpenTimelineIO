@@ -7,12 +7,13 @@ from .. import _otio
 
 @add_method(_otio.Transition)
 def __str__(self):
-    return 'Transition("{}", "{}", {}, {}, {})'.format(
+    return 'Transition("{}", "{}", {}, {}, {}, {})'.format(
         self.name,
         self.transition_type,
         self.in_offset,
         self.out_offset,
-        self.metadata
+        self.metadata,
+        self.enabled
     )
 
 
@@ -24,12 +25,14 @@ def __repr__(self):
         'transition_type={}, '
         'in_offset={}, '
         'out_offset={}, '
-        'metadata={}'
+        'metadata={}, '
+        'enabled={}'
         ')'.format(
             repr(self.name),
             repr(self.transition_type),
             repr(self.in_offset),
             repr(self.out_offset),
             repr(self.metadata),
+            repr(self.enabled)
         )
     )

@@ -24,13 +24,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        # Pinned to windows-2022 because the June 2026 migration of
+        # windows-latest to Windows Server 2025 + Visual Studio 2026 +
+        # CMake 4.3 breaks the vcpkg-based ZLIB find_package path.
+        # windows-2022 is supported by GitHub through ~2028.
+        os: [ubuntu-latest, windows-2022, macos-15]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
           - os: ubuntu-latest
             OTIO_TEST_TARGET: test
-          - os: windows-latest
+          - os: windows-2022
             OTIO_TEST_TARGET: RUN_TESTS
           - os: macos-15
             OTIO_TEST_TARGET: test
@@ -49,6 +53,15 @@ jobs:
         if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
         run: |
           sudo apt-get install lcov
+      - name: Install ZLIB (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y zlib1g-dev
+      - name: Install ZLIB (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install zlib:x64-windows
+          echo "CMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows" >> $env:GITHUB_ENV
+          echo "C:/vcpkg/installed/x64-windows/bin" >> $env:GITHUB_PATH
       - name: Build
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
@@ -90,13 +103,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-15]
+        # See note in cpp_build about pinning to windows-2022.
+        os: [ubuntu-latest, windows-2022, macos-15]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-15, shell: bash }
-          - { os: windows-latest, shell: pwsh }
-          - { os: windows-latest, shell: msys2, python-version: "mingw64" }
+          - { os: windows-2022, shell: pwsh }
+          - { os: windows-2022, shell: msys2, python-version: "mingw64" }
         exclude:
           - { os: macos-15, python-version: 3.9 }
 
@@ -122,6 +136,7 @@ jobs:
             mingw-w64-x86_64-python-pip
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-zlib
             make
             git
       - name: Set up Python ${{ matrix.python-version }}
@@ -134,6 +149,15 @@ jobs:
         run: |
           echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
           sudo apt-get install lcov
+      - name: Install ZLIB (Linux)
+        if: runner.os == 'Linux' && matrix.python-version != 'mingw64'
+        run: sudo apt-get install -y zlib1g-dev
+      - name: Install ZLIB (Windows)
+        if: runner.os == 'Windows' && matrix.python-version != 'mingw64'
+        run: |
+          vcpkg install zlib:x64-windows
+          echo "CMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows" >> $env:GITHUB_ENV
+          echo "C:/vcpkg/installed/x64-windows/bin" >> $env:GITHUB_PATH
       - name: Install python build dependencies
         run: |
           python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
@@ -146,6 +170,23 @@ jobs:
       - name: Build and Install
         run: |
           pip install .[dev] -v --break-system-packages
+      # Python 3.8+ ignores PATH when resolving DLL dependencies of .pyd
+      # files, so zlib1.dll from vcpkg's bin is not findable at import
+      # time even though it is on PATH for the C++ tests. Copy it next
+      # to the installed _otio.pyd, which IS a directory Python's
+      # restricted DLL search checks.
+      # (In package_wheels, cibuildwheel does this via delvewheel.)
+      - name: Copy ZLIB DLL next to _otio.pyd (Windows)
+        if: runner.os == 'Windows' && matrix.python-version != 'mingw64'
+        run: |
+          $target = python -c "import sysconfig, os; print(os.path.join(sysconfig.get_paths()['purelib'], 'opentimelineio'))"
+          $sourceDir = "C:/vcpkg/installed/x64-windows/bin"
+          Write-Host "Target: $target"
+          Write-Host "Contents of ${sourceDir}:"
+          Get-ChildItem $sourceDir -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.Name)" }
+          Copy-Item "$sourceDir/*.dll" "$target/" -ErrorAction Stop
+          Write-Host "DLLs now in ${target}:"
+          Get-ChildItem "$target/*.dll" | ForEach-Object { Write-Host "  $($_.Name)" }
       - name: Run tests w/ python coverage
         run: make ci-postbuild
       # (only on GH_COV_OS and GH_COV_PY)
@@ -168,11 +209,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # See note in cpp_build about pinning to windows-2022.
         os:
           [
             ubuntu-latest,
             ubuntu-24.04-arm,
-            windows-latest,
+            windows-2022,
             macos-15,
           ]
         python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
@@ -186,6 +228,9 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.python-build }}*
           CIBW_SKIP: "*musllinux*"
+          CIBW_BEFORE_BUILD_LINUX: "yum install -y zlib-devel"
+          CIBW_BEFORE_BUILD_WINDOWS: "vcpkg install zlib:x64-windows"
+          CIBW_ENVIRONMENT_WINDOWS: 'CMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows PATH="C:/vcpkg/installed/x64-windows/bin;$PATH"'
           CIBW_ARCHS_LINUX: native
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
           CIBW_MANYLINUX_AARCH64_IMAGE: manylinux2014

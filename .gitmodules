@@ -7,3 +7,6 @@
 [submodule "src/deps/Imath"]
 	path = src/deps/Imath
 	url = https://github.com/AcademySoftwareFoundation/Imath
+[submodule "src/deps/minizip-ng"]
+	path = src/deps/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng.git

@@ -35,6 +35,12 @@ serialize tool-specifically and don't round-trip across formats.
 Exit codes follow diff(1): 0 = no structural changes, 1 = changes found,
 2 = could not read an input.
 
+This example is a lightweight, self-contained take on timeline diffing. For
+a more full-featured, integrated tool — including a visual annotated-OTIO
+output — see the proposed ``otiodiff`` feature for ``otiotool`` in
+https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1922 and the
+tracking issue https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues/26
+
 A packaged version of this tool with tests and an MCP server for AI agents
 lives at https://github.com/chaoz23/otio-diff
 """

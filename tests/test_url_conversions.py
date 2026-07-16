@@ -49,11 +49,15 @@ class TestConversions(unittest.TestCase):
         # should have reconstructed it by this point
         self.assertEqual(os.path.normpath(result), MEDIA_EXAMPLE_PATH_REL)
 
-    def test_non_file_scheme_raises(self):
+    def test_non_file_scheme_passes_through(self):
         # The C++ file_from_url returns None for non-file schemes;
-        # the Python wrapper translates that to ValueError.
-        with self.assertRaises(ValueError):
-            otio.url_utils.filepath_from_url("http://example.com/foo")
+        # the Python wrapper passes the input through unchanged, matching
+        # the historical Python behavior of not raising on unrecognized
+        # input.
+        self.assertEqual(
+            otio.url_utils.filepath_from_url("http://example.com/foo"),
+            "http://example.com/foo",
+        )
 
 
 if __name__ == "__main__":

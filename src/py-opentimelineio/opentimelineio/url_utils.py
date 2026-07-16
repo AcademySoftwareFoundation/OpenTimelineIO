@@ -5,7 +5,6 @@
 
 import os
 import urllib
-from urllib import request
 import pathlib
 
 from ._otio import bundle

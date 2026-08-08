@@ -22,5 +22,6 @@ from . import (
     adapters,
     hooks,
     algorithms,
+    url_utils,
     versioning,
 )

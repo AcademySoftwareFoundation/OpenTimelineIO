@@ -72,6 +72,17 @@ Options for reading bundles.
             "If this is set to true for otioz files, an extract_path must also be set.");
 
     mbundle.def(
+        "file_from_url",
+        &file_from_url,
+        "Convert a file:// URL to a filesystem path.\n\n"
+        "Handles Windows drive letters in netloc position (file://C:/...), "
+        "UNC paths (file://host/share/...), percent-encoded characters, "
+        "and the 'localhost' authority. Returns the input unchanged if it "
+        "is a bare path with no URL scheme. Returns None if the URL uses a "
+        "non-file scheme (e.g. http://...).",
+        py::arg("url"));
+
+    mbundle.def(
         "dry_run",
         [](
             Timeline const*     timeline,

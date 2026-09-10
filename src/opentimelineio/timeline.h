@@ -44,7 +44,7 @@ public:
     }*/
 
     /// @brief Set the timeline stack.
-    void set_tracks(Stack* stack);
+    OTIO_API void set_tracks(Stack* stack);
 
     /// @brief Return the global start time.
     std::optional<RationalTime> global_start_time() const noexcept
@@ -97,7 +97,7 @@ public:
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
     template <typename T = Composable>
-    OTIO_API std::vector<Retainer<T>> find_children(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;

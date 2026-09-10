@@ -107,7 +107,7 @@ if(OTIO_SHARED_LIBS)
         VERSION ${OTIO_VERSION})
     target_compile_definitions(
         opentimelineio
-        PUBLIC
+        PRIVATE
         OTIO_EXPORTS)
 else()
     target_compile_definitions(

@@ -30,7 +30,7 @@ if(OTIO_SHARED_LIBS)
         VERSION ${OTIO_VERSION})
     target_compile_definitions(
         opentime
-        PUBLIC
+        PRIVATE
         OPENTIME_EXPORTS)
 else()
     target_compile_definitions(

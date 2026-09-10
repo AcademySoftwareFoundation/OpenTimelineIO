@@ -604,13 +604,13 @@ public:
     };
 
     /// @brief Deserialize from the given reader.
-    virtual bool read_from(Reader&);
+    OTIO_API virtual bool read_from(Reader&);
 
     /// @brief Serialize to the given writer.
-    virtual void write_to(Writer&) const;
+    OTIO_API virtual void write_to(Writer&) const;
 
     /// @brief Return whether this schema is unknown.
-    virtual bool is_unknown_schema() const;
+    OTIO_API virtual bool is_unknown_schema() const;
 
     /// @brief Return the schema name.
     std::string schema_name() const { return _type_record()->schema_name; }
@@ -675,9 +675,9 @@ public:
 protected:
     virtual ~SerializableObject();
 
-    virtual bool _is_deletable();
+    OTIO_API virtual bool _is_deletable();
 
-    virtual std::string _schema_name_for_reference() const;
+    OTIO_API virtual std::string _schema_name_for_reference() const;
 
 private:
     SerializableObject(SerializableObject const&)            = delete;
@@ -700,12 +700,12 @@ public:
     };
 
     /// @todo Add comment.
-    void install_external_keepalive_monitor(
+    OTIO_API void install_external_keepalive_monitor(
         std::function<void()> monitor,
         bool                  apply_now);
 
     /// @brief Return the current reference count.
-    int current_ref_count() const;
+    OTIO_API int current_ref_count() const;
 
     /// @brief This struct provides an unknown type.
     struct UnknownType
@@ -719,7 +719,7 @@ private:
         _cached_type_record = type_record;
     }
 
-    TypeRegistry::_TypeRecord const* _type_record() const;
+    OTIO_API TypeRegistry::_TypeRecord const* _type_record() const;
 
     mutable TypeRegistry::_TypeRecord const* _cached_type_record;
     int                                      _managed_ref_count;

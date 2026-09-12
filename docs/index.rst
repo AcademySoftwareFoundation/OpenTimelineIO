@@ -37,6 +37,7 @@ Tutorials
    :caption: Tutorials
 
    tutorials/adapters
+   tutorials/AI_Policy
    tutorials/architecture
    tutorials/contributing
    tutorials/feature-matrix

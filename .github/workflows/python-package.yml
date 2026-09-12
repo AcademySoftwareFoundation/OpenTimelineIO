@@ -116,7 +116,7 @@ jobs:
       matrix:
         # See note in cpp_build about pinning to windows-2022.
         os: [ubuntu-latest, windows-2022, macos-15]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15.0-rc.2"]
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-15, shell: bash }

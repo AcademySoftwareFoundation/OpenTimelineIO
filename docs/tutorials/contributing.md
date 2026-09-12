@@ -15,6 +15,16 @@ Here are the two possible CLAs:
 * [OTIO_CLA_Corporate.pdf](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/raw/main/OTIO_CLA_Corporate.pdf): please sign this one for corporate use
 * [OTIO_CLA_Individual.pdf](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
 
+## AI Coding Tools
+
+Please see our [AI Coding Assistant Policy](https://opentimelineio.readthedocs.io/en/latest/tutorials/AI_Policy.html) for guidelines on contributing code developed with AI coding assistance.
+
+Note that **Disclosure is required.** Patches that were written with the aid of AI
+coding assistants must have, at a minimum, the following line in the commit
+comment and PR description body:
+
+    Assisted-by: TOOL / MODEL
+
 ## Coding Conventions
 Please follow the coding convention and style in each file and in each library when adding new files.
 

@@ -1,8 +1,7 @@
 Policy on AI Coding Assistants
 ==============================
 
-- Initial policy merged 23-Mar-2026
-- Revised: 11-Sep-2026
+- Revised: 12-Sep-2026
 
 
 Use of "AI coding assistants" is permitted on this project, with the following
@@ -14,7 +13,7 @@ Summary of our core values:
   to explain, defend, and modify it in response to review comments).
 - Interact with the project and community yourself, not by agent.
 - Disclose what tools you used and how. At a minimum, we require an
-  "Assisted-by: TOOL / MODEL" line in the commit comments and PR description.
+  "Assisted-by: TOOL / MODEL" line in the PR description.
 - Don't waste maintainer's time with low quality PRs.
 
 The long version:
@@ -67,8 +66,7 @@ describe it to others.
 ### Disclosure
 
 **Disclosure is required.** Patches that were written with the aid of AI
-coding assistants must have, at a minimum, the following line in the commit
-comment and PR description body:
+coding assistants must have, at a minimum, the following line in the PR description body:
 
     Assisted-by: TOOL / MODEL
 

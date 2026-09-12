@@ -17,7 +17,7 @@ Here are the two possible CLAs:
 
 ## AI Coding Tools
 
-Please see our [AI Coding Assistant Policy](https://opentimelineio.readthedocs.io/en/latest/tutorials/AI_Policy.html) for guidelines on contributing code developed with AI coding assistance.
+Please see our [AI Coding Assistant Policy](ai-policy) for guidelines on contributing code developed with AI coding assistance.
 
 Note that **Disclosure is required.** Patches that were written with the aid of AI
 coding assistants must have, at a minimum, the following line in the commit

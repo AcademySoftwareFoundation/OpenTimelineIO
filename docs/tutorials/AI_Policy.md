@@ -11,7 +11,7 @@ Summary of our core values:
 - Human must always be in the loop, and is the responsible party for
   the contents of a PR (including fully understanding and being able
   to explain, defend, and modify it in response to review comments).
-- Interact with the project and community yourself, not by agent.
+- Humans should interact with the project and community directly, not agents.
 - Disclose what tools you used and how. At a minimum, we require an
   "Assisted-by: TOOL / MODEL" line in the PR description.
 - Don't waste maintainer's time with low quality PRs.

@@ -18,7 +18,7 @@ Summary of our core values:
 
 The long version:
 
-### Human authorship and interaction with the project
+## Human authorship and interaction with the project
 
 **The human making a PR is considered the author** and is fully responsible
 for the code they submit.
@@ -42,7 +42,7 @@ programming between the author and assistant, but even if the machine is doing
 most of the work, all code should be approved and fully understood by the
 author prior to PR submission.
 
-### Professionalism and quality
+## Professionalism and quality
 
 **The usual high quality level of PRs should be maintained regardless of tools
 used.** This includes not only code, but also the design, testing, PR
@@ -63,7 +63,7 @@ encouraged to write your own PR description, in your own words, if for no
 other reason than to force yourself to understand the code well enough to
 describe it to others.
 
-### Disclosure
+## Disclosure
 
 **Disclosure is required.** Patches that were written with the aid of AI
 coding assistants must have, at a minimum, the following line in the PR description body:
@@ -80,7 +80,7 @@ from, feel free to briefly say how you used the tool. But this is not required
 and we understand that it's often infeasibly difficult to describe accurately
 in any detail.
 
-### Intellectual Property
+## Intellectual Property
 
 Regardless of how the code came to be -- from your head alone, from a friend,
 from Stack Overflow, from a blog post, from reading other code bases, or from
@@ -100,7 +100,7 @@ You may find that your confidence about complying with the DCO+CLA depends on:
 - Whether your tool has guardrails to prevent answers that are too similar to
   existing code, for example as claimed by [Claude](https://privacy.claude.com/en/articles/10023638-why-am-i-receiving-an-output-blocked-by-content-filtering-policy-error) and [Copilot](https://docs.github.com/en/copilot/how-tos/manage-your-account/).
 
-### Extractive submissions
+## Extractive submissions
 
 **Maintainer time and attention are precious commodities**, and use of coding
 assistants is not an excuse to submit poor PRs or to externalize costs onto
@@ -119,7 +119,7 @@ actually learn from. We expect each developer to implement at most one "good
 first issue" per Dev Days occasion, and we encourage you to solve the problem
 with your own brain to maximize the learning experience.
 
-### Exceptions
+## Exceptions
 
 This AI tool use policy is not meant to encompass cases such as:
 - "Smart auto-complete", spell-checking, grammar checking, or other uses that
@@ -138,7 +138,7 @@ This AI tool use policy is not meant to encompass cases such as:
   isn't making substantive fixes for you).
 
 
-### Creative contributions -- out of scope
+## Creative contributions -- out of scope
 
 This project repository contains code for tools, and their documentation. We
 don't really directly host any artistically creative work here, so we have not
@@ -149,7 +149,7 @@ guidance or inspiration for your own policies, please be aware that you may
 have needs that are not covered by these policies but deserve well-crafted
 guidance.
 
-### References and inspiration
+## References and inspiration
 
 Our policy has been informed and inspired by the following efforts in other communities:
 

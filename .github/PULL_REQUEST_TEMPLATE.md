@@ -5,7 +5,7 @@ A reminder on things to do when using AI assistance:
 - Make sure you disclose AI assistance via `Assisted-by: TOOL / MODEL` in the PR description.
 - Do not use AI assistance to address a 'good first issue'.
 - A human must always be in the loop, and is the responsible party for the contents of a PR (including fully understanding and being able to explain, defend, and modify it in response to review comments).
-- Interact with the project and community yourself, not by agent.
+- Humans should interact with the project and community directly, not agents.
 
 **Link the Issue(s) this Pull Request is related to.**
 

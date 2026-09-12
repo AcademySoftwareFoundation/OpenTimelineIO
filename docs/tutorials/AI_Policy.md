@@ -51,7 +51,7 @@ preparation, and the author's ability to explain and defend the code and
 respond to questions and requests for changes. We never want to hear "but the
 AI..." as an excuse for anything.
 
-**PRs should always be [reviewed](CodeReview.md) and approved by someone other
+**PRs should always be reviewed and approved by someone other
 than their author if at all possible.** This is especially true of code with
 machine-generated components, because of the additional risk that the
 submitter/operator may not fully understand what they did not write

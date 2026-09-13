@@ -195,10 +195,9 @@ else()
 endif()
 
 if(WIN32)
-    # Windows debug builds for Python require a d in order for the module to
-    # load. This also helps ensure that debug builds in general are matched
-    # to the Microsoft debug CRT.
-    set(OTIO_DEBUG_POSTFIX "_d")
+    # Windows builds for Python can use a postfix to find Debug versions.
+    set(OTIO_DEBUG_POSTFIX "_d" CACHE STRING
+        "Postfix for the names of debug libraries and Python modules")
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

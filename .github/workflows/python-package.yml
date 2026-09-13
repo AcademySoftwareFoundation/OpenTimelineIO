@@ -5,7 +5,7 @@ name: OpenTimelineIO
 
 # for configuring which build will be a C++ coverage build / coverage report
 env:
-  GH_COV_PY: "3.10"
+  GH_COV_PY: "3.13"
   GH_COV_OS: ubuntu-latest
   GH_DEPENDABOT: dependabot
 
@@ -105,7 +105,7 @@ jobs:
       matrix:
         # See note in cpp_build about pinning to windows-2022.
         os: [ubuntu-latest, windows-2022, macos-15]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15.0-rc.2"]
         include:
           - { os: ubuntu-latest, shell: bash }
           - { os: macos-15, shell: bash }
@@ -217,12 +217,12 @@ jobs:
             windows-2022,
             macos-15,
           ]
-        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313"]
+        python-build: ["cp39", "cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Build wheels (Python 3)
-        uses: pypa/cibuildwheel@9c00cb4f6b517705a3794b22395aedc36257242c # v3.2.1
+        uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         with:
           output-dir: wheelhouse
         env:

@@ -4,6 +4,11 @@
 from . _core_utils import add_method
 from .. import _otio
 
+_otio.Item.__doc__ = """
+An item in the timeline.
+
+An Item can contain effects, markers, a source range, and metadata.
+"""
 
 @add_method(_otio.Item)
 def __str__(self):

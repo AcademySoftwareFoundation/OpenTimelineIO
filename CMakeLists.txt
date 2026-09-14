@@ -298,6 +298,20 @@ endif()
 # set up the internally hosted dependencies
 add_subdirectory(src/deps)
 
+# Needed when OTIO is built against an external minizip-ng, which names its
+# target minizip-ng when built without the compatibility layer.
+if(TARGET MINIZIP::minizip-ng)
+    set(OTIO_MINIZIP_TARGET MINIZIP::minizip-ng)
+else()
+    set(OTIO_MINIZIP_TARGET MINIZIP::minizip)
+endif()
+
+# install(TARGETS) does not accept an alias.
+get_target_property(OTIO_MINIZIP_LIB ${OTIO_MINIZIP_TARGET} ALIASED_TARGET)
+if(NOT OTIO_MINIZIP_LIB)
+    set(OTIO_MINIZIP_LIB ${OTIO_MINIZIP_TARGET})
+endif()
+
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)
 

@@ -94,7 +94,7 @@ endif()
 
 target_link_libraries(opentimelineio
     PUBLIC opentime Imath::Imath
-    PRIVATE MINIZIP::minizip)
+    PRIVATE ${OTIO_MINIZIP_TARGET})
 
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
@@ -137,7 +137,7 @@ if(OTIO_CXX_INSTALL)
     set(OPENTIMELINEIO_INCLUDES ${OTIO_RESOLVED_CXX_INSTALL_DIR}/include)
 
     if(NOT OTIO_FIND_MINIZIP_NG)
-        install(TARGETS minizip
+        install(TARGETS ${OTIO_MINIZIP_LIB}
             EXPORT OpenTimelineIOTargets
             ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
             LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"

@@ -102,8 +102,14 @@ or if the rate is less than or equal to zero.
 Returns true if the time is valid. The time is considered valid if the value and rate are not NaN values
 and the rate is greater than zero.
 )docstring")
-        .def_property_readonly("value", &RationalTime::value)
-        .def_property_readonly("rate", &RationalTime::rate)
+        .def_property_readonly(
+            "value",
+            &RationalTime::value,
+            "The count of :attr:`rate` units that have elapsed.")
+        .def_property_readonly(
+            "rate",
+            &RationalTime::rate,
+            "The number of subdivisions of a second this time is counted in.")
         .def(
             "rescaled_to",
             (RationalTime (RationalTime::*)(double) const)

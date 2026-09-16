@@ -108,13 +108,13 @@ available range, along with lists of :class:`.Effect`\s and
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
+- *color*: Optional display :class:`~Color` for this item, used by editing tools that render a timeline.
+- *effects*: The list of :class:`~Effect` objects attached to this item, in the order they are applied.
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
+- *markers*: The list of :class:`~Marker` objects attached to this item.
 - *metadata*: 
 - *name*: 
-- *source_range*: 
+- *source_range*: The range of media this item wants to show, in the space of its own intrinsic time (or ``None`` to use the available range of the media, if any).
 
 ### MediaReference.1
 
@@ -133,8 +133,8 @@ describing the range of media that is available, and an optional
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
+- *available_image_bounds*: The spatial bounds of the available image data, or ``None`` if unknown/not applicable.
+- *available_range*: The range of time (in the media's own coordinate system) that is available to be referenced, or ``None`` if unknown/not applicable (for example, an infinite generator).
 - *metadata*: 
 - *name*: 
 
@@ -202,8 +202,8 @@ to, added to, or subtracted from another :class:`~RationalTime`.
 ```
 
 parameters:
-- *rate*: 
-- *value*: 
+- *rate*: The number of subdivisions of a second this time is counted in.
+- *value*: The count of :attr:`rate` units that have elapsed.
 
 ### TimeRange.1
 

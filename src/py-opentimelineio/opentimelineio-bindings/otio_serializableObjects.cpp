@@ -633,8 +633,16 @@ available range, along with lists of :class:`.Effect`\s and
         .def_property(
             "source_range",
             &Item::source_range,
-            &Item::set_source_range)
-        .def_property("color", &Item::color, &Item::set_color)
+            &Item::set_source_range,
+            "The range of media this item wants to show, in the space of "
+            "its own intrinsic time (or ``None`` to use the available range "
+            "of the media, if any).")
+        .def_property(
+            "color",
+            &Item::color,
+            &Item::set_color,
+            "Optional display :class:`~Color` for this item, used by "
+            "editing tools that render a timeline.")
         .def(
             "available_range",
             [](Item* item) {
@@ -647,10 +655,13 @@ available range, along with lists of :class:`.Effect`\s and
             })
         .def_property_readonly(
             "markers",
-            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); })
+            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); },
+            "The list of :class:`~Marker` objects attached to this item.")
         .def_property_readonly(
             "effects",
-            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); })
+            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); },
+            "The list of :class:`~Effect` objects attached to this item, "
+            "in the order they are applied.")
         .def(
             "duration",
             [](Item* item) { return item->duration(ErrorStatusHandler()); })
@@ -686,9 +697,13 @@ available range, along with lists of :class:`.Effect`\s and
             },
             "time_range"_a,
             "to_item"_a)
-        .def_property_readonly("available_image_bounds", [](Item* item) {
-            return item->available_image_bounds(ErrorStatusHandler());
-        });
+        .def_property_readonly(
+            "available_image_bounds",
+            [](Item* item) {
+                return item->available_image_bounds(ErrorStatusHandler());
+            },
+            "The spatial bounds of the available image data for this item, "
+            "or ``None`` if unknown/not applicable.");
 
     auto transition_class =
         py::class_<Transition, Composable, managing_ptr<Transition>>(
@@ -1350,14 +1365,21 @@ describing the range of media that is available, and an optional
         .def_property(
             "available_range",
             &MediaReference::available_range,
-            &MediaReference::set_available_range)
+            &MediaReference::set_available_range,
+            "The range of time (in the media's own coordinate system) that "
+            "is available to be referenced, or ``None`` if unknown/not "
+            "applicable (for example, an infinite generator).")
         .def_property(
             "available_image_bounds",
             &MediaReference::available_image_bounds,
-            &MediaReference::set_available_image_bounds)
+            &MediaReference::set_available_image_bounds,
+            "The spatial bounds of the available image data, or ``None`` "
+            "if unknown/not applicable.")
         .def_property_readonly(
             "is_missing_reference",
-            &MediaReference::is_missing_reference);
+            &MediaReference::is_missing_reference,
+            "True for a reference (such as :class:`~MissingReference`) "
+            "that does not actually resolve to any media.");
 
     py::class_<
         GeneratorReference,

@@ -591,7 +591,16 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
     py::class_<Item, Composable, managing_ptr<Item>>(
         m,
         "Item",
-        py::dynamic_attr())
+        py::dynamic_attr(),
+        R"docstring(
+Base class for objects that can be composed within a :class:`.Composition`
+and have a duration, such as :class:`.Clip`, :class:`.Gap`, :class:`.Track`,
+and :class:`.Stack`.
+
+An :class:`~Item` has an optional :attr:`source_range` that trims its
+available range, along with lists of :class:`.Effect`\s and
+:class:`.Marker`\s.
+)docstring")
         .def(
             py::init([](std::string                         name,
                         std::optional<TimeRange>            source_range,
@@ -1311,7 +1320,16 @@ define_media_references(py::module m)
     py::class_<MediaReference, SOWithMetadata, managing_ptr<MediaReference>>(
         m,
         "MediaReference",
-        py::dynamic_attr())
+        py::dynamic_attr(),
+        R"docstring(
+Base class for references to media, such as :class:`.ExternalReference`,
+:class:`.GeneratorReference`, :class:`.ImageSequenceReference`, and
+:class:`.MissingReference`.
+
+A :class:`~MediaReference` has an optional :attr:`available_range`
+describing the range of media that is available, and an optional
+:attr:`available_image_bounds` describing its spatial bounds.
+)docstring")
         .def(
             py::init([](std::string              name,
                         std::optional<TimeRange> available_range,

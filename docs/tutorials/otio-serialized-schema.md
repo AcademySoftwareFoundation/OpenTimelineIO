@@ -98,7 +98,13 @@ parameters:
 *documentation*:
 
 ```
-None
+Base class for objects that can be composed within a :class:`.Composition`
+and have a duration, such as :class:`.Clip`, :class:`.Gap`, :class:`.Track`,
+and :class:`.Stack`.
+
+An :class:`~Item` has an optional :attr:`source_range` that trims its
+available range, along with lists of :class:`.Effect`\s and
+:class:`.Marker`\s.
 ```
 
 parameters:
@@ -117,7 +123,13 @@ parameters:
 *documentation*:
 
 ```
-None
+Base class for references to media, such as :class:`.ExternalReference`,
+:class:`.GeneratorReference`, :class:`.ImageSequenceReference`, and
+:class:`.MissingReference`.
+
+A :class:`~MediaReference` has an optional :attr:`available_range`
+describing the range of media that is available, and an optional
+:attr:`available_image_bounds` describing its spatial bounds.
 ```
 
 parameters:
@@ -181,8 +193,12 @@ parameters:
 *documentation*:
 
 ```
-The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
-It can be rescaled into another :class:`~RationalTime`'s rate.
+The RationalTime class represents a measure of time of ``value/rate`` seconds,
+where ``value`` and ``rate`` are the :attr:`value` and :attr:`rate` of the
+instance.
+
+It can be rescaled into another :class:`~RationalTime`'s rate, and compared
+to, added to, or subtracted from another :class:`~RationalTime`.
 ```
 
 parameters:

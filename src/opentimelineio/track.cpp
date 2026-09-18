@@ -14,8 +14,8 @@ Track::Track(
     std::optional<TimeRange> const& source_range,
     std::string const&              kind,
     AnyDictionary const&            metadata,
-    std::vector<Marker*> const&     markers,
-    std::optional<Color> const&     color)
+    std::optional<Color> const&     color,
+    std::vector<Marker*> const&     markers)
     : Parent(
           name,
           source_range,

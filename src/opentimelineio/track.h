@@ -43,16 +43,16 @@ public:
     /// @param source_range The source range of the track.
     /// @param kind The kind of track.
     /// @param metadata The metadata for the track.
+    /// @param color The color for the track.
     /// @param markers The list of markers for the track. Note that the
     /// the track keeps a retainer to each marker.
-    /// @param color The color for the track.
     OTIO_API Track(
         std::string const&              name         = std::string(),
         std::optional<TimeRange> const& source_range = std::nullopt,
         std::string const&              kind         = Kind::video,
         AnyDictionary const&            metadata     = AnyDictionary(),
-        std::vector<Marker*> const&     markers      = std::vector<Marker*>(),
-        std::optional<Color> const&     color        = std::nullopt);
+        std::optional<Color> const&     color        = std::nullopt,
+        std::vector<Marker*> const&     markers      = std::vector<Marker*>());
 
     /// @brief Return this kind of track.
     std::string kind() const noexcept { return _kind; }

@@ -157,6 +157,7 @@ main(int argc, char** argv)
             std::nullopt,
             Track::Kind::video,
             AnyDictionary(),
+            std::nullopt,
             std::vector<Marker*>({ ma0, ma1 }));
         assertEqual(tr->markers().size(), 2);
         assertEqual(tr->markers()[0].value, ma0.value);

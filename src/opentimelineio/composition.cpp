@@ -397,6 +397,7 @@ Composition::trimmed_range_of_child(
         result_range = TimeRange(
             result_range->start_time() + parent_range.start_time(),
             result_range->duration());
+        current = parent;
     }
 
     if (!source_range())

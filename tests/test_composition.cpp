@@ -5,6 +5,7 @@
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/composition.h>
+#include <opentimelineio/gap.h>
 #include <opentimelineio/item.h>
 #include <opentimelineio/stack.h>
 #include <opentimelineio/track.h>
@@ -92,6 +93,28 @@ main(int argc, char** argv)
         assertEqual(
             error.outcome,
             OTIO_NS::ErrorStatus::NOT_DESCENDED_FROM);
+    });
+
+    tests.add_test("test_trimmed_range_of_nested_child", [] {
+        SerializableObject::Retainer<Stack> root  = new Stack;
+        SerializableObject::Retainer<Track> track = new Track;
+        SerializableObject::Retainer<Stack> stack = new Stack;
+        SerializableObject::Retainer<Clip>  clip  = new Clip;
+
+        clip->set_source_range(
+            TimeRange(RationalTime(100, 24), RationalTime(50, 24)));
+        root->append_child(track);
+        track->append_child(new Gap(RationalTime(10, 24)));
+        track->append_child(stack);
+        stack->append_child(clip);
+
+        OTIO_NS::ErrorStatus err;
+        auto                 range = root->trimmed_range_of_child(clip, &err);
+        assertFalse(is_error(err));
+        assertTrue(range.has_value());
+        assertEqual(
+            *range,
+            TimeRange(RationalTime(10, 24), RationalTime(50, 24)));
     });
 
     tests.run(argc, argv);

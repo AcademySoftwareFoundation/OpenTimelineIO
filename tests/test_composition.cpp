@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #include <opentimelineio/clip.h>
+#include <opentimelineio/composable.h>
 #include <opentimelineio/composition.h>
 #include <opentimelineio/gap.h>
 #include <opentimelineio/item.h>
@@ -75,6 +76,38 @@ main(int argc, char** argv)
         assertEqual(
             *range,
             TimeRange(RationalTime(10, 24), RationalTime(50, 24)));
+    });
+
+    tests.add_test("test_composable_available_image_bounds", [] {
+        SerializableObject::Retainer<Gap> gap = new Gap();
+        // Calling available_image_bounds with default nullptr should not crash
+        auto bounds = gap->available_image_bounds();
+        assertFalse(bounds.has_value());
+
+        // Calling with explicit nullptr should not crash
+        bounds = gap->available_image_bounds(nullptr);
+        assertFalse(bounds.has_value());
+
+        // Calling with valid error_status pointer sets NOT_IMPLEMENTED
+        OTIO_NS::ErrorStatus err;
+        bounds = gap->available_image_bounds(&err);
+        assertFalse(bounds.has_value());
+        assertTrue(is_error(err));
+        assertEqual(err.outcome, OTIO_NS::ErrorStatus::NOT_IMPLEMENTED);
+
+        // Also test Composable directly
+        SerializableObject::Retainer<Composable> composable = new Composable();
+        bounds = composable->available_image_bounds();
+        assertFalse(bounds.has_value());
+
+        bounds = composable->available_image_bounds(nullptr);
+        assertFalse(bounds.has_value());
+
+        OTIO_NS::ErrorStatus comp_err;
+        bounds = composable->available_image_bounds(&comp_err);
+        assertFalse(bounds.has_value());
+        assertTrue(is_error(comp_err));
+        assertEqual(comp_err.outcome, OTIO_NS::ErrorStatus::NOT_IMPLEMENTED);
     });
 
     tests.run(argc, argv);

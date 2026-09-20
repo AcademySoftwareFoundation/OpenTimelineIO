@@ -26,6 +26,9 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment ve
 
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+
 #------------------------------------------------------------------------------
 # Options
 # Add all options and settings here for all subprojects to aid in project

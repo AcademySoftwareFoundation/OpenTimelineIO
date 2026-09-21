@@ -132,7 +132,7 @@ public:
         bool read(std::string const& key, IMATH_NAMESPACE::Box2d* value);
         bool read(std::string const& key, AnyVector* dest);
         bool read(std::string const& key, AnyDictionary* dest);
-        bool read(std::string const& key, std::any* dest);
+        OTIO_API bool read(std::string const& key, std::any* dest);
 
         bool read(std::string const& key, std::optional<bool>* dest);
         bool read(std::string const& key, std::optional<int>* dest);
@@ -402,7 +402,7 @@ public:
         bool _fetch(std::string const& key, int64_t* dest);
         bool _fetch(std::string const& key, double* dest);
         bool _fetch(std::string const& key, SerializableObject** dest);
-        bool
+        OTIO_API bool
         _type_check(std::type_info const& wanted, std::type_info const& found);
         bool _type_check_so(
             std::type_info const& wanted,
@@ -446,7 +446,7 @@ public:
             ErrorStatus*              error_status               = nullptr);
 
         void write(std::string const& key, bool value);
-        void write(std::string const& key, int64_t value);
+        OTIO_API void write(std::string const& key, int64_t value);
         void write(std::string const& key, double value);
         void write(std::string const& key, std::string const& value);
         void write(std::string const& key, RationalTime value);
@@ -673,7 +673,7 @@ public:
     };
 
 protected:
-    virtual ~SerializableObject();
+    OTIO_API virtual ~SerializableObject();
 
     OTIO_API virtual bool _is_deletable();
 

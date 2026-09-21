@@ -22,7 +22,7 @@ static constexpr std::array<double, 2> dropframe_timecode_rates{ {
 // ST 12-1:2014 - SMPTE Standard - Time and Control Code
 // https://ieeexplore.ieee.org/document/7291029
 //
-static constexpr std::array<double, 11> smpte_timecode_rates{
+static constexpr std::array<double, 10> smpte_timecode_rates{
     { 24000.0 / 1001.0,
       24.0,
       25.0,

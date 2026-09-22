@@ -21,6 +21,7 @@ concurrency:
 
 jobs:
   cpp_build:
+    name: cpp_build (${{ matrix.os }}, shared=${{ matrix.shared }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -29,6 +30,7 @@ jobs:
         # CMake 4.3 breaks the vcpkg-based ZLIB find_package path.
         # windows-2022 is supported by GitHub through ~2028.
         os: [ubuntu-latest, windows-2022, macos-15]
+        shared: ["ON", "OFF"]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
@@ -38,6 +40,11 @@ jobs:
             OTIO_TEST_TARGET: RUN_TESTS
           - os: macos-15
             OTIO_TEST_TARGET: test
+          # Coverage is measured once, on the static build.
+          - shared: "ON"
+            OTIO_CXX_COVERAGE: "OFF"
+          - shared: "OFF"
+            OTIO_CXX_COVERAGE: "ON"
 
     env:
       OTIO_BUILD_CONFIG: Release
@@ -50,7 +57,7 @@ jobs:
         with:
           submodules: "recursive"
       - name: Install coverage dependency
-        if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        if: matrix.os == env.GH_COV_OS && matrix.shared == 'OFF' && github.actor != env.GH_DEPENDABOT
         run: |
           sudo apt-get install lcov
       - name: Install ZLIB (Linux)
@@ -66,14 +73,14 @@ jobs:
         run: |
           cmake -E make_directory ${{ env.OTIO_BUILD_DIR }}
           cd ${{ env.OTIO_BUILD_DIR }}
-          cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=OFF -DOTIO_CXX_COVERAGE=ON -DOTIO_CXX_EXAMPLES=ON
+          cmake ${{ github.workspace }} -DCMAKE_INSTALL_PREFIX=${{ env.OTIO_INSTALL_DIR }} -DOTIO_SHARED_LIBS=${{ matrix.shared }} -DOTIO_CXX_COVERAGE=${{ matrix.OTIO_CXX_COVERAGE }} -DOTIO_CXX_EXAMPLES=ON
           cmake --build . --config ${{ env.OTIO_BUILD_CONFIG }}
       - name: Run tests
         run: |
           cd ${{ env.OTIO_BUILD_DIR }}
           cmake --build . --target ${{ matrix.OTIO_TEST_TARGET }} --config ${{ env.OTIO_BUILD_CONFIG }}
       - name: Collect code coverage
-        if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+        if: matrix.os == env.GH_COV_OS && matrix.shared == 'OFF' && github.actor != env.GH_DEPENDABOT
         run: |
           cd ${{ env.OTIO_BUILD_DIR }}
           lcov --rc lcov_branch_coverage=1 --rc no_exception_branch=1 --ignore-errors mismatch --capture -b . --directory . --output-file=coverage.info -q
@@ -82,7 +89,7 @@ jobs:
           lcov --list coverage.filtered.info
       # \todo Should the Codecov web pages show the results of the C++ or Python tests?
       #    - name: Upload coverage to Codecov
-      #      if: matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
+      #      if: matrix.os == env.GH_COV_OS && matrix.shared == 'OFF' && github.actor != env.GH_DEPENDABOT
       #      uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
       #      with:
       #        files: ${{ env.OTIO_BUILD_DIR }}/coverage.filtered.info

@@ -79,6 +79,11 @@ class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
 
+    def test_available_image_bounds(self):
+        gp = otio.schema.Gap()
+        with self.assertRaises(NotImplementedError):
+            _ = gp.available_image_bounds
+
 
 class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 

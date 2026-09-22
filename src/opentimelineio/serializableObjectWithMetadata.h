@@ -42,10 +42,10 @@ public:
     AnyDictionary metadata() const noexcept { return _metadata; }
 
 protected:
-    virtual ~SerializableObjectWithMetadata();
+    OTIO_API virtual ~SerializableObjectWithMetadata();
 
-    bool read_from(Reader&) override;
-    void write_to(Writer&) const override;
+    OTIO_API bool read_from(Reader&) override;
+    OTIO_API void write_to(Writer&) const override;
 
 private:
     std::string   _name;

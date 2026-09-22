@@ -29,7 +29,6 @@ These adapters are supported by the broader OpenTimelineIO community. While the 
 
 Below are some other adapters that may be useful to some users:
 
-- [kdenlive](https://invent.kde.org/multimedia/kdenlive-opentimelineio)
 - [fcpx_xml](https://github.com/OpenTimelineIO/otio-fcpx-xml-adapter)
 - [hls_playlist](https://github.com/OpenTimelineIO/otio-hls-playlist-adapter)
 

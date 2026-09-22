@@ -29,6 +29,11 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
+# Windows binaries and DLLs need to be in the same directory.
+if(WIN32)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+endif()
+
 #------------------------------------------------------------------------------
 # Options
 # Add all options and settings here for all subprojects to aid in project

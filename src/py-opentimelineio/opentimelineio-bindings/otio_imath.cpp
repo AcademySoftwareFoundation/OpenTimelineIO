@@ -111,14 +111,36 @@ define_imath_2d(py::module m)
             [](IMATH_NAMESPACE::V2d* v, IMATH_NAMESPACE::V2d const& v2) {
                 return v->cross(v2);
             })
-        .def("length", &IMATH_NAMESPACE::V2d::length)
+        // Imath 3.2.3 made length() and the normalize*() methods member
+        // templates, so their addresses can no longer be passed to def().
+        // The in-place normalize*() lambdas return a reference so the
+        // result is still the same Python object as self.
+        .def("length", [](IMATH_NAMESPACE::V2d* v) { return v->length(); })
         .def("length2", &IMATH_NAMESPACE::V2d::length2)
-        .def("normalize", &IMATH_NAMESPACE::V2d::normalize)
-        .def("normalizeExc", &IMATH_NAMESPACE::V2d::normalizeExc)
-        .def("normalizeNonNull", &IMATH_NAMESPACE::V2d::normalizeNonNull)
-        .def("normalized", &IMATH_NAMESPACE::V2d::normalized)
-        .def("normalizedExc", &IMATH_NAMESPACE::V2d::normalizedExc)
-        .def("normalizedNonNull", &IMATH_NAMESPACE::V2d::normalizedNonNull)
+        .def(
+            "normalize",
+            [](IMATH_NAMESPACE::V2d* v) -> IMATH_NAMESPACE::V2d const& {
+                return v->normalize();
+            })
+        .def(
+            "normalizeExc",
+            [](IMATH_NAMESPACE::V2d* v) -> IMATH_NAMESPACE::V2d const& {
+                return v->normalizeExc();
+            })
+        .def(
+            "normalizeNonNull",
+            [](IMATH_NAMESPACE::V2d* v) -> IMATH_NAMESPACE::V2d const& {
+                return v->normalizeNonNull();
+            })
+        .def(
+            "normalized",
+            [](IMATH_NAMESPACE::V2d* v) { return v->normalized(); })
+        .def(
+            "normalizedExc",
+            [](IMATH_NAMESPACE::V2d* v) { return v->normalizedExc(); })
+        .def(
+            "normalizedNonNull",
+            [](IMATH_NAMESPACE::V2d* v) { return v->normalizedNonNull(); })
         .def_static(
             "baseTypeLowest",
             []() { return IMATH_NAMESPACE::V2d::baseTypeLowest(); })

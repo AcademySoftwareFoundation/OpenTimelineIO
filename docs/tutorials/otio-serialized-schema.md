@@ -98,17 +98,23 @@ parameters:
 *documentation*:
 
 ```
-None
+Base class for objects that can be composed within a :class:`.Composition`
+and have a duration, such as :class:`.Clip`, :class:`.Gap`, :class:`.Track`,
+and :class:`.Stack`.
+
+An :class:`~Item` has an optional :attr:`source_range` that trims its
+available range, along with lists of :class:`.Effect`\s and
+:class:`.Marker`\s.
 ```
 
 parameters:
-- *color*: 
-- *effects*: 
+- *color*: Optional display :class:`~Color` for this item, used by editing tools that render a timeline.
+- *effects*: The list of :class:`~Effect` objects attached to this item, in the order they are applied.
 - *enabled*: If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
-- *markers*: 
+- *markers*: The list of :class:`~Marker` objects attached to this item.
 - *metadata*: 
 - *name*: 
-- *source_range*: 
+- *source_range*: The range of media this item wants to show, in the space of its own intrinsic time (or ``None`` to use the available range of the media, if any).
 
 ### MediaReference.1
 
@@ -117,12 +123,18 @@ parameters:
 *documentation*:
 
 ```
-None
+Base class for references to media, such as :class:`.ExternalReference`,
+:class:`.GeneratorReference`, :class:`.ImageSequenceReference`, and
+:class:`.MissingReference`.
+
+A :class:`~MediaReference` has an optional :attr:`available_range`
+describing the range of media that is available, and an optional
+:attr:`available_image_bounds` describing its spatial bounds.
 ```
 
 parameters:
-- *available_image_bounds*: 
-- *available_range*: 
+- *available_image_bounds*: The spatial bounds of the available image data, or ``None`` if unknown/not applicable.
+- *available_range*: The range of time (in the media's own coordinate system) that is available to be referenced, or ``None`` if unknown/not applicable (for example, an infinite generator).
 - *metadata*: 
 - *name*: 
 
@@ -181,13 +193,17 @@ parameters:
 *documentation*:
 
 ```
-The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
-It can be rescaled into another :class:`~RationalTime`'s rate.
+The RationalTime class represents a measure of time of ``value/rate`` seconds,
+where ``value`` and ``rate`` are the :attr:`value` and :attr:`rate` of the
+instance.
+
+It can be rescaled into another :class:`~RationalTime`'s rate, and compared
+to, added to, or subtracted from another :class:`~RationalTime`.
 ```
 
 parameters:
-- *rate*: 
-- *value*: 
+- *rate*: The number of subdivisions of a second this time is counted in.
+- *value*: The count of :attr:`rate` units that have elapsed.
 
 ### TimeRange.1
 

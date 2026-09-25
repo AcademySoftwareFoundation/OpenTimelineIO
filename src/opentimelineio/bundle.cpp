@@ -908,15 +908,6 @@ namespace bundle {
                     "input '" + path  + "' is not a directory");
             return nullptr;
         }
-        auto const version_path = input_path / version_file;
-        if (!std::filesystem::is_regular_file(version_path))
-        {
-            if (error_status)
-                *error_status = ErrorStatus(
-                    ErrorStatus::FILE_OPEN_FAILED,
-                    "'" + path  + "' is missing a version file");
-            return nullptr;
-        }
         auto const timeline_path = input_path / timeline_file;
         if (!std::filesystem::is_regular_file(timeline_path))
         {

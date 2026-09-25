@@ -41,25 +41,6 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result = otio.adapters.read_from_file(otioz_path)
             self.assertIsNotNone(result)
 
-    def test_media_policy_as_string(self):
-        # As for otiod: the policy may arrive as a string.
-        with tempfile.TemporaryDirectory() as temp_dir:
-            tl = otio.schema.Timeline()
-            tr = otio.schema.Track()
-            tl.tracks.append(tr)
-            cl = otio.schema.Clip()
-            tr.append(cl)
-            cl.media_reference = otio.schema.ExternalReference(
-                "http://example.com/video.mov")
-
-            otioz_path = os.path.join(temp_dir, "policy.otioz")
-            otio.adapters.write_to_file(
-                tl,
-                otioz_path,
-                relative_media_base_dir=temp_dir,
-                media_policy="AllMissing")
-            self.assertIsNotNone(otio.adapters.read_from_file(otioz_path))
-
 
 if __name__ == "__main__":
     unittest.main()

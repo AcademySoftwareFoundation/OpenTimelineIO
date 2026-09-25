@@ -67,5 +67,34 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result = otio.adapters.read_from_file(otiod_path)
             self.assertIsNotNone(result)
 
+    def test_media_policy_as_string(self):
+        # The policy arrives as a string from the commandline, in either the
+        # name the enumeration uses or the one the adapters used before it.
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            tr = otio.schema.Track()
+            tl.tracks.append(tr)
+            cl = otio.schema.Clip()
+            tr.append(cl)
+            cl.media_reference = otio.schema.ExternalReference(
+                "http://example.com/video.mov")
+
+            for i, policy in enumerate(("all_missing", "AllMissing")):
+                otiod_path = os.path.join(temp_dir, "policy%d.otiod" % i)
+                otio.adapters.write_to_file(
+                    tl,
+                    otiod_path,
+                    relative_media_base_dir=temp_dir,
+                    media_policy=policy)
+                self.assertIsNotNone(otio.adapters.read_from_file(otiod_path))
+
+            with self.assertRaises(ValueError):
+                otio.adapters.write_to_file(
+                    tl,
+                    os.path.join(temp_dir, "bad.otiod"),
+                    relative_media_base_dir=temp_dir,
+                    media_policy="not_a_policy")
+
+
 if __name__ == "__main__":
     unittest.main()

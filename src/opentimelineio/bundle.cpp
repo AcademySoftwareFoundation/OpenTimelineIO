@@ -908,10 +908,6 @@ namespace bundle {
                     "input '" + path  + "' is not a directory");
             return nullptr;
         }
-        // Note that the version file is not required to read a bundle. One
-        // is written, and read_otioz does not ask for one either, but the
-        // adapter that wrote otiod bundles before this never wrote one, so
-        // requiring it here would refuse every bundle made until now.
         auto const timeline_path = input_path / timeline_file;
         if (!std::filesystem::is_regular_file(timeline_path))
         {

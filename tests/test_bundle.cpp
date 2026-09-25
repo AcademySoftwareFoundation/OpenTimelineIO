@@ -483,9 +483,7 @@ main(int argc, char** argv)
     });
 
     tests.add_test("test_otiod_no_version_file", [] {
-        // The adapter that wrote otiod bundles before this one did not write
-        // a version file, and read_otioz does not ask for one either, so a
-        // bundle without one still reads.
+        // The python adapter did not write version files for .otiod bundles.
         TempDir temp;
         SerializableObject::Retainer<Timeline> tl(new Timeline);
 

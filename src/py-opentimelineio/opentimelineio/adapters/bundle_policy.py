@@ -1,17 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""Turns a media policy written as a string into the enumeration.
-
-The bundle adapters take their arguments from whoever calls them, and from
-the commandline that is always a string: `otioconvert -A
-media_policy=all_missing` reaches the adapter as the text `all_missing`,
-which is not a value the enumeration will accept.
-
-Both spellings are understood: the names the enumeration uses, and the
-names the adapters used before it, which is what documentation and scripts
-written against those versions say.
-"""
+"""Convert a string to a media reference policy."""
 
 from .. import (
     _otio

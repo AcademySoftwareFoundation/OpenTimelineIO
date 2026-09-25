@@ -482,6 +482,28 @@ main(int argc, char** argv)
         assertEqual(result->find_clips().size(), 0);
     });
 
+    tests.add_test("test_otiod_no_version_file", [] {
+        // The adapter that wrote otiod bundles before this one did not write
+        // a version file, and read_otioz does not ask for one either, so a
+        // bundle without one still reads.
+        TempDir temp;
+        SerializableObject::Retainer<Timeline> tl(new Timeline);
+
+        auto const otiod_path = (temp.path() / "no_version.otiod").u8string();
+        OTIO_NS::ErrorStatus error;
+        assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
+
+        auto const version_path =
+            std::filesystem::u8path(otiod_path) / bundle::version_file;
+        assertTrue(std::filesystem::is_regular_file(version_path));
+        std::filesystem::remove(version_path);
+
+        auto result = dynamic_cast<Timeline*>(read_otiod(
+            otiod_path, ReadOptions(), &error));
+        assertNotNull(result);
+        assertFalse(is_error(error));
+    });
+
     tests.add_test("test_otioz_error", [] {
         TempDir temp;
 

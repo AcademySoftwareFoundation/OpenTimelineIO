@@ -41,6 +41,31 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result = otio.adapters.read_from_file(otiod_path)
             self.assertIsNotNone(result)
 
+    def test_read_without_version_file(self):
+        # The adapter that wrote otiod bundles before the C++ implementation
+        # did not write a version file, so reading one must not require it.
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            tr = otio.schema.Track()
+            tl.tracks.append(tr)
+            cl = otio.schema.Clip()
+            tr.append(cl)
+            ref = otio.schema.ExternalReference("video.mov")
+            cl.media_reference = ref
+            pathlib.Path(os.path.join(temp_dir, ref.target_url)).touch()
+
+            otiod_path = os.path.join(temp_dir, "no_version.otiod")
+            otio.adapters.write_to_file(
+                tl,
+                otiod_path,
+                relative_media_base_dir=temp_dir)
+
+            version_path = os.path.join(otiod_path, "version.txt")
+            self.assertTrue(os.path.isfile(version_path))
+            os.remove(version_path)
+
+            result = otio.adapters.read_from_file(otiod_path)
+            self.assertIsNotNone(result)
 
 if __name__ == "__main__":
     unittest.main()

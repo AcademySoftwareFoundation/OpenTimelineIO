@@ -1,3 +1,12 @@
+**If using AI assistance to author the PR, make sure you're acting within our [AI Policy](https://opentimelineio.readthedocs.io/en/latest/tutorials/AI_Policy.html)**
+
+A reminder on things to do when using AI assistance:
+
+- Make sure you disclose AI assistance via `Assisted-by: TOOL / MODEL` in the PR description.
+- Do not use AI assistance to address a 'good first issue'.
+- A human must always be in the loop, and is the responsible party for the contents of a PR (including fully understanding and being able to explain, defend, and modify it in response to review comments).
+- Humans should interact with the project and community directly, not agents.
+
 **Link the Issue(s) this Pull Request is related to.**
 
 If there is an associated issue, link it in the form:

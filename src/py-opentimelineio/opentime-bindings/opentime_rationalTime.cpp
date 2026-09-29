@@ -86,8 +86,12 @@ void
 opentime_rationalTime_bindings(py::module m)
 {
     py::class_<RationalTime>(m, "RationalTime", R"docstring(
-The RationalTime class represents a measure of time of :math:`rt.value/rt.rate` seconds.
-It can be rescaled into another :class:`~RationalTime`'s rate.
+The RationalTime class represents a measure of time of ``value/rate`` seconds,
+where ``value`` and ``rate`` are the :attr:`value` and :attr:`rate` of the
+instance.
+
+It can be rescaled into another :class:`~RationalTime`'s rate, and compared
+to, added to, or subtracted from another :class:`~RationalTime`.
 )docstring")
         .def(py::init<double, double>(), "value"_a = 0, "rate"_a = 1)
         .def("is_invalid_time", &RationalTime::is_invalid_time, R"docstring(
@@ -98,8 +102,14 @@ or if the rate is less than or equal to zero.
 Returns true if the time is valid. The time is considered valid if the value and rate are not NaN values
 and the rate is greater than zero.
 )docstring")
-        .def_property_readonly("value", &RationalTime::value)
-        .def_property_readonly("rate", &RationalTime::rate)
+        .def_property_readonly(
+            "value",
+            &RationalTime::value,
+            "The count of :attr:`rate` units that have elapsed.")
+        .def_property_readonly(
+            "rate",
+            &RationalTime::rate,
+            "The number of subdivisions of a second this time is counted in.")
         .def(
             "rescaled_to",
             (RationalTime (RationalTime::*)(double) const)

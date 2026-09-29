@@ -591,7 +591,16 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
     py::class_<Item, Composable, managing_ptr<Item>>(
         m,
         "Item",
-        py::dynamic_attr())
+        py::dynamic_attr(),
+        R"docstring(
+Base class for objects that can be composed within a :class:`.Composition`
+and have a duration, such as :class:`.Clip`, :class:`.Gap`, :class:`.Track`,
+and :class:`.Stack`.
+
+An :class:`~Item` has an optional :attr:`source_range` that trims its
+available range, along with lists of :class:`.Effect`\s and
+:class:`.Marker`\s.
+)docstring")
         .def(
             py::init([](std::string                         name,
                         std::optional<TimeRange>            source_range,
@@ -624,8 +633,16 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
         .def_property(
             "source_range",
             &Item::source_range,
-            &Item::set_source_range)
-        .def_property("color", &Item::color, &Item::set_color)
+            &Item::set_source_range,
+            "The range of media this item wants to show, in the space of "
+            "its own intrinsic time (or ``None`` to use the available range "
+            "of the media, if any).")
+        .def_property(
+            "color",
+            &Item::color,
+            &Item::set_color,
+            "Optional display :class:`~Color` for this item, used by "
+            "editing tools that render a timeline.")
         .def(
             "available_range",
             [](Item* item) {
@@ -638,10 +655,13 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
             })
         .def_property_readonly(
             "markers",
-            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); })
+            [](Item* item) { return ((MarkerVectorProxy*) &item->markers()); },
+            "The list of :class:`~Marker` objects attached to this item.")
         .def_property_readonly(
             "effects",
-            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); })
+            [](Item* item) { return ((EffectVectorProxy*) &item->effects()); },
+            "The list of :class:`~Effect` objects attached to this item, "
+            "in the order they are applied.")
         .def(
             "duration",
             [](Item* item) { return item->duration(ErrorStatusHandler()); })
@@ -677,9 +697,13 @@ An object that can be composed within a :class:`~Composition` (such as :class:`~
             },
             "time_range"_a,
             "to_item"_a)
-        .def_property_readonly("available_image_bounds", [](Item* item) {
-            return item->available_image_bounds(ErrorStatusHandler());
-        });
+        .def_property_readonly(
+            "available_image_bounds",
+            [](Item* item) {
+                return item->available_image_bounds(ErrorStatusHandler());
+            },
+            "The spatial bounds of the available image data for this item, "
+            "or ``None`` if unknown/not applicable.");
 
     auto transition_class =
         py::class_<Transition, Composable, managing_ptr<Transition>>(
@@ -1311,7 +1335,16 @@ define_media_references(py::module m)
     py::class_<MediaReference, SOWithMetadata, managing_ptr<MediaReference>>(
         m,
         "MediaReference",
-        py::dynamic_attr())
+        py::dynamic_attr(),
+        R"docstring(
+Base class for references to media, such as :class:`.ExternalReference`,
+:class:`.GeneratorReference`, :class:`.ImageSequenceReference`, and
+:class:`.MissingReference`.
+
+A :class:`~MediaReference` has an optional :attr:`available_range`
+describing the range of media that is available, and an optional
+:attr:`available_image_bounds` describing its spatial bounds.
+)docstring")
         .def(
             py::init([](std::string              name,
                         std::optional<TimeRange> available_range,
@@ -1332,14 +1365,21 @@ define_media_references(py::module m)
         .def_property(
             "available_range",
             &MediaReference::available_range,
-            &MediaReference::set_available_range)
+            &MediaReference::set_available_range,
+            "The range of time (in the media's own coordinate system) that "
+            "is available to be referenced, or ``None`` if unknown/not "
+            "applicable (for example, an infinite generator).")
         .def_property(
             "available_image_bounds",
             &MediaReference::available_image_bounds,
-            &MediaReference::set_available_image_bounds)
+            &MediaReference::set_available_image_bounds,
+            "The spatial bounds of the available image data, or ``None`` "
+            "if unknown/not applicable.")
         .def_property_readonly(
             "is_missing_reference",
-            &MediaReference::is_missing_reference);
+            &MediaReference::is_missing_reference,
+            "True for a reference (such as :class:`~MissingReference`) "
+            "that does not actually resolve to any media.");
 
     py::class_<
         GeneratorReference,

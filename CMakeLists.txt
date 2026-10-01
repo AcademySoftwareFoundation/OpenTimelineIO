@@ -29,6 +29,11 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
+# Windows binaries and DLLs need to be in the same directory.
+if(WIN32)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+endif()
+
 #------------------------------------------------------------------------------
 # Options
 # Add all options and settings here for all subprojects to aid in project
@@ -297,6 +302,20 @@ endif()
 
 # set up the internally hosted dependencies
 add_subdirectory(src/deps)
+
+# Needed when OTIO is built against an external minizip-ng, which names its
+# target minizip-ng when built without the compatibility layer.
+if(TARGET MINIZIP::minizip-ng)
+    set(OTIO_MINIZIP_TARGET MINIZIP::minizip-ng)
+else()
+    set(OTIO_MINIZIP_TARGET MINIZIP::minizip)
+endif()
+
+# install(TARGETS) does not accept an alias.
+get_target_property(OTIO_MINIZIP_LIB ${OTIO_MINIZIP_TARGET} ALIASED_TARGET)
+if(NOT OTIO_MINIZIP_LIB)
+    set(OTIO_MINIZIP_LIB ${OTIO_MINIZIP_TARGET})
+endif()
 
 add_subdirectory(src/opentime)
 add_subdirectory(src/opentimelineio)

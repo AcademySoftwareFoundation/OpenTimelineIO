@@ -33,7 +33,7 @@ using label_to_schema_version_map =
 
 ///@}
 
-extern const label_to_schema_version_map CORE_VERSION_MAP;
+extern OTIO_API const label_to_schema_version_map CORE_VERSION_MAP;
 
 /// @brief Type registry.
 class OTIO_API_TYPE TypeRegistry
@@ -42,7 +42,7 @@ public:
     /// @brief Get the type registry singleton.
     ///
     /// Access to functions are thread-safe.
-    static TypeRegistry& instance();
+    OTIO_API static TypeRegistry& instance();
 
     /// @brief Register a new schema.
     ///
@@ -51,7 +51,7 @@ public:
     /// the templated form of this call.
     ///
     /// If the specified schema_name has already been registered, this function does nothing and returns false.
-    bool register_type(
+    OTIO_API bool register_type(
         std::string const&                   schema_name,
         int                                  schema_version,
         std::type_info const*                type,
@@ -79,7 +79,7 @@ public:
     /// case a schema name is changed and the old name needs to be allowed as well.
     ///
     /// On success, returns true; otherwise, returns false and sets error_status if non-null.
-    bool register_type_from_existing_type(
+    OTIO_API bool register_type_from_existing_type(
         std::string const& schema_name,
         int                schema_version,
         std::string const& existing_schema_name,
@@ -98,7 +98,7 @@ public:
     ///
     /// Returns false if an upgrade function has been registered for this (schema_name, version)
     /// pair, or if schema_name itself has not been registered, and true otherwise.
-    bool register_upgrade_function(
+    OTIO_API bool register_upgrade_function(
         std::string const&                  schema_name,
         int                                 version_to_upgrade_to,
         std::function<void(AnyDictionary*)> upgrade_function);
@@ -119,7 +119,7 @@ public:
 
     /// @brief Downgrade function from version_to_downgrade_from to
     /// version_to_downgrade_from - 1
-    bool register_downgrade_function(
+    OTIO_API bool register_downgrade_function(
         std::string const&                  schema_name,
         int                                 version_to_downgrade_from,
         std::function<void(AnyDictionary*)> downgrade_function);
@@ -154,13 +154,13 @@ public:
     }
 
     /// @brief For use by external bridging systems.
-    bool set_type_record(
+    OTIO_API bool set_type_record(
         SerializableObject*,
         std::string const& schema_name,
         ErrorStatus*       error_status = nullptr);
 
     /// @brief For inspecting the type registry, build a map of schema name to version.
-    void type_version_map(schema_version_map& result);
+    OTIO_API void type_version_map(schema_version_map& result);
 
 private:
     TypeRegistry();
@@ -204,7 +204,7 @@ private:
         return it == _type_records.end() ? nullptr : it->second;
     }
 
-    SerializableObject* _instance_from_schema(
+    OTIO_API SerializableObject* _instance_from_schema(
         std::string    schema_name,
         int            schema_version,
         AnyDictionary& dict,

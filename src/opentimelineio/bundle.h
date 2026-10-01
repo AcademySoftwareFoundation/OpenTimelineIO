@@ -37,7 +37,7 @@ namespace bundle {
     };
 
     /// @brief Get a file from a URL.
-    std::optional<std::string> file_from_url(std::string const& url);
+    OTIO_API std::optional<std::string> file_from_url(std::string const& url);
 
     /// @brief Options for writing bundles.
     struct OTIO_API_TYPE WriteOptions

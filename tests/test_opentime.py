@@ -744,9 +744,11 @@ class TestTime(unittest.TestCase):
             (23.999999, 24.0),
             (29.999999, 30.0),
             (30.01, 30.0),
-            (60.01, 60.0)
+            (60.01, 60.0),
+            (0.1, 24000.0 / 1001.0),
+            (0.0, 24000.0 / 1001.0),
+            (-0.1, 24000.0 / 1001.0),
         )
-
         for wonky_rate, smpte_rate in rate_pairs:
             self.assertTrue(
                 otio.opentime.RationalTime.is_smpte_timecode_rate(

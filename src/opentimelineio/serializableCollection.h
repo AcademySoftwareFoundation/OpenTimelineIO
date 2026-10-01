@@ -98,7 +98,7 @@ public:
     /// @param shallow_search The search is recursive unless shallow_search is
     /// set to true.
     template <typename T = Composable>
-    OTIO_API std::vector<Retainer<T>> find_children(
+    std::vector<Retainer<T>> find_children(
         ErrorStatus*             error_status   = nullptr,
         std::optional<TimeRange> search_range   = std::nullopt,
         bool                     shallow_search = false) const;

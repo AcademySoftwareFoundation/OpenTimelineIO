@@ -252,7 +252,18 @@ Composition::_path_from_child(
     ErrorStatus*      error_status) const
 {
     auto                      current = child->parent();
-    std::vector<Composition*> parents{ current };
+    std::vector<Composition*> parents;
+
+    if (!current)
+    {
+        if (error_status)
+        {
+            *error_status                = ErrorStatus::NOT_DESCENDED_FROM;
+            error_status->object_details = this;
+        }
+        return parents;
+    }
+    parents.push_back(current);
 
     while (current != this)
     {
@@ -311,7 +322,7 @@ Composition::range_of_child(Composable const* child, ErrorStatus* error_status)
     const
 {
     auto parents = _path_from_child(child, error_status);
-    if (is_error(error_status))
+    if (parents.empty() || is_error(error_status))
     {
         return TimeRange();
     }
@@ -363,7 +374,7 @@ Composition::trimmed_range_of_child(
     ErrorStatus*      error_status) const
 {
     auto parents = _path_from_child(child, error_status);
-    if (is_error(error_status))
+    if (parents.empty() || is_error(error_status))
     {
         return TimeRange();
     }

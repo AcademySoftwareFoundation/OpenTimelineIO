@@ -55,6 +55,46 @@ main(int argc, char** argv)
         assertEqual(items[0].value, clip.value);
     });
 
+    tests.add_test("test_orphan_ranges_report_errors", [] {
+        SerializableObject::Retainer<Clip> clip = new Clip;
+        OTIO_NS::ErrorStatus               error;
+
+        assertEqual(clip->range_in_parent(&error), TimeRange());
+        assertEqual(error.outcome, OTIO_NS::ErrorStatus::NOT_A_CHILD);
+
+        error = OTIO_NS::ErrorStatus();
+        assertFalse(clip->trimmed_range_in_parent(&error).has_value());
+        assertEqual(error.outcome, OTIO_NS::ErrorStatus::NOT_A_CHILD);
+        assertEqual(clip->range_in_parent(), TimeRange());
+        assertFalse(clip->trimmed_range_in_parent().has_value());
+
+        SerializableObject::Retainer<Transition> transition = new Transition;
+        error = OTIO_NS::ErrorStatus();
+        assertFalse(transition->range_in_parent(&error).has_value());
+        assertEqual(error.outcome, OTIO_NS::ErrorStatus::NOT_A_CHILD);
+
+        error = OTIO_NS::ErrorStatus();
+        assertFalse(transition->trimmed_range_in_parent(&error).has_value());
+        assertEqual(error.outcome, OTIO_NS::ErrorStatus::NOT_A_CHILD);
+        assertFalse(transition->range_in_parent().has_value());
+        assertFalse(transition->trimmed_range_in_parent().has_value());
+
+        SerializableObject::Retainer<Stack> stack = new Stack;
+        error = OTIO_NS::ErrorStatus();
+        assertEqual(stack->range_of_child(clip, &error), TimeRange());
+        assertEqual(error.outcome, OTIO_NS::ErrorStatus::NOT_DESCENDED_FROM);
+        assertEqual(stack->range_of_child(clip), TimeRange());
+        assertEqual(
+            stack->trimmed_range_of_child(clip).value(),
+            TimeRange());
+
+        error = OTIO_NS::ErrorStatus();
+        stack->trimmed_range_of_child(clip, &error);
+        assertEqual(
+            error.outcome,
+            OTIO_NS::ErrorStatus::NOT_DESCENDED_FROM);
+    });
+
     tests.add_test("test_trimmed_range_of_nested_child", [] {
         SerializableObject::Retainer<Stack> root  = new Stack;
         SerializableObject::Retainer<Track> track = new Track;

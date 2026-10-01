@@ -87,10 +87,14 @@ Item::visible_range(ErrorStatus* error_status) const
 std::optional<TimeRange>
 Item::trimmed_range_in_parent(ErrorStatus* error_status) const
 {
-    if (!parent() && error_status)
+    if (!parent())
     {
-        *error_status                = ErrorStatus::NOT_A_CHILD;
-        error_status->object_details = this;
+        if (error_status)
+        {
+            *error_status                = ErrorStatus::NOT_A_CHILD;
+            error_status->object_details = this;
+        }
+        return std::nullopt;
     }
 
     return parent()->trimmed_range_of_child(this, error_status);
@@ -99,10 +103,14 @@ Item::trimmed_range_in_parent(ErrorStatus* error_status) const
 TimeRange
 Item::range_in_parent(ErrorStatus* error_status) const
 {
-    if (!parent() && error_status)
+    if (!parent())
     {
-        *error_status                = ErrorStatus::NOT_A_CHILD;
-        error_status->object_details = this;
+        if (error_status)
+        {
+            *error_status                = ErrorStatus::NOT_A_CHILD;
+            error_status->object_details = this;
+        }
+        return TimeRange();
     }
 
     return parent()->range_of_child(this, error_status);

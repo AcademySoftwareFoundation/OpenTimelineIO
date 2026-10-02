@@ -119,12 +119,12 @@ Color::from_int_list(std::vector<int> const& color, int bit_depth)
 }
 
 Color*
-Color::from_agbr_int(unsigned int agbr) noexcept
+Color::from_abgr_int(unsigned int abgr) noexcept
 {
-    auto conv_r = (agbr & 0xFF) / 255.0;
-    auto conv_g = ((agbr >> 16) & 0xFF) / 255.0;
-    auto conv_b = ((agbr >> 8) & 0xFF) / 255.0;
-    auto conv_a = ((agbr >> 24) & 0xFF) / 255.0;
+    auto conv_r = (abgr & 0xFF) / 255.0;
+    auto conv_g = ((abgr >> 8) & 0xFF) / 255.0;
+    auto conv_b = ((abgr >> 16) & 0xFF) / 255.0;
+    auto conv_a = ((abgr >> 24) & 0xFF) / 255.0;
     return new Color(conv_r, conv_g, conv_b, conv_a);
 }
 
@@ -165,7 +165,7 @@ Color::to_rgba_int_list(int base)
 }
 
 unsigned int
-Color::to_agbr_integer()
+Color::to_abgr_integer()
 {
     auto rgba = to_rgba_int_list(8);
     return (rgba[3] << 24) + (rgba[2] << 16) + (rgba[1] << 8) + rgba[0];

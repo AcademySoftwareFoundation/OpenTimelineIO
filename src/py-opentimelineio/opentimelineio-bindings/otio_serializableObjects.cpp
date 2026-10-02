@@ -369,13 +369,13 @@ define_bases2(py::module m)
 
         .def("to_hex", &Color::to_hex)
         .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8)
-        .def("to_agbr_integer", &Color::to_agbr_integer)
+        .def("to_abgr_integer", &Color::to_abgr_integer)
         .def("to_rgba_float_list", &Color::to_rgba_float_list)
 
         .def_static("from_hex", Color::from_hex)
         .def_static("from_float_list", &Color::from_float_list)
         .def_static("from_int_list", &Color::from_int_list)
-        .def_static("from_agbr_int", &Color::from_agbr_int)
+        .def_static("from_abgr_int", &Color::from_abgr_int)
 
         .def_property_readonly_static(
             "PINK",

@@ -17,7 +17,7 @@ class ColorTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(white.a, 1.0)
         self.assertEqual(white.to_hex(), "#ffffffff")
         self.assertEqual(white.to_rgba_int_list(8), [255, 255, 255, 255])
-        self.assertEqual(white.to_agbr_integer(), 4294967295)
+        self.assertEqual(white.to_abgr_integer(), 4294967295)
         self.assertEqual(white.to_rgba_float_list(), [1.0, 1.0, 1.0, 1.0])
 
         black = otio.core.Color.BLACK
@@ -27,7 +27,7 @@ class ColorTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(black.a, 1.0)
         self.assertEqual(black.to_hex(), "#000000ff")
         self.assertEqual(black.to_rgba_int_list(8), [0, 0, 0, 255])
-        self.assertEqual(black.to_agbr_integer(), 4278190080)
+        self.assertEqual(black.to_abgr_integer(), 4278190080)
         self.assertEqual(black.to_rgba_float_list(), [0.0, 0.0, 0.0, 1.0])
 
     def test_from_hex(self):
@@ -80,9 +80,9 @@ class ColorTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 self.assertEqual(c[2], actual[2])
                 self.assertEqual(1.0, actual[3])
 
-    def test_from_agbr_int(self):
+    def test_from_abgr_int(self):
         self.assertEqual(
-            otio.core.Color.from_agbr_int(4281740498).to_hex(),
+            otio.core.Color.from_abgr_int(4281740498).to_hex(),
             '#d2362cff'
         )
 

@@ -30,6 +30,16 @@ class ColorTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(black.to_abgr_integer(), 4278190080)
         self.assertEqual(black.to_rgba_float_list(), [0.0, 0.0, 0.0, 1.0])
 
+        orange = otio.core.Color.ORANGE
+        self.assertEqual(orange.r, 1.0)
+        self.assertEqual(orange.g, 0.5)
+        self.assertEqual(orange.b, 0.0)
+        self.assertEqual(orange.a, 1.0)
+        self.assertEqual(orange.to_hex(), "#ff7f00ff")
+        self.assertEqual(orange.to_rgba_int_list(8), [255, 127, 0, 255])
+        self.assertEqual(orange.to_abgr_integer(), 4278222847)
+        self.assertEqual(orange.to_rgba_float_list(), [1.0, 0.5, 0.0, 1.0])
+
     def test_from_hex(self):
         all_reds = [
             "f00",  # 3 digits
@@ -83,7 +93,25 @@ class ColorTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_from_abgr_int(self):
         self.assertEqual(
             otio.core.Color.from_abgr_int(4281740498).to_hex(),
-            '#d2362cff'
+            '#d22c36ff'
+        )
+
+    def test_to_abgr_integer(self):
+        self.assertEqual(
+            otio.core.Color.from_hex("#d22c36ff").to_abgr_integer(),
+            4281740498
+        )
+
+    def test_abgr_round_trip(self):
+        abgr = 4281740498
+        color = otio.core.Color.from_abgr_int(abgr)
+        self.assertEqual(
+            color.to_abgr_integer(),
+            abgr
+        )
+        self.assertEqual(
+            otio.core.Color.from_hex(color.to_hex()).to_abgr_integer(),
+            abgr
         )
 
     def test_repr(self):

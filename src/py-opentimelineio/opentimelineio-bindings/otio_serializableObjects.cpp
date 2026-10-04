@@ -369,7 +369,7 @@ define_bases2(py::module m)
 
         .def("to_hex", &Color::to_hex)
         .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8)
-        .def("to_abgr_integer", &Color::to_abgr_integer)
+        .def("to_abgr_int", &Color::to_abgr_int)
         .def("to_rgba_float_list", &Color::to_rgba_float_list)
 
         .def_static("from_hex", Color::from_hex)

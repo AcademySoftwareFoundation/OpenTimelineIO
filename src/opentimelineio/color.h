@@ -60,7 +60,7 @@ public:
     friend bool operator==(Color lhs, Color rhs) noexcept
     {
         return lhs.to_hex() == rhs.to_hex()
-               && lhs.to_abgr_integer() == rhs.to_abgr_integer();
+               && lhs.to_abgr_int() == rhs.to_abgr_int();
     }
 
     friend bool operator!=(Color lhs, Color rhs) noexcept
@@ -70,7 +70,7 @@ public:
 
     OTIO_API std::string to_hex();
     OTIO_API std::vector<int> to_rgba_int_list(int base);
-    OTIO_API unsigned int     to_abgr_integer();
+    OTIO_API unsigned int     to_abgr_int();
     OTIO_API std::vector<double> to_rgba_float_list();
 
     double      r() const { return _r; }

@@ -165,7 +165,7 @@ Color::to_rgba_int_list(int base)
 }
 
 unsigned int
-Color::to_abgr_integer()
+Color::to_abgr_int()
 {
     auto rgba = to_rgba_int_list(8);
     return (rgba[3] << 24) + (rgba[2] << 16) + (rgba[1] << 8) + rgba[0];

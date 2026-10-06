@@ -82,11 +82,11 @@ public:
     RationalTime duration(ErrorStatus* error_status = nullptr) const override;
 
     /// @brief Return the range in the parent's time.
-    std::optional<TimeRange>
+    OTIO_API std::optional<TimeRange>
     range_in_parent(ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the range trimmed in the parent's time.
-    std::optional<TimeRange>
+    OTIO_API std::optional<TimeRange>
     trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
 
 protected:

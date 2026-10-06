@@ -67,6 +67,7 @@ Transition::range_in_parent(ErrorStatus* error_status) const
                 "cannot compute range in parent because item has no parent",
                 this);
         }
+        return std::nullopt;
     }
 
     return parent()->range_of_child(this, error_status);
@@ -84,6 +85,7 @@ Transition::trimmed_range_in_parent(ErrorStatus* error_status) const
                 "cannot compute trimmed range in parent because item has no parent",
                 this);
         }
+        return std::nullopt;
     }
 
     return parent()->trimmed_range_of_child(this, error_status);

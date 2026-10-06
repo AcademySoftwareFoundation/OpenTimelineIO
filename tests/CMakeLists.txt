@@ -40,4 +40,4 @@ foreach(test ${tests_opentimelineio})
            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endforeach()
 
-target_link_libraries(test_bundle MINIZIP::minizip)
+target_link_libraries(test_bundle ${OTIO_MINIZIP_TARGET})

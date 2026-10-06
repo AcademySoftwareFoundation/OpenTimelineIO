@@ -702,6 +702,9 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with self.assertRaises(otio.exceptions.NotAChildError):
             otio.schema.Clip().trimmed_range_in_parent()
 
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.schema.Clip().range_in_parent()
+
     def test_transformed_time(self):
         st = otio.schema.Stack(
             name="foo",
@@ -1034,6 +1037,16 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         sq = otio.schema.Track(children=[it])
         del sq
         self.assertIsNone(it.parent())
+
+    def test_orphan_is_not_descended_from_composition(self):
+        stack = otio.schema.Stack()
+        orphan = otio.schema.Clip()
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            stack.range_of_child(orphan)
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            stack.trimmed_range_of_child(orphan)
 
     def test_transactional(self):
         item = otio.core.Item()

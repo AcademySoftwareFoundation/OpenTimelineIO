@@ -136,23 +136,23 @@ public:
     }
 
     /// @brief Return the end frame.
-    int end_frame() const;
+    OTIO_API int end_frame() const;
 
     /// @brief Return the number of images in the sequence.
-    int number_of_images_in_sequence() const;
+    OTIO_API int number_of_images_in_sequence() const;
 
     /// @brief Return the frame for the given time.
-    int frame_for_time(
+    OTIO_API int frame_for_time(
         RationalTime const& time,
         ErrorStatus*        error_status = nullptr) const;
 
     /// @brief Return the target URL for the given image number.
-    std::string target_url_for_image_number(
+    OTIO_API std::string target_url_for_image_number(
         int          image_number,
         ErrorStatus* error_status = nullptr) const;
 
     /// @brief Return the presentation time for the given image number.
-    RationalTime presentation_time_for_image_number(
+    OTIO_API RationalTime presentation_time_for_image_number(
         int          image_number,
         ErrorStatus* error_status = nullptr) const;
 

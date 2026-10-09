@@ -12,8 +12,8 @@ Summary of our core values:
   the contents of a PR (including fully understanding and being able
   to explain, defend, and modify it in response to review comments).
 - Humans should interact with the project and community directly, not agents.
-- Disclose what tools you used and how. At a minimum, we require an
-  "Assisted-by: TOOL / MODEL" line in the PR description.
+- You are strongly encouraged to disclose what tools you used and how. At a
+  minimum, we request an "Assisted-by: TOOL / MODEL" line in the PR description.
 - Don't waste maintainer's time with low quality PRs.
 
 The long version:
@@ -65,12 +65,12 @@ describe it to others.
 
 ## Disclosure
 
-**Disclosure is required.** Patches that were written with the aid of AI
-coding assistants must have, at a minimum, the following line in the PR description body:
+**Disclosure is strongly encouraged.** Patches that were written with the aid of AI
+coding assistants should have, at a minimum, the following line in the PR description body:
 
     Assisted-by: TOOL / MODEL
 
-This is absolutely required when an LLM materially helped with the change
+We especially request this when an LLM materially helped with the change
 (drafted code, helped design the approach, found the bug, suggested the
 specific fix, etc.). You may omit for any of the reasons listed in the
 "Exceptions" section below.

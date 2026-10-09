@@ -19,8 +19,8 @@ Here are the two possible CLAs:
 
 Please see our [AI Coding Assistant Policy](ai-policy) for guidelines on contributing code developed with AI coding assistance.
 
-Note that **Disclosure is required.** Patches that were written with the aid of AI
-coding assistants must have, at a minimum, the following line in the commit
+Note that **disclosure is strongly encouraged.** Patches that were written with the aid of AI
+coding assistants should have, at a minimum, the following line in the commit
 comment and PR description body:
 
     Assisted-by: TOOL / MODEL

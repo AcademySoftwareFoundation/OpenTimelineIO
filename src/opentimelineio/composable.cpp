@@ -77,7 +77,10 @@ Composable::duration(ErrorStatus* error_status) const
 std::optional<IMATH_NAMESPACE::Box2d>
 Composable::available_image_bounds(ErrorStatus* error_status) const
 {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (error_status)
+    {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return std::optional<IMATH_NAMESPACE::Box2d>();
 }
 

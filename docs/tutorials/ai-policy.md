@@ -58,10 +58,10 @@ themselves. This is part of the reason for AI tool disclosure -- to ensure
 that another pair of eyes is on it. AI code review may be requested for
 additional input, but the AI cannot give "approval", nor merge code itself.
 
-Even when using a coding assistant to write the code, you are strongly
+**Even when using a coding assistant to write the code, you are strongly
 encouraged to write your own PR description, in your own words, if for no
 other reason than to force yourself to understand the code well enough to
-describe it to others.
+describe it to others.**
 
 ## Disclosure
 

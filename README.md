@@ -148,6 +148,8 @@ Developing
 
 If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 
+Also please review our [AI Policy](https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html#ai-coding-tools) if using AI coding assistance tools.
+
 You can get the latest development version via:
 
 `git clone git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git --recursive `

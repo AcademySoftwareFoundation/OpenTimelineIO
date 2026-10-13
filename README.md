@@ -4,7 +4,7 @@ OpenTimelineIO
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2022--2025-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11%2C%203.12-blue)
+![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11%2C%203.12%2C%203.13%2C%203.14%2C%203.15-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -64,7 +64,7 @@ Supported VFX Platforms
 -----------------
 The current release supports:
 - VFX platform 2025, 2024, 2023, 2022
-- Python 3.9 - 3.12
+- Python 3.9 - 3.15
 
 See also [OpenTimelineIO VFX Reference Platform Support Matrix](VERSIONS.md) for details of which versions of OTIO support which VFX Reference Platform years.
 
@@ -158,7 +158,7 @@ You can also install the PySide2 dependency with `python -m pip install .[view]`
 
 You may need to escape the `[` depending on your shell, `\[view\]` .
 
-Currently the code base is written against python 3.9-3.12,
+Currently the code base is written against python 3.9-3.15,
 in keeping with the pep8 style.  We ask that before developers submit pull
 request, they:
 

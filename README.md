@@ -3,7 +3,7 @@ OpenTimelineIO
 [![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2022--2025-lightgrey.svg)](http://www.vfxplatform.com/)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2023--2027-lightgrey.svg)](http://www.vfxplatform.com/)
 ![Supported Versions](https://img.shields.io/badge/python-3.9%2C%203.10%2C%203.11%2C%203.12%2C%203.13%2C%203.14%2C%203.15-blue)
 [![Build Status](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml/badge.svg)](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/actions/workflows/python-package.yml)
 [![codecov](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO/branch/main/graph/badge.svg)](https://codecov.io/gh/AcademySoftwareFoundation/OpenTimelineIO)
@@ -63,7 +63,7 @@ Documentation, including quick start, architecture, use cases, API docs, and muc
 Supported VFX Platforms
 -----------------
 The current release supports:
-- VFX platform 2025, 2024, 2023, 2022
+- VFX platform 2023 - 2027
 - Python 3.9 - 3.15
 
 See also [OpenTimelineIO VFX Reference Platform Support Matrix](VERSIONS.md) for details of which versions of OTIO support which VFX Reference Platform years.

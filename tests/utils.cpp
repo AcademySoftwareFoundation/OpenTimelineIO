@@ -56,7 +56,7 @@ TempDir::TempDir()
         {
             throw std::runtime_error(
                 "cannot create temp directory in '" +
-                temp_root.u8string() + "': " + ec.message());
+                temp_root.string() + "': " + ec.message());
         }
 
         // Name collided; loop and try another.
@@ -64,7 +64,7 @@ TempDir::TempDir()
 
     throw std::runtime_error(
         "cannot create a unique temp directory in '" +
-        temp_root.u8string() + "'");
+        temp_root.string() + "'");
 }
 
 TempDir::~TempDir()

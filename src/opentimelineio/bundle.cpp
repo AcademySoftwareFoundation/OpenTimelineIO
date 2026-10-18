@@ -95,7 +95,7 @@ namespace bundle {
             ErrorStatus* error_status)
         {
             // Check if this file would overwrite any others
-            auto const paths_key = to_lower(source_path.filename().u8string());
+            auto const paths_key = to_lower(source_path.filename().string());
             auto const i = paths.find(paths_key);
             if (i != paths.end() &&
                 source_path.parent_path() != i->second.parent_path())
@@ -103,8 +103,8 @@ namespace bundle {
                 if (error_status)
                     *error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED,
-                        "media file '" + source_path.u8string() +
-                        "' would overwrite '" + i->second.u8string() + "'");
+                        "media file '" + source_path.string() +
+                        "' would overwrite '" + i->second.string() + "'");
                 return false;
             }
             paths[paths_key] = source_path;
@@ -114,8 +114,8 @@ namespace bundle {
             if (resolved.is_relative() && !relative_media_base_dir.empty())
                 resolved = relative_media_base_dir / resolved;
             auto const bundle_path = (std::filesystem::u8path(media_dir) /
-                source_path.filename()).u8string();
-            out.insert({ resolved.u8string(), bundle_path });
+                source_path.filename()).string();
+            out.insert({ resolved.string(), bundle_path });
             return true;
         }
 
@@ -184,7 +184,7 @@ namespace bundle {
                             
                             // Set the URL to the bundle location
                             ext->set_target_url((std::filesystem::u8path(media_dir) /
-                                path.filename()).u8string());
+                                path.filename()).string());
                         }
 
                         // Save the URL for the missing reference metadata
@@ -332,7 +332,7 @@ namespace bundle {
                         if (current.is_relative())
                         {
                             ext->set_target_url(
-                                (bundle_root / current).lexically_normal().u8string());
+                                (bundle_root / current).lexically_normal().string());
                         }
                     }
                     else if (auto seq = dynamic_cast<ImageSequenceReference*>(ref.second))
@@ -340,7 +340,7 @@ namespace bundle {
                         auto const base = std::filesystem::u8path(seq->target_url_base());
                         if (base.is_relative())
                         {
-                            auto absolute = (bundle_root / base).lexically_normal().u8string();
+                            auto absolute = (bundle_root / base).lexically_normal().string();
                             if (!absolute.empty() && absolute.back() != '/')
                                 absolute += '/';
                             seq->set_target_url_base(absolute);
@@ -555,7 +555,7 @@ namespace bundle {
             auto const canonical_out = std::filesystem::weakly_canonical(out_path);
             auto const rel = std::filesystem::relative(canonical_out, canonical_dest);
             if (rel.empty()) return false;
-            auto const first = rel.begin()->u8string();
+            auto const first = rel.begin()->string();
             return first != "..";
         }
     }
@@ -738,7 +738,7 @@ namespace bundle {
                 if (error_status)
                     *error_status = ErrorStatus(
                         ErrorStatus::FILE_WRITE_FAILED,
-                        "output directory '" + output_path.u8string() +
+                        "output directory '" + output_path.string() +
                         "' already exists");
                 return nullptr;
             }
@@ -779,7 +779,7 @@ namespace bundle {
                     else
                     {
                         std::filesystem::create_directories(file_path.parent_path());
-                        zr.extract_current_to_file(file_path.u8string());
+                        zr.extract_current_to_file(file_path.string());
                     }
                 });
             }
@@ -929,7 +929,7 @@ namespace bundle {
         
         // Read the timeline
         auto result = Timeline::from_json_file(
-            timeline_path.u8string(),
+            timeline_path.string(),
             error_status);
         if (!result || is_error(error_status))
             return nullptr;
@@ -950,4 +950,3 @@ namespace bundle {
 }
 }
 }
-

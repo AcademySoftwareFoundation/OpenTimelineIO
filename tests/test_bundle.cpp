@@ -270,7 +270,7 @@ main(int argc, char** argv)
         find_clip_by_name(tl, "audio clip 1")->set_media_references(
             {
                 { "wav", new ExternalReference("audio.wav") },
-                { "absolute_path", new ExternalReference((temp.path() / "audio.mp3").u8string()) },
+                { "absolute_path", new ExternalReference((temp.path() / "audio.mp3").string()) },
                 { "sub_dir", new ExternalReference("sub_dir/audio.ogg") }
             },
             "wav");
@@ -278,9 +278,9 @@ main(int argc, char** argv)
 
         // Dry run
         std::string const otioz_path =
-            (temp.path() / "round_trip.otioz").u8string();
+            (temp.path() / "round_trip.otioz").string();
         WriteOptions write_options;
-        write_options.relative_media_base_dir = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().string();
         OTIO_NS::ErrorStatus error;
         auto const size = dry_run(tl, write_options, &error);
         assertTrue(size.has_value());
@@ -300,7 +300,7 @@ main(int argc, char** argv)
         // Read the otioz and extract the contents
         ReadOptions read_options;
         auto const extract_path = temp.path() / "extract";
-        read_options.extract_path = extract_path.u8string();
+        read_options.extract_path = extract_path.string();
         result = dynamic_cast<Timeline*>(read_otioz(
             otioz_path,
             read_options,
@@ -337,7 +337,7 @@ main(int argc, char** argv)
         find_clip_by_name(tl, "audio clip 1")->set_media_references(
             {
                 { "wav", new ExternalReference("audio.wav") },
-                { "absolute_path", new ExternalReference((temp.path() / "audio.mp3").u8string()) },
+                { "absolute_path", new ExternalReference((temp.path() / "audio.mp3").string()) },
                 { "sub_dir", new ExternalReference("sub_dir/audio.ogg") }
             },
             "wav");
@@ -345,9 +345,9 @@ main(int argc, char** argv)
         
         // Write the otiod
         std::string const otiod_path =
-            (temp.path() / "round_trip.otiod").u8string();
+            (temp.path() / "round_trip.otiod").string();
         WriteOptions write_options;
-        write_options.relative_media_base_dir = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, write_options, &error));
         
@@ -396,9 +396,9 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "error_if_not_file.otioz").u8string();
+            (temp.path() / "error_if_not_file.otioz").string();
             WriteOptions write_options;
-            write_options.relative_media_base_dir = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().string();
             write_options.policy = MediaReferencePolicy::error_if_not_file;
             OTIO_NS::ErrorStatus error;
             assertFalse(dry_run(tl, write_options, &error).has_value());
@@ -411,9 +411,9 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "missing_if_not_file.otioz").u8string();
+            (temp.path() / "missing_if_not_file.otioz").string();
             WriteOptions write_options;
-            write_options.relative_media_base_dir = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().string();
             write_options.policy = MediaReferencePolicy::missing_if_not_file;
             OTIO_NS::ErrorStatus error;
             assertTrue(dry_run(tl, write_options, &error).has_value());
@@ -434,9 +434,9 @@ main(int argc, char** argv)
             create_refs(tl, temp.path());
 
             std::string const otioz_path =
-                (temp.path() / "all_missing.otioz").u8string();
+            (temp.path() / "all_missing.otioz").string();
             WriteOptions write_options;
-            write_options.relative_media_base_dir = temp.path().u8string();
+            write_options.relative_media_base_dir = temp.path().string();
             write_options.policy = MediaReferencePolicy::all_missing;
             OTIO_NS::ErrorStatus error;
             assertTrue(dry_run(tl, write_options, &error).has_value());
@@ -458,7 +458,7 @@ main(int argc, char** argv)
         TempDir temp;
         SerializableObject::Retainer<Timeline> tl(new Timeline);
 
-        auto const otioz_path = (temp.path() / "empty.otioz").u8string();
+        auto const otioz_path = (temp.path() / "empty.otioz").string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otioz(tl, otioz_path, WriteOptions(), &error));
 
@@ -472,7 +472,7 @@ main(int argc, char** argv)
         TempDir temp;
         SerializableObject::Retainer<Timeline> tl(new Timeline);
 
-        auto const otiod_path = (temp.path() / "empty.otiod").u8string();
+        auto const otiod_path = (temp.path() / "empty.otiod").string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
 
@@ -490,7 +490,7 @@ main(int argc, char** argv)
 
         // Write the otioz
         std::string otioz_path =
-            (temp.path() / "error.otioz").u8string();
+            (temp.path() / "error.otioz").string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otioz(tl, otioz_path, WriteOptions(), &error));
 
@@ -512,7 +512,7 @@ main(int argc, char** argv)
         std::filesystem::remove(otioz_path);
 
         // Write the otioz (error on input path)
-        otioz_path = (temp.path() / "subdir" / "error.otioz").u8string();
+        otioz_path = (temp.path() / "subdir" / "error.otioz").string();
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
         std::filesystem::remove(otioz_path);
     });
@@ -525,7 +525,7 @@ main(int argc, char** argv)
 
         // Write the otiod
         std::string otiod_path =
-            (temp.path() / "error.otiod").u8string();
+            (temp.path() / "error.otiod").string();
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
 
@@ -547,7 +547,7 @@ main(int argc, char** argv)
         std::filesystem::remove_all(otiod_path);
 
         // Write the otiod (error on input path)
-        otiod_path = (temp.path() / "subdir" / "error.otiod").u8string();
+        otiod_path = (temp.path() / "subdir" / "error.otiod").string();
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
         std::filesystem::remove_all(otiod_path);
     });
@@ -585,9 +585,9 @@ main(int argc, char** argv)
         std::filesystem::resize_file(temp.path() / large_file_2, large_file_size);
 
         // Dry run
-        std::string const otioz_path = (temp.path() / "zip64.otioz").u8string();
+        std::string const otioz_path = (temp.path() / "zip64.otioz").string();
         WriteOptions write_options;
-        write_options.relative_media_base_dir = temp.path().u8string();
+        write_options.relative_media_base_dir = temp.path().string();
         OTIO_NS::ErrorStatus error;
         auto const dry_run_size = dry_run(tl, write_options, &error);
         assertTrue(dry_run_size.has_value());
@@ -600,7 +600,7 @@ main(int argc, char** argv)
         // Read the otioz and extract the contents
         ReadOptions read_options;
         auto const extract_path = temp.path() / "extract";
-        read_options.extract_path = extract_path.u8string();
+        read_options.extract_path = extract_path.string();
         auto result = dynamic_cast<Timeline*>(read_otioz(
             otioz_path,
             read_options,
@@ -618,7 +618,7 @@ main(int argc, char** argv)
         TempDir temp;
 
         // Write an otioz file with a malicious entry ("zip slip")
-        std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
+        std::string const otioz_path = (temp.path() / "zip_slip.otioz").string();
         {
             ZipWriter zip(otioz_path);
             zip.add_text(bundle::version_file, bundle::version);
@@ -629,7 +629,7 @@ main(int argc, char** argv)
         // Read the otioz
         ReadOptions read_options;
         auto const extract_path = temp.path() / "extract";
-        read_options.extract_path = extract_path.u8string();
+        read_options.extract_path = extract_path.string();
         OTIO_NS::ErrorStatus error;
         auto result = dynamic_cast<Timeline*>(read_otioz(
             otioz_path,
@@ -644,18 +644,18 @@ main(int argc, char** argv)
         TempDir temp;
 
         // Write an otioz file with a malicious entry ("zip slip")
-        std::string const otioz_path = (temp.path() / "zip_slip.otioz").u8string();
+        std::string const otioz_path = (temp.path() / "zip_slip.otioz").string();
         {
             ZipWriter zip(otioz_path);
             zip.add_text(bundle::version_file, bundle::version);
             zip.add_text(bundle::timeline_file, "{}");
-            zip.add_text((temp.path() / "absolute").u8string(), "");
+            zip.add_text((temp.path() / "absolute").string(), "");
         }
 
         // Read the otioz
         ReadOptions read_options;
         auto const extract_path = temp.path() / "extract";
-        read_options.extract_path = extract_path.u8string();
+        read_options.extract_path = extract_path.string();
         OTIO_NS::ErrorStatus error;
         auto result = dynamic_cast<Timeline*>(read_otioz(
             otioz_path,

@@ -506,25 +506,25 @@ main(int argc, char** argv)
 
         // Write the otioz (error on overwrite)
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
-        std::filesystem::remove(otioz_path);
+        std::filesystem::remove(from_utf8(otioz_path));
 
         // Write the otioz (error on missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(
             new ExternalReference("video.mov"));
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
-        std::filesystem::remove(otioz_path);
+        std::filesystem::remove(from_utf8(otioz_path));
 
         // Write the otioz (error on overwrite media)
         find_clip_by_name(tl, "video clip 2")->set_media_reference(
             new ExternalReference("sub_dir/video.mov"));
         create_refs(tl, temp.path());
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
-        std::filesystem::remove(otioz_path);
+        std::filesystem::remove(from_utf8(otioz_path));
 
         // Write the otioz (error on input path)
         otioz_path = to_utf8(temp.path() / "subdir" / "error.otioz");
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
-        std::filesystem::remove(otioz_path);
+        std::filesystem::remove(from_utf8(otioz_path));
     });
 
     tests.add_test("test_otiod_error", [] {
@@ -541,25 +541,25 @@ main(int argc, char** argv)
 
         // Write the otiod (error on overwrite)
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
-        std::filesystem::remove_all(otiod_path);
+        std::filesystem::remove_all(from_utf8(otiod_path));
 
         // Write the otiod (missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(
             new ExternalReference("video.mov"));
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
-        std::filesystem::remove_all(otiod_path);
+        std::filesystem::remove_all(from_utf8(otiod_path));
 
         // Write the otiod (error on overwrite media)
         find_clip_by_name(tl, "video clip 2")->set_media_reference(
             new ExternalReference("sub_dir/video.mov"));
         create_refs(tl, temp.path());
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
-        std::filesystem::remove_all(otiod_path);
+        std::filesystem::remove_all(from_utf8(otiod_path));
 
         // Write the otiod (error on input path)
         otiod_path = to_utf8(temp.path() / "subdir" / "error.otiod");
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
-        std::filesystem::remove_all(otiod_path);
+        std::filesystem::remove_all(from_utf8(otiod_path));
     });
 
     tests.add_test("test_otioz_zip64", [] {
@@ -605,7 +605,7 @@ main(int argc, char** argv)
 
         // Write the otioz
         assertTrue(write_otioz(tl, otioz_path, write_options, &error));
-        assertTrue(std::filesystem::file_size(otioz_path) >= *dry_run_size);
+        assertTrue(std::filesystem::file_size(from_utf8(otioz_path)) >= *dry_run_size);
 
         // Read the otioz and extract the contents
         ReadOptions read_options;

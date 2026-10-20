@@ -3,6 +3,8 @@
 
 #include "utils.h"
 
+#include <opentimelineio/stringUtils.h>
+
 #include <charconv>
 #include <iostream>
 #include <random>
@@ -56,7 +58,7 @@ TempDir::TempDir()
         {
             throw std::runtime_error(
                 "cannot create temp directory in '" +
-                temp_root.u8string() + "': " + ec.message());
+                OTIO_NS::to_utf8(temp_root) + "': " + ec.message());
         }
 
         // Name collided; loop and try another.
@@ -64,7 +66,7 @@ TempDir::TempDir()
 
     throw std::runtime_error(
         "cannot create a unique temp directory in '" +
-        temp_root.u8string() + "'");
+        OTIO_NS::to_utf8(temp_root) + "'");
 }
 
 TempDir::~TempDir()

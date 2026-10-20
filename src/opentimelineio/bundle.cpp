@@ -381,7 +381,7 @@ namespace bundle {
                 if (!_finalized)
                 {
                     std::error_code ec;
-                    std::filesystem::remove(_path, ec);
+                    std::filesystem::remove(from_utf8(_path), ec);
                 }
             }
 
@@ -733,7 +733,7 @@ namespace bundle {
         std::filesystem::path output_path;
         if (options.extract_path.has_value())
         {
-            output_path = options.extract_path.value();
+            output_path = from_utf8(options.extract_path.value());
             if (std::filesystem::exists(output_path))
             {
                 if (error_status)
@@ -877,7 +877,7 @@ namespace bundle {
             for (const auto& i : files)
             {
                 std::filesystem::copy_file(
-                    i.source_path,
+                    from_utf8(i.source_path),
                     output_path / from_utf8(i.archive_name));
             }
         }

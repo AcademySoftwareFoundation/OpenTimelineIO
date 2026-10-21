@@ -544,7 +544,7 @@ main(int argc, char** argv)
         std::filesystem::create_directory(locked);
         std::filesystem::permissions(locked, std::filesystem::perms::none);
         std::error_code ec;
-        std::filesystem::status(locked / "error.otioz", ec);
+        std::filesystem::exists(locked / "error.otioz", ec);
         if (ec)
         {
             std::string const locked_path = to_utf8(locked / "error.otioz");
@@ -598,7 +598,7 @@ main(int argc, char** argv)
         std::filesystem::create_directory(locked);
         std::filesystem::permissions(locked, std::filesystem::perms::none);
         std::error_code ec;
-        std::filesystem::status(locked / "error.otiod", ec);
+        std::filesystem::exists(locked / "error.otiod", ec);
         if (ec)
         {
             std::string const locked_path = to_utf8(locked / "error.otiod");

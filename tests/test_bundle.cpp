@@ -249,6 +249,16 @@ main(int argc, char** argv)
                 "file:///path/sub dir/file.ext",
                 "/path/sub dir/file.ext"
             },
+            {
+                // '%' that is not an escape
+                "file:///path/100%.mov",
+                "/path/100%.mov"
+            },
+            {
+                // '%' without hex digits
+                "file:///path/%zz.mov",
+                "/path/%zz.mov"
+            },
         };
         for (auto i : urls)
         {
@@ -497,12 +507,12 @@ main(int argc, char** argv)
         TempDir temp;
         SerializableObject::Retainer<Timeline> tl(new Timeline);
 
-        auto const otiod_path = (temp.path() / "no_version.otiod").u8string();
+        auto const otiod_path = to_utf8(temp.path() / "no_version.otiod");
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
 
         auto const version_path =
-            std::filesystem::u8path(otiod_path) / bundle::version_file;
+            from_utf8(otiod_path) / bundle::version_file;
         assertTrue(std::filesystem::is_regular_file(version_path));
         std::filesystem::remove(version_path);
 
@@ -527,6 +537,25 @@ main(int argc, char** argv)
         // Write the otioz (error on overwrite)
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
         std::filesystem::remove(from_utf8(otioz_path));
+
+        // Write and read the otioz (error on a directory without access,
+        // where the platform enforces it)
+        auto const locked = temp.path() / "locked";
+        std::filesystem::create_directory(locked);
+        std::filesystem::permissions(locked, std::filesystem::perms::none);
+        std::error_code ec;
+        std::filesystem::status(locked / "error.otioz", ec);
+        if (ec)
+        {
+            std::string const locked_path = to_utf8(locked / "error.otioz");
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otioz(tl, locked_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(read_otioz(locked_path, ReadOptions(), &error));
+            assertTrue(is_error(error));
+        }
+        std::filesystem::permissions(locked, std::filesystem::perms::owner_all);
 
         // Write the otioz (error on missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(
@@ -562,6 +591,25 @@ main(int argc, char** argv)
         // Write the otiod (error on overwrite)
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
         std::filesystem::remove_all(from_utf8(otiod_path));
+
+        // Write and read the otiod (error on a directory without access,
+        // where the platform enforces it)
+        auto const locked = temp.path() / "locked";
+        std::filesystem::create_directory(locked);
+        std::filesystem::permissions(locked, std::filesystem::perms::none);
+        std::error_code ec;
+        std::filesystem::status(locked / "error.otiod", ec);
+        if (ec)
+        {
+            std::string const locked_path = to_utf8(locked / "error.otiod");
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otiod(tl, locked_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(read_otiod(locked_path, ReadOptions(), &error));
+            assertTrue(is_error(error));
+        }
+        std::filesystem::permissions(locked, std::filesystem::perms::owner_all);
 
         // Write the otiod (missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(

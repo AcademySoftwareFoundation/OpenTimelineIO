@@ -12,6 +12,7 @@ into a single directory named with a suffix of .otiod.
 from .. import (
     _otio
 )
+from .bundle_policy import media_reference_policy
 
 
 def read_from_file(
@@ -34,7 +35,7 @@ def write_to_file(
 ):
     options = _otio.bundle.WriteOptions()
     options.relative_media_base_dir = relative_media_base_dir
-    options.policy = media_policy
+    options.policy = media_reference_policy(media_policy)
 
     if dryrun:
         return _otio.bundle.dry_run(input_otio, options)

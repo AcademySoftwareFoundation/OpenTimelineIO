@@ -1602,7 +1602,7 @@ main(int argc, char** argv)
                     RationalTime(1575360, 23.976024),
                     RationalTime(1.0, 23.976024)),
                 TimeRange(
-                    RationalTime(1575502.0, 23.976024),
+                    RationalTime(1575501.0, 23.976024),
                     RationalTime(3668.0, 23.976024)),
             });
 
@@ -1939,11 +1939,11 @@ main(int argc, char** argv)
             // Clip in Track Ranges
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
               TimeRange(RationalTime(20.0, 24.0), RationalTime(40.0, 24.0)),
-              TimeRange(RationalTime(60.0, 24.0), RationalTime(20.0, 24.0)) },
+              TimeRange(RationalTime(60.0, 24.0), RationalTime(10.0, 24.0)) },
             // Clip Ranges
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
               TimeRange(RationalTime(5.0, 24.0), RationalTime(40.0, 24.0)),
-              TimeRange(RationalTime(15.0, 24.0), RationalTime(20.0, 24.0)) });
+              TimeRange(RationalTime(15.0, 24.0), RationalTime(10.0, 24.0)) });
     });
 
     tests.add_test("test_edit_roll_4", [] {
@@ -1953,11 +1953,11 @@ main(int argc, char** argv)
             // Clip in Track Ranges
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
               TimeRange(RationalTime(20.0, 24.0), RationalTime(25.0, 24.0)),
-              TimeRange(RationalTime(45.0, 24.0), RationalTime(20.0, 24.0)) },
+              TimeRange(RationalTime(45.0, 24.0), RationalTime(25.0, 24.0)) },
             // Clip Ranges
             { TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
               TimeRange(RationalTime(5.0, 24.0), RationalTime(25.0, 24.0)),
-              TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)) });
+              TimeRange(RationalTime(0.0, 24.0), RationalTime(25.0, 24.0)) });
     });
 
     // Add longer clip in gap as Fit reference point
@@ -1978,7 +1978,7 @@ main(int argc, char** argv)
     });
 
     // Add longer clip at gap as Source reference point.
-    // Stretches timeline.
+    // Overwrites the start of the next clip.
     tests.add_test("test_edit_fill_2", [] {
         test_edit_fill(
             TimeRange(RationalTime(0.0, 24.0), RationalTime(35.0, 24.0)),
@@ -1988,13 +1988,13 @@ main(int argc, char** argv)
             {
                 TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
                 TimeRange(RationalTime(20.0, 24.0), RationalTime(35.0, 24.0)),
-                TimeRange(RationalTime(55.0, 24.0), RationalTime(5.0, 24.0)),
+                TimeRange(RationalTime(55.0, 24.0), RationalTime(15.0, 24.0)),
             },
             // Clip Ranges
             {
                 TimeRange(RationalTime(0.0, 24.0), RationalTime(20.0, 24.0)),
                 TimeRange(RationalTime(0.0, 24.0), RationalTime(35.0, 24.0)),
-                TimeRange(RationalTime(20.0, 24.0), RationalTime(5.0, 24.0)),
+                TimeRange(RationalTime(10.0, 24.0), RationalTime(15.0, 24.0)),
             });
     });
 
@@ -2301,6 +2301,106 @@ main(int argc, char** argv)
 
         assert(is_error(error_status));
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
+    });
+
+    // Edit clips whose source ranges do not start at zero, so that source
+    // and track times cannot be mixed up.
+    tests.add_test("test_edit_source_ranges", [] {
+        auto const tr = [](double start, double duration) {
+            return TimeRange(
+                RationalTime(start, 24.0),
+                RationalTime(duration, 24.0));
+        };
+        auto const rt = [](double value) { return RationalTime(value, 24.0); };
+
+        // A track with clips A and B, optionally with a gap between them.
+        auto const make_track = [&](bool gap) {
+            SerializableObject::Retainer<Track> track = new Track();
+            track->append_child(new Clip("A", nullptr, tr(100, 10)));
+            if (gap)
+                track->append_child(new Gap(tr(0, 10)));
+            track->append_child(new Clip("B", nullptr, tr(200, 10)));
+            return track;
+        };
+        auto const child = [](Track* track, int index) {
+            return dynamic_retainer_cast<Item>(track->children()[index]);
+        };
+        OTIO_NS::ErrorStatus error_status;
+
+        // Overwrite the end of A and the start of B.
+        auto track = make_track(false);
+        algo::overwrite(
+            new Clip("C", nullptr, tr(300, 4)),
+            track,
+            tr(8, 4),
+            true,
+            nullptr,
+            &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 8), tr(300, 4), tr(202, 8) });
+
+        // Overwrite inside A with a longer clip.
+        track = make_track(false);
+        algo::overwrite(
+            new Clip("C", nullptr, tr(300, 10)),
+            track,
+            tr(3, 4),
+            true,
+            nullptr,
+            &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(
+            track,
+            { tr(100, 3), tr(300, 4), tr(107, 3), tr(200, 10) });
+
+        // Insert into A.
+        track = make_track(false);
+        algo::insert(
+            new Clip("C", nullptr, tr(300, 4)),
+            track,
+            rt(3),
+            true,
+            nullptr,
+            &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(
+            track,
+            { tr(100, 3), tr(300, 4), tr(103, 7), tr(200, 10) });
+
+        // Roll the start of B past the start of A, which leaves A one frame.
+        track = make_track(false);
+        algo::roll(child(track, 1), rt(-15), rt(0), &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 1), tr(191, 19) });
+
+        // Ripple the start of A both ways.
+        track = make_track(false);
+        algo::ripple(child(track, 0), rt(3), rt(0), &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(103, 7), tr(200, 10) });
+        algo::ripple(child(track, 0), rt(-6), rt(0), &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(97, 13), tr(200, 10) });
+
+        // Trim the start of B, which fills the hole with a gap, and trim it
+        // back into A, which does not change A.
+        track = make_track(false);
+        algo::trim(child(track, 1), rt(3), rt(0), nullptr, &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 10), tr(0, 3), tr(203, 7) });
+        track = make_track(false);
+        algo::trim(child(track, 1), rt(-3), rt(0), nullptr, &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 10), tr(200, 10) });
+
+        // Trim the end of A into the gap and away from it.
+        track = make_track(true);
+        algo::trim(child(track, 0), rt(0), rt(3), nullptr, &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 13), tr(0, 7), tr(200, 10) });
+        algo::trim(child(track, 0), rt(0), rt(-6), nullptr, &error_status);
+        assert(!is_error(error_status));
+        assert_clip_ranges(track, { tr(100, 7), tr(0, 13), tr(200, 10) });
     });
 
     tests.run(argc, argv);

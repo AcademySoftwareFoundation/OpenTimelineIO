@@ -29,6 +29,15 @@ namespace bundle {
 
     namespace {
 
+        // The value of a hex digit, or -1 if it is not one
+        int hex_digit(char c)
+        {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return -1;
+        }
+
         // Utility to decode a URL (ie, %20 -> ' ')
         std::string percent_decode(std::string const& s)
         {
@@ -36,10 +45,13 @@ namespace bundle {
             result.reserve(s.size());
             for (size_t i = 0; i < s.size(); ++i)
             {
-                if (s[i] == '%' && i + 2 < s.size())
+                // Only '%' and two hex digits is an escape; any other '%' is
+                // kept as it is, as in a file named "100%.mov"
+                if (s[i] == '%' && i + 2 < s.size() &&
+                    hex_digit(s[i + 1]) >= 0 && hex_digit(s[i + 2]) >= 0)
                 {
-                    int hi = std::stoi(s.substr(i + 1, 2), nullptr, 16);
-                    result += static_cast<char>(hi);
+                    result += static_cast<char>(
+                        hex_digit(s[i + 1]) * 16 + hex_digit(s[i + 2]));
                     i += 2;
                 }
                 else
@@ -620,6 +632,9 @@ namespace bundle {
         Timeline const*     timeline,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    // The functions below catch whatever escapes their bodies, so that a
+    // filesystem error or the like is reported rather than thrown.
+    try
     {
         // Prepare the bundle
         SerializableObject::Retainer<Timeline> clone;
@@ -659,12 +674,19 @@ namespace bundle {
         
         return total;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, e.what());
+        return std::nullopt;
+    }
 
     bool write_otioz(
         Timeline const*     timeline,
         std::string const&  path,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    try
     {
         // Validate the path
         if (std::filesystem::exists(std::filesystem::u8path(path)))
@@ -713,11 +735,20 @@ namespace bundle {
         }
         return true;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_WRITE_FAILED,
+                "error writing '" + path + "': " + e.what());
+        return false;
+    }
 
     SerializableObject* read_otioz(
         std::string const& path,
         ReadOptions const& options,
         ErrorStatus*       error_status)
+    try
     {
         // Validate the paths
         auto const input_path = std::filesystem::u8path(path);
@@ -801,8 +832,9 @@ namespace bundle {
             return nullptr;
         }
 
-        // Create the timeline
-        auto result = Timeline::from_json_string(json, error_status);
+        // Create the timeline, held until it is returned so it is not leaked
+        SerializableObject::Retainer<SerializableObject> result(
+            Timeline::from_json_string(json, error_status));
         if (!result || is_error(error_status))
             return nullptr;
 
@@ -810,7 +842,7 @@ namespace bundle {
         if (options.absolute_media_reference_paths &&
             options.extract_path)
         {
-            if (auto timeline = dynamic_cast<Timeline*>(result))
+            if (auto timeline = dynamic_cast<Timeline*>(result.value))
             {
                 rewrite_media_to_absolute(
                     timeline,
@@ -818,7 +850,15 @@ namespace bundle {
             }
         }
 
-        return result;
+        return result.take_value();
+    }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_OPEN_FAILED,
+                "error reading '" + path + "': " + e.what());
+        return nullptr;
     }
 
     bool write_otiod(
@@ -826,6 +866,7 @@ namespace bundle {
         std::string const&  path,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    try
     {
         // Validate the path
         auto const output_path = std::filesystem::u8path(path);
@@ -892,11 +933,20 @@ namespace bundle {
         }
         return true;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_WRITE_FAILED,
+                "error writing '" + path + "': " + e.what());
+        return false;
+    }
 
     SerializableObject* read_otiod(
         std::string const& path,
         ReadOptions const& options,
         ErrorStatus*       error_status)
+    try
     {
         // Validate the paths
         auto const input_path = std::filesystem::u8path(path);
@@ -918,17 +968,16 @@ namespace bundle {
             return nullptr;
         }
         
-        // Read the timeline
-        auto result = Timeline::from_json_file(
-            timeline_path.u8string(),
-            error_status);
+        // Read the timeline, held until it is returned so it is not leaked
+        SerializableObject::Retainer<SerializableObject> result(
+            Timeline::from_json_file(timeline_path.u8string(), error_status));
         if (!result || is_error(error_status))
             return nullptr;
         
         // Optionally make the media reference paths absolute
         if (options.absolute_media_reference_paths)
         {
-            if (auto timeline = dynamic_cast<Timeline*>(result))
+            if (auto timeline = dynamic_cast<Timeline*>(result.value))
             {
                 rewrite_media_to_absolute(
                     timeline,
@@ -936,7 +985,15 @@ namespace bundle {
             }
         }
 
-        return result;
+        return result.take_value();
+    }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_OPEN_FAILED,
+                "error reading '" + path + "': " + e.what());
+        return nullptr;
     }
 }
 }

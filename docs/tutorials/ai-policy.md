@@ -8,7 +8,7 @@ Use of "AI coding assistants" is permitted on this project, with the following
 guidelines and principles.
 
 Summary of our core values:
-- Human must always be in the loop, and is the responsible party for
+- A human must always be in the loop, and is the responsible party for
   the contents of a PR (including fully understanding and being able
   to explain, defend, and modify it in response to review comments).
 - Humans should interact with the project and community directly, not agents.

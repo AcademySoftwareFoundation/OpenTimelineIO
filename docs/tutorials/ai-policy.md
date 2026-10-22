@@ -1,7 +1,7 @@
 Policy on AI Coding Assistants
 ==============================
 
-- Revised: 12-Sep-2026
+- Revised: 20-Oct-2026
 
 
 Use of "AI coding assistants" is permitted on this project, with the following

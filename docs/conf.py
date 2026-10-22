@@ -103,7 +103,6 @@ linkcheck_exclude_documents = [
 # even though they work fine in a browser.
 linkcheck_ignore = [
     r'https://opensource.org/licenses/MIT',
-    r'https://invent.kde.org/multimedia/kdenlive-opentimelineio',
 ]
 
 # -- Options for MySt-Parser -----------------------------------------------------------

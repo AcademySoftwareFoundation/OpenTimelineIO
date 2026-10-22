@@ -9,6 +9,7 @@
 using opentime::string_printf;
 
 #include <any>
+#include <filesystem>
 #include <string>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
@@ -33,6 +34,38 @@ bool split_schema_string(
     std::string const& schema_and_version,
     std::string*       schema_name,
     int*               schema_version);
+
+///@}
+
+/// @name Path Utilities
+///
+/// Paths are passed as UTF-8 strings. These convert between them and
+/// std::filesystem::path the same way in C++17 and C++20, where
+/// path::u8string() returns std::u8string rather than std::string.
+///@{
+
+/// Convert a UTF-8 string to a path.
+inline std::filesystem::path
+from_utf8(std::string const& value)
+{
+#if defined(__cpp_lib_char8_t)
+    return std::filesystem::path(std::u8string(value.begin(), value.end()));
+#else
+    return std::filesystem::u8path(value);
+#endif
+}
+
+/// Convert a path to a UTF-8 string.
+inline std::string
+to_utf8(std::filesystem::path const& value)
+{
+#if defined(__cpp_lib_char8_t)
+    auto const out = value.u8string();
+    return std::string(out.begin(), out.end());
+#else
+    return value.u8string();
+#endif
+}
 
 ///@}
 

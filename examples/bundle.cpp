@@ -33,9 +33,8 @@ main(int argc, char** argv)
     // Write the bundle
     bundle::WriteOptions options;
     options.relative_media_base_dir =
-        std::filesystem::u8path(input).parent_path().u8string();
-    auto const ext = std::filesystem::u8path(output).extension().u8string();
-    if (".otiod" == ext)
+        std::filesystem::path(input).parent_path().string();
+    if (std::filesystem::path(output).extension() == ".otiod")
     {
         if (!bundle::write_otiod(
             timeline,

@@ -41,6 +41,13 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result = otio.adapters.read_from_file(otiod_path)
             self.assertIsNotNone(result)
 
+    def test_bundle_module(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            otiod_path = os.path.join(temp_dir, "module.otiod")
+            otio.bundle.write_otiod(tl, otiod_path)
+            self.assertIsNotNone(otio.bundle.read_otiod(otiod_path))
+
 
 if __name__ == "__main__":
     unittest.main()

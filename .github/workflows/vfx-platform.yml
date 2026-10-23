@@ -45,6 +45,12 @@ jobs:
       # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      # we need just this one submodule
+      - name: Init minizip-ng submodule
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git submodule update --init src/deps/minizip-ng
+
       - name: Report platform toolchain
         run: |
           echo "VFX platform: ${ASWF_VFXPLATFORM_VERSION}"

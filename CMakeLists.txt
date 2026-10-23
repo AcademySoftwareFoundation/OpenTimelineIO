@@ -184,7 +184,7 @@ endif()
 # Global language settings
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD 20)
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

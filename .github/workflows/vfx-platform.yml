@@ -45,12 +45,6 @@ jobs:
       # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      # we need just this one submodule
-      - name: Init minizip-ng submodule
-        run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git submodule update --init src/deps/minizip-ng
-
       - name: Report platform toolchain
         run: |
           echo "VFX platform: ${ASWF_VFXPLATFORM_VERSION}"
@@ -73,6 +67,7 @@ jobs:
             -DOTIO_FIND_IMATH=ON \
             -DOTIO_FIND_PYBIND11=ON \
             -DOTIO_FIND_RAPIDJSON=ON \
+            -DOTIO_FIND_MINIZIP_NG=ON \
             -DOTIO_PYTHON_INSTALL=ON \
             -DOTIO_PYTHON_INSTALL_DIR="$GITHUB_WORKSPACE/install/python"
 
@@ -97,6 +92,6 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           python -m pip install --upgrade pip
-          export CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_CXX_EXAMPLES=OFF -DOTIO_DEPENDENCIES_INSTALL=OFF -DOTIO_FIND_IMATH=ON -DOTIO_FIND_PYBIND11=ON -DOTIO_FIND_RAPIDJSON=ON"
+          export CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_CXX_EXAMPLES=OFF -DOTIO_DEPENDENCIES_INSTALL=OFF -DOTIO_FIND_IMATH=ON -DOTIO_FIND_PYBIND11=ON -DOTIO_FIND_RAPIDJSON=ON -DOTIO_FIND_MINIZIP_NG=ON"
           python -m pip install .
           make test

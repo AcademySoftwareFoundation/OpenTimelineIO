@@ -42,9 +42,8 @@ jobs:
       image: aswf/ci-otio:${{ matrix.platform }}
 
     steps:
+      # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          submodules: recursive
 
       - name: Report platform toolchain
         run: |

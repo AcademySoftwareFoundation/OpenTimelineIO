@@ -123,6 +123,27 @@ To use this argument with `otioconvert` from the commandline,  you can use the `
 otioconvert -i <some_file> -o path/to/output_file.otioz -A media_policy="AllMissing"
 ```
 
+### target_schema_versions Optional Argument
+
+As with `.otio` files, a bundle's `content.otio` can be written at older schema versions so that it can be read by an older version of OpenTimelineIO.  Pass a map of schema name to version as `target_schema_versions`, for example one of the `OTIO_CORE` version maps (see [Versioning Schemas](versioning-schemas)):
+
+```python
+downgrade_manifest = otio.versioning.fetch_map("OTIO_CORE", "0.18.1")
+otio.adapters.write_to_file(
+    timeline,
+    "/path/to/file.otioz",
+    target_schema_versions=downgrade_manifest
+)
+```
+
+If `target_schema_versions` is not given, the {term}`OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable is used if it is set.
+
+From the commandline:
+
+```
+otioconvert -i some_file.otio -o /var/tmp/some_file.otioz -A target_schema_versions="{'Marker':2}"
+```
+
 ### Write Adapter Example
 
 Convert an otio into a zip bundle:

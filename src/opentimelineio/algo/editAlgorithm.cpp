@@ -755,7 +755,7 @@ roll(
 
             // Clamp to previous clip's range first, leaving it one frame
             const RationalTime duration = previous_range.duration();
-            if (duration < -in_offset)
+            if (duration <= -in_offset)
             {
                 in_offset = RationalTime(1.0, duration.rate()) - duration;
             }

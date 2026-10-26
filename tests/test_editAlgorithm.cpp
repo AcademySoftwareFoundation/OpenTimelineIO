@@ -2367,11 +2367,15 @@ main(int argc, char** argv)
             track,
             { tr(100, 3), tr(300, 4), tr(103, 7), tr(200, 10) });
 
-        // Roll the start of B past the start of A, which leaves A one frame.
-        track = make_track(false);
-        algo::roll(child(track, 1), rt(-15), rt(0), &error_status);
-        assert(!is_error(error_status));
-        assert_clip_ranges(track, { tr(100, 1), tr(191, 19) });
+        // Roll the start of B to and past the start of A, which leaves A one
+        // frame.
+        for (double delta : { -10.0, -15.0 })
+        {
+            track = make_track(false);
+            algo::roll(child(track, 1), rt(delta), rt(0), &error_status);
+            assert(!is_error(error_status));
+            assert_clip_ranges(track, { tr(100, 1), tr(191, 19) });
+        }
 
         // Ripple the start of A both ways.
         track = make_track(false);

@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter
-        uses: release-drafter/release-drafter@139054aeaa9adc52ab36ddf67437541f039b88e2 # v7.1.1
+        uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         id: draft-release
         with:
           publish: false

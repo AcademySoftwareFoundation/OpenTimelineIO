@@ -1,0 +1,119 @@
+name: VFX Platform
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Mondays at 07:31 UTC.
+    - cron: "31 7 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  vfx_platform:
+    name: VFX Platform ${{ matrix.platform }} (C++${{ matrix.cxx-standard }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # CY2023--CY2026 are covered by OTIO's support policy. CY2027 is
+          # included as forward-looking support.
+          # NOTE: minizip-ng versions won't be needed after ci-otio gets updated.
+          - platform: "2023"
+            cxx-standard: 17
+            minizip-ng-version: "4.0.10"
+          - platform: "2024"
+            cxx-standard: 17
+            minizip-ng-version: "4.0.10"
+          - platform: "2025"
+            cxx-standard: 17
+            minizip-ng-version: "4.0.10"
+          - platform: "2026"
+            cxx-standard: 20
+            minizip-ng-version: "4.0.10"
+          - platform: "2027"
+            cxx-standard: 20
+            minizip-ng-version: "4.2.1"
+
+    container:
+      image: aswf/ci-otio:${{ matrix.platform }}
+
+    steps:
+      # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Report platform toolchain
+        run: |
+          echo "VFX platform: ${ASWF_VFXPLATFORM_VERSION}"
+          python --version
+          gcc --version
+          g++ --version
+          cmake --version
+
+      # The aswf/ci-otio images currently don't include minizip-ng.
+      # This step installs minizip-ng as a temporary workaround.
+      - name: Install minizip-ng via Conan
+        run: |
+          # The image's Conan configuration is in .conan; CONAN_HOME points at
+          # .conan2, which is only populated while the image is being built.
+          export CONAN_HOME="$ASWF_CONAN_HOME/.conan"
+          conan install \
+            --requires="minizip-ng/${{ matrix.minizip-ng-version }}@aswf/vfx${{ matrix.platform }}" \
+            --build=missing \
+            --profile:all "vfx${{ matrix.platform }}" \
+            --deployer=aswf_deploy \
+            --deployer-folder=/usr/local \
+            --conf user.aswf:exclude_package=cmake \
+            --output-folder=/tmp/otio-conan
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc \
+            -DCMAKE_CXX_COMPILER=g++ \
+            -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} \
+            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/install" \
+            -DOTIO_AUTOMATIC_SUBMODULES=OFF \
+            -DOTIO_CXX_EXAMPLES=OFF \
+            -DOTIO_DEPENDENCIES_INSTALL=OFF \
+            -DOTIO_FIND_IMATH=ON \
+            -DOTIO_FIND_PYBIND11=ON \
+            -DOTIO_FIND_RAPIDJSON=ON \
+            -DOTIO_FIND_MINIZIP_NG=ON \
+            -DOTIO_PYTHON_INSTALL=ON \
+            -DOTIO_PYTHON_INSTALL_DIR="$GITHUB_WORKSPACE/install/python"
+
+      - name: Build and test
+        run: |
+          cmake --build build --parallel
+          ctest --test-dir build --output-on-failure
+
+      - name: Install and run consumer tests
+        run: |
+          cmake --install build
+          cmake -S tests/consumer -B consumer-build \
+            -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install"
+
+      - name: Verify Python bindings
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE/install/python" \
+            python -c 'import opentimelineio; print(opentimelineio.__file__)'
+
+      - name: Run Python tests
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          export CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_CXX_EXAMPLES=OFF -DOTIO_DEPENDENCIES_INSTALL=OFF -DOTIO_FIND_IMATH=ON -DOTIO_FIND_PYBIND11=ON -DOTIO_FIND_RAPIDJSON=ON -DOTIO_FIND_MINIZIP_NG=ON"
+          python -m pip install .
+          make test

@@ -27,22 +27,16 @@ jobs:
         include:
           # CY2023--CY2026 are covered by OTIO's support policy. CY2027 is
           # included as forward-looking support.
-          # NOTE: minizip-ng versions won't be needed after ci-otio gets updated.
           - platform: "2023"
             cxx-standard: 17
-            minizip-ng-version: "4.0.10"
           - platform: "2024"
             cxx-standard: 17
-            minizip-ng-version: "4.0.10"
           - platform: "2025"
             cxx-standard: 17
-            minizip-ng-version: "4.0.10"
           - platform: "2026"
             cxx-standard: 20
-            minizip-ng-version: "4.0.10"
           - platform: "2027"
             cxx-standard: 20
-            minizip-ng-version: "4.2.1"
 
     container:
       image: aswf/ci-otio:${{ matrix.platform }}
@@ -58,22 +52,6 @@ jobs:
           gcc --version
           g++ --version
           cmake --version
-
-      # The aswf/ci-otio images currently don't include minizip-ng.
-      # This step installs minizip-ng as a temporary workaround.
-      - name: Install minizip-ng via Conan
-        run: |
-          # The image's Conan configuration is in .conan; CONAN_HOME points at
-          # .conan2, which is only populated while the image is being built.
-          export CONAN_HOME="$ASWF_CONAN_HOME/.conan"
-          conan install \
-            --requires="minizip-ng/${{ matrix.minizip-ng-version }}@aswf/vfx${{ matrix.platform }}" \
-            --build=missing \
-            --profile:all "vfx${{ matrix.platform }}" \
-            --deployer=aswf_deploy \
-            --deployer-folder=/usr/local \
-            --conf user.aswf:exclude_package=cmake \
-            --output-folder=/tmp/otio-conan
 
       - name: Configure
         run: |

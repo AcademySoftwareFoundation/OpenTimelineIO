@@ -12,3 +12,4 @@ void otio_imath_bindings(pybind11::module);
 void otio_serializable_object_bindings(pybind11::module);
 void otio_tests_bindings(pybind11::module);
 void otio_bundle_bindings(pybind11::module);
+void otio_edit_algorithm_bindings(pybind11::module);

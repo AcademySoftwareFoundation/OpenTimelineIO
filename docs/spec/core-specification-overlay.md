@@ -255,9 +255,10 @@ extra metadata to a clip, or to identify clips for VFX.
 
 `marked_range` specifies the marked range in the host item's local time
 coordinates. For example, a `marked_range` of
-`TimeRange(start_time=RationalTime(0, 24), duration=RationalTime(0, 24))` marks
-the beginning of the clip as positioned in the timeline, not the beginning of
-the source media.
+`TimeRange(start_time=RationalTime(100, 24), duration=RationalTime(0, 24))`
+marks the first visible frame of a clip whose `source_range.start_time` is
+`RationalTime(100, 24)`. A marker at frame zero is outside that clip's trimmed
+range; marker times are not relative to the clip's position in its parent track.
 
 `color` describes the color the marker is drawn with in the user interface and
 is commonly overloaded to convey workflow context (e.g. red for chapter markers,
@@ -352,7 +353,9 @@ single JSON tree rooted at one object.
 
 Because schema are versioned and automatically migrated on read, a file written
 by one version of OTIO can be read by a newer version without special handling.
-There are currently no mechanisms for downgrading the schema versions used
-within an OTIO file, so keeping the OTIO implementation in your software
-up-to-date maximizes read compatibility with files produced by other
-applications.
+When writing, `opentimelineio.core.serialize_json_to_string` and
+`serialize_json_to_file` accept a `schema_version_targets` mapping from schema
+names to target versions, such as `{"Marker": 2}`. This requests the registered
+downgrade conversions for those schemas. Downgrading can discard fields that
+the target version cannot represent, and unsupported conversions fail; it is
+not a guarantee that every newer feature can be preserved in older software.

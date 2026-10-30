@@ -89,13 +89,13 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
 ```
 
 parameters:
-- *color* (`Color | None`): Optional color used to display this item in a user interface.
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Item.1
 
@@ -110,13 +110,13 @@ None
 ```
 
 parameters:
-- *color* (`Color | None`): Optional color used to display this item in a user interface.
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### MediaReference.1
 
@@ -131,8 +131,8 @@ None
 ```
 
 parameters:
-- *available_image_bounds* (`Box2d | None`): Optional spatial bounds of the image content of this media.
-- *available_range* (`TimeRange | None`): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
 
@@ -301,14 +301,14 @@ Contains a :class:`.MediaReference` and a trim on that media reference.
 
 parameters:
 - *active_media_reference_key* (`String`, default: `"DEFAULT_MEDIA"`): Key, in ``media_references``, of the media reference currently active for this clip.
-- *color* (`Color | None`): Optional color used to display this clip in a user interface.
+- *color* (`Color`, optional): Optional color used to display this clip in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *media_references* (`Map[String, MediaReference]`): 
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Color.1
 
@@ -362,8 +362,8 @@ None
 ```
 
 parameters:
-- *available_image_bounds* (`Box2d | None`): Optional spatial bounds of the image content of this media.
-- *available_range* (`TimeRange | None`): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
 - *target_url* (`String`, default: `""`): URL locating the referenced media. Local files use ``file://`` URLs.
@@ -404,13 +404,13 @@ None
 ```
 
 parameters:
-- *color* (`Color | None`): Optional color used to display this item in a user interface.
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### GeneratorReference.1
 
@@ -425,8 +425,8 @@ None
 ```
 
 parameters:
-- *available_image_bounds* (`Box2d | None`): Optional spatial bounds of the image content of this media.
-- *available_range* (`TimeRange | None`): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
 - *generator_kind* (`String`, default: `""`): Key identifying the kind of media to generate (for example a solid color, color bars, or tone). The generator's configuration is stored in ``parameters``.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
@@ -519,8 +519,8 @@ yield the first three target urls as:
 ```
 
 parameters:
-- *available_image_bounds* (`Box2d | None`): Optional spatial bounds of the image content of this media.
-- *available_range* (`TimeRange | None`): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
 - *frame_step* (`Integer`, default: `1`): Step between frame numbers in file names.
 - *frame_zero_padding* (`Integer`, default: `0`): Number of digits to pad zeros out to in frame numbers.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
@@ -572,7 +572,7 @@ system.
 ```
 
 parameters:
-- *color* (`Color | None`): Color object assigned to this marker
+- *color* (`Color`, optional): Color object assigned to this marker
 - *comment* (`String`, default: `""`): Optional comment for this marker.
 - *marked_range* (`TimeRange`): Range this marker applies to, relative to the :class:`.Item` this marker is attached to (e.g. the :class:`.Clip` or :class:`.Track` that owns this marker).
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
@@ -594,8 +594,8 @@ is not known.
 ```
 
 parameters:
-- *available_image_bounds* (`Box2d | None`): Optional spatial bounds of the image content of this media.
-- *available_range* (`TimeRange | None`): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
+- *available_image_bounds* (`Box2d`, optional): Optional spatial bounds of the image content of this media.
+- *available_range* (`TimeRange`, optional): The range of media available in this reference, in the media's own time coordinates. When set, its ``start_time`` should be the media's start timecode or first frame number so consumers can reliably locate the media.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
 
@@ -637,13 +637,13 @@ None
 ```
 
 parameters:
-- *color* (`Color | None`): Optional color used to display this item in a user interface.
+- *color* (`Color`, optional): Optional color used to display this item in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### TimeEffect.1
 
@@ -676,10 +676,10 @@ None
 ```
 
 parameters:
-- *global_start_time* (`RationalTime | None`): Global offset for the start of the timeline, used to express a sequence's start timecode (for example ``01:00:00:00``).
+- *global_start_time* (`RationalTime`, optional): Global offset for the start of the timeline, used to express a sequence's start timecode (for example ``01:00:00:00``).
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *tracks* (`Stack`): The :class:`~Stack` holding the timeline's tracks (its audio, video, and other :class:`~Track`\s).
+- *tracks* (`Stack`): The :class:`~opentimelineio.schema.Stack` holding the timeline's audio, video, and other tracks.
 
 ### Track.1
 
@@ -694,14 +694,14 @@ None
 ```
 
 parameters:
-- *color* (`Color | None`): Optional color used to display this track in a user interface.
+- *color* (`Color`, optional): Optional color used to display this track in a user interface.
 - *effects* (`Array[Effect]`, default: `[]`): Effects applied to this item's media, applied in the order they appear in the list.
 - *enabled* (`Boolean`, default: `true`): If true, an Item contributes to compositions. For example, when an audio/video clip is ``enabled=false`` the clip is muted/hidden.
 - *kind* (`String`, default: `"Video"`): The kind of media this track composes (for example the ``Audio`` or ``Video`` constants). A free-form string; applications are expected to ignore tracks of a kind they do not understand.
 - *markers* (`Array[Marker]`, default: `[]`): Markers attached to this item, positioned in the item's local time coordinates.
 - *metadata* (`Map[String, Any]`, default: `{}`): Arbitrary, application-defined data attached to this object. By convention, store data under a top-level namespace key unique to your application and preserve metadata you do not own.
 - *name* (`String`, default: `""`): Human-readable name for this object.
-- *source_range* (`TimeRange | None`): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
+- *source_range* (`TimeRange`, optional): The range of the item to present, expressed in the item's own time coordinate space. This determines the item's duration. When null, the item's full ``available_range`` is used.
 
 ### Transition.1
 

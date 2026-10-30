@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 
+import opentimelineio as otio
 from opentimelineio.console import (
     autogen_serialized_datamodel as asd,
     autogen_plugin_documentation as apd,
@@ -20,6 +21,19 @@ from opentimelineio.console import (
     "$OTIO_DISABLE_SERIALIZED_SCHEMA_TEST is set to something other than ''"
 )
 class SerializedSchemaTester(unittest.TestCase):
+    def test_optional_types(self):
+        for raw in (
+            "Optional[opentimelineio._opentime.TimeRange]",
+            "opentimelineio._opentime.TimeRange | None",
+            "None | opentimelineio._opentime.TimeRange",
+        ):
+            with self.subTest(raw=raw):
+                self.assertEqual(asd._normalize_type(raw), ("TimeRange", True))
+
+        field = asd._generate_model()[otio.schema.Clip]["source_range"]
+        self.assertEqual(field["type"], "TimeRange")
+        self.assertTrue(field["optional"])
+
     def test_serialized_schema(self):
         """Test if the schema has changed since last time the serialized schema
         documentation was generated.
@@ -48,6 +62,51 @@ class SerializedSchemaTester(unittest.TestCase):
     "$OTIO_DISABLE_SERIALIZED_SCHEMA_TEST is set to something other than ''"
 )
 class CoreSpecificationTester(unittest.TestCase):
+    def setUp(self):
+        root = os.path.dirname(os.path.dirname(__file__))
+        with open(os.path.join(root, "docs", "spec",
+                               "core-specification-overlay.md")) as stream:
+            self.overlay = stream.read()
+
+    def test_serializable_object_definition(self):
+        text = acs.generate_specification(self.overlay)
+        section = text.split("### SerializableObject\n", 1)[1].split("\n### ", 1)[0]
+        self.assertIn("`opentimelineio.core.SerializableObject`", section)
+        self.assertIn(otio.core.SerializableObject.__doc__, section)
+        self.assertNotIn("PythonPlugin", text)
+        self.assertNotIn("*filepath*", text)
+
+    def test_container_children(self):
+        text = acs.generate_specification(self.overlay)
+        for cls, child_type in (
+            (otio.core.Composition, "Composable"),
+            (otio.schema.Stack, "Composable"),
+            (otio.schema.Track, "Composable"),
+            (otio.schema.SerializableCollection, "SerializableObject"),
+        ):
+            with self.subTest(container=cls.__name__):
+                section = text.split(f"### {cls.__name__}\n", 1)[1]
+                section = section.split("\n### ", 1)[0]
+                self.assertIn(f"*children* (`Array[{child_type}]`", section)
+
+    def test_invalid_object_directives(self):
+        for overlay, error in (
+            (self.overlay + "\n<!-- @object Clip -->\n", "more than once: Clip"),
+            (self.overlay + "\n<!-- @object NotASchema -->\n", "unknown schema"),
+            (self.overlay.replace("<!-- @object Clip -->", ""), "no overlay"),
+        ):
+            with self.subTest(error=error):
+                with self.assertRaisesRegex(ValueError, error):
+                    acs.generate_specification(overlay)
+
+    def test_duplicate_schema_names(self):
+        model = {
+            otio.core.SerializableObject: {"OTIO_SCHEMA": "SerializableObject.1"},
+            otio.plugins.PythonPlugin: {"OTIO_SCHEMA": "SerializableObject.1"},
+        }
+        with self.assertRaisesRegex(ValueError, "multiple classes use schema name"):
+            acs._index_model(model)
+
     def test_core_specification(self):
         """Test that the generated Core Specification matches the checked-in
         baseline. It is regenerated from the code (schema, types, docstrings)

@@ -154,7 +154,7 @@ You can get the latest development version via:
 
 `git clone git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git --recursive `
 
-You can install development dependencies with `python -m pip install -r tests/requirements.txt`
+You can install development dependencies with `python -m pip install .[dev]`
 
 You can also install the PySide2 dependency with `python -m pip install .[view]`
 

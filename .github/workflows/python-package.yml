@@ -24,6 +24,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pr_tools_tests:
+    name: PR labeling tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - run: node --test .github/scripts/tests/*.test.cjs
+
   cpp_build:
     name: cpp_build (${{ matrix.os }}, shared=${{ matrix.shared }})
     runs-on: ${{ matrix.os }}

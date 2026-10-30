@@ -1,0 +1,16 @@
+name: Pull Request Label Signal
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+# This workflow only signals that PR metadata changed. It needs no token
+# permissions, checkout, secrets, caches, or artifacts, including for forks.
+permissions: {}
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo 'Pull request metadata changed.'

@@ -10,8 +10,31 @@ the preview.
 disabled in [#1996](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1996),
 and removed in [#1999](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1999).
 It uses GitHub's `actions/labeler` and `.github/labeler.yml` with the modern
-`changed-files` syntax. Maintainers can apply other category labels, such as
-`feat` and `fix`, manually.
+`changed-files` syntax. All automatically managed labels already exist in the
+repository and are mapped to Release Drafter sections:
+
+| Labels | Automatic matching | Release section |
+| --- | --- | --- |
+| `documentation` | Docs, Doxygen, Markdown, and reStructuredText files | Documentation |
+| `ci`, `github_actions` | CI configuration and GitHub Actions workflows, scripts, and configuration | Maintenance |
+| `build`, `cmake` | Build, packaging, and CMake files | Maintenance |
+| `wheels` | Python packaging files and wheel/publishing workflows | Maintenance |
+| `dependencies`, `submodules` | Dependency declarations, requirements, and submodules | Maintenance |
+| `maintenance` | Maintainer tools or changes entirely within `tests/` | Maintenance |
+| `python`, `python-bindings` | Python files and Python package/binding sources | Python & Bindings |
+| `opentime`, `time calculations` | OpenTime sources, bindings, and tests | Time |
+| `color` | Color implementation, Python wrapper, and tests | Color |
+
+The existing `enhancement` label also maps to Features. Intent and triage labels
+such as `bug`, `enhancement`, `security`, `good first issue`, and `WIP` stay manual:
+file paths alone cannot reliably determine them. The external `Adapters`,
+`AAF`, `otioview`, and `PySide6` labels have no dedicated source paths in this
+repository and are not automatically managed.
+
+Release Drafter v7.1.1 can list a PR in multiple matching sections, for example
+Bug Fixes and Python & Bindings. Component labels do not imply that a change is
+a feature or a bug fix. The inactive Release Drafter `autolabeler` block is removed;
+`.github/labeler.yml` is the single source for automatic rules.
 
 ## Security boundary
 

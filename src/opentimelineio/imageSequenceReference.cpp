@@ -3,6 +3,8 @@
 
 #include "opentimelineio/imageSequenceReference.h"
 
+#include <limits>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
 ImageSequenceReference::ImageSequenceReference(
@@ -199,6 +201,17 @@ ImageSequenceReference::read_from(Reader& reader)
         && reader.read("frame_step", &frame_step_value)
         && reader.read("rate", &_rate)
         && reader.read("frame_zero_padding", &frame_zero_padding_value);
+
+    if (!result)
+        return false;
+    if (frame_step_value <= 0 ||
+        frame_step_value > std::numeric_limits<int>::max())
+    {
+        reader.error(ErrorStatus(
+            ErrorStatus::JSON_PARSE_ERROR,
+            "ImageSequenceReference frame_step must be a positive integer"));
+        return false;
+    }
 
     _start_frame        = static_cast<int>(start_frame_value);
     _frame_step         = static_cast<int>(frame_step_value);

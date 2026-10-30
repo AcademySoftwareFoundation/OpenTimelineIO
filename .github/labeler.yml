@@ -1,26 +1,33 @@
-# Exact file paths or directory/** prefixes, including dotfiles.
-# Each rule accepts file paths directly or grouped in an `any` list.
+# https://github.com/actions/labeler#common-examples
 
 release-candidate:
-- 'CHANGELOG.md'
+- changed-files:
+  - any-glob-to-any-file: 'CHANGELOG.md'
 
 submodules:
-- any: ['src/deps/**']
+- changed-files:
+  - any-glob-to-any-file: 'src/deps/**'
 
 dependencies:
-- any: ['pyproject.toml']
+- changed-files:
+  - any-glob-to-any-file: 'pyproject.toml'
 
 ci:
-- '.github/**'
+- changed-files:
+  - any-glob-to-any-file: '.github/**'
 
 documentation:
-- any: ['docs/**']
+- changed-files:
+  - any-glob-to-any-file: 'docs/**'
 
 opentime:
-- any: ['src/opentime/**']
+- changed-files:
+  - any-glob-to-any-file: 'src/opentime/**'
 
-'time calculations':
-- any: ['src/opentime/**']
+time calculations:
+- changed-files:
+  - any-glob-to-any-file: 'src/opentime/**'
 
 python-bindings:
-- any: ['src/py-opentimelineio/**']
+- changed-files:
+  - any-glob-to-any-file: 'src/py-opentimelineio/**'

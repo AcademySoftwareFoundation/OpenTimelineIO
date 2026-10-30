@@ -28,23 +28,67 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      # workflow_run's github.sha is on the default branch. Never replace this
-      # with the triggering run's head_sha or a PR ref: this job has write access.
-      - name: Check out trusted labeling code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-          sparse-checkout: .github
-
-      # Install only the parser locked in the trusted checkout. Do not run
-      # dependency lifecycle scripts or restore a PR-produced package cache.
-      - name: Install YAML parser
-        run: npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
-
-      - name: Reconcile file labels incrementally
+      # No checkout, artifacts, or caches: PR metadata is data, never code.
+      - name: Find current pull requests
+        id: prs
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
-            const {syncPullRequestLabels} = require('./.github/scripts/sync-pr-labels.cjs');
-            await syncPullRequestLabels({github, context, core});
+            const repository = context.payload.repository;
+            let candidates;
+            const manual = context.eventName === 'workflow_dispatch';
+            const headSha = context.payload.workflow_run?.head_sha;
+            if (manual) {
+              const input = context.payload.inputs['pull-request'];
+              if (!/^[1-9][0-9]*$/.test(input) || !Number.isSafeInteger(Number(input))) {
+                throw new Error('Expected a positive integer PR number');
+              }
+              candidates = [{number: Number(input)}];
+            } else {
+              if (!/^[0-9a-f]{40}$/.test(headSha ?? '')) {
+                throw new Error('Invalid head SHA in labeling signal');
+              }
+              // Fork runs may have no workflow_run.pull_requests association.
+              candidates = (await github.paginate(github.rest.pulls.list, {
+                ...context.repo, state: 'open', per_page: 100,
+              })).filter(pr => pr.head.sha === headSha);
+            }
+            const numbers = [];
+            for (const candidate of candidates) {
+              const {data: pr} = await github.rest.pulls.get({
+                ...context.repo, pull_number: candidate.number,
+              });
+              if (pr.base.repo.id !== repository.id ||
+                  !(pr.state === 'open' || (manual && pr.merged_at)) ||
+                  (!manual && pr.head.sha !== headSha)) continue;
+              // GitHub's files endpoint cannot return more than 3,000 files.
+              if (pr.changed_files > 3000) {
+                core.warning(`Skipping PR #${pr.number}: file list would be incomplete`);
+                continue;
+              }
+              numbers.push(pr.number);
+            }
+            core.setOutput('numbers', numbers.join('\n'));
+            if (numbers.length) {
+              // This labeler commit double-encodes slashes in remote config
+              // paths. Fetch only the trusted YAML using a literal API path.
+              const {data} = await github.request(
+                'GET /repos/{owner}/{repo}/contents/.github/labeler.yml',
+                {...context.repo, ref: context.sha},
+              );
+              require('node:fs').writeFileSync(
+                require('node:path').join(process.env.RUNNER_TEMP, 'otio-labeler.yml'),
+                Buffer.from(data.content, 'base64'),
+              );
+            }
+
+      - name: Apply file labels incrementally
+        if: steps.prs.outputs.numbers != ''
+        # Post-v7.0.0 fix: selective additions/removals preserve other labels.
+        # https://github.com/actions/labeler/pull/957
+        uses: actions/labeler@b7a88044754812b108a54feec878dd5c328bba59
+        with:
+          pr-number: ${{ steps.prs.outputs.numbers }}
+          configuration-path: ${{ runner.temp }}/otio-labeler.yml
+          sync-labels: true
+          dot: true

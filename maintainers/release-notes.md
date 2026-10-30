@@ -1,71 +1,53 @@
 # Release notes and PR labels
 
-The **Release Preview** workflow generates draft release notes using
+**Release Preview** continues to generate draft release notes using
 `.github/release-drafter.yml`. Its categories use the labels on merged PRs.
 Run it manually as before to create a release branch and optionally announce
 the preview.
 
-The **Pull Request Tools** workflow restores the file-based labeling previously
-disabled in #1996 and removed in #1999, without a `pull_request_target` trigger.
-It applies `.github/labeler.yml` and removes labels from that configuration when
-their file patterns no longer match. Each rule lists exact file paths or
-`directory/**` prefixes, which also match dotfiles; other glob syntax is rejected.
-The YAML retains the original list and `any` rule format and supports comments.
-The updater adds missing matching labels and removes individual stale managed
-labels through GitHub's API. It never replaces the entire label list, so
-concurrent additions or removals of unrelated labels are preserved.
-Maintainers can apply other category labels, such as `feat` and `fix`, manually.
-Labels listed in the configuration remain owned by the automation even when
-applied manually. Concurrent edits to those same managed labels are not atomic;
-the next run reconciles them against the file rules.
+**Pull Request Tools** restores the file-based labeling introduced in
+[#1689](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1689),
+disabled in [#1996](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1996),
+and removed in [#1999](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/pull/1999).
+It uses GitHub's `actions/labeler` and `.github/labeler.yml` with the modern
+`changed-files` syntax. Maintainers can apply other category labels, such as
+`feat` and `fix`, manually.
 
-## Trust boundary
+## Security boundary
 
-1. **Pull Request Label Signal** runs on PR opens, edits, updates, reopens, and
-   transitions out of draft. It has no token permissions and does not check out
-   code, use secrets, or produce artifacts.
-2. **Pull Request Tools** runs after that signal succeeds, using the workflow
-   definition and code from the default branch. Only this job can write PR
-   labels; it has no release or other contents write permission.
-3. The job checks out the default-branch commit (`github.sha`), with persisted
-   credentials disabled. It never checks out the triggering run's `head_sha`.
-   The checkout and GitHub Script actions are pinned to full commit hashes.
-   The YAML parser is pinned in `.github/scripts/package-lock.json` and installed
-   from that trusted checkout with lifecycle scripts disabled. No PR-produced
-   dependency caches are restored. The parser uses a data-only YAML schema and
-   rejects duplicate keys and unknown tags.
-4. The resolver queries the base repository's open PRs through GitHub's API and
-   matches the signal's head SHA to their current heads. This works for forks
-   even when `workflow_run.pull_requests` is empty, and skips superseded runs.
-   PR code, artifacts, caches, titles, and bodies are never executed or used as
-   scripts. The updater reads file paths from the API and trusted configuration,
-   and rechecks the PR's head and base before writing labels. A successful signal
-   is a notification, not an assertion that its code is trusted.
+- **Pull Request Label Signal** runs on PR updates with `permissions: {}`. It
+  checks out no code, uses no secrets, and produces no artifacts or caches.
+- **Pull Request Tools** runs from the default branch after the signal succeeds.
+  It validates the event, workflow path, and repository. Its only token
+  permissions are `contents: read` and `pull-requests: write`.
+- A short inline API lookup finds current PR heads in the base repository.
+  It handles fork runs with empty PR associations and skips superseded heads.
+  PRs over GitHub's 3,000-file API limit are skipped to avoid incomplete matches.
+- The job performs no checkout or package install and consumes no artifacts or
+  caches. GitHub Script fetches only the YAML configuration from `github.sha`,
+  the trusted default-branch commit, into a runner temporary file. This avoids
+  the pinned labeler's remote configuration-path encoding bug. File paths are
+  read through GitHub's API, never executed.
+- Both actions are pinned to full commit hashes. The labeler pin deliberately
+  includes [the incremental-update fix in #957](https://github.com/actions/labeler/pull/957),
+  which is newer than the `v7.0.0` release. Keep that fix when updating the pin.
+  It adds matching labels and removes only stale configured labels, preserving
+  concurrent edits to unrelated labels. Configured labels remain owned by the
+  automation, including when applied manually; edits to those same labels are
+  not transactional.
 
-Both workflows must be merged into the default branch before automatic labeling
-works. A fork PR may still need the normal GitHub Actions approval before its
-signal runs. Unmerged changes to the labeling rules do not affect live labeling.
-Keep all executable code and label configuration in the privileged job on the
-default-branch commit; do not add PR checkouts, artifact downloads, or cache
-restores to it. See GitHub's
-[workflow security guidance](https://docs.github.com/en/actions/reference/security/secure-use).
+`workflow_run` is privileged, so a successful signal is not evidence that PR
+code is trusted. Do not add PR checkouts, artifact execution, or cache restores
+to the privileged job. See GitHub's
+[secure-use guidance](https://docs.github.com/en/actions/reference/security/secure-use).
 
-## Backfill and validation
+## Backfill and rollout
 
-To label an existing open or merged PR, run **Pull Request Tools** from the
-default branch and enter its number. Closed, unmerged PRs are skipped. This can
-also recover a missed signal or label a PR merged before automatic labeling
-finished. Then rerun **Release Preview** to refresh the draft notes.
+Run **Pull Request Tools** from the default branch with a PR number to label an
+existing open or merged PR. Closed, unmerged PRs are skipped. Then rerun
+**Release Preview** to refresh the draft notes.
 
-Run the resolver and incremental updater tests locally with:
-
-```sh
-npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
-node --test .github/scripts/tests/*.test.cjs
-```
-
-They also run in the main CI workflow. After merging, verify a fork PR that
-changes `docs/` receives `documentation`, and one that changes `.github/`
-receives `ci`. Revert those changes and check that the corresponding labels
-are removed while unrelated labels remain. These integration checks require
-GitHub Actions; local tests use mocked API responses and do not write labels.
+Both workflows must exist on the default branch before automatic labeling works.
+A fork PR may still need normal GitHub Actions approval before its signal runs.
+After merging, verify that a fork PR changing `docs/` receives `documentation`,
+then loses that label when the change is reverted, while unrelated labels remain.

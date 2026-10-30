@@ -11,11 +11,15 @@ on:
   release:
     types: [published]
 
+permissions: {}
+
 jobs:
   load-repo:
     name: Download GitHub repo
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       

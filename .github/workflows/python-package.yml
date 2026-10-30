@@ -110,12 +110,12 @@ jobs:
           cd ${{ env.OTIO_CONSUMER_TEST_BUILD_DIR }}
           cmake ${{ github.workspace }}/tests/consumer -DCMAKE_PREFIX_PATH=${{ env.OTIO_INSTALL_DIR }}
 
-  py_smoketest_build:
+  # Builds from source on the coverage OS/Python only, to run the lint checks and
+  # generate coverage. All Python versions are built and tested as wheels by
+  # package_wheels and test_wheels.
+  py_coverage_build:
     # Ideally this would be ${{ env.GH_COV_OS }} - but github doens't allow it
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
 
     defaults:
       run:
@@ -130,12 +130,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           submodules: "recursive"
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.GH_COV_PY }}
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.GH_COV_PY }}
       - name: Install coverage dependency
-        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        if: github.actor != env.GH_DEPENDABOT
         run: |
           echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
           sudo apt-get install lcov
@@ -154,12 +154,11 @@ jobs:
           python -m pip install . -v --break-system-packages
       - name: Run tests w/ python coverage
         run: make ci-postbuild
-      # (only on GH_COV_OS and GH_COV_PY)
       - name: Generate C++ coverage report
-        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        if: github.actor != env.GH_DEPENDABOT
         run: make lcov
       - name: Upload coverage to Codecov
-        if: matrix.python-version == env.GH_COV_PY && github.actor != env.GH_DEPENDABOT
+        if: github.actor != env.GH_DEPENDABOT
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
         with:
           flags: py-unittests
@@ -291,7 +290,6 @@ jobs:
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Set up Python ${{ matrix.python-version }}
         if: matrix.python-version != 'mingw64'
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -299,7 +297,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install python build dependencies
         run: |
-          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest && python -m pip install --upgrade -r tests/requirements.txt
+          python -m pip install --upgrade pip setuptools wheel
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: wheel-${{ matrix.os }}-*
@@ -307,6 +305,13 @@ jobs:
           merge-multiple: true
       - name: Install wheel for environment
         run: pip install --no-cache-dir --no-index --find-links wheelhouse opentimelineio
+      # Get the tests only after the wheel is installed, so the tests run
+      # against the wheel and not the source tree (same order as py_testonly_build)
+      - name: Get tests and requirements from source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade -r tests/requirements.txt
       - name: Run tests w/ python coverage
         run: make ci-postbuild
 

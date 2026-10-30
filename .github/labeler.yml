@@ -1,0 +1,26 @@
+# Exact file paths or directory/** prefixes, including dotfiles.
+# Each rule accepts file paths directly or grouped in an `any` list.
+
+release-candidate:
+- 'CHANGELOG.md'
+
+submodules:
+- any: ['src/deps/**']
+
+dependencies:
+- any: ['pyproject.toml']
+
+ci:
+- '.github/**'
+
+documentation:
+- any: ['docs/**']
+
+opentime:
+- any: ['src/opentime/**']
+
+'time calculations':
+- any: ['src/opentime/**']
+
+python-bindings:
+- any: ['src/py-opentimelineio/**']

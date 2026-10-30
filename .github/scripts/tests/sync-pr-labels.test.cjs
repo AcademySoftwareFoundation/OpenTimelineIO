@@ -1,7 +1,9 @@
 const assert = require('node:assert/strict');
 const {test} = require('node:test');
-const {syncPullRequestLabels, compileRules} = require('../sync-pr-labels.cjs');
-const config = require('../../labeler.json');
+const {readFileSync} = require('node:fs');
+const {join} = require('node:path');
+const {syncPullRequestLabels, compileRules, parseRules} = require('../sync-pr-labels.cjs');
+const yamlConfig = readFileSync(join(__dirname, '..', '..', 'labeler.yml'), 'utf8');
 
 function fixture({filenames = ['docs/guide.md'], labels = ['ci', 'bug']} = {}) {
   const pr = {
@@ -208,7 +210,7 @@ test('file names including shell syntax remain data', async () => {
 });
 
 test('all existing file rules retain their matches, including dotfiles', () => {
-  const rules = compileRules(config);
+  const rules = parseRules(yamlConfig);
   const cases = {
     'CHANGELOG.md': ['release-candidate'],
     'src/deps/pybind11': ['submodules'],
@@ -234,7 +236,31 @@ test('rejects invalid configurations instead of treating them as no matches', ()
   for (const invalid of [null, [], {}, {docs: []}, {docs: [null]},
     {docs: ['']}, {'': ['docs/**']}, {docs: ['docs/*.md']},
     {docs: ['../docs/**']}, {docs: ['/docs/**']}, {docs: ['docs//**']},
-    {docs: ['**']}]) {
+    {docs: ['**']}, {docs: [{any: []}]}, {docs: [{all: ['docs/**']}]},
+    {docs: [{any: ['docs/**'], typo: true}]}]) {
     assert.throws(() => compileRules(invalid));
   }
+});
+
+test('reads YAML comments, quoted labels, and any lists', () => {
+  const rules = parseRules(`
+    # A quoted label with two alternative paths.
+    'time calculations':
+      - any:
+          - src/opentime/**
+          - README.md
+  `);
+  assert.equal(rules[0].label, 'time calculations');
+  assert(rules[0].matches('src/opentime/rationalTime.cpp'));
+  assert(rules[0].matches('README.md'));
+  assert(!rules[0].matches('docs/guide.md'));
+});
+
+test('rejects malformed YAML, duplicate keys, and custom tags', () => {
+  for (const source of [
+    'docs: [',
+    'docs: [docs/**]\ndocs: [README.md]',
+    'docs: [!!js/function "function() { return 1; }"]',
+    'docs: [docs/**]\n---\nci: [.github/**]',
+  ]) assert.throws(() => parseRules(source));
 });

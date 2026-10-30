@@ -1,18 +1,26 @@
 const {readFileSync} = require('node:fs');
 const {join} = require('node:path');
+const {parseDocument} = require('yaml');
 const findPullRequests = require('./pr-labels.cjs');
 
-// Keep rules declarative and dependency-free. Support exact file paths and
+// Keep rules declarative. Support exact file paths and
 // directory/** prefixes (including dotfiles); reject other glob syntax.
 function compileRules(config) {
   if (!config || typeof config !== 'object' || Array.isArray(config) ||
       Object.keys(config).length === 0) {
     throw new Error('Expected a nonempty label configuration');
   }
-  return Object.entries(config).map(([label, patterns]) => {
-    if (!label.trim() || !Array.isArray(patterns) || !patterns.length) {
+  return Object.entries(config).map(([label, entries]) => {
+    if (!label.trim() || !Array.isArray(entries) || !entries.length) {
       throw new Error('Each label must have at least one file pattern');
     }
+    const patterns = entries.flatMap(entry => {
+      if (typeof entry === 'string') return [entry];
+      if (entry && typeof entry === 'object' &&
+          Object.keys(entry).length === 1 &&
+          Array.isArray(entry.any) && entry.any.length) return entry.any;
+      throw new Error('Expected a file pattern or a nonempty any list');
+    });
     const matchers = patterns.map(pattern => {
       if (typeof pattern !== 'string' || !pattern) {
         throw new Error('Expected a nonempty file pattern');
@@ -31,6 +39,15 @@ function compileRules(config) {
   });
 }
 
+function parseRules(source) {
+  // The core schema reads data only; unknown tags and duplicate keys fail
+  // validation rather than silently changing which labels we manage.
+  const document = parseDocument(source, {schema: 'core', uniqueKeys: true});
+  const problems = [...document.errors, ...document.warnings];
+  if (problems.length) throw new Error(`Invalid label YAML: ${problems[0].message}`);
+  return compileRules(document.toJS({maxAliasCount: 50}));
+}
+
 function isEligible(pr, context) {
   return pr.base?.repo?.id === context.payload.repository.id &&
     (pr.state === 'open' ||
@@ -42,9 +59,9 @@ function isEligible(pr, context) {
 async function syncPullRequestLabels({github, context, core}) {
   // The resolver validates the trigger and default branch before any writes.
   const numbers = await findPullRequests({github, context});
-  const rules = compileRules(JSON.parse(readFileSync(
-    join(__dirname, '..', 'labeler.json'), 'utf8'
-  )));
+  const rules = parseRules(readFileSync(
+    join(__dirname, '..', 'labeler.yml'), 'utf8'
+  ));
 
   for (const number of numbers) {
     const pull = {...context.repo, pull_number: number};
@@ -100,4 +117,4 @@ async function syncPullRequestLabels({github, context, core}) {
   }
 }
 
-module.exports = {syncPullRequestLabels, compileRules};
+module.exports = {syncPullRequestLabels, compileRules, parseRules};

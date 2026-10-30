@@ -201,6 +201,24 @@ public:
             &file_info);
     }
 
+    // Add a symbolic link, as written on a Unix system.
+    void add_symlink(std::string const& name, std::string const& target)
+    {
+        mz_zip_file file_info = {};
+        file_info.filename = name.c_str();
+        file_info.modified_date = time(nullptr);
+        file_info.version_madeby =
+            (MZ_HOST_SYSTEM_UNIX << 8) | MZ_VERSION_MADEBY_ZIP_VERSION;
+        file_info.external_fa = 0120777u << 16;
+        file_info.compression_method = MZ_COMPRESS_METHOD_STORE;
+        file_info.flag = MZ_ZIP_FLAG_UTF8;
+        mz_zip_writer_add_buffer(
+            _writer,
+            const_cast<char*>(target.data()),
+            static_cast<int32_t>(target.size()),
+            &file_info);
+    }
+
 private:
     std::string _path;
     void* _writer = nullptr;
@@ -742,6 +760,37 @@ main(int argc, char** argv)
         assertEqual(result, nullptr);
         assertTrue(is_error(error));
         assertFalse(std::filesystem::exists(temp.path() / "absolute"));
+    });
+
+    tests.add_test("test_otioz_symlink", [] {
+        TempDir temp;
+
+        // Write an otioz file with a symbolic link to a file outside of
+        // the extract path
+        auto const outside_path = temp.path() / "outside.txt";
+        std::ofstream(outside_path) << "outside";
+        std::string const otioz_path = to_utf8(temp.path() / "symlink.otioz");
+        {
+            ZipWriter zip(otioz_path);
+            zip.add_text(bundle::version_file, bundle::version);
+            SerializableObject::Retainer<Timeline> tl(new Timeline);
+            zip.add_text(bundle::timeline_file, tl->to_json_string());
+            zip.add_symlink("media/link", to_utf8(outside_path));
+        }
+
+        // Read the otioz
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = to_utf8(extract_path);
+        OTIO_NS::ErrorStatus error;
+        auto result = dynamic_cast<Timeline*>(read_otioz(
+            otioz_path,
+            read_options,
+            &error));
+        assertEqual(result, nullptr);
+        assertTrue(is_error(error));
+        std::error_code ec;
+        assertFalse(std::filesystem::is_symlink(extract_path / "media" / "link", ec));
     });
 
     tests.run(argc, argv);

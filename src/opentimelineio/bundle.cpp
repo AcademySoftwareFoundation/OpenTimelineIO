@@ -300,6 +300,26 @@ namespace bundle {
             std::string&                            out_json,
             BundleFiles&                            out_files)
         {
+            // Invalid steps can make sequence enumeration loop forever.
+            // Check the original timeline before cloning it via deserialization.
+            for (auto clip : timeline->find_clips())
+            {
+                for (auto const& ref : clip->media_references())
+                {
+                    if (auto seq = dynamic_cast<ImageSequenceReference*>(ref.second))
+                    {
+                        if (seq->frame_step() <= 0)
+                        {
+                            if (error_status)
+                                *error_status = ErrorStatus(
+                                    ErrorStatus::FILE_WRITE_FAILED,
+                                    "ImageSequenceReference frame_step must be positive");
+                            return false;
+                        }
+                    }
+                }
+            }
+
             // Clone the timeline so we can make modifications
             out_clone = SerializableObject::Retainer<Timeline>(
                 dynamic_cast<Timeline*>(timeline->clone(error_status)));

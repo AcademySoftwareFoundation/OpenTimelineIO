@@ -630,6 +630,52 @@ main(int argc, char** argv)
         std::filesystem::remove_all(from_utf8(otiod_path));
     });
 
+    tests.add_test("test_bundle_invalid_image_step", [] {
+        TempDir temp;
+        for (int step : { 0, -1 })
+        {
+            auto timeline = create_simple_timeline();
+            auto seq = new ImageSequenceReference(
+                "", "render.", ".exr", 0, 1, 24, 0,
+                ImageSequenceReference::MissingFramePolicy::error,
+                TimeRange(0, 24, 24));
+            find_clip_by_name(timeline, "video clip 1")->set_media_reference(seq);
+            seq->set_frame_step(step);
+
+            OTIO_NS::ErrorStatus error;
+            auto const json = timeline->to_json_string(&error);
+            assertFalse(is_error(error));
+            SerializableObject::Retainer<SerializableObject> parsed =
+                SerializableObject::from_json_string(json, &error);
+            assertEqual(parsed.value, nullptr);
+            assertEqual(error.outcome, OTIO_NS::ErrorStatus::JSON_PARSE_ERROR);
+
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(dry_run(timeline, WriteOptions(), &error).has_value());
+            assertEqual(error.outcome, OTIO_NS::ErrorStatus::FILE_WRITE_FAILED);
+
+            WriteOptions all_missing;
+            all_missing.policy = MediaReferencePolicy::all_missing;
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(dry_run(timeline, all_missing, &error).has_value());
+            assertEqual(error.outcome, OTIO_NS::ErrorStatus::FILE_WRITE_FAILED);
+
+            auto const zip_path = to_utf8(temp.path() /
+                ("invalid_" + std::to_string(step) + ".otioz"));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otioz(timeline, zip_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            assertFalse(std::filesystem::exists(from_utf8(zip_path)));
+
+            auto const dir_path = to_utf8(temp.path() /
+                ("invalid_" + std::to_string(step) + ".otiod"));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otiod(timeline, dir_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            assertFalse(std::filesystem::exists(from_utf8(dir_path)));
+        }
+    });
+
     tests.add_test("test_otioz_zip64", [] {
         TempDir temp;
 

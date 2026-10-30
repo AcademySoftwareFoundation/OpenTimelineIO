@@ -515,8 +515,8 @@ namespace bundle {
                 return out;
             }
 
-            // Iterate every entry, invoking fn(filename, is_dir) for each. fn may call
-            // extract_current() to save the current entry to disk.
+            // Iterate every entry, invoking fn(filename, is_dir, is_symlink) for
+            // each. fn may call extract_current() to save the current entry to disk.
             template<typename Fn>
             void for_each_entry(Fn&& fn)
             {
@@ -534,7 +534,11 @@ namespace bundle {
                             "cannot stat zip entry in '" + _path + "'");
 
                     bool const is_dir = (mz_zip_reader_entry_is_dir(_reader) == MZ_OK);
-                    fn(std::string(info->filename ? info->filename : ""), is_dir);
+                    bool const is_symlink = (mz_zip_attrib_is_symlink(
+                        info->external_fa, info->version_madeby) == MZ_OK);
+                    fn(std::string(info->filename ? info->filename : ""),
+                        is_dir,
+                        is_symlink);
 
                     err = mz_zip_reader_goto_next_entry(_reader);
                     if (err != MZ_OK && err != MZ_END_OF_LIST)
@@ -794,7 +798,10 @@ namespace bundle {
             {
                 std::filesystem::create_directories(output_path);
 
-                zr.for_each_entry([&](std::string const& filename, bool is_dir)
+                zr.for_each_entry([&](
+                    std::string const& filename,
+                    bool is_dir,
+                    bool is_symlink)
                 {
                     auto const file_path = output_path / from_utf8(filename);
 
@@ -802,6 +809,13 @@ namespace bundle {
                     if (!is_path_safe(output_path, file_path))
                         throw std::runtime_error(
                             "unsafe path '" + filename + "' in '" +
+                            path + "'");
+
+                    // Bundles do not contain symbolic links, and extracting
+                    // one could point outside of the extract path
+                    if (is_symlink)
+                        throw std::runtime_error(
+                            "symbolic link '" + filename + "' in '" +
                             path + "'");
 
                     if (is_dir)

@@ -1,0 +1,10 @@
+{
+  "release-candidate": ["CHANGELOG.md"],
+  "submodules": ["src/deps/**"],
+  "dependencies": ["pyproject.toml"],
+  "ci": [".github/**"],
+  "documentation": ["docs/**"],
+  "opentime": ["src/opentime/**"],
+  "time calculations": ["src/opentime/**"],
+  "python-bindings": ["src/py-opentimelineio/**"]
+}

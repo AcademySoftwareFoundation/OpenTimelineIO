@@ -1,0 +1,45 @@
+name: Pull Request Tools
+
+on:
+  workflow_run:
+    workflows: [Pull Request Label Signal]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      pull-request:
+        description: 'PR number to label (open or merged)'
+        type: string
+        required: true
+
+permissions: {}
+
+jobs:
+  label:
+    if: >-
+      github.ref == format('refs/heads/{0}', github.event.repository.default_branch) &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.path == '.github/workflows/pr-labels.yml' &&
+        github.event.workflow_run.repository.id == github.event.repository.id))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # workflow_run's github.sha is on the default branch. Never replace this
+      # with the triggering run's head_sha or a PR ref: this job has write access.
+      - name: Check out trusted labeling code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: .github
+
+      - name: Reconcile file labels incrementally
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const {syncPullRequestLabels} = require('./.github/scripts/sync-pr-labels.cjs');
+            await syncPullRequestLabels({github, context, core});

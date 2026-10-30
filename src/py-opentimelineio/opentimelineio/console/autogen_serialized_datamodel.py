@@ -169,6 +169,12 @@ def _normalize_type(raw):
     if opt:
         optional = True
         type_str = opt.group(1).strip()
+    elif type_str.endswith(" | None"):
+        optional = True
+        type_str = type_str[:-len(" | None")].strip()
+    elif type_str.startswith("None | "):
+        optional = True
+        type_str = type_str[len("None | "):].strip()
 
     vec = re.match(r"(.+)Vector$", type_str)
     dct = re.match(r"[Dd]ict\[\s*str\s*,\s*(.+)\]$", type_str)
@@ -218,6 +224,14 @@ def _type_for_property(cl, key, value):
     inferring from the serialized default value when the signature is missing or
     opaque (``object``).
     """
+    # Containers expose their serialized children through the sequence API,
+    # rather than a Python property with a getter signature.
+    if key == "children":
+        if issubclass(cl, otio.core.Composition):
+            return "Array[Composable]", False
+        if issubclass(cl, otio.schema.SerializableCollection):
+            return "Array[SerializableObject]", False
+
     raw = _signature_return_type(cl, key)
     if raw is not None:
         type_str, optional = _normalize_type(raw)
@@ -315,7 +329,7 @@ SKIP_MODULES = [
 ]
 
 
-def _generate_model_for_module(mod, classes, modules):
+def _generate_model_for_module(mod, classes, modules, skip_classes, skip_keys):
     modules.add(mod)
 
     # fetch the classes from this module
@@ -337,28 +351,31 @@ def _generate_model_for_module(mod, classes, modules):
     # serialize/deserialize the classes to capture their serialized parameters
     model = {}
     for cl in serializable_classes:
-        if cl in SKIP_CLASSES:
+        if cl in skip_classes:
             continue
 
         model[cl] = {}
         field_dict = json.loads(otio.adapters.otio_json.write_to_string(cl()))
         for k in field_dict.keys():
-            if k in SKIP_KEYS:
+            if k in skip_keys:
                 continue
 
             value = field_dict[k]
             helpstr = ""
-            for fetcher in PROP_FETCHERS:
-                try:
-                    # Serialized fields are almost always properties, but skip
-                    # over those that are not
-                    helpstr = fetcher(cl, k) if isinstance(
-                        getattr(cl, k), property) else ""
-                    break
-                except AttributeError:
-                    pass
+            if k == "children":
+                helpstr = "Ordered children of this container."
             else:
-                sys.stderr.write(f"ERROR: could not fetch property: {k}")
+                for fetcher in PROP_FETCHERS:
+                    try:
+                        # Serialized fields are almost always properties, but skip
+                        # over those that are not
+                        helpstr = fetcher(cl, k) if isinstance(
+                            getattr(cl, k), property) else ""
+                        break
+                    except AttributeError:
+                        pass
+                else:
+                    sys.stderr.write(f"ERROR: could not fetch property: {k}")
 
             type_str, optional = _type_for_property(cl, k, value)
             model[cl][k] = {
@@ -389,13 +406,16 @@ def _generate_model_for_module(mod, classes, modules):
     )
 
     # recurse into the new modules and update the classes and modules values
-    [_generate_model_for_module(m, classes, modules) for m in new_mods]
+    for module in new_mods:
+        _generate_model_for_module(
+            module, classes, modules, skip_classes, skip_keys
+        )
 
 
-def _generate_model():
+def _generate_model(skip_classes=SKIP_CLASSES, skip_keys=SKIP_KEYS):
     classes = {}
     modules = set()
-    _generate_model_for_module(otio, classes, modules)
+    _generate_model_for_module(otio, classes, modules, skip_classes, skip_keys)
     return classes
 
 

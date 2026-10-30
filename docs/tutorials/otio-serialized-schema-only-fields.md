@@ -40,30 +40,30 @@ parameters:
 ### Composition.1
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *markers* (`Array[Marker]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### Item.1
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *markers* (`Array[Marker]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### MediaReference.1
 
 parameters:
-- *available_image_bounds* (`Box2d | None`)
-- *available_range* (`TimeRange | None`)
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
 
@@ -134,14 +134,14 @@ parameters:
 
 parameters:
 - *active_media_reference_key* (`String`)
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *markers* (`Array[Marker]`)
 - *media_references* (`Map[String, MediaReference]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### Color.1
 
@@ -163,8 +163,8 @@ parameters:
 ### ExternalReference.1
 
 parameters:
-- *available_image_bounds* (`Box2d | None`)
-- *available_range* (`TimeRange | None`)
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
 - *target_url* (`String`)
@@ -181,19 +181,19 @@ parameters:
 ### Gap.1
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *markers* (`Array[Marker]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### GeneratorReference.1
 
 parameters:
-- *available_image_bounds* (`Box2d | None`)
-- *available_range* (`TimeRange | None`)
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
 - *generator_kind* (`String`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
@@ -202,8 +202,8 @@ parameters:
 ### ImageSequenceReference.1
 
 parameters:
-- *available_image_bounds* (`Box2d | None`)
-- *available_range* (`TimeRange | None`)
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
 - *frame_step* (`Integer`)
 - *frame_zero_padding* (`Integer`)
 - *metadata* (`Map[String, Any]`)
@@ -227,7 +227,7 @@ parameters:
 ### Marker.3
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *comment* (`String`)
 - *marked_range* (`TimeRange`)
 - *metadata* (`Map[String, Any]`)
@@ -236,8 +236,8 @@ parameters:
 ### MissingReference.1
 
 parameters:
-- *available_image_bounds* (`Box2d | None`)
-- *available_range* (`TimeRange | None`)
+- *available_image_bounds* (`Box2d`, optional)
+- *available_range* (`TimeRange`, optional)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
 
@@ -250,13 +250,13 @@ parameters:
 ### Stack.1
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *markers* (`Array[Marker]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### TimeEffect.1
 
@@ -269,7 +269,7 @@ parameters:
 ### Timeline.1
 
 parameters:
-- *global_start_time* (`RationalTime | None`)
+- *global_start_time* (`RationalTime`, optional)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
 - *tracks* (`Stack`)
@@ -277,14 +277,14 @@ parameters:
 ### Track.1
 
 parameters:
-- *color* (`Color | None`)
+- *color* (`Color`, optional)
 - *effects* (`Array[Effect]`)
 - *enabled* (`Boolean`)
 - *kind* (`String`)
 - *markers* (`Array[Marker]`)
 - *metadata* (`Map[String, Any]`)
 - *name* (`String`)
-- *source_range* (`TimeRange | None`)
+- *source_range* (`TimeRange`, optional)
 
 ### Transition.1
 

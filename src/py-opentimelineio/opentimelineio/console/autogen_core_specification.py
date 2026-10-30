@@ -11,7 +11,7 @@ The specification is assembled from two sources:
 1. The *code* -- every serializable schema object, its fields, field types,
    default values, inheritance, and the semantic docstrings carried by the
    bindings.  This half is produced by reusing the model builder from
-   :mod:`autogen_serialized_datamodel`.
+   :mod:`opentimelineio.console.autogen_serialized_datamodel`.
 
 2. A curated markdown *overlay* -- the human-authored narrative (introduction,
    conventions, metadata conventions, root objects, JSON serialization) and the
@@ -45,10 +45,12 @@ The generated document is verified by the unit test suite.
 """
 
 import argparse
+from collections import Counter
 import os
 import re
 import sys
 
+import opentimelineio as otio
 from opentimelineio.console import autogen_serialized_datamodel as asd
 
 
@@ -146,6 +148,8 @@ def _index_model(model):
     index = {}
     for cl, entry in model.items():
         base = entry["OTIO_SCHEMA"].rsplit(".", 1)[0]
+        if base in index:
+            raise ValueError("multiple classes use schema name: " + base)
         modobj = cl.__module__
         if modobj in ("opentimelineio._opentime", "opentimelineio._otio"):
             modobj = asd._remap_to_python_modules(cl)
@@ -187,7 +191,7 @@ def _render_object(name, index, prose):
 
     fields = sorted(
         (k, v) for k, v in entry.items()
-        if k not in asd.SKIP_KEYS and isinstance(v, dict)
+        if k != "OTIO_SCHEMA" and isinstance(v, dict)
     )
     if fields:
         lines.append("#### Fields")
@@ -210,13 +214,26 @@ def _render_object(name, index, prose):
 
 def generate_specification(overlay_text):
     """Assemble the full specification markdown from the overlay + the model."""
-    model = asd._generate_model()
+    # Include the root class and container fields that the shorter serialized
+    # schema reference omits. PythonPlugin is unregistered and serializes with
+    # its base class's schema label, so it must not stand in for that base.
+    skip_classes = set(asd.SKIP_CLASSES) - {otio.core.SerializableObject}
+    skip_classes.add(otio.plugins.PythonPlugin)
+    model = asd._generate_model(skip_classes=skip_classes, skip_keys={"OTIO_SCHEMA"})
     index = _index_model(model)
     segments = _parse_overlay(overlay_text)
 
     documented = [
         arg for directive, arg, _ in segments if directive == "object"
     ]
+    duplicates = sorted(
+        name for name, count in Counter(documented).items() if count > 1
+    )
+    if duplicates:
+        raise ValueError(
+            "overlay documents schema object(s) more than once: "
+            + ", ".join(duplicates)
+        )
 
     # Validate the overlay against the code, in both directions.
     unknown = [name for name in documented if name not in index]

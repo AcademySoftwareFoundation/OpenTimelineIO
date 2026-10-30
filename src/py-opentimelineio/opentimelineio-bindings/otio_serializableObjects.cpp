@@ -1207,7 +1207,7 @@ Should be subclassed (for example by :class:`.Track` and :class:`.Stack`), not u
             "tracks",
             &Timeline::tracks,
             &Timeline::set_tracks,
-            "The :class:`~Stack` holding the timeline's tracks (its audio, video, and other :class:`~Track`\\s).")
+            "The :class:`~opentimelineio.schema.Stack` holding the timeline's audio, video, and other tracks.")
         .def(
             "duration",
             [](Timeline* t) { return t->duration(ErrorStatusHandler()); })

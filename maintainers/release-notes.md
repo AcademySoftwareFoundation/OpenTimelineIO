@@ -7,9 +7,10 @@ the preview.
 
 The **Pull Request Tools** workflow restores the file-based labeling previously
 disabled in #1996 and removed in #1999, without a `pull_request_target` trigger.
-It applies `.github/labeler.json` and removes labels from that configuration when
+It applies `.github/labeler.yml` and removes labels from that configuration when
 their file patterns no longer match. Each rule lists exact file paths or
 `directory/**` prefixes, which also match dotfiles; other glob syntax is rejected.
+The YAML retains the original list and `any` rule format and supports comments.
 The updater adds missing matching labels and removes individual stale managed
 labels through GitHub's API. It never replaces the entire label list, so
 concurrent additions or removals of unrelated labels are preserved.
@@ -29,6 +30,10 @@ the next run reconciles them against the file rules.
 3. The job checks out the default-branch commit (`github.sha`), with persisted
    credentials disabled. It never checks out the triggering run's `head_sha`.
    The checkout and GitHub Script actions are pinned to full commit hashes.
+   The YAML parser is pinned in `.github/scripts/package-lock.json` and installed
+   from that trusted checkout with lifecycle scripts disabled. No PR-produced
+   dependency caches are restored. The parser uses a data-only YAML schema and
+   rejects duplicate keys and unknown tags.
 4. The resolver queries the base repository's open PRs through GitHub's API and
    matches the signal's head SHA to their current heads. This works for forks
    even when `workflow_run.pull_requests` is empty, and skips superseded runs.
@@ -55,6 +60,7 @@ finished. Then rerun **Release Preview** to refresh the draft notes.
 Run the resolver and incremental updater tests locally with:
 
 ```sh
+npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
 node --test .github/scripts/tests/*.test.cjs
 ```
 

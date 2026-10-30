@@ -34,6 +34,7 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
+      - run: npm ci --prefix .github/scripts --ignore-scripts --no-audit --no-fund
       - run: node --test .github/scripts/tests/*.test.cjs
 
   cpp_build:

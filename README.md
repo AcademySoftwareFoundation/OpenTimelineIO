@@ -160,7 +160,7 @@ the development environment and compile the native extensions:
 ```sh
 uv sync --locked
 uv run python -m unittest discover -s tests
-make lint
+uv run ruff check .
 ```
 
 The package supports Python 3.9–3.15. `uv.lock` pins development dependencies
@@ -169,8 +169,11 @@ Use `uv sync --locked --group docs` to install documentation tools (Python 3.11+
 No environment activation is needed with `uv run`.
 
 The Makefile provides the same commands as `make sync`, `make test`, `make lint`,
-and `make coverage`. Python style continues to be checked with Flake8; the
-existing `make format` target formats C++.
+`make format-check`, and `make coverage`. Run `make format-python` to apply Ruff's
+formatting pipeline: `ruff format` followed by lint autofixes for double quotes,
+import sorting, and removal of trailing commas from list literals. `make format-check`
+checks that combined result without editing files. The existing `make format`
+target formats C++.
 
 `uv build` creates a source distribution and builds a wheel from that archive.
 The build backend is scikit-build-core, which invokes the existing CMake build.

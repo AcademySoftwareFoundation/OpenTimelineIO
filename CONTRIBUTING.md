@@ -39,9 +39,12 @@ Here are the two possible CLAs:
 
 ## Coding Conventions
 
-Python style continues to be checked with Flake8 using the existing rules in
-`setup.cfg`. Initialize submodules, run `uv sync --locked`, then `make lint`
-and `make test`. C++ continues to use the existing clang-format configuration.
+Python style is checked with Ruff, configured in `pyproject.toml`. Use double
+quotes and omit trailing commas from list literals. Run `uv sync --locked` after
+initializing submodules, then `make lint` and `make format-check`. `make format-python` runs
+Ruff's formatter followed by lint autofixes and list-comma cleanup; the order is
+important because the formatter introduces commas that the final cleanup removes.
+C++ continues to use the existing clang-format configuration.
 
 The default uv development group includes lint and test tools. Documentation
 uses `uv sync --locked --group docs` (Python 3.11+). Commit `uv.lock` when changing
@@ -89,6 +92,7 @@ Once you are happy with your change, you can verify that the change didn't cause
 ```bash
 make test
 make lint
+make format-check
 ```
 
 If all the tests pass and you'd like to send your change in for consideration, push it to your remote repo:

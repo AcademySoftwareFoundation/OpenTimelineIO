@@ -72,7 +72,7 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run:
 ```sh
 uv sync --locked
 uv run python -m unittest discover -s tests
-make lint
+uv run ruff check .
 ```
 
 This builds the native bindings and installs the package in editable mode,
@@ -83,7 +83,10 @@ available. After changing C++, rebuild with:
 uv sync --locked --reinstall-package opentimelineio
 ```
 
-`uv build` creates an sdist
+`make format-python` runs Ruff formatting followed by quote, comma, and import
+autofixes. `make format-check` checks that combined result without editing files.
+Use these commands rather than running the formatter alone, since the final
+comma fix is part of the project's style. `uv build` creates an sdist
 and then builds a wheel from it. `uv sync --locked --group docs` installs the
 documentation tools, which require Python 3.11 or newer.
 

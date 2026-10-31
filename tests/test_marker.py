@@ -69,6 +69,41 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
 
+    def test_upgrade_from_marker_2(self):
+        """A Marker.2 already has marked_range, and only needs its color
+        converting; the 1 -> 2 upgrade must not run again and wipe it."""
+        src = """
+        {
+            "OTIO_SCHEMA" : "Marker.2",
+            "metadata" : {},
+            "name" : "marker_2",
+            "comment" : "",
+            "color" : "GREEN",
+            "marked_range" : {
+                "OTIO_SCHEMA" : "TimeRange.1",
+                "start_time" : {
+                    "OTIO_SCHEMA" : "RationalTime.1",
+                    "rate" : 24,
+                    "value" : 10
+                },
+                "duration" : {
+                    "OTIO_SCHEMA" : "RationalTime.1",
+                    "rate" : 24,
+                    "value" : 1
+                }
+            }
+        }
+        """
+        marker = otio.adapters.read_from_string(src, "otio_json")
+        self.assertEqual(
+            marker.marked_range,
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(10, 24),
+                otio.opentime.RationalTime(1, 24),
+            )
+        )
+        self.assertEqual(marker.color, otio.core.Color.GREEN)
+
     def test_upgrade_from_2(self):
         """Test color conversion from a name to Color object.
 

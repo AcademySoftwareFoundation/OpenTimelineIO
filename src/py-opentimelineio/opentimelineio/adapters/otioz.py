@@ -19,6 +19,9 @@ read on unix and windows platforms.
 from .. import (
     _otio
 )
+from . import otio_json
+
+import os
 from .bundle_policy import media_reference_policy
 
 
@@ -39,11 +42,20 @@ def write_to_file(
     relative_media_base_dir=None,
     # see documentation in bundle. for more information on the media_policy
     media_policy=_otio.bundle.MediaReferencePolicy.error_if_not_file,
-    dryrun=False
+    dryrun=False,
+    # schema versions to write content.otio at, see otio_json.write_to_file
+    target_schema_versions=None,
 ):
+    if (
+        target_schema_versions is None
+        and otio_json._DEFAULT_VERSION_ENVVAR in os.environ
+    ):
+        target_schema_versions = otio_json._fetch_downgrade_map_from_env()
+
     options = _otio.bundle.WriteOptions()
     options.relative_media_base_dir = relative_media_base_dir
     options.policy = media_reference_policy(media_policy)
+    options.target_schema_versions = target_schema_versions
 
     if dryrun:
         return _otio.bundle.dry_run(input_otio, options)

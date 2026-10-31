@@ -105,3 +105,30 @@ jobs:
           # platform year shares its Python ABI and the uv dependency cache.
           uv sync --locked --no-editable --no-default-groups --group test --reinstall-package opentimelineio --python "$(python -c 'import sys; print(sys.executable)')"
           make test UV_RUN="uv run --no-sync"
+
+  devcontainer:
+    name: Development container (VFX Platform 2026)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      # The devcontainer action exports an OCI image; Docker's default
+      # builder cannot do that, so select a BuildKit container builder first.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+        with:
+          driver: docker-container
+      - name: Build and verify the development container
+        uses: devcontainers/ci@513af61f4de4f75d37e4438f184ba4358f0fc1ca # v0.3
+        with:
+          imageName: otio-devcontainer
+          push: never
+          platform: linux/amd64
+          runCmd: |
+            bash .devcontainer/post-create.sh
+            uv run --no-sync python maintainers/verify_package.py
+            uv run --no-sync python -m unittest discover -s tests
+            uv run --no-sync python maintainers/format_python.py --check
+            cmake --preset vfx2026
+            cmake --build --preset vfx2026
+            ctest --preset vfx2026

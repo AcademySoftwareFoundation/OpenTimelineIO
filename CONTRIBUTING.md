@@ -46,11 +46,29 @@ Ruff's formatter followed by lint autofixes and list-comma cleanup; the order is
 important because the formatter introduces commas that the final cleanup removes.
 C++ continues to use the existing clang-format configuration.
 
+VS Code workspace settings select Ruff and the `.venv` interpreter. Saving applies
+lint fixes and sorts imports; the **Format Python** task runs the complete
+formatter/autofix pipeline. Automatic formatting on save is disabled so formatting
+cannot undo the comma fixes after VS Code runs its save code actions.
+
 The default uv development group includes lint and test tools. Documentation
 uses `uv sync --locked --group docs` (Python 3.11+). Commit `uv.lock` when changing
 dependencies; use `uv lock --upgrade` to intentionally refresh pinned versions.
 For VFX builds, preserve the interpreter and compiler supplied by the Reference
 Platform environment; see the [developer quickstart](docs/tutorials/quickstart.md).
+
+## Development environment
+
+The checked-in `.devcontainer` uses the CY2026 ASWF image and installs the uv
+development and documentation groups on creation. Open the repository with
+**Dev Containers: Reopen in Container** to use it. Its Python environment and
+extension-build cache are separate from the host's `.venv` and build outputs.
+Use a native Linux x86-64 Docker host for the ASWF image.
+
+The VS Code task picker provides the common build, test, lint, coverage, and docs
+commands. C++ tasks use `CMakePresets.json`: select `vfx2026` in the container or
+`dev` on your host, configure once, then build and test with the same preset.
+See the [development instructions](README.md#development-container) for details.
 
 ## Git Workflow
 Here is the workflow we recommend for working on OpenTimelineIO if you intend on contributing changes back:

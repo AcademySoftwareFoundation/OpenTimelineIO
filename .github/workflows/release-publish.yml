@@ -14,19 +14,9 @@ on:
 permissions: {}
 
 jobs:
-  load-repo:
-    name: Download GitHub repo
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      
   announce-release:
     runs-on: ubuntu-latest
     name: Announce successful release
-    needs: [load-repo]
     steps:
       - name: Convert markdown to slack markdown
         # https://github.com/LoveToKnow/slackify-markdown-action

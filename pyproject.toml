@@ -114,7 +114,7 @@ directory = "coverage_html_report"
 
 [tool.cibuildwheel]
 build-frontend = "build[uv]"
-test-command = "python -m unittest discover -s {project}/tests"
+test-command = "python -m unittest discover -s {project}/tests -t {project}"
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]

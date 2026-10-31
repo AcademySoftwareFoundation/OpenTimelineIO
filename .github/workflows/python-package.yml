@@ -257,6 +257,7 @@ jobs:
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
         with:
+          extras: uv
           output-dir: wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.python-build }}*

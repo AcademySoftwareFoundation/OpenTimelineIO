@@ -25,6 +25,8 @@ jobs:
     if: ${{github.event.inputs.create-new-branch && github.event.inputs.create-new-branch == 'true' && !startsWith(github.ref,'refs/heads/release/')}}
     name: Release Branch
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
     steps:
@@ -39,13 +41,16 @@ jobs:
         id: get-branch-name
         shell: bash
         run: |
-          echo ::set-output name=branch-name::$(git rev-parse --abbrev-ref HEAD)
+          printf 'branch-name=%s\n' "$(git rev-parse --abbrev-ref HEAD)" >> "$GITHUB_OUTPUT"
 
   release-preview:
     needs: [release-branch]
     if: ${{ always() }}
     name: Release Preview
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter

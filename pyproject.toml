@@ -1,8 +1,9 @@
 [build-system]
+# Setuptools 80.x supports Python 3.9; CMake 4.x breaks the Windows vcpkg ZLIB lookup.
 requires = [
-    "setuptools",
-    "wheel",
-    "cmake>=3.12",
+    "setuptools==80.10.2",
+    "wheel==0.48.0",
+    "cmake==3.31.10",
 ]
 build-backend = "setuptools.build_meta"
 

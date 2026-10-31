@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core>=0.10.7"]
+requires = ["scikit-build-core>=1.1"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -9,7 +9,8 @@ description = "Editorial interchange format and API"
 authors = [
     {name = "Contributors to the OpenTimelineIO project", email = "otio-discussion@lists.aswf.io"}
 ]
-license = {file = "LICENSE.txt"}
+license = "Apache-2.0"
+license-files = ["LICENSE.txt", "NOTICE.txt"]
 keywords = ["film", "tv", "editing", "editorial", "edit", "non-linear", "edl", "time"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -18,7 +19,6 @@ classifiers = [
     "Topic :: Multimedia :: Video :: Display",
     "Topic :: Multimedia :: Video :: Non-Linear Editor",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -58,6 +58,7 @@ dev = [
 ]
 
 [tool.scikit-build]
+minimum-version = "build-system.requires"
 cmake.version = "CMakeLists.txt"
 
 cmake.build-type = "Release"

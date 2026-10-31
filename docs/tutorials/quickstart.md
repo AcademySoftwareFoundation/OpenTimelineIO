@@ -73,7 +73,7 @@ must be used to build the python package. `scikit-build-core` will take care
 of automatically installing the required dependencies (cmake, ninja, etc).
 
 By default, `scikit-build-core` will build the project in a temporary directory and will
-not use caching. This can be changed by setting [`build-dir` in `pyproject.toml`](https://scikit-build-core.readthedocs.io/en/stable/configuration.html#other-options). Alternatively, you can also set `build-dir` via a command line
+not use caching. This can be changed by setting [`build-dir` in `pyproject.toml`](https://scikit-build-core.readthedocs.io/en/stable/configuration/index.html#other-options). Alternatively, you can also set `build-dir` via a command line
 argument: `pip install --config-settings=build-dir=<path> .` or
 `python -m build --config-settings=build-dir=<path> --wheel .`.
 
@@ -84,7 +84,7 @@ environment variable when building from source. *nix Example:
 env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" python -m pip install .
 ```
 
-Additionally, `scikit-build-core` supports [editable installs](https://scikit-build-core.readthedocs.io/en/stable/configuration.html#editable-installs).
+Additionally, `scikit-build-core` supports [editable installs](https://scikit-build-core.readthedocs.io/en/stable/configuration/editable.html).
 You can use this to speed up your development.
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:

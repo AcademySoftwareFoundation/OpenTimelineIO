@@ -64,6 +64,4 @@ def plugin_manifest():
     #      see the mockplugin unit test.
 
     filepath = importlib.resources.files(__package__) / "plugin_manifest.json"
-    return manifest.manifest_from_string(
-        filepath.read_text()
-    )
+    return manifest.manifest_from_string(filepath.read_text())

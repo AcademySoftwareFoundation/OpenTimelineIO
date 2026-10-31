@@ -14,11 +14,9 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.Clip(name="testClip"),
             otio.schema.MissingReference()
         ]
-        self.md = {'foo': 'bar'}
+        self.md = {"foo": "bar"}
         self.sc = otio.schema.SerializableCollection(
-            name="test",
-            children=self.children,
-            metadata=self.md
+            name="test", children=self.children, metadata=self.md
         )
 
     def test_ctor(self):
@@ -32,10 +30,7 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(self.sc), 2)
 
         # test recursive iteration
-        sc = otio.schema.SerializableCollection(
-            name="parent",
-            children=[self.sc]
-        )
+        sc = otio.schema.SerializableCollection(name="parent", children=[self.sc])
 
         self.assertEqual(len(list(sc.find_clips())), 1)
 
@@ -57,21 +52,28 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_str(self):
         self.assertMultiLineEqual(
             str(self.sc),
-            "SerializableCollection(" +
-            str(self.sc.name) + ", " +
-            str(list(self.sc)) + ", " +
-            str(self.sc.metadata) +
-            ")"
+            "SerializableCollection("
+            + str(self.sc.name)
+            + ", "
+            + str(list(self.sc))
+            + ", "
+            + str(self.sc.metadata)
+            + ")",
         )
 
     def test_repr(self):
         self.assertMultiLineEqual(
             repr(self.sc),
-            "otio.schema.SerializableCollection(" +
-            "name=" + repr(self.sc.name) + ", " +
-            "children=" + repr(list(self.sc)) + ", " +
-            "metadata=" + repr(self.sc.metadata) +
-            ")"
+            "otio.schema.SerializableCollection("
+            + "name="
+            + repr(self.sc.name)
+            + ", "
+            + "children="
+            + repr(list(self.sc))
+            + ", "
+            + "metadata="
+            + repr(self.sc.metadata)
+            + ")",
         )
 
     def test_find_children(self):
@@ -89,7 +91,8 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_find_children_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
-            otio.opentime.RationalTime(24.0, 24.0))
+            otio.opentime.RationalTime(24.0, 24.0),
+        )
         cl0 = otio.schema.Clip()
         cl0.source_range = range
         cl1 = otio.schema.Clip()
@@ -123,5 +126,5 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(result[0], cl)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -3,16 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import unittest
-import os
-from pathlib import Path
-import sys
-
-from unittest import mock
-
-from importlib import reload as import_reload
-
 import importlib.metadata as metadata
+import os
+import sys
+import unittest
+from importlib import reload as import_reload
+from pathlib import Path
+from unittest import mock
 
 import opentimelineio as otio
 from tests import baseline_reader
@@ -23,26 +20,26 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         # Get the location of the mock plugin module metadata
         mock_module_path = os.path.join(
             os.path.normpath(baseline_reader.path_to_baseline_directory()),
-            'plugin_module',
+            "plugin_module",
         )
-        self.mock_module_manifest_path = Path(
-            mock_module_path,
-            "otio_jsonplugin",
-            "plugin_manifest.json"
-        ).absolute().as_posix()
+        self.mock_module_manifest_path = (
+            Path(mock_module_path, "otio_jsonplugin", "plugin_manifest.json")
+            .absolute()
+            .as_posix()
+        )
 
-        self.override_adapter_manifest_path = Path(
-            mock_module_path,
-            "otio_override_adapter",
-            "plugin_manifest.json"
-        ).absolute().as_posix()
+        self.override_adapter_manifest_path = (
+            Path(mock_module_path, "otio_override_adapter", "plugin_manifest.json")
+            .absolute()
+            .as_posix()
+        )
 
         # Create a WorkingSet as if the module were installed
         entries = [mock_module_path] + sys.path
 
         self.original_sysmodule_keys = set(sys.modules.keys())
 
-        self.sys_patch = mock.patch('sys.path', entries)
+        self.sys_patch = mock.patch("sys.path", entries)
         self.sys_patch.start()
 
     def tearDown(self):
@@ -61,11 +58,11 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Make sure the adapter is included in the adapter list
         adapter_names = [adapter.name for adapter in man.adapters]
-        self.assertIn('mock_adapter', adapter_names)
+        self.assertIn("mock_adapter", adapter_names)
 
         # Make sure the linker is included in the linker list
         linker_names = [linker.name for linker in man.media_linkers]
-        self.assertIn('mock_linker', linker_names)
+        self.assertIn("mock_linker", linker_names)
 
         # Make sure adapters and linkers landed in the proper place
         for adapter in man.adapters:
@@ -80,19 +77,19 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         man = otio.plugins.manifest.load_manifest()
 
         # The override_adapter creates another otiod adapter
-        adapters = [adapter for adapter in man.adapters
-                    if adapter.name == "otiod"]
+        adapters = [adapter for adapter in man.adapters if adapter.name == "otiod"]
 
         # More then one otiod adapter should exist.
         self.assertTrue(len(adapters) > 1)
 
         # Override adapter should be the first adapter found
-        manifest = adapters[0].plugin_info_map().get('from manifest', None)
+        manifest = adapters[0].plugin_info_map().get("from manifest", None)
         self.assertEqual(manifest, self.override_adapter_manifest_path)
 
         self.assertTrue(
             any(
-                True for p in man.source_files
+                True
+                for p in man.source_files
                 if self.override_adapter_manifest_path in p
             )
         )
@@ -123,11 +120,11 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Make sure the adapter is included in the adapter list
         adapter_names = [adapter.name for adapter in man.adapters]
-        self.assertIn('mock_adapter_json', adapter_names)
+        self.assertIn("mock_adapter_json", adapter_names)
 
         # Make sure the linker is included in the linker list
         linker_names = [linker.name for linker in man.media_linkers]
-        self.assertIn('mock_linker_json', linker_names)
+        self.assertIn("mock_linker_json", linker_names)
 
         # Make sure adapters and linkers landed in the proper place
         for adapter in man.adapters:
@@ -137,70 +134,59 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
         self.assertTrue(
-            any(
-                True for p in man.source_files
-                if self.mock_module_manifest_path in p
-            )
+            any(True for p in man.source_files if self.mock_module_manifest_path in p)
         )
 
     def test_deduplicate_env_variable_paths(self):
         "Ensure that duplicate entries in the environment variable are ignored"
 
         # back up existing manifest
-        bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+        bak_env = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH")
 
-        relative_path = self.mock_module_manifest_path.replace(os.getcwd(), '.')
+        relative_path = self.mock_module_manifest_path.replace(os.getcwd(), ".")
 
         # set where to find the new manifest
-        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = os.pathsep.join(
+        os.environ["OTIO_PLUGIN_MANIFEST_PATH"] = os.pathsep.join(
             (
                 # absolute
                 self.mock_module_manifest_path,
-
                 # relative
-                relative_path
+                relative_path,
             )
         )
 
         result = otio.plugins.manifest.load_manifest()
         self.assertEqual(
             len(
-                [
-                    p for p in result.source_files
-                    if self.mock_module_manifest_path in p
-                ]
+                [p for p in result.source_files if self.mock_module_manifest_path in p]
             ),
-            1
+            1,
         )
         if relative_path != self.mock_module_manifest_path:
             self.assertNotIn(relative_path, result.source_files)
 
         if bak_env:
-            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
+            os.environ["OTIO_PLUGIN_MANIFEST_PATH"] = bak_env
         else:
-            del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+            del os.environ["OTIO_PLUGIN_MANIFEST_PATH"]
 
     def test_plugin_load_failure(self):
         """When a plugin fails to load, ensure the exception message
         is logged (and no exception thrown)
         """
 
-        sys.modules['otio_mock_bad_module'] = mock.Mock(
-            name='otio_mock_bad_module',
-            plugin_manifest=mock.Mock(
-                side_effect=Exception("Mock Exception")
-            )
+        sys.modules["otio_mock_bad_module"] = mock.Mock(
+            name="otio_mock_bad_module",
+            plugin_manifest=mock.Mock(side_effect=Exception("Mock Exception")),
         )
 
         entry_points = mock.patch(
-            'opentimelineio.plugins.manifest.metadata.entry_points',
+            "opentimelineio.plugins.manifest.metadata.entry_points",
             return_value=[
                 metadata.EntryPoint(
-                    'mock_bad_module',
-                    'otio_mock_bad_module',
-                    'opentimelineio.plugins'
+                    "mock_bad_module", "otio_mock_bad_module", "opentimelineio.plugins"
                 )
-            ]
+            ],
         )
 
         with self.assertLogs() as cm, entry_points:
@@ -208,7 +194,8 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             otio.plugins.manifest.load_manifest()
 
             load_errors = [
-                r for r in cm.records
+                r
+                for r in cm.records
                 if r.message.startswith(
                     "could not load plugin: mock_bad_module.  "
                     "Exception is: Mock Exception"
@@ -217,5 +204,5 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             self.assertEqual(len(load_errors), 1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

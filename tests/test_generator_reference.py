@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-""" Generator Reference class test harness.  """
+"""Generator Reference class test harness."""
 
-import unittest
 import os
+import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -19,19 +19,13 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="SMPTEBars",
             generator_kind="SMPTEBars",
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(100, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(100, 24)
             ),
-            parameters={
-                "test_param": 5.0,
-            },
-            metadata={
-                "foo": "bar"
-            },
+            parameters={"test_param": 5.0},
+            metadata={"foo": "bar"},
             available_image_bounds=otio.schema.Box2d(
-                otio.schema.V2d(0.0, 0.0),
-                otio.schema.V2d(16.0, 9.0)
-            )
+                otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)
+            ),
         )
 
     def test_constructor(self):
@@ -42,16 +36,12 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(
             self.gen.available_range,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(100, 24),
-            )
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(100, 24)
+            ),
         )
         self.assertEqual(
             self.gen.available_image_bounds,
-            otio.schema.Box2d(
-                otio.schema.V2d(0.0, 0.0),
-                otio.schema.V2d(16.0, 9.0)
-            )
+            otio.schema.Box2d(otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)),
         )
 
     def test_serialize(self):
@@ -69,19 +59,13 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_stringify(self):
         self.assertMultiLineEqual(
             str(self.gen),
-            "GeneratorReference("
-            '"{}", '
-            '"{}", '
-            '{}, '
-            '{}, '
-            "{}"
-            ")".format(
+            'GeneratorReference("{}", "{}", {}, {}, {})'.format(
                 str(self.gen.name),
                 str(self.gen.generator_kind),
                 str(self.gen.parameters),
                 str(self.gen.available_image_bounds),
                 str(self.gen.metadata),
-            )
+            ),
         )
 
         self.assertMultiLineEqual(
@@ -98,9 +82,9 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 repr(self.gen.parameters),
                 repr(self.gen.available_image_bounds),
                 repr(self.gen.metadata),
-            )
+            ),
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

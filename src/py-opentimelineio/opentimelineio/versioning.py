@@ -5,10 +5,7 @@
 
 import copy
 
-from . import (
-    core,
-    plugins
-)
+from . import core, plugins
 
 
 def full_map():
@@ -49,11 +46,7 @@ def full_map():
     """
 
     result = copy.deepcopy(plugins.ActiveManifest().version_manifests)
-    result.update(
-        {
-            "OTIO_CORE": core.release_to_schema_version_map(),
-        }
-    )
+    result.update({"OTIO_CORE": core.release_to_schema_version_map()})
     return result
 
 

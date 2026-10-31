@@ -1,26 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import inspect
 import collections
+import inspect
 
-from .. import (
-    core,
-    exceptions,
-    plugins,
-    schemadef
-)
+from .. import core, exceptions, plugins, schemadef
 
 
 @core.register_type
 class SchemaDef(plugins.PythonPlugin):
     _serializable_label = "SchemaDef.1"
 
-    def __init__(
-        self,
-        name=None,
-        filepath=None,
-    ):
+    def __init__(self, name=None, filepath=None):
         plugins.PythonPlugin.__init__(self, name, filepath)
 
     def module(self):
@@ -40,45 +31,29 @@ class SchemaDef(plugins.PythonPlugin):
         return self._module
 
     def plugin_info_map(self):
-        """Adds extra schemadef-specific information to call to the parent fn.
-        """
+        """Adds extra schemadef-specific information to call to the parent fn."""
 
         result = super().plugin_info_map()
 
         features = collections.OrderedDict()
         for name in dir(self.module()):
             thing = getattr(self.module(), name)
-            if (
-                not (
-                    inspect.isclass(thing)
-                    and issubclass(thing, core.SerializableObject)
-                )
+            if not (
+                inspect.isclass(thing) and issubclass(thing, core.SerializableObject)
             ):
                 continue
-            features[name] = {
-                "class": thing,
-                "doc": inspect.getdoc(thing)
-            }
+            features[name] = {"class": thing, "doc": inspect.getdoc(thing)}
             # @TODO: include fields
 
         result["SchemaDefs"] = features
         return result
 
     def __str__(self):
-        return "SchemaDef({}, {})".format(
-            repr(self.name),
-            repr(self.filepath)
-        )
+        return "SchemaDef({}, {})".format(repr(self.name), repr(self.filepath))
 
     def __repr__(self):
-        return (
-            "otio.schema.SchemaDef("
-            "name={}, "
-            "filepath={}"
-            ")".format(
-                repr(self.name),
-                repr(self.filepath)
-            )
+        return "otio.schema.SchemaDef(name={}, filepath={})".format(
+            repr(self.name), repr(self.filepath)
         )
 
 
@@ -96,8 +71,7 @@ def from_name(name):
     except exceptions.NotSupportedError:
         raise exceptions.NotSupportedError(
             "schemadef not supported: {}, available: {}".format(
-                name,
-                available_schemadef_names()
+                name, available_schemadef_names()
             )
         )
 

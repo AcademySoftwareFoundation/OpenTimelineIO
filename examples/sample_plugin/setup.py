@@ -22,22 +22,16 @@ For more information about python plugins, see the python packaging guide:
 """
 
 setup(
-    name='otio_counter',
-    entry_points={
-        'opentimelineio.plugins': 'track_counter = otio_counter'
-    },
-    packages=['otio_counter'],
-    package_data={
-        'otio_counter': [
-            'plugin_manifest.json',
-        ],
-    },
-    keywords='plugin OpenTimelineIO sample',
-    platforms='any',
-    version='1.0.0',
-    description='Adapter writes number of tracks to file.',
-    license='Modified Apache 2.0 License',
-    author='Contributors to the OpenTimelineIO project',
-    author_email='otio-discussion@lists.aswf.io',
-    url='http://opentimeline.io',
+    name="otio_counter",
+    entry_points={"opentimelineio.plugins": "track_counter = otio_counter"},
+    packages=["otio_counter"],
+    package_data={"otio_counter": ["plugin_manifest.json"]},
+    keywords="plugin OpenTimelineIO sample",
+    platforms="any",
+    version="1.0.0",
+    description="Adapter writes number of tracks to file.",
+    license="Modified Apache 2.0 License",
+    author="Contributors to the OpenTimelineIO project",
+    author_email="otio-discussion@lists.aswf.io",
+    url="http://opentimeline.io",
 )

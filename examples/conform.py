@@ -25,38 +25,32 @@ Saved conformed.otio with 100 clips.
 """
 
 import argparse
-from argparse import RawTextHelpFormatter
 import glob
 import os
+from argparse import RawTextHelpFormatter
 
 import opentimelineio as otio
 
 
 def parse_args():
-    """ parse arguments out of sys.argv """
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=RawTextHelpFormatter)
-    parser.add_argument(
-        '-i',
-        '--input',
-        type=str,
-        required=True,
-        help='Timeline file to read. Supported formats: {adapters}'
-             ''.format(adapters=otio.adapters.available_adapter_names())
+    """parse arguments out of sys.argv"""
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=RawTextHelpFormatter
     )
     parser.add_argument(
-        '-f',
-        '--folder',
+        "-i",
+        "--input",
         type=str,
         required=True,
-        help='Folder to look for media in.'
+        help="Timeline file to read. Supported formats: {adapters}".format(
+            adapters=otio.adapters.available_adapter_names()
+        ),
     )
     parser.add_argument(
-        '-o',
-        '--output',
-        type=str,
-        required=True,
-        help="Timeline file to write out."
+        "-f", "--folder", type=str, required=True, help="Folder to look for media in."
+    )
+    parser.add_argument(
+        "-o", "--output", type=str, required=True, help="Timeline file to write out."
     )
     return parser.parse_args()
 
@@ -83,16 +77,14 @@ def _find_matching_media(name, folder):
     else:
         print(
             "WARNING: {} matches found for clip '{}', using '{}'".format(
-                len(matches),
-                name,
-                matches[0]
+                len(matches), name, matches[0]
             )
         )
         return matches[0]
 
 
 def _conform_timeline(timeline, folder):
-    """ Look for replacement media for each clip in the given timeline.
+    """Look for replacement media for each clip in the given timeline.
 
     The clips are relinked in place if media with a matching name is found.
     """
@@ -110,8 +102,8 @@ def _conform_timeline(timeline, folder):
         # relink to the found path
         clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + new_path,
-            available_range=None  # the available range is unknown without
-                                  # opening the file
+            available_range=None,  # the available range is unknown without
+            # opening the file
         )
         count += 1
 
@@ -126,12 +118,9 @@ def main():
     print(f"Relinked {count} clips to new media.")
     otio.adapters.write_to_file(timeline, args.output)
     print(
-        "Saved {} with {} clips.".format(
-            args.output,
-            len(list(timeline.find_clips()))
-        )
+        "Saved {} with {} clips.".format(args.output, len(list(timeline.find_clips())))
     )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

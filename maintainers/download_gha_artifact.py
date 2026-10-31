@@ -12,15 +12,15 @@ Use cases:
 * You want to upload the artifact to a remote repository (test.pypi.org for example)
   before a release.
 """
+
+import argparse
 import io
+import json
 import os
 import sys
-import json
 import time
-import zipfile
-import argparse
-
 import urllib.request
+import zipfile
 
 parser = argparse.ArgumentParser(
     description="Download an artifact from a GitHub Action workflow run."

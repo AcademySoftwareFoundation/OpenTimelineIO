@@ -26,17 +26,14 @@ class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         v2 = otio.schema.V2d(3.0, 4.0)
         box = otio.schema.Box2d(v1, v2)
 
-        self.assertMultiLineEqual(
-            str(box),
-            'Box2d(V2d(1.0, 2.0), V2d(3.0, 4.0))'
-        )
+        self.assertMultiLineEqual(str(box), "Box2d(V2d(1.0, 2.0), V2d(3.0, 4.0))")
 
         self.assertMultiLineEqual(
             repr(box),
-            'otio.schema.Box2d('
-            'min=otio.schema.V2d(x=1.0, y=2.0), '
-            'max=otio.schema.V2d(x=3.0, y=4.0)'
-            ')'
+            "otio.schema.Box2d("
+            "min=otio.schema.V2d(x=1.0, y=2.0), "
+            "max=otio.schema.V2d(x=3.0, y=4.0)"
+            ")",
         )
 
     def test_center(self):
@@ -44,9 +41,7 @@ class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         v2 = otio.schema.V2d(3.0, 4.0)
         box1 = otio.schema.Box2d(v1, v2)
 
-        self.assertEqual(box1.center(),
-                         otio.schema.V2d(2.0, 3.0)
-                         )
+        self.assertEqual(box1.center(), otio.schema.V2d(2.0, 3.0))
 
     def test_extend(self):
         v1 = otio.schema.V2d(1.0, 2.0)
@@ -54,24 +49,20 @@ class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         box1 = otio.schema.Box2d(v1, v2)
 
         box1.extendBy(otio.schema.V2d(5.0, 5.0))
-        self.assertEqual(box1,
-                         otio.schema.Box2d(
-                             otio.schema.V2d(1.0, 2.0),
-                             otio.schema.V2d(5.0, 5.0)
-                         )
-                         )
+        self.assertEqual(
+            box1,
+            otio.schema.Box2d(otio.schema.V2d(1.0, 2.0), otio.schema.V2d(5.0, 5.0)),
+        )
 
         v3 = otio.schema.V2d(2.0, 3.0)
         v4 = otio.schema.V2d(6.0, 6.0)
         box2 = otio.schema.Box2d(v3, v4)
 
         box1.extendBy(box2)
-        self.assertEqual(box1,
-                         otio.schema.Box2d(
-                             otio.schema.V2d(1.0, 2.0),
-                             otio.schema.V2d(6.0, 6.0)
-                         )
-                         )
+        self.assertEqual(
+            box1,
+            otio.schema.Box2d(otio.schema.V2d(1.0, 2.0), otio.schema.V2d(6.0, 6.0)),
+        )
 
     def test_intersects(self):
         v1 = otio.schema.V2d(1.0, 2.0)
@@ -95,5 +86,5 @@ class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertFalse(box1.intersects(box3))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

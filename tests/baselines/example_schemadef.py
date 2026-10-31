@@ -16,27 +16,20 @@ class exampleSchemaDef(otio.core.SerializableObject):
     _serializable_label = "exampleSchemaDef.1"
     _name = "exampleSchemaDef"
 
-    def __init__(
-        self,
-        exampleArg=None,
-    ):
+    def __init__(self, exampleArg=None):
         otio.core.SerializableObject.__init__(self)
         self.exampleArg = exampleArg
 
     exampleArg = otio.core.serializable_field(
-        "exampleArg",
-        doc=(
-            "example of an arg passed to the exampleSchemaDef"
-        )
+        "exampleArg", doc=("example of an arg passed to the exampleSchemaDef")
     )
 
     def __str__(self):
-        return 'exampleSchemaDef({})'.format(
-            repr(self.exampleArg)
-        )
+        return "exampleSchemaDef({})".format(repr(self.exampleArg))
 
     def __repr__(self):
-        return \
-            'otio.schemadef.example_schemadef.exampleSchemaDef(exampleArg={})'.format(
+        return (
+            "otio.schemadef.example_schemadef.exampleSchemaDef(exampleArg={})".format(
                 repr(self.exampleArg)
             )
+        )

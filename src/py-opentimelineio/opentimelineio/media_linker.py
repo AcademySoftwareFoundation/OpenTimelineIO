@@ -17,18 +17,15 @@ the media reference. The :meth:`.Composable.parent` method can be used to find t
 track if metadata is stored there.
 """
 
-import os
 import inspect
+import os
 
-from . import (
-    exceptions,
-    plugins,
-    core,
-)
+from . import core, exceptions, plugins
 
 
 class MediaLinkingPolicy:
     """Enum describing different media linker policies"""
+
     DoNotLinkMedia = "__do_not_link_media"
     ForceDefaultLinker = "__default"
 
@@ -51,22 +48,18 @@ def from_name(name):
 
     # @TODO: make this handle the enums
     try:
-        return plugins.ActiveManifest().from_name(
-            name,
-            kind_list="media_linkers"
-        )
+        return plugins.ActiveManifest().from_name(name, kind_list="media_linkers")
     except exceptions.NotSupportedError:
         raise exceptions.NotSupportedError(
             "media linker not supported: {}, available: {}".format(
-                name,
-                available_media_linker_names()
+                name, available_media_linker_names()
             )
         )
 
 
 def default_media_linker():
     try:
-        return os.environ['OTIO_DEFAULT_MEDIA_LINKER']
+        return os.environ["OTIO_DEFAULT_MEDIA_LINKER"]
     except KeyError:
         raise exceptions.NoDefaultMediaLinkerError(
             "No default Media Linker set in $OTIO_DEFAULT_MEDIA_LINKER"
@@ -76,7 +69,7 @@ def default_media_linker():
 def linked_media_reference(
     target_clip,
     media_linker_name=MediaLinkingPolicy.ForceDefaultLinker,
-    media_linker_argument_map=None
+    media_linker_argument_map=None,
 ):
     media_linker = from_name(media_linker_name)
 
@@ -88,21 +81,14 @@ def linked_media_reference(
     if not media_linker_argument_map:
         media_linker_argument_map = {}
 
-    return media_linker.link_media_reference(
-        target_clip,
-        media_linker_argument_map
-    )
+    return media_linker.link_media_reference(target_clip, media_linker_argument_map)
 
 
 @core.register_type
 class MediaLinker(plugins.PythonPlugin):
     _serializable_label = "MediaLinker.1"
 
-    def __init__(
-        self,
-        name=None,
-        filepath=None,
-    ):
+    def __init__(self, name=None, filepath=None):
         super().__init__(name, filepath)
 
     def link_media_reference(self, in_clip, media_linker_argument_map=None):
@@ -111,7 +97,7 @@ class MediaLinker(plugins.PythonPlugin):
         return self._execute_function(
             "link_media_reference",
             in_clip=in_clip,
-            media_linker_argument_map=media_linker_argument_map
+            media_linker_argument_map=media_linker_argument_map,
         )
 
     def is_default_linker(self):
@@ -124,7 +110,7 @@ class MediaLinker(plugins.PythonPlugin):
 
         fn_doc = inspect.getdoc(self.module().link_media_reference)
         if fn_doc:
-            mod_doc = [result['doc'], ""]
+            mod_doc = [result["doc"], ""]
             mod_doc.append(fn_doc)
             result["doc"] = "\n".join(mod_doc)
 
@@ -134,18 +120,9 @@ class MediaLinker(plugins.PythonPlugin):
         return result
 
     def __str__(self):
-        return "MediaLinker({}, {})".format(
-            repr(self.name),
-            repr(self.filepath)
-        )
+        return "MediaLinker({}, {})".format(repr(self.name), repr(self.filepath))
 
     def __repr__(self):
-        return (
-            "otio.media_linker.MediaLinker("
-            "name={}, "
-            "filepath={}"
-            ")".format(
-                repr(self.name),
-                repr(self.filepath)
-            )
+        return "otio.media_linker.MediaLinker(name={}, filepath={})".format(
+            repr(self.name), repr(self.filepath)
         )

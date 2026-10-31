@@ -5,28 +5,28 @@
 
 import argparse
 import json
-import urllib.request
 import os
+import urllib.request
 
 CONTRIBUTORS_FILE = "CONTRIBUTORS.md"
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='Fetch a list of contributors for a given GitHub repo.'
+        description="Fetch a list of contributors for a given GitHub repo."
     )
     parser.add_argument(
-        '--repo',
+        "--repo",
         required=True,
-        help='GitHub Project/Repo name.'
-        ' (e.g. "AcademySoftwareFoundation/OpenTimelineIO")'
+        help="GitHub Project/Repo name."
+        ' (e.g. "AcademySoftwareFoundation/OpenTimelineIO")',
     )
     parser.add_argument(
-        '--token',
+        "--token",
         required=False,
         default=None,
-        help='GitHub personal access token, used for authorization.'
-        ' Get one here: https://github.com/settings/tokens/new'
+        help="GitHub personal access token, used for authorization."
+        " Get one here: https://github.com/settings/tokens/new",
     )
     return parser.parse_args()
 
@@ -59,9 +59,9 @@ def main():
 
     request = urllib.request.Request(
         f"https://api.github.com/repos/{args.repo}/stats/contributors",
-        headers={"Authorization": f"token {args.token}"}
+        headers={"Authorization": f"token {args.token}"},
     )
-    response = urllib.request.urlopen(request).read().decode('utf-8')
+    response = urllib.request.urlopen(request).read().decode("utf-8")
 
     # this just ensures that response is really waited on so that json.loads
     # works
@@ -76,19 +76,18 @@ def main():
         print(response)
 
     for contributor in contributors:
-
-        login = contributor['author']['login']
-        url = contributor['author']['html_url']
-        total = contributor['total']
+        login = contributor["author"]["login"]
+        url = contributor["author"]["html_url"]
+        total = contributor["total"]
 
         request = urllib.request.Request(
             f"https://api.github.com/users/{login}",
-            headers={"Authorization": f"token {args.token}"}
+            headers={"Authorization": f"token {args.token}"},
         )
-        response = urllib.request.urlopen(request).read().decode('utf-8')
+        response = urllib.request.urlopen(request).read().decode("utf-8")
 
         user = json.loads(response)
-        name = user['name'] or "?"
+        name = user["name"] or "?"
 
         if (
             login not in input_contributors
@@ -102,7 +101,7 @@ def main():
 
     if output_lines:
         # split the input_contributors into preamble and contributors list
-        split_contribs = input_contributors.split('\n')
+        split_contribs = input_contributors.split("\n")
 
         header = []
         body = []
@@ -121,9 +120,9 @@ def main():
         body.extend(output_lines)
         body.sort(key=lambda v: v.lower())
 
-        result = '\n'.join(header + body)
+        result = "\n".join(header + body)
 
-        with open(CONTRIBUTORS_FILE, 'w') as fo:
+        with open(CONTRIBUTORS_FILE, "w") as fo:
             fo.write(result)
     else:
         print(f"All contributors present in {CONTRIBUTORS_FILE}")
@@ -131,5 +130,5 @@ def main():
     # print("\n".join(sorted(output_lines, key=str.casefold)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

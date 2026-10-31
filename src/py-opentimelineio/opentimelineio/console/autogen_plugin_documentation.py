@@ -9,13 +9,11 @@
 #        ship with any, I've left places for them but haven't fleshed them out.
 
 import argparse
+import io
 import tempfile
 import textwrap
 
-import io
-
 import opentimelineio as otio
-
 
 # force using the same path separator regardless of what the OS says
 # this ensures same behavior on windows and linux
@@ -135,11 +133,10 @@ SCHEMADEF_TEMPLATE = """
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
+    """parse commandline arguments with argparse"""
 
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -147,14 +144,14 @@ def _parsed_args():
         "--dryrun",
         action="store_true",
         default=False,
-        help="Dryrun mode - print out instead of perform actions"
+        help="Dryrun mode - print out instead of perform actions",
     )
     group.add_argument(
         "-o",
         "--output",
         type=str,
         default=None,
-        help="Update the baseline with the current version"
+        help="Update the baseline with the current version",
     )
     parser.add_argument(
         "-p",
@@ -164,14 +161,14 @@ def _parsed_args():
         help=(
             "Only include plugins defined in the public open source manifests."
             "  Used by unit test."
-        )
+        ),
     )
     parser.add_argument(
         "-s",
         "--sanitized-paths",
         default=False,
         action="store_true",
-        help="Sanitize paths to only show last three directories in a path."
+        help="Sanitize paths to only show last three directories in a path.",
     )
 
     return parser.parse_args()
@@ -182,7 +179,7 @@ def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
     # between every platform.
     PATH_SEP = "/"
 
-    path = plugin_map['path']
+    path = plugin_map["path"]
 
     # force using PATH_SEP in place of os.path.sep
     path = path.replace("\\", PATH_SEP)
@@ -190,10 +187,7 @@ def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
     if sanitized_paths:
         path = PATH_SEP.join(path.split(PATH_SEP)[-3:])
     return PLUGIN_TEMPLATE.format(
-        name=plugin_map['name'],
-        doc=plugin_map['doc'],
-        path=path,
-        other=extra_stuff,
+        name=plugin_map["name"], doc=plugin_map["doc"], path=path, other=extra_stuff
     )
 
 
@@ -222,16 +216,12 @@ def _format_doc(docstring, prefix):
 def _format_adapters(plugin_map):
     feature_lines = []
 
-    for feature, feature_data in plugin_map['supported features'].items():
-        doc = feature_data['doc']
+    for feature, feature_data in plugin_map["supported features"].items():
+        doc = feature_data["doc"]
         if doc:
-            feature_lines.append(
-                _format_doc(doc, f"- {feature}: \n```\n") + "\n```"
-            )
+            feature_lines.append(_format_doc(doc, f"- {feature}: \n```\n") + "\n```")
         else:
-            feature_lines.append(
-                f"- {feature}:"
-            )
+            feature_lines.append(f"- {feature}:")
 
         for arg in feature_data["args"]:
             feature_lines.append(f"  - {arg}")
@@ -242,29 +232,20 @@ def _format_adapters(plugin_map):
 def _format_schemadefs(plugin_map):
     feature_lines = []
 
-    for sd in plugin_map['SchemaDefs'].keys():
-        doc = plugin_map['SchemaDefs'][sd]['doc']
+    for sd in plugin_map["SchemaDefs"].keys():
+        doc = plugin_map["SchemaDefs"][sd]["doc"]
         if doc:
-            feature_lines.append(
-                _format_doc(doc, f"- {sd}: \n```\n") + "\n```"
-            )
+            feature_lines.append(_format_doc(doc, f"- {sd}: \n```\n") + "\n```")
         else:
             feature_lines.append(f"- {sd}:")
 
     return SCHEMADEF_TEMPLATE.format("\n".join(feature_lines))
 
 
-_PLUGIN_FORMAT_MAP = {
-    "adapters": _format_adapters,
-    "schemadefs": _format_schemadefs,
-}
+_PLUGIN_FORMAT_MAP = {"adapters": _format_adapters, "schemadefs": _format_schemadefs}
 
 
-def _manifest_formatted(
-        plugin_info_map,
-        manifest_paths=None,
-        sanitized_paths=False
-):
+def _manifest_formatted(plugin_info_map, manifest_paths=None, sanitized_paths=False):
     display_map = {}
 
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
@@ -276,8 +257,7 @@ def _manifest_formatted(
             continue
 
         sorted_plugins = [
-            plugin_info_map[pt][name]
-            for name in sorted(plugin_info_map[pt].keys())
+            plugin_info_map[pt][name] for name in sorted(plugin_info_map[pt].keys())
         ]
 
         for plug in sorted_plugins:
@@ -285,7 +265,7 @@ def _manifest_formatted(
                 continue
 
             # filter out plugins from other manifests
-            if manifest_paths and plug['from manifest'] not in manifest_paths:
+            if manifest_paths and plug["from manifest"] not in manifest_paths:
                 continue
 
             plugin_stuff = ""
@@ -301,29 +281,27 @@ def _manifest_formatted(
         display_map[pt] = "\n".join(str(line) for line in pt_lines)
 
     return MANIFEST_CONTENT_TEMPLATE.format(
-        adapters=display_map['adapters'],
-        media_linkers=display_map['media_linkers'],
-        schemadefs=display_map['schemadefs'],
-        hook_scripts=display_map['hook_scripts'],
-        hooks=display_map['hooks'],
+        adapters=display_map["adapters"],
+        media_linkers=display_map["media_linkers"],
+        schemadefs=display_map["schemadefs"],
+        hook_scripts=display_map["hook_scripts"],
+        hooks=display_map["hooks"],
     )
 
 
-def generate_and_write_documentation_plugins(
-        public_only=False,
-        sanitized_paths=False
-):
+def generate_and_write_documentation_plugins(public_only=False, sanitized_paths=False):
     md_out = io.StringIO()
 
     plugin_info_map = otio.plugins.plugin_info_map()
 
     # start with the manifest list
-    manifest_path_list = plugin_info_map['manifests'][:]
+    manifest_path_list = plugin_info_map["manifests"][:]
 
     if public_only:
         # keep only core manifests
         manifest_path_list = [
-            p for p in manifest_path_list
+            p
+            for p in manifest_path_list
             if p.replace("\\", PATH_SEP).split(PATH_SEP)[-3] == "opentimelineio"
         ]
 
@@ -342,9 +320,7 @@ def generate_and_write_documentation_plugins(
     core_manifest_path = manifest_path_list[0]
     core_manifest_path_sanitized = sanitized_path_list[0]
     core_manifest_text = _manifest_formatted(
-        plugin_info_map,
-        [core_manifest_path],
-        sanitized_paths
+        plugin_info_map, [core_manifest_path], sanitized_paths
     )
 
     local_manifest_text = ""
@@ -355,13 +331,10 @@ def generate_and_write_documentation_plugins(
             f"- `{mp}`" for mp in local_manifest_paths_sanitized
         )
         local_manifest_body = _manifest_formatted(
-            plugin_info_map,
-            local_manifest_paths,
-            sanitized_paths
+            plugin_info_map, local_manifest_paths, sanitized_paths
         )
         local_manifest_text = LOCAL_MANIFEST_TEMPLATE.format(
-            manifest_paths=local_manifest_list,
-            local_manifest_body=local_manifest_body,
+            manifest_paths=local_manifest_list, local_manifest_body=local_manifest_body
         )
 
     header = PUBLIC_ONLY_TEXT if public_only else ALL_PLUGINS_TEXT
@@ -380,13 +353,12 @@ def generate_and_write_documentation_plugins(
 
 
 def main():
-    """  main entry point  """
+    """main entry point"""
 
     args = _parsed_args()
 
     docs = generate_and_write_documentation_plugins(
-        args.public_only,
-        args.sanitized_paths
+        args.public_only, args.sanitized_paths
     )
 
     # print it out somewhere
@@ -397,16 +369,14 @@ def main():
     output = args.output
     if not output:
         output = tempfile.NamedTemporaryFile(
-            'w',
-            suffix="otio_serialized_schema.md",
-            delete=False
+            "w", suffix="otio_serialized_schema.md", delete=False
         ).name
 
-    with open(output, 'w') as fo:
+    with open(output, "w") as fo:
         fo.write(docs)
 
     print(f"wrote documentation to {output}.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

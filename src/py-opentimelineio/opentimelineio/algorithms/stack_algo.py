@@ -3,11 +3,7 @@
 
 __doc__ = """ Algorithms for stack objects. """
 
-from .. import (
-    schema,
-    opentime,
-    _otio,
-)
+from .. import _otio, opentime, schema
 
 
 def top_clip_at_time(in_stack, t):
@@ -31,8 +27,7 @@ def top_clip_at_time(in_stack, t):
     # ensure that it only runs on stacks
     if not isinstance(in_stack, schema.Stack):
         raise ValueError(
-            "Argument in_stack must be of type otio.schema.Stack, "
-            "not: '{}'".format(
+            "Argument in_stack must be of type otio.schema.Stack, not: '{}'".format(
                 type(in_stack)
             )
         )
@@ -43,7 +38,7 @@ def top_clip_at_time(in_stack, t):
         # 0 duration so we are just sampling a point in time.
         # XXX Should this duration be equal to the length of one sample?
         #     opentime.RationalTime(1, rate)?
-        duration=opentime.RationalTime(0, t.rate)
+        duration=opentime.RationalTime(0, t.rate),
     )
 
     # walk through the children of the stack in reverse order.
@@ -51,7 +46,8 @@ def top_clip_at_time(in_stack, t):
         valid_results = []
         if hasattr(track, "find_clips"):
             valid_results = list(
-                c for c in track.find_clips(search_range, shallow_search=True)
+                c
+                for c in track.find_clips(search_range, shallow_search=True)
                 if c.visible()
             )
 

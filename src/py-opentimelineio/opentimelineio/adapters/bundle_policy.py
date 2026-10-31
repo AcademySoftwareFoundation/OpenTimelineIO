@@ -3,10 +3,7 @@
 
 """Convert a string to a media reference policy."""
 
-from .. import (
-    _otio
-)
-
+from .. import _otio
 
 _POLICIES = {
     "error_if_not_file": _otio.bundle.MediaReferencePolicy.error_if_not_file,
@@ -34,9 +31,6 @@ def media_reference_policy(value):
     except KeyError:
         raise ValueError(
             "unknown media policy '{}', expected one of: {}".format(
-                value,
-                ", ".join(sorted(
-                    n for n in _POLICIES if "_" in n
-                ))
+                value, ", ".join(sorted(n for n in _POLICIES if "_" in n))
             )
         )

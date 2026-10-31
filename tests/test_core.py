@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import sys
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -20,12 +20,11 @@ class TestCoreFunctions(unittest.TestCase):
         """Verify the bindings return the correct errors based on the errno"""
 
         with self.assertRaises(FileNotFoundError) as exc:
-            otio.core.deserialize_json_from_file('non-existent-file-here')
+            otio.core.deserialize_json_from_file("non-existent-file-here")
         self.assertIsInstance(exc.exception, FileNotFoundError)
 
     @unittest.skipUnless(
-        not sys.platform.startswith("win"),
-        "requires non Windows system"
+        not sys.platform.startswith("win"), "requires non Windows system"
     )
     def test_serialize_json_to_file_errors_non_windows(self):
         """Verify the bindings return the correct errors based on the errno"""

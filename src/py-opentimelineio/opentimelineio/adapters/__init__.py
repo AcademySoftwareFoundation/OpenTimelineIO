@@ -13,34 +13,27 @@ For more information, consult the documentation in the individual adapter
 modules.
 """
 
-import os
 import itertools
+import os
 import pathlib
 
-from .. import (
-    exceptions,
-    plugins,
-    media_linker
-)
-
-from .adapter import Adapter  # noqa
+from .. import exceptions, media_linker, plugins
 
 # OTIO Json, OTIOZ and OTIOD adapters are always available
-from . import (  # noqa: F401
-    otio_json,  # core JSON adapter
-)
+from . import otio_json  # noqa: F401  # core JSON adapter
+from .adapter import Adapter  # noqa
 
 __all__ = [
-    'Adapter',
-    'otio_json',
-    'suffixes_with_defined_adapters',
-    'available_adapter_names',
-    'from_filepath',
-    'from_name',
-    'read_from_file',
-    'read_from_string',
-    'write_to_file',
-    'write_to_string'
+    "Adapter",
+    "otio_json",
+    "suffixes_with_defined_adapters",
+    "available_adapter_names",
+    "from_filepath",
+    "from_name",
+    "read_from_file",
+    "read_from_string",
+    "write_to_file",
+    "write_to_string"
 ]
 
 
@@ -60,11 +53,7 @@ def suffixes_with_defined_adapters(read=False, write=False):
         if write and adp.has_feature("write"):
             positive_adapters.append(adp)
 
-    return set(
-        itertools.chain.from_iterable(
-            adp.suffixes for adp in positive_adapters
-        )
-    )
+    return set(itertools.chain.from_iterable(adp.suffixes for adp in positive_adapters))
 
 
 def available_adapter_names():
@@ -92,10 +81,7 @@ def from_filepath(filepath):
         return plugins.ActiveManifest().from_filepath(outext)
     except exceptions.NoKnownAdapterForExtensionError:
         raise exceptions.NoKnownAdapterForExtensionError(
-            "No adapter for suffix '{}' on file '{}'".format(
-                outext,
-                filepath
-            )
+            "No adapter for suffix '{}' on file '{}'".format(outext, filepath)
         )
 
 
@@ -107,8 +93,7 @@ def from_name(name):
     except exceptions.NotSupportedError:
         raise exceptions.NotSupportedError(
             "adapter not supported: {}, available: {}".format(
-                name,
-                available_adapter_names()
+                name, available_adapter_names()
             )
         )
 
@@ -118,7 +103,7 @@ def read_from_file(
     adapter_name=None,
     media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
     media_linker_argument_map=None,
-    **adapter_argument_map
+    **adapter_argument_map,
 ):
     """Read filepath using adapter_name.
 
@@ -142,16 +127,16 @@ def read_from_file(
         filepath=string_filepath,
         media_linker_name=media_linker_name,
         media_linker_argument_map=media_linker_argument_map,
-        **adapter_argument_map
+        **adapter_argument_map,
     )
 
 
 def read_from_string(
     input_str,
-    adapter_name='otio_json',
+    adapter_name="otio_json",
     media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
     media_linker_argument_map=None,
-    **adapter_argument_map
+    **adapter_argument_map,
 ):
     """Read a timeline from input_str using adapter_name.
 
@@ -170,16 +155,11 @@ def read_from_string(
         input_str=input_str,
         media_linker_name=media_linker_name,
         media_linker_argument_map=media_linker_argument_map,
-        **adapter_argument_map
+        **adapter_argument_map,
     )
 
 
-def write_to_file(
-    input_otio,
-    filepath,
-    adapter_name=None,
-    **adapter_argument_map
-):
+def write_to_file(input_otio, filepath, adapter_name=None, **adapter_argument_map):
     """Write input_otio to filepath using adapter_name.
 
     If adapter_name is None, infer the adapter_name to use based on the
@@ -199,17 +179,11 @@ def write_to_file(
         string_filepath = os.fspath(filepath)
 
     return adapter.write_to_file(
-        input_otio=input_otio,
-        filepath=string_filepath,
-        **adapter_argument_map
+        input_otio=input_otio, filepath=string_filepath, **adapter_argument_map
     )
 
 
-def write_to_string(
-    input_otio,
-    adapter_name='otio_json',
-    **adapter_argument_map
-):
+def write_to_string(input_otio, adapter_name="otio_json", **adapter_argument_map):
     """Return input_otio written to a string using adapter_name.
 
     .. code-block:: python
@@ -219,7 +193,4 @@ def write_to_string(
     """
 
     adapter = plugins.ActiveManifest().from_name(adapter_name)
-    return adapter.write_to_string(
-        input_otio=input_otio,
-        **adapter_argument_map
-    )
+    return adapter.write_to_string(input_otio=input_otio, **adapter_argument_map)

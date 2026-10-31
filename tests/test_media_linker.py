@@ -4,10 +4,8 @@
 import os
 import unittest
 
-from tests import baseline_reader
-
 import opentimelineio as otio
-from tests import utils
+from tests import baseline_reader, utils
 
 LINKER_PATH = "media_linker_example"
 
@@ -20,9 +18,7 @@ class TestPluginMediaLinker(unittest.TestCase):
         self.jsn = baseline_reader.json_baseline_as_string(LINKER_PATH)
         self.mln = otio.adapters.otio_json.read_from_string(self.jsn)
         self.mln._json_path = os.path.join(
-            baseline_reader.MODPATH,
-            "baselines",
-            LINKER_PATH
+            baseline_reader.MODPATH, "baselines", LINKER_PATH
         )
 
     def tearDown(self):
@@ -35,11 +31,7 @@ class TestPluginMediaLinker(unittest.TestCase):
 
     def test_load_adapter_module(self):
 
-        target = os.path.join(
-            baseline_reader.MODPATH,
-            "baselines",
-            "example.py"
-        )
+        target = os.path.join(baseline_reader.MODPATH, "baselines", "example.py")
 
         self.assertEqual(self.mln.module_abs_path(), target)
         self.assertTrue(hasattr(self.mln.module(), "link_media_reference"))
@@ -56,20 +48,13 @@ class TestPluginMediaLinker(unittest.TestCase):
 
         self.assertEqual(
             str(self.mln),
-            "MediaLinker({}, {})".format(
-                repr(self.mln.name),
-                repr(self.mln.filepath)
-            )
+            "MediaLinker({}, {})".format(repr(self.mln.name), repr(self.mln.filepath)),
         )
         self.assertEqual(
             repr(self.mln),
-            "otio.media_linker.MediaLinker("
-            "name={}, "
-            "filepath={}"
-            ")".format(
-                repr(self.mln.name),
-                repr(self.mln.filepath)
-            )
+            "otio.media_linker.MediaLinker(name={}, filepath={})".format(
+                repr(self.mln.name), repr(self.mln.filepath)
+            ),
         )
 
     def test_available_media_linker_names(self):
@@ -77,10 +62,10 @@ class TestPluginMediaLinker(unittest.TestCase):
         self.assertTrue(otio.media_linker.available_media_linker_names())
 
     def test_default_media_linker(self):
-        os.environ['OTIO_DEFAULT_MEDIA_LINKER'] = 'foo'
-        self.assertEqual(otio.media_linker.default_media_linker(), 'foo')
+        os.environ["OTIO_DEFAULT_MEDIA_LINKER"] = "foo"
+        self.assertEqual(otio.media_linker.default_media_linker(), "foo")
         with self.assertRaises(otio.exceptions.NoDefaultMediaLinkerError):
-            del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
+            del os.environ["OTIO_DEFAULT_MEDIA_LINKER"]
             otio.media_linker.default_media_linker()
 
     def test_from_name_fail(self):
@@ -88,5 +73,5 @@ class TestPluginMediaLinker(unittest.TestCase):
             otio.media_linker.from_name("should not exist")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

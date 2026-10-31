@@ -3,20 +3,14 @@
 
 """Base class for OTIO plugins that are exposed by manifests."""
 
-import os
-import inspect
 import collections
 import copy
 import importlib.util
+import inspect
+import os
 
-from .. import (
-    core,
-    exceptions,
-)
-
-from . import (
-    manifest
-)
+from .. import core, exceptions
+from . import manifest
 
 
 def plugin_info_map():
@@ -33,15 +27,14 @@ def plugin_info_map():
                 type_map[plug.name] = plug.plugin_info_map()
             except Exception as err:
                 type_map[plug.name] = (
-                    "ERROR: could not compute plugin_info_map because:"
-                    " {}".format(err)
+                    "ERROR: could not compute plugin_info_map because: {}".format(err)
                 )
 
         result[pt] = type_map
 
-    result['hooks'] = copy.deepcopy(active_manifest.hooks)
+    result["hooks"] = copy.deepcopy(active_manifest.hooks)
 
-    result['manifests'] = copy.deepcopy(active_manifest.source_files)
+    result["manifests"] = copy.deepcopy(active_manifest.source_files)
 
     return result
 
@@ -53,11 +46,7 @@ class PythonPlugin(core.SerializableObject):
 
     _serializable_label = "PythonPlugin.1"
 
-    def __init__(
-        self,
-        name=None,
-        filepath=None,
-    ):
+    def __init__(self, name=None, filepath=None):
         core.SerializableObject.__init__(self)
         self.name = name
         self.filepath = filepath
@@ -68,10 +57,7 @@ class PythonPlugin(core.SerializableObject):
     filepath = core.serializable_field(
         "filepath",
         str,
-        doc=(
-            "Absolute path or relative path to adapter module from location of"
-            " json."
-        )
+        doc=("Absolute path or relative path to adapter module from location of json."),
     )
 
     def plugin_info_map(self):
@@ -79,10 +65,10 @@ class PythonPlugin(core.SerializableObject):
 
         result = collections.OrderedDict()
 
-        result['name'] = self.name
-        result['doc'] = inspect.getdoc(self.module())
-        result['path'] = self.module_abs_path()
-        result['from manifest'] = self._json_path
+        result["name"] = self.name
+        result["doc"] = inspect.getdoc(self.module())
+        result["path"] = self.module_abs_path()
+        result["from manifest"] = self._json_path
 
         return result
 
@@ -93,10 +79,8 @@ class PythonPlugin(core.SerializableObject):
         if not os.path.isabs(filepath):
             if not self._json_path:
                 raise exceptions.MisconfiguredPluginError(
-                    "{} plugin is misconfigured, missing json path. "
-                    "plugin: {}".format(
-                        self.name,
-                        repr(self)
+                    "{} plugin is misconfigured, missing json path. plugin: {}".format(
+                        self.name, repr(self)
                     )
                 )
 
@@ -116,8 +100,7 @@ class PythonPlugin(core.SerializableObject):
             pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
             pydir = os.path.dirname(self.module_abs_path())
             spec = importlib.util.spec_from_file_location(
-                module_name,
-                os.path.join(pydir, f"{pyname}.py"),
+                module_name, os.path.join(pydir, f"{pyname}.py")
             )
 
             mod = importlib.util.module_from_spec(spec)
@@ -126,7 +109,7 @@ class PythonPlugin(core.SerializableObject):
         return mod
 
     def module(self):
-        """Return the module object for this adapter. """
+        """Return the module object for this adapter."""
 
         if not self._module:
             self._module = self._imported_module("adapters")
@@ -141,4 +124,4 @@ class PythonPlugin(core.SerializableObject):
             raise exceptions.AdapterDoesntSupportFunctionError(
                 f"Sorry, {self.name} doesn't support {func_name}."
             )
-        return (getattr(self.module(), func_name)(**kwargs))
+        return getattr(self.module(), func_name)(**kwargs)

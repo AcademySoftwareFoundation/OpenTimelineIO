@@ -5,8 +5,8 @@
 
 """Test file for the track algorithms library."""
 
-import unittest
 import copy
+import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -22,7 +22,7 @@ import opentimelineio.test_utils as otio_test_utils
 
 
 class TransitionExpansionTests(unittest.TestCase):
-    """ test harness for transition expansion function """
+    """test harness for transition expansion function"""
 
     def test_expand_surrounded_by_clips(self):
         name = "test"
@@ -30,19 +30,13 @@ class TransitionExpansionTests(unittest.TestCase):
         rt_2 = otio.opentime.RationalTime(1, 24)
         tr = otio.opentime.TimeRange(rt, rt + rt)
         avail_tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, 24),
-            otio.opentime.RationalTime(50, 24)
+            otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(50, 24)
         )
         mr = otio.schema.ExternalReference(
-            available_range=avail_tr,
-            target_url="/var/tmp/test.mov"
+            available_range=avail_tr, target_url="/var/tmp/test.mov"
         )
 
-        cl = otio.schema.Clip(
-            name=name + "_pre",
-            media_reference=mr,
-            source_range=tr,
-        )
+        cl = otio.schema.Clip(name=name + "_pre", media_reference=mr, source_range=tr)
 
         seq = otio.schema.Track()
         seq.append(cl)
@@ -53,9 +47,7 @@ class TransitionExpansionTests(unittest.TestCase):
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
             in_offset=in_offset,
             out_offset=out_offset,
-            metadata={
-                "foo": "bar"
-            }
+            metadata={"foo": "bar"},
         )
         seq.append(trx)
         cl_2 = copy.deepcopy(cl)
@@ -78,37 +70,27 @@ class TransitionExpansionTests(unittest.TestCase):
 
         # first clip is trimmed
         self.assertEqual(
-            seq2[0].source_range.duration,
-            cl_2.source_range.duration - in_offset
+            seq2[0].source_range.duration, cl_2.source_range.duration - in_offset
         )
 
         self.assertEqual(
             seq2[1][0].source_range.start_time,
-            cl.source_range.end_time_exclusive() - in_offset
+            cl.source_range.end_time_exclusive() - in_offset,
         )
+        self.assertEqual(seq2[1][0].source_range.duration, in_offset + out_offset)
         self.assertEqual(
-            seq2[1][0].source_range.duration,
-            in_offset + out_offset
+            seq2[1][2].source_range.start_time, cl_2.source_range.start_time - in_offset
         )
-        self.assertEqual(
-            seq2[1][2].source_range.start_time,
-            cl_2.source_range.start_time - in_offset
-        )
-        self.assertEqual(
-            seq2[1][2].source_range.duration,
-            in_offset + out_offset
-        )
+        self.assertEqual(seq2[1][2].source_range.duration, in_offset + out_offset)
 
         # final clip is trimmed
         self.assertEqual(
-            seq2[2].source_range.duration,
-            cl_2.source_range.duration - out_offset
+            seq2[2].source_range.duration, cl_2.source_range.duration - out_offset
         )
 
         # make sure that both transition clips are the same length
         self.assertEqual(
-            seq2[1][0].source_range.duration,
-            seq2[1][2].source_range.duration
+            seq2[1][0].source_range.duration, seq2[1][2].source_range.duration
         )
 
         # big hammer stuff
@@ -124,19 +106,13 @@ class TransitionExpansionTests(unittest.TestCase):
         rt_2 = otio.opentime.RationalTime(1, 24)
         tr = otio.opentime.TimeRange(rt, rt + rt)
         avail_tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, 24),
-            otio.opentime.RationalTime(50, 24)
+            otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(50, 24)
         )
         mr = otio.schema.ExternalReference(
-            available_range=avail_tr,
-            target_url="/var/tmp/test.mov"
+            available_range=avail_tr, target_url="/var/tmp/test.mov"
         )
 
-        cl = otio.schema.Clip(
-            name=name + "_pre",
-            media_reference=mr,
-            source_range=tr,
-        )
+        cl = otio.schema.Clip(name=name + "_pre", media_reference=mr, source_range=tr)
 
         seq = otio.schema.Track()
         seq.name = name
@@ -148,9 +124,7 @@ class TransitionExpansionTests(unittest.TestCase):
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
             in_offset=in_offset,
             out_offset=out_offset,
-            metadata={
-                "foo": "bar"
-            }
+            metadata={"foo": "bar"},
         )
         seq.append(trx)
         seq_2 = copy.deepcopy(seq)
@@ -167,63 +141,56 @@ class TransitionExpansionTests(unittest.TestCase):
         # print "AFTER:"
         # print_expanded_tree(expanded_seq)
 
-        self.assertNotEqual(
-            pre_duration,
-            expanded_seq[0].source_range.duration
-        )
+        self.assertNotEqual(pre_duration, expanded_seq[0].source_range.duration)
 
         # check ranges on results
 
         # first clip is trimmed
         self.assertEqual(
             expanded_seq[0].source_range.duration,
-            seq_2.source_range.duration - in_offset
+            seq_2.source_range.duration - in_offset,
         )
 
         self.assertEqual(
             expanded_seq[1][0].source_range.start_time,
-            cl.source_range.end_time_exclusive() - in_offset
+            cl.source_range.end_time_exclusive() - in_offset,
         )
         self.assertEqual(
-            expanded_seq[1][0].source_range.duration,
-            in_offset + out_offset
+            expanded_seq[1][0].source_range.duration, in_offset + out_offset
         )
         self.assertEqual(
             expanded_seq[1][2].source_range.start_time,
-            seq_2.source_range.start_time - in_offset
+            seq_2.source_range.start_time - in_offset,
         )
         self.assertEqual(
-            expanded_seq[1][2].source_range.duration,
-            in_offset + out_offset
+            expanded_seq[1][2].source_range.duration, in_offset + out_offset
         )
 
         # final clip is trimmed
         self.assertEqual(
             expanded_seq[2].source_range.duration,
-            seq_2.source_range.duration - out_offset
+            seq_2.source_range.duration - out_offset,
         )
 
         # make sure that both transition clips are the same length
         self.assertEqual(
             expanded_seq[1][0].source_range.duration,
-            expanded_seq[1][2].source_range.duration
+            expanded_seq[1][2].source_range.duration,
         )
 
         # big hammer stuff
         self.assertNotEqual(seq, expanded_seq)
         self.assertNotEqual(seq[0], expanded_seq[0])
         self.assertNotEqual(seq[-1], expanded_seq[-1])
-        self.assertNotEqual(
-            seq[-1].source_range,
-            expanded_seq[-1].source_range
-        )
+        self.assertNotEqual(seq[-1].source_range, expanded_seq[-1].source_range)
 
 
 class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
-    """ test harness for track trimming function """
+    """test harness for track trimming function"""
 
     def make_sample_track(self):
-        return otio.adapters.read_from_string("""
+        return otio.adapters.read_from_string(
+            """
         {
             "OTIO_SCHEMA": "Track.1",
             "children": [
@@ -298,7 +265,9 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name": "Sequence1",
             "source_range": null
         }
-        """, "otio_json")
+        """,
+            "otio_json",
+        )
 
     def test_trim_to_existing_range(self):
         original_track = self.make_sample_track()
@@ -306,8 +275,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(150, 24)
-            )
+                duration=otio.opentime.RationalTime(150, 24),
+            ),
         )
 
         # trim to the exact range it already has
@@ -315,8 +284,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(150, 24)
-            )
+                duration=otio.opentime.RationalTime(150, 24),
+            ),
         )
         # it shouldn't have changed at all
         self.assertIsOTIOEquivalentTo(original_track, trimmed)
@@ -328,8 +297,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(-10, 24),
-                duration=otio.opentime.RationalTime(160, 24)
-            )
+                duration=otio.opentime.RationalTime(160, 24),
+            ),
         )
         # it shouldn't have changed at all
         self.assertJsonEqual(original_track, trimmed)
@@ -341,8 +310,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(60, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         self.assertNotEqual(original_track, trimmed)
         self.assertEqual(len(trimmed), 2)
@@ -350,8 +319,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         # did clip B get trimmed?
         self.assertEqual(trimmed[0].name, "B")
@@ -359,8 +328,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed[0].trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(10, 24),
-                duration=otio.opentime.RationalTime(40, 24)
-            )
+                duration=otio.opentime.RationalTime(40, 24),
+            ),
         )
         # clip C should have been left alone
         self.assertIsOTIOEquivalentTo(trimmed[1], original_track[2])
@@ -372,8 +341,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         self.assertNotEqual(original_track, trimmed)
         self.assertEqual(len(trimmed), 2)
@@ -381,8 +350,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         # clip A should have been left alone
         self.assertIsOTIOEquivalentTo(trimmed[0], original_track[0])
@@ -392,29 +361,23 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed[1].trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(40, 24)
-            )
+                duration=otio.opentime.RationalTime(40, 24),
+            ),
         )
 
     def test_trim_with_transitions(self):
         original_track = self.make_sample_track()
-        self.assertEqual(
-            otio.opentime.RationalTime(150, 24),
-            original_track.duration()
-        )
+        self.assertEqual(otio.opentime.RationalTime(150, 24), original_track.duration())
         self.assertEqual(len(original_track), 3)
 
         # add a transition
         tr = otio.schema.Transition(
             in_offset=otio.opentime.RationalTime(12, 24),
-            out_offset=otio.opentime.RationalTime(20, 24)
+            out_offset=otio.opentime.RationalTime(20, 24),
         )
         original_track.insert(1, tr)
         self.assertEqual(len(original_track), 4)
-        self.assertEqual(
-            otio.opentime.RationalTime(150, 24),
-            original_track.duration()
-        )
+        self.assertEqual(otio.opentime.RationalTime(150, 24), original_track.duration())
 
         # if you try to sever a Transition in the middle it should fail
         with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
@@ -422,8 +385,8 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 original_track,
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(5, 24),
-                    duration=otio.opentime.RationalTime(50, 24)
-                )
+                    duration=otio.opentime.RationalTime(50, 24),
+                ),
             )
 
         with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
@@ -431,20 +394,21 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 original_track,
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(45, 24),
-                    duration=otio.opentime.RationalTime(50, 24)
-                )
+                    duration=otio.opentime.RationalTime(50, 24),
+                ),
             )
 
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(25, 24),
-                duration=otio.opentime.RationalTime(50, 24)
-            )
+                duration=otio.opentime.RationalTime(50, 24),
+            ),
         )
         self.assertNotEqual(original_track, trimmed)
 
-        expected = otio.adapters.read_from_string("""
+        expected = otio.adapters.read_from_string(
+            """
         {
             "OTIO_SCHEMA": "Track.1",
             "children": [
@@ -514,10 +478,12 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             "name": "Sequence1",
             "source_range": null
         }
-        """, "otio_json")
+        """,
+            "otio_json",
+        )
 
         self.assertJsonEqual(expected, trimmed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

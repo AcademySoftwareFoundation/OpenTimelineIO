@@ -12,18 +12,12 @@ import opentimelineio as otio
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
+    """parse commandline arguments with argparse"""
 
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument(
-        'filepath',
-        type=str,
-        nargs='+',
-        help='files to operate on'
-    )
+    parser.add_argument("filepath", type=str, nargs="+", help="files to operate on")
 
     return parser.parse_args()
 
@@ -35,6 +29,7 @@ def stat_check(name):
     def real_stat_check(fn):
         TESTS.append((name, fn))
         return fn
+
     return real_stat_check
 
 
@@ -65,9 +60,7 @@ def _equal_length_tracks(tl):
             raise RuntimeError(
                 "track {} is not the same duration as the other tracks."
                 " Track {} duration, vs: {}".format(
-                    i,
-                    track.duration(),
-                    tl.tracks[0].duration()
+                    i, track.duration(), tl.tracks[0].duration()
                 )
             )
     return True
@@ -82,6 +75,7 @@ def _deepest_nesting(input):
         for child in parent:
             d = max(d, depth(child) + 1)
         return d
+
     if isinstance(input, otio.schema.Timeline):
         return depth(input.tracks) + 1
     else:
@@ -120,7 +114,7 @@ def _top_level_rate(input):
 
 @stat_check("clips with cdl data")
 def _clips_with_cdl_data(input):
-    return len(list(c for c in input.find_clips() if 'cdl' in c.metadata))
+    return len(list(c for c in input.find_clips() if "cdl" in c.metadata))
 
 
 @stat_check("Tracks with non standard types")
@@ -135,39 +129,35 @@ def _sequences_with_non_standard_types(input):
 
 
 def _stat_otio(input_otio):
-    for (test, testfunc) in TESTS:
+    for test, testfunc in TESTS:
         try:
             print(f"{test}: {testfunc(input_otio)}")
-        except (otio.exceptions.OTIOError) as e:
-            sys.stderr.write(
-                "There was an OTIO Error: "
-                " {}\n".format(e),
-            )
+        except otio.exceptions.OTIOError as e:
+            sys.stderr.write("There was an OTIO Error:  {}\n".format(e))
             continue
-        except (Exception) as e:
+        except Exception as e:
             sys.stderr.write(f"There was a system error: {e}\n")
             continue
 
 
 def main():
-    """  main entry point  """
+    """main entry point"""
     args = _parsed_args()
 
     for fp in args.filepath:
         try:
             parsed_otio = otio.adapters.read_from_file(fp)
-        except (otio.exceptions.OTIOError) as e:
+        except otio.exceptions.OTIOError as e:
             sys.stderr.write(
-                "The file did not successfully parse, with error:"
-                " {}\n".format(e),
+                "The file did not successfully parse, with error: {}\n".format(e)
             )
             continue
-        except (Exception) as e:
+        except Exception as e:
             sys.stderr.write(f"There was a system error: {e}\n")
             continue
 
         _stat_otio(parsed_otio)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

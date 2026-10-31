@@ -3,23 +3,22 @@
 # Copyright Contributors to the OpenTimelineIO project
 import re
 
-import sphinx_rtd_theme
 import opentimelineio
 
 # -- Project information ---------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'OpenTimelineIO'
+project = "OpenTimelineIO"
 copyright = "Copyright Contributors to the OpenTimelineIO project"
-author = 'Contributors to the OpenTimelineIO project'
+author = "Contributors to the OpenTimelineIO project"
 
 try:
     RELEASE = opentimelineio.__version__
 except AttributeError:
-    RELEASE = 'unknown'
+    RELEASE = "unknown"
 
 # The short X.Y version.
-version = RELEASE.split('-')[0]
+version = RELEASE.split("-")[0]
 # The full version, including alpha/beta/rc tags.
 release = RELEASE
 
@@ -27,17 +26,17 @@ release = RELEASE
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'myst_parser',  # This plugin is used to format our markdown correctly
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.intersphinx",
+    "myst_parser"  # This plugin is used to format our markdown correctly
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
-exclude_patterns = ['_build', '_templates', '.venv']
+exclude_patterns = ["_build", "_templates", ".venv"]
 
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 
 # -- Options for HTML output -----------------------------------------------------------
@@ -45,41 +44,40 @@ pygments_style = 'sphinx'
 
 html_theme = "sphinx_rtd_theme"
 
-htmlhelp_basename = f'{project.lower()}doc'
+htmlhelp_basename = f"{project.lower()}doc"
 
 
 # -- Options for LaTeX output ----------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 
 latex_documents = [
-    ('index', f'{project.lower()}.tex',
-     f'{project} Documentation',
-     author, 'manual'),
+    ("index", f"{project.lower()}.tex", f"{project} Documentation", author, "manual")
 ]
 
 # -- Options for manual page output ----------------------------------------------------
 # sphinx-doc.org/en/master/usage/configuration.html#options-for-manual-page-output
 
-man_pages = [
-    ('index', project.lower(), f'{project} Documentation',
-     [author], 1)
-]
+man_pages = [("index", project.lower(), f"{project} Documentation", [author], 1)]
 
 # -- Options for Texinfo output --------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-texinfo-output
 
 texinfo_documents = [
-    ('index', project.lower(), f'{project} Documentation',
-     author, project, 'One line description of project.',
-     'Miscellaneous'),
+    (
+        "index",
+        project.lower(),
+        f"{project} Documentation",
+        author,
+        project,
+        "One line description of project.",
+        "Miscellaneous",
+    )
 ]
 
 # -- Options for intersphinx -----------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#configuration
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- Options for Autodoc ---------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
@@ -88,22 +86,16 @@ intersphinx_mapping = {
 # Pybind11 generates class signatures on the __init__ method.
 autoclass_content = "both"
 
-autodoc_default_options = {
-    'undoc-members': True
-}
+autodoc_default_options = {"undoc-members": True}
 
 # -- Options for linkcheck -------------------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-the-linkcheck-builder
 
-linkcheck_exclude_documents = [
-    r'cxx/cxx'
-]
+linkcheck_exclude_documents = [r"cxx/cxx"]
 
 # These URLs give 403 Forbidden to the linkcheck bot (bot/user-agent filtering)
 # even though they work fine in a browser.
-linkcheck_ignore = [
-    r'https://opensource.org/licenses/MIT',
-]
+linkcheck_ignore = [r"https://opensource.org/licenses/MIT"]
 
 # -- Options for MySt-Parser -----------------------------------------------------------
 # https://myst-parser.readthedocs.io/en/latest/sphinx/reference.html
@@ -111,6 +103,7 @@ linkcheck_ignore = [
 myst_heading_anchors = 5
 
 # -- Custom ----------------------------------------------------------------------------
+
 
 def process_signature(
     app,
@@ -149,7 +142,7 @@ def process_signature(
                 nameToMatch = name.split(".")[-1] if not isClass else "__init__"
 
                 # Maybe get use sphinx.util.inspect.signature_from_str ?
-                if match := re.search(fr"^\d+\.\s{nameToMatch}(\(.*)", line):
+                if match := re.search(rf"^\d+\.\s{nameToMatch}(\(.*)", line):
                     signatures.append(match.group(1))
         elif signature:
             signatures.append(signature)
@@ -170,12 +163,7 @@ def process_signature(
 
 
 def process_docstring(
-    app,
-    what: str,
-    name: str,
-    obj: object,
-    options: dict[str, str],
-    lines: list[str],
+    app, what: str, name: str, obj: object, options: dict[str, str], lines: list[str]
 ):
     for index, line in enumerate(lines):
         # Remove "self" from docstrings of overloaded functions/methods.
@@ -188,7 +176,7 @@ def process_docstring(
         #
         # "self" is a distraction that can be removed to improve readability.
         # This should be removed once https://github.com/pybind/pybind11/pull/2621 is merged.
-        if re.match(fr'\d+\. {name.split("."[0])}', line):
+        if re.match(rf"\d+\. {name.split('.'[0])}", line):
             line = re.sub(r"self\: [a-zA-Z0-9._]+(,\s)?", "", line)
             lines[index] = line
 

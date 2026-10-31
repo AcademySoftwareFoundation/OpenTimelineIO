@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import unittest
 import os
+import unittest
 
 import opentimelineio as otio
 from tests import baseline_reader
@@ -40,19 +40,19 @@ def _clean_plugin_module():
 class TestPluginSchemadefs(unittest.TestCase):
     def setUp(self):
         self.save_manifest = otio.plugins.manifest._MANIFEST
-        self.save_manifest_path = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+        self.save_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH")
         # find the path to the baselines/schemadef_example.json
         self.manifest_path = baseline_reader.path_to_baseline(SCHEMADEF_NAME)
-        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = self.manifest_path
+        os.environ["OTIO_PLUGIN_MANIFEST_PATH"] = self.manifest_path
         otio.plugins.manifest.ActiveManifest(force_reload=True)
         _clean_plugin_module()
 
     def tearDown(self):
         # restore original state
         if self.save_manifest_path:
-            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = self.save_manifest_path
+            os.environ["OTIO_PLUGIN_MANIFEST_PATH"] = self.save_manifest_path
         else:
-            del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+            del os.environ["OTIO_PLUGIN_MANIFEST_PATH"]
         otio.plugins.manifest._MANIFEST = self.save_manifest
 
         _clean_plugin_module()
@@ -74,9 +74,9 @@ class TestPluginSchemadefs(unittest.TestCase):
         # the example_schemadef.
         # Try creating a schema object using the instance_from_schema method.
         peculiar_value = "something One-derful"
-        example = otio.core.instance_from_schema("exampleSchemaDef", 1, {
-            EXAMPLE_ARG: peculiar_value
-        })
+        example = otio.core.instance_from_schema(
+            "exampleSchemaDef", 1, {EXAMPLE_ARG: peculiar_value}
+        )
 
         self.assertEqual(str(type(example)), EXCLASS)
         self.assertEqual(example.exampleArg, peculiar_value)
@@ -86,9 +86,7 @@ class TestPluginSchemadefs(unittest.TestCase):
             otio.schemadef.example_schemadef
 
         # force loading the module
-        plugin_module = otio.schema.schemadef.module_from_name(
-            "example_schemadef"
-        )
+        plugin_module = otio.schema.schemadef.module_from_name("example_schemadef")
 
         # Try creating schema object with the direct class definition method:
         peculiar_value = "something Two-derful"
@@ -98,5 +96,5 @@ class TestPluginSchemadefs(unittest.TestCase):
         self.assertEqual(example.exampleArg, peculiar_value)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

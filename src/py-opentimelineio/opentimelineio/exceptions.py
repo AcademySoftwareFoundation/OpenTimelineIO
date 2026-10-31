@@ -2,30 +2,31 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Exception classes for OpenTimelineIO"""
-from . _otio import ( # noqa
+
+from ._otio import (  # noqa
     OTIOError,
     NotAChildError,
     UnsupportedSchemaError,
-    CannotComputeAvailableRangeError
+    CannotComputeAvailableRangeError,
 )
 
 __all__ = [
-    'OTIOError',
-    'NotAChildError',
-    'CannotComputeAvailableRangeError',
-    'UnsupportedSchemaError',
-    'CouldNotReadFileError',
-    'NoKnownAdapterForExtensionError',
-    'ReadingNotSupportedError',
-    'WritingNotSupportedError',
-    'NotSupportedError',
-    'InvalidSerializableLabelError',
-    'AdapterDoesntSupportFunctionError',
-    'InstancingNotAllowedError',
-    'TransitionFollowingATransitionError',
-    'MisconfiguredPluginError',
-    'CannotTrimTransitionsError',
-    'NoDefaultMediaLinkerError'
+    "OTIOError",
+    "NotAChildError",
+    "CannotComputeAvailableRangeError",
+    "UnsupportedSchemaError",
+    "CouldNotReadFileError",
+    "NoKnownAdapterForExtensionError",
+    "ReadingNotSupportedError",
+    "WritingNotSupportedError",
+    "NotSupportedError",
+    "InvalidSerializableLabelError",
+    "AdapterDoesntSupportFunctionError",
+    "InstancingNotAllowedError",
+    "TransitionFollowingATransitionError",
+    "MisconfiguredPluginError",
+    "CannotTrimTransitionsError",
+    "NoDefaultMediaLinkerError"
 ]
 
 

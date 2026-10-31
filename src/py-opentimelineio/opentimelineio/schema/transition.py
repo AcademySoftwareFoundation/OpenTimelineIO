@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from .. core._core_utils import add_method
 from .. import _otio
+from ..core._core_utils import add_method
 
 
 @add_method(_otio.Transition)
@@ -13,26 +13,26 @@ def __str__(self):
         self.in_offset,
         self.out_offset,
         self.metadata,
-        self.enabled
+        self.enabled,
     )
 
 
 @add_method(_otio.Transition)
 def __repr__(self):
     return (
-        'otio.schema.Transition('
-        'name={}, '
-        'transition_type={}, '
-        'in_offset={}, '
-        'out_offset={}, '
-        'metadata={}, '
-        'enabled={}'
-        ')'.format(
+        "otio.schema.Transition("
+        "name={}, "
+        "transition_type={}, "
+        "in_offset={}, "
+        "out_offset={}, "
+        "metadata={}, "
+        "enabled={}"
+        ")".format(
             repr(self.name),
             repr(self.transition_type),
             repr(self.in_offset),
             repr(self.out_offset),
             repr(self.metadata),
-            repr(self.enabled)
+            repr(self.enabled),
         )
     )

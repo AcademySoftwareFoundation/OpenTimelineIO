@@ -1,20 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import types
 import collections.abc
 import copy
+import types
 
-from .. import (
-    _otio,
-)
-from .. _otio import (
-    SerializableObject,
-    AnyDictionary,
-    AnyVector,
-    PyAny
-)
-
+from .. import _otio
+from .._otio import AnyDictionary, AnyVector, PyAny, SerializableObject
 
 SUPPORTED_VALUE_TYPES = (
     "int",
@@ -27,7 +19,7 @@ SUPPORTED_VALUE_TYPES = (
     "opentime.TimeRange",
     "opentime.TimeTransform",
     "opentimelineio.core.Color",
-    "opentimelineio.core.SerializableObject"
+    "opentimelineio.core.SerializableObject",
 )
 
 
@@ -49,7 +41,7 @@ def _value_to_any(value, ids=None):
         if ids is None:
             ids = set()
         d = AnyDictionary()
-        for (k, v) in value.items():
+        for k, v in value.items():
             if not _is_str(k):
                 raise ValueError(f"key '{k}' is not a string")
             if id(v) in ids:
@@ -82,10 +74,7 @@ def _value_to_any(value, ids=None):
                 "A value of type '{}' is incompatible with OpenTimelineIO. "
                 "OpenTimelineIO only supports the following value types in "
                 "AnyDictionary containers (like the .metadata dictionary): "
-                "{}.".format(
-                    type(value),
-                    SUPPORTED_VALUE_TYPES,
-                )
+                "{}.".format(type(value), SUPPORTED_VALUE_TYPES)
             )
         except RuntimeError:
             # communicate about integer range first
@@ -95,9 +84,7 @@ def _value_to_any(value, ids=None):
                     "A value of {} is outside of the range of integers that "
                     "OpenTimelineIO supports, [{}, {}], which is the range of "
                     "C++ int64_t.".format(
-                        value,
-                        -9223372036854775808,
-                        9223372036854775807,
+                        value, -9223372036854775808, 9223372036854775807
                     )
                 )
 
@@ -106,11 +93,7 @@ def _value_to_any(value, ids=None):
                 "The value '{}' of type '{}' is incompatible with OpenTimelineIO. "
                 "OpenTimelineIO only supports the following value types in "
                 "AnyDictionary containers (like the .metadata dictionary): "
-                "{}.".format(
-                    value,
-                    type(value),
-                    SUPPORTED_VALUE_TYPES,
-                )
+                "{}.".format(value, type(value), SUPPORTED_VALUE_TYPES)
             )
 
 
@@ -169,11 +152,11 @@ def _add_mutable_mapping_methods(mapClass):
             seen.add(name)
             func = getattr(klass, name)
             if (
-                    isinstance(func, types.FunctionType)
-                    and name not in klass.__abstractmethods__
+                isinstance(func, types.FunctionType)
+                and name not in klass.__abstractmethods__
             ):
                 setattr(mapClass, name, func)
-                if name.startswith('__') or name.endswith('__'):  # noqa
+                if name.startswith("__") or name.endswith("__"):  # noqa
                     continue
 
                 # Hide the method frm Sphinx doc.
@@ -190,9 +173,7 @@ def _add_mutable_mapping_methods(mapClass):
 
 
 def _add_mutable_sequence_methods(
-        sequenceClass,
-        conversion_func=None,
-        side_effecting_insertions=False
+    sequenceClass, conversion_func=None, side_effecting_insertions=False
 ):
     def noop(x):
         return x
@@ -206,9 +187,7 @@ def _add_mutable_sequence_methods(
         elif _is_nonstring_sequence(other):
             return list(self) + list(other)
         else:
-            raise TypeError(
-                f"Cannot add types '{type(self)}' and '{type(other)}'"
-            )
+            raise TypeError(f"Cannot add types '{type(self)}' and '{type(other)}'")
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -238,9 +217,9 @@ def _add_mutable_sequence_methods(
 
             if index.step in (1, None):
                 if (
-                        not side_effecting_insertions
-                        and isinstance(item, collections.abc.MutableSequence)
-                        and len(item) == len(indices)
+                    not side_effecting_insertions
+                    and isinstance(item, collections.abc.MutableSequence)
+                    and len(item) == len(indices)
                 ):
                     for i0, i in enumerate(indices):
                         self.__internal_setitem__(i, conversion_func(item[i0]))
@@ -302,8 +281,7 @@ def _add_mutable_sequence_methods(
 
     def insert(self, index, item):
         self.__internal_insert(
-            index, conversion_func(item)
-            if conversion_func else item
+            index, conversion_func(item) if conversion_func else item
         )
 
     collections.abc.MutableSequence.register(sequenceClass)
@@ -323,12 +301,12 @@ def _add_mutable_sequence_methods(
                 seen.add(name)
                 func = getattr(klass, name)
                 if (
-                        isinstance(func, types.FunctionType)
-                        and name not in klass.__abstractmethods__
-                        and not hasattr(sequenceClass, name)
+                    isinstance(func, types.FunctionType)
+                    and name not in klass.__abstractmethods__
+                    and not hasattr(sequenceClass, name)
                 ):
                     setattr(sequenceClass, name, func)
-                    if name.startswith('__') or name.endswith('__'):
+                    if name.startswith("__") or name.endswith("__"):
                         continue
 
                     # Hide the method frm Sphinx doc.
@@ -339,6 +317,7 @@ def _add_mutable_sequence_methods(
                         getattr(sequenceClass, name).__doc__ += "\n\n:meta private:"
 
     if not issubclass(sequenceClass, SerializableObject):
+
         def __copy__(self):
             v = sequenceClass()
             v.extend(e for e in self)
@@ -373,6 +352,7 @@ SerializableObject.__setattr__ = __setattr__
 def add_method(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
+
     return decorator
 
 

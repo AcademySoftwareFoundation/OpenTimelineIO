@@ -18,4 +18,3 @@ from . import (
     autogen_serialized_datamodel,
     otiopluginfo,
 )
-

@@ -3,13 +3,12 @@
 
 """unit tests for the version manifest plugin system"""
 
-import unittest
-import os
 import json
+import os
+import unittest
 
 import opentimelineio as otio
 from tests import utils
-
 
 FIRST_MANIFEST = """{
     "OTIO_SCHEMA" : "PluginManifest.1",
@@ -64,23 +63,17 @@ class TestPlugin_VersionManifest(unittest.TestCase):
 
     def test_read_in_manifest(self):
         self.assertIn("TEST_FAMILY_NAME", self.man.version_manifests)
-        self.assertIn(
-            "TEST_LABEL",
-            self.man.version_manifests["TEST_FAMILY_NAME"]
-        )
+        self.assertIn("TEST_LABEL", self.man.version_manifests["TEST_FAMILY_NAME"])
 
     def test_full_map(self):
         d = otio.versioning.full_map()
         self.assertIn("TEST_FAMILY_NAME", d)
-        self.assertIn(
-            "TEST_LABEL",
-            d["TEST_FAMILY_NAME"]
-        )
+        self.assertIn("TEST_LABEL", d["TEST_FAMILY_NAME"])
 
     def test_fetch_map(self):
         self.assertEqual(
             otio.versioning.fetch_map("TEST_FAMILY_NAME", "TEST_LABEL"),
-            {"ExampleSchema": 2, "EnvVarTestSchema": 1, "Clip": 1}
+            {"ExampleSchema": 2, "EnvVarTestSchema": 1, "Clip": 1},
         )
 
     def test_env_variable_downgrade(self):
@@ -115,16 +108,12 @@ class TestPlugin_VersionManifest(unittest.TestCase):
         invalid_env_error = otio.exceptions.InvalidEnvironmentVariableError
 
         # missing ":"
-        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
-            "invalid_formatting"
-        )
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = "invalid_formatting"
         with self.assertRaises(invalid_env_error):
             otio.adapters.otio_json.write_to_string(cl)
 
         # asking for family/label that doesn't exist in the plugins
-        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = (
-            "nosuch:labelorfamily"
-        )
+        os.environ["OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"] = "nosuch:labelorfamily"
         with self.assertRaises(invalid_env_error):
             otio.adapters.otio_json.write_to_string(cl)
 
@@ -144,5 +133,5 @@ class TestPlugin_VersionManifest(unittest.TestCase):
         self.assertEqual(lay_fam["May2022"]["SimpleClass"], 2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

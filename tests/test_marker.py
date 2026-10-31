@@ -9,20 +9,18 @@ import opentimelineio.test_utils as otio_test_utils
 
 
 class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
-
     def test_cons(self):
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(5, 24),
-            otio.opentime.RationalTime(10, 24)
+            otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(10, 24)
         )
         m = otio.schema.Marker(
             name="marker_1",
             marked_range=tr,
             color=otio.core.Color.GREEN,
-            metadata={'foo': 'bar'}
+            metadata={"foo": "bar"},
         )
-        self.assertEqual(m.name, 'marker_1')
-        self.assertEqual(m.metadata['foo'], 'bar')
+        self.assertEqual(m.name, "marker_1")
+        self.assertEqual(m.metadata["foo"], "bar")
         self.assertEqual(m.marked_range, tr)
         self.assertEqual(m.color, otio.core.Color.GREEN)
 
@@ -31,9 +29,9 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(m, decoded)
 
     def test_set_color(self):
-        m1 = otio.schema.Marker(name='marker_1')
+        m1 = otio.schema.Marker(name="marker_1")
         m1.color = otio.core.Color.RED
-        m2 = otio.schema.Marker(name='marker_2')
+        m2 = otio.schema.Marker(name="marker_2")
         m2.color = otio.core.Color.GREEN
 
         self.assertNotEqual(m1.color, m2.color)
@@ -64,9 +62,8 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(
             marker.marked_range,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 5),
-                otio.opentime.RationalTime(0, 5),
-            )
+                otio.opentime.RationalTime(0, 5), otio.opentime.RationalTime(0, 5)
+            ),
         )
 
     def test_upgrade_from_2(self):
@@ -98,10 +95,7 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             }
             """.replace("{REPLACE_COLOR}", color.name)
             marker = otio.adapters.read_from_string(src, "otio_json")
-            self.assertEqual(
-                marker.color,
-                color
-            )
+            self.assertEqual(marker.color, color)
 
         src = """
         {
@@ -125,10 +119,7 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         }
         """
         marker = otio.adapters.read_from_string(src, "otio_json")
-        self.assertEqual(
-            marker.color.name,
-            "something unknown"
-        )
+        self.assertEqual(marker.color.name, "something unknown")
 
     def test_downgrade_to_2(self):
         """Test color conversion from Color object to a name.
@@ -139,29 +130,19 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for color in (otio.core.Color.RED, otio.core.Color.GREEN, otio.core.Color.BLUE):
             marker = otio.schema.Marker(color=color)
             marker_str = otio.adapters.write_to_string(
-                marker,
-                "otio_json",
-                target_schema_versions={"Marker": 2}
+                marker, "otio_json", target_schema_versions={"Marker": 2}
             )
             marker_in_json = json.loads(marker_str)
-            self.assertEqual(
-                marker_in_json["color"],
-                color.name.upper()
-            )
+            self.assertEqual(marker_in_json["color"], color.name.upper())
 
         marker = otio.schema.Marker(
             color=otio.core.Color(0.5, 0.5, 0.5, 1.0, "something unknown")
         )
         marker_str = otio.adapters.write_to_string(
-            marker,
-            "otio_json",
-            target_schema_versions={"Marker": 2}
+            marker, "otio_json", target_schema_versions={"Marker": 2}
         )
         marker_in_json = json.loads(marker_str)
-        self.assertEqual(
-            marker_in_json["color"],
-            "something unknown"
-        )
+        self.assertEqual(marker_in_json["color"], "something unknown")
 
     def test_equality(self):
         m = otio.schema.Marker()
@@ -172,14 +153,13 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_repr(self):
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(5, 24),
-            otio.opentime.RationalTime(10, 24)
+            otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(10, 24)
         )
         m = otio.schema.Marker(
             name="marker_1",
             marked_range=tr,
             color=otio.core.Color.GREEN,
-            metadata={'foo': 'bar'}
+            metadata={"foo": "bar"},
         )
 
         expected = (
@@ -218,14 +198,14 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(marker.comment, "foo bar")
 
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(5, 24),
-            otio.opentime.RationalTime(10, 24)
+            otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(10, 24)
         )
         m = otio.schema.Marker(
             name="marker_1",
             marked_range=tr,
-            metadata={'foo': 'bar'},
-            comment="foo bar2")
+            metadata={"foo": "bar"},
+            comment="foo bar2",
+        )
         self.assertEqual(m.comment, "foo bar2")
 
         encoded = otio.adapters.otio_json.write_to_string(m)
@@ -234,22 +214,21 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_str(self):
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(5, 24),
-            otio.opentime.RationalTime(10, 24)
+            otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(10, 24)
         )
         m = otio.schema.Marker(
             name="marker_1",
             marked_range=tr,
             color=otio.core.Color.GREEN,
-            metadata={'foo': 'bar'}
+            metadata={"foo": "bar"},
         )
 
-        expected = 'Marker(marker_1, {}, {}, {})'.format(
+        expected = "Marker(marker_1, {}, {}, {})".format(
             str(tr), str(m.color), str(m.metadata)
         )
 
         self.assertEqual(str(m), expected)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

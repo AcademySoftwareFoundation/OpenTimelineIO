@@ -3,14 +3,13 @@
 
 """Test Harness for the otio.opentime library."""
 
-import opentimelineio as otio
-
-import unittest
 import copy
+import unittest
+
+import opentimelineio as otio
 
 
 class TestTime(unittest.TestCase):
-
     def test_create(self):
         t_val = 30.2
         t = otio.opentime.RationalTime(t_val)
@@ -127,15 +126,15 @@ class TestTime(unittest.TestCase):
 
     def test_negative_timecode(self):
         with self.assertRaises(ValueError):
-            otio.opentime.from_timecode('-01:00:13:13', 24)
+            otio.opentime.from_timecode("-01:00:13:13", 24)
 
     def test_bogus_timecode(self):
         with self.assertRaises(ValueError):
-            otio.opentime.from_timecode('pink elephants', 13)
+            otio.opentime.from_timecode("pink elephants", 13)
 
     def test_time_timecode_convert_bad_rate(self):
         with self.assertRaises(ValueError) as exception_manager:
-            otio.opentime.from_timecode('01:00:13:24', 24)
+            otio.opentime.from_timecode("01:00:13:24", 24)
 
         exc_message = str(exception_manager.exception)
         self.assertEqual(
@@ -184,17 +183,13 @@ class TestTime(unittest.TestCase):
     def test_long_running_timecode_24(self):
         final_frame_number = 24 * 60 * 60 * 24 - 1
         final_time = otio.opentime.from_frames(final_frame_number, 24)
-        self.assertEqual(
-            otio.opentime.to_timecode(final_time),
-            "23:59:59:23"
-        )
+        self.assertEqual(otio.opentime.to_timecode(final_time), "23:59:59:23")
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
 
         # fetching this test function from the c++ module directly
         cumulative_time = otio._opentime._testing.add_many(
-            step_time,
-            final_frame_number
+            step_time, final_frame_number
         )
         self.assertEqual(cumulative_time, final_time)
 
@@ -226,13 +221,8 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
         timecode = "23:59:59:23"
-        t = otio.opentime.RationalTime(
-            value=24 * 60 * 60 * 24 - 1,
-            rate=ntsc_23976
-        )
-        self.assertEqual(
-            t, otio.opentime.from_timecode(timecode, ntsc_23976)
-        )
+        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=ntsc_23976)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, ntsc_23976))
 
     def test_converting_negative_values_to_timecode(self):
         t = otio.opentime.RationalTime(value=-1, rate=25)
@@ -254,77 +244,69 @@ class TestTime(unittest.TestCase):
           (fps * seconds + frames - dropframes * (minutes - minutes / 10))
         """
         test_values = {
-            'first_four_frames': [
-                (0, '00:00:00;00'),
-                (1, '00:00:00;01'),
-                (2, '00:00:00;02'),
-                (3, '00:00:00;03')
+            "first_four_frames": [
+                (0, "00:00:00;00"),
+                (1, "00:00:00;01"),
+                (2, "00:00:00;02"),
+                (3, "00:00:00;03")
             ],
-
-            'first_minute_rollover': [
-                (30 * 59 + 29, '00:00:59;29'),
-                (30 * 59 + 30, '00:01:00;02'),
-                (30 * 59 + 31, '00:01:00;03'),
-                (30 * 59 + 32, '00:01:00;04'),
-                (30 * 59 + 33, '00:01:00;05')
+            "first_minute_rollover": [
+                (30 * 59 + 29, "00:00:59;29"),
+                (30 * 59 + 30, "00:01:00;02"),
+                (30 * 59 + 31, "00:01:00;03"),
+                (30 * 59 + 32, "00:01:00;04"),
+                (30 * 59 + 33, "00:01:00;05")
             ],
-
-            'fift_minute': [
-                (30 * 299 + 29 - 2 * 4, '00:04:59;29'),
-                (30 * 299 + 30 - 2 * 4, '00:05:00;02'),
-                (30 * 299 + 31 - 2 * 4, '00:05:00;03'),
-                (30 * 299 + 32 - 2 * 4, '00:05:00;04'),
-                (30 * 299 + 33 - 2 * 4, '00:05:00;05')
+            "fift_minute": [
+                (30 * 299 + 29 - 2 * 4, "00:04:59;29"),
+                (30 * 299 + 30 - 2 * 4, "00:05:00;02"),
+                (30 * 299 + 31 - 2 * 4, "00:05:00;03"),
+                (30 * 299 + 32 - 2 * 4, "00:05:00;04"),
+                (30 * 299 + 33 - 2 * 4, "00:05:00;05")
             ],
-
-            'seventh_minute': [
-                (30 * 419 + 29 - 2 * 6, '00:06:59;29'),
-                (30 * 419 + 30 - 2 * 6, '00:07:00;02'),
-                (30 * 419 + 31 - 2 * 6, '00:07:00;03'),
-                (30 * 419 + 32 - 2 * 6, '00:07:00;04'),
-                (30 * 419 + 33 - 2 * 6, '00:07:00;05')
+            "seventh_minute": [
+                (30 * 419 + 29 - 2 * 6, "00:06:59;29"),
+                (30 * 419 + 30 - 2 * 6, "00:07:00;02"),
+                (30 * 419 + 31 - 2 * 6, "00:07:00;03"),
+                (30 * 419 + 32 - 2 * 6, "00:07:00;04"),
+                (30 * 419 + 33 - 2 * 6, "00:07:00;05")
             ],
-
-            'tenth_minute': [
-                (30 * 599 + 29 - 2 * (10 - 10 // 10), '00:09:59;29'),
-                (30 * 599 + 30 - 2 * (10 - 10 // 10), '00:10:00;00'),
-                (30 * 599 + 31 - 2 * (10 - 10 // 10), '00:10:00;01'),
-                (30 * 599 + 32 - 2 * (10 - 10 // 10), '00:10:00;02'),
-                (30 * 599 + 33 - 2 * (10 - 10 // 10), '00:10:00;03')
+            "tenth_minute": [
+                (30 * 599 + 29 - 2 * (10 - 10 // 10), "00:09:59;29"),
+                (30 * 599 + 30 - 2 * (10 - 10 // 10), "00:10:00;00"),
+                (30 * 599 + 31 - 2 * (10 - 10 // 10), "00:10:00;01"),
+                (30 * 599 + 32 - 2 * (10 - 10 // 10), "00:10:00;02"),
+                (30 * 599 + 33 - 2 * (10 - 10 // 10), "00:10:00;03")
             ],
-
-            'second_hour': [
-                (30 * 7199 + 29 - 2 * (120 - 120 // 10), '01:59:59;29'),
-                (30 * 7199 + 30 - 2 * (120 - 120 // 10), '02:00:00;00'),
-                (30 * 7199 + 31 - 2 * (120 - 120 // 10), '02:00:00;01'),
-                (30 * 7199 + 32 - 2 * (120 - 120 // 10), '02:00:00;02'),
-                (30 * 7199 + 33 - 2 * (120 - 120 // 10), '02:00:00;03')
+            "second_hour": [
+                (30 * 7199 + 29 - 2 * (120 - 120 // 10), "01:59:59;29"),
+                (30 * 7199 + 30 - 2 * (120 - 120 // 10), "02:00:00;00"),
+                (30 * 7199 + 31 - 2 * (120 - 120 // 10), "02:00:00;01"),
+                (30 * 7199 + 32 - 2 * (120 - 120 // 10), "02:00:00;02"),
+                (30 * 7199 + 33 - 2 * (120 - 120 // 10), "02:00:00;03")
             ],
-
-            'second_and_a_half_hour': [
-                (30 * 8999 + 29 - 2 * (150 - 150 // 10), '02:29:59;29'),
-                (30 * 8999 + 30 - 2 * (150 - 150 // 10), '02:30:00;00'),
-                (30 * 8999 + 31 - 2 * (150 - 150 // 10), '02:30:00;01'),
-                (30 * 8999 + 32 - 2 * (150 - 150 // 10), '02:30:00;02'),
-                (30 * 8999 + 33 - 2 * (150 - 150 // 10), '02:30:00;03')
+            "second_and_a_half_hour": [
+                (30 * 8999 + 29 - 2 * (150 - 150 // 10), "02:29:59;29"),
+                (30 * 8999 + 30 - 2 * (150 - 150 // 10), "02:30:00;00"),
+                (30 * 8999 + 31 - 2 * (150 - 150 // 10), "02:30:00;01"),
+                (30 * 8999 + 32 - 2 * (150 - 150 // 10), "02:30:00;02"),
+                (30 * 8999 + 33 - 2 * (150 - 150 // 10), "02:30:00;03")
             ],
-
-            'tenth_hour': [
-                (30 * 35999 + 29 - 2 * (600 - 600 // 10), '09:59:59;29'),
-                (30 * 35999 + 30 - 2 * (600 - 600 // 10), '10:00:00;00'),
-                (30 * 35999 + 31 - 2 * (600 - 600 // 10), '10:00:00;01'),
-                (30 * 35999 + 32 - 2 * (600 - 600 // 10), '10:00:00;02'),
-                (30 * 35999 + 33 - 2 * (600 - 600 // 10), '10:00:00;03')
+            "tenth_hour": [
+                (30 * 35999 + 29 - 2 * (600 - 600 // 10), "09:59:59;29"),
+                (30 * 35999 + 30 - 2 * (600 - 600 // 10), "10:00:00;00"),
+                (30 * 35999 + 31 - 2 * (600 - 600 // 10), "10:00:00;01"),
+                (30 * 35999 + 32 - 2 * (600 - 600 // 10), "10:00:00;02"),
+                (30 * 35999 + 33 - 2 * (600 - 600 // 10), "10:00:00;03")
             ],
-
             # Since 3 minutes < 10, we subtract 1 from 603 minutes
-            'tenth_hour_third minute': [
-                (30 * 36179 + 29 - 2 * (602 - 602 // 10), '10:02:59;29'),
-                (30 * 36179 + 30 - 2 * (602 - 602 // 10), '10:03:00;02'),
-                (30 * 36179 + 31 - 2 * (602 - 602 // 10), '10:03:00;03'),
-                (30 * 36179 + 32 - 2 * (602 - 602 // 10), '10:03:00;04'),
-                (30 * 36179 + 33 - 2 * (602 - 602 // 10), '10:03:00;05')
-            ]
+            "tenth_hour_third minute": [
+                (30 * 36179 + 29 - 2 * (602 - 602 // 10), "10:02:59;29"),
+                (30 * 36179 + 30 - 2 * (602 - 602 // 10), "10:03:00;02"),
+                (30 * 36179 + 31 - 2 * (602 - 602 // 10), "10:03:00;03"),
+                (30 * 36179 + 32 - 2 * (602 - 602 // 10), "10:03:00;04"),
+                (30 * 36179 + 33 - 2 * (602 - 602 // 10), "10:03:00;05")
+            ],
         }
 
         ntsc_2997 = otio.opentime.RationalTime.nearest_smpte_timecode_rate(29.97)
@@ -333,27 +315,25 @@ class TestTime(unittest.TestCase):
             for value, tc in time_values:
                 t = otio.opentime.RationalTime(value, ntsc_2997)
                 self.assertEqual(
-                    tc, otio.opentime.to_timecode(
-                        t, rate=ntsc_2997, drop_frame=True
-                    )
+                    tc, otio.opentime.to_timecode(t, rate=ntsc_2997, drop_frame=True)
                 )
                 t1 = otio.opentime.from_timecode(tc, rate=ntsc_2997)
                 self.assertEqual(t, t1)
 
     def test_timecode_ntsc_2997fps(self):
         frames = 1084319
-        rate_float = (30000 / 1001.0)
+        rate_float = 30000 / 1001.0
         t = otio.opentime.RationalTime(frames, rate_float)
 
         dftc = otio.opentime.to_timecode(t, rate_float, drop_frame=True)
-        self.assertEqual(dftc, '10:03:00;05')
+        self.assertEqual(dftc, "10:03:00;05")
 
         tc = otio.opentime.to_timecode(t, rate_float, drop_frame=False)
-        self.assertEqual(tc, '10:02:23:29')
+        self.assertEqual(tc, "10:02:23:29")
 
         # Detect DFTC from rate for backward compatibility with old versions
         tc_auto = otio.opentime.to_timecode(t, rate_float)
-        self.assertEqual(tc_auto, '10:03:00;05')
+        self.assertEqual(tc_auto, "10:03:00;05")
 
         invalid_df_rate = otio.opentime.RationalTime(30, (24000 / 1001.0))
         with self.assertRaises(ValueError):
@@ -368,10 +348,10 @@ class TestTime(unittest.TestCase):
         # should be displayed as drop-frame timecode.
         frames = 1084319
         rates = [
-            (29.97, '10:03:00;05'),
-            (30000.0 / 1001.0, '10:03:00;05'),
-            (59.94, '05:01:30;03'),
-            (60000.0 / 1001.0, '05:01:30;03')
+            (29.97, "10:03:00;05"),
+            (30000.0 / 1001.0, "10:03:00;05"),
+            (59.94, "05:01:30;03"),
+            (60000.0 / 1001.0, "05:01:30;03")
         ]
         for rate, timecode in rates:
             t = otio.opentime.RationalTime(frames, rate)
@@ -381,12 +361,12 @@ class TestTime(unittest.TestCase):
 
     def test_timecode_2997(self):
         ref_values = [
-            (10789, '00:05:59:19', '00:05:59;29'),
-            (10790, '00:05:59:20', '00:06:00;02'),
-            (17981, '00:09:59:11', '00:09:59;29'),
-            (17982, '00:09:59:12', '00:10:00;00'),
-            (17983, '00:09:59:13', '00:10:00;01'),
-            (17984, '00:09:59:14', '00:10:00;02'),
+            (10789, "00:05:59:19", "00:05:59;29"),
+            (10790, "00:05:59:20", "00:06:00;02"),
+            (17981, "00:09:59:11", "00:09:59;29"),
+            (17982, "00:09:59:12", "00:10:00;00"),
+            (17983, "00:09:59:13", "00:10:00;01"),
+            (17984, "00:09:59:14", "00:10:00;02")
         ]
         ntsc_2997 = 30000 / 1001.0
         for value, tc, dftc in ref_values:
@@ -424,7 +404,7 @@ class TestTime(unittest.TestCase):
         'INVALID_RATE_FOR_DROP_FRAME_TIMECODE'.
         """
         with self.assertRaises(ValueError):
-            otio.opentime.from_timecode('01:00:13;23', 24)
+            otio.opentime.from_timecode("01:00:13;23", 24)
 
     def test_faulty_time_string(self):
         with self.assertRaises(ValueError):
@@ -523,21 +503,17 @@ class TestTime(unittest.TestCase):
         rt = otio.opentime.RationalTime(2090, 24)
         self.assertEqual(
             str(rt),
-            str(otio.opentime.from_time_string(otio.opentime.to_time_string(rt), 24))
+            str(otio.opentime.from_time_string(otio.opentime.to_time_string(rt), 24)),
         )
 
     def test_long_running_time_string_24(self):
         final_frame_number = 24 * 60 * 60 * 24 - 1
         final_time = otio.opentime.from_frames(final_frame_number, 24)
-        self.assertEqual(
-            otio.opentime.to_time_string(final_time),
-            "23:59:59.958333"
-        )
+        self.assertEqual(otio.opentime.to_time_string(final_time), "23:59:59.958333")
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
         cumulative_time = otio._opentime._testing.add_many(
-            step_time,
-            final_frame_number
+            step_time, final_frame_number
         )
 
         self.assertTrue(cumulative_time.almost_equal(final_time, delta=0.001))
@@ -554,22 +530,22 @@ class TestTime(unittest.TestCase):
         # This list is rewritten from conversion into seconds of
         # test_timecode_23976_fps
         ref_values_23976 = [
-            (1025, '00:00:01.708333'),
-            (179900, '00:04:59.833333'),
-            (180000, '00:05:00.0'),
-            (360000, '00:10:00.0'),
-            (720000, '00:20:00.0'),
-            (1079300, '00:29:58.833333'),
-            (1080000, '00:30:00.0'),
-            (1080150, '00:30:00.25'),
-            (1440000, '00:40:00.0'),
-            (1800000, '00:50:00.0'),
-            (1978750, '00:54:57.916666'),
-            (1980000, '00:55:00.0'),
-            (46700, '00:01:17.833333'),
-            (225950, '00:06:16.583333'),
-            (436400, '00:12:07.333333'),
-            (703350, '00:19:32.25')
+            (1025, "00:00:01.708333"),
+            (179900, "00:04:59.833333"),
+            (180000, "00:05:00.0"),
+            (360000, "00:10:00.0"),
+            (720000, "00:20:00.0"),
+            (1079300, "00:29:58.833333"),
+            (1080000, "00:30:00.0"),
+            (1080150, "00:30:00.25"),
+            (1440000, "00:40:00.0"),
+            (1800000, "00:50:00.0"),
+            (1978750, "00:54:57.916666"),
+            (1980000, "00:55:00.0"),
+            (46700, "00:01:17.833333"),
+            (225950, "00:06:16.583333"),
+            (436400, "00:12:07.333333"),
+            (703350, "00:19:32.25")
         ]
         for value, ts in ref_values_23976:
             t = otio.opentime.RationalTime(value, 600)
@@ -581,10 +557,7 @@ class TestTime(unittest.TestCase):
     def test_time_to_string(self):
         t = otio.opentime.RationalTime(1.0, 2.0)
         self.assertEqual(str(t), "RationalTime(1, 2)")
-        self.assertEqual(
-            repr(t),
-            "otio.opentime.RationalTime(value=1, rate=2)"
-        )
+        self.assertEqual(repr(t), "otio.opentime.RationalTime(value=1, rate=2)")
 
     def test_frames_with_int_fps(self):
         for fps in (24, 30, 48, 60):
@@ -684,8 +657,7 @@ class TestTime(unittest.TestCase):
         tend = otio.opentime.RationalTime(12, 25)
 
         tdur = otio.opentime.duration_from_start_end_time(
-            start_time=otio.opentime.RationalTime(0, 25),
-            end_time_exclusive=tend
+            start_time=otio.opentime.RationalTime(0, 25), end_time_exclusive=tend
         )
 
         self.assertEqual(tend, tdur)
@@ -714,15 +686,11 @@ class TestTime(unittest.TestCase):
         ntsc_2997 = otio.opentime.RationalTime.nearest_smpte_timecode_rate(29.97)
         self.assertEqual(ntsc_2997, 30000 / 1001.0)
 
-        tc1 = otio.opentime.to_timecode(
-            otio.opentime.RationalTime(frames, ntsc_2997)
-        )
+        tc1 = otio.opentime.to_timecode(otio.opentime.RationalTime(frames, ntsc_2997))
         self.assertEqual(tc1, DF_TC)
 
         tc2 = otio.opentime.to_timecode(
-            otio.opentime.RationalTime(frames, ntsc_2997),
-            ntsc_2997,
-            drop_frame=False
+            otio.opentime.RationalTime(frames, ntsc_2997), ntsc_2997, drop_frame=False
         )
         self.assertEqual(tc2, NDF_TC)
 
@@ -751,20 +719,15 @@ class TestTime(unittest.TestCase):
         )
         for wonky_rate, smpte_rate in rate_pairs:
             self.assertTrue(
-                otio.opentime.RationalTime.is_smpte_timecode_rate(
-                    smpte_rate
-                )
+                otio.opentime.RationalTime.is_smpte_timecode_rate(smpte_rate)
             )
             self.assertEqual(
-                otio.opentime.RationalTime.nearest_smpte_timecode_rate(
-                    wonky_rate
-                ),
+                otio.opentime.RationalTime.nearest_smpte_timecode_rate(wonky_rate),
                 smpte_rate,
             )
 
 
 class TestTimeTransform(unittest.TestCase):
-
     def test_identity_transform(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform()
@@ -782,23 +745,18 @@ class TestTimeTransform(unittest.TestCase):
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         self.assertEqual(
-            txform.applied_to(tr),
-            otio.opentime.TimeRange(tstart + toffset, tstart)
+            txform.applied_to(tr), otio.opentime.TimeRange(tstart + toffset, tstart)
         )
 
     def test_scale(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform(scale=2)
-        self.assertEqual(
-            otio.opentime.RationalTime(24, 25),
-            txform.applied_to(tstart)
-        )
+        self.assertEqual(otio.opentime.RationalTime(24, 25), txform.applied_to(tstart))
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         tstart_scaled = otio.opentime.RationalTime(24, 25)
         self.assertEqual(
-            txform.applied_to(tr),
-            otio.opentime.TimeRange(tstart_scaled, tstart_scaled)
+            txform.applied_to(tr), otio.opentime.TimeRange(tstart_scaled, tstart_scaled)
         )
 
     def test_rate(self):
@@ -818,13 +776,10 @@ class TestTimeTransform(unittest.TestCase):
             "), "
             "scale=2, "
             "rate=-1"
-            ")"
+            ")",
         )
 
-        self.assertEqual(
-            str(txform),
-            "TimeTransform(RationalTime(12, 25), 2, -1)"
-        )
+        self.assertEqual(str(txform), "TimeTransform(RationalTime(12, 25), 2, -1)")
 
     def test_comparison(self):
         tstart = otio.opentime.RationalTime(12, 25)
@@ -863,21 +818,16 @@ class TestTimeTransform(unittest.TestCase):
 
 
 class TestTimeRange(unittest.TestCase):
-
     def test_create(self):
         tr = otio.opentime.TimeRange()
         blank = otio.opentime.RationalTime()
         self.assertEqual(tr.start_time, blank)
         self.assertEqual(tr.duration, blank)
 
-        tr1 = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(10, 48)
-        )
+        tr1 = otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(10, 48))
         self.assertEqual(tr1.start_time.rate, tr1.duration.rate)
 
-        tr2 = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 48)
-        )
+        tr2 = otio.opentime.TimeRange(duration=otio.opentime.RationalTime(10, 48))
         self.assertEqual(tr2.start_time.rate, tr2.duration.rate)
 
         tr3 = otio.opentime.TimeRange(0, 48, 24)
@@ -904,9 +854,7 @@ class TestTimeRange(unittest.TestCase):
         # base 25 is just for testing
 
         # range starts at 0 and has duration 0
-        tr = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(0, 25)
-        )
+        tr = otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(0, 25))
         with self.assertRaises(TypeError):
             tr.extended_by("foo")
         self.assertEqual(tr.duration, otio.opentime.RationalTime())
@@ -920,28 +868,25 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(tr.end_time_exclusive(), rt_start + rt_dur)
         self.assertEqual(
             tr.end_time_inclusive(),
-            rt_start + rt_dur - otio.opentime.RationalTime(1, 24)
+            rt_start + rt_dur - otio.opentime.RationalTime(1, 24),
         )
 
         # test non-integer duration value
         rt_dur = otio.opentime.RationalTime(5.5, 24)
         tr = otio.opentime.TimeRange(rt_start, rt_dur)
         self.assertEqual(tr.end_time_exclusive(), rt_start + rt_dur)
-        self.assertEqual(
-            tr.end_time_inclusive(),
-            otio.opentime.RationalTime(6, 24)
-        )
+        self.assertEqual(tr.end_time_inclusive(), otio.opentime.RationalTime(6, 24))
 
     def test_repr(self):
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(-1.0, 24.0),
-            otio.opentime.RationalTime(6.0, 24.0)
+            otio.opentime.RationalTime(6.0, 24.0),
         )
         self.assertEqual(
             repr(tr),
             "otio.opentime.TimeRange("
             "start_time=otio.opentime.RationalTime(value=-1, rate=24), "
-            "duration=otio.opentime.RationalTime(value=6, rate=24))"
+            "duration=otio.opentime.RationalTime(value=6, rate=24))",
         )
 
     def test_compare(self):
@@ -969,8 +914,7 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(
             tr2,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(18, 24),
-                otio.opentime.RationalTime(7, 24),
+                otio.opentime.RationalTime(18, 24), otio.opentime.RationalTime(7, 24)
             ),
         )
 
@@ -983,8 +927,7 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(
             tr2,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(18, 24),
-                otio.opentime.RationalTime(7, 24),
+                otio.opentime.RationalTime(18, 24), otio.opentime.RationalTime(7, 24)
             ),
         )
 
@@ -993,13 +936,11 @@ class TestTimeRange(unittest.TestCase):
         test_point_max = otio.opentime.RationalTime(6, 24)
 
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(-1, 24),
-            otio.opentime.RationalTime(6, 24),
+            otio.opentime.RationalTime(-1, 24), otio.opentime.RationalTime(6, 24)
         )
 
         other_tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(-2, 24),
-            otio.opentime.RationalTime(7, 24),
+            otio.opentime.RationalTime(-2, 24), otio.opentime.RationalTime(7, 24)
         )
 
         self.assertEqual(tr.clamped(test_point_min), tr.start_time)
@@ -1289,8 +1230,7 @@ class TestTimeRange(unittest.TestCase):
         tend = otio.opentime.RationalTime(12, 25)
 
         tr = otio.opentime.range_from_start_end_time(
-            start_time=tstart,
-            end_time_exclusive=tend
+            start_time=tstart, end_time_exclusive=tend
         )
 
         self.assertEqual(tr.start_time, tstart)
@@ -1298,15 +1238,14 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertEqual(tr.end_time_exclusive(), tend)
         self.assertEqual(
-            tr.end_time_inclusive(),
-            tend - otio.opentime.RationalTime(1, 25)
+            tr.end_time_inclusive(), tend - otio.opentime.RationalTime(1, 25)
         )
 
         self.assertEqual(
             tr,
             otio.opentime.range_from_start_end_time(
                 tr.start_time, tr.end_time_exclusive()
-            )
+            ),
         )
 
     def test_range_from_start_end_time_inclusive(self):
@@ -1314,40 +1253,33 @@ class TestTimeRange(unittest.TestCase):
         tend = otio.opentime.RationalTime(12, 25)
 
         tr = otio.opentime.range_from_start_end_time_inclusive(
-            start_time=tstart,
-            end_time_inclusive=tend
+            start_time=tstart, end_time_inclusive=tend
         )
 
         self.assertEqual(tr.start_time, tstart)
         self.assertEqual(tr.duration, otio.opentime.RationalTime(13, 25))
 
         self.assertEqual(tr.end_time_inclusive(), tend)
-        self.assertEqual(
-            tr.end_time_inclusive(),
-            otio.opentime.RationalTime(12, 25),
-        )
+        self.assertEqual(tr.end_time_inclusive(), otio.opentime.RationalTime(12, 25))
 
         self.assertEqual(
             tr,
             otio.opentime.range_from_start_end_time_inclusive(
                 tr.start_time, tr.end_time_inclusive()
-            )
+            ),
         )
 
     def test_adjacent_timeranges(self):
         d1 = 0.3
         d2 = 0.4
         r1 = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, 1),
-            otio.opentime.RationalTime(d1, 1)
+            otio.opentime.RationalTime(0, 1), otio.opentime.RationalTime(d1, 1)
         )
         r2 = otio.opentime.TimeRange(
-            r1.end_time_exclusive(),
-            otio.opentime.RationalTime(d2, 1)
+            r1.end_time_exclusive(), otio.opentime.RationalTime(d2, 1)
         )
         full = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, 1),
-            otio.opentime.RationalTime(d1 + d2, 1)
+            otio.opentime.RationalTime(0, 1), otio.opentime.RationalTime(d1 + d2, 1)
         )
         self.assertFalse(r1.overlaps(r2))
         self.assertEqual(r1.extended_by(r2), full)
@@ -1358,16 +1290,15 @@ class TestTimeRange(unittest.TestCase):
         gap = 1.7
         d2 = 0.4
         r1 = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(start, 1),
-            otio.opentime.RationalTime(d1, 1)
+            otio.opentime.RationalTime(start, 1), otio.opentime.RationalTime(d1, 1)
         )
         r2 = otio.opentime.TimeRange(
             otio.opentime.RationalTime(start + gap + d1, 1),
-            otio.opentime.RationalTime(d2, 1)
+            otio.opentime.RationalTime(d2, 1),
         )
         full = otio.opentime.TimeRange(
             otio.opentime.RationalTime(start, 1),
-            otio.opentime.RationalTime(d1 + gap + d2, 1)
+            otio.opentime.RationalTime(d1 + gap + d2, 1),
         )
         self.assertFalse(r1.overlaps(r2))
         self.assertEqual(full, r1.extended_by(r2))
@@ -1384,7 +1315,7 @@ class TestTimeRange(unittest.TestCase):
         time2 = otio.opentime.RationalTime(1.0, 1.0)
         self.assertEqual(
             otio.opentime.to_timecode(time1, 24.0),
-            otio.opentime.to_timecode(time2, 24.0)
+            otio.opentime.to_timecode(time2, 24.0),
         )
 
     def test_to_frames_mixed_rates(self):
@@ -1395,5 +1326,5 @@ class TestTimeRange(unittest.TestCase):
         self.assertNotEqual(frame, otio.opentime.to_frames(t, 12))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

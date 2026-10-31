@@ -3,28 +3,23 @@
 
 """OTIO Python Plugin Manifest system: locates plugins to OTIO."""
 
-from importlib import resources
 import inspect
 import logging
 import os
 
 # for python <= 3.9
-from importlib import metadata
+from importlib import metadata, resources
 
-from .. import (
-    core,
-    exceptions,
-)
-
+from .. import core, exceptions
 
 # for tracking what kinds of plugins the manifest system supports
 OTIO_PLUGIN_TYPES = [
-    'adapters',
-    'media_linkers',
-    'schemadefs',
-    'hook_scripts',
-    'hooks',
-    'version_manifests',
+    "adapters",
+    "media_linkers",
+    "schemadefs",
+    "hook_scripts",
+    "hooks",
+    "version_manifests"
 ]
 
 
@@ -33,12 +28,10 @@ def plugin_entry_points():
     plugins.
     """
     try:
-        entry_points = metadata.entry_points(group='opentimelineio.plugins')
+        entry_points = metadata.entry_points(group="opentimelineio.plugins")
     except TypeError:
         # For python <= 3.9
-        entry_points = metadata.entry_points().get(
-            'opentimelineio.plugins', []
-        )
+        entry_points = metadata.entry_points().get("opentimelineio.plugins", [])
 
     return entry_points
 
@@ -85,6 +78,7 @@ class Manifest(core.SerializableObject):
 
     For more information, consult the documentation.
     """
+
     _serializable_label = "PluginManifest.1"
 
     def __init__(self):
@@ -101,34 +95,22 @@ class Manifest(core.SerializableObject):
         self.version_manifests = {}
 
     adapters = core.serializable_field(
-        "adapters",
-        type([]),
-        "Adapters this manifest describes."
+        "adapters", type([]), "Adapters this manifest describes."
     )
     schemadefs = core.serializable_field(
-        "schemadefs",
-        type([]),
-        "Schemadefs this manifest describes."
+        "schemadefs", type([]), "Schemadefs this manifest describes."
     )
     media_linkers = core.serializable_field(
-        "media_linkers",
-        type([]),
-        "Media Linkers this manifest describes."
+        "media_linkers", type([]), "Media Linkers this manifest describes."
     )
     hooks = core.serializable_field(
-        "hooks",
-        type({}),
-        "Hooks that hooks scripts can be attached to."
+        "hooks", type({}), "Hooks that hooks scripts can be attached to."
     )
     hook_scripts = core.serializable_field(
-        "hook_scripts",
-        type([]),
-        "Scripts that can be attached to hooks."
+        "hook_scripts", type([]), "Scripts that can be attached to hooks."
     )
     version_manifests = core.serializable_field(
-        "version_manifests",
-        type({}),
-        "Sets of versions to downgrade schemas to."
+        "version_manifests", type({}), "Sets of versions to downgrade schemas to."
     )
 
     def extend(self, another_manifest):
@@ -167,10 +149,7 @@ class Manifest(core.SerializableObject):
         """Set the source file path for the manifest."""
 
         for thing in (
-            self.adapters
-            + self.schemadefs
-            + self.media_linkers
-            + self.hook_scripts
+            self.adapters + self.schemadefs + self.media_linkers + self.hook_scripts
         ):
             thing._json_path = path
 
@@ -198,11 +177,8 @@ class Manifest(core.SerializableObject):
                 return thing
 
         raise exceptions.NotSupportedError(
-            "Could not find plugin: '{}' in kind_list: '{}'."
-            " options: {}".format(
-                name,
-                kind_list,
-                getattr(self, kind_list)
+            "Could not find plugin: '{}' in kind_list: '{}'. options: {}".format(
+                name, kind_list, getattr(self, kind_list)
             )
         )
 
@@ -270,9 +246,7 @@ def load_manifest():
                     # put into source_files in favor of using the path to the
                     # python package as the unique identifier
 
-                    manifest_path = os.path.abspath(
-                        plugin_entry_point.__file__
-                    )
+                    manifest_path = os.path.abspath(plugin_entry_point.__file__)
 
                     if manifest_path in result.source_files:
                         continue

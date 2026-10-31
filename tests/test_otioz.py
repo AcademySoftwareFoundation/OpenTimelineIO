@@ -5,10 +5,10 @@
 
 """Tests for the OTIOZ adapter."""
 
-import unittest
 import os
 import pathlib
 import tempfile
+import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -17,7 +17,6 @@ import opentimelineio.test_utils as otio_test_utils
 class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_round_trip(self):
         with tempfile.TemporaryDirectory() as temp_dir:
-
             # Create a timeline
             tl = otio.schema.Timeline()
             tr = otio.schema.Track()
@@ -33,9 +32,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             # Write to otioz
             otioz_path = os.path.join(temp_dir, "round_trip.otioz")
             otio.adapters.write_to_file(
-                tl,
-                otioz_path,
-                relative_media_base_dir=temp_dir)
+                tl, otioz_path, relative_media_base_dir=temp_dir
+            )
 
             # Read from otiod
             result = otio.adapters.read_from_file(otioz_path)

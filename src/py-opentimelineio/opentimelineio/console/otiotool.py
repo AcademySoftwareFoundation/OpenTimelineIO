@@ -16,10 +16,8 @@ import os
 import pathlib
 import re
 import sys
-
-from urllib.request import urlopen
-
 from copy import deepcopy
+from urllib.request import urlopen
 
 import opentimelineio as otio
 
@@ -70,16 +68,12 @@ def main():
 
     if args.only_tracks_with_name or args.only_tracks_with_index:
         timelines = filter_tracks(
-            args.only_tracks_with_name,
-            args.only_tracks_with_index,
-            timelines
+            args.only_tracks_with_name, args.only_tracks_with_index, timelines
         )
 
     if args.only_clips_with_name or args.only_clips_with_name_regex:
         timelines = filter_clips(
-            args.only_clips_with_name,
-            args.only_clips_with_name_regex,
-            timelines
+            args.only_clips_with_name, args.only_clips_with_name_regex, timelines
         )
 
     if args.trim:
@@ -99,9 +93,7 @@ def main():
     if args.flatten:
         for timeline in timelines:
             flatten_timeline(
-                timeline,
-                which_tracks=args.flatten,
-                keep=args.keep_flattened_tracks
+                timeline, which_tracks=args.flatten, keep=args.keep_flattened_tracks
             )
 
     # Phase 5: Relinking media
@@ -136,12 +128,14 @@ def main():
         for timeline in timelines:
             inspect_timelines(args.inspect, timeline)
 
-    should_summarize = (args.list_clips or
-                        args.list_media or
-                        args.verify_media or
-                        args.list_tracks or
-                        args.list_markers or
-                        args.verify_ranges)
+    should_summarize = (
+        args.list_clips
+        or args.list_media
+        or args.verify_media
+        or args.list_tracks
+        or args.list_markers
+        or args.verify_ranges
+    )
     if should_summarize:
         for timeline in timelines:
             summarize_timeline(
@@ -151,7 +145,8 @@ def main():
                 args.verify_media,
                 args.list_markers,
                 args.verify_ranges,
-                timeline)
+                timeline,
+            )
 
     # Final Phase: Output
 
@@ -238,7 +233,7 @@ otiotool -i playlist.otio --verify-media
 Inspect specific audio clips in detail:
 otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
 """,
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     # Input...
@@ -246,105 +241,95 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
         "--input",
         "-i",
         type=str,
-        nargs='+',
-        metavar='PATH(s)',
+        nargs="+",
+        metavar="PATH(s)",
         help="""Input file path(s). All formats supported by adapter plugins
-        are supported. Use '-' to read OTIO from standard input."""
+        are supported. Use '-' to read OTIO from standard input.""",
     )
 
     # Filter...
     track_type_group = parser.add_mutually_exclusive_group()
     track_type_group.add_argument(
-        "--video-only",
-        "-v",
-        action='store_true',
-        help="Output only video tracks"
+        "--video-only", "-v", action="store_true", help="Output only video tracks"
     )
     track_type_group.add_argument(
-        "--audio-only",
-        "-a",
-        action='store_true',
-        help="Output only audio tracks"
+        "--audio-only", "-a", action="store_true", help="Output only audio tracks"
     )
 
     parser.add_argument(
         "--only-tracks-with-name",
         type=str,
-        nargs='+',
-        metavar='NAME(s)',
-        help="Output tracks with these name(s)"
+        nargs="+",
+        metavar="NAME(s)",
+        help="Output tracks with these name(s)",
     )
     parser.add_argument(
         "--only-tracks-with-index",
         type=int,
-        nargs='+',
-        metavar='INDEX(es)',
+        nargs="+",
+        metavar="INDEX(es)",
         help="Output tracks with these indexes"
-        " (1 based, in same order as --list-tracks)"
+        " (1 based, in same order as --list-tracks)",
     )
     parser.add_argument(
         "--only-clips-with-name",
         type=str,
-        nargs='+',
-        metavar='NAME(s)',
-        help="Output only clips with these name(s)"
+        nargs="+",
+        metavar="NAME(s)",
+        help="Output only clips with these name(s)",
     )
     parser.add_argument(
         "--only-clips-with-name-regex",
         type=str,
-        nargs='+',
-        metavar='REGEX(es)',
+        nargs="+",
+        metavar="REGEX(es)",
         help="""Output only clips with names matching the given
-        regular expression pattern (e.g. '[Ii]nterview [0-9]+')"""
+        regular expression pattern (e.g. '[Ii]nterview [0-9]+')""",
     )
     parser.add_argument(
-        "--remove-transitions",
-        action='store_true',
-        help="Remove all transitions"
+        "--remove-transitions", action="store_true", help="Remove all transitions"
     )
     parser.add_argument(
-        "--remove-effects",
-        action='store_true',
-        help="Remove all effects"
+        "--remove-effects", action="store_true", help="Remove all effects"
     )
     parser.add_argument(
         "--trim",
         "-t",
         type=str,
         nargs=2,
-        metavar=('START', 'END'),
+        metavar=("START", "END"),
         help="""Trim from START to END, each specified as seconds or
-        HH:MM:SS:FF timecode (matching the timeline's rate)"""
+        HH:MM:SS:FF timecode (matching the timeline's rate)""",
     )
 
     # Combine...
     parser.add_argument(
         "--flatten",
         "-f",
-        choices=['video', 'audio', 'all'],
-        metavar='TYPE',
+        choices=["video", "audio", "all"],
+        metavar="TYPE",
         help="""Flatten multiple tracks into one.
-        TYPE must be 'video' or 'audio' or 'all'."""
+        TYPE must be 'video' or 'audio' or 'all'.""",
     )
     parser.add_argument(
         "--keep-flattened-tracks",
-        action='store_true',
+        action="store_true",
         help="""When used with --flatten, the new flat track is added above the
-        others instead of replacing them."""
+        others instead of replacing them.""",
     )
 
     combine_group = parser.add_mutually_exclusive_group()
     combine_group.add_argument(
         "--stack",
         "-s",
-        action='store_true',
-        help="Stack multiple input files into one timeline"
+        action="store_true",
+        help="Stack multiple input files into one timeline",
     )
     combine_group.add_argument(
         "--concat",
         "-c",
-        action='store_true',
-        help="Concatenate multiple input files end-to-end into one timeline"
+        action="store_true",
+        help="Concatenate multiple input files end-to-end into one timeline",
     )
 
     # Relink
@@ -352,110 +337,102 @@ otiotool -i playlist.otio --only-audio --list-tracks --inspect "Interview"
     relink_group.add_argument(
         "--relink-by-name",
         type=str,
-        nargs='+',
-        metavar='FOLDER(s)',
+        nargs="+",
+        metavar="FOLDER(s)",
         help="""Scan the specified folder looking for filenames which match
-        each clip's name. If found, clips are relinked to those files."""
+        each clip's name. If found, clips are relinked to those files.""",
     )
     relink_group.add_argument(
         "--copy-media-to-folder",
         type=str,
-        metavar='FOLDER',
+        metavar="FOLDER",
         help="""Copy or download all linked media to the specified folder and
-        relink all media references to the copies"""
+        relink all media references to the copies""",
     )
 
     # Remove/Redact
     parser.add_argument(
         "--remove-metadata-key",
         type=str,
-        nargs='+',
-        metavar='KEY(s)',
+        nargs="+",
+        metavar="KEY(s)",
         help="""Remove one or more metadata dictionary top-level keys from all
-        objects."""
+        objects.""",
     )
     parser.add_argument(
         "--redact",
-        action='store_true',
+        action="store_true",
         help="""Remove all metadata, names, etc. leaving only the timeline
-        structure"""
+        structure""",
     )
 
     # Inspect...
     parser.add_argument(
         "--stats",
-        action='store_true',
+        action="store_true",
         help="""List statistics about the result, including start, end, and
-        duration"""
+        duration""",
     )
     parser.add_argument(
-        "--list-clips",
-        action='store_true',
-        help="List each clip's name"
+        "--list-clips", action="store_true", help="List each clip's name"
     )
     parser.add_argument(
-        "--list-tracks",
-        action='store_true',
-        help="List each track's name"
+        "--list-tracks", action="store_true", help="List each track's name"
     )
     parser.add_argument(
-        "--list-media",
-        action='store_true',
-        help="List each referenced media URL"
+        "--list-media", action="store_true", help="List each referenced media URL"
     )
     parser.add_argument(
         "--verify-media",
-        action='store_true',
+        action="store_true",
         help="""Verify that each referenced media URL exists (for local media
-        only)"""
+        only)""",
     )
     parser.add_argument(
-        "--list-markers",
-        action='store_true',
-        help="List summary of all markers"
+        "--list-markers", action="store_true", help="List summary of all markers"
     )
     parser.add_argument(
         "--verify-ranges",
-        action='store_true',
+        action="store_true",
         help="""Verify that each clip in a timeline has a source range
         within the available range of media
-        (acceptable in some use cases, not in others)"""
+        (acceptable in some use cases, not in others)""",
     )
     parser.add_argument(
         "--inspect",
         type=str,
-        nargs='+',
-        metavar='NAME(s)',
+        nargs="+",
+        metavar="NAME(s)",
         help="""Inspect details of clips with names matching the given regular
-        expression pattern (e.g. 'SFX.*-TEMP')"""
+        expression pattern (e.g. 'SFX.*-TEMP')""",
     )
 
     # Output...
     parser.add_argument(
         "--downgrade",
         type=str,
-        metavar='FAMILY:VERSION',
+        metavar="FAMILY:VERSION",
         help="""Downgrade OTIO schema. Only relevant when --output is used
         to output an OTIO file. FAMILY:VERSION specifies which schema family
         and version to use. If FAMILY: is omitted, the default OTIO_CORE: is
         used. For example `--downgrade OTIO_CORE:0.14.0` is equivalent to
         `--downgrade 0.14.0`. See
         https://opentimelineio.readthedocs.io/en/latest/tutorials/versioning-schemas.html
-        for details."""
+        for details.""",
     )
     parser.add_argument(
         "--list-versions",
-        action='store_true',
-        help="""List available versions for the --downgrade option."""
+        action="store_true",
+        help="""List available versions for the --downgrade option.""",
     )
 
     parser.add_argument(
         "--output",
         "-o",
         type=str,
-        metavar='PATH',
+        metavar="PATH",
         help="""Output file. All formats supported by adapter plugins
-        are supported. Use '-' to write OTIO to standard output."""
+        are supported. Use '-' to write OTIO to standard output.""",
     )
 
     args = parser.parse_args()
@@ -477,9 +454,9 @@ def read_inputs(input_paths):
     """
     timelines = []
     for input_path in input_paths:
-        if input_path == '-':
+        if input_path == "-":
             text = sys.stdin.read()
-            timeline = otio.adapters.read_from_string(text, 'otio_json')
+            timeline = otio.adapters.read_from_string(text, "otio_json")
         else:
             timeline = otio.adapters.read_from_file(input_path)
         timelines.append(timeline)
@@ -499,10 +476,12 @@ def keep_only_audio_tracks(timeline):
 def filter_transitions(timelines):
     """Return a copy of the input timelines with all transitions removed.
     The overall duration of the timelines should not be affected."""
+
     def _f(item):
         if isinstance(item, otio.schema.Transition):
             return None
         return item
+
     return [otio.algorithms.filtered_composition(t, _f) for t in timelines]
 
 
@@ -589,14 +568,11 @@ def concatenate_timelines(timelines):
     concatenated_track = otio.schema.Track()
     for timeline in timelines:
         concatenated_track.append(deepcopy(timeline.tracks))
-    concatenated_timeline = otio.schema.Timeline(
-        name=name,
-        tracks=[concatenated_track]
-    )
+    concatenated_timeline = otio.schema.Timeline(name=name, tracks=[concatenated_track])
     return concatenated_timeline
 
 
-def flatten_timeline(timeline, which_tracks='video', keep=False):
+def flatten_timeline(timeline, which_tracks="video", keep=False):
     """Replace the tracks of this timeline with a single track by flattening.
     If which_tracks is specified, you may choose 'video', 'audio', or 'all'.
     If keep is True, then the old tracks are retained and the new one is added
@@ -606,22 +582,23 @@ def flatten_timeline(timeline, which_tracks='video', keep=False):
     # Make two lists: tracks_to_flatten and other_tracks
     # Note: that we take care to NOT assume that there are only two kinds
     # of tracks.
-    if which_tracks == 'all':
+    if which_tracks == "all":
         tracks_to_flatten = timeline.tracks
         other_tracks = []
         kind = tracks_to_flatten[0].kind
-    elif which_tracks == 'video':
+    elif which_tracks == "video":
         tracks_to_flatten = timeline.video_tracks()
         other_tracks = [t for t in timeline.tracks if t not in tracks_to_flatten]
         kind = otio.schema.TrackKind.Video
-    elif which_tracks == 'audio':
+    elif which_tracks == "audio":
         tracks_to_flatten = timeline.audio_tracks()
         other_tracks = [t for t in timeline.tracks if t not in tracks_to_flatten]
         kind = otio.schema.TrackKind.Audio
     else:
         raise ValueError(
-            "Invalid choice {} for which_tracks argument"
-            " to flatten_timeline.".format(which_tracks)
+            "Invalid choice {} for which_tracks argument to flatten_timeline.".format(
+                which_tracks
+            )
         )
 
     flat_track = otio.algorithms.flatten_stack(tracks_to_flatten[:])
@@ -657,13 +634,14 @@ def trim_timeline(start, end, timeline):
         start_time = time_from_string(start, rate)
         end_time = time_from_string(end, rate)
     except Exception:
-        raise ValueError("Start and end arguments to --trim must be "
-                         "either HH:MM:SS:FF or a floating point number of"
-                         " seconds, not '{}' and '{}'".format(start, end))
+        raise ValueError(
+            "Start and end arguments to --trim must be "
+            "either HH:MM:SS:FF or a floating point number of"
+            " seconds, not '{}' and '{}'".format(start, end)
+        )
     trim_range = otio.opentime.range_from_start_end_time(start_time, end_time)
     timeline.tracks[:] = [
-        otio.algorithms.track_trimmed_to_range(t, trim_range)
-        for t in timeline.tracks
+        otio.algorithms.track_trimmed_to_range(t, trim_range) for t in timeline.tracks
     ]
 
 
@@ -675,13 +653,13 @@ def remove_metadata_key(timeline, key):
     rem(timeline.metadata)
     for child in [timeline.tracks] + list(timeline.find_children()):
         rem(child.metadata)
-        if hasattr(child, 'markers'):
+        if hasattr(child, "markers"):
             for marker in child.markers:
                 rem(marker.metadata)
-        if hasattr(child, 'effects'):
+        if hasattr(child, "effects"):
             for effect in child.effects:
                 rem(effect.metadata)
-        if hasattr(child, 'media_reference'):
+        if hasattr(child, "media_reference"):
             media_reference = child.media_reference
             if media_reference:
                 rem(media_reference.metadata)
@@ -711,21 +689,21 @@ def redact_timeline(timeline):
         counter = _counter(child.schema_name())
         child.name = f"{child.schema_name()} #{counter}"
         child.metadata.clear()
-        if hasattr(child, 'markers'):
+        if hasattr(child, "markers"):
             for marker in child.markers:
                 counter = _counter(marker.schema_name())
                 marker.name = f"{marker.schema_name()} #{counter}"
                 marker.metadata.clear()
-        if hasattr(child, 'effects'):
+        if hasattr(child, "effects"):
             for effect in child.effects:
                 counter = _counter(effect.schema_name())
                 effect.name = f"{effect.schema_name()} #{counter}"
                 effect.metadata.clear()
-        if hasattr(child, 'media_reference'):
+        if hasattr(child, "media_reference"):
             media_reference = child.media_reference
             if media_reference:
                 counter = _counter(media_reference.schema_name())
-                has_target_url = hasattr(media_reference, 'target_url')
+                has_target_url = hasattr(media_reference, "target_url")
                 if has_target_url and media_reference.target_url:
                     media_reference.target_url = f"URL #{counter}"
                 media_reference.name = f"{media_reference.schema_name()} #{counter}"
@@ -757,16 +735,19 @@ def relink_by_name(timeline, path):
 
     count = 0
     if os.path.isdir(path):
-        name_to_url = dict([
-            (
-                os.path.splitext(x)[0],
-                _conform_path(os.path.join(path, x))
-            )
-            for x in os.listdir(path)
-        ])
+        name_to_url = dict(
+            [
+                (os.path.splitext(x)[0], _conform_path(os.path.join(path, x)))
+                for x in os.listdir(path)
+            ]
+        )
     elif os.path.isfile(path):
-        print((f"ERROR: Cannot relink to '{path}':"
-               " Please specify a folder instead of a file."))
+        print(
+            (
+                f"ERROR: Cannot relink to '{path}':"
+                " Please specify a folder instead of a file."
+            )
+        )
         return
     else:
         print(f"ERROR: Cannot relink to '{path}': No such file or folder.")
@@ -792,9 +773,11 @@ def copy_media_to_folder(timeline, folder):
     copied_files = set()
     for clip in timeline.find_clips():
         media_reference = clip.media_reference
-        has_actual_url = (media_reference and
-                          hasattr(media_reference, 'target_url') and
-                          media_reference.target_url)
+        has_actual_url = (
+            media_reference
+            and hasattr(media_reference, "target_url")
+            and media_reference.target_url
+        )
         if has_actual_url:
             source_url = media_reference.target_url
             filename = os.path.basename(source_url)
@@ -829,19 +812,22 @@ def print_timeline_stats(timeline):
     """Print some statistics about the given timeline."""
     print(f"Name: {timeline.name}")
     trimmed_range = timeline.tracks.trimmed_range()
-    print("Start:    {}\nEnd:      {}\nDuration: {}".format(
-        otio.opentime.to_timecode(trimmed_range.start_time),
-        otio.opentime.to_timecode(trimmed_range.end_time_exclusive()),
-        otio.opentime.to_timecode(trimmed_range.duration),
-    ))
+    print(
+        "Start:    {}\nEnd:      {}\nDuration: {}".format(
+            otio.opentime.to_timecode(trimmed_range.start_time),
+            otio.opentime.to_timecode(trimmed_range.end_time_exclusive()),
+            otio.opentime.to_timecode(trimmed_range.duration),
+        )
+    )
 
 
 def inspect_timelines(name_regex, timeline):
     """Print some detailed information about the item(s) in the timeline with names
     that match the given regular expression."""
     print("TIMELINE:", timeline.name)
-    items_to_inspect = [_filter(item, [], name_regex)
-                        for item in timeline.find_children()]
+    items_to_inspect = [
+        _filter(item, [], name_regex) for item in timeline.find_children()
+    ]
     items_to_inspect = list(filter(None, items_to_inspect))
     for item in items_to_inspect:
         print(f"  ITEM: {item.name} ({type(item)})")
@@ -855,15 +841,11 @@ def inspect_timelines(name_regex, timeline):
         print("    range_in_parent:", item.range_in_parent())
         print(
             "    trimmed range in timeline:",
-            item.transformed_time_range(
-                item.trimmed_range(), timeline.tracks
-            )
+            item.transformed_time_range(item.trimmed_range(), timeline.tracks),
         )
         print(
             "    visible range in timeline:",
-            item.transformed_time_range(
-                item.visible_range(), timeline.tracks
-            )
+            item.transformed_time_range(item.visible_range(), timeline.tracks),
         )
         ancestor = item.parent()
         while ancestor is not None:
@@ -871,14 +853,21 @@ def inspect_timelines(name_regex, timeline):
                 "    range in {} ({}): {}".format(
                     ancestor.name,
                     type(ancestor),
-                    item.transformed_time_range(item.trimmed_range(), ancestor)
+                    item.transformed_time_range(item.trimmed_range(), ancestor),
                 )
             )
             ancestor = ancestor.parent()
 
 
-def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
-                       list_markers, verify_ranges, timeline):
+def summarize_timeline(
+    list_tracks,
+    list_clips,
+    list_media,
+    verify_media,
+    list_markers,
+    verify_ranges,
+    timeline,
+):
     """Print a summary of a timeline, optionally listing the tracks, clips, media,
     and/or markers inside it."""
     print("TIMELINE:", timeline.name)
@@ -924,32 +913,38 @@ def summarize_timeline(list_tracks, list_clips, list_media, verify_media,
                         detail = " NOT FOUND"
                 print(f"    MEDIA{detail}: {url}")
 
-        if list_markers and hasattr(child, 'markers'):
+        if list_markers and hasattr(child, "markers"):
             top_level = child
             while top_level.parent() is not None:
                 top_level = top_level.parent()
             for marker in child.markers:
-                template = "  MARKER: global: {} local: {} duration: {} color: {} name: {}"  # noqa: E501
-                print(template.format(
-                    otio.opentime.to_timecode(child.transformed_time(
-                        marker.marked_range.start_time,
-                        top_level)),
-                    otio.opentime.to_timecode(marker.marked_range.start_time),
-                    marker.marked_range.duration.value,
-                    marker.color,
-                    marker.name
-                ))
+                template = (
+                    "  MARKER: global: {} local: {} duration: {} color: {} name: {}"  # noqa: E501
+                )
+                print(
+                    template.format(
+                        otio.opentime.to_timecode(
+                            child.transformed_time(
+                                marker.marked_range.start_time, top_level
+                            )
+                        ),
+                        otio.opentime.to_timecode(marker.marked_range.start_time),
+                        marker.marked_range.duration.value,
+                        marker.color,
+                        marker.name,
+                    )
+                )
 
 
 def write_output(output_path, output):
     """Write the given OTIO object to a file path. If the file path given is
     the string '-' then the output is written to stdout instead."""
-    if output_path == '-':
+    if output_path == "-":
         result = otio.adapters.write_to_string(output)
         print(result)
     else:
         otio.adapters.write_to_file(output, output_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

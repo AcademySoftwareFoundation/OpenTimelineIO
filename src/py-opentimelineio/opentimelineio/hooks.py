@@ -1,10 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from . import (
-    plugins,
-    core,
-)
+from . import core, plugins
 
 __doc__ = """
 HookScripts are plugins that run at defined points ("Hooks").
@@ -80,11 +77,7 @@ To delete a function the list:
 class HookScript(plugins.PythonPlugin):
     _serializable_label = "HookScript.1"
 
-    def __init__(
-        self,
-        name=None,
-        filepath=None,
-    ):
+    def __init__(self, name=None, filepath=None):
         """HookScript plugin constructor."""
 
         super().__init__(name, filepath)
@@ -95,26 +88,15 @@ class HookScript(plugins.PythonPlugin):
         # @TODO: should in_timeline be passed in place?  or should a copy be
         #        made?
         return self._execute_function(
-            "hook_function",
-            in_timeline=in_timeline,
-            argument_map=argument_map
+            "hook_function", in_timeline=in_timeline, argument_map=argument_map
         )
 
     def __str__(self):
-        return "HookScript({}, {})".format(
-            repr(self.name),
-            repr(self.filepath)
-        )
+        return "HookScript({}, {})".format(repr(self.name), repr(self.filepath))
 
     def __repr__(self):
-        return (
-            "otio.hooks.HookScript("
-            "name={}, "
-            "filepath={}"
-            ")".format(
-                repr(self.name),
-                repr(self.filepath)
-            )
+        return "otio.hooks.HookScript(name={}, filepath={})".format(
+            repr(self.name), repr(self.filepath)
         )
 
 

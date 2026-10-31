@@ -4,8 +4,8 @@
 """Utilities for conversion between URLs and file paths."""
 
 import os
-import urllib
 import pathlib
+import urllib
 
 from ._otio import bundle
 
@@ -33,12 +33,7 @@ def url_from_filepath(fpath):
         # handles relative paths
         return urllib.parse.urlunparse(
             urllib.parse.ParseResult(
-                scheme=scheme,
-                path=fpath,
-                netloc="",
-                params="",
-                query="",
-                fragment=""
+                scheme=scheme, path=fpath, netloc="", params="", query="", fragment=""
             )
         )
 

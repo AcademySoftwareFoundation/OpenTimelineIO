@@ -1,13 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-"""Algorithms for filtering OTIO files.  """
+"""Algorithms for filtering OTIO files."""
 
 import copy
 
-from .. import (
-    schema
-)
+from .. import schema
 
 
 def _is_in(thing, container):
@@ -18,11 +16,7 @@ def _isinstance_in(child, typelist):
     return any(isinstance(child, t) for t in typelist)
 
 
-def filtered_composition(
-    root,
-    unary_filter_fn,
-    types_to_prune=None,
-):
+def filtered_composition(root, unary_filter_fn, types_to_prune=None):
     """
     Filter a deep copy of root (and children) with ``unary_filter_fn``.
 
@@ -117,7 +111,7 @@ def filtered_composition(
             del child.parent()[child_index]
 
         # first try to prune
-        if (types_to_prune and _isinstance_in(child, types_to_prune)):
+        if types_to_prune and _isinstance_in(child, types_to_prune):
             result = None
         # finally call the user function
         else:
@@ -140,16 +134,12 @@ def filtered_composition(
 
 
 def _safe_parent(child):
-    if hasattr(child, 'parent'):
+    if hasattr(child, "parent"):
         return child.parent()
     return None
 
 
-def filtered_with_sequence_context(
-    root,
-    reduce_fn,
-    types_to_prune=None,
-):
+def filtered_with_sequence_context(root, reduce_fn, types_to_prune=None):
     """Filter a deep copy of root (and children) with ``reduce_fn``.
 
     The ``reduce_fn`` must have this signature:

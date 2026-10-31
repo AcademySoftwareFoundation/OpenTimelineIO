@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import unittest
 import threading
+import unittest
 import weakref
 
 import opentimelineio as otio
@@ -87,5 +87,5 @@ class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         otio._otio._testing.bash_retainers2(self.sc, self.materialize)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

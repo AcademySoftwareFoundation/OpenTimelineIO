@@ -11,55 +11,48 @@ import textwrap
 
 import opentimelineio as otio
 
-OTIO_PLUGIN_TYPES = ['all'] + otio.plugins.manifest.OTIO_PLUGIN_TYPES
+OTIO_PLUGIN_TYPES = ["all"] + otio.plugins.manifest.OTIO_PLUGIN_TYPES
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
+    """parse commandline arguments with argparse"""
 
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        '-p',
-        '--plugin-types',
+        "-p",
+        "--plugin-types",
         type=str,
-        default='all',
-        nargs='+',
+        default="all",
+        nargs="+",
         choices=OTIO_PLUGIN_TYPES,
-        help=(
-            'Comma separated list of which kinds of plugins to print info on.'
-        )
+        help=("Comma separated list of which kinds of plugins to print info on."),
     )
     parser.add_argument(
-        '-a',
-        '--attribs',
+        "-a",
+        "--attribs",
         type=str,
-        default=['*'],
-        nargs='+',
-        help=(
-            'Comma separated list of globs of which attributes to print info'
-            ' on.'
-        )
-
+        default=["*"],
+        nargs="+",
+        help=("Comma separated list of globs of which attributes to print info on."),
     )
     parser.add_argument(
-        '-l',
-        '--long-docs',
+        "-l",
+        "--long-docs",
         default=False,
         action="store_true",
         help="Print full docstring instead of just the summary line.",
     )
     parser.add_argument(
-        'plugpattern',
+        "plugpattern",
         type=str,
-        default='*',
-        nargs='?',
-        help='Only print information about plugins that match this glob.'
+        default="*",
+        nargs="?",
+        help="Only print information about plugins that match this glob.",
     )
     parser.add_argument(
-        '--version',
+        "--version",
         default=False,
         action="store_true",
         help=(
@@ -78,7 +71,7 @@ def _supported_features_formatted(feature_map, _):
         # skip hooks, they are treated separately, see below
         if thing == "hooks":
             continue
-        print("      {} args: {}".format(thing, args['args']))
+        print("      {} args: {}".format(thing, args["args"]))
 
     # check if there are any adapter specific-hooks implemented
     adapter_hook_names = feature_map.get("hooks", [])
@@ -91,9 +84,7 @@ def _supported_features_formatted(feature_map, _):
             f"{kind}_from_string" in feature_map
             and f"{kind}_from_file" not in feature_map
         ):
-            extra_features.append(
-                "{0}_from_file (calls: {0}_from_string)".format(kind)
-            )
+            extra_features.append("{0}_from_file (calls: {0}_from_string)".format(kind))
 
     if extra_features:
         print("    implicit supported features:")
@@ -105,11 +96,11 @@ def _schemadefs_formatted(feature_map, args):
     print("    SchemaDefs:")
     for sd in feature_map.keys():
         print(f"      {sd}")
-        _docs_formatted(feature_map[sd]['doc'], args, indent=8)
+        _docs_formatted(feature_map[sd]["doc"], args, indent=8)
 
 
 def _docs_formatted(docstring, arg_map, indent=4):
-    long_docs = arg_map.get('long_docs')
+    long_docs = arg_map.get("long_docs")
 
     if long_docs:
         prefix = " " * indent + "doc (long): "
@@ -124,7 +115,7 @@ def _docs_formatted(docstring, arg_map, indent=4):
     except AttributeError:
         raise RuntimeError(
             "Plugin: '{}' is missing a docstring.  Make sure the doctring is "
-            "assigned to the __doc__ variable name.".format(arg_map['plugname'])
+            "assigned to the __doc__ variable name.".format(arg_map["plugname"])
         )
 
     fmt_block = []
@@ -158,7 +149,7 @@ _FIELDS_TO_SKIP = frozenset(["name"])
 def _print_field(key, val, **args):
     # if attribute doesn't hit any of the user specified patterns
     if (
-        not any(fnmatch.filter([key], pt) for pt in args['attribs'])
+        not any(fnmatch.filter([key], pt) for pt in args["attribs"])
         or key in _FIELDS_TO_SKIP
     ):
         return
@@ -171,12 +162,12 @@ def _print_field(key, val, **args):
 
 
 def main():
-    """  main entry point  """
+    """main entry point"""
     args = _parsed_args()
 
     plugin_types = args.plugin_types
 
-    if 'all' in plugin_types:
+    if "all" in plugin_types:
         # all means the full list of built in plugins
         plugin_types = otio.plugins.manifest.OTIO_PLUGIN_TYPES
 
@@ -210,8 +201,7 @@ def main():
         # filter plugins by the patterns passed in on the command line
         plugin_by_type = getattr(active_plugin_manifest, pt)
         plugins = [
-            p for p in plugin_by_type
-            if fnmatch.filter([p.name], args.plugpattern)
+            p for p in plugin_by_type if fnmatch.filter([p.name], args.plugpattern)
         ]
 
         # if nothing is found of that type that matches the filter
@@ -226,10 +216,7 @@ def main():
             except Exception as err:
                 print(
                     "    ERROR: plugin {} couldn't generate its information"
-                    " map: {}\n".format(
-                        plug.name,
-                        err
-                    )
+                    " map: {}\n".format(plug.name, err)
                 )
                 continue
 
@@ -248,8 +235,7 @@ def main():
         print("")
         print("hooks:")
         hooknames = fnmatch.filter(
-            active_plugin_manifest.hooks.keys(),
-            args.plugpattern
+            active_plugin_manifest.hooks.keys(), args.plugpattern
         )
         for hookname in hooknames:
             print(f"  {hookname}")
@@ -262,5 +248,5 @@ def main():
             print("  (none found)")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

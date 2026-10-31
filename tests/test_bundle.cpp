@@ -163,6 +163,33 @@ void compare_filenames(Timeline* a, Timeline* b)
     }
 }
 
+// Overwrite a 32-bit field in the central directory header of a ZIP entry,
+// for example to forge its CRC (offset 16) or uncompressed size (offset 24).
+// The header starts with a signature and the file name is at offset 46.
+void forge_zip_field(
+    std::string const& path,
+    std::string const& entry_name,
+    size_t             field_offset,
+    uint32_t           value)
+{
+    std::string bytes;
+    {
+        std::ifstream in(from_utf8(path), std::ios::binary);
+        bytes.assign(
+            std::istreambuf_iterator<char>(in),
+            std::istreambuf_iterator<char>());
+    }
+    std::string const signature("PK\x01\x02", 4);
+    size_t const name_offset = 46;
+    auto const header =
+        bytes.find(entry_name, bytes.find(signature)) - name_offset;
+    assertEqual(bytes.substr(header, signature.size()), signature);
+    for (size_t i = 0; i < 4; ++i)
+        bytes[header + field_offset + i] = static_cast<char>(value >> (i * 8));
+    std::ofstream out(from_utf8(path), std::ios::binary);
+    out << bytes;
+}
+
 // Minimal ZIP writer used only for constructing malicious archives in
 // test_otioz_zip_slip. The bundle library has its own ZIP writer; this
 // helper exists because the test needs to write entries with names the
@@ -708,6 +735,33 @@ main(int argc, char** argv)
         assertEqual(
             std::filesystem::file_size(extract_path / "media" / large_file_2),
             large_file_size);
+    });
+
+    tests.add_test("test_otioz_forged_timeline_size", [] {
+        TempDir temp;
+
+        // Write an otioz file, then forge the recorded size of the timeline
+        // to be almost 2GB. Reading should only use as much memory as the
+        // actual timeline.
+        auto tl = create_simple_timeline();
+        OTIO_NS::ErrorStatus error;
+        auto const json = tl->to_json_string(&error);
+        std::string const otioz_path = to_utf8(temp.path() / "forged.otioz");
+        {
+            ZipWriter zip(otioz_path);
+            zip.add_text(bundle::timeline_file, json);
+        }
+        forge_zip_field(otioz_path, bundle::timeline_file, 24, 0x7ffffff0);
+        SerializableObject::Retainer<SerializableObject> result(
+            read_otioz(otioz_path, ReadOptions(), &error));
+        assertFalse(is_error(error));
+        assertNotNull(dynamic_cast<Timeline*>(result.value));
+
+        // Forge the CRC, which should be an error
+        forge_zip_field(otioz_path, bundle::timeline_file, 16, 0);
+        error = OTIO_NS::ErrorStatus();
+        assertEqual(read_otioz(otioz_path, ReadOptions(), &error), nullptr);
+        assertTrue(is_error(error));
     });
 
     tests.add_test("test_otioz_zip_slip_relative", [] {

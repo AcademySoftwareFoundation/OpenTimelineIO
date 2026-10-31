@@ -27,6 +27,8 @@ jobs:
             ${{ github.ref_name }} New version of OTIO released!.
             [Release Notes](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/releases/tag/${{ github.ref_name }})
 
+            ${{ github.event.release.body }}
+
       - name: 'Slack Notification to #opentimelineio'
         # https://github.com/rtCamp/action-slack-notify
         uses: rtCamp/action-slack-notify@e31e87e03dd19038e411e38ae27cbad084a90661 # v2

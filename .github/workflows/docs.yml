@@ -14,26 +14,19 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       with:
-        python-version: '3.10'
-
-    - name: Create virtualenv
-      run: python3 -m venv .venv
+        python-version: '3.13'
+        enable-cache: true
 
     - name: Install dependencies
-      run: |
-        source .venv/bin/activate
-        python -m pip install .
-        python -m pip install -r docs/requirements.txt
+      run: uv sync --locked --no-default-groups --group docs
 
     - name: Linkcheck
       working-directory: docs
       run: |
-        source ../.venv/bin/activate
-
         set +e
-        make linkcheck
+        uv run --no-sync make linkcheck
         exit_code=$?
 
         set -e
@@ -62,26 +55,19 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+    - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       with:
-        python-version: '3.10'
-
-    - name: Create virtualenv
-      run: python3 -m venv .venv
+        python-version: '3.13'
+        enable-cache: true
 
     - name: Install dependencies
-      run: |
-        source .venv/bin/activate
-        python -m pip install .
-        python -m pip install -r docs/requirements.txt
+      run: uv sync --locked --no-default-groups --group docs
 
     - name: Check warnings/errors
       working-directory: docs
       run: |
-        source ../.venv/bin/activate
-
         set +e
-        make htmlstrict
+        uv run --no-sync make htmlstrict
 
         exit_code=$?
 

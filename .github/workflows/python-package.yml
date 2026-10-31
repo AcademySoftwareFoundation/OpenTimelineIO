@@ -24,6 +24,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv lock --check
+      - run: make ci-prebuild
+
   cpp_build:
     name: cpp_build (${{ matrix.os }}, shared=${{ matrix.shared }})
     runs-on: ${{ matrix.os }}
@@ -130,8 +141,9 @@ jobs:
         shell: "${{ matrix.shell }} {0}"
 
     env:
-      OTIO_CXX_COVERAGE_BUILD: ON
-      OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
+      OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build/coverage
+      CMAKE_ARGS: -DOTIO_CXX_COVERAGE=ON
+      SKBUILD_BUILD_DIR: ${{ github.workspace }}/build/coverage
 
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -155,10 +167,14 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        if: matrix.python-version != 'mingw64'
+        with:
+          enable-cache: true
       - name: Install coverage dependency
         if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
         run: |
-          echo 'OTIO_CXX_DEBUG_BUILD=1' >> $GITHUB_ENV
+          echo 'SKBUILD_CMAKE_BUILD_TYPE=Debug' >> $GITHUB_ENV
           sudo apt-get install lcov
       - name: Install ZLIB (Linux)
         if: runner.os == 'Linux' && matrix.python-version != 'mingw64'
@@ -169,18 +185,17 @@ jobs:
           vcpkg install zlib:x64-windows
           echo "CMAKE_PREFIX_PATH=C:/vcpkg/installed/x64-windows" >> $env:GITHUB_ENV
           echo "C:/vcpkg/installed/x64-windows/bin" >> $env:GITHUB_PATH
-      - name: Install python build dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel "flake8>=3.5" check-manifest
-      # \todo Temporarily disable check-manifest on MinGW, it is failing
-      # intermittently with this error:
-      # ModuleNotFoundError: No module named 'pip._vendor.distlib'
-      - name: Run check-manifest and lint check
+      - name: Build and install with uv
         if: matrix.python-version != 'mingw64'
-        run: make ci-prebuild
-      - name: Build and Install
+        run: uv sync --locked --no-editable --no-default-groups --group test --no-python-downloads --python "$(python -c 'import sys; print(sys.executable)')"
+      # Use MinGW's native packaging tools for its patched Python and compiler.
+      - name: Build and install with MinGW Python
+        if: matrix.python-version == 'mingw64'
+        env:
+          CMAKE_GENERATOR: Unix Makefiles
         run: |
-          pip install .[dev] -v --break-system-packages
+          python -m pip install --upgrade pip --break-system-packages
+          python -m pip install --group test . -v --break-system-packages
       # Python 3.8+ ignores PATH when resolving DLL dependencies of .pyd
       # files, so zlib1.dll from vcpkg's bin is not findable at import
       # time even though it is on PATH for the C++ tests. Copy it next
@@ -190,7 +205,7 @@ jobs:
       - name: Copy ZLIB DLL next to _otio.pyd (Windows)
         if: runner.os == 'Windows' && matrix.python-version != 'mingw64'
         run: |
-          $target = python -c "import sysconfig, os; print(os.path.join(sysconfig.get_paths()['purelib'], 'opentimelineio'))"
+          $target = uv run --no-sync python -c "import sysconfig, os; print(os.path.join(sysconfig.get_paths()['purelib'], 'opentimelineio'))"
           $sourceDir = "C:/vcpkg/installed/x64-windows/bin"
           Write-Host "Target: $target"
           Write-Host "Contents of ${sourceDir}:"
@@ -198,8 +213,13 @@ jobs:
           Copy-Item "$sourceDir/*.dll" "$target/" -ErrorAction Stop
           Write-Host "DLLs now in ${target}:"
           Get-ChildItem "$target/*.dll" | ForEach-Object { Write-Host "  $($_.Name)" }
-      - name: Run tests w/ python coverage
-        run: make ci-postbuild
+      - name: Run tests with Python coverage
+        if: matrix.python-version != 'mingw64'
+        run: make ci-postbuild UV_RUN="uv run --no-sync"
+      - name: Run tests with MinGW Python coverage
+        if: matrix.python-version == 'mingw64'
+        run: make ci-postbuild UV_RUN=
+
       # (only on GH_COV_OS and GH_COV_PY)
       - name: Generate C++ coverage report
         if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
@@ -231,6 +251,8 @@ jobs:
         python-build: ["cp39", "cp310", "cp311", "cp312", "cp313", "cp314", "cp315"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          submodules: "recursive"
 
       - name: Build wheels (Python 3)
         uses: pypa/cibuildwheel@e090b81e30c4d855ea63bf4b6e59204c09a101ae # v4.2.1
@@ -260,15 +282,23 @@ jobs:
         with:
           submodules: "recursive"
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.13"
+          enable-cache: true
 
-      - name: Install pypa/build
-        run: python -m pip install build --user
+      - name: Build sdist and a wheel from the sdist
+        run: uv build
 
-      - name: Generate sdist
-        run: python -m build -s .
+      - name: Test the installed wheel in a clean environment
+        run: |
+          uv venv artifact-venv
+          uv pip install --python artifact-venv/bin/python dist/*.whl
+          export PATH="$PWD/artifact-venv/bin:$PATH"
+          artifact-venv/bin/python maintainers/verify_package.py
+          artifact-venv/bin/python -m unittest discover -s tests
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sdist
-          path: dist
+          path: dist/*.tar.gz

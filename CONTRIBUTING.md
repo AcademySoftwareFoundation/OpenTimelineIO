@@ -38,7 +38,16 @@ Here are the two possible CLAs:
 * [OTIO_CLA_Individual.pdf](https://github.com/AcademySoftwareFoundation/OpenTimelineIO/raw/main/OTIO_CLA_Individual.pdf): please sign this one if you're an individual contributor
 
 ## Coding Conventions
-Please follow the coding convention and style in each file and in each library when adding new files.
+
+Python style continues to be checked with Flake8 using the existing rules in
+`setup.cfg`. Initialize submodules, run `uv sync --locked`, then `make lint`
+and `make test`. C++ continues to use the existing clang-format configuration.
+
+The default uv development group includes lint and test tools. Documentation
+uses `uv sync --locked --group docs` (Python 3.11+). Commit `uv.lock` when changing
+dependencies; use `uv lock --upgrade` to intentionally refresh pinned versions.
+For VFX builds, preserve the interpreter and compiler supplied by the Reference
+Platform environment; see the [developer quickstart](docs/tutorials/quickstart.md).
 
 ## Git Workflow
 Here is the workflow we recommend for working on OpenTimelineIO if you intend on contributing changes back:

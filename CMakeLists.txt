@@ -2,11 +2,13 @@
 # Require 3.18.2+ because pybind11 recommends it.
 cmake_minimum_required(VERSION 3.18.2)
 # This policy CMP0177 can be removed when we upgrade to CMake >= 3.31.
-cmake_policy(SET CMP0177 NEW)
+if(POLICY CMP0177)
+    cmake_policy(SET CMP0177 NEW)
+endif()
 
 #------------------------------------------------------------------------------
 # Project Metadata
-# TODO: read this information from a configuration file, here, and in setup.py
+# TODO: read this information from a configuration file, here, and in the Python package
 
 file(READ "src/opentimelineio/version.h" VERSION_H)
 string(REGEX MATCH "VERSION_MAJOR ([0-9]*)" _ ${VERSION_H})

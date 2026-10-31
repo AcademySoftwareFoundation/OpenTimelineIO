@@ -9,7 +9,7 @@ import argparse
 import sys
 
 TARGET_FILES = [
-    "setup.py"
+    "src/py-opentimelineio/opentimelineio/_version.py"
 ]
 
 

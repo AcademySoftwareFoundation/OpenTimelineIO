@@ -154,6 +154,10 @@ def process_signature(
         elif signature:
             signatures.append(signature)
 
+    # Leave objects without a signature unchanged (required by Sphinx 9).
+    if not signatures:
+        return None
+
     signature = ""
 
     # Remove self from signatures.

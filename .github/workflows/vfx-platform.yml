@@ -25,8 +25,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # CY2023--CY2026 are covered by OTIO's support policy. CY2027 is
-          # included as forward-looking support.
+          # Keep every year in VERSIONS.md covered with the ASWF toolchain.
           - platform: "2023"
             cxx-standard: 17
           - platform: "2024"
@@ -38,12 +37,23 @@ jobs:
           - platform: "2027"
             cxx-standard: 20
 
+    # Never replace the Reference Platform interpreter with a uv-managed build.
+    env:
+      UV_PYTHON_DOWNLOADS: never
+      UV_NO_MANAGED_PYTHON: "1"
+
     container:
       image: aswf/ci-otio:${{ matrix.platform }}
 
     steps:
       # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      # Some image tags do not expose uv on PATH. Install only the tool;
+      # UV_NO_MANAGED_PYTHON keeps the container's interpreter authoritative.
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
 
       - name: Report platform toolchain
         run: |
@@ -52,6 +62,7 @@ jobs:
           gcc --version
           g++ --version
           cmake --version
+          uv --version
 
       - name: Configure
         run: |
@@ -89,9 +100,8 @@ jobs:
 
       - name: Run Python tests
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
           export CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_CXX_EXAMPLES=OFF -DOTIO_DEPENDENCIES_INSTALL=OFF -DOTIO_FIND_IMATH=ON -DOTIO_FIND_PYBIND11=ON -DOTIO_FIND_RAPIDJSON=ON -DOTIO_FIND_MINIZIP_NG=ON"
-          python -m pip install .
-          make test
+          # Always compile against this year's libraries, even if another
+          # platform year shares its Python ABI and the uv dependency cache.
+          uv sync --locked --no-editable --no-default-groups --group test --reinstall-package opentimelineio --python "$(python -c 'import sys; print(sys.executable)')"
+          make test UV_RUN="uv run --no-sync"

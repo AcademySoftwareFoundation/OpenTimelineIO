@@ -1,6 +1,6 @@
 # Quickstart
 
-**Note** This guide assumes that you are working inside a [virtualenv](https://virtualenv.pypa.io/en/latest/).
+**Note** Use a virtual environment for pip installations. The developer commands below use uv to manage one automatically.
 
 ## Install OTIO
 
@@ -29,7 +29,13 @@ still have access to it.
 # Developer Quickstart
 
 Get the source and submodules:
-+ `git clone git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git`
+```sh
+git clone --recursive git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git
+cd OpenTimelineIO
+```
+
+For an existing checkout, run `git submodule update --init --recursive` before
+building. Source archives already include the required dependency sources.
 
 Before reading further, it is good to note that there is two parts to the
 C++ code: the OTIO C++ library that you can use in your C++ projects,
@@ -61,36 +67,57 @@ with OpenTimelineIO due to spaces in the path.
 
 ## To build OTIO for Python development:
 
-+ `python -m pip install -e .`
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run:
+
+```sh
+uv sync --locked
+uv run python -m unittest discover -s tests
+make lint
+```
+
+This builds the native bindings and installs the package in editable mode,
+alongside the locked development tools. Pure Python edits are immediately
+available. After changing C++, rebuild with:
+
+```sh
+uv sync --locked --reinstall-package opentimelineio
+```
+
+`uv build` creates an sdist
+and then builds a wheel from it. `uv sync --locked --group docs` installs the
+documentation tools, which require Python 3.11 or newer.
 
 ## To build OTIO for both C++ and Python development:
 
-The Python package is a mix of pure python and C++ code. Therefore, it is
-recommended to use the python tooling (`python -m pip`) to develop both
-the C++ binding and the pure python code. We use `setuptools` as our
-python build backend, which means `pip` will call the `setup.py` in the root
-of the directory to build both the pure python and the C++ bindings.
-`setuptools` will take care of all the complexity of building a C++ Python
-extension for you.
+The Python package combines pure Python with C++ extensions. scikit-build-core
+invokes CMake to compile those extensions, while uv manages environments and
+runs the PEP 517 build. Standard pip installs also work:
 
-The first time `setup.py` is run, cmake scripts will be created, and the headers
-and libraries will be installed where you specify. If the C++ or Python  sources
-are subsequently modified, running this command again will build and update everything
-appropriately.
-
-**Note** Any CMake arguments can be passed through `pip` by using the `CMAKE_ARGS`
-environment variable when building from source. *nix Example:
-
-```bash
-env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" python -m pip install .
+```sh
+python -m pip install -e .
 ```
 
-`python -m pip install .` adds some overhead that might be annoying or unwanted when
-developing the python bindings. For that reason (and only that reason), if you want a faster
-iteration process, you can use `setuptools` commands. For example you can use
-`python setup.py build_ext` to only run the compilation step. Be aware that calling `setup.py`
-directly is highly discouraged and should only be used when no of the other options
-are viable. See https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html.
+Use CMake configuration settings to customize the build:
+
+```sh
+uv sync --locked --reinstall-package opentimelineio -Ccmake.define.CMAKE_CXX_STANDARD=17
+```
+
+`CMAKE_ARGS` is supported for existing build environments. To install C++ SDK
+headers and libraries for another C++ project, use the standalone CMake build
+above, separately from the Python wheel build.
+
+For VFX Reference Platform builds, use that platform's compiler, Python, and
+library versions. In an ASWF container or studio environment, prevent uv from
+selecting or downloading a different Python:
+
+```sh
+UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never uv sync --locked --python /path/to/platform/python
+```
+
+The CI matrix verifies CY2023–CY2027 against the corresponding ASWF containers.
+The [VFX Reference Platform FAQ](https://vfxplatform.com/FAQ/) identifies those
+containers as the reference for build recipes and compiler flags.
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
 
@@ -106,8 +133,11 @@ To use opentime without opentimelineio, link with -lopentime instead, and compil
 
 ## Linux / GDB / LLDB
 
-To compile in debug mode, set the `OTIO_CXX_DEBUG_BUILD` environment variable to any value
-and then `python -m pip install`.
+To compile in debug mode with symbols, run:
+
+```sh
+uv sync --locked --reinstall-package opentimelineio -Ccmake.build-type=Debug -Cinstall.strip=false
+```
 
 You can then attach GDB to python and run your program:
 

@@ -175,6 +175,37 @@ import sorting, and removal of trailing commas from list literals. `make format-
 checks that combined result without editing files. The existing `make format`
 target formats C++.
 
+VS Code recommends the Python, Pylance, and Ruff extensions and uses `.venv`.
+Saving applies Ruff's lint fixes. Run the **Format Python** task for the full
+pipeline. Format-on-save is disabled because VS Code runs formatting after save
+code actions, which would reintroduce list trailing commas after cleanup.
+
+### Development container
+
+With Docker and the recommended Dev Containers extension installed, run
+**Dev Containers: Reopen in Container** in VS Code. The container is based on
+`aswf/ci-otio:2026`, matching the CY2026 CI toolchain. First-time setup installs
+the locked development and documentation dependencies using the image's Python.
+It runs as a non-root user and keeps its Python environment and native Python
+build cache under `/home/vscode`, separate from your host environment.
+
+The VS Code task picker includes Python environment setup, extension rebuilds,
+tests, coverage, linting, distribution builds, and documentation checks. Use
+**Docs: Build HTML**, then **Docs: Serve HTML** to preview the docs on port 8000.
+The default build task rebuilds the Python extensions; the default test task
+runs the Python suite.
+
+C++ tasks prompt for a CMake preset: choose `dev` for the host toolchain or
+`vfx2026` inside the container. Run **C++: Configure** before **C++: Build** and
+**C++: Run tests**. **C++: Install SDK** installs into the preset's build directory,
+without requiring administrator access. Build directories are separated by
+preset and operating system. Host C++ tasks require CMake 3.21+ and a compiler;
+initialize submodules before using the host preset.
+
+The ASWF image targets Linux x86-64. Use a native x86-64 Docker host or a remote
+development host for this container; emulation on ARM hosts can fail in uv.
+The development container is built and tested on a native CI runner.
+
 `uv build` creates a source distribution and builds a wheel from that archive.
 The build backend is scikit-build-core, which invokes the existing CMake build.
 A C++ compiler and zlib development files are still required. Standard PEP 517

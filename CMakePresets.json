@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Host C++ development",
+      "description": "Debug C++ build using the host toolchain and checked-out submodules.",
+      "binaryDir": "${sourceDir}/build/${presetName}/${hostSystemName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/${presetName}/${hostSystemName}/install",
+        "OTIO_CXX_INSTALL": true,
+        "OTIO_PYTHON_INSTALL": false,
+        "OTIO_CXX_EXAMPLES": false,
+        "BUILD_TESTING": true
+      }
+    },
+    {
+      "name": "vfx2026",
+      "displayName": "VFX Platform 2026 C++ development",
+      "description": "Use inside the devcontainer: GCC and native dependencies from aswf/ci-otio:2026.",
+      "inherits": "dev",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_CXX_STANDARD": "20",
+        "OTIO_AUTOMATIC_SUBMODULES": false,
+        "OTIO_DEPENDENCIES_INSTALL": false,
+        "OTIO_FIND_IMATH": true,
+        "OTIO_FIND_PYBIND11": true,
+        "OTIO_FIND_RAPIDJSON": true,
+        "OTIO_FIND_MINIZIP_NG": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "jobs": 4,
+      "configuration": "Debug"
+    },
+    {
+      "name": "vfx2026",
+      "configurePreset": "vfx2026",
+      "jobs": 4,
+      "configuration": "Debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "output": {
+        "outputOnFailure": true
+      },
+      "configuration": "Debug"
+    },
+    {
+      "name": "vfx2026",
+      "configurePreset": "vfx2026",
+      "output": {
+        "outputOnFailure": true
+      },
+      "configuration": "Debug"
+    }
+  ]
+}

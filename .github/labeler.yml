@@ -1,25 +1,111 @@
-# https://github.com/actions/labeler#common-examples
-
-release-candidate:
-- 'CHANGELOG.md'
-
-submodules:
-- any: ['src/deps/**']
-
-dependencies:
-- any: ['pyproject.toml']
-
-ci:
-- '.github/**'
+# File-based labels consumed by Release Drafter in .github/release-drafter.yml.
+# Use existing repository labels; status and triage labels remain manual.
 
 documentation:
-- any: ['docs/**']
+- changed-files:
+  - any-glob-to-any-file:
+    - 'docs/**'
+    - 'doxygen/**'
+    - '**/*.md'
+    - '**/*.rst'
 
-opentime:
-- any: ['src/opentime/**']
+ci:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/**'
+    - '.codecov.yml'
+    - '.readthedocs.yml'
+    - 'readthedocs-conda.yml'
 
-'time calculations':
-- any: ['src/opentime/**']
+github_actions:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.github/workflows/**'
+    - '.github/actions/**'
+    - '.github/scripts/**'
+    - '.github/dependabot.yml'
+    - '.github/labeler.yml'
+    - '.github/release-drafter.yml'
+
+build:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/CMakeLists.txt'
+    - '**/*.cmake'
+    - '**/*.cmake.in'
+    - 'Makefile'
+    - 'setup.py'
+    - 'setup.cfg'
+    - 'pyproject.toml'
+    - 'MANIFEST.in'
+
+cmake:
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/CMakeLists.txt'
+    - '**/*.cmake'
+    - '**/*.cmake.in'
+
+wheels:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'setup.py'
+    - 'setup.cfg'
+    - 'pyproject.toml'
+    - 'MANIFEST.in'
+    - '.github/workflows/python-package.yml'
+    - '.github/workflows/pypi-publish.yml'
+
+dependencies:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.gitmodules'
+    - 'src/deps/**'
+    - 'pyproject.toml'
+    - '**/requirements*.txt'
+
+submodules:
+- changed-files:
+  - any-glob-to-any-file:
+    - '.gitmodules'
+    - 'src/deps/**'
+
+python:
+- changed-files:
+  - any-glob-to-any-file: '**/*.py'
 
 python-bindings:
-- any: ['src/py-opentimelineio/**']
+- changed-files:
+  - any-glob-to-any-file:
+    - 'src/py-opentimelineio/**'
+    - 'tests/test_cxx_sdk_bindings.py'
+
+opentime:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'src/opentime/**'
+    - 'src/py-opentimelineio/opentime-bindings/**'
+    - 'tests/test_opentime.*'
+
+time calculations:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'src/opentime/**'
+    - 'src/py-opentimelineio/opentime-bindings/**'
+    - 'tests/test_opentime.*'
+
+color:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'src/opentimelineio/color.*'
+    - 'src/py-opentimelineio/opentimelineio/core/color.py'
+    - 'tests/test_color.*'
+    - 'tests/baselines/empty_color.json'
+
+maintenance:
+- any:
+  - changed-files:
+    - any-glob-to-any-file: 'maintainers/**'
+  # A production change accompanied by tests is not automatically maintenance.
+  - changed-files:
+    - all-globs-to-all-files: 'tests/**'

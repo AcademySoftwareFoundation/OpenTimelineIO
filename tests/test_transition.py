@@ -14,10 +14,8 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         trx = otio.schema.Transition(
             name="AtoB",
             transition_type="SMPTE.Dissolve",
-            metadata={
-                "foo": "bar"
-            },
-            enabled=False
+            metadata={"foo": "bar"},
+            enabled=False,
         )
         self.assertEqual(trx.transition_type, "SMPTE.Dissolve")
         self.assertEqual(trx.name, "AtoB")
@@ -28,10 +26,8 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         trx = otio.schema.Transition(
             name="AtoB",
             transition_type="SMPTE.Dissolve",
-            metadata={
-                "foo": "bar"
-            },
-            enabled=False
+            metadata={"foo": "bar"},
+            enabled=False,
         )
         encoded = otio.adapters.otio_json.write_to_string(trx)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
@@ -45,21 +41,14 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         trx.out_offset = out_offset
         self.assertMultiLineEqual(
             str(trx),
-            "Transition("
-            '"{}", '
-            '"{}", '
-            '{}, '
-            "{}, "
-            "{}, "
-            "{}"
-            ")".format(
+            'Transition("{}", "{}", {}, {}, {}, {})'.format(
                 str(trx.name),
                 str(trx.transition_type),
                 str(trx.in_offset),
                 str(trx.out_offset),
                 str(trx.metadata),
-                str(trx.enabled)
-            )
+                str(trx.enabled),
+            ),
         )
 
         self.assertMultiLineEqual(
@@ -77,17 +66,13 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 repr(trx.in_offset),
                 repr(trx.out_offset),
                 repr(trx.metadata),
-                repr(trx.enabled)
-            )
+                repr(trx.enabled),
+            ),
         )
 
     def test_setters(self):
         trx = otio.schema.Transition(
-            name="AtoB",
-            transition_type="SMPTE.Dissolve",
-            metadata={
-                "foo": "bar"
-            }
+            name="AtoB", transition_type="SMPTE.Dissolve", metadata={"foo": "bar"}
         )
         self.assertEqual(trx.transition_type, "SMPTE.Dissolve")
         trx.transition_type = "EdgeWipe"
@@ -105,62 +90,39 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                         otio.schema.Clip(
                             name="A",
                             source_range=otio.opentime.TimeRange(
-                                start_time=otio.opentime.RationalTime(
-                                    value=1,
-                                    rate=30
-                                ),
-                                duration=otio.opentime.RationalTime(
-                                    value=50,
-                                    rate=30
-                                )
-                            )
+                                start_time=otio.opentime.RationalTime(value=1, rate=30),
+                                duration=otio.opentime.RationalTime(value=50, rate=30),
+                            ),
                         ),
                         otio.schema.Transition(
-                            in_offset=otio.opentime.RationalTime(
-                                value=7,
-                                rate=30
-                            ),
-                            out_offset=otio.opentime.RationalTime(
-                                value=10,
-                                rate=30
-                            ),
+                            in_offset=otio.opentime.RationalTime(value=7, rate=30),
+                            out_offset=otio.opentime.RationalTime(value=10, rate=30),
                         ),
                         otio.schema.Clip(
                             name="B",
                             source_range=otio.opentime.TimeRange(
                                 start_time=otio.opentime.RationalTime(
-                                    value=100,
-                                    rate=30
+                                    value=100, rate=30
                                 ),
-                                duration=otio.opentime.RationalTime(
-                                    value=50,
-                                    rate=30
-                                )
-                            )
-                        ),
-                    ]
+                                duration=otio.opentime.RationalTime(value=50, rate=30),
+                            ),
+                        )
+                    ],
                 )
             ]
         )
         trx = timeline.tracks[0][1]
-        time_range = otio.opentime.TimeRange(otio.opentime.RationalTime(43, 30),
-                                             otio.opentime.RationalTime(17, 30))
+        time_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(43, 30), otio.opentime.RationalTime(17, 30)
+        )
 
-        self.assertEqual(time_range,
-                         trx.range_in_parent())
+        self.assertEqual(time_range, trx.range_in_parent())
 
-        self.assertEqual(time_range,
-                         trx.trimmed_range_in_parent())
+        self.assertEqual(time_range, trx.trimmed_range_in_parent())
 
         trx = otio.schema.Transition(
-            in_offset=otio.opentime.RationalTime(
-                value=7,
-                rate=30
-            ),
-            out_offset=otio.opentime.RationalTime(
-                value=10,
-                rate=30
-            ),
+            in_offset=otio.opentime.RationalTime(value=7, rate=30),
+            out_offset=otio.opentime.RationalTime(value=10, rate=30),
         )
 
         with self.assertRaises(otio.exceptions.NotAChildError):
@@ -170,5 +132,5 @@ class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trx.trimmed_range_in_parent()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

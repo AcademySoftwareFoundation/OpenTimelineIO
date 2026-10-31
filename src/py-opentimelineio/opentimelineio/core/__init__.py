@@ -3,10 +3,9 @@
 
 """Core implementation details and wrappers around the C++ library"""
 
-from .. _otio import ( # noqa
+from .._otio import (  # noqa
     # errors
     CannotComputeAvailableRangeError,
-
     # classes
     Color,
     Composable,
@@ -16,7 +15,6 @@ from .. _otio import ( # noqa
     SerializableObject,
     SerializableObjectWithMetadata,
     Track,
-
     # functions
     deserialize_json_from_file,
     deserialize_json_from_string,
@@ -33,13 +31,13 @@ from .. _otio import ( # noqa
     release_to_schema_version_map,
 )
 
-from . _core_utils import ( # noqa
+from ._core_utils import (  # noqa
     add_method,
     _value_to_any,
     _add_mutable_mapping_methods,
     _add_mutable_sequence_methods,
 )
-from . import ( # noqa
+from . import (  # noqa
     mediaReference,
     color,
     composition,
@@ -48,30 +46,30 @@ from . import ( # noqa
 )
 
 __all__ = [
-    'Color',
-    'Composable',
-    'Composition',
-    'Item',
-    'MediaReference',
-    'SerializableObject',
-    'SerializableObjectWithMetadata',
-    'Track',
-    'deserialize_json_from_file',
-    'deserialize_json_from_string',
-    'flatten_stack',
-    'install_external_keepalive_monitor',
-    'instance_from_schema',
-    'set_type_record',
-    'add_method',
-    'upgrade_function_for',
-    'downgrade_function_from',
-    'serializable_field',
-    'deprecated_field',
-    'serialize_json_to_string',
-    'serialize_json_to_file',
-    'register_type',
-    'type_version_map',
-    'release_to_schema_version_map',
+    "Color",
+    "Composable",
+    "Composition",
+    "Item",
+    "MediaReference",
+    "SerializableObject",
+    "SerializableObjectWithMetadata",
+    "Track",
+    "deserialize_json_from_file",
+    "deserialize_json_from_string",
+    "flatten_stack",
+    "install_external_keepalive_monitor",
+    "instance_from_schema",
+    "set_type_record",
+    "add_method",
+    "upgrade_function_for",
+    "downgrade_function_from",
+    "serializable_field",
+    "deprecated_field",
+    "serialize_json_to_string",
+    "serialize_json_to_file",
+    "register_type",
+    "type_version_map",
+    "release_to_schema_version_map"
 ]
 
 
@@ -93,18 +91,11 @@ def serialize_json_to_string(root, schema_version_targets=None, indent=4):
     :rtype: str
     """
     return _serialize_json_to_string(
-        _value_to_any(root),
-        schema_version_targets or {},
-        indent
+        _value_to_any(root), schema_version_targets or {}, indent
     )
 
 
-def serialize_json_to_file(
-        root,
-        filename,
-        schema_version_targets=None,
-        indent=4
-):
+def serialize_json_to_file(root, filename, schema_version_targets=None, indent=4):
     """Serialize root to a json file.  Optionally downgrade resulting schemas
     to schema_version_targets.
 
@@ -122,10 +113,7 @@ def serialize_json_to_file(
     :rtype: bool
     """
     return _serialize_json_to_file(
-        _value_to_any(root),
-        filename,
-        schema_version_targets or {},
-        indent
+        _value_to_any(root), filename, schema_version_targets or {}, indent
     )
 
 
@@ -189,14 +177,16 @@ def upgrade_function_for(cls, version_to_upgrade_to):
     """
 
     def decorator_func(func):
-        """ Decorator for marking upgrade functions """
+        """Decorator for marking upgrade functions"""
+
         def wrapped_update(data):
             modified = func(data)
             data.clear()
             data.update(modified)
 
-        register_upgrade_function(cls._serializable_label.split(".")[0],
-                                  version_to_upgrade_to, wrapped_update)
+        register_upgrade_function(
+            cls._serializable_label.split(".")[0], version_to_upgrade_to, wrapped_update
+        )
         return func
 
     return decorator_func
@@ -227,7 +217,8 @@ def downgrade_function_from(cls, version_to_downgrade_from):
     """
 
     def decorator_func(func):
-        """ Decorator for marking downgrade functions """
+        """Decorator for marking downgrade functions"""
+
         def wrapped_update(data):
             modified = func(data)
             data.clear()
@@ -236,7 +227,7 @@ def downgrade_function_from(cls, version_to_downgrade_from):
         register_downgrade_function(
             cls._serializable_label.split(".")[0],
             version_to_downgrade_from,
-            wrapped_update
+            wrapped_update,
         )
         return func
 
@@ -292,9 +283,7 @@ def serializable_field(name, required_type=None, doc=None, default_value=None):
             if not isinstance(val, required_type):
                 raise TypeError(
                     "attribute '{}' must be an instance of '{}', not: {}".format(
-                        name,
-                        required_type,
-                        type(val)
+                        name, required_type, type(val)
                     )
                 )
 

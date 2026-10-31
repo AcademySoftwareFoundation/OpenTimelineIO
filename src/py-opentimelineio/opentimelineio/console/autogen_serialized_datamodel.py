@@ -8,15 +8,13 @@
 
 import argparse
 import inspect
+import io
 import json
-import tempfile
 import sys
+import tempfile
 import textwrap
 
-import io
-
 import opentimelineio as otio
-
 
 DOCUMENT_HEADER = """# Serialized Data Documentation
 
@@ -102,11 +100,10 @@ PROP_FETCHERS = (
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
+    """parse commandline arguments with argparse"""
 
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
@@ -114,14 +111,14 @@ def _parsed_args():
         "--dryrun",
         action="store_true",
         default=False,
-        help="Dryrun mode - print out instead of perform actions"
+        help="Dryrun mode - print out instead of perform actions",
     )
     group.add_argument(
         "-o",
         "--output",
         type=str,
         default=None,
-        help="Update the baseline with the current version"
+        help="Update the baseline with the current version",
     )
 
     return parser.parse_args()
@@ -132,16 +129,16 @@ def _parsed_args():
 SKIP_CLASSES = [
     otio.core.SerializableObject,
     otio._otio.UnknownSchema,
-    otio._otio.TestObject,
+    otio._otio.TestObject
 ]
 SKIP_KEYS = [
     "OTIO_SCHEMA",  # not data, just for the backing format
-    "children",     # children are stored by container objects, implicitly
+    "children"  # children are stored by container objects, implicitly
 ]
 SKIP_MODULES = [
     "opentimelineio.schemadef",  # because these are plugins
-    "opentimelineio._otio",      # C++ .so, but customers should use the full
-    "opentimelineio._opentime",  # python wrapped modules (otio.schema etc)
+    "opentimelineio._otio",  # C++ .so, but customers should use the full
+    "opentimelineio._opentime"  # python wrapped modules (otio.schema etc)
 ]
 
 
@@ -150,16 +147,18 @@ def _generate_model_for_module(mod, classes, modules):
 
     # fetch the classes from this module
     serializable_classes = [
-        thing for thing in mod.__dict__.values()
+        thing
+        for thing in mod.__dict__.values()
         if (
             inspect.isclass(thing)
             and thing not in classes
             and issubclass(thing, otio.core.SerializableObject)
-            or thing in (
+            or thing
+            in (
                 otio.opentime.RationalTime,
                 otio.opentime.TimeRange,
                 otio.opentime.TimeTransform,
-                otio.core.Color
+                otio.core.Color,
             )
         )
     ]
@@ -180,8 +179,9 @@ def _generate_model_for_module(mod, classes, modules):
                 try:
                     # Serialized fields are almost always properties, but skip
                     # over those that are not
-                    model[cl][k] = fetcher(cl, k) if isinstance(
-                        getattr(cl, k), property) else ""
+                    model[cl][k] = (
+                        fetcher(cl, k) if isinstance(getattr(cl, k), property) else ""
+                    )
                     break
                 except AttributeError:
                     pass
@@ -197,7 +197,8 @@ def _generate_model_for_module(mod, classes, modules):
     # find new modules to recurse into
     new_mods = sorted(
         (
-            thing for thing in mod.__dict__.values()
+            thing
+            for thing in mod.__dict__.values()
             if (
                 inspect.ismodule(thing)
                 and thing not in modules
@@ -205,7 +206,7 @@ def _generate_model_for_module(mod, classes, modules):
                 and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
             )
         ),
-        key=lambda mod: str(mod)
+        key=lambda mod: str(mod),
     )
 
     # recurse into the new modules and update the classes and modules values
@@ -223,11 +224,7 @@ def _search_mod_recursively(cl, mod_to_search, already_searched):
     if cl in mod_to_search.__dict__.values():
         return mod_to_search.__name__
 
-    child_modules = (
-        m
-        for m in mod_to_search.__dict__.values()
-        if inspect.ismodule(m)
-    )
+    child_modules = (m for m in mod_to_search.__dict__.values() if inspect.ismodule(m))
 
     for submod in child_modules:
         if submod in already_searched:
@@ -246,17 +243,10 @@ def _remap_to_python_modules(cl):
     """
 
     # where the python wrapped classes live
-    SEARCH_MODULES = [
-        otio.schema,
-        otio.opentime,
-        otio.core,
-    ]
+    SEARCH_MODULES = [otio.schema, otio.opentime, otio.core]
 
     # the C++ modules
-    IGNORE_MODS = {
-        otio._otio,
-        otio._opentime
-    }
+    IGNORE_MODS = {otio._otio, otio._opentime}
 
     for mod in SEARCH_MODULES:
         result = _search_mod_recursively(cl, mod, IGNORE_MODS)
@@ -277,14 +267,14 @@ def _write_documentation(model):
     for cl in model:
         modobj = cl.__module__
 
-        if modobj in ['opentimelineio._opentime', 'opentimelineio._otio']:
+        if modobj in ["opentimelineio._opentime", "opentimelineio._otio"]:
             modobj = _remap_to_python_modules(cl)
 
         modules.setdefault(modobj, []).append(cl)
 
     CURRENT_MODULE = None
     for module_list in sorted(modules):
-        this_mod = ".".join(module_list.split('.')[:2])
+        this_mod = ".".join(module_list.split(".")[:2])
         if this_mod != CURRENT_MODULE:
             CURRENT_MODULE = this_mod
             md_with_helpstrings.write(MODULE_HEADER.format(modname=this_mod))
@@ -296,16 +286,19 @@ def _write_documentation(model):
             modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
 
-            if (cl.__doc__ is not None):
+            if cl.__doc__ is not None:
                 docstring = inspect.getdoc(cl).split("\n")
                 new_docstring = []
                 for line in docstring:
-                    line = textwrap.wrap(line, width=100,
-                                         expand_tabs=False,
-                                         replace_whitespace=False,
-                                         drop_whitespace=False,
-                                         break_long_words=False)
-                    if (line == []):
+                    line = textwrap.wrap(
+                        line,
+                        width=100,
+                        expand_tabs=False,
+                        replace_whitespace=False,
+                        drop_whitespace=False,
+                        break_long_words=False,
+                    )
+                    if line == []:
                         line = [""]
                     for wrapped_line in line:
                         new_docstring.append(wrapped_line)
@@ -317,14 +310,10 @@ def _write_documentation(model):
                 CLASS_HEADER_WITH_DOCS.format(
                     classname=label,
                     modpath=modname + "." + cl.__name__,
-                    docstring=new_docstring
+                    docstring=new_docstring,
                 )
             )
-            md_only_fields.write(
-                CLASS_HEADER_ONLY_FIELDS.format(
-                    classname=label,
-                )
-            )
+            md_only_fields.write(CLASS_HEADER_ONLY_FIELDS.format(classname=label))
 
             for key, helpstr in sorted(model[cl].items()):
                 if key in SKIP_KEYS:
@@ -332,15 +321,13 @@ def _write_documentation(model):
                 md_with_helpstrings.write(
                     PROP_HEADER.format(propkey=key, prophelp=helpstr)
                 )
-                md_only_fields.write(
-                    PROP_HEADER_NO_HELP.format(propkey=key)
-                )
+                md_only_fields.write(PROP_HEADER_NO_HELP.format(propkey=key))
 
     return md_with_helpstrings.getvalue(), md_only_fields.getvalue()
 
 
 def main():
-    """  main entry point  """
+    """main entry point"""
     args = _parsed_args()
     with_docs, without_docs = generate_and_write_documentation()
 
@@ -352,19 +339,17 @@ def main():
     output = args.output
     if not output:
         output = tempfile.NamedTemporaryFile(
-            'w',
-            suffix="otio_serialized_schema.md",
-            delete=False
+            "w", suffix="otio_serialized_schema.md", delete=False
         ).name
 
-    with open(output, 'w') as fo:
+    with open(output, "w") as fo:
         fo.write(with_docs)
 
     # write version without docstrings
-    prefix, suffix = output.rsplit('.', 1)
+    prefix, suffix = output.rsplit(".", 1)
     output_only_fields = prefix + "-only-fields." + suffix
 
-    with open(output_only_fields, 'w') as fo:
+    with open(output_only_fields, "w") as fo:
         fo.write(without_docs)
 
     print(f"wrote documentation to {output} and {output_only_fields}")
@@ -375,5 +360,5 @@ def generate_and_write_documentation():
     return _write_documentation(model)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

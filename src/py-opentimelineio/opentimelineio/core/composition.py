@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from . _core_utils import add_method
 from .. import _otio
+from ._core_utils import add_method
 
 
 @add_method(_otio.Composition)
@@ -12,7 +12,7 @@ def __str__(self):
         str(self.name),
         str(list(self)),
         str(self.source_range),
-        str(self.metadata)
+        str(self.metadata),
     )
 
 
@@ -32,6 +32,6 @@ def __repr__(self):
             repr(list(self)),
             repr(self.source_range),
             repr(self.color),
-            repr(self.metadata)
+            repr(self.metadata),
         )
     )

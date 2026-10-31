@@ -2,15 +2,14 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Test harness for Image Sequence References."""
+
 import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
 
-class ImageSequenceReferenceTests(
-    unittest.TestCase, otio_test_utils.OTIOAssertions
-):
+class ImageSequenceReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_create(self):
         frame_policy = otio.schema.ImageSequenceReference.MissingFramePolicy.hold
         ref = otio.schema.ImageSequenceReference(
@@ -19,8 +18,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=5,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
             ),
             frame_step=3,
             missing_frame_policy=frame_policy,
@@ -36,9 +34,8 @@ class ImageSequenceReferenceTests(
         self.assertEqual(
             ref.available_range,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
-            )
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
+            ),
         )
         self.assertEqual(ref.frame_step, 3)
         self.assertEqual(ref.rate, 30)
@@ -58,30 +55,28 @@ class ImageSequenceReferenceTests(
             rate=30,
             frame_zero_padding=5,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
             ),
             metadata={"custom": {"foo": "bar"}},
             available_image_bounds=otio.schema.Box2d(
-                otio.schema.V2d(0.0, 0.0),
-                otio.schema.V2d(16.0, 9.0)
+                otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)
             ),
         )
         self.assertEqual(
             str(ref),
-            'ImageSequenceReference('
+            "ImageSequenceReference("
             '"file:///show/seq/shot/rndr/", '
             '"show_shot.", '
             '".exr", '
-            '1, '
-            '3, '
-            '30.0, '
-            '5, '
-            'MissingFramePolicy.error, '
-            'TimeRange(RationalTime(0, 30), RationalTime(60, 30)), '
-            'Box2d(V2d(0.0, 0.0), V2d(16.0, 9.0)), '
+            "1, "
+            "3, "
+            "30.0, "
+            "5, "
+            "MissingFramePolicy.error, "
+            "TimeRange(RationalTime(0, 30), RationalTime(60, 30)), "
+            "Box2d(V2d(0.0, 0.0), V2d(16.0, 9.0)), "
             "{'custom': {'foo': 'bar'}}"
-            ')'
+            ")",
         )
 
     def test_repr(self):
@@ -94,31 +89,29 @@ class ImageSequenceReferenceTests(
             rate=30,
             frame_zero_padding=5,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
             ),
             available_image_bounds=otio.schema.Box2d(
-                otio.schema.V2d(0.0, 0.0),
-                otio.schema.V2d(16.0, 9.0)
+                otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)
             ),
             metadata={"custom": {"foo": "bar"}},
         )
         ref_value = (
-            'ImageSequenceReference('
+            "ImageSequenceReference("
             "target_url_base='file:///show/seq/shot/rndr/', "
             "name_prefix='show_shot.', "
             "name_suffix='.exr', "
-            'start_frame=1, '
-            'frame_step=3, '
-            'rate=30.0, '
-            'frame_zero_padding=5, '
-            'missing_frame_policy=<MissingFramePolicy.error: 0>, '
-            'available_range={}, '
-            'available_image_bounds=otio.schema.Box2d('
-            'min=otio.schema.V2d(x=0.0, y=0.0), '
-            'max=otio.schema.V2d(x=16.0, y=9.0)), '
+            "start_frame=1, "
+            "frame_step=3, "
+            "rate=30.0, "
+            "frame_zero_padding=5, "
+            "missing_frame_policy=<MissingFramePolicy.error: 0>, "
+            "available_range={}, "
+            "available_image_bounds=otio.schema.Box2d("
+            "min=otio.schema.V2d(x=0.0, y=0.0), "
+            "max=otio.schema.V2d(x=16.0, y=9.0)), "
             "metadata={{'custom': {{'foo': 'bar'}}}}"
-            ')'.format(repr(ref.available_range))
+            ")".format(repr(ref.available_range))
         )
         self.assertEqual(repr(ref), ref_value)
 
@@ -130,8 +123,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=5,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
             ),
             frame_step=3,
             rate=30,
@@ -147,24 +139,21 @@ class ImageSequenceReferenceTests(
         self.assertEqual(encoded, encoded2)
 
         # Check Values
-        self.assertEqual(
-            decoded.target_url_base, "file:///show/seq/shot/rndr/"
-        )
+        self.assertEqual(decoded.target_url_base, "file:///show/seq/shot/rndr/")
         self.assertEqual(decoded.name_prefix, "show_shot.")
         self.assertEqual(decoded.name_suffix, ".exr")
         self.assertEqual(decoded.frame_zero_padding, 5)
         self.assertEqual(
             decoded.available_range,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 30),
-                otio.opentime.RationalTime(60, 30),
-            )
+                otio.opentime.RationalTime(0, 30), otio.opentime.RationalTime(60, 30)
+            ),
         )
         self.assertEqual(decoded.frame_step, 3)
         self.assertEqual(decoded.rate, 30)
         self.assertEqual(
             decoded.missing_frame_policy,
-            otio.schema.ImageSequenceReference.MissingFramePolicy.hold
+            otio.schema.ImageSequenceReference.MissingFramePolicy.hold,
         )
         self.assertEqual(decoded.metadata, {"custom": {"foo": "bar"}})
 
@@ -208,8 +197,7 @@ class ImageSequenceReferenceTests(
             "show_shot.",
             ".exr",
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             rate=24,
         )
@@ -221,8 +209,7 @@ class ImageSequenceReferenceTests(
             "file:///show/seq/shot/rndr/",
             "show_shot.",
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             frame_step=2,
             rate=24,
@@ -235,8 +222,7 @@ class ImageSequenceReferenceTests(
 
     def test_target_url_for_image_number(self):
         all_images_urls = [
-            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
-            for i in range(1, 49)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr" for i in range(1, 49)
         ]
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
@@ -244,8 +230,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -265,8 +250,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=2,
@@ -274,8 +258,7 @@ class ImageSequenceReferenceTests(
         )
 
         all_images_urls = [
-            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
-            for i in range(1, 49, 2)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr" for i in range(1, 49, 2)
         ]
         generated_urls = [
             ref.target_url_for_image_number(i)
@@ -285,8 +268,7 @@ class ImageSequenceReferenceTests(
 
         ref.frame_step = 3
         all_images_urls_threes = [
-            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
-            for i in range(1, 49, 3)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr" for i in range(1, 49, 3)
         ]
         generated_urls_threes = [
             ref.target_url_for_image_number(i)
@@ -297,8 +279,7 @@ class ImageSequenceReferenceTests(
         ref.frame_step = 2
         ref.start_frame = 0
         all_images_urls_zero_first = [
-            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr"
-            for i in range(0, 48, 2)
+            f"file:///show/seq/shot/rndr/show_shot.{i:04}.exr" for i in range(0, 48, 2)
         ]
         generated_urls_zero_first = [
             ref.target_url_for_image_number(i)
@@ -313,8 +294,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -323,7 +303,7 @@ class ImageSequenceReferenceTests(
 
         self.assertEqual(
             ref.target_url_for_image_number(0),
-            "file:///show/seq/shot/rndr/show_shot.0001.exr"
+            "file:///show/seq/shot/rndr/show_shot.0001.exr",
         )
 
     def test_abstract_target_url(self):
@@ -333,8 +313,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -343,7 +322,7 @@ class ImageSequenceReferenceTests(
 
         self.assertEqual(
             ref.abstract_target_url("@@@@"),
-            "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
+            "file:///show/seq/shot/rndr/show_shot.@@@@.exr",
         )
 
     def test_abstract_target_url_with_missing_slash(self):
@@ -353,8 +332,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -363,7 +341,7 @@ class ImageSequenceReferenceTests(
 
         self.assertEqual(
             ref.abstract_target_url("@@@@"),
-            "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
+            "file:///show/seq/shot/rndr/show_shot.@@@@.exr",
         )
 
     def test_presentation_time_for_image_number(self):
@@ -373,17 +351,14 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=2,
             rate=24,
         )
 
-        reference_values = [
-            otio.opentime.RationalTime(i * 2, 24) for i in range(24)
-        ]
+        reference_values = [otio.opentime.RationalTime(i * 2, 24) for i in range(24)]
 
         generated_values = [
             ref.presentation_time_for_image_number(i)
@@ -399,8 +374,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=2,
@@ -409,8 +383,7 @@ class ImageSequenceReferenceTests(
 
         first_frame_time = otio.opentime.RationalTime(12, 24)
         reference_values = [
-            first_frame_time + otio.opentime.RationalTime(i * 2, 24)
-            for i in range(24)
+            first_frame_time + otio.opentime.RationalTime(i * 2, 24) for i in range(24)
         ]
 
         generated_values = [
@@ -427,8 +400,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -448,8 +420,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=101,
             frame_step=1,
@@ -469,8 +440,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=1,
             frame_step=1,
@@ -478,14 +448,10 @@ class ImageSequenceReferenceTests(
         )
 
         # The start time should be frame 1
-        self.assertEqual(
-            ref.frame_for_time(ref.available_range.start_time), 1
-        )
+        self.assertEqual(ref.frame_for_time(ref.available_range.start_time), 1)
 
         # Test a sample in the middle
-        self.assertEqual(
-            ref.frame_for_time(otio.opentime.RationalTime(15, 24)), 4
-        )
+        self.assertEqual(ref.frame_for_time(otio.opentime.RationalTime(15, 24)), 4)
 
         # The end time (inclusive) should map to the last frame number
         self.assertEqual(
@@ -494,9 +460,7 @@ class ImageSequenceReferenceTests(
 
         # make sure frame step and RationalTime rate have no effect
         ref.frame_step = 2
-        self.assertEqual(
-            ref.frame_for_time(otio.opentime.RationalTime(118, 48)), 48
-        )
+        self.assertEqual(ref.frame_for_time(otio.opentime.RationalTime(118, 48)), 48)
 
     def test_frame_for_time_out_of_range(self):
         ref = otio.schema.ImageSequenceReference(
@@ -505,8 +469,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 30),
-                otio.opentime.RationalTime(60, 30),
+                otio.opentime.RationalTime(12, 30), otio.opentime.RationalTime(60, 30)
             ),
             start_frame=1,
             frame_step=1,
@@ -522,16 +485,14 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(60, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(60, 24)
             ),
             start_frame=1,
             frame_step=1,
             rate=24,
         )
         time_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(24, 24),
-            otio.opentime.RationalTime(17, 24),
+            otio.opentime.RationalTime(24, 24), otio.opentime.RationalTime(17, 24)
         )
 
         self.assertEqual(ref.frame_range_for_time_range(time_range), (13, 29))
@@ -543,16 +504,14 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(60, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(60, 24)
             ),
             start_frame=1,
             frame_step=1,
             rate=24,
         )
         time_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(24, 24),
-            otio.opentime.RationalTime(60, 24),
+            otio.opentime.RationalTime(24, 24), otio.opentime.RationalTime(60, 24)
         )
 
         with self.assertRaises(ValueError):
@@ -565,8 +524,7 @@ class ImageSequenceReferenceTests(
             ".exr",
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(12, 24),
-                otio.opentime.RationalTime(48, 24),
+                otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
             ),
             start_frame=-1,
             frame_step=2,
@@ -638,28 +596,24 @@ class ImageSequenceReferenceTests(
             ref.target_url_for_image_number(0)
 
         self.assertEqual(
-            str(exception_manager.exception),
-            "Zero duration sequences has no frames.",
+            str(exception_manager.exception), "Zero duration sequences has no frames."
         )
 
         ref.available_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(12, 24),
-            otio.opentime.RationalTime(0, 1),
+            otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(0, 1)
         )
 
         with self.assertRaises(IndexError) as exception_manager:
             ref.target_url_for_image_number(0)
 
         self.assertEqual(
-            str(exception_manager.exception),
-            "Zero duration sequences has no frames.",
+            str(exception_manager.exception), "Zero duration sequences has no frames."
         )
 
         # Set the duration and make sure a similarly useful message comes
         # when rate is un-set.
         ref.available_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(12, 24),
-            otio.opentime.RationalTime(48, 24),
+            otio.opentime.RationalTime(12, 24), otio.opentime.RationalTime(48, 24)
         )
         ref.rate = 0
 
@@ -667,16 +621,16 @@ class ImageSequenceReferenceTests(
             ref.target_url_for_image_number(0)
 
         self.assertEqual(
-            str(exception_manager.exception),
-            "Zero rate sequence has no frames.",
+            str(exception_manager.exception), "Zero rate sequence has no frames."
         )
 
     def test_clone(self):
-        """ ensure that deeopcopy/clone function """
+        """ensure that deeopcopy/clone function"""
         isr = otio.schema.ImageSequenceReference()
 
         try:
             import copy
+
             cln = copy.deepcopy(isr)
             cln = isr.clone()
         except ValueError as exc:
@@ -693,13 +647,11 @@ class ImageSequenceReferenceTests(
             frame_zero_padding=4,
             available_range=otio.opentime.TimeRange(
                 otio.opentime.from_timecode("01:25:30:04", rate=24),
-                duration=otio.opentime.from_frames(48, 24)
+                duration=otio.opentime.from_frames(48, 24),
             ),
         )
 
-        self.assertEqual(
-            ref.target_url_for_image_number(0), "myfilename.0101.exr"
-        )
+        self.assertEqual(ref.target_url_for_image_number(0), "myfilename.0101.exr")
 
 
 if __name__ == "__main__":

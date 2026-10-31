@@ -22,7 +22,7 @@ NOT_DASH_RE_SUFFIX = r"(?!-)"
 
 def _parsed_args():
     parser = argparse.ArgumentParser(
-        description='Fetch a list of contributors for a given GitHub repo.'
+        description="Fetch a list of contributors for a given GitHub repo."
     )
 
     op_grp = parser.add_mutually_exclusive_group(required=True)
@@ -31,21 +31,21 @@ def _parsed_args():
         "--freeze",
         default=False,
         action="store_true",
-        help="freeze the ci version from latest to their version."
+        help="freeze the ci version from latest to their version.",
     )
     op_grp.add_argument(
         "-u",
         "--unfreeze",
         default=False,
         action="store_true",
-        help="unfreeze the ci version from the version back to latest."
+        help="unfreeze the ci version from the version back to latest.",
     )
     parser.add_argument(
         "-d",
         "--dryrun",
         default=False,
         action="store_true",
-        help="Perform actions but modify no files on disk."
+        help="Perform actions but modify no files on disk.",
     )
     return parser.parse_args()
 
@@ -54,13 +54,11 @@ def _fetch_plat_map():
     # HACK: pull the image version corresponding to -latest out of the
     #       README.md for the github repo where they are stored
     request = urllib.request.Request(GITHUB_README_URL)
-    response = urllib.request.urlopen(request).read().decode('utf-8')
+    response = urllib.request.urlopen(request).read().decode("utf-8")
 
     def md_row_fields(md_row):
         # Split on |, discard the empty entries from leading and trailing |
-        return [
-            col.strip() for col in md_row.split("|")[1:-1]
-        ]
+        return [col.strip() for col in md_row.split("|")[1:-1]]
 
     # First, just strip the readme down the platform image table
     lines = response.split("\n")
@@ -90,15 +88,15 @@ def _fetch_plat_map():
         available_labels = platform_name_re.findall(raw_labels)
         try:
             next(
-                label for label in available_labels
-                if label.split("-")[-1] == "latest"
+                label for label in available_labels if label.split("-")[-1] == "latest"
             )
         except StopIteration:
             # not a latest label
             continue
 
         label = next(
-            label for label in available_labels
+            label
+            for label in available_labels
             if label.split("-")[-1] not in {"xl", "xlarge", "latest"}
         )
         platform = label.split("-")[0]
@@ -137,7 +135,7 @@ def freeze_ci(plat_map, dryrun=False):
         print(f"Platform {plat} frozen to version: {plat_map[plat]}")
 
     if modified and not dryrun:
-        with open(CI_WORKFLOW_FP, 'w') as fo:
+        with open(CI_WORKFLOW_FP, "w") as fo:
             fo.write(output_content)
         return True
 
@@ -153,11 +151,7 @@ def unfreeze_ci(plat_map, dryrun=False):
         plat_latest = plat + "-latest"
         plat_latest_re = re.compile(plat_latest + NOT_DASH_RE_SUFFIX)
         if plat_latest_re.search(output_content) is not None:
-            print(
-                "Platform {} appears to already be set to -latest.".format(
-                    plat
-                )
-            )
+            print("Platform {} appears to already be set to -latest.".format(plat))
             continue
 
         plat_current_re = re.compile(plat_current + NOT_DASH_RE_SUFFIX)
@@ -166,7 +160,7 @@ def unfreeze_ci(plat_map, dryrun=False):
         print(f"Platform {plat} unfrozen back to: {plat_latest}")
 
     if modified and not dryrun:
-        with open(CI_WORKFLOW_FP, 'w') as fo:
+        with open(CI_WORKFLOW_FP, "w") as fo:
             fo.write(output_content)
         return True
 

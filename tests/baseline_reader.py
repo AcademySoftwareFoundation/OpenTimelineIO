@@ -3,8 +3,8 @@
 
 """Utilities for reading baseline json."""
 
-import os
 import json
+import os
 
 MODPATH = os.path.dirname(__file__)
 
@@ -13,11 +13,7 @@ def test_hook(dct):
     if "FROM_TEST_FILE" in dct:
         # fetch the baseline
         result = json_from_file_as_string(
-            os.path.join(
-                MODPATH,
-                "baselines",
-                str(dct["FROM_TEST_FILE"])
-            )
+            os.path.join(MODPATH, "baselines", str(dct["FROM_TEST_FILE"]))
         )
 
         # allow you to overlay values onto the baseline in the test, if they

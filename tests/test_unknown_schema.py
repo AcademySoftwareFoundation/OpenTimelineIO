@@ -67,16 +67,14 @@ class UnknownSchemaTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         unknown = self.orig.media_reference.metadata["stuff"]
         self.assertTrue(unknown.is_unknown_schema)
         unknown_data = unknown.data
-        self.assertIsNotNone(
-            unknown_data
-        )
+        self.assertIsNotNone(unknown_data)
 
         self.assertEqual(
             unknown_data,
             {
                 "some_data": 895,
-                "howlongami": otio.opentime.RationalTime(rate=30, value=100)
-            }
+                "howlongami": otio.opentime.RationalTime(rate=30, value=100),
+            },
         )
 
         # Mutation of unkown_data should not mutate the unknown object.
@@ -85,10 +83,10 @@ class UnknownSchemaTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             unknown.data,
             {
                 "some_data": 895,
-                "howlongami": otio.opentime.RationalTime(rate=30, value=100)
-            }
+                "howlongami": otio.opentime.RationalTime(rate=30, value=100),
+            },
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

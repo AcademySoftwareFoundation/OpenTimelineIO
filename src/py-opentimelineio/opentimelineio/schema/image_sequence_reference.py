@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from .. core._core_utils import add_method
 from .. import _otio
+from ..core._core_utils import add_method
 
 
 @add_method(_otio.ImageSequenceReference)
 def __str__(self):
     return (
-        'ImageSequenceReference('
-        '"{}", "{}", "{}", {}, {}, {}, {}, {}, {}, {}, {})' .format(
+        "ImageSequenceReference("
+        '"{}", "{}", "{}", {}, {}, {}, {}, {}, {}, {}, {})'.format(
             self.target_url_base,
             self.name_prefix,
             self.name_suffix,
@@ -28,19 +28,19 @@ def __str__(self):
 @add_method(_otio.ImageSequenceReference)
 def __repr__(self):
     return (
-        'ImageSequenceReference('
-        'target_url_base={}, '
-        'name_prefix={}, '
-        'name_suffix={}, '
-        'start_frame={}, '
-        'frame_step={}, '
-        'rate={}, '
-        'frame_zero_padding={}, '
-        'missing_frame_policy={}, '
-        'available_range={}, '
-        'available_image_bounds={}, '
-        'metadata={}'
-        ')' .format(
+        "ImageSequenceReference("
+        "target_url_base={}, "
+        "name_prefix={}, "
+        "name_suffix={}, "
+        "start_frame={}, "
+        "frame_step={}, "
+        "rate={}, "
+        "frame_zero_padding={}, "
+        "missing_frame_policy={}, "
+        "available_range={}, "
+        "available_image_bounds={}, "
+        "metadata={}"
+        ")".format(
             repr(self.target_url_base),
             repr(self.name_prefix),
             repr(self.name_suffix),
@@ -66,7 +66,7 @@ def frame_range_for_time_range(self, time_range):
     """
     return (
         self.frame_for_time(time_range.start_time),
-        self.frame_for_time(time_range.end_time_inclusive())
+        self.frame_for_time(time_range.end_time_inclusive()),
     )
 
 
@@ -81,6 +81,4 @@ def abstract_target_url(self, symbol):
     else:
         base = self.target_url_base
 
-    return "{}{}{}{}".format(
-        base, self.name_prefix, symbol, self.name_suffix
-    )
+    return "{}{}{}{}".format(base, self.name_prefix, symbol, self.name_suffix)

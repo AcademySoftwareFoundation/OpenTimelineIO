@@ -3,15 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
+import json
+import unittest
+
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
-import unittest
-import json
-
 
 class OpenTimeTypeSerializerTest(unittest.TestCase):
-
     def test_serialize_time(self):
         rt = otio.opentime.RationalTime(15, 24)
         encoded = otio.adapters.otio_json.write_to_string(rt)
@@ -33,8 +32,8 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
 class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
         so = otio.core.SerializableObjectWithMetadata()
-        so.metadata['foo'] = 'bar'
-        self.assertEqual(so.metadata['foo'], 'bar')
+        so.metadata["foo"] = "bar"
+        self.assertEqual(so.metadata["foo"], "bar")
 
     def test_update(self):
         so = otio.core.SerializableObjectWithMetadata()
@@ -137,8 +136,7 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             o.clone()
 
     def test_imath(self):
-        b = otio.schema.Box2d(
-            otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0))
+        b = otio.schema.Box2d(otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0))
         so = otio.core.SerializableObjectWithMetadata()
         so.metadata["box"] = b
         self.assertEqual(repr(so.metadata["box"]), repr(b))
@@ -158,23 +156,20 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         class FakeThing(otio.core.SerializableObject):
             _serializable_label = "Stuff.1"
             foo_two = otio.core.serializable_field("foo_2", doc="test")
+
         ft = FakeThing()
 
         self.assertEqual(ft.schema_name(), "Stuff")
         self.assertEqual(ft.schema_version(), 1)
 
         with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
-            otio.core.instance_from_schema(
-                "Stuff",
-                2,
-                {"foo": "bar"}
-            )
+            otio.core.instance_from_schema("Stuff", 2, {"foo": "bar"})
 
         version_map = otio.core.type_version_map()
         self.assertEqual(version_map["Stuff"], 1)
 
         ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo'], "bar")
+        self.assertEqual(ft._dynamic_fields["foo"], "bar")
 
     @unittest.skip("@TODO: disabled pending discussion")
     def test_double_register_schema(self):
@@ -182,10 +177,12 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         class DoubleReg(otio.core.SerializableObject):
             _serializable_label = "Stuff.1"
             foo_two = otio.core.serializable_field("foo_2", doc="test")
+
         _ = DoubleReg()  # quiet pyflakes
 
         # not allowed to register a type twice
         with self.assertRaises(ValueError):
+
             @otio.core.register_type
             class DoubleReg(otio.core.SerializableObject):
                 _serializable_label = "Stuff.1"
@@ -214,13 +211,13 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         #         raise RuntimeError("shouldn't see this ever")
 
         ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+        self.assertEqual(ft._dynamic_fields["foo_3"], "bar")
 
         ft = otio.core.instance_from_schema("NewStuff", 3, {"foo_2": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+        self.assertEqual(ft._dynamic_fields["foo_3"], "bar")
 
         ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
-        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+        self.assertEqual(ft._dynamic_fields["foo_3"], "bar")
 
     def test_upgrade_rename(self):
         """test that upgrading system handles schema renames correctly"""
@@ -234,7 +231,7 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(thing)
 
     def test_downgrade_version(self):
-        """ test a python defined downgrade function"""
+        """test a python defined downgrade function"""
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
@@ -262,13 +259,9 @@ class VersioningTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         self.assertDictEqual(
-            result,
-            {
-                "OTIO_SCHEMA": "FakeThingToDowngrade.1",
-                "foo": "a thing here",
-            }
+            result, {"OTIO_SCHEMA": "FakeThingToDowngrade.1", "foo": "a thing here"}
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

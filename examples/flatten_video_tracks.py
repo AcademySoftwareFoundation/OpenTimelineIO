@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-import opentimelineio as otio
-import sys
 import copy
+import sys
+
+import opentimelineio as otio
 
 inputpath, outputpath = sys.argv[1:]
 
@@ -14,10 +15,11 @@ timeline = otio.adapters.read_from_file(inputpath)
 video_tracks = timeline.video_tracks()
 audio_tracks = timeline.audio_tracks()
 
-print("Read {} video tracks and {} audio tracks.".format(
-    len(video_tracks),
-    len(audio_tracks)
-))
+print(
+    "Read {} video tracks and {} audio tracks.".format(
+        len(video_tracks), len(audio_tracks)
+    )
+)
 
 # Take just the video tracks - and flatten them into one.
 # This will trim away any overlapping segments, collapsing everything
@@ -33,8 +35,9 @@ newtimeline.tracks[:] = [onetrack]
 newtimeline.tracks.extend(copy.deepcopy(audio_tracks))
 
 # ...and save it to disk.
-print("Saving {} video tracks and {} audio tracks.".format(
-    len(newtimeline.video_tracks()),
-    len(newtimeline.audio_tracks())
-))
+print(
+    "Saving {} video tracks and {} audio tracks.".format(
+        len(newtimeline.video_tracks()), len(newtimeline.audio_tracks())
+    )
+)
 otio.adapters.write_to_file(newtimeline, outputpath)

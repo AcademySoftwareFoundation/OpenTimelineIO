@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from .. core._core_utils import add_method
 from .. import _otio
+from ..core._core_utils import add_method
 
 
 @add_method(_otio.GeneratorReference)
@@ -12,20 +12,20 @@ def __str__(self):
         self.generator_kind,
         self.parameters,
         self.available_image_bounds,
-        self.metadata
+        self.metadata,
     )
 
 
 @add_method(_otio.GeneratorReference)
 def __repr__(self):
     return (
-        'otio.schema.GeneratorReference('
-        'name={}, '
-        'generator_kind={}, '
-        'parameters={}, '
-        'available_image_bounds={}, '
-        'metadata={}'
-        ')'.format(
+        "otio.schema.GeneratorReference("
+        "name={}, "
+        "generator_kind={}, "
+        "parameters={}, "
+        "available_image_bounds={}, "
+        "metadata={}"
+        ")".format(
             repr(self.name),
             repr(self.generator_kind),
             repr(self.parameters),

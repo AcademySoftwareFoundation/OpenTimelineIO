@@ -2,13 +2,12 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Unit tests for the 'examples'"""
-import unittest
-import sys
+
 import os
 import subprocess
-
-
+import sys
 import tempfile
+import unittest
 
 import opentimelineio as otio
 
@@ -27,8 +26,7 @@ class BuildSimpleTimelineExampleTest(unittest.TestCase):
             )
 
             subprocess.check_call(
-                [sys.executable, examples_path, temp_file],
-                stdout=subprocess.PIPE
+                [sys.executable, examples_path, temp_file], stdout=subprocess.PIPE
             )
             known = otio.adapters.read_from_file(temp_file)
 
@@ -38,11 +36,11 @@ class BuildSimpleTimelineExampleTest(unittest.TestCase):
                 this_test_file = temp_file.replace(".otio", suffix)
                 subprocess.check_call(
                     [sys.executable, examples_path, this_test_file],
-                    stdout=subprocess.PIPE
+                    stdout=subprocess.PIPE,
                 )
                 test_result = otio.adapters.read_from_file(this_test_file)
                 self.assertEqual(known.duration(), test_result.duration())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -5,9 +5,8 @@
 import math
 import os
 import sys
-import unittest
-
 import tempfile
+import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -17,7 +16,6 @@ BIG_INT_TEST = os.path.join(SAMPLE_DATA_DIR, "big_int.otio")
 
 
 class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
-
     def test_init(self):
         rt = otio.opentime.RationalTime(12, 24)
         tl = otio.schema.Timeline("test_timeline", global_start_time=rt)
@@ -27,8 +25,8 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_metadata(self):
         rt = otio.opentime.RationalTime(12, 24)
         tl = otio.schema.Timeline("test_timeline", global_start_time=rt)
-        tl.metadata['foo'] = "bar"
-        self.assertEqual(tl.metadata['foo'], 'bar')
+        tl.metadata["foo"] = "bar"
+        self.assertEqual(tl.metadata["foo"], "bar")
 
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
@@ -55,82 +53,64 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # from memory
         supported_integers = [
             # name       value to enter
-            ('minint32', -int(2**31 - 1)),
-            ('maxint32', int(2**31 - 1)),
-            ('maxuint32', int(2**32 - 1)),
-            ('minint64', -int(2**63 - 1)),
-            ('maxint64', int(2**63 - 1)),
+            ("minint32", -int(2**31 - 1)),
+            ("maxint32", int(2**31 - 1)),
+            ("maxuint32", int(2**32 - 1)),
+            ("minint64", -int(2**63 - 1)),
+            ("maxint64", int(2**63 - 1))
         ]
 
-        for (name, value) in supported_integers:
+        for name, value in supported_integers:
             md[name] = value
             self.assertEqual(
                 md[name],
                 value,
                 "{} didn't match expected value: got {} expected {}".format(
-                    name,
-                    md[name],
-                    value
-                )
+                    name, md[name], value
+                ),
             )
             self.assertEqual(
                 type(md[name]),
                 int,
                 "{} didn't match expected type: got {} expected {}".format(
-                    name,
-                    type(md[name]),
-                    int
-                )
+                    name, type(md[name]), int
+                ),
             )
 
             # test that roundtripping through json functions
-            serialized = otio.adapters.write_to_string(
-                result,
-                "otio_json"
-            )
-            deserialized = otio.adapters.read_from_string(
-                serialized,
-                "otio_json"
-            )
+            serialized = otio.adapters.write_to_string(result, "otio_json")
+            deserialized = otio.adapters.read_from_string(serialized, "otio_json")
 
-            value_deserialized = (
-                deserialized.tracks[0][0].metadata["int_test"][name]
-            )
+            value_deserialized = deserialized.tracks[0][0].metadata["int_test"][name]
             self.assertEqual(
                 value,
                 value_deserialized,
                 "{} did not round trip correctly.  expected: {} got: {}".format(
-                    name,
-                    value,
-                    value_deserialized
-                )
+                    name, value, value_deserialized
+                ),
             )
             self.assertEqual(
                 type(value),
                 type(value_deserialized),
                 "the type of {} did not round trip correctly.  expected: "
-                "{} got: {}".format(
-                    name,
-                    type(value),
-                    type(value_deserialized)
-                )
+                "{} got: {}".format(name, type(value), type(value_deserialized)),
             )
 
         supported_doubles = [
             # name       value to enter
-            ('minint32', -float(2**31 - 1)),
-            ('maxint32', float(2**31 - 1)),
-            ('maxuint32', float(2**32 - 1)),
-            ('minint64', -float(2**63 - 1)),
-            ('maxint64', float(2**63 - 1)),
-            ('maxdouble', sys.float_info.max),
-            ('infinity', float('inf')),
-            ('infinity_because_too_big', float(2 * sys.float_info.max)),
-            ('nan', float('nan')),
-            ('neg_infinity', float('-inf')),
+            ("minint32", -float(2**31 - 1)),
+            ("maxint32", float(2**31 - 1)),
+            ("maxuint32", float(2**32 - 1)),
+            ("minint64", -float(2**63 - 1)),
+            ("maxint64", float(2**63 - 1)),
+            ("maxdouble", sys.float_info.max),
+            ("infinity", float("inf")),
+            ("infinity_because_too_big", float(2 * sys.float_info.max)),
+            ("nan", float("nan")),
+            ("neg_infinity", float("-inf"))
         ]
 
-        for (name, value) in supported_doubles:
+        for name, value in supported_doubles:
             md[name] = value
 
             # float('nan') != float('nan'), so need to test isnan(value) instead
@@ -140,63 +120,40 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     value,
                     "{} didn't match expected value: got '{}' ('{}') expected "
                     "'{}' ('{}')".format(
-                        name,
-                        md[name],
-                        type(md[name]),
-                        value,
-                        type(value)
-                    )
+                        name, md[name], type(md[name]), value, type(value)
+                    ),
                 )
             else:
                 self.assertTrue(
-                    math.isnan(md[name]),
-                    f"Expected {name} to be a nan, got {md[name]}"
+                    math.isnan(md[name]), f"Expected {name} to be a nan, got {md[name]}"
                 )
 
             self.assertEqual(
                 type(md[name]),
                 float,
                 "{} didn't match expected type: got {} expected {}".format(
-                    name,
-                    type(md[name]),
-                    float
-                )
+                    name, type(md[name]), float
+                ),
             )
 
             # test that roundtripping through json functions
             try:
-                serialized = otio.adapters.write_to_string(
-                    result,
-                    "otio_json"
-                )
+                serialized = otio.adapters.write_to_string(result, "otio_json")
             except Exception as e:
                 self.fail(
                     "A problem occurred when attempting to serialize {} "
-                    "with value: {}.  Error message was: {}".format(
-                        name,
-                        value,
-                        e
-                    )
+                    "with value: {}.  Error message was: {}".format(name, value, e)
                 )
 
             try:
-                deserialized = otio.adapters.read_from_string(
-                    serialized,
-                    "otio_json"
-                )
+                deserialized = otio.adapters.read_from_string(serialized, "otio_json")
             except Exception as e:
                 self.fail(
                     "A problem occurred when attempting to serialize {} "
-                    "with value: {}.  Error message was: {}".format(
-                        name,
-                        value,
-                        e
-                    )
+                    "with value: {}.  Error message was: {}".format(name, value, e)
                 )
 
-            value_deserialized = (
-                deserialized.tracks[0][0].metadata["int_test"][name]
-            )
+            value_deserialized = deserialized.tracks[0][0].metadata["int_test"][name]
 
             if not math.isnan(value):
                 self.assertEqual(
@@ -209,49 +166,42 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                         type(value),
                         value_deserialized,
                         type(value_deserialized),
-                    )
+                    ),
                 )
             else:
                 self.assertTrue(
                     math.isnan(value_deserialized),
-                    "Expected {} to be a nan, got {}".format(
-                        name,
-                        value_deserialized
-                    )
+                    "Expected {} to be a nan, got {}".format(name, value_deserialized),
                 )
 
         unsupported_values = [
             # numbers -- supported python type but don't fit into the C++ types
             #            (ie int but doesn't fit into int64_t)
-            ('minuint64_not_int64', int(2**63), ValueError),
-            ('maxuint64', int(2**64 - 1), ValueError),
-            ('minint128', int(2**64), ValueError),
-
+            ("minuint64_not_int64", int(2**63), ValueError),
+            ("maxuint64", int(2**64 - 1), ValueError),
+            ("minint128", int(2**64), ValueError),
             # other kinds of python things
-            ('object', object(), TypeError),
-            ('set', set(), TypeError),
+            ("object", object(), TypeError),
+            ("set", set(), TypeError)
         ]
 
-        for (name, value, exc) in unsupported_values:
-            with self.assertRaises(
-                    exc,
-                    msg=f"Expected {name} to raise an exception."
-            ):
+        for name, value, exc in unsupported_values:
+            with self.assertRaises(exc, msg=f"Expected {name} to raise an exception."):
                 md[name] = value
 
     def test_unicode(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)
 
-        md = result.tracks[0][0].metadata['unicode']
+        md = result.tracks[0][0].metadata["unicode"]
 
         utf8_test_str = "Viel glück und hab spaß!"
 
-        self.assertEqual(md['utf8'], utf8_test_str)
+        self.assertEqual(md["utf8"], utf8_test_str)
 
         tl = otio.schema.Timeline()
 
-        tl.metadata['utf8'] = utf8_test_str
-        self.assertEqual(tl.metadata['utf8'], utf8_test_str)
+        tl.metadata["utf8"] = utf8_test_str
+        self.assertEqual(tl.metadata["utf8"], utf8_test_str)
 
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
@@ -260,7 +210,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_unicode_file_name(self):
         with tempfile.TemporaryDirectory() as temp_dir:
-
             tl = otio.schema.Timeline("大平原")
             filename = os.path.join(temp_dir, "大平原.otio")
             otio.adapters.write_to_file(tl, filename)
@@ -274,10 +223,9 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         rt = otio.opentime.RationalTime(5, 24)
         mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
-                otio.opentime.RationalTime(5, 24),
-                otio.opentime.RationalTime(15, 24)
+                otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(15, 24)
             ),
-            target_url="/var/tmp/test.mov"
+            target_url="/var/tmp/test.mov",
         )
 
         cl = otio.schema.Clip(
@@ -300,10 +248,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(tl.duration(), rt + rt + rt)
 
-        self.assertEqual(
-            tl.range_of_child(cl),
-            tl.tracks[0].range_of_child_at_index(0)
-        )
+        self.assertEqual(tl.range_of_child(cl), tl.tracks[0].range_of_child_at_index(0))
 
     def test_available_image_bounds(self):
         track = otio.schema.Track(name="test_track")
@@ -314,41 +259,35 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="test clip1",
             media_reference=otio.schema.ExternalReference(
                 available_image_bounds=otio.schema.Box2d(
-                    otio.schema.V2d(0.0, 0.0),
-                    otio.schema.V2d(1.0, 1.0)
+                    otio.schema.V2d(0.0, 0.0), otio.schema.V2d(1.0, 1.0)
                 ),
-                target_url="/var/tmp/test.mov"
-            )
+                target_url="/var/tmp/test.mov",
+            ),
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=otio.schema.ExternalReference(
                 available_image_bounds=otio.schema.Box2d(
-                    otio.schema.V2d(1.0, 1.0),
-                    otio.schema.V2d(2.0, 2.0)
+                    otio.schema.V2d(1.0, 1.0), otio.schema.V2d(2.0, 2.0)
                 ),
-                target_url="/var/tmp/test.mov"
-            )
+                target_url="/var/tmp/test.mov",
+            ),
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=otio.schema.ExternalReference(
                 available_image_bounds=otio.schema.Box2d(
-                    otio.schema.V2d(2.0, 2.0),
-                    otio.schema.V2d(3.0, 3.0)
+                    otio.schema.V2d(2.0, 2.0), otio.schema.V2d(3.0, 3.0)
                 ),
-                target_url="/var/tmp/test.mov"
-            )
+                target_url="/var/tmp/test.mov",
+            ),
         )
         gap = otio.schema.Gap(name="gap")
 
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3, gap])
 
-        union = otio.schema.Box2d(
-            otio.schema.V2d(0.0, 0.0),
-            otio.schema.V2d(3.0, 3.0)
-        )
+        union = otio.schema.Box2d(otio.schema.V2d(0.0, 0.0), otio.schema.V2d(3.0, 3.0))
 
         # union should be overlapping area, gap should be ignored
         self.assertEqual(tl.tracks[0].available_image_bounds, union)
@@ -360,35 +299,25 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         rt = otio.opentime.RationalTime(5, 24)
         mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
-                otio.opentime.RationalTime(5, 24),
-                otio.opentime.RationalTime(15, 24)
+                otio.opentime.RationalTime(5, 24), otio.opentime.RationalTime(15, 24)
             ),
-            target_url="/var/tmp/test.mov"
+            target_url="/var/tmp/test.mov",
         )
 
         cl = otio.schema.Clip(
             name="test clip1",
             media_reference=mr,
-            source_range=otio.opentime.TimeRange(
-                mr.available_range.start_time,
-                rt
-            ),
+            source_range=otio.opentime.TimeRange(mr.available_range.start_time, rt),
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=mr,
-            source_range=otio.opentime.TimeRange(
-                mr.available_range.start_time,
-                rt
-            ),
+            source_range=otio.opentime.TimeRange(mr.available_range.start_time, rt),
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=mr,
-            source_range=otio.opentime.TimeRange(
-                mr.available_range.start_time,
-                rt
-            ),
+            source_range=otio.opentime.TimeRange(mr.available_range.start_time, rt),
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
@@ -410,47 +339,41 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # the last two clips
         search_range = otio.opentime.TimeRange(
             start_time=cl2.range_in_parent().start_time,
-            duration=cl2.trimmed_range().duration + rt_end
+            duration=cl2.trimmed_range().duration + rt_end,
         )
         self.assertEqual([cl2, cl3], list(tl.find_clips(search_range)))
 
         # no clips
         search_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(
-                value=-10,
-                rate=rt_start.rate
-            ),
-            duration=rt_end
+            start_time=otio.opentime.RationalTime(value=-10, rate=rt_start.rate),
+            duration=rt_end,
         )
         self.assertEqual([], list(tl.find_clips(search_range)))
 
     def test_str(self):
         self.maxDiff = None
         clip = otio.schema.Clip(
-            name="test_clip",
-            media_reference=otio.schema.MissingReference()
+            name="test_clip", media_reference=otio.schema.MissingReference()
         )
         track = otio.schema.Track(name="test_track", children=[clip])
         tl = otio.schema.Timeline(name="test_timeline", tracks=[track])
         self.assertMultiLineEqual(
-            str(tl),
-            'Timeline(' +
-            '"' + str(tl.name) + '", ' +
-            str(tl.tracks) +
-            ')'
+            str(tl), "Timeline(" + '"' + str(tl.name) + '", ' + str(tl.tracks) + ")"
         )
         self.assertMultiLineEqual(
             repr(tl),
-            'otio.schema.Timeline(' +
-            "name='" + tl.name + "', " +
-            "tracks=" + repr(tl.tracks) +
-            ')'
+            "otio.schema.Timeline("
+            + "name='"
+            + tl.name
+            + "', "
+            + "tracks="
+            + repr(tl.tracks)
+            + ")",
         )
 
     def test_serialize_timeline(self):
         clip = otio.schema.Clip(
-            name="test_clip",
-            media_reference=otio.schema.MissingReference()
+            name="test_clip", media_reference=otio.schema.MissingReference()
         )
         tl = otio.schema.timeline_from_clips([clip])
         encoded = otio.adapters.otio_json.write_to_string(tl)
@@ -463,9 +386,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_serialization_of_subclasses(self):
         clip1 = otio.schema.Clip()
         clip1.name = "Test Clip"
-        clip1.media_reference = otio.schema.ExternalReference(
-            "/tmp/foo.mov"
-        )
+        clip1.media_reference = otio.schema.ExternalReference("/tmp/foo.mov")
         tl1 = otio.schema.timeline_from_clips([clip1])
         tl1.name = "Testing Serialization"
         self.assertIsNotNone(tl1)
@@ -486,53 +407,30 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         clip2 = tl2.tracks[0][0]
         self.assertEqual(clip1.name, clip2.name)
         self.assertEqual(type(clip1), type(clip2))
+        self.assertEqual(type(clip1.media_reference), type(clip2.media_reference))
         self.assertEqual(
-            type(clip1.media_reference),
-            type(clip2.media_reference)
-        )
-        self.assertEqual(
-            clip1.media_reference.target_url,
-            clip2.media_reference.target_url
+            clip1.media_reference.target_url, clip2.media_reference.target_url
         )
 
     def test_tracks(self):
-        tl = otio.schema.Timeline(tracks=[
-            otio.schema.Track(
-                name="V1",
-                kind=otio.schema.TrackKind.Video
-            ),
-            otio.schema.Track(
-                name="V2",
-                kind=otio.schema.TrackKind.Video
-            ),
-            otio.schema.Track(
-                name="A1",
-                kind=otio.schema.TrackKind.Audio
-            ),
-            otio.schema.Track(
-                name="A2",
-                kind=otio.schema.TrackKind.Audio
-            ),
-        ])
-        self.assertListEqual(
-            ["V1", "V2"],
-            [t.name for t in tl.video_tracks()]
+        tl = otio.schema.Timeline(
+            tracks=[
+                otio.schema.Track(name="V1", kind=otio.schema.TrackKind.Video),
+                otio.schema.Track(name="V2", kind=otio.schema.TrackKind.Video),
+                otio.schema.Track(name="A1", kind=otio.schema.TrackKind.Audio),
+                otio.schema.Track(name="A2", kind=otio.schema.TrackKind.Audio)
+            ]
         )
-        self.assertListEqual(
-            ["A1", "A2"],
-            [t.name for t in tl.audio_tracks()]
-        )
+        self.assertListEqual(["V1", "V2"], [t.name for t in tl.video_tracks()])
+        self.assertListEqual(["A1", "A2"], [t.name for t in tl.audio_tracks()])
 
     def test_tracks_set_null_tracks(self):
-        tl = otio.schema.Timeline(tracks=[
-            otio.schema.Track(
-                name="V1",
-                kind=otio.schema.TrackKind.Video
-            ),
-            otio.schema.Track(
-                name="V2",
-                kind=otio.schema.TrackKind.Video
-            )])
+        tl = otio.schema.Timeline(
+            tracks=[
+                otio.schema.Track(name="V1", kind=otio.schema.TrackKind.Video),
+                otio.schema.Track(name="V2", kind=otio.schema.TrackKind.Video)
+            ]
+        )
 
         self.assertEqual(len(tl.tracks), 2)
         self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
@@ -554,7 +452,8 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_find_children_search_range(self):
         range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0.0, 24.0),
-            otio.opentime.RationalTime(24.0, 24.0))
+            otio.opentime.RationalTime(24.0, 24.0),
+        )
         cl0 = otio.schema.Clip()
         cl0.source_range = range
         cl1 = otio.schema.Clip()
@@ -584,5 +483,5 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(result[0], cl)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

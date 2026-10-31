@@ -3,13 +3,9 @@
 
 """Adapter for reading and writing native .otio json files."""
 
-from .. import (
-    core,
-    versioning,
-    exceptions
-)
-
 import os
+
+from .. import core, exceptions, versioning
 
 _DEFAULT_VERSION_ENVVAR = "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL"
 
@@ -49,8 +45,7 @@ def _fetch_downgrade_map_from_env():
         raise exceptions.InvalidEnvironmentVariableError(
             "Environment variable '{}' is incorrectly formatted with '{}'."
             "Variable must be formatted as 'FAMILY:LABEL'".format(
-                _DEFAULT_VERSION_ENVVAR,
-                version_envvar,
+                _DEFAULT_VERSION_ENVVAR, version_envvar
             )
         )
 
@@ -64,10 +59,7 @@ def _fetch_downgrade_map_from_env():
             "Environment variable '{}' is requesting family '{}' and label"
             " '{}', however this combination does not exist in the "
             "currently loaded manifests.  Full version map: {}".format(
-                _DEFAULT_VERSION_ENVVAR,
-                family,
-                label,
-                versioning.full_map()
+                _DEFAULT_VERSION_ENVVAR, family, label, versioning.full_map()
             )
         )
 
@@ -95,25 +87,13 @@ def write_to_string(input_otio, target_schema_versions=None, indent=4):
         "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
     """
 
-    if (
-            target_schema_versions is None
-            and _DEFAULT_VERSION_ENVVAR in os.environ
-    ):
+    if target_schema_versions is None and _DEFAULT_VERSION_ENVVAR in os.environ:
         target_schema_versions = _fetch_downgrade_map_from_env()
 
-    return core.serialize_json_to_string(
-        input_otio,
-        target_schema_versions,
-        indent
-    )
+    return core.serialize_json_to_string(input_otio, target_schema_versions, indent)
 
 
-def write_to_file(
-        input_otio,
-        filepath,
-        target_schema_versions=None,
-        indent=4
-):
+def write_to_file(input_otio, filepath, target_schema_versions=None, indent=4):
     """
     Serializes an OpenTimelineIO object into a file
 
@@ -139,15 +119,9 @@ def write_to_file(
         "OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL".
     """
 
-    if (
-        target_schema_versions is None
-        and _DEFAULT_VERSION_ENVVAR in os.environ
-    ):
+    if target_schema_versions is None and _DEFAULT_VERSION_ENVVAR in os.environ:
         target_schema_versions = _fetch_downgrade_map_from_env()
 
     return core.serialize_json_to_file(
-        input_otio,
-        filepath,
-        target_schema_versions,
-        indent
+        input_otio, filepath, target_schema_versions, indent
     )

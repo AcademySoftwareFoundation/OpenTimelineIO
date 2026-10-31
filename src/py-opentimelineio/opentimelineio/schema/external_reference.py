@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from .. core._core_utils import add_method
 from .. import _otio
+from ..core._core_utils import add_method
 
 
 @add_method(_otio.ExternalReference)
@@ -12,6 +12,6 @@ def __str__(self):
 
 @add_method(_otio.ExternalReference)
 def __repr__(self):
-    return 'otio.schema.ExternalReference(target_url={})'.format(
+    return "otio.schema.ExternalReference(target_url={})".format(
         repr(str(self.target_url))
     )

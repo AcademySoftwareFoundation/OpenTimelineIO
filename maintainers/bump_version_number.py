@@ -6,20 +6,20 @@
 __doc__ = """Manage and apply the version in the OTIO_VERSION.json file"""
 
 import argparse
-import sys
 import json
+import sys
 
 OTIO_VERSION_JSON_PATH = "OTIO_VERSION.json"
 
 
 def version():
     with open(OTIO_VERSION_JSON_PATH) as fi:
-        return json.load(fi)['version']
+        return json.load(fi)["version"]
 
 
 def _parsed_args():
     parser = argparse.ArgumentParser(
-        description='Fetch a list of contributors for a given GitHub repo.'
+        description="Fetch a list of contributors for a given GitHub repo."
     )
 
     op_grp = parser.add_mutually_exclusive_group(required=True)
@@ -29,7 +29,7 @@ def _parsed_args():
         type=str,
         default=None,
         choices=("major", "minor", "patch"),
-        help="Increment either the major or minor version number."
+        help="Increment either the major or minor version number.",
     )
     op_grp.add_argument(
         "-s",
@@ -37,21 +37,21 @@ def _parsed_args():
         type=str,
         default=None,
         nargs=3,
-        help="Set the version string, in the form of MAJOR MINOR PATCH"
+        help="Set the version string, in the form of MAJOR MINOR PATCH",
     )
     op_grp.add_argument(
         "-q",
         "--query",
         default=False,
         action="store_true",
-        help="Query/print the current version without changing it"
+        help="Query/print the current version without changing it",
     )
     parser.add_argument(
         "-d",
         "--dryrun",
         default=False,
         action="store_true",
-        help="Perform actions but modify no files on disk."
+        help="Perform actions but modify no files on disk.",
     )
     return parser.parse_args()
 
@@ -80,9 +80,7 @@ def main():
 
     # update the OTIO_VERSION file
     with open(OTIO_VERSION_JSON_PATH, "w") as fo:
-        fo.write(
-            json.dumps({"version": [str(v) for v in (major, minor, patch)]})
-        )
+        fo.write(json.dumps({"version": [str(v) for v in (major, minor, patch)]}))
     print(f"Updated {OTIO_VERSION_JSON_PATH}")
 
     #  update the CMakeLists.txt
@@ -93,15 +91,13 @@ def main():
     key_map = {"MAJOR": major, "MINOR": minor, "PATCH": patch}
     for ln in cmake_input.split("\n"):
         for label, new_value in key_map.items():
-            if f"set(OTIO_VERSION_{label} \"" in ln:
-                cmake_output.append(
-                    f"set(OTIO_VERSION_{label} \"{new_value}\")"
-                )
+            if f'set(OTIO_VERSION_{label} "' in ln:
+                cmake_output.append(f'set(OTIO_VERSION_{label} "{new_value}")')
                 break
         else:
             cmake_output.append(ln)
 
-    with open("CMakeLists.txt", 'w') as fo:
+    with open("CMakeLists.txt", "w") as fo:
         fo.write("\n".join(cmake_output))
     print("Updated {}".format("CMakeLists.txt"))
 
@@ -123,8 +119,9 @@ def main():
 def add_suffix(content, version):
     if version not in content:
         sys.stderr.write(
-            "Version {} not found, suffix may have already been "
-            "added.\n".format(version)
+            "Version {} not found, suffix may have already been added.\n".format(
+                version
+            )
         )
         return False
 
@@ -134,14 +131,14 @@ def add_suffix(content, version):
 
 
 def remove_suffix(content, version):
-    if version + '.dev1' not in content:
+    if version + ".dev1" not in content:
         sys.stderr.write(
             "Version+Suffix {} not found, suffix may have already been "
-            "removed.\n".format(version + '.dev1')
+            "removed.\n".format(version + ".dev1")
         )
         return False
 
-    content.replace(version + ' .dev1', version)
+    content.replace(version + " .dev1", version)
     return True
 
 

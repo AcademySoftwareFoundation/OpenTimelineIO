@@ -50,7 +50,7 @@ otioautogen_serialized_schema_docs = "opentimelineio.console.autogen_serialized_
 
 [dependency-groups]
 dev = [{include-group = "lint"}, {include-group = "test"}]
-lint = ["flake8>=3.5"]
+lint = ["ruff>=0.15"]
 test = ["coverage[toml]>=7.6", "urllib3>=2.2"]
 docs = [
     "sphinx>=8.1",
@@ -78,7 +78,7 @@ wheel.packages = ["src/py-opentimelineio/opentimelineio"]
 # Include initialized submodules so sdists do not need Git to fetch C++ sources.
 sdist.include = ["src/deps/**"]
 sdist.exclude = [
-    ".github", ".gitmodules", ".readthedocs.yml", ".venv",
+    ".github", ".gitmodules", ".readthedocs.yml", ".ruff_cache", ".venv",
     "build", "dist", "docs", "doxygen", "uv.lock",
     "src/deps/**/.git", "src/deps/**/.github",
     "src/deps/rapidjson/thirdparty", "src/deps/pybind11/tools/clang",
@@ -98,6 +98,28 @@ BUILD_TESTING = "OFF"
 provider = "scikit_build_core.metadata.regex"
 field = "version"
 input = "src/py-opentimelineio/opentimelineio/_version.py"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+include = ["*.py", "*.pyi", "pyproject.toml"]
+extend-exclude = ["src/deps", "build*", "dist*", "docs/_build", "docs/api"]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "W", "I", "Q000", "COM819"]
+
+[tool.ruff.format]
+quote-style = "double"
+# Make the format -> comma-fix pipeline stable across repeated runs.
+skip-magic-trailing-comma = true
+
+# Applied after formatting by maintainers/format_python.py.
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+
+[tool.ruff.lint.isort]
+known-first-party = ["opentimelineio", "tests"]
+split-on-trailing-comma = false
 
 [tool.coverage.run]
 branch = true

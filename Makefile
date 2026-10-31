@@ -1,4 +1,5 @@
-.PHONY: sync coverage test test-core test_first_fail clean lint doc-html python-version wheel sdist build lcov lcov-html lcov-reset
+.PHONY: sync coverage test test-core test_first_fail clean lint format-python \
+	format-check doc-html python-version wheel sdist build lcov lcov-html lcov-reset
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -41,7 +42,7 @@ test-core: python-version
 
 # CI
 ###################################
-ci-prebuild: lint
+ci-prebuild: lint format-check
 ci-postbuild: coverage
 ###################################
 
@@ -100,7 +101,14 @@ sync:
 	@$(UV) sync --locked
 
 lint:
-	@$(UV) run --locked --only-group lint python -m flake8
+	@$(UV) run --locked --only-group lint ruff check .
+
+# Check the final formatter + autofix result without editing the working tree.
+format-check:
+	@$(UV) run --locked --only-group lint python maintainers/format_python.py --check
+
+format-python:
+	@$(UV) run --locked --only-group lint python maintainers/format_python.py
 
 # Build a source distribution, then build the wheel from that archive.
 build:

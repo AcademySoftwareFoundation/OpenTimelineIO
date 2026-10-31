@@ -12,7 +12,7 @@ import opentimelineio.test_utils as otio_test_utils
 
 
 class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
-    """ test harness for timeline trimming function """
+    """test harness for timeline trimming function"""
 
     def make_sample_timeline(self):
         result = otio.adapters.read_from_string(
@@ -106,7 +106,7 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     "source_range": null
                 }
             }""",
-            "otio_json"
+            "otio_json",
         )
 
         return result, result.tracks[0]
@@ -117,8 +117,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_track.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(150, 24)
-            )
+                duration=otio.opentime.RationalTime(150, 24),
+            ),
         )
 
         # trim to the exact range it already has
@@ -126,8 +126,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_timeline,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(150, 24)
-            )
+                duration=otio.opentime.RationalTime(150, 24),
+            ),
         )
         # it shouldn't have changed at all
         self.assertIsOTIOEquivalentTo(original_timeline, trimmed)
@@ -139,8 +139,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_timeline,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(-10, 24),
-                duration=otio.opentime.RationalTime(160, 24)
-            )
+                duration=otio.opentime.RationalTime(160, 24),
+            ),
         )
         # it shouldn't have changed at all
         self.assertJsonEqual(original_timeline, trimmed)
@@ -152,8 +152,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_timeline,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(60, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         self.assertNotEqual(original_timeline, trimmed)
         trimmed = trimmed.tracks[0]
@@ -163,8 +163,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         # did clip B get trimmed?
         self.assertEqual(trimmed[0].name, "B")
@@ -172,8 +172,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed[0].trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(10, 24),
-                duration=otio.opentime.RationalTime(40, 24)
-            )
+                duration=otio.opentime.RationalTime(40, 24),
+            ),
         )
         # clip C should have been left alone
         self.assertIsOTIOEquivalentTo(trimmed[1], original_track[2])
@@ -185,8 +185,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             original_timeline,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
         # rest of the tests are on the track
         trimmed = trimmed_timeline.tracks[0]
@@ -197,8 +197,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(90, 24)
-            )
+                duration=otio.opentime.RationalTime(90, 24),
+            ),
         )
 
         # clip A should have been left alone
@@ -209,28 +209,26 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             trimmed[1].trimmed_range(),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0, 24),
-                duration=otio.opentime.RationalTime(40, 24)
-            )
+                duration=otio.opentime.RationalTime(40, 24),
+            ),
         )
 
     def test_trim_with_transitions(self):
         original_timeline, original_track = self.make_sample_timeline()
         self.assertEqual(
-            otio.opentime.RationalTime(150, 24),
-            original_timeline.duration()
+            otio.opentime.RationalTime(150, 24), original_timeline.duration()
         )
         self.assertEqual(len(original_track), 3)
 
         # add a transition
         tr = otio.schema.Transition(
             in_offset=otio.opentime.RationalTime(12, 24),
-            out_offset=otio.opentime.RationalTime(20, 24)
+            out_offset=otio.opentime.RationalTime(20, 24),
         )
         original_track.insert(1, tr)
         self.assertEqual(len(original_track), 4)
         self.assertEqual(
-            otio.opentime.RationalTime(150, 24),
-            original_timeline.duration()
+            otio.opentime.RationalTime(150, 24), original_timeline.duration()
         )
 
         # if you try to sever a Transition in the middle it should fail
@@ -239,8 +237,8 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 original_timeline,
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(5, 24),
-                    duration=otio.opentime.RationalTime(50, 24)
-                )
+                    duration=otio.opentime.RationalTime(50, 24),
+                ),
             )
 
         with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
@@ -248,16 +246,16 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 original_timeline,
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(45, 24),
-                    duration=otio.opentime.RationalTime(50, 24)
-                )
+                    duration=otio.opentime.RationalTime(50, 24),
+                ),
             )
 
         trimmed = otio.algorithms.timeline_trimmed_to_range(
             original_timeline,
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(25, 24),
-                duration=otio.opentime.RationalTime(50, 24)
-            )
+                duration=otio.opentime.RationalTime(50, 24),
+            ),
         )
         self.assertNotEqual(original_timeline, trimmed)
 
@@ -348,11 +346,11 @@ class TimelineTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 }
             }
             """,
-            "otio_json"
+            "otio_json",
         )
 
         self.assertJsonEqual(expected, trimmed)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

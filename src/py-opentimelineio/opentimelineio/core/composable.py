@@ -1,28 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-from . _core_utils import add_method
 from .. import _otio
+from ._core_utils import add_method
 
 
 @add_method(_otio.Composable)
 def __repr__(self):
-    return (
-        "otio.{}("
-        "name={}, "
-        "metadata={}"
-        ")".format(
-            "core.Composable",
-            repr(str(self.name)),
-            repr(self.metadata)
-        )
+    return "otio.{}(name={}, metadata={})".format(
+        "core.Composable", repr(str(self.name)), repr(self.metadata)
     )
 
 
 @add_method(_otio.Composable)
 def __str__(self):
-    return "{}({}, {})".format(
-        "Composable",
-        str(self.name),
-        str(self.metadata)
-    )
+    return "{}({}, {})".format("Composable", str(self.name), str(self.metadata))

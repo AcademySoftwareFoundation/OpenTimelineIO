@@ -7,9 +7,7 @@
 
 import re
 
-from . import (
-    adapters
-)
+from . import adapters
 
 
 class OTIOAssertions:
@@ -17,15 +15,15 @@ class OTIOAssertions:
         """Convert to json and compare that (more readable)."""
         self.maxDiff = None
 
-        known_str = adapters.write_to_string(known, 'otio_json')
-        test_str = adapters.write_to_string(test_result, 'otio_json')
+        known_str = adapters.write_to_string(known, "otio_json")
+        test_str = adapters.write_to_string(test_result, "otio_json")
 
         def strip_trailing_decimal_zero(s):
             return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
 
         self.assertMultiLineEqual(
             strip_trailing_decimal_zero(known_str),
-            strip_trailing_decimal_zero(test_str)
+            strip_trailing_decimal_zero(test_str),
         )
 
     def assertIsOTIOEquivalentTo(self, known, test_result):

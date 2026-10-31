@@ -3,8 +3,8 @@
 
 """Unit tests for the JSON format OTIO Serializes to."""
 
-import unittest
 import json
+import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -14,7 +14,6 @@ from tests import baseline_reader
 
 
 class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
-
     def setUp(self):
         self.maxDiff = None
 
@@ -25,11 +24,9 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
             baseline_reader.json_from_string(
                 otio.adapters.otio_json.write_to_string(obj)
             ),
-            baseline
+            baseline,
         )
-        baseline_data = otio.adapters.otio_json.read_from_string(
-            json.dumps(baseline)
-        )
+        baseline_data = otio.adapters.otio_json.read_from_string(json.dumps(baseline))
         if isinstance(baseline_data, dict):
             raise TypeError("did not deserialize correctly")
 
@@ -56,8 +53,8 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="test_track",
             metadata={
                 "comments": "adding some stuff to metadata to try out",
-                "a number": 1.0
-            }
+                "a number": 1.0,
+            },
         )
         self.check_against_baseline(st, "empty_track")
 
@@ -66,8 +63,8 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="tracks",
             metadata={
                 "comments": "adding some stuff to metadata to try out",
-                "a number": 1.0
-            }
+                "a number": 1.0,
+            },
         )
         self.check_against_baseline(st, "empty_stack")
 
@@ -76,19 +73,17 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
             name="Example Timeline",
             metadata={
                 "comments": "adding some stuff to metadata to try out",
-                "a number": 1.0
-            }
+                "a number": 1.0,
+            },
         )
-        tl.tracks.metadata.update({
-            "comments": "adding some stuff to metadata to try out",
-            "a number": 1.0
-        })
+        tl.tracks.metadata.update(
+            {"comments": "adding some stuff to metadata to try out", "a number": 1.0}
+        )
         self.check_against_baseline(tl, "empty_timeline")
 
     def test_clip(self):
         cl = otio.schema.Clip(
-            name="test_clip",
-            media_reference=otio.schema.MissingReference()
+            name="test_clip", media_reference=otio.schema.MissingReference()
         )
         self.check_against_baseline(cl, "empty_clip")
 
@@ -117,10 +112,7 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.check_against_baseline(trx, "empty_transition")
 
     def test_serializable_collection(self):
-        tr = otio.schema.SerializableCollection(
-            name="test",
-            metadata={"foo": "bar"}
-        )
+        tr = otio.schema.SerializableCollection(name="test", metadata={"foo": "bar"})
         self.check_against_baseline(tr, "empty_serializable_collection")
 
     def test_generator_reference(self):
@@ -128,5 +120,5 @@ class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.check_against_baseline(trx, "empty_generator_reference")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

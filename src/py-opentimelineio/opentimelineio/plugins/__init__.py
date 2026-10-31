@@ -5,12 +5,6 @@
 
 # flake8: noqa
 
-from .python_plugin import (
-    plugin_info_map,
-    PythonPlugin,
-)
+from .python_plugin import plugin_info_map, PythonPlugin
 
-from .manifest import (
-    manifest_from_file,
-    ActiveManifest,
-)
+from .manifest import manifest_from_file, ActiveManifest

@@ -28,38 +28,32 @@ LICENSES = {
 """,
     ".mm": """// SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the OpenTimelineIO project
-"""
+""",
 }
 
 # dependencies and build dir do not need to be checked
-SKIP_DIRS = [
-    os.path.join("src", "deps"),
-    "build",
-    ".git",
-    ".venv",
-]
+SKIP_DIRS = [os.path.join("src", "deps"), "build", ".git", ".venv"]
 
 
 def _parsed_args():
-    """ parse commandline arguments with argparse """
+    """parse commandline arguments with argparse"""
 
     parser = argparse.ArgumentParser(
-        description=__doc__,
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        '-s',
-        '--start-dir',
-        default='.',
+        "-s",
+        "--start-dir",
+        default=".",
         type=str,
-        help=("Directory to start searching for files in.")
+        help=("Directory to start searching for files in."),
     )
     parser.add_argument(
-        '-f',
-        '--fix',
+        "-f",
+        "--fix",
         default=False,
         action="store_true",
-        help="Fix licenses in place when possible"
+        help="Fix licenses in place when possible",
     )
 
     return parser.parse_args()
@@ -85,10 +79,7 @@ def main():
                         content = open(fullpath).read()
                     except Exception as ex:
                         sys.stderr.write(
-                            "ERROR: Unable to read file: {}\n{}".format(
-                                fullpath,
-                                ex
-                            )
+                            "ERROR: Unable to read file: {}\n{}".format(fullpath, ex)
                         )
                         continue
 
@@ -98,23 +89,14 @@ def main():
                             content = LICENSES[os.path.splitext(fullpath)[1]]
                             with open(fullpath) as fi:
                                 content += fi.read()
-                            with open(fullpath, 'w') as fo:
+                            with open(fullpath, "w") as fo:
                                 fo.write(content)
-                            print(
-                                "...FIXED: {}".format(
-                                    os.path.relpath(fullpath)
-                                )
-                            )
+                            print("...FIXED: {}".format(os.path.relpath(fullpath)))
                         incorrect_license += 1
                     else:
                         correct_license += 1
 
-    print(
-        "{} of {} files have the correct license.".format(
-            correct_license,
-            total
-        )
-    )
+    print("{} of {} files have the correct license.".format(correct_license, total))
 
     if incorrect_license != 0:
         if not args.fix:
@@ -124,11 +106,7 @@ def main():
                 )
             )
         else:
-            print(
-                "{} files had the correct license added.".format(
-                    incorrect_license
-                )
-            )
+            print("{} files had the correct license added.".format(incorrect_license))
 
 
 if __name__ == "__main__":

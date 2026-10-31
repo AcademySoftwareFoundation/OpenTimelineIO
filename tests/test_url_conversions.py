@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
 
-""" Unit tests of functions that convert between file paths and urls. """
+"""Unit tests of functions that convert between file paths and urls."""
 
-import unittest
 import os
+import unittest
 
 import opentimelineio as otio
 
@@ -14,21 +14,14 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "..",  # root
         "docs",
         "_static",
-        "OpenTimelineIO@3xDark.png"
+        "OpenTimelineIO@3xDark.png",
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = otio.url_utils.url_from_filepath(
-    MEDIA_EXAMPLE_PATH_REL
-)
+MEDIA_EXAMPLE_PATH_URL_REL = otio.url_utils.url_from_filepath(MEDIA_EXAMPLE_PATH_REL)
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
-    MEDIA_EXAMPLE_PATH_REL.replace(
-        "3xDark",
-        "3xLight"
-    )
+    MEDIA_EXAMPLE_PATH_REL.replace("3xDark", "3xLight")
 )
-MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
-    MEDIA_EXAMPLE_PATH_ABS
-)
+MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(MEDIA_EXAMPLE_PATH_ABS)
 
 
 class TestConversions(unittest.TestCase):

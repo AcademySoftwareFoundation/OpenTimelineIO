@@ -16,10 +16,14 @@ def read_from_file(filepath, suffix="", hook_function_argument_map=None):
     fake_tl.tracks.append(otio.schema.Track())
     fake_tl.tracks[0].append(otio.schema.Clip(name=filepath + "_clip"))
 
-    if (hook_function_argument_map and
-            hook_function_argument_map.get("run_custom_hook", False)):
-        return otio.hooks.run(hook="custom_adapter_hook", tl=fake_tl,
-                              extra_args=hook_function_argument_map)
+    if hook_function_argument_map and hook_function_argument_map.get(
+        "run_custom_hook", False
+    ):
+        return otio.hooks.run(
+            hook="custom_adapter_hook",
+            tl=fake_tl,
+            extra_args=hook_function_argument_map,
+        )
 
     return fake_tl
 
@@ -41,12 +45,9 @@ def adapter_hook_names():
 def link_media_reference(in_clip, media_linker_argument_map):
     import opentimelineio as otio
 
-    d = {'from_test_linker': True}
+    d = {"from_test_linker": True}
     d.update(media_linker_argument_map)
-    return otio.schema.MissingReference(
-        name=in_clip.name + "_tweaked",
-        metadata=d
-    )
+    return otio.schema.MissingReference(name=in_clip.name + "_tweaked", metadata=d)
 
 
 # same thing for this hookscript

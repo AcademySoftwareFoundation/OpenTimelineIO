@@ -5,9 +5,7 @@
 
 import copy
 
-from . import (
-    track_algo
-)
+from . import track_algo
 
 
 def timeline_trimmed_to_range(in_timeline, trim_range):
@@ -38,8 +36,7 @@ def timeline_trimmed_to_range(in_timeline, trim_range):
 
         # trim the track and assign it to the new stack.
         new_timeline.tracks[track_num] = track_algo.track_trimmed_to_range(
-            child_track,
-            trim_range
+            child_track, trim_range
         )
 
     return new_timeline

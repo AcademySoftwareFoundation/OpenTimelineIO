@@ -11,5 +11,5 @@ class CxxSDKTests(unittest.TestCase):
         self.assertTrue(otio._otio._testing.test_big_uint())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

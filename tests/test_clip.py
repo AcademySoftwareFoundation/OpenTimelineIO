@@ -8,28 +8,23 @@ import opentimelineio.test_utils as otio_test_utils
 
 
 class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
-
     def test_cons(self):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         tr = otio.opentime.TimeRange(rt, rt)
         mr = otio.schema.ExternalReference(
             available_range=otio.opentime.TimeRange(
-                rt,
-                otio.opentime.RationalTime(10, 24)
+                rt, otio.opentime.RationalTime(10, 24)
             ),
-            target_url="/var/tmp/test.mov"
+            target_url="/var/tmp/test.mov",
         )
 
-        ltw = otio.schema.LinearTimeWarp(
-            name="linear_time_warp",
-            time_scalar=1.5)
+        ltw = otio.schema.LinearTimeWarp(name="linear_time_warp", time_scalar=1.5)
         effects = []
         effects.append(ltw)
 
         red = otio.core.Color.RED
-        m = otio.schema.Marker(
-            name="red_marker", color=red)
+        m = otio.schema.Marker(name="red_marker", color=red)
         markers = []
         markers.append(m)
 
@@ -64,65 +59,60 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertMultiLineEqual(
             str(cl),
             'Clip("test_clip", '
-            'MissingReference(\'\', None, None, {}), None, {}, [], [])'
+            "MissingReference('', None, None, {}), None, {}, [], [])",
         )
         self.assertMultiLineEqual(
             repr(cl),
-            'otio.schema.Clip('
+            "otio.schema.Clip("
             "name='test_clip', "
-            'media_reference={}, '
-            'source_range=None, '
-            'color=None, '
-            'metadata={{}}, '
-            'effects=[], '
-            'markers=[]'
-            ')'.format(
-                repr(cl.media_reference)
-            )
+            "media_reference={}, "
+            "source_range=None, "
+            "color=None, "
+            "metadata={{}}, "
+            "effects=[], "
+            "markers=[]"
+            ")".format(repr(cl.media_reference)),
         )
 
     def test_str_with_filepath(self):
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.schema.ExternalReference(
-                "/var/tmp/foo.mov"
-            )
+            media_reference=otio.schema.ExternalReference("/var/tmp/foo.mov"),
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip('
+            "Clip("
             '"test_clip", '
             'ExternalReference("/var/tmp/foo.mov"), None, {}, [], []'
-            ')'
+            ")",
         )
         self.assertMultiLineEqual(
             repr(cl),
-            'otio.schema.Clip('
+            "otio.schema.Clip("
             "name='test_clip', "
             "media_reference=otio.schema.ExternalReference("
             "target_url='/var/tmp/foo.mov'"
             "), "
-            'source_range=None, '
-            'color=None, '
-            'metadata={}, '
-            'effects=[], '
-            'markers=[]'
-            ')'
+            "source_range=None, "
+            "color=None, "
+            "metadata={}, "
+            "effects=[], "
+            "markers=[]"
+            ")",
         )
 
     def test_ranges(self):
         tr = otio.opentime.TimeRange(
             # 1 hour in at 24 fps
             start_time=otio.opentime.RationalTime(86400, 24),
-            duration=otio.opentime.RationalTime(200, 24)
+            duration=otio.opentime.RationalTime(200, 24),
         )
 
         cl = otio.schema.Clip(
             name="test_clip",
             media_reference=otio.schema.ExternalReference(
-                "/var/tmp/foo.mov",
-                available_range=tr
-            )
+                "/var/tmp/foo.mov", available_range=tr
+            ),
         )
         self.assertEqual(cl.duration(), cl.trimmed_range().duration)
         self.assertEqual(cl.duration(), tr.duration)
@@ -134,7 +124,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl.source_range = otio.opentime.TimeRange(
             # 1 hour + 100 frames
             start_time=otio.opentime.RationalTime(86500, 24),
-            duration=otio.opentime.RationalTime(50, 24)
+            duration=otio.opentime.RationalTime(50, 24),
         )
         self.assertNotEqual(cl.duration(), tr.duration)
         self.assertNotEqual(cl.trimmed_range(), tr)
@@ -146,24 +136,20 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_available_image_bounds(self):
         available_image_bounds = otio.schema.Box2d(
-            otio.schema.V2d(0.0, 0.0),
-            otio.schema.V2d(16.0, 9.0)
+            otio.schema.V2d(0.0, 0.0), otio.schema.V2d(16.0, 9.0)
         )
 
         media_reference = otio.schema.ExternalReference(
-            "/var/tmp/foo.mov",
-            available_image_bounds=available_image_bounds
+            "/var/tmp/foo.mov", available_image_bounds=available_image_bounds
         )
 
         cl = otio.schema.Clip(
-            name="test_available_image_bounds",
-            media_reference=media_reference
+            name="test_available_image_bounds", media_reference=media_reference
         )
 
         self.assertEqual(available_image_bounds, cl.available_image_bounds)
         self.assertEqual(
-            cl.available_image_bounds,
-            media_reference.available_image_bounds
+            cl.available_image_bounds, media_reference.available_image_bounds
         )
 
         self.assertEqual(0.0, cl.available_image_bounds.min.x)
@@ -179,38 +165,32 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_ref_default(self):
         cl = otio.schema.Clip()
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.MissingReference()
+            cl.media_reference, otio.schema.MissingReference()
         )
 
         cl.media_reference = None
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.MissingReference()
+            cl.media_reference, otio.schema.MissingReference()
         )
 
         cl.media_reference = otio.schema.ExternalReference()
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.ExternalReference()
+            cl.media_reference, otio.schema.ExternalReference()
         )
 
     def test_multi_ref(self):
         cl = otio.schema.Clip()
 
         self.assertEqual(
-            otio.schema.Clip.DEFAULT_MEDIA_KEY,
-            cl.active_media_reference_key
+            otio.schema.Clip.DEFAULT_MEDIA_KEY, cl.active_media_reference_key
         )
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.MissingReference()
+            cl.media_reference, otio.schema.MissingReference()
         )
 
         mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
-            otio.schema.MissingReference()
+            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY], otio.schema.MissingReference()
         )
 
         cl.set_media_references(
@@ -219,81 +199,54 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 "high_quality": otio.schema.GeneratorReference(),
                 "proxy_quality": otio.schema.ImageSequenceReference(),
             },
-            otio.schema.Clip.DEFAULT_MEDIA_KEY)
+            otio.schema.Clip.DEFAULT_MEDIA_KEY,
+        )
 
         mrs = cl.media_references()
         self.assertIsOTIOEquivalentTo(
-            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY],
-            otio.schema.ExternalReference()
+            mrs[otio.schema.Clip.DEFAULT_MEDIA_KEY], otio.schema.ExternalReference()
         )
         self.assertIsOTIOEquivalentTo(
-            mrs["high_quality"],
-            otio.schema.GeneratorReference()
+            mrs["high_quality"], otio.schema.GeneratorReference()
         )
         self.assertIsOTIOEquivalentTo(
-            mrs["proxy_quality"],
-            otio.schema.ImageSequenceReference()
+            mrs["proxy_quality"], otio.schema.ImageSequenceReference()
         )
 
         cl.active_media_reference_key = "high_quality"
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference,
-            otio.schema.GeneratorReference()
+            cl.media_reference, otio.schema.GeneratorReference()
         )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+        self.assertEqual(cl.active_media_reference_key, "high_quality")
 
         # we should get an exception if we try to use a key that is
         # not in the media_references
         with self.assertRaises(ValueError):
             cl.active_media_reference_key = "cloud"
 
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+        self.assertEqual(cl.active_media_reference_key, "high_quality")
 
         # we should also get an exception if we set the references without
         # the active key
         with self.assertRaises(ValueError):
             cl.set_media_references(
-                {
-                    "cloud": otio.schema.ExternalReference()
-                },
-                "high_quality"
+                {"cloud": otio.schema.ExternalReference()}, "high_quality"
             )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+        self.assertEqual(cl.active_media_reference_key, "high_quality")
 
         # we should also get an exception if we set the references with
         # an empty key
         with self.assertRaises(ValueError):
-            cl.set_media_references(
-                {
-                    "": otio.schema.ExternalReference()
-                },
-                ""
-            )
-        self.assertEqual(
-            cl.active_media_reference_key,
-            "high_quality"
-        )
+            cl.set_media_references({"": otio.schema.ExternalReference()}, "")
+        self.assertEqual(cl.active_media_reference_key, "high_quality")
 
         # setting the references and the active key should resolve the problem
-        cl.set_media_references(
-            {
-                "cloud": otio.schema.ExternalReference()
-            },
-            "cloud"
-        )
+        cl.set_media_references({"cloud": otio.schema.ExternalReference()}, "cloud")
         self.assertEqual(cl.active_media_reference_key, "cloud")
         self.assertIsOTIOEquivalentTo(
-            cl.media_reference, otio.schema.ExternalReference())
+            cl.media_reference, otio.schema.ExternalReference()
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

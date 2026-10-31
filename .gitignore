@@ -27,3 +27,4 @@ lcov_html_report/
 .coverage.*
 coverage.xml
 coverage_html_report/
+.ruff_cache/

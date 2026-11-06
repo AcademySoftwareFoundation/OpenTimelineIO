@@ -149,6 +149,7 @@ into a single directory named with a suffix of .otiod.
   - relative_media_base_dir
   - media_policy
   - dryrun
+  - target_schema_versions
 
 
 
@@ -186,6 +187,7 @@ read on unix and windows platforms.
   - relative_media_base_dir
   - media_policy
   - dryrun
+  - target_schema_versions
 
 
 

@@ -8,6 +8,7 @@
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/generatorReference.h>
 #include <opentimelineio/imageSequenceReference.h>
+#include <opentimelineio/marker.h>
 #include <opentimelineio/missingReference.h>
 #include <opentimelineio/stringUtils.h>
 #include <opentimelineio/timeline.h>
@@ -201,6 +202,24 @@ public:
             &file_info);
     }
 
+    // Add a symbolic link, as written on a Unix system.
+    void add_symlink(std::string const& name, std::string const& target)
+    {
+        mz_zip_file file_info = {};
+        file_info.filename = name.c_str();
+        file_info.modified_date = time(nullptr);
+        file_info.version_madeby =
+            (MZ_HOST_SYSTEM_UNIX << 8) | MZ_VERSION_MADEBY_ZIP_VERSION;
+        file_info.external_fa = 0120777u << 16;
+        file_info.compression_method = MZ_COMPRESS_METHOD_STORE;
+        file_info.flag = MZ_ZIP_FLAG_UTF8;
+        mz_zip_writer_add_buffer(
+            _writer,
+            const_cast<char*>(target.data()),
+            static_cast<int32_t>(target.size()),
+            &file_info);
+    }
+
 private:
     std::string _path;
     void* _writer = nullptr;
@@ -248,6 +267,16 @@ main(int argc, char** argv)
                 // posix url
                 "file:///path/sub dir/file.ext",
                 "/path/sub dir/file.ext"
+            },
+            {
+                // '%' that is not an escape
+                "file:///path/100%.mov",
+                "/path/100%.mov"
+            },
+            {
+                // '%' without hex digits
+                "file:///path/%zz.mov",
+                "/path/%zz.mov"
             },
         };
         for (auto i : urls)
@@ -492,6 +521,48 @@ main(int argc, char** argv)
         assertEqual(result->find_clips().size(), 0);
     });
 
+    tests.add_test("test_otiod_no_version_file", [] {
+        // The python adapter did not write version files for .otiod bundles.
+        TempDir temp;
+        SerializableObject::Retainer<Timeline> tl(new Timeline);
+
+        auto const otiod_path = to_utf8(temp.path() / "no_version.otiod");
+        OTIO_NS::ErrorStatus error;
+        assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
+
+        auto const version_path =
+            from_utf8(otiod_path) / bundle::version_file;
+        assertTrue(std::filesystem::is_regular_file(version_path));
+        std::filesystem::remove(version_path);
+
+        auto result = dynamic_cast<Timeline*>(read_otiod(
+            otiod_path, ReadOptions(), &error));
+        assertNotNull(result);
+        assertFalse(is_error(error));
+    });
+
+    tests.add_test("test_downgrade_error", [] {
+        // A downgrade that is not possible is an error, whether or not an
+        // error status is given.
+        TempDir temp;
+        SerializableObject::Retainer<Timeline> tl(new Timeline);
+        tl->tracks()->markers().push_back(new Marker("marker"));
+        WriteOptions options;
+        options.target_schema_versions = schema_version_map{ { "Marker", 1 } };
+
+        auto const otioz_path = to_utf8(temp.path() / "downgrade.otioz");
+        auto const otiod_path = to_utf8(temp.path() / "downgrade.otiod");
+        assertFalse(dry_run(tl, options).has_value());
+        assertFalse(write_otioz(tl, otioz_path, options));
+        assertFalse(write_otiod(tl, otiod_path, options));
+        assertFalse(std::filesystem::exists(from_utf8(otioz_path)));
+        assertFalse(std::filesystem::exists(from_utf8(otiod_path)));
+
+        OTIO_NS::ErrorStatus error;
+        assertFalse(write_otioz(tl, otioz_path, options, &error));
+        assertTrue(is_error(error));
+    });
+
     tests.add_test("test_otioz_error", [] {
         TempDir temp;
 
@@ -507,6 +578,25 @@ main(int argc, char** argv)
         // Write the otioz (error on overwrite)
         assertFalse(write_otioz(tl, otioz_path, WriteOptions(), &error));
         std::filesystem::remove(from_utf8(otioz_path));
+
+        // Write and read the otioz (error on a directory without access,
+        // where the platform enforces it)
+        auto const locked = temp.path() / "locked";
+        std::filesystem::create_directory(locked);
+        std::filesystem::permissions(locked, std::filesystem::perms::none);
+        std::error_code ec;
+        std::filesystem::exists(locked / "error.otioz", ec);
+        if (ec)
+        {
+            std::string const locked_path = to_utf8(locked / "error.otioz");
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otioz(tl, locked_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(read_otioz(locked_path, ReadOptions(), &error));
+            assertTrue(is_error(error));
+        }
+        std::filesystem::permissions(locked, std::filesystem::perms::owner_all);
 
         // Write the otioz (error on missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(
@@ -542,6 +632,25 @@ main(int argc, char** argv)
         // Write the otiod (error on overwrite)
         assertFalse(write_otiod(tl, otiod_path, WriteOptions(), &error));
         std::filesystem::remove_all(from_utf8(otiod_path));
+
+        // Write and read the otiod (error on a directory without access,
+        // where the platform enforces it)
+        auto const locked = temp.path() / "locked";
+        std::filesystem::create_directory(locked);
+        std::filesystem::permissions(locked, std::filesystem::perms::none);
+        std::error_code ec;
+        std::filesystem::exists(locked / "error.otiod", ec);
+        if (ec)
+        {
+            std::string const locked_path = to_utf8(locked / "error.otiod");
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(write_otiod(tl, locked_path, WriteOptions(), &error));
+            assertTrue(is_error(error));
+            error = OTIO_NS::ErrorStatus();
+            assertFalse(read_otiod(locked_path, ReadOptions(), &error));
+            assertTrue(is_error(error));
+        }
+        std::filesystem::permissions(locked, std::filesystem::perms::owner_all);
 
         // Write the otiod (missing media)
         find_clip_by_name(tl, "video clip 1")->set_media_reference(
@@ -674,6 +783,37 @@ main(int argc, char** argv)
         assertEqual(result, nullptr);
         assertTrue(is_error(error));
         assertFalse(std::filesystem::exists(temp.path() / "absolute"));
+    });
+
+    tests.add_test("test_otioz_symlink", [] {
+        TempDir temp;
+
+        // Write an otioz file with a symbolic link to a file outside of
+        // the extract path
+        auto const outside_path = temp.path() / "outside.txt";
+        std::ofstream(outside_path) << "outside";
+        std::string const otioz_path = to_utf8(temp.path() / "symlink.otioz");
+        {
+            ZipWriter zip(otioz_path);
+            zip.add_text(bundle::version_file, bundle::version);
+            SerializableObject::Retainer<Timeline> tl(new Timeline);
+            zip.add_text(bundle::timeline_file, tl->to_json_string());
+            zip.add_symlink("media/link", to_utf8(outside_path));
+        }
+
+        // Read the otioz
+        ReadOptions read_options;
+        auto const extract_path = temp.path() / "extract";
+        read_options.extract_path = to_utf8(extract_path);
+        OTIO_NS::ErrorStatus error;
+        auto result = dynamic_cast<Timeline*>(read_otioz(
+            otioz_path,
+            read_options,
+            &error));
+        assertEqual(result, nullptr);
+        assertTrue(is_error(error));
+        std::error_code ec;
+        assertFalse(std::filesystem::is_symlink(extract_path / "media" / "link", ec));
     });
 
     tests.run(argc, argv);

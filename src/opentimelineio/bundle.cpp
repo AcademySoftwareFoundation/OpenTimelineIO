@@ -30,6 +30,15 @@ namespace bundle {
 
     namespace {
 
+        // The value of a hex digit, or -1 if it is not one
+        int hex_digit(char c)
+        {
+            if (c >= '0' && c <= '9') return c - '0';
+            if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+            if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+            return -1;
+        }
+
         // Utility to decode a URL (ie, %20 -> ' ')
         std::string percent_decode(std::string const& s)
         {
@@ -37,10 +46,13 @@ namespace bundle {
             result.reserve(s.size());
             for (size_t i = 0; i < s.size(); ++i)
             {
-                if (s[i] == '%' && i + 2 < s.size())
+                // Only '%' and two hex digits is an escape; any other '%' is
+                // kept as it is, as in a file named "100%.mov"
+                if (s[i] == '%' && i + 2 < s.size() &&
+                    hex_digit(s[i + 1]) >= 0 && hex_digit(s[i + 2]) >= 0)
                 {
-                    int hi = std::stoi(s.substr(i + 1, 2), nullptr, 16);
-                    result += static_cast<char>(hi);
+                    result += static_cast<char>(
+                        hex_digit(s[i + 1]) * 16 + hex_digit(s[i + 2]));
                     i += 2;
                 }
                 else
@@ -310,12 +322,22 @@ namespace bundle {
                 out_files))
                 return false;
            
-            // Convert the new timeline to json for writing
+            // Convert the new timeline to json for writing. This uses a local
+            // error status since the caller's may be null.
+            ErrorStatus json_error;
             out_json = out_clone->to_json_string(
-                error_status,
-                nullptr,
+                &json_error,
+                options.target_schema_versions
+                    ? &*options.target_schema_versions
+                    : nullptr,
                 options.indent);
-            return !is_error(error_status);
+            if (is_error(json_error))
+            {
+                if (error_status)
+                    *error_status = json_error;
+                return false;
+            }
+            return true;
         }
 
         // Change relative paths to absolute
@@ -503,8 +525,8 @@ namespace bundle {
                 return out;
             }
 
-            // Iterate every entry, invoking fn(filename, is_dir) for each. fn may call
-            // extract_current() to save the current entry to disk.
+            // Iterate every entry, invoking fn(filename, is_dir, is_symlink) for
+            // each. fn may call extract_current() to save the current entry to disk.
             template<typename Fn>
             void for_each_entry(Fn&& fn)
             {
@@ -522,7 +544,11 @@ namespace bundle {
                             "cannot stat zip entry in '" + _path + "'");
 
                     bool const is_dir = (mz_zip_reader_entry_is_dir(_reader) == MZ_OK);
-                    fn(std::string(info->filename ? info->filename : ""), is_dir);
+                    bool const is_symlink = (mz_zip_attrib_is_symlink(
+                        info->external_fa, info->version_madeby) == MZ_OK);
+                    fn(std::string(info->filename ? info->filename : ""),
+                        is_dir,
+                        is_symlink);
 
                     err = mz_zip_reader_goto_next_entry(_reader);
                     if (err != MZ_OK && err != MZ_END_OF_LIST)
@@ -621,6 +647,9 @@ namespace bundle {
         Timeline const*     timeline,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    // The functions below catch whatever escapes their bodies, so that a
+    // filesystem error or the like is reported rather than thrown.
+    try
     {
         // Prepare the bundle
         SerializableObject::Retainer<Timeline> clone;
@@ -660,12 +689,19 @@ namespace bundle {
         
         return total;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, e.what());
+        return std::nullopt;
+    }
 
     bool write_otioz(
         Timeline const*     timeline,
         std::string const&  path,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    try
     {
         // Validate the path
         if (std::filesystem::exists(from_utf8(path)))
@@ -714,11 +750,20 @@ namespace bundle {
         }
         return true;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_WRITE_FAILED,
+                "error writing '" + path + "': " + e.what());
+        return false;
+    }
 
     SerializableObject* read_otioz(
         std::string const& path,
         ReadOptions const& options,
         ErrorStatus*       error_status)
+    try
     {
         // Validate the paths
         auto const input_path = from_utf8(path);
@@ -763,7 +808,10 @@ namespace bundle {
             {
                 std::filesystem::create_directories(output_path);
 
-                zr.for_each_entry([&](std::string const& filename, bool is_dir)
+                zr.for_each_entry([&](
+                    std::string const& filename,
+                    bool is_dir,
+                    bool is_symlink)
                 {
                     auto const file_path = output_path / from_utf8(filename);
 
@@ -771,6 +819,13 @@ namespace bundle {
                     if (!is_path_safe(output_path, file_path))
                         throw std::runtime_error(
                             "unsafe path '" + filename + "' in '" +
+                            path + "'");
+
+                    // Bundles do not contain symbolic links, and extracting
+                    // one could point outside of the extract path
+                    if (is_symlink)
+                        throw std::runtime_error(
+                            "symbolic link '" + filename + "' in '" +
                             path + "'");
 
                     if (is_dir)
@@ -802,8 +857,9 @@ namespace bundle {
             return nullptr;
         }
 
-        // Create the timeline
-        auto result = Timeline::from_json_string(json, error_status);
+        // Create the timeline, held until it is returned so it is not leaked
+        SerializableObject::Retainer<SerializableObject> result(
+            Timeline::from_json_string(json, error_status));
         if (!result || is_error(error_status))
             return nullptr;
 
@@ -811,7 +867,7 @@ namespace bundle {
         if (options.absolute_media_reference_paths &&
             options.extract_path)
         {
-            if (auto timeline = dynamic_cast<Timeline*>(result))
+            if (auto timeline = dynamic_cast<Timeline*>(result.value))
             {
                 rewrite_media_to_absolute(
                     timeline,
@@ -819,7 +875,15 @@ namespace bundle {
             }
         }
 
-        return result;
+        return result.take_value();
+    }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_OPEN_FAILED,
+                "error reading '" + path + "': " + e.what());
+        return nullptr;
     }
 
     bool write_otiod(
@@ -827,6 +891,7 @@ namespace bundle {
         std::string const&  path,
         WriteOptions const& options,
         ErrorStatus*        error_status)
+    try
     {
         // Validate the path
         auto const output_path = from_utf8(path);
@@ -893,11 +958,20 @@ namespace bundle {
         }
         return true;
     }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_WRITE_FAILED,
+                "error writing '" + path + "': " + e.what());
+        return false;
+    }
 
     SerializableObject* read_otiod(
         std::string const& path,
         ReadOptions const& options,
         ErrorStatus*       error_status)
+    try
     {
         // Validate the paths
         auto const input_path = from_utf8(path);
@@ -907,15 +981,6 @@ namespace bundle {
                 *error_status = ErrorStatus(
                     ErrorStatus::FILE_OPEN_FAILED,
                     "input '" + path  + "' is not a directory");
-            return nullptr;
-        }
-        auto const version_path = input_path / version_file;
-        if (!std::filesystem::is_regular_file(version_path))
-        {
-            if (error_status)
-                *error_status = ErrorStatus(
-                    ErrorStatus::FILE_OPEN_FAILED,
-                    "'" + path  + "' is missing a version file");
             return nullptr;
         }
         auto const timeline_path = input_path / timeline_file;
@@ -928,17 +993,16 @@ namespace bundle {
             return nullptr;
         }
         
-        // Read the timeline
-        auto result = Timeline::from_json_file(
-            to_utf8(timeline_path),
-            error_status);
+        // Read the timeline, held until it is returned so it is not leaked
+        SerializableObject::Retainer<SerializableObject> result(
+            Timeline::from_json_file(to_utf8(timeline_path), error_status));
         if (!result || is_error(error_status))
             return nullptr;
         
         // Optionally make the media reference paths absolute
         if (options.absolute_media_reference_paths)
         {
-            if (auto timeline = dynamic_cast<Timeline*>(result))
+            if (auto timeline = dynamic_cast<Timeline*>(result.value))
             {
                 rewrite_media_to_absolute(
                     timeline,
@@ -946,7 +1010,15 @@ namespace bundle {
             }
         }
 
-        return result;
+        return result.take_value();
+    }
+    catch (std::exception const& e)
+    {
+        if (error_status)
+            *error_status = ErrorStatus(
+                ErrorStatus::FILE_OPEN_FAILED,
+                "error reading '" + path + "': " + e.what());
+        return nullptr;
     }
 }
 }

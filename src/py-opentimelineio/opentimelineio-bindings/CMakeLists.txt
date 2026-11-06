@@ -31,8 +31,10 @@ target_link_libraries(_otio PUBLIC opentimelineio opentime)
 # The version of pybind11 we are currently using generates an overwhelming number of
 # compiler warnings; until we update pybind11, suprress the warnings:
 target_compile_options(_otio PRIVATE
-     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:
      -Wno-range-loop-analysis>
+     $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,11>>:
+     -Wno-range-loop-construct>
      $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
      -Wno-unused-value>
      $<$<CXX_COMPILER_ID:MSVC>: /EHsc>

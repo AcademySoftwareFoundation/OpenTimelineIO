@@ -206,14 +206,26 @@ namespace bundle {
                     }
                     else if (auto seq = dynamic_retainer_cast<ImageSequenceReference>(ref.second))
                     {
-                        // Handle image sequence references
+                        // Handle image sequence references. A frame step
+                        // that is not positive has no valid image count.
+                        if (seq->frame_step() <= 0)
+                        {
+                            if (error_status)
+                                *error_status = ErrorStatus(
+                                    ErrorStatus::FILE_WRITE_FAILED,
+                                    "media reference '" + seq->name() +
+                                    "' has a frame step that is not positive");
+                            return false;
+                        }
                         if (policy != MediaReferencePolicy::all_missing)
                         {
-                            for (int frame = 0;
-                                frame < seq->number_of_images_in_sequence();
-                                frame += seq->frame_step())
+                            // The image numbers are indices into the
+                            // sequence, the frame step is applied by
+                            // target_url_for_image_number()
+                            int const images = seq->number_of_images_in_sequence();
+                            for (int image = 0; image < images; ++image)
                             {
-                                file = file_from_url(seq->target_url_for_image_number(frame));
+                                file = file_from_url(seq->target_url_for_image_number(image));
                                 if (file.has_value())
                                 {
                                     const auto path = from_utf8(*file);

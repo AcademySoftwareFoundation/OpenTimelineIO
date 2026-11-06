@@ -9,6 +9,8 @@ import unittest
 import os
 import pathlib
 import tempfile
+import zipfile
+from unittest import mock
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -40,6 +42,44 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             # Read from otiod
             result = otio.adapters.read_from_file(otioz_path)
             self.assertIsNotNone(result)
+
+    def test_target_schema_versions(self):
+        """A bundle can be written at older schema versions, for an older OTIO
+        to read."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            tl.tracks.markers.append(
+                otio.schema.Marker(name="m", color=otio.core.Color.GREEN))
+
+            otioz_path = os.path.join(temp_dir, "versions.otioz")
+            otio.adapters.write_to_file(
+                tl, otioz_path, target_schema_versions={"Marker": 2})
+
+            with zipfile.ZipFile(otioz_path) as zf:
+                content = zf.read("content.otio").decode("utf-8")
+            self.assertIn('"Marker.2"', content)
+
+            result = otio.adapters.read_from_file(otioz_path)
+            self.assertEqual(result.tracks.markers[0].color,
+                             otio.core.Color.GREEN)
+
+    def test_target_schema_versions_from_env(self):
+        """OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL is used when
+        target_schema_versions isn't given, as for .otio files."""
+        with tempfile.TemporaryDirectory() as temp_dir, mock.patch.dict(
+            os.environ,
+            {"OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL": "OTIO_CORE:0.18.1"}
+        ):
+            tl = otio.schema.Timeline()
+            tl.tracks.markers.append(
+                otio.schema.Marker(name="m", color=otio.core.Color.GREEN))
+
+            otioz_path = os.path.join(temp_dir, "env.otioz")
+            otio.adapters.write_to_file(tl, otioz_path)
+
+            with zipfile.ZipFile(otioz_path) as zf:
+                content = zf.read("content.otio").decode("utf-8")
+            self.assertIn('"Marker.2"', content)
 
 
 if __name__ == "__main__":

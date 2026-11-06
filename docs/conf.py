@@ -35,7 +35,9 @@ extensions = [
 
 templates_path = ['_templates']
 
-exclude_patterns = ['_build', '_templates', '.venv']
+exclude_patterns = [
+    '_build', '_templates', '.venv', 'spec/core-specification-overlay.md'
+]
 
 pygments_style = 'sphinx'
 

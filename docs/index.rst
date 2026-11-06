@@ -84,6 +84,7 @@ Schema Reference
    :caption: Schema Reference
 
    tutorials/otio-file-format-specification
+   spec/otio-core-specification
    tutorials/otio-serialized-schema
    tutorials/otio-serialized-schema-only-fields
 

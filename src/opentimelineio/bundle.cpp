@@ -322,14 +322,22 @@ namespace bundle {
                 out_files))
                 return false;
            
-            // Convert the new timeline to json for writing
+            // Convert the new timeline to json for writing. This uses a local
+            // error status since the caller's may be null.
+            ErrorStatus json_error;
             out_json = out_clone->to_json_string(
-                error_status,
+                &json_error,
                 options.target_schema_versions
                     ? &*options.target_schema_versions
                     : nullptr,
                 options.indent);
-            return !is_error(error_status);
+            if (is_error(json_error))
+            {
+                if (error_status)
+                    *error_status = json_error;
+                return false;
+            }
+            return true;
         }
 
         // Change relative paths to absolute

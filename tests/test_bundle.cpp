@@ -8,6 +8,7 @@
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/generatorReference.h>
 #include <opentimelineio/imageSequenceReference.h>
+#include <opentimelineio/marker.h>
 #include <opentimelineio/missingReference.h>
 #include <opentimelineio/stringUtils.h>
 #include <opentimelineio/timeline.h>
@@ -565,6 +566,28 @@ main(int argc, char** argv)
             otiod_path, ReadOptions(), &error));
         assertNotNull(result);
         assertFalse(is_error(error));
+    });
+
+    tests.add_test("test_downgrade_error", [] {
+        // A downgrade that is not possible is an error, whether or not an
+        // error status is given.
+        TempDir temp;
+        SerializableObject::Retainer<Timeline> tl(new Timeline);
+        tl->tracks()->markers().push_back(new Marker("marker"));
+        WriteOptions options;
+        options.target_schema_versions = schema_version_map{ { "Marker", 1 } };
+
+        auto const otioz_path = to_utf8(temp.path() / "downgrade.otioz");
+        auto const otiod_path = to_utf8(temp.path() / "downgrade.otiod");
+        assertFalse(dry_run(tl, options).has_value());
+        assertFalse(write_otioz(tl, otioz_path, options));
+        assertFalse(write_otiod(tl, otiod_path, options));
+        assertFalse(std::filesystem::exists(from_utf8(otioz_path)));
+        assertFalse(std::filesystem::exists(from_utf8(otiod_path)));
+
+        OTIO_NS::ErrorStatus error;
+        assertFalse(write_otioz(tl, otioz_path, options, &error));
+        assertTrue(is_error(error));
     });
 
     tests.add_test("test_otioz_error", [] {

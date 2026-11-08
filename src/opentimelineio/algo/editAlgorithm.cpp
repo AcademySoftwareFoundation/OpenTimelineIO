@@ -177,7 +177,7 @@ overwrite(
             item_range = item->trimmed_range();
             if (range.duration() < item_range.duration() && !is_fill_fit)
                 item->set_source_range(
-                    TimeRange(trimmed_range.start_time(), range.duration()));
+                    TimeRange(item_range.start_time(), range.duration()));
             composition->insert_child(insert_index, item);
             if (!isEqual(second_duration.value(), 0.0))
             {
@@ -233,10 +233,10 @@ overwrite(
                     last_partial = true;
                     const TimeRange trimmed_range =
                         items.back()->trimmed_range();
-                    RationalTime duration = item_range.end_time_inclusive()
-                                            - range.end_time_inclusive();
                     if (items.size() == 1)
                     {
+                        RationalTime duration = item_range.end_time_inclusive()
+                                                - range.end_time_inclusive();
                         duration += range.start_time();
                         last_source_range = TimeRange(
                             trimmed_range.start_time() + range.duration(),
@@ -244,9 +244,12 @@ overwrite(
                     }
                     else
                     {
+                        const RationalTime overwritten =
+                            range.end_time_exclusive()
+                            - item_range.start_time();
                         last_source_range = TimeRange(
-                            trimmed_range.start_time() + duration,
-                            trimmed_range.duration() - duration);
+                            trimmed_range.start_time() + overwritten,
+                            trimmed_range.duration() - overwritten);
                     }
                 }
             }
@@ -362,15 +365,12 @@ insert(
 
     // Insert the new item
     composition->insert_child(insert_index, insert_item);
-    const TimeRange insert_range =
-        composition->trimmed_range_of_child_at_index(insert_index);
 
     // Second item from splitting item
     if (split)
     {
         const TimeRange second_source_range(
-            first_source_range.start_time() + insert_range.start_time()
-                + insert_range.duration(),
+            first_source_range.end_time_exclusive(),
             range.end_time_exclusive() - time);
         // Clone the item for the second partially overwritten item.
         if (!isEqual(second_source_range.duration().value(), 0.0))
@@ -421,19 +421,6 @@ trim(
     const TimeRange range              = item->trimmed_range();
     RationalTime    start_time         = range.start_time();
     RationalTime    end_time_exclusive = range.end_time_exclusive();
-    if (delta_in.value() != 0.0)
-    {
-        start_time += delta_in;
-        if (index > 0)
-        {
-            auto previous = dynamic_retainer_cast<Item>(children[index - 1]);
-            TimeRange previous_range = previous->trimmed_range();
-            previous_range           = TimeRange(
-                previous_range.start_time(),
-                previous_range.duration() + delta_in);
-            previous->set_source_range(previous_range);
-        }
-    }
     if (delta_out.value() != 0.0)
     {
         const int next_index = index + 1;
@@ -441,37 +428,56 @@ trim(
         {
             auto next     = dynamic_retainer_cast<Item>(children[next_index]);
             auto gap_next = dynamic_retainer_cast<Gap>(children[next_index]);
-            if (gap_next && delta_out.value() > 0.0)
+            if (gap_next)
             {
                 end_time_exclusive += delta_out;
+                const TimeRange gap_range = gap_next->trimmed_range();
+                gap_next->set_source_range(TimeRange(
+                    gap_range.start_time(),
+                    gap_range.duration() - delta_out));
             }
             else if (delta_out.value() < 0.0)
             {
-                if (gap_next)
-                {
-                    end_time_exclusive += delta_out;
-                    const TimeRange gap_range = gap_next->trimmed_range();
-                    const TimeRange gap_new_range(
-                        gap_range.start_time() - delta_out,
-                        gap_range.duration() + delta_out);
-                    gap_next->set_source_range(gap_new_range);
-                }
-                else
-                {
-                    end_time_exclusive += delta_out;
+                end_time_exclusive += delta_out;
 
-                    const RationalTime fill_duration = -delta_out;
-                    if (fill_duration.value() > 0.0)
-                    {
-                        const TimeRange fill_range = TimeRange(
-                            RationalTime(0.0, fill_duration.rate()),
-                            fill_duration);
-                        if (!fill_template)
-                            fill_template = new Gap(fill_range);
-                        composition->insert_child(next_index, fill_template);
-                    }
-                }
+                const RationalTime fill_duration = -delta_out;
+                const TimeRange    fill_range    = TimeRange(
+                    RationalTime(0.0, fill_duration.rate()),
+                    fill_duration);
+                if (!fill_template)
+                    fill_template = new Gap(fill_range);
+                composition->insert_child(next_index, fill_template);
             }
+        }
+    }
+    // The start is adjusted after the end, since a fill inserted before the
+    // item changes its index.
+    if (delta_in.value() != 0.0)
+    {
+        auto gap_previous =
+            index > 0 ? dynamic_retainer_cast<Gap>(children[index - 1])
+                      : nullptr;
+        if (gap_previous)
+        {
+            start_time += delta_in;
+            const TimeRange gap_range = gap_previous->trimmed_range();
+            gap_previous->set_source_range(TimeRange(
+                gap_range.start_time(),
+                gap_range.duration() + delta_in));
+        }
+        else if (index > 0 && delta_in.value() > 0.0)
+        {
+            start_time += delta_in;
+            const TimeRange fill_range(
+                RationalTime(0.0, delta_in.rate()),
+                delta_in);
+            if (!fill_template || fill_template->parent())
+                fill_template = new Gap(fill_range);
+            composition->insert_child(index, fill_template);
+        }
+        else if (index == 0)
+        {
+            start_time += delta_in;
         }
     }
     const TimeRange new_range =
@@ -673,14 +679,16 @@ ripple(
     RationalTime    end_time_exclusive = range.end_time_exclusive();
     if (delta_in.value() != 0.0)
     {
+        // Clamp the start between zero and one frame before the end.
         RationalTime in_offset = delta_in;
-        if (delta_in < start_time)
+        if (start_time + delta_in < RationalTime(0.0, start_time.rate()))
         {
             in_offset = -start_time;
         }
-        else if (start_time + delta_in > end_time_exclusive)
+        else if (start_time + delta_in >= end_time_exclusive)
         {
-            in_offset = delta_in - end_time_exclusive;
+            in_offset = end_time_exclusive - start_time
+                        - RationalTime(1.0, start_time.rate());
         }
         start_time += in_offset;
     }
@@ -745,12 +753,11 @@ roll(
             auto previous = dynamic_retainer_cast<Item>(children[index - 1]);
             TimeRange previous_range = previous->trimmed_range();
 
-            // Clamp to previous clip's range first
-            RationalTime duration = previous_range.duration();
-            if (duration < -in_offset)
+            // Clamp to previous clip's range first, leaving it one frame
+            const RationalTime duration = previous_range.duration();
+            if (duration <= -in_offset)
             {
-                duration -= RationalTime(1.0, duration.rate());
-                in_offset -= duration;
+                in_offset = RationalTime(1.0, duration.rate()) - duration;
             }
             previous_range = TimeRange(
                 previous_range.start_time(),
@@ -778,22 +785,23 @@ roll(
             RationalTime    out_offset           = delta_out;
 
             // If available range, clamp to it.
-            if (!(isEqual(available_range.duration().value(), 0.0)))
-            {
-                RationalTime available_start_time =
-                    next_available_range.start_time();
-                if (-out_offset > available_start_time)
-                    out_offset = -available_start_time;
-            }
-            else
-            {
-                if (-out_offset > next_start_time)
-                    out_offset = -next_start_time;
-            }
+            RationalTime next_available_start_time(0.0, next_start_time.rate());
+            if (!(isEqual(next_available_range.duration().value(), 0.0)))
+                next_available_start_time = next_available_range.start_time();
+            if (next_start_time + out_offset < next_available_start_time)
+                out_offset = next_available_start_time - next_start_time;
 
+            // Clamp to the next clip's range, leaving it one frame
+            const RationalTime next_duration = next_range.duration();
+            if (out_offset >= next_duration)
+                out_offset =
+                    next_duration - RationalTime(1.0, next_duration.rate());
+
+            // Move the next item's start with this item's end, so that its
+            // end in the parent does not change
             end_time_exclusive += out_offset;
             next_start_time += out_offset;
-            next_range = TimeRange(next_start_time, next_range.duration());
+            next_range = TimeRange(next_start_time, next_duration - out_offset);
             next->set_source_range(next_range);
         }
     }

@@ -60,8 +60,10 @@ duration is invalid, or if the duration is less than zero.
 Returns true if the time range is valid. The time range is considered valid if both the start time and
 duration are valid, and the duration is greater than or equal to zero.
 )docstring")
-        .def_property_readonly("start_time", &TimeRange::start_time)
-        .def_property_readonly("duration", &TimeRange::duration)
+        .def_property_readonly("start_time", &TimeRange::start_time,
+            "The beginning of the range. The range is half-open: it includes ``start_time``.")
+        .def_property_readonly("duration", &TimeRange::duration,
+            "The length of the range. The range excludes ``start_time + duration``.")
         .def("end_time_inclusive", &TimeRange::end_time_inclusive, R"docstring(
 The time of the last sample containing data in the time range.
 

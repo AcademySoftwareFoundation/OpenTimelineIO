@@ -24,9 +24,12 @@ opentime_timeTransform_bindings(py::module m)
             "offset"_a = RationalTime(),
             "scale"_a  = 1,
             "rate"_a   = -1)
-        .def_property_readonly("offset", &TimeTransform::offset)
-        .def_property_readonly("scale", &TimeTransform::scale)
-        .def_property_readonly("rate", &TimeTransform::rate)
+        .def_property_readonly("offset", &TimeTransform::offset,
+            "The time added when applying this transform.")
+        .def_property_readonly("scale", &TimeTransform::scale,
+            "The factor applied to time when applying this transform.")
+        .def_property_readonly("rate", &TimeTransform::rate,
+            "If greater than zero, the rate the result is rescaled to after applying offset and scale.")
         .def(
             "applied_to",
             (TimeRange (TimeTransform::*)(TimeRange) const)

@@ -106,7 +106,8 @@ project at ASWF TAC meetings.
 
 (alphabetical by last name)
 
-* Jeff Hodges - Adobe
+* Jeff Hodges - Alchemist
+* Darby Johnston - Grizzly Peak 3D
 * Joshua Minor - Pixar
 * Roger Nelson - Autodesk
 * Nick Porcino - Pixar

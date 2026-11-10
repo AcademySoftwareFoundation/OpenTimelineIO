@@ -18,6 +18,7 @@ The OpenTimelineIO Project Committers (alphabetically by last name) are:
 - Daniel Flehner Heen ([apetrynet on github](https://github.com/apetrynet))
 - Jeff Hodges ([jhodges10 on github](https://github.com/jhodges10))
 - Darby Johnston ([darbyjohnston on github](https://github.com/darbyjohnston))
+- Tim Lehr ([timlehr on github](https://github.com/timlehr))
 - Joshua Minor ([jminor on github](https://github.com/jminor))
 - Jean-Christophe Morin ([JeanChristopheMorinPerso on github](https://github.com/JeanChristopheMorinPerso))
 - Roger Nelson ([rogernelson on github](https://github.com/rogernelson))

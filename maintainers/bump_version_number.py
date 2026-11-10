@@ -89,15 +89,23 @@ def main():
         json.dumps({"version": [str(v) for v in (major, minor, patch)]})
     )]
 
-    # update the version headers, which CMake also reads the version from
+    # update the version headers, which CMake also reads the version from.
+    # The version and namespace names, for example v0_19_0 and v0_19, are
+    # updated along with the numbers.
     for path, prefix in VERSION_HEADERS:
         with open(path) as fi:
             content = fi.read()
-        for label, value in (("MAJOR", major), ("MINOR", minor), ("PATCH", patch)):
+        for pattern, value in (
+            (r"_VERSION_MAJOR )\d+", major),
+            (r"_VERSION_MINOR )\d+", minor),
+            (r"_VERSION_PATCH )\d+", patch),
+            (r"_VERSION )v\d+_\d+_\d+", f"v{major}_{minor}_{patch}"),
+            (r"_VERSION_NS )v\d+_\d+", f"v{major}_{minor}"),
+        ):
             content = _replace_once(
                 path,
                 content,
-                r"(#define {}_VERSION_{} )\d+".format(prefix, label),
+                r"(#define {}{}".format(prefix, pattern),
                 r"\g<1>{}".format(value)
             )
         changes.append((path, content))

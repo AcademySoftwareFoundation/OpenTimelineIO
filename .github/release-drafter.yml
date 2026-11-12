@@ -41,67 +41,8 @@ tag-template: 'v$RESOLVED_VERSION'
 #       - 'docs'
 #       - 'style'
 
-# automatically label pull requests
-# https://github.com/release-drafter/release-drafter#autolabeler
-autolabeler:
-  - label: 'feat'
-    title:
-      - '/^feat.+/'
-    branch:
-      - '/feature\/.+/'
-      - '/feat\/.+/'
-  - label: 'fix'
-    title:
-      - '/^fix.+/'
-    branch:
-      - '/bugfix\/.+/'
-      - '/hotfix\/.+/'
-      - '/fix\/.+/'
-  - label: 'build'
-    title:
-      - '/^build.+/'
-    branch:
-      - '/build\/.+/'
-  - label: 'chore'
-    title:
-      - '/^chore.+/'
-    branch:
-      - '/chore\/.+/'
-  - label: 'ci'
-    title:
-      - '/^ci.+/'
-    branch:
-      - '/ci\/.+/'
-  - label: 'documentation'
-    title:
-      - '/^docs.+/'
-    branch:
-      - '/docs\/.+/'
-  - label: 'perf'
-    title:
-      - '/^perf.+/'
-    branch:
-      - '/perf\/.+/'
-  - label: 'refactor'
-    title:
-      - '/^refactor.+/'
-    branch:
-      - '/refactor\/.+/'
-  - label: 'revert'
-    title:
-      - '/^revert.+/'
-    branch:
-      - '/revert\/.+/'
-  - label: 'style'
-    title:
-      - '/^style.+/'
-    branch:
-      - '/style\/.+/'
-  - label: 'test'
-    title:
-      - '/^test.+/'
-    branch:
-      - '/test\/.+/'
+# Automatic file labels are configured in .github/labeler.yml.
+# Release Preview runs the drafter, not its separate autolabeler action.
 
 # Categorize pull requests using labels
 # https://github.com/release-drafter/release-drafter#categorize-pull-requests
@@ -110,6 +51,7 @@ categories:
     labels:
       - 'feat'
       - 'feature'
+      - 'enhancement'
       - 'perf'
   - title: '📖 Documentation'
     labels:
@@ -119,11 +61,29 @@ categories:
       - 'bug'
       - 'bugfix'
       - 'fix'
+  - title: '🐍 Python & Bindings'
+    labels:
+      - 'python'
+      - 'python-bindings'
+      - 'language support'
+  - title: '⏱️ Time'
+    labels:
+      - 'opentime'
+      - 'time calculations'
+      - 'frame rates'
+  - title: '🎨 Color'
+    labels:
+      - 'color'
   - title: '🧰 Maintenance'
     labels:
       - 'build'
+      - 'cmake'
+      - 'maintenance'
       - 'chore'
       - 'dependencies'
+      - 'submodules'
+      - 'github_actions'
+      - 'wheels'
       - 'ci'
       - 'refactor'
       - 'revert'

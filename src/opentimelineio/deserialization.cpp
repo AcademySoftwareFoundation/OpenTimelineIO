@@ -15,6 +15,7 @@
 #include <rapidjson/cursorstreamwrapper.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/filereadstream.h>
+#include <rapidjson/memorystream.h>
 #include <rapidjson/reader.h>
 
 #if defined(_WINDOWS)
@@ -882,12 +883,26 @@ deserialize_json_from_string(
     ErrorStatus*       error_status)
 {
     OTIO_rapidjson::Reader                            reader;
-    OTIO_rapidjson::StringStream                      ss(input.c_str());
-    OTIO_rapidjson::CursorStreamWrapper<decltype(ss)> csw(ss);
+    OTIO_rapidjson::MemoryStream                      ms(
+        input.data(), input.size());
+    OTIO_rapidjson::CursorStreamWrapper<decltype(ms)> csw(ms);
     JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
 
     bool status =
         reader.Parse<OTIO_rapidjson::kParseNanAndInfFlag>(csw, handler);
+
+    // RapidJSON treats NUL as end-of-input, including a NUL inside the buffer.
+    if (status && csw.Tell() != input.size())
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::JSON_PARSE_ERROR,
+                "JSON parse error on input string: embedded NUL byte");
+        }
+        return false;
+    }
+
     handler.finalize();
 
     if (handler.has_errored(error_status))
@@ -929,12 +944,12 @@ deserialize_json_from_file(
         MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);
     std::vector<wchar_t> wchars(wlen);
     MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, wchars.data(), wlen);
-    if (_wfopen_s(&fp, wchars.data(), L"r") != 0)
+    if (_wfopen_s(&fp, wchars.data(), L"rb") != 0)
     {
         fp = nullptr;
     }
 #else  // _WINDOWS
-    fp = fopen(file_name.c_str(), "r");
+    fp = fopen(file_name.c_str(), "rb");
 #endif // _WINDOWS
     if (!fp)
     {
@@ -955,7 +970,28 @@ deserialize_json_from_file(
 
     bool status =
         reader.Parse<OTIO_rapidjson::kParseNanAndInfFlag>(csw, handler);
+
+    // FileReadStream advances past a real NUL, but not its synthetic EOF NUL.
+    // RapidJSON treats both as end-of-input, so distinguish them here.
+    bool embedded_nul = false;
+    if (status)
+    {
+        auto const position = fs.Tell();
+        fs.Take();
+        embedded_nul = fs.Tell() != position;
+    }
     fclose(fp);
+
+    if (embedded_nul)
+    {
+        if (error_status)
+        {
+            *error_status = ErrorStatus(
+                ErrorStatus::JSON_PARSE_ERROR,
+                "JSON parse error in file: embedded NUL byte");
+        }
+        return false;
+    }
 
     handler.finalize();
 

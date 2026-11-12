@@ -2,6 +2,7 @@
 # Copyright Contributors to the OpenTimelineIO project
 
 """Test harness for Image Sequence References."""
+import json
 import unittest
 
 import opentimelineio as otio
@@ -11,6 +12,15 @@ import opentimelineio.test_utils as otio_test_utils
 class ImageSequenceReferenceTests(
     unittest.TestCase, otio_test_utils.OTIOAssertions
 ):
+    def test_deserialize_invalid_frame_step(self):
+        ref = otio.schema.ImageSequenceReference()
+        data = json.loads(otio.adapters.otio_json.write_to_string(ref))
+        for step in (0, -1, 2**31):
+            with self.subTest(frame_step=step):
+                data["frame_step"] = step
+                with self.assertRaisesRegex(ValueError, "frame_step"):
+                    otio.adapters.otio_json.read_from_string(json.dumps(data))
+
     def test_create(self):
         frame_policy = otio.schema.ImageSequenceReference.MissingFramePolicy.hold
         ref = otio.schema.ImageSequenceReference(

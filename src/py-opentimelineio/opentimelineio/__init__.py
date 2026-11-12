@@ -25,3 +25,9 @@ from . import (
     url_utils,
     versioning,
 )
+
+from ._version import __version__
+
+__author__ = "Contributors to the OpenTimelineIO project"
+__author_email__ = "otio-discussion@lists.aswf.io"
+__license__ = "Apache 2.0 License"

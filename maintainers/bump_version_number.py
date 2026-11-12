@@ -105,28 +105,19 @@ def main():
         fo.write("\n".join(cmake_output))
     print("Updated {}".format("CMakeLists.txt"))
 
-    # update the setup.py
-    with open("setup.py") as fi:
-        setup_input = fi.read()
-
-    setup_output = []
-    for ln in setup_input.split("\n"):
-        if "\"version\": " in ln:
-
-            setup_output.append(
-                "    \"version\": \"{}.{}.{}{}\",".format(
-                    major,
-                    minor,
-                    patch,
-                    (".dev1" in ln) and ".dev1" or ""
-                )
-            )
-        else:
-            setup_output.append(ln)
-
-    with open("setup.py", 'w') as fo:
-        fo.write("\n".join(setup_output))
-    print("Updated {}".format("setup.py"))
+    # Update the Python version read by the build backend and at runtime.
+    version_file = "src/py-opentimelineio/opentimelineio/_version.py"
+    with open(version_file) as fi:
+        version_input = fi.read()
+    suffix = ".dev1" if ".dev1" in version_input else ""
+    version_output = []
+    for line in version_input.splitlines():
+        if line.startswith("__version__ ="):
+            line = f'__version__ = "{major}.{minor}.{patch}{suffix}"'
+        version_output.append(line)
+    with open(version_file, "w") as fo:
+        fo.write("\n".join(version_output) + "\n")
+    print(f"Updated {version_file}")
 
 
 def add_suffix(content, version):

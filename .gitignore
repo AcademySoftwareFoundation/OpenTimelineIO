@@ -23,3 +23,7 @@ cpp_cov_html/
 lcov_html_report/
 *.so
 *.pyd
+
+.coverage.*
+coverage.xml
+coverage_html_report/

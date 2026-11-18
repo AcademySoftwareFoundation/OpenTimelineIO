@@ -165,9 +165,18 @@ Note that all metadata should be nested inside a sub-dictionary (in this example
 Clip media (if known) should be linked like this:
 ```python
 clip.media_reference = otio.schema.ExternalReference(
-    target_url="file://example/movie.mov"
+    target_url=otio.url_utils.url_from_filepath("/show/seq/shot/movie.mov")
 )
 ```
+Prefer `otio.url_utils.url_from_filepath()` over building the `file://` URL by
+hand (e.g. `"file://" + path`). A hand-built URL is easy to get subtly wrong —
+for example `"file://" + "/show/movie.mov"` yields `file:///show/movie.mov`
+correctly, but `"file://" + "show/movie.mov"` (no leading slash, or a
+Windows-style path like `C:\show\movie.mov`) produces a URL whose first path
+segment is parsed as the host per [RFC 3986](https://tools.ietf.org/html/rfc3986#section-2.1),
+silently dropping part of the path. `url_from_filepath()` handles absolute vs.
+relative paths and Windows drive letters correctly, and its output round-trips
+through `otio.url_utils.filepath_from_url()`.
 
 Some formats don't support direct links to media, but focus on metadata instead. It is fine to leave the media_reference empty ('None') if your adapter doesn't know a real file path or URL for the media.
 
@@ -186,7 +195,7 @@ Note that the source_range of the clip is not necessarily the same as the availa
 If you know the range of media available at that Media Reference's URL, then you can specify it like this:
 ```python
 clip.media_reference = otio.schema.ExternalReference(
-  target_url="file://example/movie.mov",
+  target_url=otio.url_utils.url_from_filepath("/show/seq/shot/movie.mov"),
   available_range=otio.opentime.TimeRange(
       start_time=otio.opentime.RationalTime(100, 24), # frame 100 @ 24fps
       duration=otio.opentime.RationalTime(500, 24) # 500 frames @ 24fps

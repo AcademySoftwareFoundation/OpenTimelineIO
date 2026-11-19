@@ -6,7 +6,7 @@ name: OpenTimelineIO
 # for configuring which build will be a C++ coverage build / coverage report
 env:
   GH_COV_PY: "3.13"
-  GH_COV_OS: ubuntu-latest
+  GH_COV_OS: ubuntu-24.04
   GH_DEPENDABOT: dependabot
 
 on:
@@ -33,12 +33,14 @@ jobs:
         # windows-latest to Windows Server 2025 + Visual Studio 2026 +
         # CMake 4.3 breaks the vcpkg-based ZLIB find_package path.
         # windows-2022 is supported by GitHub through ~2028.
-        os: [ubuntu-latest, windows-2022, macos-15]
+        # Pinned to ubuntu-24.04 because ubuntu-latest moved to Ubuntu 26.04,
+        # which has no Python 3.9 builds for actions/setup-python.
+        os: [ubuntu-24.04, windows-2022, macos-15]
         shared: ["ON", "OFF"]
         # Unfortunately the CMake test target is OS dependent so we set it as
         # a variable here.
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             OTIO_TEST_TARGET: test
           - os: windows-2022
             OTIO_TEST_TARGET: RUN_TESTS
@@ -117,11 +119,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # See note in cpp_build about pinning to windows-2022.
-        os: [ubuntu-latest, windows-2022, macos-15]
+        # See the notes in cpp_build about pinning to windows-2022 and ubuntu-24.04.
+        os: [ubuntu-24.04, windows-2022, macos-15]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.15"]
         include:
-          - { os: ubuntu-latest, shell: bash }
+          - { os: ubuntu-24.04, shell: bash }
           - { os: macos-15, shell: bash }
           - { os: windows-2022, shell: pwsh }
           - { os: windows-2022, shell: msys2, python-version: "mingw64" }

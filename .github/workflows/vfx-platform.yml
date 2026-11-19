@@ -29,17 +29,22 @@ jobs:
           # included as forward-looking support.
           - platform: "2023"
             cxx-standard: 17
+            image: "aswf/ci-otio:2023@sha256:888156204e68f3ced0ff277157423852c9330f0eed48419361a67fbf5ab48a53"
           - platform: "2024"
             cxx-standard: 17
+            image: "aswf/ci-otio:2024@sha256:e5cf8b39c930258aa447a3e19f2f085cd231ff6433ab1d33ae2067c2e62c9853"
           - platform: "2025"
             cxx-standard: 17
+            image: "aswf/ci-otio:2025@sha256:2253b4e8ec4e231874f5b5a0e623f58ba50b758578a87404b670cc004c033417"
           - platform: "2026"
             cxx-standard: 20
+            image: "aswf/ci-otio:2026@sha256:53aa78ae1951512cc1ad84c6deed932a1a4dff50740b82a6abf7a31f2715c071"
           - platform: "2027"
             cxx-standard: 20
+            image: "aswf/ci-otio:2027@sha256:7b545f0e9151b802638448b07e7f3947622bb314f23a865f68ef46c8c6d8347a"
 
     container:
-      image: aswf/ci-otio:${{ matrix.platform }}
+      image: ${{ matrix.image }}
 
     steps:
       # checkout *without* submodules, so we'll pick up the dependencies in the aswf containers
@@ -91,7 +96,7 @@ jobs:
         run: |
           python -m venv .venv
           source .venv/bin/activate
-          python -m pip install --upgrade pip
+          python -m pip install "pip==25.2"
           export CMAKE_ARGS="-DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_STANDARD=${{ matrix.cxx-standard }} -DOTIO_AUTOMATIC_SUBMODULES=OFF -DOTIO_CXX_EXAMPLES=OFF -DOTIO_DEPENDENCIES_INSTALL=OFF -DOTIO_FIND_IMATH=ON -DOTIO_FIND_PYBIND11=ON -DOTIO_FIND_RAPIDJSON=ON -DOTIO_FIND_MINIZIP_NG=ON"
           python -m pip install .
           make test

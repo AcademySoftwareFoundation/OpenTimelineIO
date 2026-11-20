@@ -2199,6 +2199,9 @@ main(int argc, char** argv)
 
         assert(is_error(error_status));
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
+
+        // Break the cycle so the clip can be freed
+        big_clip->metadata().erase("cycle");
     });
 
     tests.add_test("regression: overwrite fails gracefully", [] {
@@ -2229,6 +2232,10 @@ main(int argc, char** argv)
 
         assert(is_error(error_status));
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
+
+        // Break the cycles so the clips can be freed
+        big_clip->metadata().erase("cycle");
+        small_clip->metadata().erase("cycle");
     });
 
     tests.add_test("regression: insert fails gracefully", [] {
@@ -2259,6 +2266,10 @@ main(int argc, char** argv)
 
         assert(is_error(error_status));
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
+
+        // Break the cycles so the clips can be freed
+        big_clip->metadata().erase("cycle");
+        small_clip->metadata().erase("cycle");
     });
 
     tests.add_test("regression: fill fails gracefully", [] {
@@ -2301,6 +2312,11 @@ main(int argc, char** argv)
 
         assert(is_error(error_status));
         assert(error_status.outcome == OTIO_NS::ErrorStatus::TYPE_MISMATCH);
+
+        // Break the cycles so the clips can be freed
+        big_clip->metadata().erase("cycle");
+        small_clip->metadata().erase("cycle");
+        small_clip2->metadata().erase("cycle");
     });
 
     tests.run(argc, argv);

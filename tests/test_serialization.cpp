@@ -111,7 +111,7 @@ main(int argc, char** argv)
     });
 
     tests.add_test("clone", [] {
-        auto json     = R"CONTENT({
+        auto json = R"CONTENT({
   "OTIO_SCHEMA": "SerializableObjectWithMetadata.1",
   "metadata": {
     "a": 1,
@@ -127,9 +127,11 @@ main(int argc, char** argv)
   },
   "name": ""
 })CONTENT";
-        auto original = SerializableObjectWithMetadata::from_json_string(json);
-        auto cloned   = original->clone();
-        assert(cloned != nullptr);
+
+        SerializableObject::Retainer<> original(
+            SerializableObjectWithMetadata::from_json_string(json));
+        SerializableObject::Retainer<> cloned(original->clone());
+        assert(cloned);
         OTIO_NS::ErrorStatus err;
         auto                 cloned_json = cloned->to_json_string(&err, {}, 2);
         assertFalse(is_error(err));
@@ -137,10 +139,11 @@ main(int argc, char** argv)
     });
 
     tests.add_test("clone with cycle returns nullptr", [] {
-        auto original                 = new SerializableObjectWithMetadata();
-        original->metadata()["cycle"] = original;
-        auto cloned                   = original->clone();
-        assert(cloned == nullptr);
+        SerializableObject::Retainer<SerializableObjectWithMetadata> original(
+            new SerializableObjectWithMetadata());
+        original->metadata()["cycle"] = original.value;
+        SerializableObject::Retainer<> cloned(original->clone());
+        assert(!cloned);
     });
 
     tests.run(argc, argv);

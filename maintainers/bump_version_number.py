@@ -6,10 +6,14 @@
 __doc__ = """Manage and apply the version in the OTIO_VERSION.json file"""
 
 import argparse
-import sys
 import json
+import re
 
 OTIO_VERSION_JSON_PATH = "OTIO_VERSION.json"
+VERSION_HEADERS = [
+    ("src/opentime/version.h", "OPENTIME"),
+    ("src/opentimelineio/version.h", "OPENTIMELINEIO"),
+]
 
 
 def version():
@@ -71,87 +75,67 @@ def main():
     elif args.increment == "patch":
         patch += 1
     elif args.set:
-        major, minor, patch = args.set
+        major, minor, patch = (int(v) for v in args.set)
     elif args.query:
         print(".".join(str(v) for v in (major, minor, patch)))
         return
 
     print(f"Setting version to: {major}.{minor}.{patch}")
 
-    # update the OTIO_VERSION file
-    with open(OTIO_VERSION_JSON_PATH, "w") as fo:
-        fo.write(
-            json.dumps({"version": [str(v) for v in (major, minor, patch)]})
-        )
-    print(f"Updated {OTIO_VERSION_JSON_PATH}")
+    # Make all of the changes before writing anything, so that an error
+    # does not leave the files with different versions
+    changes = [(
+        OTIO_VERSION_JSON_PATH,
+        json.dumps({"version": [str(v) for v in (major, minor, patch)]})
+    )]
 
-    #  update the CMakeLists.txt
-    with open("CMakeLists.txt") as fi:
-        cmake_input = fi.read()
-
-    cmake_output = []
-    key_map = {"MAJOR": major, "MINOR": minor, "PATCH": patch}
-    for ln in cmake_input.split("\n"):
-        for label, new_value in key_map.items():
-            if f"set(OTIO_VERSION_{label} \"" in ln:
-                cmake_output.append(
-                    f"set(OTIO_VERSION_{label} \"{new_value}\")"
-                )
-                break
-        else:
-            cmake_output.append(ln)
-
-    with open("CMakeLists.txt", 'w') as fo:
-        fo.write("\n".join(cmake_output))
-    print("Updated {}".format("CMakeLists.txt"))
-
-    # update the setup.py
-    with open("setup.py") as fi:
-        setup_input = fi.read()
-
-    setup_output = []
-    for ln in setup_input.split("\n"):
-        if "\"version\": " in ln:
-
-            setup_output.append(
-                "    \"version\": \"{}.{}.{}{}\",".format(
-                    major,
-                    minor,
-                    patch,
-                    (".dev1" in ln) and ".dev1" or ""
-                )
+    # update the version headers, which CMake also reads the version from.
+    # The version and namespace names, for example v0_19_0 and v0_19, are
+    # updated along with the numbers.
+    for path, prefix in VERSION_HEADERS:
+        with open(path) as fi:
+            content = fi.read()
+        for pattern, value in (
+            (r"_VERSION_MAJOR )\d+", major),
+            (r"_VERSION_MINOR )\d+", minor),
+            (r"_VERSION_PATCH )\d+", patch),
+            (r"_VERSION )v\d+_\d+_\d+", f"v{major}_{minor}_{patch}"),
+            (r"_VERSION_NS )v\d+_\d+", f"v{major}_{minor}"),
+        ):
+            content = _replace_once(
+                path,
+                content,
+                r"(#define {}{}".format(prefix, pattern),
+                r"\g<1>{}".format(value)
             )
-        else:
-            setup_output.append(ln)
+        changes.append((path, content))
 
-    with open("setup.py", 'w') as fo:
-        fo.write("\n".join(setup_output))
-    print("Updated {}".format("setup.py"))
+    # update the setup.py, keeping the .dev1 suffix if it is there
+    with open("setup.py") as fi:
+        content = fi.read()
+    changes.append(("setup.py", _replace_once(
+        "setup.py",
+        content,
+        r'("version": ")\d+\.\d+\.\d+((\.dev1)?",)',
+        r"\g<1>{}.{}.{}\g<2>".format(major, minor, patch)
+    )))
+
+    for path, content in changes:
+        if not args.dryrun:
+            with open(path, "w") as fo:
+                fo.write(content)
+        print(f"Updated {path}")
 
 
-def add_suffix(content, version):
-    if version not in content:
-        sys.stderr.write(
-            "Version {} not found, suffix may have already been "
-            "added.\n".format(version)
+def _replace_once(path, content, pattern, replacement):
+    content, count = re.subn(pattern, replacement, content)
+    if count != 1:
+        raise RuntimeError(
+            "Expected one match for '{}' in {}, found {}".format(
+                pattern, path, count
+            )
         )
-        return False
-
-    print("adding suffix, version will be: {}".format(version + ".dev1"))
-    content.replace(version, version + ".dev1")
-    return True
-
-
-def remove_suffix(content, version):
-    if version + '.dev1' not in content:
-        sys.stderr.write(
-            "Version+Suffix {} not found, suffix may have already been "
-            "removed.\n".format(version + '.dev1')
-        )
-        return False
-
-    content.replace(version + ' .dev1', version)
-    return True
+    return content
 
 
 if __name__ == "__main__":

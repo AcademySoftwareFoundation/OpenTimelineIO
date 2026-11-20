@@ -352,10 +352,9 @@ main(int argc, char** argv)
         assertTrue(write_otioz(tl, otioz_path, write_options, &error));
         
         // Read the otioz and compare with the original
-        auto result = dynamic_cast<Timeline*>(read_otioz(
-            otioz_path,
-            ReadOptions(),
-            &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otioz(otioz_path, ReadOptions(), &error)));
         assertNotNull(result);
         compare_filenames(tl, result);
 
@@ -418,10 +417,9 @@ main(int argc, char** argv)
         // Read the otiod and compare with the original
         ReadOptions read_options;
         read_options.absolute_media_reference_paths = true;
-        auto result = dynamic_cast<Timeline*>(read_otiod(
-            otiod_path,
-            read_options,
-            &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otiod(otiod_path, read_options, &error)));
         assertNotNull(result);
         compare_filenames(tl, result);
 
@@ -484,11 +482,10 @@ main(int argc, char** argv)
             OTIO_NS::ErrorStatus error;
             assertTrue(dry_run(tl, write_options, &error).has_value());
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
-            
-            auto result = dynamic_cast<Timeline*>(read_otioz(
-                otioz_path,
-                ReadOptions(),
-                &error));
+
+            SerializableObject::Retainer<Timeline> result(
+                dynamic_cast<Timeline*>(
+                    read_otioz(otioz_path, ReadOptions(), &error)));
             assertNotNull(result);
             assertNotNull(dynamic_cast<MissingReference*>(
                 find_clip_by_name(result, "video clip 2")->media_reference()));
@@ -507,11 +504,10 @@ main(int argc, char** argv)
             OTIO_NS::ErrorStatus error;
             assertTrue(dry_run(tl, write_options, &error).has_value());
             assertTrue(write_otioz(tl, otioz_path, write_options, &error));
-            
-            auto result = dynamic_cast<Timeline*>(read_otioz(
-                otioz_path,
-                ReadOptions(),
-                &error));
+
+            SerializableObject::Retainer<Timeline> result(
+                dynamic_cast<Timeline*>(
+                    read_otioz(otioz_path, ReadOptions(), &error)));
             assertNotNull(result);
             assertNotNull(dynamic_cast<MissingReference*>(
                 find_clip_by_name(result, "video clip 1")->media_reference()));
@@ -528,8 +524,9 @@ main(int argc, char** argv)
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otioz(tl, otioz_path, WriteOptions(), &error));
 
-        auto result = dynamic_cast<Timeline*>(read_otioz(
-            otioz_path, ReadOptions(), &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otioz(otioz_path, ReadOptions(), &error)));
         assertNotNull(result);
         assertEqual(result->find_clips().size(), 0);
     });
@@ -542,8 +539,9 @@ main(int argc, char** argv)
         OTIO_NS::ErrorStatus error;
         assertTrue(write_otiod(tl, otiod_path, WriteOptions(), &error));
 
-        auto result = dynamic_cast<Timeline*>(read_otiod(
-            otiod_path, ReadOptions(), &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otiod(otiod_path, ReadOptions(), &error)));
         assertNotNull(result);
         assertEqual(result->find_clips().size(), 0);
     });
@@ -562,8 +560,9 @@ main(int argc, char** argv)
         assertTrue(std::filesystem::is_regular_file(version_path));
         std::filesystem::remove(version_path);
 
-        auto result = dynamic_cast<Timeline*>(read_otiod(
-            otiod_path, ReadOptions(), &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otiod(otiod_path, ReadOptions(), &error)));
         assertNotNull(result);
         assertFalse(is_error(error));
     });
@@ -612,7 +611,8 @@ main(int argc, char** argv)
         std::filesystem::create_directory(locked);
         std::filesystem::permissions(locked, std::filesystem::perms::none);
         std::error_code ec;
-        std::filesystem::exists(locked / "error.otioz", ec);
+        // Only the error code is needed, to see if access is enforced
+        (void)std::filesystem::exists(locked / "error.otioz", ec);
         if (ec)
         {
             std::string const locked_path = to_utf8(locked / "error.otioz");
@@ -666,7 +666,8 @@ main(int argc, char** argv)
         std::filesystem::create_directory(locked);
         std::filesystem::permissions(locked, std::filesystem::perms::none);
         std::error_code ec;
-        std::filesystem::exists(locked / "error.otiod", ec);
+        // Only the error code is needed, to see if access is enforced
+        (void)std::filesystem::exists(locked / "error.otiod", ec);
         if (ec)
         {
             std::string const locked_path = to_utf8(locked / "error.otiod");
@@ -747,10 +748,9 @@ main(int argc, char** argv)
         ReadOptions read_options;
         auto const extract_path = temp.path() / "extract";
         read_options.extract_path = to_utf8(extract_path);
-        auto result = dynamic_cast<Timeline*>(read_otioz(
-            otioz_path,
-            read_options,
-            &error));
+        SerializableObject::Retainer<Timeline> result(
+            dynamic_cast<Timeline*>(
+                read_otioz(otioz_path, read_options, &error)));
         assertNotNull(result);
         assertEqual(
             std::filesystem::file_size(extract_path / "media" / large_file),

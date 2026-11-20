@@ -50,7 +50,7 @@ main(int argc, char** argv)
         st->append_child(tr_under);
         st->append_child(tr_over);
 
-        auto result = flatten_stack(st);
+        SerializableObject::Retainer<Track> result = flatten_stack(st);
 
         assertEqual(result->children()[0]->name(), std::string("track1_A"));
         assertEqual(result->children().size(), 2);
@@ -97,7 +97,7 @@ main(int argc, char** argv)
         st->append_child(tr_middle);
         st->append_child(tr_top);
 
-        auto result = flatten_stack(st);
+        SerializableObject::Retainer<Track> result = flatten_stack(st);
 
         assertEqual(result->children()[0]->name(), std::string("track1_A"));
         assertEqual(result->children().size(), 2);
@@ -140,7 +140,7 @@ main(int argc, char** argv)
         st->append_child(tr_middle);
         st->append_child(tr_top);
 
-        auto result = flatten_stack(st);
+        SerializableObject::Retainer<Track> result = flatten_stack(st);
 
         assertEqual(result->children()[0]->name(), std::string("track1_A"));
         assertEqual(result->children().size(), 2);
@@ -179,7 +179,7 @@ main(int argc, char** argv)
         st.push_back(tr_under);
         st.push_back(tr_over);
 
-        auto result = flatten_stack(st);
+        SerializableObject::Retainer<Track> result = flatten_stack(st);
 
         assertEqual(result->children()[0]->name(), std::string("track1_A"));
         assertEqual(result->children().size(), 2);

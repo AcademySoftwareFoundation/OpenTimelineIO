@@ -41,8 +41,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 TypeRegistry&
 TypeRegistry::TypeRegistry::instance()
 {
-    static TypeRegistry r;
-    return r;
+    // The registry is never destroyed, so the type records stay valid while
+    // other static objects are destroyed at exit
+    static TypeRegistry* r = new TypeRegistry;
+    return *r;
 }
 
 TypeRegistry::TypeRegistry()

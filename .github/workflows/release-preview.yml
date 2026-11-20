@@ -25,6 +25,9 @@ jobs:
     if: ${{github.event.inputs.create-new-branch && github.event.inputs.create-new-branch == 'true' && !startsWith(github.ref,'refs/heads/release/')}}
     name: Release Branch
     runs-on: ubuntu-latest
+    permissions:
+      # Push the new release branch
+      contents: write
     outputs:
       branch-name: ${{ steps.get-branch-name.outputs.branch-name }}
     steps:
@@ -46,6 +49,10 @@ jobs:
     if: ${{ always() }}
     name: Release Preview
     runs-on: ubuntu-latest
+    permissions:
+      # Create or update the draft release, from the merged pull requests
+      contents: write
+      pull-requests: read
     steps:
       - name: Draft or Update a Release
         # https://github.com/release-drafter/release-drafter

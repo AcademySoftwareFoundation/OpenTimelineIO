@@ -107,12 +107,11 @@ void create_refs(Timeline* timeline, std::filesystem::path const& path)
             }
             else if (auto seq = dynamic_cast<ImageSequenceReference*>(ref.second))
             {
-                auto const base = file_from_url(seq->target_url_base());
-                for (int frame = seq->start_frame();
-                    frame <= seq->end_frame();
-                    frame += seq->frame_step())
+                for (int image = 0;
+                    image < seq->number_of_images_in_sequence();
+                    ++image)
                 {
-                    if (auto const file = file_from_url(seq->target_url_for_image_number(frame)))
+                    if (auto const file = file_from_url(seq->target_url_for_image_number(image)))
                     {
                         auto const file_path = from_utf8(*file);
                         create_file(file_path.is_relative() ?
@@ -438,6 +437,47 @@ main(int argc, char** argv)
         assertTrue(file.has_value());
         assertTrue(from_utf8(*file).is_absolute());
         assertTrue(std::filesystem::exists(from_utf8(*file)));
+    });
+
+    tests.add_test("test_image_sequence_frame_step", [] {
+        TempDir temp;
+
+        // A sequence of every other frame, 1 through 23
+        auto tl = create_simple_timeline();
+        auto seq = new ImageSequenceReference(
+            "",
+            "render.",
+            ".exr",
+            1, 2, 24, 0,
+            ImageSequenceReference::MissingFramePolicy::error,
+            TimeRange(0, 24, 24));
+        find_clip_by_name(tl, "video clip 1")->set_media_reference(seq);
+        create_refs(tl, temp.path());
+
+        // All of the images are in the bundle, and only those
+        WriteOptions write_options;
+        write_options.relative_media_base_dir = to_utf8(temp.path());
+        auto const otiod_path = temp.path() / "frame_step.otiod";
+        OTIO_NS::ErrorStatus error;
+        assertTrue(write_otiod(tl, to_utf8(otiod_path), write_options, &error));
+        for (int frame = 1; frame <= 24; ++frame)
+        {
+            std::stringstream ss;
+            ss << "render." << frame << ".exr";
+            assertEqual(
+                std::filesystem::exists(otiod_path / media_dir / ss.str()),
+                frame % 2 == 1);
+        }
+
+        // A frame step that is not positive is an error
+        for (int step : { 0, -1 })
+        {
+            seq->set_frame_step(step);
+            assertFalse(dry_run(tl, write_options).has_value());
+            write_options.policy = MediaReferencePolicy::all_missing;
+            assertFalse(dry_run(tl, write_options).has_value());
+            write_options.policy = MediaReferencePolicy::error_if_not_file;
+        }
     });
 
     tests.add_test("test_otioz_media_policy", [] {

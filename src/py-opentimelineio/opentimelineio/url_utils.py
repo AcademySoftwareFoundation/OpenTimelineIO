@@ -4,7 +4,7 @@
 """Utilities for conversion between URLs and file paths."""
 
 import os
-import urllib
+import urllib.parse
 import pathlib
 
 from ._otio import bundle

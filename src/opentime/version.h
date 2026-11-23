@@ -3,6 +3,7 @@
 
 #pragma once
 
+// These are updated by maintainers/bump_version_number.py
 #define OPENTIME_VERSION_MAJOR 0
 #define OPENTIME_VERSION_MINOR 19
 #define OPENTIME_VERSION_PATCH 0

@@ -81,6 +81,27 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 content = zf.read("content.otio").decode("utf-8")
             self.assertIn('"Marker.2"', content)
 
+    def test_dry_run(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            tr = otio.schema.Track()
+            tl.tracks.append(tr)
+            cl = otio.schema.Clip()
+            tr.append(cl)
+            cl.media_reference = otio.schema.ExternalReference("video.mov")
+            with open(os.path.join(temp_dir, "video.mov"), "wb") as f:
+                f.write(b"\0" * 1000)
+
+            # The size includes the media, and nothing is written
+            otioz_path = os.path.join(temp_dir, "dry_run.otioz")
+            size = otio.adapters.write_to_file(
+                tl,
+                otioz_path,
+                relative_media_base_dir=temp_dir,
+                dryrun=True)
+            self.assertGreater(size, 1000)
+            self.assertFalse(os.path.exists(otioz_path))
+
 
 if __name__ == "__main__":
     unittest.main()

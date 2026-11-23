@@ -16,6 +16,7 @@
 #include <mz_zip_rw.h>
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 
@@ -205,14 +206,26 @@ namespace bundle {
                     }
                     else if (auto seq = dynamic_retainer_cast<ImageSequenceReference>(ref.second))
                     {
-                        // Handle image sequence references
+                        // Handle image sequence references. A frame step
+                        // that is not positive has no valid image count.
+                        if (seq->frame_step() <= 0)
+                        {
+                            if (error_status)
+                                *error_status = ErrorStatus(
+                                    ErrorStatus::FILE_WRITE_FAILED,
+                                    "media reference '" + seq->name() +
+                                    "' has a frame step that is not positive");
+                            return false;
+                        }
                         if (policy != MediaReferencePolicy::all_missing)
                         {
-                            for (int frame = 0;
-                                frame < seq->number_of_images_in_sequence();
-                                frame += seq->frame_step())
+                            // The image numbers are indices into the
+                            // sequence, the frame step is applied by
+                            // target_url_for_image_number()
+                            int const images = seq->number_of_images_in_sequence();
+                            for (int image = 0; image < images; ++image)
                             {
-                                file = file_from_url(seq->target_url_for_image_number(frame));
+                                file = file_from_url(seq->target_url_for_image_number(image));
                                 if (file.has_value())
                                 {
                                     const auto path = from_utf8(*file);
@@ -499,29 +512,30 @@ namespace bundle {
                         "cannot open zip entry '" + name + "' in '" +
                         _path + "'");
 
-                // Close the entry on any exit path.
-                struct EntryScope {
-                    void* r; ~EntryScope() { mz_zip_reader_entry_close(r); }
-                } scope{ _reader };
+                // Read in chunks rather than allocating the uncompressed size
+                // recorded in the zip file, which can be forged to make a tiny
+                // file allocate gigabytes of memory. If an exception is thrown
+                // the entry is closed when the reader is destroyed.
+                std::string out;
+                std::array<char, 65536> buffer;
+                while (true)
+                {
+                    int32_t const n = mz_zip_reader_entry_read(
+                        _reader, buffer.data(), static_cast<int32_t>(buffer.size()));
+                    if (n == 0)
+                        break;
+                    if (n < 0)
+                        throw std::runtime_error(
+                            "cannot read zip entry '" + name + "' in '" +
+                            _path + "'");
+                    out.append(buffer.data(), static_cast<size_t>(n));
+                }
 
-                mz_zip_file* info = nullptr;
-                if (mz_zip_reader_entry_get_info(_reader, &info) != MZ_OK || !info)
+                // Closing the entry verifies the CRC
+                if (mz_zip_reader_entry_close(_reader) != MZ_OK)
                     throw std::runtime_error(
-                        "cannot stat zip entry '" + name + "' in '" +
+                        "zip entry '" + name + "' is corrupt in '" +
                         _path + "'");
-                if (info->uncompressed_size < 0 ||
-                    info->uncompressed_size > static_cast<int64_t>(INT32_MAX))
-                    throw std::runtime_error(
-                        "zip entry '" + name + "' too large in '" +
-                        _path + "'");
-
-                std::string out(static_cast<size_t>(info->uncompressed_size), '\0');
-                int32_t const n = mz_zip_reader_entry_read(
-                    _reader, out.data(), static_cast<int32_t>(out.size()));
-                if (n != static_cast<int32_t>(out.size()))
-                    throw std::runtime_error(
-                        "cannot extract zip '" + name +
-                        "' entry to memory in '" + _path + "'");
                 return out;
             }
 

@@ -103,6 +103,48 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     relative_media_base_dir=temp_dir,
                     media_policy="not_a_policy")
 
+    def test_bundle_module(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            otiod_path = os.path.join(temp_dir, "module.otiod")
+            otio.bundle.write_otiod(tl, otiod_path)
+            self.assertIsNotNone(otio.bundle.read_otiod(otiod_path))
+
+    def test_dry_run(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tl = otio.schema.Timeline()
+            tr = otio.schema.Track()
+            tl.tracks.append(tr)
+            cl = otio.schema.Clip()
+            tr.append(cl)
+            media_path = os.path.join(temp_dir, "video.mov")
+            with open(media_path, "wb") as f:
+                f.write(b"\0" * 1000)
+            cl.media_reference = otio.schema.ExternalReference(
+                otio.url_utils.url_from_filepath(media_path))
+
+            # A dry run writes nothing, and the size includes the media
+            otiod_path = os.path.join(temp_dir, "dry_run.otiod")
+            size = otio.bundle.dry_run(tl)
+            self.assertEqual(
+                otio.adapters.write_to_file(tl, otiod_path, dryrun=True),
+                size)
+            self.assertFalse(os.path.exists(otiod_path))
+
+            with open(media_path, "wb") as f:
+                f.write(b"\0" * 3000)
+            self.assertEqual(otio.bundle.dry_run(tl), size + 2000)
+
+            # Non-file media is an error with the default policy
+            cl.media_reference = otio.schema.ExternalReference(
+                "http://example.com/video.mov")
+            with self.assertRaises(OSError):
+                otio.bundle.dry_run(tl)
+
+            options = otio.bundle.WriteOptions()
+            options.policy = otio.bundle.MediaReferencePolicy.all_missing
+            self.assertGreater(otio.bundle.dry_run(tl, options), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

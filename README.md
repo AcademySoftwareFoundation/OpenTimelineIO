@@ -154,42 +154,72 @@ You can get the latest development version via:
 
 `git clone git@github.com:AcademySoftwareFoundation/OpenTimelineIO.git --recursive `
 
-You can install development dependencies with `python -m pip install .[dev]`
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then create
+the development environment and compile the native extensions:
 
-You can also install the PySide2 dependency with `python -m pip install .[view]`
+```sh
+uv sync --locked
+uv run python -m unittest discover -s tests
+make lint
+```
 
-You may need to escape the `[` depending on your shell, `\[view\]` .
+The package supports Python 3.9–3.15. `uv.lock` pins development dependencies
+across supported Python versions; it does not add runtime dependencies to OTIO.
+Use `uv sync --locked --group docs` to install documentation tools (Python 3.11+).
+No environment activation is needed with `uv run`.
 
-Currently the code base is written against python 3.9-3.15,
-in keeping with the pep8 style.  We ask that before developers submit pull
-request, they:
+The Makefile provides the same commands as `make sync`, `make test`, `make lint`,
+and `make coverage`. Python style continues to be checked with Flake8; the
+existing `make format` target formats C++.
 
-- run `make test` -- to ensure that none of the unit tests were broken
-- run `make lint` -- to ensure that coding conventions conform to pep8
-- run `make coverage` -- to detect code which isn't covered
+`uv build` creates a source distribution and builds a wheel from that archive.
+The build backend is scikit-build-core, which invokes the existing CMake build.
+A C++ compiler and zlib development files are still required. Standard PEP 517
+frontends, including `python -m pip install .`, remain supported.
 
-PEP8: https://www.python.org/dev/peps/pep-0008/
+CMake options can be passed with build configuration settings, for example:
 
-For advanced developers, arguments can be passed to CMake through the pip
-commandline by using the `CMAKE_ARGS` environment variable.
+```sh
+uv sync --locked --reinstall-package opentimelineio -Ccmake.define.CMAKE_CXX_STANDARD=17
+```
 
-*nix Example:
+The `CMAKE_ARGS` environment variable is also supported. After editing C++ code,
+run `uv sync --locked --reinstall-package opentimelineio` to rebuild the extensions;
+pure Python edits are available immediately in the editable installation.
 
-`env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
+### VFX Reference Platform builds
 
-Additionally, to reproduce CI failures regarding the file manifest, run:
-`make manifest` locally to run the python `check-manifest` program.
+Modern Python tooling does not change the required VFX Reference Platform
+runtime, compiler, or dependency versions. The CY2023–CY2027 CI jobs use the
+[ASWF build containers](https://github.com/AcademySoftwareFoundation/aswf-docker),
+their Python interpreter and compiler, and their preinstalled dependencies.
+They disable uv-managed Python and automatic Python downloads.
+
+In a studio or Reference Platform environment, select that environment's Python
+explicitly rather than downloading a replacement:
+
+```sh
+UV_NO_MANAGED_PYTHON=1 UV_PYTHON_DOWNLOADS=never uv sync --locked --python /path/to/platform/python
+```
+
+See [the support matrix](VERSIONS.md) and the
+[developer quickstart](docs/tutorials/quickstart.md) for CMake build instructions.
 
 ## C++ Coverage Builds
 
-To enable C++ code coverage reporting via gcov/lcov for builds, set the
-following environment variables:
+Enable coverage and select a persistent build directory when installing:
 
-- `OTIO_CXX_COVERAGE_BUILD=ON`
-- `OTIO_CXX_BUILD_TMP_DIR=path/to/build/dir`
+```sh
+uv sync --locked --reinstall-package opentimelineio \
+  -Ccmake.define.OTIO_CXX_COVERAGE=ON \
+  -Ccmake.build-type=Debug -Cbuild-dir=build/coverage
+make coverage
+make lcov OTIO_CXX_BUILD_TMP_DIR=build/coverage
+```
 
-When building/installing through `pip`/`setup.py`, these variables must be set
-before running the install command (`python -m pip install .` for example).
+The old `OTIO_CXX_DEBUG_BUILD`, `OTIO_CXX_BUILD_TMP_DIR`, and
+`OTIO_CXX_COVERAGE_BUILD` packaging variables are replaced by scikit-build-core's
+`cmake.build-type`, `build-dir`, and `cmake.define.OTIO_CXX_COVERAGE` settings.
 
 License
 -------

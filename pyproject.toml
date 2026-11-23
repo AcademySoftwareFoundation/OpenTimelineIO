@@ -1,10 +1,120 @@
 [build-system]
-requires = [
-    "setuptools",
-    "wheel",
-    "cmake>=3.12",
+requires = ["scikit-build-core>=1.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "OpenTimelineIO"
+dynamic = ["version"]
+description = "Editorial interchange format and API"
+readme = "README.md"
+# Python 3.9.0 is excluded because of https://github.com/python/cpython/pull/22670.
+requires-python = ">=3.9.1"
+license = "Apache-2.0"
+license-files = ["LICENSE.txt", "NOTICE.txt"]
+authors = [
+    {name = "Contributors to the OpenTimelineIO project", email = "otio-discussion@lists.aswf.io"},
 ]
-build-backend = "setuptools.build_meta"
+keywords = ["film", "tv", "editing", "editorial", "edit", "non-linear", "edl", "time"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Video :: Display",
+    "Topic :: Multimedia :: Video :: Non-Linear Editor",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+]
+
+[project.urls]
+Homepage = "https://opentimeline.io"
+Source = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO"
+Documentation = "https://opentimelineio.readthedocs.io/"
+Issues = "https://github.com/AcademySoftwareFoundation/OpenTimelineIO/issues"
+
+[project.scripts]
+otiocat = "opentimelineio.console.otiocat:main"
+otioconvert = "opentimelineio.console.otioconvert:main"
+otiopluginfo = "opentimelineio.console.otiopluginfo:main"
+otiostat = "opentimelineio.console.otiostat:main"
+otiotool = "opentimelineio.console.otiotool:main"
+otioautogen_serialized_schema_docs = "opentimelineio.console.autogen_serialized_datamodel:main"
+
+[dependency-groups]
+dev = [{include-group = "lint"}, {include-group = "test"}]
+lint = ["flake8>=3.5"]
+test = ["coverage[toml]>=7.6", "urllib3>=2.2"]
+docs = [
+    "sphinx>=8.1",
+    "readthedocs-sphinx-ext>=2.2.5",
+    "sphinx-rtd-theme>=3",
+    "myst-parser>=4",
+]
+
+[tool.uv]
+required-version = ">=0.8"
+cache-keys = [
+    {file = "pyproject.toml"},
+    {file = "CMakeLists.txt"},
+    {file = "src/py-opentimelineio/opentimelineio/_version.py"},
+]
+
+[tool.uv.dependency-groups]
+docs = {requires-python = ">=3.11"}
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+# Reuse native compilation between editable installs, per interpreter/platform.
+build-dir = "build/{wheel_tag}"
+wheel.packages = ["src/py-opentimelineio/opentimelineio"]
+# Include initialized submodules so sdists do not need Git to fetch C++ sources.
+sdist.include = ["src/deps/**"]
+sdist.exclude = [
+    ".github", ".gitmodules", ".readthedocs.yml", ".venv",
+    "build", "dist", "docs", "doxygen", "uv.lock",
+    "src/deps/**/.git", "src/deps/**/.github",
+    "src/deps/rapidjson/thirdparty", "src/deps/pybind11/tools/clang",
+]
+
+[tool.scikit-build.cmake.define]
+OTIO_PYTHON_INSTALL = "ON"
+OTIO_PYTHON_INSTALL_DIR = "."
+OTIO_CXX_INSTALL = "OFF"
+OTIO_SHARED_LIBS = "OFF"
+OTIO_INSTALL_PYTHON_MODULES = "OFF"
+# Dependencies are initialized explicitly for checkouts and bundled in sdists.
+OTIO_AUTOMATIC_SUBMODULES = "OFF"
+BUILD_TESTING = "OFF"
+
+[[tool.dynamic-metadata]]
+provider = "scikit_build_core.metadata.regex"
+field = "version"
+input = "src/py-opentimelineio/opentimelineio/_version.py"
+
+[tool.coverage.run]
+branch = true
+source = ["opentimelineio", "tests"]
+
+[tool.coverage.paths]
+otio = ["src/py-opentimelineio/opentimelineio", "*site-packages/opentimelineio"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.cibuildwheel]
+build-frontend = "build[uv]"
+test-command = "python -m unittest discover -s {project}/tests -t {project}"
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64", "aarch64"]

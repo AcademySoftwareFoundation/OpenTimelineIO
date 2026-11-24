@@ -308,17 +308,17 @@ Sample Code:
 
     import opentimelineio as otio
 
-    #Create a Red color
+    # Create a Red color
     c = otio.core.Color.RED
 
-    #Convert it to hex
-    print(c.to_hex())                      #ff0000ff
+    # Convert it to hex
+    print(c.to_hex())                      #  #ff0000ff
 
-    #Create a colour from hex
+    # Create a colour from hex
     d = otio.core.Color.from_hex("#FF5A5F")
 
-    #Convert it to an RGBA integer list
-    print(d.to_rgba_int_list())            #[255, 90, 95, 255] < Alpha defaults to 255 (opaque)
+    # Convert it to an RGBA integer list
+    print(d.to_rgba_int_list())            # [255, 90, 95, 255] < Alpha defaults to 255 (opaque)
     
     
 ```

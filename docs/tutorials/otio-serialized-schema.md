@@ -300,14 +300,48 @@ parameters:
 encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the 
 intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant
  for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
+        
+
+Sample Code:
+
+.. code-block:: python
+
+    import opentimelineio as otio
+
+    #Create a Red color
+    c = otio.core.Color.RED
+
+    #Convert it to hex
+    print(c.to_hex())                      #ff0000ff
+
+    #Create a colour from hex
+    d = otio.core.Color.from_hex("#FF5A5F")
+
+    #Convert it to an RGBA integer list
+    print(d.to_rgba_int_list())            #[255, 90, 95, 255] < Alpha defaults to 255 (opaque)
+    
+    
 ```
 
 parameters:
-- *a*: 
-- *b*: 
-- *g*: 
-- *name*: 
-- *r*: 
+- *a*: The alpha (transparency) channel component of the color.  This value ranges from 0.0 (fully transparent) to 1.0 (fully opaque).
+- *b*: The blue channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.
+- *g*: The green channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.
+- *name*: Optional human-readable name for this color (for example, ``"Rausch"``).  Empty by default.
+
+Example:
+
+.. code-block:: json
+
+    {
+        "OTIO_SCHEMA": "Color.1",
+        "r": 1.0,
+        "g": 0.35,
+        "b": 0.37,
+        "a": 1.0,
+        "name": "Rausch"
+    }
+- *r*: The red channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.
 
 ### Effect.1
 

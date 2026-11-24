@@ -348,7 +348,28 @@ define_bases2(py::module m)
         m,
         "Color",
         py::dynamic_attr(),
-        R"docstring(:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing conversion between different formats. To be considered interoperable, the sRGB transfer function encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant for use in user interface elements, like marker or clip coloring, NOT for image pixel content.)docstring")
+        R"docstring(:class:`Color` is a definition of red, green, blue, and alpha double floating point values, allowing conversion between different formats. To be considered interoperable, the sRGB transfer function encoded values, ranging between zero and one, are expected to be accurate to within 1/255 of the intended value. Round-trip conversions may not be guaranteed outside that. This Color class is meant for use in user interface elements, like marker or clip coloring, NOT for image pixel content.
+        
+
+Sample Code:
+
+.. code-block:: python
+
+    import opentimelineio as otio
+
+    #Create a Red color
+    c = otio.core.Color.RED
+
+    #Convert it to hex
+    print(c.to_hex())                      #ff0000ff
+
+    #Create a colour from hex
+    d = otio.core.Color.from_hex("#FF5A5F")
+
+    #Convert it to an RGBA integer list
+    print(d.to_rgba_int_list())            #[255, 90, 95, 255] < Alpha defaults to 255 (opaque)
+    
+    )docstring")
         .def(
             py::init(
                 [](double r, double g, double b, double a, std::string name) {
@@ -361,21 +382,35 @@ define_bases2(py::module m)
             py::arg_v("name"_a = std::string()))
         .def(py::self == py::self)
         .def(py::self != py::self)
-        .def_property("r", &Color::r, &Color::set_r)
-        .def_property("g", &Color::g, &Color::set_g)
-        .def_property("b", &Color::b, &Color::set_b)
-        .def_property("a", &Color::a, &Color::set_a)
-        .def_property("name", &Color::name, &Color::set_name)
+        .def_property("r", &Color::r, &Color::set_r, "The red channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.")
+        .def_property("g", &Color::g, &Color::set_g, "The green channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.")
+        .def_property("b", &Color::b, &Color::set_b, "The blue channel component of the color.  This is an sRGB-encoded float, nominally 0.0 to 1.0.")
+        .def_property("a", &Color::a, &Color::set_a, "The alpha (transparency) channel component of the color.  This value ranges from 0.0 (fully transparent) to 1.0 (fully opaque).")
+        .def_property("name", &Color::name, &Color::set_name, R"docstring(Optional human-readable name for this color (for example, ``"Rausch"``).  Empty by default.
+            
+            Example:
 
-        .def("to_hex", &Color::to_hex)
-        .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8)
-        .def("to_abgr_int", &Color::to_abgr_int)
-        .def("to_rgba_float_list", &Color::to_rgba_float_list)
+            .. code-block:: json
 
-        .def_static("from_hex", Color::from_hex)
-        .def_static("from_float_list", &Color::from_float_list)
-        .def_static("from_int_list", &Color::from_int_list)
-        .def_static("from_abgr_int", &Color::from_abgr_int)
+                {
+                    "OTIO_SCHEMA": "Color.1",
+                    "r": 1.0,
+                    "g": 0.35,
+                    "b": 0.37,
+                    "a": 1.0,
+                    "name": "Rausch"
+                }
+            )docstring")
+
+        .def("to_hex", &Color::to_hex, "Return this :class:`Color` as an 8-digit RGBA hex string with a leading ``#``, for example ``\"#ff0000ff\"`` for opaque red.  Components are converted to 8-bit integers by truncation, not rounding.")
+        .def("to_rgba_int_list", &Color::to_rgba_int_list, py::arg("base") = 8, "Return this :class:`Color` as a list of integers ``[r, g, b, a]``, each scaled to the range of 0 to ``2**base - 1``.  ``base`` is the bit depth, so the default of 8 returns values from 0 to 255.  Components are converted by truncation, not rounding.")
+        .def("to_abgr_int", &Color::to_abgr_int, "Return this :class:`Color` as a single 32-bit unsigned integer, with 8 bits per component in ABGR channel order.")
+        .def("to_rgba_float_list", &Color::to_rgba_float_list, "Return this :class:`Color` as a list of floats ``[r, g, b, a]``.")
+
+        .def_static("from_hex", Color::from_hex, "Create a :class:`Color` from an 8-digit RGBA hex string with a leading ``#``, for example ``\"#ff0000ff\"`` for opaque red.")
+        .def_static("from_float_list", &Color::from_float_list, "Create a :class:`Color` from a list of 3 floats ``[r, g, b]`` or 4 floats ``[r, g, b, a]``. If no alpha is given, alpha is 1.0.")
+        .def_static("from_int_list", &Color::from_int_list, "Create a :class:`Color` from a list of 3 integers ``[r, g, b]`` or 4 integers ``[r, g, b, a]``.  ``arg1`` is an integer of the bit depth.  If no alpha is given, alpha is 1.0.")
+        .def_static("from_abgr_int", &Color::from_abgr_int, "Create a :class:`Color` from a single 32-bit unsigned integer, with 8 bits per component in ABGR channel order.")
 
         .def_property_readonly_static(
             "PINK",

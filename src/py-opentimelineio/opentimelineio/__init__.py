@@ -22,6 +22,7 @@ from . import (
     adapters,
     hooks,
     algorithms,
+    bundle,
     url_utils,
     versioning,
 )

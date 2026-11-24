@@ -4,6 +4,9 @@
 #pragma once
 
 #include "opentimelineio/timeline.h"
+#include "opentimelineio/typeRegistry.h"
+
+#include <optional>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 
@@ -52,6 +55,11 @@ namespace bundle {
         
         /// @brief Number of spaces for JSON indentation.
         int indent = 4;
+
+        /// @brief Schema versions to write the timeline at, e.g. one of the
+        /// CORE_VERSION_MAP entries, so that an older OTIO can read it. If
+        /// not set the current versions are written.
+        std::optional<schema_version_map> target_schema_versions;
     };
 
     /// @brief Options for reading bundles.

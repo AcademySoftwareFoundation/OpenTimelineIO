@@ -224,6 +224,8 @@ You can accomplish this in two ways:
 If your software uses OTIO's Python adapter system, then you can set the {term}`OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL` environment variable with a `FAMILY:VERSION` value.
 For example, in a *nix shell: `env OTIO_DEFAULT_TARGET_VERSION_FAMILY_LABEL=OTIO_CORE:0.14.0 my_program`
 
+This applies to the `.otio` adapter and to the `.otiod` and `.otioz` file bundle adapters.
+
 The `OTIO_CORE` family is pre-populated with the core OTIO schema versions for previous OTIO releases, for example `0.14.0`. If you have custom schema that needs to be downgraded as well, you will need to specify your own family and version mapping, as described above.
 
 ### Downgrading with otioconvert
@@ -239,6 +241,8 @@ or you can specify the version mapping for each schema you care about like this:
 ```
 otioconvert -i input.otio -o output.otio -A target_schema_versions="{'Clip':1, 'Timeline':1, 'Marker':2}"
 ```
+
+The same works when the output is a file bundle (`.otiod` or `.otioz`); see [File Bundles](otio-filebundles).  From C++, set `bundle::WriteOptions::target_schema_versions` when calling `bundle::write_otiod` or `bundle::write_otioz`.
 
 ## For Developers
 

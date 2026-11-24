@@ -4,6 +4,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  # Download the wheels and sdist built by the OpenTimelineIO workflow
+  actions: read
+
 jobs:
   release:
     runs-on: ubuntu-latest

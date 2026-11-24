@@ -41,8 +41,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION_NS {
 TypeRegistry&
 TypeRegistry::TypeRegistry::instance()
 {
-    static TypeRegistry r;
-    return r;
+    // The registry is never destroyed, so the type records stay valid while
+    // other static objects are destroyed at exit
+    static TypeRegistry* r = new TypeRegistry;
+    return *r;
 }
 
 TypeRegistry::TypeRegistry()
@@ -410,7 +412,9 @@ TypeRegistry::_instance_from_schema(
     {
         for (const auto& e: type_record->upgrade_functions)
         {
-            if (schema_version <= e.first
+            // e.first is the version the function upgrades *to*, so an
+            // object already at that version must not run it again.
+            if (schema_version < e.first
                 && e.first <= type_record->schema_version)
             {
                 e.second(&dict);

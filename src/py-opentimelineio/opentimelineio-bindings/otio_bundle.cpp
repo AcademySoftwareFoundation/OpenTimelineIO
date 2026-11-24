@@ -53,7 +53,12 @@ Options for writing bundles.
         .def_readwrite(
             "indent",
             &WriteOptions::indent,
-            "Number of spaces for JSON indentation.");
+            "Number of spaces for JSON indentation.")
+        .def_readwrite(
+            "target_schema_versions",
+            &WriteOptions::target_schema_versions,
+            "Schema versions to write the timeline at, so an older OTIO can "
+            "read it. If not set the current versions are written.");
     
     py::class_<ReadOptions>(mbundle, "ReadOptions",
 R"docstring(

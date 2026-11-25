@@ -82,6 +82,24 @@ main(int argc, char** argv)
         assertEqual(t2.round(), RationalTime(31.0));
     });
 
+    tests.add_test("test_to_time_string_small_fractions", [] {
+        auto t = RationalTime(50, 1000000);
+        assertEqual(t.to_time_string(), std::string("00:00:00.00005"));
+        assertTrue(
+            t.almost_equal(
+                RationalTime::from_time_string(t.to_time_string(), t.rate()),
+                0.001));
+        assertEqual(
+            RationalTime(3000050, 1000000).to_time_string(),
+            std::string("00:00:03.00005"));
+        assertEqual(
+            RationalTime(1, 24000).to_time_string(),
+            std::string("00:00:00.000041"));
+        assertEqual(
+            RationalTime(1, 10000000).to_time_string(),
+            std::string("00:00:00.0"));
+    });
+
     tests.add_test("test_from_time_string", [] {
         std::string time_string = "0:12:04";
         auto        t           = RationalTime(24 * (12 * 60 + 4), 24);

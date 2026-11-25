@@ -633,6 +633,16 @@ RationalTime::to_time_string() const
     // get the fractional component (with enough digits of resolution)
     std::string microseconds_str = string_printf("%.7g", fractpart);
 
+    // Small fractions can use scientific notation with %g. Only rewrite that
+    // form, keeping the existing maximum of six fractional digits.
+    if (microseconds_str.find('e') != std::string::npos)
+    {
+        microseconds_str = string_printf("%.7f", fractpart).substr(0, 8);
+        microseconds_str.resize(std::max<std::string::size_type>(
+            3,
+            microseconds_str.find_last_not_of('0') + 1));
+    }
+
     // trim leading 0
     microseconds_str = microseconds_str.substr(1);
 

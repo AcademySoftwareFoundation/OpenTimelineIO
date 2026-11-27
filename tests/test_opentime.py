@@ -510,6 +510,30 @@ class TestTime(unittest.TestCase):
         time_string = otio.opentime.to_time_string(rt)
         self.assertEqual(baseline_time_string, time_string)
 
+    def test_from_time_string_negative(self):
+        """
+        from_time_string should accept the leading '-' that
+        to_time_string writes for a negative time.
+        """
+
+        cases = [
+            ("-00:00:01.0", otio.opentime.RationalTime(-24, 24)),
+            ("-01:00:00", otio.opentime.RationalTime(-24 * 3600, 24)),
+            ("-10", otio.opentime.RationalTime(-240, 24)),
+        ]
+        for time_string, t in cases:
+            time_obj = otio.opentime.from_time_string(time_string, 24)
+            self.assertTrue(t.almost_equal(time_obj, delta=0.001))
+
+        rt = otio.opentime.RationalTime(-24, 24)
+        time_string = otio.opentime.to_time_string(rt)
+        self.assertEqual(rt, otio.opentime.from_time_string(time_string, 24))
+
+        # the sign is only valid at the very start of the string
+        for time_string in ("-", "--10", "00:-01:00", "1-0"):
+            with self.assertRaises(ValueError):
+                otio.opentime.from_time_string(time_string, 24)
+
     def test_time_time_string_zero(self):
         t = otio.opentime.RationalTime()
         time_string = "00:00:00.0"

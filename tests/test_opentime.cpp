@@ -89,6 +89,35 @@ main(int argc, char** argv)
         assertTrue(t.almost_equal(time_obj, 0.001));
     });
 
+    tests.add_test("test_from_time_string_negative", [] {
+        std::string time_string = "-00:00:01.0";
+        auto        t           = RationalTime(-24, 24);
+        auto        time_obj = RationalTime::from_time_string(time_string, 24);
+        assertTrue(t.almost_equal(time_obj, 0.001));
+        time_string = "-01:00:00";
+        t           = RationalTime(-24 * 3600, 24);
+        time_obj    = RationalTime::from_time_string(time_string, 24);
+        assertTrue(t.almost_equal(time_obj, 0.001));
+        time_string = "-10";
+        t           = RationalTime(-240, 24);
+        time_obj    = RationalTime::from_time_string(time_string, 24);
+        assertTrue(t.almost_equal(time_obj, 0.001));
+
+        // The string written for a negative time reads back as the same time.
+        t        = RationalTime(-24, 24);
+        time_obj = RationalTime::from_time_string(t.to_time_string(), 24);
+        assertTrue(t.almost_equal(time_obj, 0.001));
+
+        // The sign is only valid at the very start of the string.
+        for (auto const& invalid: { "-", "--10", "00:-01:00", "1-0" })
+        {
+            ErrorStatus error_status;
+            time_obj =
+                RationalTime::from_time_string(invalid, 24, &error_status);
+            assertTrue(is_error(error_status));
+        }
+    });
+
     tests.add_test("test_from_time_string24", [] {
         std::string time_string = "00:00:00.041667";
         auto        t           = RationalTime(1, 24);

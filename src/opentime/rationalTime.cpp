@@ -332,11 +332,28 @@ RationalTime::from_time_string(
         return RationalTime::_invalid_time;
     }
 
-    const char* start          = time_string.data();
-    const char* end            = start + time_string.length();
-    char*       current        = const_cast<char*>(end);
-    char*       parse_end      = current;
-    char*       prev_parse_end = current;
+    const char* start = time_string.data();
+    const char* end   = start + time_string.length();
+
+    // A leading '-' applies to the whole time, as written by to_time_string().
+    // Skip it here, parse the rest as a positive time, and negate the result.
+    const bool is_negative = start < end && *start == '-';
+    if (is_negative)
+    {
+        ++start;
+        if (start == end)
+        {
+            set_error(
+                time_string,
+                ErrorStatus::INVALID_TIME_STRING,
+                error_status);
+            return RationalTime::_invalid_time;
+        }
+    }
+
+    char* current        = const_cast<char*>(end);
+    char* parse_end      = current;
+    char* prev_parse_end = current;
 
     double power[3] = {
         1.0,   // seconds
@@ -425,6 +442,11 @@ RationalTime::from_time_string(
         {
             prev_parse_end = current;
         }
+    }
+
+    if (is_negative)
+    {
+        accumulator = -accumulator;
     }
 
     return from_seconds(accumulator).rescaled_to(rate);
